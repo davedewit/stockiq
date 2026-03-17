@@ -406,16 +406,35 @@ if (hasPaid) {{
         <p>&copy; 2026 StockIQ - Professional Investment Research Platform</p>
         <p>Powered by AI • Real-time Data • Comprehensive Analysis</p>
         <p>
-            <a href="../terms.html" style="color: #007bff; text-decoration: none;">Terms of Service</a> • 
-            <a href="../privacy-policy.html" style="color: #007bff; text-decoration: none;">Privacy Policy</a> • 
-            <a href="../refunds.html" style="color: #007bff; text-decoration: none;">Refund Policy</a> • 
-            <a href="../support.html" style="color: #007bff; text-decoration: none;">Support</a> • 
-            <a href="../contact.html" style="color: #007bff; text-decoration: none;">Contact</a> • 
-            <a href="../data-deletion.html" style="color: #007bff; text-decoration: none;">Data Deletion</a> • 
-            <a href="../news.html" style="color: #007bff; text-decoration: none;">News</a> • 
-            <a href="../blog.html" style="color: #007bff; text-decoration: none;">Blog</a> • 
-            <a href="../faq.html" style="color: #007bff; text-decoration: none;">FAQ</a>
+            <a href="../terms.html" style="color: #007bff; text-decoration: none;">Terms</a> • 
+            <a href="../privacy-policy.html" style="color: #007bff; text-decoration: none;">Privacy</a> • 
+            <a href="../support.html" style="color: #007bff; text-decoration: none;">Support</a>
         </p>
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+            <p style="font-weight: 600; margin-bottom: 10px;">Popular Stocks:</p>
+            <p style="line-height: 1.8;">
+                <a href="AAPL.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">AAPL</a> •
+                <a href="TSLA.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">TSLA</a> •
+                <a href="NVDA.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">NVDA</a> •
+                <a href="MSFT.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">MSFT</a> •
+                <a href="GOOGL.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">GOOGL</a> •
+                <a href="AMZN.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">AMZN</a> •
+                <a href="META.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">META</a> •
+                <a href="JPM.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">JPM</a> •
+                <a href="V.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">V</a> •
+                <a href="JNJ.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">JNJ</a> •
+                <a href="WMT.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">WMT</a> •
+                <a href="PG.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">PG</a> •
+                <a href="XOM.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">XOM</a> •
+                <a href="BAC.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">BAC</a> •
+                <a href="DIS.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">DIS</a> •
+                <a href="NFLX.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">NFLX</a> •
+                <a href="ORCL.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">ORCL</a> •
+                <a href="AMD.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">AMD</a> •
+                <a href="INTC.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">INTC</a> •
+                <a href="CSCO.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">CSCO</a>
+            </p>
+        </div>
         <p style="margin-top: 15px;">
             <a href="https://instagram.com/stockiq.tech" target="_blank" style="color: #E4405F; text-decoration: none; font-size: 24px;" title="Follow us on Instagram">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
