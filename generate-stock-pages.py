@@ -331,6 +331,9 @@ if (hasPaid) {{
     <main style="max-width: 1200px; margin: 0 auto; padding: 5px 20px 20px;">
         <div style="text-align: center; margin-bottom: 40px;">
             <h1>{name} ({symbol}) Stock Analysis</h1>
+            <div id="live-ticker" data-main-symbol="{symbol}" style="font-size: 1.3rem; margin: 15px 0; color: var(--text-secondary);">
+                --
+            </div>
             <p style="font-size: 1.2rem; color: var(--text-secondary); margin-top: 10px;">
                 Free AI-powered analysis and research for {name} stock
             </p>
@@ -497,6 +500,7 @@ if (hasPaid) {{
     }}
     </script>
     <script src="../js/timezone-converter.js"></script>
+    <script src="../stock-prices.js"></script>
     <script src="../ai-chat.js"></script>
 </body>
 </html>"""

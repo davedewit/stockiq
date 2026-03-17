@@ -224,7 +224,8 @@ $AWS s3 sync "$WEBSITE_DIR" s3://$BUCKET/ \
   --include "stocks.txt" \
   --include "robots.txt" \
   --include "sitemap.xml" \
-  --include "news.js"
+  --include "news.js" \
+  --include "stock-prices.js"
 
 echo "✅ Sync complete! Only changed files were uploaded."
 

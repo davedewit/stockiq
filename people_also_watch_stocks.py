@@ -128,7 +128,7 @@ def generate_related_section(related_stocks):
                 <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; min-width: 160px; cursor: pointer; transition: box-shadow 0.2s;">
                     <div style="font-size: 1.1em; font-weight: bold; color: #007bff; margin-bottom: 4px;">{stock['symbol']}</div>
                     <div style="font-size: 0.75em; color: var(--text-secondary); margin-bottom: 4px;">{stock['name']}</div>
-                    <div style="font-size: 0.75em; color: var(--text-secondary);">--</div>
+                    <div class="stock-price" data-symbol="{stock['symbol']}" style="font-size: 0.75em; color: var(--text-secondary);">--</div>
                 </div>
             </a>'''
     
