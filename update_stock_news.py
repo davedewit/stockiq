@@ -76,7 +76,7 @@ def load_company_names():
     """Load company names from stocks.txt and extract key words"""
     import os
     company_names = {}
-    skip_words = {'INC', 'CORP', 'LTD', 'LIMITED', 'PLC', 'CO', 'COMPANY', 'GROUP', 'HOLDINGS', 'THE', 'AND', '&', 'SA', 'AG', 'SE', 'NV', 'N.V.'}
+    skip_words = {'INC', 'CORP', 'LTD', 'LIMITED', 'PLC', 'CO', 'COMPANY', 'CORPORATION', 'INCORPORATED', 'GROUP', 'HOLDINGS', 'THE', 'AND', '&', 'SA', 'S.A', 'AG', 'SE', 'NV', 'N.V', 'N.V.', 'REIT', 'BANCORP', 'TRUST', 'BANK', 'AKTIENGESELLSCHAFT', 'CANADA', 'PROPERTIES'}
     
     stocks_file = '/Users/ddewit/VSCODE/website/stocks.txt'
     
