@@ -1,0 +1,1 @@
+../../.amazonq/rules/stock-matching-system.md

@@ -353,10 +353,8 @@ def fetch_stock_news(symbol):
                 if company_name and company_name in title_upper:
                     is_match = True
                 
-                # NEW LOGIC: Check base symbol in title (for shortened names)
-                # Only if base_symbol is a valid key in dictionary
+                # Check base symbol in title (for shortened names)
                 if not is_match and base_symbol in COMPANY_NAMES:
-                    # Check if base symbol appears in title
                     import re
                     if re.search(r'\b' + re.escape(base_symbol) + r'\b', title_upper):
                         is_match = True

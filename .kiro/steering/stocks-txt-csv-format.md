@@ -1,0 +1,1 @@
+../../.amazonq/rules/stocks-txt-csv-format.md

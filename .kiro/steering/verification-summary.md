@@ -1,0 +1,1 @@
+../../.amazonq/rules/verification-summary.md

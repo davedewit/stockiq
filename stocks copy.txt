@@ -1,0 +1,3467 @@
+0001.HK,CK Hutchison Holdings Limited,Industrials
+0002.HK,CLP Holdings Limited,Utilities
+0003.HK,The Hong Kong and China Gas Company Limited,Utilities
+0005.HK,HSBC Holdings plc,Financial Services
+0006.HK,Power Assets Holdings Limited,Utilities
+0011.HK,HANG SENG BANK,Financial Services
+0012.HK,Henderson Land Development Company Limited,Real Estate
+0016.HK,Sun Hung Kai Properties Limited,Real Estate
+0017.HK,New World Development Company Limited,Real Estate
+0027.HK,Galaxy Entertainment Group Limited,Consumer Cyclical
+0066.HK,MTR Corporation Limited,Industrials
+0083.HK,Sino Land Company Limited,Real Estate
+0101.HK,Hang Lung Properties Limited,Real Estate
+0175.HK,Geely Automobile Holdings Limited,Consumer Cyclical
+0241.HK,Alibaba Health Information Technology Limited,Healthcare
+0267.HK,CITIC Limited,Industrials
+0288.HK,WH Group Limited,Consumer Defensive
+0291.HK,China Resources Beer (Holdings) Company Limited,Consumer Defensive
+0316.HK,Orient Overseas (International) Limited,Industrials
+0386.HK,China Petroleum & Chemical Corporation,Energy
+0388.HK,Hong Kong Exchanges and Clearing Limited,Financial Services
+0669.HK,Techtronic Industries Company Limited,Industrials
+0688.HK,China Overseas Land & Investment Limited,Real Estate
+0700.HK,Tencent Holdings Limited,Communication Services
+0762.HK,China Unicom (Hong Kong) Limited,Communication Services
+0823.HK,Link Real Estate Investment Trust,Real Estate
+0857.HK,PetroChina Company Limited,Energy
+0883.HK,CNOOC Limited,Energy
+0939.HK,China Construction Bank Corporation,Financial Services
+0941.HK,China Mobile Limited,Communication Services
+0960.HK,Longfor Group Holdings Limited,Real Estate
+0968.HK,Xinyi Solar Holdings Limited,Technology
+0981.HK,Semiconductor Manufacturing International Corporation,Technology
+0992.HK,Lenovo Group Limited,Technology
+1038.HK,CK Infrastructure Holdings Limited,Utilities
+1044.HK,Hengan International Group Company Limited,Consumer Defensive
+1093.HK,CSPC Pharmaceutical Group Limited,Healthcare
+1109.HK,China Resources Land Limited,Real Estate
+1113.HK,CK Asset Holdings Limited,Real Estate
+1177.HK,Sino Biopharmaceutical Limited,Healthcare
+1211.HK,BYD Company Limited,Consumer Cyclical
+1299.HK,AIA Group Limited,Financial Services
+1398.HK,Industrial and Commercial Bank of China Limited,Financial Services
+1605.T,Inpex Corporation,Energy
+1801.T,Taisei Corporation,Industrials
+1802.T,Obayashi Corporation,Industrials
+1803.T,Shimizu Corporation,Industrials
+1810.HK,Xiaomi Corporation,Technology
+1876.HK,Budweiser Brewing Company APAC Limited,Consumer Defensive
+1918.HK,Sunac China Holdings Limited,Real Estate
+1928.HK,Sands China Ltd.,Consumer Cyclical
+1997.HK,Wharf Real Estate Investment Company Limited,Real Estate
+2002.T,Nisshin Seifun Group Inc.,Consumer Defensive
+2007.HK,Country Garden Holdings Company Limited,Real Estate
+2018.HK,AAC Technologies Holdings Inc.,Technology
+2282.T,NH Foods Ltd.,Consumer Defensive
+2432.T,DeNA Co., Ltd.,Stock
+2501.T,Sapporo Holdings Limited,Consumer Defensive
+2502.T,Asahi Group Holdings, Ltd.,Stock
+2503.T,Kirin Holdings Company, Limited,Stock
+2801.T,Kikkoman Corporation,Consumer Defensive
+2802.T,Ajinomoto Co., Inc.,Stock
+2871.T,Nichirei Corporation,Consumer Defensive
+2914.T,Japan Tobacco Inc.,Consumer Defensive
+3086.T,J. Front Retailing Co., Ltd.,Stock
+3099.T,Isetan Mitsukoshi Holdings Ltd.,Consumer Cyclical
+3101.T,Toyobo Co., Ltd.,Stock
+3103.T,Unitika Ltd.,Basic Materials
+3105.T,Nisshinbo Holdings Inc.,Industrials
+3382.T,Seven & i Holdings Co., Ltd.,Stock
+3401.T,Teijin Limited,Industrials
+3402.T,Toray Industries, Inc.,Stock
+3407.T,Asahi Kasei Corporation,Industrials
+3659.T,NEXON Co., Ltd.,Stock
+3861.T,Oji Holdings Corporation,Basic Materials
+3863.T,Nippon Paper Industries Co., Ltd.,Stock
+4004.T,Resonac Holdings Corporation,Basic Materials
+4005.T,Sumitomo Chemical Company, Limited,Stock
+4021.T,Nissan Chemical Corporation,Basic Materials
+4043.T,Tokuyama Corporation,Basic Materials
+4061.T,Denka Company Limited,Basic Materials
+4063.T,Shin-Etsu Chemical Co., Ltd.,Stock
+4188.T,Mitsubishi Chemical Group Corporation,Basic Materials
+4208.T,UBE Corporation,Basic Materials
+4272.T,Nippon Kayaku Co., Ltd.,Stock
+4324.T,Dentsu Group Inc.,Communication Services
+4452.T,Kao Corporation,Consumer Defensive
+4502.T,Takeda Pharmaceutical Company Limited,Healthcare
+4503.T,Astellas Pharma Inc.,Healthcare
+4506.T,Sumitomo Pharma Co., Ltd.,Stock
+4507.T,Shionogi & Co., Ltd.,Stock
+4519.T,Chugai Pharmaceutical Co., Ltd.,Stock
+4523.T,Eisai Co., Ltd.,Stock
+4568.T,Daiichi Sankyo Company, Limited,Stock
+4578.T,Otsuka Holdings Co., Ltd.,Stock
+4612.T,Nippon Paint Holdings Co., Ltd.,Stock
+4631.T,DIC Corporation,Basic Materials
+4661.T,Oriental Land Co., Ltd.,Stock
+4689.T,LY Corporation,Consumer Cyclical
+4704.T,Trend Micro Incorporated,Technology
+4751.T,CyberAgent, Inc.,Stock
+4755.T,Rakuten Group, Inc.,Stock
+4901.T,FUJIFILM Holdings Corporation,Industrials
+4911.T,Shiseido Company, Limited,Stock
+4912.T,Lion Corporation,Consumer Defensive
+5019.T,Idemitsu Kosan Co.,Ltd.,Stock
+5020.T,ENEOS Holdings, Inc.,Stock
+5101.T,The Yokohama Rubber Company, Limited,Stock
+5108.T,Bridgestone Corporation,Consumer Cyclical
+5201.T,AGC Inc.,Industrials
+5202.T,Nippon Sheet Glass Company, Limited,Stock
+5214.T,Nippon Electric Glass Co., Ltd.,Stock
+5232.T,Sumitomo Osaka Cement Co., Ltd.,Stock
+5233.T,Taiheiyo Cement Corporation,Basic Materials
+5301.T,Tokai Carbon Co., Ltd.,Stock
+5332.T,TOTO LTD.,Industrials
+5333.T,NGK Insulators, Ltd.,Stock
+5401.T,Nippon Steel Corporation,Basic Materials
+5406.T,Kobe Steel, Ltd.,Stock
+5411.T,JFE Holdings, Inc.,Stock
+5631.T,The Japan Steel Works, Ltd.,Stock
+5703.T,Nippon Light Metal Holdings Company, Ltd.,Stock
+5706.T,Mitsui Kinzoku Company, Limited,Stock
+5707.T,Toho Zinc Co., Ltd.,Stock
+5711.T,Mitsubishi Materials Corporation,Basic Materials
+6501.T,Hitachi, Ltd.,Stock
+6503.T,Mitsubishi Electric Corporation,Industrials
+6758.T,Sony Group Corporation,Technology
+6861.T,Keyence Corporation,Technology
+6902.T,DENSO Corporation,Consumer Cyclical
+6954.T,Fanuc Corporation,Industrials
+7203.T,Toyota Motor Corporation,Consumer Cyclical
+7267.T,Honda Motor Co., Ltd.,Stock
+7751.T,Canon Inc.,Technology
+8001.T,ITOCHU Corporation,Industrials
+8031.T,Mitsui & Co., Ltd.,Stock
+8035.T,Tokyo Electron Limited,Technology
+8058.T,Mitsubishi Corporation,Industrials
+8306.T,Mitsubishi UFJ Financial Group, Inc.,Stock
+8316.T,Sumitomo Mitsui Financial Group, Inc.,Stock
+9020.T,East Japan Railway Company,Industrials
+9022.T,Central Japan Railway Company,Industrials
+9432.T,NTT, Inc.,Stock
+9984.T,SoftBank Group Corp.,Communication Services
+A,Agilent Technologies, Inc.,Stock
+AA,Alcoa Corporation,Basic Materials
+AAF.L,Airtel Africa Plc,Communication Services
+AAL.L,Anglo American plc,Basic Materials
+AAL,American Airlines Group Inc.,Industrials
+AAMI,Acadian Asset Management Inc.,Financial Services
+AAOI,Applied Optoelectronics, Inc.,Stock
+AAON,AAON, Inc.,Stock
+AAP,Advance Auto Parts, Inc.,Stock
+AAPL,Apple Inc.,Technology
+AARD,Aardvark Therapeutics, Inc.,Stock
+AAT,American Assets Trust, Inc.,Stock
+ABAT,American Battery Technology Company,Industrials
+ABBV,AbbVie Inc.,Healthcare
+ABCB,Ameris Bancorp,Financial Services
+ABDN.L,Aberdeen Group Plc,Financial Services
+ABEO,Abeona Therapeutics Inc.,Healthcare
+ABF.L,Associated British Foods plc,Consumer Defensive
+ABG,Asbury Automotive Group, Inc.,Stock
+ABM,ABM Industries Incorporated,Industrials
+ABNB,Airbnb Inc.,Consumer Cyclical
+ABR,Arbor Realty Trust, Inc.,Stock
+ABSI,Absci Corporation,Healthcare
+ABT,Abbott Laboratories,Healthcare
+ABUS,Arbutus Biopharma Corporation,Healthcare
+ABX.TO,Barrick Mining Corporation,Basic Materials
+ABX,Abacus Global Management, Inc.,Stock
+AC.PA,Accor SA,Consumer Cyclical
+AC.TO,Air Canada,Industrials
+ACA,Arcosa, Inc.,Stock
+ACAD,ACADIA Pharmaceuticals Inc.,Healthcare
+ACCO,ACCO Brands Corporation,Industrials
+ACDC,ProFrac Holding Corp.,Energy
+ACEL,Accel Entertainment, Inc.,Stock
+ACGL,Arch Capital Group Ltd.,Financial Services
+ACH,Accendra Health, Inc.,Stock
+ACHC,Acadia Healthcare Company, Inc.,Stock
+ACHR,Archer Aviation Inc.,Industrials
+ACI,Albertsons Companies, Inc.,Stock
+ACIC,American Coastal Insurance Corporation,Financial Services
+ACIW,ACI Worldwide, Inc.,Stock
+ACLS,Axcelis Technologies, Inc.,Stock
+ACLX,Arcellx, Inc.,Stock
+ACMR,ACM Research, Inc.,Stock
+ACN,Accenture plc,Technology
+ACNB,ACNB Corporation,Financial Services
+ACNT,Ascent Industries Co.,Basic Materials
+ACR,ACRES Commercial Realty Corp.,Real Estate
+ACRE,Ares Commercial Real Estate Corporation,Real Estate
+ACRS,Aclaris Therapeutics, Inc.,Stock
+ACT,Enact Holdings, Inc.,Stock
+ACTG,Acacia Research Corporation,Industrials
+ACTU,Actuate Therapeutics, Inc. Common stock,Stock
+ACU,Acme United Corporation,Consumer Defensive
+ACVA,ACV Auctions Inc.,Consumer Cyclical
+ADAM,Adamas Trust, Inc.,Stock
+ADBE,Adobe Inc.,Technology
+ADC,Agree Realty Corporation,Real Estate
+ADCT,ADC Therapeutics SA,Healthcare
+ADEA,Adeia Inc.,Technology
+ADI,Analog Devices Inc.,Technology
+ADM.L,Admiral Group plc,Financial Services
+ADM,Archer-Daniels-Midland Company,Consumer Defensive
+ADMA,ADMA Biologics, Inc.,Stock
+ADNT,Adient plc,Consumer Cyclical
+ADP,Automatic Data Processing, Inc.,Stock
+ADPT,Adaptive Biotechnologies Corporation,Healthcare
+ADS.DE,adidas AG,Consumer Cyclical
+ADSK,Autodesk Inc.,Technology
+ADT,ADT Inc.,Industrials
+ADTN,ADTRAN Holdings, Inc.,Stock
+ADUS,Addus HomeCare Corporation,Healthcare
+ADV,Advantage Solutions Inc.,Communication Services
+AEBI,Aebi Schmidt Holding AG,Industrials
+AEE,Ameren Corporation,Utilities
+AEF.AX,Australian Ethical Investment Limited,Financial Services
+AEHR,Aehr Test Systems, Inc.,Stock
+AEIS,Advanced Energy Industries, Inc.,Stock
+AEM.TO,Agnico Eagle Mines Limited,Basic Materials
+AEO,American Eagle Outfitters, Inc.,Stock
+AEP,American Electric Power Company Inc.,Utilities
+AES,The AES Corporation,Utilities
+AESI,Atlas Energy Solutions Inc.,Energy
+AEVA,Aeva Technologies, Inc.,Stock
+AEYE,AudioEye, Inc.,Stock
+AFCG,Advanced Flower Capital Inc.,Real Estate
+AFG,American Financial Group, Inc.,Stock
+AFL,Aflac Incorporated,Financial Services
+AFMD,Affimed N.V.,Stock
+AFRI,Forafric Global PLC,Consumer Defensive
+AFRM,Affirm Holdings, Inc.,Stock
+AGCO,AGCO Corporation,Industrials
+AGI.AX,Ainsworth Game Technology Limited,Consumer Cyclical
+AGI,Alamos Gold Inc.,Basic Materials
+AGIO,Agios Pharmaceuticals, Inc.,Stock
+AGL.AX,AGL Energy Limited,Utilities
+AGL,agilon health, inc.,Stock
+AGM,Federal Agricultural Mortgage Corporation,Financial Services
+AGNC,AGNC Investment Corp.,Real Estate
+AGO,Assured Guaranty Ltd.,Financial Services
+AGX,Argan, Inc.,Stock
+AGYS,Agilysys, Inc.,Stock
+AHCO,AdaptHealth Corp.,Healthcare
+AHH,Armada Hoffler Properties Inc,Real Estate
+AHL,Aspen Insurance Holdings Ltd,Financial Services
+AHR,American Healthcare REIT, Inc.,Stock
+AHRT,AH REALTY TRUST INC,Real Estate
+AHT.L,Sunbelt Rentals Holdings Inc,Industrials
+AI.PA,L'Air Liquide S.A.,Basic Materials
+AI,C3.ai, Inc.,Stock
+AIA.AX,Auckland International Airport Limited,Industrials
+AIG,American International Group Inc.,Financial Services
+AII,American Integrity Insurance Group, Inc.,Stock
+AIN,Albany International Corp.,Consumer Cyclical
+AIOT,PowerFleet, Inc.,Stock
+AIP,Arteris, Inc.,Stock
+AIR.DE,Airbus SE,Industrials
+AIR.PA,Airbus SE,Industrials
+AIR,AAR Corp.,Industrials
+AIRJ,AirJoule Technologies Corporation,Industrials
+AIRO,AIRO Group Holdings, Inc.,Stock
+AIRS,AirSculpt Technologies, Inc.,Stock
+AISP,Airship AI Holdings, Inc.,Stock
+AIT,Applied Industrial Technologies, Inc.,Stock
+AIV,Apartment Investment and Management Company,Real Estate
+AIZ,Assurant, Inc.,Stock
+AJG,Arthur J. Gallagher & Co.,Financial Services
+AJL.AX,AJ Lucas Group Limited,Basic Materials
+AKAM,Akamai Technologies Inc.,Technology
+AKBA,Akebia Therapeutics, Inc.,Stock
+AKP.AX,Audio Pixels Holdings Limited,Stock
+AKR,Acadia Realty Trust,Real Estate
+AL,Air Lease Corporation,Industrials
+ALA.TO,AltaGas Ltd.,Energy
+ALAB,Astera Labs, Inc.,Stock
+ALB,Albemarle Corporation,Materials
+ALCO,Alico, Inc.,Stock
+ALD.AX,Ampol Limited,Energy
+ALDX,Aldeyra Therapeutics, Inc.,Stock
+ALEC,Alector, Inc.,Stock
+ALEX,Alexander & Baldwin, Inc.,Stock
+ALG,Alamo Group Inc.,Industrials
+ALGM,Allegro MicroSystems, Inc.,Stock
+ALGN,Align Technology, Inc.,Stock
+ALGT,Allegiant Travel Company,Industrials
+ALH,Alliance Laundry Holdings Inc.,Consumer Cyclical
+ALHC,Alignment Healthcare, Inc.,Stock
+ALIT,Alight, Inc.,Stock
+ALK,Alaska Air Group, Inc.,Stock
+ALKS,Alkermes plc,Healthcare
+ALKT,Alkami Technology, Inc.,Stock
+ALL.AX,Aristocrat Leisure Limited,Consumer Cyclical
+ALL,The Allstate Corporation,Financial Services
+ALLE,Allegion plc,Industrials
+ALLO,Allogene Therapeutics, Inc.,Stock
+ALLY,Ally Financial Inc.,Financial Services
+ALMS,Alumis Inc.,Healthcare
+ALMU,Aeluma, Inc.,Stock
+ALNT,Allient Inc.,Technology
+ALNY,Alnylam Pharmaceuticals, Inc.,Stock
+ALO.PA,Alstom SA,Industrials
+ALQ.AX,ALS Limited,Industrials
+ALRM,Alarm.com Holdings, Inc.,Stock
+ALRS,Alerus Financial Corporation,Financial Services
+ALSN,Allison Transmission Holdings, Inc.,Stock
+ALT,Altimmune, Inc.,Stock
+ALTG,Alta Equipment Group Inc.,Industrials
+ALTI,AlTi Global, Inc.,Stock
+ALV.DE,Allianz SE,Financial Services
+ALV,Autoliv, Inc.,Stock
+ALX.AX,Atlas Arteria Limited,Industrials
+ALX,Alexander's, Inc.,Stock
+AM,Antero Midstream Corporation,Energy
+AMAL,Amalgamated Financial Corp.,Financial Services
+AMAT,Applied Materials Inc.,Technology
+AMBA,Ambarella, Inc.,Stock
+AMBP,Ardagh Metal Packaging S.A.,Consumer Cyclical
+AMBQ,Ambiq Micro, Inc.,Stock
+AMC.AX,Amcor plc,Consumer Cyclical
+AMC,AMC Entertainment Holdings Inc.,Communication Services
+AMCR,Amcor plc,Materials
+AMCX,AMC Networks Inc.,Communication Services
+AMD,Advanced Micro Devices Inc.,Technology
+AME,AMETEK Inc.,Industrials
+AMG,Affiliated Managers Group, Inc.,Stock
+AMGN,Amgen Inc.,Healthcare
+AMH.AX,AMCIL Limited,Financial Services
+AMH,American Homes 4 Rent,Real Estate
+AMKR,Amkor Technology, Inc.,Stock
+AMLX,Amylyx Pharmaceuticals, Inc.,Stock
+AMN,AMN Healthcare Services, Inc.,Stock
+AMP.AX,AMP Limited,Financial Services
+AMP,Ameriprise Financial, Inc.,Stock
+AMPH,Amphastar Pharmaceuticals, Inc.,Stock
+AMPL,Amplitude, Inc.,Stock
+AMPX,Amprius Technologies, Inc.,Stock
+AMR,Alpha Metallurgical Resources, Inc.,Stock
+AMRC,Ameresco, Inc.,Stock
+AMRX,Amneal Pharmaceuticals, Inc.,Stock
+AMSC,American Superconductor Corporation,Industrials
+AMSF,AMERISAFE, Inc.,Stock
+AMT,American Tower Corporation,Real Estate
+AMTB,Amerant Bancorp Inc.,Financial Services
+AMTM,Amentum Holdings, Inc.,Stock
+AMWD,American Woodmark Corporation,Consumer Cyclical
+AMZN,Amazon.com Inc.,Consumer Cyclical
+AN,AutoNation, Inc.,Stock
+ANAB,AnaptysBio, Inc.,Stock
+ANDE,The Andersons, Inc.,Stock
+ANET,Arista Networks Inc.,Technology
+ANF,Abercrombie & Fitch Co.,Consumer Cyclical
+ANGI,Angi Inc.,Communication Services
+ANGO,AngioDynamics, Inc.,Stock
+ANIK,Anika Therapeutics, Inc.,Stock
+ANIP,ANI Pharmaceuticals, Inc.,Stock
+ANN.AX,Ansell Limited,Healthcare
+ANNX,Annexon, Inc.,Stock
+ANTO.L,Antofagasta plc,Basic Materials
+ANZ.AX,ANZ Group Holdings Limited,Financial Services
+AOF.AX,Australian Unity Office Fund,Real Estate
+AOMR,Angel Oak Mortgage REIT, Inc.,Stock
+AON,Aon plc,Financial Services
+AORT,Artivion, Inc.,Stock
+AOS,A. O. Smith Corporation,Industrials
+AOSL,Alpha and Omega Semiconductor Limited,Technology
+AOUT,American Outdoor Brands, Inc.,Stock
+APA.AX,APA Group,Utilities
+APA,APA Corporation,Energy
+APAM,Artisan Partners Asset Management Inc.,Financial Services
+APD,Air Products and Chemicals Inc.,Materials
+APE.AX,Eagers Automotive Limited,Consumer Cyclical
+APEI,American Public Education, Inc.,Stock
+APG,APi Group Corporation,Industrials
+APGE,Apogee Therapeutics, Inc.,Stock
+APH,Amphenol Corporation,Technology
+APLD,Applied Digital Corporation,Technology
+APLE,Apple Hospitality REIT, Inc.,Stock
+APLS,Apellis Pharmaceuticals, Inc.,Stock
+APO,Apollo Global Management Inc.,Financial Services
+APOG,Apogee Enterprises, Inc.,Stock
+APP,AppLovin Corporation,Communication Services
+APPF,AppFolio, Inc.,Stock
+APPN,Appian Corporation,Technology
+APPS,Digital Turbine, Inc.,Stock
+APTV,Aptiv PLC,Consumer Cyclical
+APX.AX,Appen Limited,Technology
+AQN.TO,Algonquin Power & Utilities Corp.,Utilities
+AQST,Aquestive Therapeutics, Inc.,Stock
+AR,Antero Resources Corporation,Energy
+ARAY,Accuray Incorporated,Healthcare
+ARB.AX,ARB Corporation Limited,Consumer Cyclical
+ARCB,ArcBest Corporation,Industrials
+ARCT,Arcturus Therapeutics Holdings Inc.,Healthcare
+ARDT,Ardent Health, Inc.,Stock
+ARDX,Ardelyx, Inc.,Stock
+ARE,Alexandria Real Estate Equities, Inc.,Stock
+AREN,The Arena Group Holdings, Inc.,Stock
+ARES,Ares Management Corporation,Financial Services
+ARF.AX,Arena REIT,Real Estate
+ARG.AX,Argo Investments Limited,Financial Services
+ARHS,Arhaus, Inc.,Stock
+ARI,Apollo Commercial Real Estate Finance, Inc.,Stock
+ARIS,Aris Mining Corporation,Basic Materials
+ARKG,ARK Genomic Revolution ETF,Stock
+ARKO,Arko Corp.,Consumer Cyclical
+ARL,American Realty Investors, Inc.,Stock
+ARLO,Arlo Technologies, Inc.,Stock
+ARM,Arm Holdings plc,Technology
+ARMK,Aramark,Industrials
+AROC,Archrock, Inc.,Stock
+AROW,Arrow Financial Corporation,Financial Services
+ARQ,Arq, Inc.,Stock
+ARQT,Arcutis Biotherapeutics, Inc.,Stock
+ARR,ARMOUR Residential REIT, Inc.,Stock
+ARRY,Array Technologies, Inc.,Stock
+ARVN,Arvinas, Inc.,Stock
+ARW,Arrow Electronics, Inc.,Stock
+ARWR,Arrowhead Pharmaceuticals, Inc.,Stock
+ARX.TO,ARC Resources Ltd.,Energy
+AS,Amer Sports, Inc.,Stock
+ASAN,Asana, Inc.,Stock
+ASB.AX,Austal Limited,Industrials
+ASB,Associated Banc-Corp,Financial Services
+ASC,Ardmore Shipping Corporation,Industrials
+ASGN,ASGN Incorporated,Technology
+ASH,Ashland Inc.,Basic Materials
+ASIC,Ategrity Specialty Insurance Company Holdings,Financial Services
+ASIX,AdvanSix Inc.,Basic Materials
+ASLE,AerSale Corporation,Industrials
+ASML,ASML Holding N.V.,Technology
+ASO,Academy Sports and Outdoors, Inc.,Stock
+ASPI,ASP Isotopes Inc.,Basic Materials
+ASPN,Aspen Aerogels, Inc.,Stock
+ASST,Strive Asset Management, LLC,Stock
+ASTE,Astec Industries, Inc.,Stock
+ASTH,Astrana Health, Inc.,Stock
+ASTS,AST SpaceMobile, Inc.,Stock
+ASUR,Asure Software, Inc.,Stock
+ASX.AX,ASX Limited,Financial Services
+ATD.TO,Alimentation Couche-Tard Inc.,Consumer Cyclical
+ATEC,Alphatec Holdings, Inc.,Stock
+ATEN,A10 Networks, Inc.,Stock
+ATEX,Anterix Inc.,Communication Services
+ATGE,Adtalem Global Education Inc,Consumer Defensive
+ATI,ATI Inc.,Industrials
+ATKR,Atkore Inc.,Industrials
+ATLC,Atlanticus Holdings Corporation,Financial Services
+ATLO,Ames National Corporation,Financial Services
+ATM.AX,PT Aneka Tambang Tbk,Basic Materials
+ATMU,Atmus Filtration Technologies Inc.,Consumer Cyclical
+ATNI,ATN International, Inc.,Stock
+ATO.PA,Atos SE,Technology
+ATO,Atmos Energy Corporation,Utilities
+ATOM,Atomera Incorporated,Technology
+ATOS,Atossa Therapeutics, Inc.,Stock
+ATR,AptarGroup, Inc.,Stock
+ATRC,AtriCure, Inc.,Stock
+ATRO,Astronics Corporation,Industrials
+ATYR,aTyr Pharma, Inc.,Stock
+AU,AngloGold Ashanti plc,Basic Materials
+AUB.AX,AUB Group Limited,Financial Services
+AUB,Atlantic Union Bankshares Corporation,Financial Services
+AUPH,Aurinia Pharmaceuticals Inc.,Healthcare
+AUR,Aurora Innovation, Inc.,Stock
+AURA,Aura Biosciences, Inc.,Stock
+AUTO.L,Autotrader Group plc,Communication Services
+AV.L,Aviva plc,Financial Services
+AVA,Avista Corporation,Utilities
+AVAH,Aveanna Healthcare Holdings Inc.,Healthcare
+AVAV,AeroVironment, Inc.,Stock
+AVB,AvalonBay Communities Inc.,Real Estate
+AVBH,Avidbank Holdings, Inc.,Stock
+AVBP,ArriVent BioPharma, Inc.,Stock
+AVD,American Vanguard Corporation,Basic Materials
+AVDL,Avadel Pharmaceuticals PLC,Healthcare
+AVGO,Broadcom Inc.,Technology
+AVH.AX,AVITA Medical, Inc.,Stock
+AVIR,Atea Pharmaceuticals, Inc.,Stock
+AVNS,Avanos Medical, Inc.,Stock
+AVNT,Avient Corporation,Basic Materials
+AVNW,Aviat Networks, Inc.,Stock
+AVO,Mission Produce, Inc.,Stock
+AVPT,AvePoint, Inc.,Stock
+AVR,Anteris Technologies Global Corp.,Healthcare
+AVTR,Avantor, Inc.,Stock
+AVXL,Anavex Life Sciences Corp.,Healthcare
+AVY,Avery Dennison Corporation,Consumer Cyclical
+AWI,Armstrong World Industries, Inc.,Stock
+AWK,American Water Works Company, Inc.,Stock
+AWR,American States Water Company,Utilities
+AX,Axos Financial, Inc.,Stock
+AXGN,Axogen, Inc.,Stock
+AXL,Dauch Corporation,Consumer Cyclical
+AXON,Axon Enterprise Inc.,Industrials
+AXP,American Express Company,Financial Services
+AXS,AXIS Capital Holdings Limited,Financial Services
+AXSM,Axsome Therapeutics, Inc.,Stock
+AXTA,Axalta Coating Systems Ltd.,Basic Materials
+AYI,Acuity Inc.,Industrials
+AZJ.AX,Aurizon Holdings Limited,Industrials
+AZN.L,AstraZeneca PLC,Healthcare
+AZN,AstraZeneca PLC,Healthcare
+AZO,AutoZone Inc.,Consumer Cyclical
+AZTA,Azenta, Inc.,Stock
+AZZ,AZZ Inc.,Industrials
+BA.L,BAE Systems plc,Industrials
+BA,The Boeing Company,Industrials
+BAC,Bank of America Corp.,Financial Services
+BAH,Booz Allen Hamilton Holding Corporation,Industrials
+BAL.AX,Bellamy's Australia Limited,Stock
+BALL,Ball Corporation,Materials
+BALY,Bally's Corporation,Consumer Cyclical
+BAM,Brookfield Asset Management Ltd.,Financial Services
+BANC,Banc of California, Inc.,Stock
+BAND,Bandwidth Inc.,Technology
+BANF,BancFirst Corporation,Financial Services
+BANR,Banner Corporation,Financial Services
+BAP.AX,Bapcor Limited,Consumer Cyclical
+BARC.L,Barclays PLC,Financial Services
+BARK,BARK, Inc.,Stock
+BAS.DE,BASF SE,Basic Materials
+BATRA,Atlanta Braves Holdings, Inc.,Stock
+BATRK,Atlanta Braves Holdings, Inc.,Stock
+BATS.L,British American Tobacco p.l.c.,Consumer Defensive
+BAX,Baxter International Inc.,Healthcare
+BAYN.DE,Bayer Aktiengesellschaft,Healthcare
+BB.TO,BlackBerry Limited,Technology
+BBAI,BigBear.ai Holdings, Inc.,Stock
+BBBY,Bed Bath & Beyond, Inc.,Stock
+BBCP,Concrete Pumping Holdings, Inc.,Stock
+BBIO,BridgeBio Pharma, Inc.,Stock
+BBN.AX,Baby Bunting Group Limited,Consumer Cyclical
+BBNX,Beta Bionics, Inc.,Stock
+BBSI,Barrett Business Services, Inc.,Stock
+BBT,Beacon Financial Corporation,Financial Services
+BBUC,Brookfield Business Corporation,Financial Services
+BBW,Build-A-Bear Workshop, Inc.,Stock
+BBWI,Bath & Body Works, Inc.,Stock
+BBY,Best Buy Co. Inc.,Consumer Cyclical
+BC,Brunswick Corporation,Consumer Cyclical
+BCAL,California BanCorp,Financial Services
+BCAX,Bicara Therapeutics Inc.,Healthcare
+BCBP,BCB Bancorp, Inc.,Stock
+BCC,Boise Cascade Company,Basic Materials
+BCE.TO,BCE Inc.,Communication Services
+BCI.AX,BCI Minerals Limited,Basic Materials
+BCML,BayCom Corp,Financial Services
+BCO,The Brink's Company,Industrials
+BCPC,Balchem Corporation,Basic Materials
+BCRX,BioCryst Pharmaceuticals, Inc.,Stock
+BDC,Belden Inc.,Technology
+BDN,Brandywine Realty Trust,Real Estate
+BDX,Becton Dickinson and Company,Healthcare
+BE,Bloom Energy Corporation,Industrials
+BEAM,Beam Therapeutics Inc.,Healthcare
+BEEP,Mobile Infrastructure Corporation,Industrials
+BEI.DE,Beiersdorf Aktiengesellschaft,Consumer Defensive
+BELFA,Bel Fuse Inc.,Technology
+BELFB,Bel Fuse Inc.,Technology
+BEN.AX,Bendigo and Adelaide Bank Limited,Financial Services
+BEN,Franklin Resources, Inc.,Stock
+BEPC,Brookfield Renewable Corporation,Utilities
+BETR,Better Home & Finance Holding Company,Financial Services
+BEZ.L,Beazley plc,Financial Services
+BFAM,Bright Horizons Family Solutions Inc.,Consumer Cyclical
+BFC,Bank First Corporation,Financial Services
+BFG.AX,Bell Financial Group Limited,Financial Services
+BFH,Bread Financial Holdings, Inc.,Stock
+BFIN,BankFinancial Corporation,Financial Services
+BFLY,Butterfly Network, Inc.,Stock
+BFS,Saul Centers, Inc.,Stock
+BFST,Business First Bancshares, Inc.,Stock
+BG,Bunge Global SA,Consumer Defensive
+BGA.AX,Bega Cheese Limited,Consumer Defensive
+BGC,BGC Group, Inc.,Stock
+BGP.AX,Briscoe Group Limited,Consumer Cyclical
+BGS,B&G Foods, Inc.,Stock
+BH,Biglari Holdings Inc.,Consumer Cyclical
+BHB,Bar Harbor Bankshares,Financial Services
+BHC.TO,Bausch Health Companies Inc.,Healthcare
+BHE,Benchmark Electronics, Inc.,Stock
+BHF,Brighthouse Financial, Inc.,Stock
+BHP.AX,BHP Group Limited,Basic Materials
+BHR,Braemar Hotels & Resorts Inc.,Real Estate
+BHRB,Burke & Herbert Financial Services Corp.,Financial Services
+BHVN,Biohaven Ltd.,Healthcare
+BIIB,Biogen Inc.,Healthcare
+BILL,BILL Holdings, Inc.,Stock
+BIO,Bio-Rad Laboratories, Inc.,Stock
+BIOA,BioAge Labs, Inc.,Stock
+BIPC,Brookfield Infrastructure Corporation,Utilities
+BIR.TO,Birchcliff Energy Ltd.,Energy
+BIRK,Birkenstock Holding plc,Consumer Cyclical
+BIS.AX,Bisalloy Steel Group Limited,Basic Materials
+BIVV,Bioverativ Inc.,Stock
+BJ,BJ's Wholesale Club Holdings, Inc.,Stock
+BJRI,BJ's Restaurants, Inc.,Stock
+BK,The Bank of New York Mellon Corporation,Financial Services
+BKD,Brookdale Senior Living Inc.,Healthcare
+BKE,The Buckle, Inc.,Stock
+BKG.L,The Berkeley Group Holdings plc,Consumer Cyclical
+BKH,Black Hills Corporation,Utilities
+BKI.AX,BKI Investment Company Limited,Financial Services
+BKKT,Bakkt, Inc.,Stock
+BKNG,Booking Holdings Inc.,Consumer Cyclical
+BKR,Baker Hughes Company,Energy
+BKSY,BlackSky Technology Inc.,Industrials
+BKTI,BK Technologies Corporation,Technology
+BKU,BankUnited, Inc.,Stock
+BKV,BKV Corporation,Energy
+BL,BlackLine, Inc.,Stock
+BLBD,Blue Bird Corporation,Industrials
+BLCO,Bausch + Lomb Corporation,Healthcare
+BLD,TopBuild Corp.,Industrials
+BLDR,Builders FirstSource Inc.,Industrials
+BLFS,BioLife Solutions, Inc.,Stock
+BLFY,Blue Foundry Bancorp,Financial Services
+BLK,BlackRock Inc.,Financial Services
+BLKB,Blackbaud, Inc.,Stock
+BLMN,Bloomin' Brands, Inc.,Stock
+BLND.L,British Land Company PLC,Real Estate
+BLND,Blend Labs, Inc.,Stock
+BLSH,Bullish,Technology
+BLX.TO,Boralex Inc.,Utilities
+BLX,Banco Latinoamericano de Comercio Exterior, S. A.,Stock
+BLZE,Backblaze, Inc.,Stock
+BMBL,Bumble Inc.,Communication Services
+BMI,Badger Meter, Inc.,Stock
+BMN.AX,Bannerman Energy Ltd,Energy
+BMO.TO,Bank of Montreal,Financial Services
+BMRC,Bank of Marin Bancorp,Financial Services
+BMRN,BioMarin Pharmaceutical Inc.,Healthcare
+BMW.DE,Bayerische Motoren Werke Aktiengesellschaft,Consumer Cyclical
+BMY,Bristol-Myers Squibb Company,Healthcare
+BN.PA,Danone S.A.,Consumer Defensive
+BN.TO,Brookfield Corporation,Financial Services
+BNE.TO,Bonterra Energy Corp.,Energy
+BNED,Barnes & Noble Education, Inc.,Stock
+BNGO,Bionano Genomics, Inc.,Stock
+BNL,Broadstone Net Lease, Inc.,Stock
+BNP.PA,BNP Paribas SA,Financial Services
+BNR.DE,Brenntag SE,Basic Materials
+BNS.TO,The Bank of Nova Scotia,Financial Services
+BNTC,Benitec Biopharma Inc.,Healthcare
+BNTX,BioNTech SE,Healthcare
+BNZL.L,Bunzl plc,Consumer Defensive
+BOC.AX,Bougainville Copper Limited,Basic Materials
+BOC,Boston Omaha Corporation,Industrials
+BOH,Bank of Hawaii Corporation,Financial Services
+BOKF,BOK Financial Corporation,Financial Services
+BOOM,DMC Global Inc.,Industrials
+BOOT,Boot Barn Holdings, Inc.,Stock
+BOQ.AX,Bank of Queensland Limited,Financial Services
+BORR,Borr Drilling Limited,Energy
+BOW,Bowhead Specialty Holdings Inc.,Financial Services
+BOX,Box, Inc.,Stock
+BP.L,BP p.l.c.,Energy
+BPH.AX,BPH Energy Limited,Financial Services
+BPOP,Popular, Inc.,Stock
+BPRN,Princeton Bancorp, Inc.,Stock
+BPT.AX,Beach Energy Limited,Energy
+BR,Broadridge Financial Solutions Inc.,Technology
+BRBR,BellRing Brands, Inc.,Stock
+BRBS,Blue Ridge Bankshares, Inc.,Stock
+BRBY.L,Burberry Group plc,Consumer Cyclical
+BRC,Brady Corporation,Industrials
+BRCB,Black Rock Coffee Bar, Inc.,Stock
+BRCC,BRC Inc.,Consumer Defensive
+BRG.AX,Breville Group Limited,Consumer Cyclical
+BRKR,Bruker Corporation,Healthcare
+BRN.AX,BrainChip Holdings Ltd,Technology
+BRO,Brown & Brown Inc.,Financial Services
+BROS,Dutch Bros Inc.,Consumer Cyclical
+BRSL,Brightstar Lottery PLC,Consumer Cyclical
+BRSP,BrightSpire Capital, Inc.,Stock
+BRT,BRT Apartments Corp.,Real Estate
+BRU.AX,Buru Energy Limited,Energy
+BRX,Brixmor Property Group Inc.,Real Estate
+BRZE,Braze, Inc.,Stock
+BSA.AX,BSA Limited,Industrials
+BSET,Bassett Furniture Industries, Incorporated,Stock
+BSL.AX,BlueScope Steel Limited,Basic Materials
+BSRR,Sierra Bancorp,Financial Services
+BSVN,Bank7 Corp.,Financial Services
+BSX,Boston Scientific Corporation,Healthcare
+BSY,Bentley Systems, Incorporated,Stock
+BTBT,Bit Digital, Inc.,Stock
+BTDR,Bitdeer Technologies Group,Technology
+BTE.TO,Baytex Energy Corp.,Energy
+BTMD,biote Corp.,Healthcare
+BTSG,BrightSpring Health Services, Inc.,Stock
+BTU,Peabody Energy Corporation,Energy
+BUB.AX,Bubs Australia Limited,Consumer Defensive
+BULL,Webull Corporation,Technology
+BUR,Burford Capital Limited,Financial Services
+BURL,Burlington Stores, Inc.,Stock
+BUSE,First Busey Corporation,Financial Services
+BV,BrightView Holdings, Inc.,Stock
+BVFL,BV Financial, Inc.,Stock
+BVS.AX,Bravura Solutions Limited,Technology
+BVS,Bioventus Inc.,Healthcare
+BWA,BorgWarner Inc.,Consumer Cyclical
+BWB,Bridgewater Bancshares, Inc.,Stock
+BWF.AX,BlackWall Limited,Financial Services
+BWFG,Bankwell Financial Group, Inc.,Stock
+BWIN,The Baldwin Insurance Group, Inc.,Stock
+BWMN,Bowman Consulting Group Ltd.,Industrials
+BWP.AX,BWP Trust,Real Estate
+BWXT,BWX Technologies, Inc.,Stock
+BX,Blackstone Inc.,Financial Services
+BXB.AX,Brambles Limited,Industrials
+BXC,BlueLinx Holdings Inc.,Industrials
+BXMT,Blackstone Mortgage Trust, Inc.,Stock
+BXP,Boston Properties Inc.,Real Estate
+BY,Byline Bancorp, Inc.,Stock
+BYD.TO,Boyd Group Services Inc.,Consumer Cyclical
+BYD,Boyd Gaming Corporation,Consumer Cyclical
+BYND,Beyond Meat, Inc.,Stock
+BYRN,Byrna Technologies Inc.,Industrials
+BZAI,Blaize Holdings, Inc.,Stock
+BZH,Beazer Homes USA, Inc.,Stock
+C,Citigroup Inc.,Financial Services
+CA.PA,Carrefour SA,Consumer Defensive
+CAA.AX,Capral Limited,Basic Materials
+CAB.AX,Cabcharge Australia Limited,Stock
+CABO,Cable One, Inc.,Stock
+CAC,Camden National Corporation,Financial Services
+CACC,Credit Acceptance Corporation,Financial Services
+CACI,CACI International Inc,Technology
+CAD,PIMCO Canada Bond Index Exchang,Stock
+CADE,Cadence Bank,Financial Services
+CADL,Candel Therapeutics, Inc.,Stock
+CAE.TO,CAE Inc.,Industrials
+CAF.AX,Centrepoint Alliance Limited,Financial Services
+CAG,Conagra Brands Inc.,Consumer Defensive
+CAH,Cardinal Health, Inc.,Stock
+CAI,Caris Life Sciences, Inc.,Stock
+CAKE,The Cheesecake Factory Incorporated,Consumer Cyclical
+CAL,Caleres, Inc.,Stock
+CALM,Cal-Maine Foods, Inc.,Stock
+CALX,Calix, Inc.,Stock
+CALY,Callaway Golf Company,Consumer Cyclical
+CAM.AX,Clime Capital Limited,Financial Services
+CAN.AX,Cann Group Limited,Healthcare
+CAP.PA,Capgemini SE,Technology
+CAPR,Capricor Therapeutics, Inc.,Stock
+CAR.AX,CAR Group Limited,Communication Services
+CAR,Avis Budget Group, Inc.,Stock
+CARE,Carter Bankshares, Inc.,Stock
+CARG,CarGurus, Inc.,Stock
+CARL,Carlsmed, Inc.,Stock
+CARR,Carrier Global Corporation,Industrials
+CARS,Cars.com Inc.,Communication Services
+CART,Maplebear Inc.,Consumer Cyclical
+CASH,Pathward Financial, Inc.,Stock
+CASS,Cass Information Systems, Inc.,Stock
+CASY,Casey's General Stores, Inc.,Stock
+CAT.AX,Catapult Sports Ltd,Technology
+CAT,Caterpillar Inc.,Industrials
+CATX,Perspective Therapeutics, Inc.,Stock
+CATY,Cathay General Bancorp,Financial Services
+CAVA,CAVA Group, Inc.,Stock
+CAY.AX,Canyon Resources Limited,Basic Materials
+CB,Chubb Limited,Financial Services
+CBA.AX,Commonwealth Bank of Australia,Financial Services
+CBAN,Colony Bankcorp, Inc.,Stock
+CBFV,CB Financial Services, Inc.,Stock
+CBK.DE,Commerzbank AG,Financial Services
+CBK,Commercial Bancgroup, Inc.,Stock
+CBL.AX,Control Bionics Limited,Healthcare
+CBL,CBL & Associates Properties, Inc.,Stock
+CBLL,CeriBell, Inc.,Stock
+CBNA,Chain Bridge Bancorp, Inc.,Stock
+CBNK,Capital Bancorp, Inc.,Stock
+CBOE,Cboe Global Markets Inc.,Financial Services
+CBRE,CBRE Group Inc.,Real Estate
+CBRL,Cracker Barrel Old Country Store, Inc.,Stock
+CBSH,Commerce Bancshares, Inc.,Stock
+CBT,Cabot Corporation,Basic Materials
+CBU,Community Financial System, Inc.,Stock
+CBZ,CBIZ, Inc.,Stock
+CC,The Chemours Company,Basic Materials
+CCA.TO,Cogeco Communications Inc.,Communication Services
+CCB,Coastal Financial Corporation,Financial Services
+CCBG,Capital City Bank Group, Inc.,Stock
+CCC,CCC Intelligent Solutions Holdings Inc.,Technology
+CCEP,Coca-Cola Europacific Partners PLC,Consumer Defensive
+CCH.L,Coca-Cola HBC AG,Consumer Defensive
+CCI,Crown Castle Inc.,Real Estate
+CCK,Crown Holdings, Inc.,Stock
+CCL,Carnival Corporation,Consumer Cyclical
+CCNE,CNB Financial Corporation,Financial Services
+CCO.TO,Cameco Corporation,Energy
+CCOI,Cogent Communications Holdings, Inc.,Stock
+CCP.AX,Credit Corp Group Limited,Financial Services
+CCRN,Cross Country Healthcare, Inc.,Stock
+CCS,Century Communities, Inc.,Stock
+CCSI,Consensus Cloud Solutions, Inc.,Stock
+CCX.AX,City Chic Collective Limited,Consumer Cyclical
+CD,Chaince Digital Holdings Inc.,Financial Services
+CDA.AX,Codan Limited,Technology
+CDE,Coeur Mining, Inc.,Stock
+CDM.AX,Cadence Capital Limited,Financial Services
+CDNA,CareDx, Inc.,Stock
+CDNS,Cadence Design Systems Inc.,Technology
+CDP,COPT Defense Properties,Real Estate
+CDRE,Cadre Holdings, Inc.,Stock
+CDW,CDW Corporation,Technology
+CDXS,Codexis, Inc.,Stock
+CDZI,Cadiz Inc.,Utilities
+CE,Celanese Corporation,Materials
+CECO,CECO Environmental Corp.,Industrials
+CEG,Constellation Energy Corporation,Utilities
+CELC,Celcuity Inc.,Healthcare
+CELH,Celsius Holdings, Inc.,Stock
+CEN.AX,Contact Energy Limited,Utilities
+CENT,Central Garden & Pet Company,Consumer Defensive
+CENTA,Central Garden & Pet Company,Consumer Defensive
+CENX,Century Aluminum Company,Basic Materials
+CERS,Cerus Corporation,Healthcare
+CERT,Certara, Inc.,Stock
+CEVA,CEVA, Inc.,Stock
+CF,CF Industries Holdings Inc.,Materials
+CFBK,CF Bankshares Inc.,Financial Services
+CFFI,C&F Financial Corporation,Financial Services
+CFFN,Capitol Federal Financial, Inc.,Stock
+CFG,Citizens Financial Group, Inc.,Stock
+CFLT,Confluent, Inc.,Stock
+CFP.TO,Canfor Corporation,Basic Materials
+CFR,Cullen/Frost Bankers, Inc.,Stock
+CFX.TO,Canfor Pulp Products Inc.,Basic Materials
+CG,The Carlyle Group Inc.,Financial Services
+CGEM,Cullinan Therapeutics, Inc.,Stock
+CGF.AX,Challenger Limited,Financial Services
+CGNX,Cognex Corporation,Technology
+CGON,CG Oncology, Inc.,Stock
+CGS.AX,Cogstate Limited,Healthcare
+CGX.TO,Cineplex Inc.,Communication Services
+CHC.AX,Charter Hall Group,Real Estate
+CHCO,City Holding Company,Financial Services
+CHCT,Community Healthcare Trust Incorporated,Real Estate
+CHD,Church & Dwight Co. Inc.,Consumer Defensive
+CHDN,Churchill Downs Incorporated,Consumer Cyclical
+CHE,Chemed Corporation,Healthcare
+CHEF,The Chefs' Warehouse, Inc.,Stock
+CHH,Choice Hotels International, Inc.,Stock
+CHMG,Chemung Financial Corporation,Financial Services
+CHN.AX,Chalice Mining Limited,Basic Materials
+CHR.TO,Chorus Aviation Inc.,Industrials
+CHRD,Chord Energy Corporation,Energy
+CHRS,Coherus Oncology, Inc.,Stock
+CHRW,C.H. Robinson Worldwide Inc.,Industrials
+CHTR,Charter Communications Inc.,Communication Services
+CHWY,Chewy, Inc.,Stock
+CI,Cigna Group,Healthcare
+CIA.AX,Champion Iron Limited,Basic Materials
+CIA,Citizens, Inc.,Stock
+CIEN,Ciena Corporation,Technology
+CIFR,Cipher Digital Inc.,Technology
+CIM,Chimera Investment Corporation,Real Estate
+CINF,Cincinnati Financial Corporation,Financial Services
+CIP.AX,Centuria Industrial REIT,Real Estate
+CIVB,Civista Bancshares, Inc.,Stock
+CIVI,Civitas Resources, Inc.,Stock
+CIX,CompX International Inc.,Industrials
+CKA.AX,Cokal Limited,Basic Materials
+CKF.AX,Collins Foods Limited,Consumer Cyclical
+CL,Colgate-Palmolive Company,Consumer Defensive
+CLAR,Clarus Corporation,Consumer Cyclical
+CLB,Core Laboratories Inc.,Energy
+CLBK,Columbia Financial, Inc.,Stock
+CLDT,Chatham Lodging Trust,Real Estate
+CLDX,Celldex Therapeutics, Inc.,Stock
+CLF,Cleveland-Cliffs Inc.,Basic Materials
+CLFD,Clearfield, Inc.,Stock
+CLH,Clean Harbors, Inc.,Stock
+CLMB,Climb Global Solutions, Inc.,Stock
+CLMT,Calumet, Inc.,Stock
+CLNE,Clean Energy Fuels Corp.,Energy
+CLOV,Clover Health Investments, Corp.,Stock
+CLPR,Clipper Realty Inc.,Real Estate
+CLPT,ClearPoint Neuro, Inc.,Stock
+CLS.TO,Celestica Inc.,Technology
+CLSK,CleanSpark, Inc.,Stock
+CLVT,Clarivate Plc,Technology
+CLW.AX,Charter Hall Long WALE REIT,Real Estate
+CLW,Clearwater Paper Corporation,Basic Materials
+CLX.AX,CTI Logistics Limited,Industrials
+CLX,The Clorox Company,Consumer Defensive
+CM.TO,Canadian Imperial Bank of Commerce,Financial Services
+CMA,Comerica Incorporated,Financial Services
+CMBT,Cmb.Tech NV,Energy
+CMC,Commercial Metals Company,Basic Materials
+CMCL,Caledonia Mining Corporation Plc,Basic Materials
+CMCO,Columbus McKinnon Corporation,Industrials
+CMCSA,Comcast Corporation,Communication Services
+CMDB,Costamare Bulkers Holdings Limited,Industrials
+CME,CME Group Inc.,Financial Services
+CMG.AX,Critical Minerals Group Limited,Basic Materials
+CMG,Chipotle Mexican Grill Inc.,Consumer Cyclical
+CMI,Cummins Inc.,Industrials
+CML.AX,CONNECTMIN FPO [CML],Basic Materials
+CMP,Compass Minerals International, Inc.,Stock
+CMPR,Cimpress plc,Industrials
+CMPX,Compass Therapeutics, Inc.,Stock
+CMRC,Commerce.com, Inc.,Stock
+CMRE,Costamare Inc.,Industrials
+CMS,CMS Energy Corporation,Utilities
+CMT,Core Molding Technologies, Inc.,Stock
+CMTG,Claros Mortgage Trust, Inc.,Stock
+CMW.AX,Cromwell Property Group,Real Estate
+CNA.L,Centrica plc,Utilities
+CNA,CNA Financial Corporation,Financial Services
+CNB.AX,Carnaby Resources Limited,Basic Materials
+CNC,Centene Corporation,Healthcare
+CNDT,Conduent Incorporated,Technology
+CNH,CNH Industrial N.V.,Industrials
+CNI.AX,Centuria Capital Group,Real Estate
+CNK,Cinemark Holdings, Inc.,Stock
+CNM,Core & Main, Inc.,Stock
+CNMD,CONMED Corporation,Healthcare
+CNNE,Cannae Holdings, Inc.,Stock
+CNO,CNO Financial Group, Inc.,Stock
+CNOB,ConnectOne Bancorp, Inc.,Stock
+CNP,CenterPoint Energy, Inc.,Stock
+CNQ.TO,Canadian Natural Resources Limited,Energy
+CNR.TO,Canadian National Railway Company,Industrials
+CNR,Core Natural Resources, Inc.,Stock
+CNS,Cohen & Steers, Inc.,Stock
+CNU.AX,Chorus Limited,Communication Services
+CNX,CNX Resources Corporation,Energy
+CNXC,Concentrix Corporation,Technology
+CNXN,PC Connection, Inc.,Stock
+COCO,The Vita Coco Company, Inc.,Stock
+CODI,Compass Diversified,Industrials
+COF,Capital One Financial Corporation,Financial Services
+COFS,ChoiceOne Financial Services, Inc.,Stock
+COGT,Cogent Biosciences, Inc.,Stock
+COH.AX,Cochlear Limited,Healthcare
+COHR,Coherent Corp.,Technology
+COHU,Cohu, Inc.,Stock
+COIN,Coinbase Global Inc.,Financial Services
+COKE,Coca-Cola Consolidated, Inc.,Stock
+COL.AX,Coles Group Limited,Consumer Defensive
+COLB,Columbia Banking System, Inc.,Stock
+COLD,Americold Realty Trust, Inc.,Stock
+COLL,Collegium Pharmaceutical, Inc.,Stock
+COLM,Columbia Sportswear Company,Consumer Cyclical
+COMP,Compass, Inc.,Stock
+CON.DE,Continental Aktiengesellschaft,Consumer Cyclical
+CON,Concentra Group Holdings Parent, Inc.,Stock
+COO,The Cooper Companies, Inc.,Stock
+COOK,Traeger, Inc.,Stock
+COP,ConocoPhillips,Energy
+COR,Cencora, Inc.,Stock
+CORT,Corcept Therapeutics Incorporated,Healthcare
+CORZ,Core Scientific, Inc.,Stock
+COSO,CoastalSouth Bancshares, Inc.,Stock
+COST,Costco Wholesale Corporation,Consumer Defensive
+COUR,Coursera, Inc.,Stock
+CP.TO,Canadian Pacific Kansas City Limited,Industrials
+CPAY,Corpay, Inc.,Stock
+CPB,Campbell Soup Company,Consumer Defensive
+CPF,Central Pacific Financial Corp.,Financial Services
+CPG.L,Compass Group PLC,Consumer Cyclical
+CPK,Chesapeake Utilities Corporation,Utilities
+CPNG,Coupang, Inc.,Stock
+CPRI,Capri Holdings Limited,Consumer Cyclical
+CPRT,Copart, Inc.,Stock
+CPRX,Catalyst Pharmaceuticals, Inc.,Stock
+CPS,Cooper-Standard Holdings Inc.,Consumer Cyclical
+CPSS,Consumer Portfolio Services, Inc.,Stock
+CPT,Camden Property Trust,Real Estate
+CPU.AX,Computershare Limited,Financial Services
+CQE.AX,Charter Hall Social Infrastructure REIT,Real Estate
+CQR.AX,Charter Hall Retail REIT,Real Estate
+CR,Crane Company,Industrials
+CRAI,CRA International, Inc.,Stock
+CRBG,Corebridge Financial, Inc.,Stock
+CRC,California Resources Corporation,Energy
+CRCL,Circle Internet Group,Financial Services
+CRCT,Cricut, Inc.,Stock
+CRDA.L,Croda International Plc,Basic Materials
+CRDA,BlackRock Credit Strategies Fund,Stock
+CRDF,Cardiff Oncology, Inc.,Stock
+CRDO,Credo Technology Group Holding Ltd,Technology
+CRG.AX,230137,Stock
+CRGY,Crescent Energy Company,Energy
+CRH.L,CRH plc,Basic Materials
+CRH,CRH plc,Basic Materials
+CRI,Carter's, Inc.,Stock
+CRK,Comstock Resources, Inc.,Stock
+CRL,Charles River Laboratories International, Inc.,Stock
+CRM,Salesforce Inc.,Technology
+CRMD,CorMedix Inc.,Healthcare
+CRML,Critical Metals Corp.,Basic Materials
+CRMT,America's Car-Mart, Inc.,Stock
+CRN.AX,Coronado Global Resources Inc.,Basic Materials
+CRNC,Cerence Inc.,Technology
+CRNX,Crinetics Pharmaceuticals, Inc.,Stock
+CROX,Crocs, Inc.,Stock
+CRS,Carpenter Technology Corporation,Industrials
+CRSP,CRISPR Therapeutics AG,Healthcare
+CRSR,Corsair Gaming, Inc.,Stock
+CRUS,Cirrus Logic, Inc.,Stock
+CRVL,CorVel Corporation,Financial Services
+CRVS,Corvus Pharmaceuticals, Inc.,Stock
+CRWD,CrowdStrike Holdings Inc.,Technology
+CS.PA,AXA SA,Financial Services
+CSAL,UNITI GROUP INC,Stock
+CSC,CSC Collective Holdings Ltd,Stock
+CSCO,Cisco Systems Inc.,Technology
+CSE.AX,Copper Strike Limited,Stock
+CSGP,CoStar Group, Inc.,Stock
+CSGS,CSG Systems International, Inc.,Stock
+CSL.AX,CSL Limited,Healthcare
+CSL,Carlisle Companies Incorporated,Industrials
+CSPI,CSP Inc.,Technology
+CSR,Centerspace,Real Estate
+CSTL,Castle Biosciences, Inc.,Stock
+CSTM,Constellium SE,Basic Materials
+CSU.TO,Constellation Software Inc.,Technology
+CSV,Carriage Services, Inc.,Stock
+CSW,CSW Industrials, Inc.,Stock
+CSX,CSX Corporation,Industrials
+CTAS,Cintas Corporation,Industrials
+CTBI,Community Trust Bancorp, Inc.,Stock
+CTD.AX,Corporate Travel Management Limited,Consumer Cyclical
+CTE.AX,Cryosite Limited,Healthcare
+CTEC.L,Convatec Group PLC,Healthcare
+CTEV,Claritev Corporation,Healthcare
+CTGO,Contango Ore, Inc.,Stock
+CTKB,Cytek Biosciences, Inc.,Stock
+CTLP,Cantaloupe, Inc.,Stock
+CTM.AX,Centaurus Metals Limited,Basic Materials
+CTO,CTO Realty Growth, Inc.,Stock
+CTOS,Custom Truck One Source, Inc.,Stock
+CTRA,Coterra Energy Inc.,Energy
+CTRE,CareTrust REIT, Inc.,Stock
+CTRI,Centuri Holdings, Inc.,Stock
+CTRM,Castor Maritime Inc.,Industrials
+CTRN,Citi Trends, Inc.,Stock
+CTS,CTS Corporation,Technology
+CTSH,Cognizant Technology Solutions Corporation,Technology
+CTVA,Corteva, Inc.,Stock
+CTXR,Citius Pharmaceuticals, Inc.,Stock
+CU.TO,Canadian Utilities Limited,Utilities
+CUB,Lionheart Holdings,Financial Services
+CUBE,CubeSmart,Real Estate
+CUBI,Customers Bancorp, Inc.,Stock
+CUE.AX,Cue Energy Resources Limited,Energy
+CURB,Curbline Properties Corp.,Real Estate
+CURI,CuriosityStream Inc.,Communication Services
+CURV,Torrid Holdings Inc.,Consumer Cyclical
+CUV.AX,Clinuvel Pharmaceuticals Limited,Healthcare
+CUZ,Cousins Properties Incorporated,Real Estate
+CV,CapsoVision, Inc.,Stock
+CVBF,CVB Financial Corp.,Financial Services
+CVCO,Cavco Industries, Inc.,Stock
+CVGW,Calavo Growers, Inc.,Stock
+CVI,CVR Energy, Inc.,Stock
+CVLG,Covenant Logistics Group, Inc.,Stock
+CVLT,Commvault Systems, Inc.,Stock
+CVNA,Carvana Co.,Consumer Cyclical
+CVRX,CVRx, Inc.,Stock
+CVS,CVS Health Corporation,Healthcare
+CVSA,Covista Inc.,Consumer Defensive
+CVX,Chevron Corporation,Energy
+CW,Curtiss-Wright Corporation,Industrials
+CWAN,Clearwater Analytics Holdings, Inc.,Stock
+CWBC,Community West Bancshares,Financial Services
+CWCO,Consolidated Water Co. Ltd.,Utilities
+CWEN,Clearway Energy, Inc.,Stock
+CWH,Camping World Holdings, Inc.,Stock
+CWK,Cushman & Wakefield Limited,Real Estate
+CWP.AX,Cedar Woods Properties Limited,Real Estate
+CWST,Casella Waste Systems, Inc.,Stock
+CWT,California Water Service Group,Utilities
+CWY.AX,Cleanaway Waste Management Limited,Industrials
+CXDO,Crexendo, Inc.,Stock
+CXL.AX,Calix Limited,Basic Materials
+CXM,Sprinklr, Inc.,Stock
+CXO.AX,Core Lithium Ltd,Basic Materials
+CXT,Crane NXT, Co.,Stock
+CXW,CoreCivic, Inc.,Stock
+CYB.AX,AUCYBER FPO [CYB],Technology
+CYBR,CyberArk Software Ltd,Technology
+CYG.AX,Coventry Group Ltd,Industrials
+CYH,Community Health Systems, Inc.,Stock
+CYRX,Cryoport, Inc.,Stock
+CYTK,Cytokinetics, Incorporated,Stock
+CZFS,Citizens Financial Services, Inc.,Stock
+CZNC,Citizens & Northern Corporation,Financial Services
+CZR,Caesars Entertainment Inc.,Consumer Cyclical
+CZWI,Citizens Community Bancorp, Inc.,Stock
+D,Dominion Energy Inc.,Utilities
+DAKT,Daktronics, Inc.,Stock
+DAL,Delta Air Lines Inc.,Industrials
+DAN,Dana Incorporated,Consumer Cyclical
+DAR,Darling Ingredients Inc.,Consumer Defensive
+DASH,DoorDash, Inc.,Stock
+DAVE,Dave Inc.,Technology
+DAWN,Day One Biopharmaceuticals, Inc.,Stock
+DBD,Diebold Nixdorf, Incorporated,Stock
+DBI.AX,Dalrymple Bay Infrastructure Limited,Industrials
+DBI,Designer Brands Inc.,Consumer Cyclical
+DBK.DE,Deutsche Bank Aktiengesellschaft,Financial Services
+DBRG,DigitalBridge Group, Inc.,Stock
+DBX,Dropbox, Inc.,Stock
+DC,Dakota Gold Corp.,Basic Materials
+DCC.L,DCC plc,Energy
+DCGO,DocGo Inc.,Healthcare
+DCH,Dauch Corporation,Consumer Cyclical
+DCI,Donaldson Company, Inc.,Stock
+DCO,Ducommun Incorporated,Industrials
+DCOM,Dime Community Bancshares, Inc.,Stock
+DCTH,Delcath Systems, Inc.,Stock
+DD,DuPont de Nemours Inc.,Materials
+DDD,3D Systems Corporation,Technology
+DDOG,Datadog Inc.,Technology
+DDS,Dillard's, Inc.,Stock
+DE,Deere & Company,Industrials
+DEA,Easterly Government Properties, Inc.,Stock
+DEC,Diversified Energy Company,Energy
+DECK,Deckers Outdoor Corporation,Consumer Cyclical
+DEI,Douglas Emmett, Inc.,Stock
+DELL,Dell Technologies Inc.,Technology
+DENN,Denny's Corporation,Consumer Cyclical
+DERM,Journey Medical Corporation,Healthcare
+DFH,Dream Finders Homes, Inc.,Stock
+DFIN,Donnelley Financial Solutions, Inc.,Stock
+DFTX,Definium Therapeutics, Inc.,Stock
+DG.PA,Vinci SA,Industrials
+DG,Dollar General Corporation,Consumer Defensive
+DGE.L,Diageo plc,Consumer Defensive
+DGH.AX,Desane Group Holdings Limited,Real Estate
+DGICA,Donegal Group Inc.,Financial Services
+DGII,Digi International Inc.,Technology
+DGX,Quest Diagnostics Incorporated,Healthcare
+DH,Definitive Healthcare Corp.,Healthcare
+DHC,Diversified Healthcare Trust,Real Estate
+DHER.DE,Delivery Hero SE,Consumer Cyclical
+DHI,D.R. Horton Inc.,Consumer Cyclical
+DHIL,Diamond Hill Investment Group, Inc.,Stock
+DHL.DE,Deutsche Post AG,Industrials
+DHR,Danaher Corporation,Healthcare
+DHT,DHT Holdings, Inc.,Stock
+DIN,Dine Brands Global, Inc.,Stock
+DINO,HF Sinclair Corporation,Energy
+DIOD,Diodes Incorporated,Technology
+DIS,The Walt Disney Company,Communication Services
+DJCO,Daily Journal Corporation,Technology
+DJT,Trump Media & Technology Group Corp.,Communication Services
+DJW.AX,Djerriwarrh Investments Limited,Financial Services
+DK,Delek US Holdings, Inc.,Stock
+DKM.AX,Duketon Mining Limited,Basic Materials
+DKNG,DraftKings Inc.,Consumer Cyclical
+DKS,DICK'S Sporting Goods, Inc.,Stock
+DLB,Dolby Laboratories, Inc.,Stock
+DLR,Digital Realty Trust Inc.,Real Estate
+DLTR,Dollar Tree Inc.,Consumer Defensive
+DLX,Deluxe Corporation,Industrials
+DMAC,DiaMedica Therapeutics Inc.,Healthcare
+DMG.AX,Dragon Mountain Gold Limited,Basic Materials
+DMP.AX,Domino's Pizza Enterprises Limited,Consumer Cyclical
+DMRC,Digimarc Corporation,Technology
+DNA,Ginkgo Bioworks Holdings, Inc.,Stock
+DND.TO,Dye & Durham Limited,Technology
+DNK.AX,Danakali Limited,Stock
+DNLI,Denali Therapeutics Inc.,Healthcare
+DNOW,DNOW Inc.,Industrials
+DNTH,Dianthus Therapeutics, Inc.,Stock
+DNUT,Krispy Kreme, Inc.,Stock
+DOC,Physicians Realty Trust,Real Estate
+DOCN,DigitalOcean Holdings, Inc.,Stock
+DOCS,Doximity, Inc.,Stock
+DOCU,DocuSign, Inc.,Stock
+DOL.TO,Dollarama Inc.,Consumer Defensive
+DOLE,Dole plc,Consumer Defensive
+DOMO,Domo, Inc.,Stock
+DOO.TO,BRP Inc.,Consumer Cyclical
+DORM,Dorman Products, Inc.,Stock
+DOUG,Douglas Elliman Inc.,Real Estate
+DOV,Dover Corporation,Industrials
+DOW.AX,Downer EDI Limited,Industrials
+DOW,Dow Inc.,Materials
+DPLM.L,Diploma PLC,Industrials
+DPZ,Domino's Pizza, Inc.,Stock
+DRE.AX,Dreadnought Resources Limited,Basic Materials
+DRH,DiamondRock Hospitality Company,Real Estate
+DRI,Darden Restaurants Inc.,Consumer Cyclical
+DRR.AX,Deterra Royalties Limited,Basic Materials
+DRS,Leonardo DRS, Inc.,Stock
+DRUG,Bright Minds Biosciences Inc.,Healthcare
+DRVN,Driven Brands Holdings Inc.,Consumer Cyclical
+DSG.TO,The Descartes Systems Group Inc.,Technology
+DSGN,Design Therapeutics, Inc.,Stock
+DSGR,Distribution Solutions Group, Inc.,Stock
+DSK.AX,Dusk Group Limited,Consumer Cyclical
+DSP,Viant Technology Inc.,Technology
+DSY.PA,Dassault Systèmes SE,Technology
+DT,Dynatrace, Inc.,Stock
+DTE.DE,Deutsche Telekom AG,Communication Services
+DTE,DTE Energy Company,Utilities
+DTL.AX,Data#3 Limited,Technology
+DTM,DT Midstream, Inc.,Stock
+DUB.AX,Dubber Corporation Limited,Technology
+DUK,Duke Energy Corporation,Utilities
+DUOL,Duolingo, Inc.,Stock
+DV,DoubleVerify Holdings, Inc.,Stock
+DVA,DaVita Inc.,Healthcare
+DVAX,Dynavax Technologies Corp,Healthcare
+DVN,Devon Energy Corporation,Energy
+DX,Dynex Capital, Inc.,Stock
+DXB.AX,Dimerix Limited,Healthcare
+DXC,DXC Technology Company,Technology
+DXCM,DexCom Inc.,Healthcare
+DXPE,DXP Enterprises, Inc.,Stock
+DXS.AX,DEXUS,Real Estate
+DY,Dycom Industries, Inc.,Stock
+DYL.AX,Deep Yellow Limited,Energy
+DYN,Dyne Therapeutics, Inc.,Stock
+EA,Electronic Arts Inc.,Communication Services
+EAT,Brinker International, Inc.,Stock
+EB,Eventbrite, Inc.,Stock
+EBAY,eBay Inc.,Consumer Cyclical
+EBC,Eastern Bankshares, Inc.,Stock
+EBF,Ennis, Inc.,Stock
+EBMT,Eagle Bancorp Montana, Inc.,Stock
+EBO.AX,EBOS Group Limited,Healthcare
+EBS,Emergent BioSolutions Inc.,Healthcare
+ECBK,ECB Bancorp, Inc.,Stock
+ECF.AX,Elanor Commercial Property Fund,Real Estate
+ECG,Everus Construction Group, Inc.,Stock
+ECL,Ecolab Inc.,Materials
+ECPG,Encore Capital Group, Inc.,Stock
+ECVT,Ecovyst Inc.,Basic Materials
+ED,Consolidated Edison Inc.,Utilities
+EDIT,Editas Medicine, Inc.,Stock
+EDV.AX,Endeavour Group Limited,Consumer Defensive
+EDV.L,Endeavour Mining plc,Basic Materials
+EE,Excelerate Energy, Inc.,Stock
+EEFT,Euronet Worldwide, Inc.,Stock
+EEX,Emerald Holding, Inc.,Stock
+EFC,Ellington Financial Inc.,Real Estate
+EFN.TO,Element Fleet Management Corp.,Industrials
+EFSC,Enterprise Financial Services Corp,Financial Services
+EFSI,Eagle Financial Services, Inc.,Stock
+EFX,Equifax Inc.,Industrials
+EG,Everest Group, Ltd.,Stock
+EGAN,eGain Corporation,Technology
+EGBN,Eagle Bancorp, Inc.,Stock
+EGG.AX,Enero Group Limited,Communication Services
+EGH.AX,Eureka Group Holdings Limited,Real Estate
+EGHT,8x8, Inc.,Stock
+EGP,EastGroup Properties, Inc.,Stock
+EGY,VAALCO Energy, Inc.,Stock
+EHAB,Enhabit, Inc.,Stock
+EHC,Encompass Health Corporation,Healthcare
+EHTH,eHealth, Inc.,Stock
+EIF.TO,Exchange Income Corporation,Industrials
+EIG,Employers Holdings, Inc.,Stock
+EIQ.AX,Echo IQ Limited,Healthcare
+EIX,Edison International,Utilities
+EL.PA,EssilorLuxottica Société anonyme,Healthcare
+EL,The Estee Lauder Companies Inc.,Consumer Defensive
+ELA,Envela Corporation,Consumer Cyclical
+ELAN,Elanco Animal Health Incorporated,Healthcare
+ELD.AX,Elders Limited,Consumer Defensive
+ELD.TO,Eldorado Gold Corporation,Basic Materials
+ELDN,Eledon Pharmaceuticals, Inc.,Stock
+ELF.TO,E-L Financial Corporation Limited,Financial Services
+ELF,e.l.f. Beauty, Inc.,Stock
+ELMD,Electromed, Inc.,Stock
+ELME,Elme Communities,Real Estate
+ELS,Equity LifeStyle Properties, Inc.,Stock
+ELV,Elevance Health Inc.,Healthcare
+ELVN,Enliven Therapeutics, Inc.,Stock
+EMA.TO,Emera Incorporated,Utilities
+EMBC,Embecta Corp.,Healthcare
+EME,EMCOR Group, Inc.,Stock
+EMH.AX,European Metals Holdings Limited,Basic Materials
+EML.AX,EML Payments Limited,Technology
+EML,The Eastern Company,Industrials
+EMN,Eastman Chemical Company,Materials
+EMR.AX,Emerald Resources NL,Basic Materials
+EMR,Emerson Electric Co.,Industrials
+ENB.TO,Enbridge Inc.,Energy
+ENGI.PA,Engie SA,Utilities
+ENH,336774,Stock
+ENOV,Enovis Corporation,Healthcare
+ENPH,Enphase Energy, Inc.,Stock
+ENR.AX,Encounter Resources Limited,Basic Materials
+ENR,Energizer Holdings, Inc.,Stock
+ENS,EnerSys,Industrials
+ENSG,The Ensign Group, Inc.,Stock
+ENT.L,Entain Plc,Consumer Cyclical
+ENTA,Enanta Pharmaceuticals, Inc.,Stock
+ENTG,Entegris, Inc.,Stock
+ENVA,Enova International, Inc.,Stock
+ENVX,Enovix Corporation,Industrials
+EOAN.DE,E.ON SE,Utilities
+EOG,EOG Resources Inc.,Energy
+EOLS,Evolus, Inc.,Stock
+EOSE,Eos Energy Enterprises, Inc.,Stock
+EP,Empire Petroleum Corporation,Energy
+EPAC,Enerpac Tool Group Corp.,Industrials
+EPAM,EPAM Systems Inc.,Technology
+EPC,Edgewell Personal Care Company,Consumer Defensive
+EPM,Evolution Petroleum Corporation,Energy
+EPR,EPR Properties,Real Estate
+EPRT,Essential Properties Realty Trust, Inc.,Stock
+EPSN,Epsilon Energy Ltd.,Energy
+EQB.TO,EQB Inc.,Financial Services
+EQBK,Equity Bancshares, Inc.,Stock
+EQH,Equitable Holdings, Inc.,Stock
+EQIX,Equinix Inc.,Real Estate
+EQR,Equity Residential,Real Estate
+EQT.AX,EQT Holdings Limited,Financial Services
+EQT,EQT Corporation,Energy
+ERA.AX,Energy Resources of Australia Ltd,Energy
+ERAS,Erasca, Inc.,Stock
+ERF.PA,Eurofins Scientific SE,Healthcare
+ERIE,Erie Indemnity Company,Financial Services
+ERII,Energy Recovery, Inc.,Stock
+ES,Eversource Energy,Utilities
+ESAB,ESAB Corporation,Industrials
+ESCA,Escalade, Incorporated,Stock
+ESE,ESCO Technologies Inc.,Technology
+ESG.AX,313712,Stock
+ESI.TO,Ensign Energy Services Inc.,Energy
+ESI,Element Solutions Inc,Basic Materials
+ESK.AX,Etherstack plc,Technology
+ESNT,Essent Group Ltd.,Financial Services
+ESOA,Energy Services of America Corporation,Industrials
+ESPR,Esperion Therapeutics, Inc.,Stock
+ESQ,Esquire Financial Holdings, Inc.,Stock
+ESRT,Empire State Realty Trust, Inc.,Stock
+ESS,Essex Property Trust Inc.,Real Estate
+ESTC,Elastic N.V.,Technology
+ETD,Ethan Allen Interiors Inc.,Consumer Cyclical
+ETN,Eaton Corporation plc,Industrials
+ETON,Eton Pharmaceuticals, Inc.,Stock
+ETR,Entergy Corporation,Utilities
+ETSY,Etsy, Inc.,Stock
+EU,enCore Energy Corp.,Energy
+EVC,Entravision Communications Corporation,Communication Services
+EVCM,EverCommerce Inc.,Technology
+EVE.AX,EVE Health Group Limited,Consumer Defensive
+EVER,EverQuote, Inc.,Stock
+EVEX,Eve Holding, Inc.,Stock
+EVGO,EVgo, Inc.,Stock
+EVH,Evolent Health, Inc.,Stock
+EVI,EVI Industries, Inc.,Stock
+EVLV,Evolv Technologies Holdings, Inc.,Stock
+EVN.AX,Evolution Mining Limited,Basic Materials
+EVR,Evercore Inc.,Financial Services
+EVRG,Evergy, Inc.,Stock
+EVT.AX,EVT Limited,Communication Services
+EVTC,EVERTEC, Inc.,Stock
+EW,Edwards Lifesciences Corporation,Healthcare
+EWBC,East West Bancorp, Inc.,Stock
+EWCZ,European Wax Center, Inc.,Stock
+EWTX,Edgewise Therapeutics, Inc.,Stock
+EXAS,Exact Sciences Corporation,Healthcare
+EXC,Exelon Corporation,Utilities
+EXE,Expand Energy Corporation,Energy
+EXEL,Exelixis, Inc.,Stock
+EXFY,Expensify, Inc.,Stock
+EXL.AX,Elixinol Wellness Limited,Healthcare
+EXLS,ExlService Holdings, Inc.,Stock
+EXP,Eagle Materials Inc.,Basic Materials
+EXPD,Expeditors International of Washington Inc.,Industrials
+EXPE,Expedia Group, Inc.,Stock
+EXPI,eXp World Holdings, Inc.,Stock
+EXPN.L,Experian plc,Industrials
+EXPO,Exponent, Inc.,Stock
+EXR.AX,Elixir Energy Limited,Energy
+EXR,Extra Space Storage Inc.,Real Estate
+EXTR,Extreme Networks, Inc.,Stock
+EYE,National Vision Holdings, Inc.,Stock
+EYPT,EyePoint, Inc.,Stock
+EZJ.L,easyJet plc,Industrials
+EZPW,EZCORP, Inc.,Stock
+F,Ford Motor Company,Automotive
+FA,First Advantage Corporation,Industrials
+FAF,First American Financial Corporation,Financial Services
+FANG,Diamondback Energy Inc.,Energy
+FAR.AX,FAR Limited,Energy
+FAST,Fastenal Company,Industrials
+FATE,Fate Therapeutics, Inc.,Stock
+FBIN,Fortune Brands Innovations, Inc.,Stock
+FBIZ,First Business Financial Services, Inc.,Stock
+FBK,FB Financial Corporation,Financial Services
+FBLA,FB Bancorp, Inc.,Stock
+FBNC,First Bancorp,Financial Services
+FBP,First BanCorp.,Financial Services
+FBR.AX,FBR Limited,Real Estate
+FBRT,Franklin BSP Realty Trust, Inc.,Stock
+FBU.AX,Fletcher Building Limited,Basic Materials
+FBYD,Falcon's Beyond Global, Inc.,Stock
+FC,Franklin Covey Co.,Consumer Defensive
+FCAP,First Capital, Inc.,Stock
+FCBC,First Community Bankshares, Inc.,Stock
+FCCO,First Community Corporation,Financial Services
+FCF,First Commonwealth Financial Corporation,Financial Services
+FCFS,FirstCash Holdings, Inc.,Stock
+FCG.AX,Freedom Care Group Holdings Limited,Healthcare
+FCN,FTI Consulting, Inc.,Stock
+FCNCA,First Citizens BancShares, Inc.,Stock
+FCPT,Four Corners Property Trust, Inc.,Stock
+FCX,Freeport-McMoRan Inc.,Materials
+FDBC,Fidelity D & D Bancorp, Inc.,Stock
+FDMT,4D Molecular Therapeutics, Inc.,Stock
+FDP,Fresh Del Monte Produce Inc.,Consumer Defensive
+FDS,FactSet Research Systems Inc.,Financial Services
+FDX,FedEx Corporation,Industrials
+FE,FirstEnergy Corp.,Utilities
+FEIM,Frequency Electronics, Inc.,Stock
+FELE,Franklin Electric Co., Inc.,Stock
+FENC,Fennec Pharmaceuticals Inc.,Healthcare
+FER,Ferrovial SE,Industrials
+FERG.L,Ferguson Enterprises Inc.,Industrials
+FERG,Ferguson Enterprises Inc.,Industrials
+FET,Forum Energy Technologies, Inc.,Stock
+FEX.AX,Fenix Resources Limited,Basic Materials
+FF,FutureFuel Corp.,Basic Materials
+FFAI,Faraday Future Intelligent Electric Inc.,Consumer Cyclical
+FFBC,First Financial Bancorp.,Financial Services
+FFG.AX,Fatfish Group Limited,Financial Services
+FFH.TO,Fairfax Financial Holdings Limited,Financial Services
+FFIC,Flushing Financial Corporation,Financial Services
+FFIN,First Financial Bankshares, Inc.,Stock
+FFIV,F5 Inc.,Technology
+FFWM,First Foundation Inc.,Financial Services
+FG,F&G Annuities & Life, Inc.,Stock
+FGG.AX,Future Generation Global Limited,Financial Services
+FGR.AX,First Graphene Limited,Basic Materials
+FHB,First Hawaiian, Inc.,Stock
+FHN,First Horizon Corporation,Financial Services
+FHTX,Foghorn Therapeutics Inc.,Healthcare
+FIBK,First Interstate BancSystem, Inc.,Stock
+FICO,Fair Isaac Corporation,Technology
+FIGR,Figure Technology Solutions, Inc.,Stock
+FIGS,FIGS, Inc.,Stock
+FIHL,Fidelis Insurance Holdings Limited,Financial Services
+FINW,FinWise Bancorp,Financial Services
+FIP,FTAI Infrastructure Inc.,Industrials
+FIS,Fidelity National Information Services,Technology
+FISI,Financial Institutions, Inc.,Stock
+FISV,Fiserv, Inc.,Stock
+FITB,Fifth Third Bancorp,Financial Services
+FIVE,Five Below, Inc.,Stock
+FIVN,Five9, Inc.,Stock
+FIX,Comfort Systems USA, Inc.,Stock
+FIZZ,National Beverage Corp.,Consumer Defensive
+FLEX,Flex Ltd.,Technology
+FLG,Flagstar Bank, National Association,Stock
+FLGT,Fulgent Genetics, Inc.,Stock
+FLNC,Fluence Energy, Inc.,Stock
+FLNG,FLEX LNG Ltd.,Energy
+FLO,Flowers Foods, Inc.,Stock
+FLOC,Flowco Holdings Inc.,Energy
+FLR,Fluor Corporation,Industrials
+FLS,Flowserve Corporation,Industrials
+FLT.AX,Flight Centre Travel Group Limited,Consumer Cyclical
+FLTR.L,Flutter Entertainment plc,Consumer Cyclical
+FLUT,Flutter Entertainment plc,Consumer Cyclical
+FLWS,1-800-FLOWERS.COM, Inc.,Stock
+FLXS,Flexsteel Industries, Inc.,Stock
+FLY,Firefly Aerospace Inc.,Industrials
+FLYW,Flywire Corporation,Technology
+FM.TO,First Quantum Minerals Ltd.,Basic Materials
+FMAO,Farmers & Merchants Bancorp, Inc.,Stock
+FMBH,First Mid Bancshares, Inc.,Stock
+FMC,FMC Corporation,Materials
+FME.DE,Fresenius Medical Care AG,Healthcare
+FMG.AX,Fortescue Ltd,Basic Materials
+FMNB,Farmers National Banc Corp.,Financial Services
+FN,Fabrinet,Technology
+FNB,F.N.B. Corporation,Financial Services
+FND,Floor & Decor Holdings, Inc.,Stock
+FNF,Fidelity National Financial, Inc.,Stock
+FNKO,Funko, Inc.,Stock
+FNLC,The First Bancorp, Inc.,Stock
+FNV.TO,Franco-Nevada Corporation,Basic Materials
+FNWD,Finward Bancorp,Financial Services
+FOA,Finance of America Companies Inc.,Financial Services
+FOLD,Amicus Therapeutics, Inc.,Stock
+FOR,Forestar Group Inc.,Real Estate
+FORM,FormFactor, Inc.,Stock
+FORR,Forrester Research, Inc.,Stock
+FOSL,Fossil Group, Inc.,Stock
+FOUR,Shift4 Payments, Inc.,Stock
+FOX,Fox Corporation,Communication Services
+FOXA,Fox Corporation,Communication Services
+FOXF,Fox Factory Holding Corp.,Consumer Cyclical
+FPH.AX,Fisher & Paykel Healthcare Corporation Limited,Healthcare
+FPI,Farmland Partners Inc.,Real Estate
+FR,First Industrial Realty Trust, Inc.,Stock
+FRAF,Franklin Financial Services Corporation,Financial Services
+FRAS.L,Frasers Group Plc,Consumer Cyclical
+FRBA,First Bank,Financial Services
+FRD,Friedman Industries, Incorporated,Stock
+FRE.DE,Fresenius SE & Co. KGaA,Healthcare
+FRHC,Freedom Holdings Corp.,Financial Services
+FRME,First Merchants Corporation,Financial Services
+FRMI,Fermi Inc.,Stock
+FRPH,FRP Holdings, Inc.,Stock
+FRPT,Freshpet, Inc.,Stock
+FRSH,Freshworks Inc.,Technology
+FRST,Primis Financial Corp.,Financial Services
+FRT,Federal Realty Investment Trust,Real Estate
+FSBC,Five Star Bancorp,Financial Services
+FSBW,FS Bancorp, Inc.,Stock
+FSLR,First Solar, Inc.,Stock
+FSLY,Fastly, Inc.,Stock
+FSP,Franklin Street Properties Corp.,Real Estate
+FSS,Federal Signal Corporation,Industrials
+FSTR,L.B. Foster Company,Industrials
+FSUN,FirstSun Capital Bancorp,Financial Services
+FSV.TO,FirstService Corporation,Real Estate
+FTAI,FTAI Aviation Ltd.,Industrials
+FTDR,Frontdoor, Inc.,Stock
+FTE.PA,Orange,Stock
+FTI,TechnipFMC plc,Energy
+FTK,Flotek Industries, Inc.,Stock
+FTLF,FitLife Brands, Inc.,Stock
+FTNT,Fortinet Inc.,Technology
+FTRE,Fortrea Holdings Inc.,Healthcare
+FTS.TO,Fortis Inc.,Utilities
+FTV,Fortive Corporation,Technology
+FUBO,FuboTV Inc.,Communication Services
+FUL,H.B. Fuller Company,Basic Materials
+FULC,Fulcrum Therapeutics, Inc.,Stock
+FULT,Fulton Financial Corporation,Financial Services
+FUN,Six Flags Entertainment Corporation,Consumer Cyclical
+FUNC,First United Corporation,Financial Services
+FVCB,FVCBankcorp, Inc.,Stock
+FVR,FrontView REIT, Inc.,Stock
+FWONA,Formula One Group,Communication Services
+FWONK,Formula One Group,Communication Services
+FWRD,Forward Air Corporation,Industrials
+FWRG,First Watch Restaurant Group, Inc.,Stock
+FXNC,First National Corporation,Financial Services
+FYBR,Frontier Communications Parent, Inc.,Stock
+G,Genpact Limited,Technology
+GABC,German American Bancorp, Inc.,Stock
+GAIA,Gaia, Inc.,Stock
+GAMB,Gambling.com Group Limited,Consumer Cyclical
+GAP,The Gap, Inc.,Stock
+GATX,GATX Corporation,Industrials
+GBCI,Glacier Bancorp, Inc.,Stock
+GBFH,GBank Financial Holdings Inc.,Financial Services
+GBTG,Global Business Travel Group, Inc.,Stock
+GBX,The Greenbrier Companies, Inc.,Stock
+GCBC,Greene County Bancorp, Inc.,Stock
+GCMG,GCM Grosvenor Inc.,Financial Services
+GCO,Genesco Inc.,Consumer Cyclical
+GCT,GigaCloud Technology Inc.,Technology
+GD,General Dynamics Corporation,Industrials
+GDDY,GoDaddy Inc.,Technology
+GDEN,Golden Entertainment, Inc.,Stock
+GDOT,Green Dot Corporation,Financial Services
+GDRX,GoodRx Holdings, Inc.,Stock
+GDYN,Grid Dynamics Holdings, Inc.,Stock
+GE,General Electric Company,Industrials
+GEF,Greif, Inc.,Stock
+GEHC,GE HealthCare Technologies Inc.,Healthcare
+GEI.TO,Gibson Energy Inc.,Energy
+GEN,Gen Digital Inc.,Technology
+GENC,Gencor Industries, Inc.,Stock
+GENI,Genius Sports Limited,Communication Services
+GEO,The GEO Group, Inc.,Stock
+GERN,Geron Corporation,Healthcare
+GETY,Getty Images Holdings, Inc.,Stock
+GEV,GE Vernova Inc.,Industrials
+GEVO,Gevo, Inc.,Stock
+GFF,Griffon Corporation,Industrials
+GFL.TO,GFL Environmental Inc.,Industrials
+GFS,GLOBALFOUNDRIES Inc.,Technology
+GGG,Graco Inc.,Industrials
+GH,Guardant Health, Inc.,Stock
+GHC,Graham Holdings Company,Consumer Defensive
+GHM,Graham Corporation,Industrials
+GIC,Global Industrial Company,Industrials
+GIII,G-III Apparel Group, Ltd.,Stock
+GILD,Gilead Sciences Inc.,Healthcare
+GIS,General Mills Inc.,Consumer Defensive
+GKOS,Glaukos Corporation,Healthcare
+GL,Globe Life Inc.,Financial Services
+GLDD,Great Lakes Dredge & Dock Corporation,Industrials
+GLE.PA,Société Générale Société anonyme,Financial Services
+GLEN.L,Glencore plc,Basic Materials
+GLIBA,GCI Liberty, Inc. - Series A GC,Stock
+GLIBK,GCI Liberty, Inc.,Stock
+GLNG,Golar LNG Limited,Energy
+GLOB,Globant S.A.,Technology
+GLPI,Gaming and Leisure Properties, Inc.,Stock
+GLRE,Greenlight Capital Re, Ltd.,Stock
+GLSI,Greenwich LifeSciences, Inc.,Stock
+GLUE,Monte Rosa Therapeutics, Inc.,Stock
+GLW,Corning Incorporated,Technology
+GM,General Motors Company,Automotive
+GME,GameStop Corp.,Consumer Cyclical
+GMED,Globus Medical, Inc.,Stock
+GMG.AX,Goodman Group,Real Estate
+GMRE,Global Medical REIT Inc,Real Estate
+GNC.AX,GrainCorp Limited,Consumer Defensive
+GNE,Genie Energy Ltd.,Utilities
+GNK,Genco Shipping & Trading Limited,Industrials
+GNL,Global Net Lease, Inc.,Stock
+GNRC,Generac Holdings Inc.,Industrials
+GNW,Genworth Financial, Inc.,Stock
+GO,Grocery Outlet Holding Corp.,Consumer Defensive
+GOCO,GoHealth, Inc.,Stock
+GOEV,Canoo Inc.,Consumer Cyclical
+GOGO,Gogo Inc.,Communication Services
+GOLD,Gold.com, Inc.,Stock
+GOLF,Acushnet Holdings Corp.,Consumer Cyclical
+GOOD,Gladstone Commercial Corporation,Real Estate
+GOOG,Alphabet Inc.,Technology
+GOOGL,Alphabet Inc.,Technology
+GOOS.TO,Canada Goose Holdings Inc.,Consumer Cyclical
+GOSS,Gossamer Bio, Inc.,Stock
+GOZ.AX,Growthpoint Properties Australia,Real Estate
+GPC,Genuine Parts Company,Consumer Cyclical
+GPGI,GPGI, Inc.,Stock
+GPI,Group 1 Automotive, Inc.,Stock
+GPK,Graphic Packaging Holding Company,Consumer Cyclical
+GPN,Global Payments Inc.,Industrials
+GPOR,Gulfport Energy Corporation,Energy
+GPRE,Green Plains Inc.,Basic Materials
+GPT.AX,The GPT Group,Real Estate
+GRAL,GRAIL, Inc.,Stock
+GRBK,Green Brick Partners, Inc.,Stock
+GRC,The Gorman-Rupp Company,Industrials
+GRDN,Guardian Pharmacy Services, Inc.,Stock
+GRMN,Garmin Ltd.,Technology
+GRND,Grindr Inc.,Technology
+GRNT,Granite Ridge Resources, Inc.,Stock
+GRPN,Groupon, Inc.,Stock
+GS,The Goldman Sachs Group Inc.,Financial Services
+GSAT,Globalstar, Inc.,Stock
+GSBC,Great Southern Bancorp, Inc.,Stock
+GSHD,Goosehead Insurance, Inc.,Stock
+GSK.L,GSK plc,Healthcare
+GSM,Ferroglobe PLC,Basic Materials
+GSY.TO,goeasy Ltd.,Financial Services
+GT,The Goodyear Tire & Rubber Company,Consumer Cyclical
+GTES,Gates Industrial Corporation plc,Industrials
+GTLS,Chart Industries, Inc.,Stock
+GTM,ZoomInfo Technologies Inc.,Technology
+GTN,Gray Media, Inc.,Stock
+GTX,Garrett Motion Inc.,Consumer Cyclical
+GTY,Getty Realty Corp.,Real Estate
+GUD.TO,Knight Therapeutics Inc.,Healthcare
+GVA,Granite Construction Incorporated,Industrials
+GWO.TO,Great-West Lifeco Inc.,Financial Services
+GWRE,Guidewire Software, Inc.,Stock
+GWRS,Global Water Resources, Inc.,Stock
+GWW,W.W. Grainger Inc.,Industrials
+GXO,GXO Logistics, Inc.,Stock
+GYRE,Gyre Therapeutics, Inc.,Stock
+H.TO,Hydro One Limited,Utilities
+H,Hyatt Hotels Corporation,Consumer Cyclical
+HAE,Haemonetics Corporation,Healthcare
+HAFC,Hanmi Financial Corporation,Financial Services
+HAIN,The Hain Celestial Group, Inc.,Stock
+HAL,Halliburton Company,Energy
+HALO,Halozyme Therapeutics, Inc.,Stock
+HAS,Hasbro, Inc.,Stock
+HASI,HA Sustainable Infrastructure Capital, Inc.,Stock
+HAYW,Hayward Holdings, Inc.,Stock
+HBAN,Huntington Bancshares Incorporated,Financial Services
+HBB,Hamilton Beach Brands Holding Company,Consumer Cyclical
+HBCP,Home Bancorp, Inc.,Stock
+HBNC,Horizon Bancorp, Inc.,Stock
+HBT,HBT Financial, Inc.,Stock
+HCA,HCA Healthcare Inc.,Healthcare
+HCAT,Health Catalyst, Inc.,Stock
+HCC,Warrior Met Coal, Inc.,Stock
+HCI,HCI Group, Inc.,Stock
+HCKT,The Hackett Group, Inc.,Stock
+HCSG,Healthcare Services Group, Inc.,Stock
+HD,The Home Depot Inc.,Consumer Cyclical
+HDN.AX,HomeCo Daily Needs REIT,Real Estate
+HDSN,Hudson Technologies, Inc.,Stock
+HE,Hawaiian Electric Industries, Inc.,Stock
+HEI.DE,Heidelberg Materials AG,Basic Materials
+HEI,HEICO Corporation,Industrials
+HELE,Helen of Troy Limited,Consumer Defensive
+HFFG,HF Foods Group Inc.,Consumer Defensive
+HFWA,Heritage Financial Corporation,Financial Services
+HG,Hamilton Insurance Group, Ltd.,Stock
+HGV,Hilton Grand Vacations Inc.,Consumer Cyclical
+HHH,Howard Hughes Holdings Inc.,Real Estate
+HIFS,Hingham Institution for Savings,Financial Services
+HIG,The Hartford Insurance Group, Inc.,Stock
+HII,Huntington Ingalls Industries, Inc.,Stock
+HILS.L,Hill & Smith PLC,Industrials
+HIMS,Hims & Hers Health, Inc.,Stock
+HIPO,Hippo Holdings Inc.,Financial Services
+HIW,Highwoods Properties, Inc.,Stock
+HL,Hecla Mining Company,Basic Materials
+HLF,Herbalife Ltd.,Consumer Defensive
+HLI,Houlihan Lokey, Inc.,Stock
+HLIO,Helios Technologies, Inc.,Stock
+HLIT,Harmonic Inc.,Technology
+HLLY,Holley Inc.,Consumer Cyclical
+HLMN,Hillman Solutions Corp.,Industrials
+HLN.L,Haleon plc,Healthcare
+HLNE,Hamilton Lane Incorporated,Financial Services
+HLS.AX,Healius Limited,Healthcare
+HLT,Hilton Worldwide Holdings Inc.,Consumer Cyclical
+HLX,Helix Energy Solutions Group, Inc.,Stock
+HMC.AX,HMC Capital Limited,Real Estate
+HMN,Horace Mann Educators Corporation,Financial Services
+HMSO.L,Hammerson Plc,Real Estate
+HNI,HNI Corporation,Consumer Cyclical
+HNRG,Hallador Energy Company,Energy
+HNST,The Honest Company, Inc.,Stock
+HNVR,Hanover Bancorp, Inc.,Stock
+HOC.L,Hochschild Mining plc,Basic Materials
+HOG,Harley-Davidson, Inc.,Stock
+HOLX,Hologic, Inc.,Stock
+HOMB,Home Bancshares, Inc. (Conway, AR),Stock
+HON,Honeywell International Inc.,Industrials
+HOOD,Robinhood Markets, Inc.,Stock
+HOPE,Hope Bancorp, Inc.,Stock
+HOUS,Anywhere Real Estate Inc.,Real Estate
+HOV,Hovnanian Enterprises, Inc.,Stock
+HP,Helmerich & Payne, Inc.,Stock
+HPE,Hewlett Packard Enterprise Company,Technology
+HPK,HighPeak Energy, Inc.,Stock
+HPP,Hudson Pacific Properties, Inc.,Stock
+HPQ,HP Inc.,Technology
+HQI,HireQuest, Inc.,Stock
+HQY,HealthEquity, Inc.,Stock
+HR,Healthcare Realty Trust Incorporated,Real Estate
+HRB,H&R Block, Inc.,Stock
+HRI,Herc Holdings Inc.,Industrials
+HRL,Hormel Foods Corporation,Consumer Defensive
+HRMY,Harmony Biosciences Holdings, Inc.,Stock
+HROW,Harrow, Inc.,Stock
+HRTG,Heritage Insurance Holdings, Inc.,Stock
+HRTX,Heron Therapeutics, Inc.,Stock
+HSBA.L,HSBC Holdings plc,Financial Services
+HSHP,Himalaya Shipping Ltd.,Industrials
+HSIC,Henry Schein, Inc.,Stock
+HST,Host Hotels & Resorts Inc.,Real Estate
+HSTM,HealthStream, Inc.,Stock
+HSY,The Hershey Company,Consumer Defensive
+HTB,HomeTrust Bancshares, Inc.,Stock
+HTBK,Heritage Commerce Corp,Financial Services
+HTFL,Heartflow, Inc.,Stock
+HTH,Hilltop Holdings Inc.,Financial Services
+HTLD,Heartland Express, Inc.,Stock
+HTO,H2O America,Utilities
+HTZ,Hertz Global Holdings, Inc.,Stock
+HUB.AX,HUB24 Limited,Financial Services
+HUBB,Hubbell Incorporated,Industrials
+HUBG,Hub Group, Inc.,Stock
+HUBS,HubSpot, Inc.,Stock
+HUM,Humana Inc.,Healthcare
+HUMA,Humacyte, Inc.,Stock
+HUN,Huntsman Corporation,Basic Materials
+HURA,TuHURA Biosciences, Inc.,Stock
+HURN,Huron Consulting Group Inc.,Industrials
+HUT,Hut 8 Corp.,Financial Services
+HVN.AX,Harvey Norman Holdings Limited,Consumer Cyclical
+HVT,Haverty Furniture Companies, Inc.,Stock
+HWBK,Hawthorn Bancshares, Inc.,Stock
+HWC,Hancock Whitney Corporation,Financial Services
+HWKN,Hawkins, Inc.,Stock
+HWM,Howmet Aerospace Inc.,Industrials
+HY,Hyster-Yale, Inc.,Stock
+HYLN,Hyliion Holdings Corp.,Consumer Cyclical
+HZO,MarineMax, Inc.,Stock
+IAC,IAC Inc.,Communication Services
+IAG.AX,Insurance Australia Group Limited,Financial Services
+IAG.L,International Consolidated Airlines Group S.A.,Industrials
+IART,Integra LifeSciences Holdings Corporation,Healthcare
+IAS,Integral Ad Science Holding Corp.,Communication Services
+IBCP,Independent Bank Corporation,Financial Services
+IBEX,IBEX Limited,Technology
+IBKR,Interactive Brokers Group, Inc.,Stock
+IBM,International Business Machines Corporation,Technology
+IBOC,International Bancshares Corporation,Financial Services
+IBP,Installed Building Products, Inc.,Stock
+IBRX,ImmunityBio, Inc.,Stock
+IBTA,Ibotta, Inc.,Stock
+ICE,Intercontinental Exchange Inc.,Financial Services
+ICFI,ICF International, Inc.,Stock
+ICG.L,ICG plc,Financial Services
+ICHR,Ichor Holdings, Ltd.,Stock
+ICUI,ICU Medical, Inc.,Stock
+IDA,IDACORP, Inc.,Stock
+IDCC,InterDigital, Inc.,Stock
+IDR,Idaho Strategic Resources, Inc.,Stock
+IDT,IDT Corporation,Communication Services
+IDXX,IDEXX Laboratories Inc.,Healthcare
+IDYA,IDEAYA Biosciences, Inc.,Stock
+IE,Ivanhoe Electric Inc.,Basic Materials
+IEL.AX,IDP Education Limited,Consumer Defensive
+IESC,IES Holdings, Inc.,Stock
+IEX,IDEX Corporation,Industrials
+IFC.TO,Intact Financial Corporation,Financial Services
+IFF,International Flavors & Fragrances Inc.,Materials
+IFL.AX,Insignia Financial Ltd.,Financial Services
+IFX.DE,Infineon Technologies AG,Technology
+IGO.AX,IGO Limited,Basic Materials
+IHG.L,InterContinental Hotels Group PLC,Consumer Cyclical
+IHRT,iHeartMedia, Inc.,Stock
+III.L,3i Group Ord,Financial Services
+III,Information Services Group, Inc.,Stock
+IIIN,Insteel Industries Inc.,Industrials
+IIIV,i3 Verticals, Inc.,Stock
+IIPR,Innovative Industrial Properties, Inc.,Stock
+IKT,Inhibikase Therapeutics, Inc.,Stock
+ILG,ILG, Inc.,Stock
+ILLR,Triller Group Inc.,Technology
+ILMN,Illumina, Inc.,Stock
+ILPT,Industrial Logistics Properties Trust,Real Estate
+ILU.AX,Iluka Resources Limited,Basic Materials
+IMAX,IMAX Corporation,Communication Services
+IMB.L,Imperial Brands PLC,Consumer Defensive
+IMG.TO,IAMGOLD Corporation,Basic Materials
+IMKTA,Ingles Markets, Incorporated,Stock
+IMMR,Immersion Corporation,Technology
+IMNM,Immunome, Inc.,Stock
+IMO.TO,Imperial Oil Limited,Energy
+IMU.AX,Imugene Limited,Healthcare
+IMVT,Immunovant, Inc.,Stock
+IMXI,International Money Express, Inc.,Stock
+INA.AX,Ingenia Communities Group,Real Estate
+INBK,First Internet Bancorp,Financial Services
+INBX,Inhibrx Biosciences, Inc.,Stock
+INCY,Incyte Corporation,Healthcare
+INDB,Independent Bank Corp.,Financial Services
+INDI,indie Semiconductor, Inc.,Stock
+INDV,Indivior Pharmaceuticals, Inc.,Stock
+INF.L,Informa plc,Communication Services
+INFY.NS,Infosys Limited,Technology
+ING.AX,Inghams Group Limited,Consumer Defensive
+INGM,Ingram Micro Holding Corporation,Technology
+INGN,Inogen, Inc.,Stock
+INGR,Ingredion Incorporated,Consumer Defensive
+INMB,INmune Bio Inc.,Healthcare
+INN,Summit Hotel Properties, Inc.,Stock
+INNV,InnovAge Holding Corp.,Healthcare
+INO,Inovio Pharmaceuticals, Inc.,Stock
+INOD,Innodata Inc.,Technology
+INR,Infinity Natural Resources, Inc.,Stock
+INSE,Inspired Entertainment, Inc.,Stock
+INSG,Inseego Corp.,Technology
+INSM,Insmed Incorporated,Healthcare
+INSP,Inspire Medical Systems, Inc.,Stock
+INSW,International Seaways, Inc.,Stock
+INTA,Intapp, Inc.,Stock
+INTC,Intel Corporation,Technology
+INTU,Intuit Inc.,Technology
+INV,Innventure, Inc.,Stock
+INVA,Innoviva, Inc.,Stock
+INVH,Invitation Homes Inc.,Real Estate
+INVX,Innovex International, Inc.,Stock
+IONQ,IonQ, Inc.,Stock
+IONS,Ionis Pharmaceuticals, Inc.,Stock
+IOSP,Innospec Inc.,Basic Materials
+IOT,Samsara Inc.,Technology
+IOVA,Iovance Biotherapeutics, Inc.,Stock
+IP,International Paper Company,Materials
+IPAR,Interparfums, Inc.,Stock
+IPGP,IPG Photonics Corporation,Technology
+IPH.AX,IPH Limited,Industrials
+IPI,Intrepid Potash, Inc.,Stock
+IPO.TO,InPlay Oil Corp.,Energy
+IQV,IQVIA Holdings Inc.,Healthcare
+IR,Ingersoll Rand Inc.,Industrials
+IRDM,Iridium Communications Inc.,Communication Services
+IRE.AX,Iress Limited,Technology
+IRM,Iron Mountain Incorporated,Real Estate
+IRMD,IRADIMED CORPORATION,Healthcare
+IRON,Disc Medicine, Inc.,Stock
+IRT,Independence Realty Trust, Inc.,Stock
+IRTC,iRhythm Holdings, Inc.,Stock
+IRWD,Ironwood Pharmaceuticals, Inc.,Stock
+ISPR,Ispire Technology Inc.,Consumer Defensive
+ISRG,Intuitive Surgical Inc.,Healthcare
+ISTR,Investar Holding Corporation,Financial Services
+IT,Gartner Inc.,Technology
+ITGR,Integer Holdings Corporation,Healthcare
+ITIC,Investors Title Company,Financial Services
+ITRI,Itron, Inc.,Stock
+ITRK.L,Intertek Group plc,Industrials
+ITT,ITT Inc.,Industrials
+ITV.L,ITV plc,Communication Services
+ITW,Illinois Tool Works Inc.,Industrials
+IVN.TO,Ivanhoe Mines Ltd.,Basic Materials
+IVR,Invesco Mortgage Capital Inc.,Real Estate
+IVT,InvenTrust Properties Corp.,Real Estate
+IVZ,Invesco Ltd.,Financial Services
+J,Jacobs Solutions Inc.,Industrials
+JACK,Jack in the Box Inc.,Consumer Cyclical
+JAG.TO,Jaguar Mining Inc.,Basic Materials
+JAKK,JAKKS Pacific, Inc.,Stock
+JAMF,Jamf Holding Corp,Technology
+JANX,Janux Therapeutics, Inc.,Stock
+JAZZ,Jazz Pharmaceuticals plc,Healthcare
+JBGS,JBG SMITH Properties,Real Estate
+JBH.AX,JB Hi-Fi Limited,Consumer Cyclical
+JBHT,J.B. Hunt Transport Services Inc.,Industrials
+JBI,Janus International Group, Inc.,Stock
+JBIO,Jade Biosciences, Inc.,Stock
+JBL,Jabil Inc.,Technology
+JBLU,JetBlue Airways Corporation,Industrials
+JBSS,John B. Sanfilippo & Son, Inc.,Stock
+JBTM,JBT Marel Corporation,Industrials
+JCAP,Jefferson Capital, Inc.,Stock
+JCI,Johnson Controls International plc,Industrials
+JD.L,JD Sports Fashion Plc,Consumer Cyclical
+JEF,Jefferies Financial Group Inc.,Financial Services
+JELD,JELD-WEN Holding, Inc.,Stock
+JHG,Janus Henderson Group plc,Financial Services
+JHX.AX,James Hardie Industries plc,Basic Materials
+JHX,James Hardie Industries plc,Basic Materials
+JILL,J.Jill, Inc.,Stock
+JJSF,J&J Snack Foods Corp.,Consumer Defensive
+JKHY,Jack Henry & Associates, Inc.,Stock
+JLL,Jones Lang LaSalle Incorporated,Real Estate
+JMSB,John Marshall Bancorp, Inc.,Stock
+JNJ,Johnson & Johnson,Healthcare
+JNPR,Juniper Networks Inc.,Technology
+JOBY,Joby Aviation, Inc.,Stock
+JOE,The St. Joe Company,Real Estate
+JOUT,Johnson Outdoors Inc.,Consumer Cyclical
+JPM,JPMorgan Chase & Co.,Financial Services
+JRVR,James River Group Holdings, Inc.,Stock
+JXN,Jackson Financial Inc.,Financial Services
+JYNT,The Joint Corp.,Healthcare
+K,Kellanova,Consumer Defensive
+KAI,Kadant Inc.,Industrials
+KALU,Kaiser Aluminum Corporation,Basic Materials
+KALV,KalVista Pharmaceuticals, Inc.,Stock
+KBH,KB Home,Consumer Cyclical
+KBR,KBR, Inc.,Stock
+KD,Kyndryl Holdings, Inc.,Stock
+KDP,Keurig Dr Pepper Inc.,Consumer Defensive
+KE,Kimball Electronics, Inc.,Stock
+KELYA,Kelly Services, Inc.,Stock
+KER.PA,Kering SA,Consumer Cyclical
+KEX,Kirby Corporation,Industrials
+KEY.TO,Keyera Corp.,Energy
+KEY,KeyCorp,Financial Services
+KEYS,Keysight Technologies Inc.,Technology
+KFRC,Kforce Inc.,Industrials
+KFS,Kingsway Financial Services Inc.,Consumer Cyclical
+KFY,Korn Ferry,Industrials
+KG,Kestrel Group Ltd,Financial Services
+KGEI,Kolibri Global Energy Inc.,Energy
+KGF.L,Kingfisher plc,Consumer Cyclical
+KGN.AX,Kogan.com Ltd,Consumer Cyclical
+KGS,Kodiak Gas Services, Inc.,Stock
+KHC,The Kraft Heinz Company,Consumer Defensive
+KIDS,OrthoPediatrics Corp.,Healthcare
+KIM,Kimco Realty Corporation,Real Estate
+KINS,Kingstone Companies, Inc.,Stock
+KKR,KKR & Co. Inc.,Financial Services
+KLAC,KLA Corporation,Technology
+KLC,KinderCare Learning Companies, Inc.,Stock
+KLIC,Kulicke and Soffa Industries, Inc.,Stock
+KLS.AX,Kelsian Group Limited,Industrials
+KLTR,Kaltura, Inc.,Stock
+KMB,Kimberly-Clark Corporation,Consumer Defensive
+KMD.AX,KMD Brands Limited,Consumer Cyclical
+KMI,Kinder Morgan Inc.,Energy
+KMPR,Kemper Corporation,Financial Services
+KMT,Kennametal Inc.,Industrials
+KMTS,Kestra Medical Technologies, Ltd.,Stock
+KMX,CarMax, Inc.,Stock
+KN,Knowles Corporation,Technology
+KNF,Knife River Corporation,Basic Materials
+KNSL,Kinsale Capital Group, Inc.,Stock
+KNTK,Kinetik Holdings Inc.,Energy
+KNX,Knight-Swift Transportation Holdings Inc.,Industrials
+KO,The Coca-Cola Company,Consumer Defensive
+KOD,Kodiak Sciences Inc.,Healthcare
+KODK,Eastman Kodak Company,Industrials
+KOP,Koppers Holdings Inc.,Basic Materials
+KOPN,Kopin Corporation,Technology
+KOS,Kosmos Energy Ltd.,Energy
+KR,The Kroger Co.,Consumer Defensive
+KRC,Kilroy Realty Corporation,Real Estate
+KREF,KKR Real Estate Finance Trust Inc.,Real Estate
+KRG,Kite Realty Group Trust,Real Estate
+KRMD,KORU Medical Systems, Inc.,Stock
+KRMN,Karman Holdings Inc.,Industrials
+KRNY,Kearny Financial Corp.,Financial Services
+KRO,Kronos Worldwide, Inc.,Stock
+KROS,Keros Therapeutics, Inc.,Stock
+KRRO,Korro Bio, Inc.,Stock
+KRT,Karat Packaging Inc.,Consumer Cyclical
+KRUS,Kura Sushi USA, Inc.,Stock
+KRYS,Krystal Biotech, Inc.,Stock
+KSS,Kohl's Corporation,Consumer Cyclical
+KTB,Kontoor Brands, Inc.,Stock
+KTOS,Kratos Defense & Security Solutions, Inc.,Stock
+KULR,KULR Technology Group, Inc.,Stock
+KURA,Kura Oncology, Inc.,Stock
+KVUE,Kenvue Inc.,Consumer Defensive
+KW,Kennedy-Wilson Holdings, Inc.,Stock
+KWR,Quaker Chemical Corporation,Basic Materials
+KYMR,Kymera Therapeutics, Inc.,Stock
+L.TO,Loblaw Companies Limited,Consumer Defensive
+L,Loews Corporation,Financial Services
+LAB,Standard BioTools Inc.,Healthcare
+LAD,Lithia Motors, Inc.,Stock
+LADR,Ladder Capital Corp,Real Estate
+LAKE,Lakeland Industries, Inc.,Stock
+LAMR,Lamar Advertising Company,Real Estate
+LAND.L,Land Securities Group Plc,Real Estate
+LAND,Gladstone Land Corporation,Real Estate
+LARK,Landmark Bancorp, Inc.,Stock
+LASR,nLIGHT, Inc.,Stock
+LAUR,Laureate Education, Inc.,Stock
+LAW,CS Disco, Inc.,Stock
+LB.TO,Laurentian Bank of Canada,Financial Services
+LBRDA,Liberty Broadband Corporation,Communication Services
+LBRDK,Liberty Broadband Corporation,Communication Services
+LBRT,Liberty Energy Inc.,Energy
+LBRX,LB Pharmaceuticals Inc,Healthcare
+LBTYA,Liberty Global Ltd.,Communication Services
+LBTYK,Liberty Global Ltd.,Communication Services
+LC,LendingClub Corporation,Financial Services
+LCID,Lucid Group, Inc.,Stock
+LCII,LCI Industries,Consumer Cyclical
+LCNB,LCNB Corp.,Financial Services
+LDI,loanDepot, Inc.,Stock
+LDOS,Leidos Holdings Inc.,Technology
+LE,Lands' End, Inc.,Stock
+LEA,Lear Corporation,Consumer Cyclical
+LECO,Lincoln Electric Holdings, Inc.,Stock
+LEG,Leggett & Platt, Incorporated,Stock
+LEGH,Legacy Housing Corporation,Consumer Cyclical
+LEN,Lennar Corporation,Consumer Cyclical
+LENZ,LENZ Therapeutics, Inc.,Stock
+LEU,Centrus Energy Corp.,Energy
+LFCR,Lifecore Biomedical, Inc.,Stock
+LFMD,LifeMD, Inc.,Stock
+LFST,LifeStance Health Group, Inc.,Stock
+LFT,Lument Finance Trust, Inc.,Stock
+LFUS,Littelfuse, Inc.,Stock
+LFVN,LifeVantage Corporation,Consumer Defensive
+LGEN.L,Legal & General Group Plc,Financial Services
+LGIH,LGI Homes, Inc.,Stock
+LGN,Legence Corp.,Industrials
+LGND,Ligand Pharmaceuticals Incorporated,Healthcare
+LH,Labcorp Holdings Inc.,Healthcare
+LHX,L3Harris Technologies, Inc.,Stock
+LIC.AX,Lifestyle Communities Limited,Real Estate
+LIF.TO,Labrador Iron Ore Royalty Corporation,Basic Materials
+LIF,Life360, Inc.,Stock
+LII,Lennox International Inc.,Industrials
+LILA,Liberty Latin America Ltd.,Communication Services
+LILAK,Liberty Latin America Ltd.,Communication Services
+LIN.DE,Linde plc,Stock
+LIN,Linde plc,Materials
+LINC,Lincoln Educational Services Corporation,Consumer Defensive
+LIND,Lindblad Expeditions Holdings, Inc.,Stock
+LINE,Lineage, Inc.,Stock
+LION,Lionsgate Studios Corp.,Stock
+LITE,Lumentum Holdings Inc.,Technology
+LIVN,LivaNova PLC,Healthcare
+LKE.AX,Lake Resources NL,Basic Materials
+LKFN,Lakeland Financial Corporation,Financial Services
+LKQ,LKQ Corporation,Consumer Cyclical
+LLC.AX,Lendlease Group,Real Estate
+LLOY.L,Lloyds Banking Group plc,Financial Services
+LLY,Eli Lilly and Company,Healthcare
+LLYVA,Liberty Live Holdings, Inc.,Stock
+LLYVK,Liberty Live Holdings, Inc.,Stock
+LMAT,LeMaitre Vascular, Inc.,Stock
+LMB,Limbach Holdings, Inc.,Stock
+LMND,Lemonade, Inc.,Stock
+LMNR,Limoneira Company,Consumer Defensive
+LMT,Lockheed Martin Corporation,Industrials
+LNC,Lincoln National Corporation,Financial Services
+LNCE,152504,Stock
+LNF.TO,Leon's Furniture Limited,Consumer Cyclical
+LNG,Cheniere Energy, Inc.,Stock
+LNKB,LINKBANCORP, Inc.,Stock
+LNN,Lindsay Corporation,Industrials
+LNSR,LENSAR, Inc.,Stock
+LNT,Alliant Energy Corporation,Utilities
+LNTH,Lantheus Holdings, Inc.,Stock
+LOAR,Loar Holdings Inc.,Industrials
+LOB,Live Oak Bancshares, Inc.,Stock
+LOCO,El Pollo Loco Holdings, Inc.,Stock
+LOPE,Grand Canyon Education, Inc.,Stock
+LOV.AX,Lovisa Holdings Limited,Consumer Cyclical
+LOVE,The Lovesac Company,Consumer Cyclical
+LOW,Lowe's Companies Inc.,Consumer Cyclical
+LPG,Dorian LPG Ltd.,Energy
+LPLA,LPL Financial Holdings Inc.,Financial Services
+LPRO,Open Lending Corporation,Financial Services
+LPX,Louisiana-Pacific Corporation,Industrials
+LQDA,Liquidia Corporation,Healthcare
+LQDT,Liquidity Services, Inc.,Stock
+LR.PA,Legrand SA,Industrials
+LRCX,Lam Research Corporation,Technology
+LRMR,Larimar Therapeutics, Inc.,Stock
+LRN,Stride, Inc.,Stock
+LSCC,Lattice Semiconductor Corporation,Technology
+LSEG.L,London Stock Exchange Group plc,Financial Services
+LSTR,Landstar System, Inc.,Stock
+LTBR,Lightbridge Corporation,Industrials
+LTC,LTC Properties, Inc.,Stock
+LTH,Life Time Group Holdings, Inc.,Stock
+LTR.AX,Liontown Limited,Basic Materials
+LUCD,Lucid Diagnostics Inc.,Healthcare
+LULU,Lululemon Athletica Inc.,Consumer Cyclical
+LUMN,Lumen Technologies, Inc.,Stock
+LUN.TO,Lundin Mining Corporation,Basic Materials
+LUNG,Pulmonx Corporation,Healthcare
+LUNR,Intuitive Machines, Inc.,Stock
+LUV,Southwest Airlines Co.,Industrials
+LVS,Las Vegas Sands Corp.,Consumer Cyclical
+LVWR,LiveWire Group, Inc.,Stock
+LW,Lamb Weston Holdings, Inc.,Stock
+LWAY,Lifeway Foods, Inc.,Stock
+LXEO,Lexeo Therapeutics, Inc.,Stock
+LXFR,Luxfer Holdings PLC,Industrials
+LXP,LXP Industrial Trust,Real Estate
+LXU,LSB Industries, Inc.,Stock
+LYB,LyondellBasell Industries N.V.,Materials
+LYC.AX,Lynas Rare Earths Limited,Basic Materials
+LYFT,Lyft, Inc.,Stock
+LYTS,LSI Industries Inc.,Technology
+LYV,Live Nation Entertainment Inc.,Communication Services
+LZ,LegalZoom.com, Inc.,Stock
+LZB,La-Z-Boy Incorporated,Consumer Cyclical
+LZM,Lifezone Metals Limited,Basic Materials
+M,Macy's, Inc.,Stock
+MA,Mastercard Inc.,Financial Services
+MAA,Mid-America Apartment Communities Inc.,Real Estate
+MAC,The Macerich Company,Real Estate
+MAD.AX,Mader Group Limited,Industrials
+MAGN,Magnera Corporation,Consumer Defensive
+MAL.TO,Magellan Aerospace Corporation,Industrials
+MAMA,Mama's Creations, Inc.,Stock
+MAN,ManpowerGroup Inc.,Industrials
+MANH,Manhattan Associates, Inc.,Stock
+MAPS,WM Technology, Inc.,Stock
+MAR,Marriott International Inc.,Consumer Cyclical
+MARA,MARA Holdings, Inc.,Stock
+MAS,Masco Corporation,Industrials
+MASS,908 Devices Inc.,Healthcare
+MAT,Mattel, Inc.,Stock
+MATV,Mativ Holdings, Inc.,Stock
+MATW,Matthews International Corporation,Industrials
+MATX,Matson, Inc.,Stock
+MAX,MediaAlpha, Inc.,Stock
+MAZE,Maze Therapeutics, Inc.,Stock
+MBC,MasterBrand, Inc.,Stock
+MBCN,Middlefield Banc Corp.,Financial Services
+MBG.DE,Mercedes-Benz Group AG,Consumer Cyclical
+MBI,MBIA Inc.,Financial Services
+MBIN,Merchants Bancorp,Financial Services
+MBUU,Malibu Boats, Inc.,Stock
+MBWM,Mercantile Bank Corporation,Financial Services
+MBX,MBX Biosciences, Inc.,Stock
+MC.PA,LVMH Moët Hennessy - Louis Vuitton, Société Européenne,Stock
+MC,Moelis & Company,Financial Services
+MCB,Metropolitan Bank Holding Corp.,Financial Services
+MCBS,MetroCity Bankshares, Inc.,Stock
+MCD,McDonald's Corporation,Consumer Cyclical
+MCFT,MasterCraft Boat Holdings, Inc.,Stock
+MCHB,Mechanics Bancorp,Financial Services
+MCHP,Microchip Technology Incorporated,Technology
+MCK,McKesson Corporation,Healthcare
+MCO,Moody's Corporation,Financial Services
+MCRI,Monarch Casino & Resort, Inc.,Stock
+MCS,The Marcus Corporation,Communication Services
+MCW,Mister Car Wash, Inc.,Stock
+MCY,Mercury General Corporation,Financial Services
+MD,Pediatrix Medical Group, Inc.,Stock
+MDA.TO,MDA Space Ltd.,Industrials
+MDB,MongoDB, Inc.,Stock
+MDGL,Madrigal Pharmaceuticals, Inc.,Stock
+MDLZ,Mondelez International Inc.,Consumer Defensive
+MDT,Medtronic plc,Healthcare
+MDU,MDU Resources Group, Inc.,Stock
+MDV,Modiv Industrial, Inc.,Stock
+MDWD,MediWound Ltd.,Healthcare
+MDXG,MiMedx Group, Inc.,Stock
+MEC,Mayville Engineering Company, Inc.,Stock
+MED,Medifast, Inc.,Stock
+MEDP,Medpace Holdings, Inc.,Stock
+MEG,Montrose Environmental Group, Inc.,Stock
+MEI,Methode Electronics, Inc.,Stock
+MELI,MercadoLibre, Inc.,Stock
+MET,MetLife Inc.,Financial Services
+META,Meta Platforms Inc.,Technology
+METC,Ramaco Resources, Inc.,Stock
+MFA,MFA Financial, Inc.,Stock
+MFC.TO,Manulife Financial Corporation,Financial Services
+MFG.AX,Magellan Financial Group Limited,Financial Services
+MFIN,Medallion Financial Corp.,Financial Services
+MG.TO,Magna International Inc.,Consumer Cyclical
+MG,Mistras Group, Inc.,Stock
+MGEE,MGE Energy, Inc.,Stock
+MGM,MGM Resorts International,Consumer Cyclical
+MGNI,Magnite, Inc.,Stock
+MGPI,MGP Ingredients, Inc.,Stock
+MGR.AX,Mirvac Group,Real Estate
+MGRC,McGrath RentCorp,Industrials
+MGTX,MeiraGTx Holdings plc,Healthcare
+MGY,Magnolia Oil & Gas Corporation,Energy
+MH,McGraw Hill, Inc.,Stock
+MHK,Mohawk Industries, Inc.,Stock
+MHO,M/I Homes, Inc.,Stock
+MIAX,Miami International Holdings, Inc.,Stock
+MIDD,The Middleby Corporation,Industrials
+MIN.AX,Mineral Resources Limited,Basic Materials
+MIR,Mirion Technologies, Inc.,Stock
+MIRM,Mirum Pharmaceuticals, Inc.,Stock
+MITK,Mitek Systems, Inc.,Stock
+MITT,TPG Mortgage Investment Trust, Inc.,Stock
+MKC,McCormick & Company Inc.,Consumer Defensive
+MKSI,MKS Inc.,Technology
+MKTW,MarketWise, Inc.,Stock
+MKTX,MarketAxess Holdings Inc.,Financial Services
+ML.PA,Compagnie Générale des Établissements Michelin Société en commandite par actions,Stock
+MLAB,Mesa Laboratories, Inc.,Stock
+MLI,Mueller Industries, Inc.,Stock
+MLKN,MillerKnoll, Inc.,Stock
+MLM,Martin Marietta Materials Inc.,Materials
+MLP,Maui Land & Pineapple Company, Inc.,Stock
+MLR,Miller Industries, Inc.,Stock
+MLYS,Mineralys Therapeutics, Inc.,Stock
+MMC,Marsh & McLennan Companies Inc.,Financial Services
+MMI,Marcus & Millichap, Inc.,Stock
+MMM,3M Company,Industrials
+MMS,Maximus, Inc.,Stock
+MMSI,Merit Medical Systems, Inc.,Stock
+MNDI.L,Mondi plc,Basic Materials
+MNG.L,M&G plc,Financial Services
+MNKD,MannKind Corporation,Healthcare
+MNMD,Mind Medicine (MindMed) Inc.,Healthcare
+MNPR,Monopar Therapeutics Inc.,Healthcare
+MNRO,Monro, Inc.,Stock
+MNSB,MainStreet Bancshares, Inc.,Stock
+MNST,Monster Beverage Corporation,Consumer Defensive
+MNTK,Montauk Renewables, Inc.,Stock
+MO,Altria Group Inc.,Consumer Defensive
+MOD,Modine Manufacturing Company,Consumer Cyclical
+MODG,Callaway Golf Company,Consumer Cyclical
+MOH,Molina Healthcare Inc.,Healthcare
+MORN,Morningstar, Inc.,Stock
+MOS,The Mosaic Company,Materials
+MOV,Movado Group, Inc.,Stock
+MP,MP Materials Corp.,Basic Materials
+MPAA,Motorcar Parts of America, Inc.,Stock
+MPB,Mid Penn Bancorp, Inc.,Stock
+MPC,Marathon Petroleum Corporation,Energy
+MPL.AX,Medibank Private Limited,Financial Services
+MPLT,MapLight Therapeutics, Inc.,Stock
+MPT,Medical Properties Trust, Inc.,Stock
+MPTI,M-tron Industries, Inc.,Stock
+MPW,Medical Properties Trust, Inc.,Stock
+MPWR,Monolithic Power Systems Inc.,Technology
+MPX,Marine Products Corporation,Consumer Cyclical
+MQ,Marqeta, Inc.,Stock
+MQG.AX,Macquarie Group Limited,Financial Services
+MRBK,Meridian Corporation,Financial Services
+MRCY,Mercury Systems, Inc.,Stock
+MRDN,Meridian Holdings Inc.,Communication Services
+MRE.TO,Martinrea International Inc.,Consumer Cyclical
+MRK.DE,Merck KGaA,Healthcare
+MRK,Merck & Co. Inc.,Healthcare
+MRNA,Moderna Inc.,Healthcare
+MRO.L,Melrose Industries PLC,Industrials
+MRP,Millrose Properties, Inc.,Stock
+MRSH,Marsh & McLennan Companies, Inc.,Stock
+MRTN,Marten Transport, Ltd.,Stock
+MRU.TO,Metro Inc.,Consumer Defensive
+MRVI,Maravai LifeSciences Holdings, Inc.,Stock
+MRVL,Marvell Technology, Inc.,Stock
+MRX,Marex Group plc,Financial Services
+MS,Morgan Stanley,Financial Services
+MSA,MSA Safety Incorporated,Industrials
+MSBI,Midland States Bancorp, Inc.,Stock
+MSCC,828151,Stock
+MSCI,MSCI,Financial Services
+MSEX,Middlesex Water Company,Utilities
+MSFT,Microsoft Corporation,Technology
+MSGE,Madison Square Garden Entertainment Corp.,Consumer Cyclical
+MSGS,Madison Square Garden Sports Corp.,Communication Services
+MSI,Motorola Solutions, Inc.,Stock
+MSM,MSC Industrial Direct Co., Inc.,Stock
+MSTR,Strategy Inc,Technology
+MTB,M&T Bank Corporation,Financial Services
+MTCH,Match Group Inc.,Communication Services
+MTD,Mettler-Toledo International Inc.,Healthcare
+MTDR,Matador Resources Company,Energy
+MTG,MGIC Investment Corporation,Financial Services
+MTH,Meritage Homes Corporation,Consumer Cyclical
+MTN,Vail Resorts, Inc.,Stock
+MTRN,Materion Corporation,Basic Materials
+MTRX,Matrix Service Company,Industrials
+MTS.AX,Metcash Limited,Consumer Defensive
+MTSI,MACOM Technology Solutions Holdings, Inc.,Stock
+MTUS,Metallus Inc.,Basic Materials
+MTW,The Manitowoc Company, Inc.,Stock
+MTX.DE,MTU Aero Engines AG,Industrials
+MTX,Minerals Technologies Inc.,Basic Materials
+MTY.TO,MTY Food Group Inc.,Consumer Cyclical
+MTZ,MasTec, Inc.,Stock
+MU,Micron Technology Inc.,Technology
+MUR,Murphy Oil Corporation,Energy
+MUSA,Murphy USA Inc.,Consumer Cyclical
+MVBF,MVB Financial Corp.,Financial Services
+MVIS,MicroVision, Inc.,Stock
+MVST,Microvast Holdings, Inc.,Stock
+MWA,Mueller Water Products, Inc.,Stock
+MXCT,MaxCyte, Inc.,Stock
+MXL,MaxLinear, Inc.,Stock
+MYE,Myers Industries, Inc.,Stock
+MYFW,First Western Financial, Inc.,Stock
+MYGN,Myriad Genetics, Inc.,Stock
+MYO,Myomo, Inc.,Stock
+MYPS,PLAYSTUDIOS, Inc.,Stock
+MYR.AX,Myer Holdings Limited,Consumer Cyclical
+MYRG,MYR Group Inc.,Industrials
+MZTI,The Marzetti Company,Consumer Defensive
+NA.TO,National Bank of Canada,Financial Services
+NAB.AX,National Australia Bank Limited,Financial Services
+NABL,N-able, Inc.,Stock
+NAGE,Niagen Bioscience, Inc.,Stock
+NAN.AX,Nanosonics Limited,Healthcare
+NAT,Nordic American Tankers Limited,Energy
+NATH,Nathan's Famous, Inc.,Stock
+NATL,NCR Atleos Corporation,Technology
+NATR,Nature's Sunshine Products, Inc.,Stock
+NAVI,Navient Corporation,Financial Services
+NAVN,Navan, Inc.,Stock
+NB,NioCorp Developments Ltd.,Basic Materials
+NBBK,NB Bancorp, Inc.,Stock
+NBHC,National Bank Holdings Corporation,Financial Services
+NBIX,Neurocrine Biosciences, Inc.,Stock
+NBN,Northeast Bank,Financial Services
+NBR,Nabors Industries Ltd.,Energy
+NBTB,NBT Bancorp Inc.,Financial Services
+NC,NACCO Industries, Inc.,Stock
+NCLH,Norwegian Cruise Line Holdings Ltd.,Consumer Cyclical
+NCMI,National CineMedia, Inc.,Stock
+NDA.DE,Aurubis AG,Industrials
+NDAQ,Nasdaq Inc.,Financial Services
+NDSN,Nordson Corporation,Industrials
+NE,Noble Corporation plc,Energy
+NEC.AX,Nine Entertainment Co. Holdings Limited,Communication Services
+NECB,Northeast Community Bancorp, Inc.,Stock
+NEE,NextEra Energy Inc.,Utilities
+NEM.AX,Newmont Corporation,Basic Materials
+NEM,Newmont Corporation,Materials
+NEO,NeoGenomics, Inc.,Stock
+NEOG,Neogen Corporation,Healthcare
+NEON,Neonode Inc.,Technology
+NESR,National Energy Services Reunited Corp.,Energy
+NET,Cloudflare, Inc.,Stock
+NEU,NewMarket Corporation,Basic Materials
+NEWT,NewtekOne, Inc.,Stock
+NEXN,Nexxen International Ltd.,Communication Services
+NEXT,NextDecade Corporation,Energy
+NFBK,Northfield Bancorp, Inc. (Staten Island, NY),Stock
+NFE,New Fortress Energy Inc.,Energy
+NFG,National Fuel Gas Company,Energy
+NFI.TO,NFI Group Inc.,Consumer Cyclical
+NFLX,Netflix Inc.,Communication Services
+NG.L,National Grid plc,Utilities
+NG,NovaGold Resources Inc.,Basic Materials
+NGG,National Grid plc,Utilities
+NGNE,Neurogene Inc.,Healthcare
+NGS,Natural Gas Services Group, Inc.,Stock
+NGVC,Natural Grocers by Vitamin Cottage, Inc.,Stock
+NGVT,Ingevity Corporation,Basic Materials
+NHC.AX,New Hope Corporation Limited,Energy
+NHC,National HealthCare Corporation,Healthcare
+NHF.AX,nib holdings limited,Financial Services
+NHI,National Health Investors, Inc.,Stock
+NI,NiSource Inc.,Utilities
+NIC.AX,Nickel Industries Limited,Basic Materials
+NIC,Nicolet Bankshares, Inc.,Stock
+NIQ,NIQ Global Intelligence plc,Stock
+NJR,New Jersey Resources Corporation,Utilities
+NKE,Nike Inc.,Consumer Cyclical
+NKLA,Nikola Corporation,Stock
+NKSH,National Bankshares, Inc.,Stock
+NKTR,Nektar Therapeutics,Healthcare
+NKTX,Nkarta, Inc.,Stock
+NL,NL Industries, Inc.,Stock
+NLOP,Net Lease Office Properties,Real Estate
+NLY,Annaly Capital Management, Inc.,Stock
+NMAX,Newsmax, Inc.,Stock
+NMIH,NMI Holdings, Inc.,Stock
+NMRK,Newmark Group, Inc.,Stock
+NN,NextNav Inc.,Technology
+NNE,NANO Nuclear Energy Inc.,Industrials
+NNI,Nelnet, Inc.,Stock
+NNN,NNN REIT, Inc.,Stock
+NNOX,Nano-X Imaging Ltd.,Healthcare
+NOC,Northrop Grumman Corporation,Industrials
+NODK,NI Holdings, Inc.,Stock
+NOG,Northern Oil and Gas, Inc.,Stock
+NOV,NOV Inc.,Energy
+NOVT,Novanta Inc.,Technology
+NOW,ServiceNow Inc.,Technology
+NPB,Northpointe Bancshares, Inc.,Stock
+NPCE,NeuroPace, Inc.,Stock
+NPI.TO,Northland Power Inc.,Utilities
+NPK,National Presto Industries, Inc.,Stock
+NPKI,NPK International Inc.,Energy
+NPO,Enpro Inc.,Industrials
+NPWR,NET Power Inc.,Industrials
+NRC,National Research Corporation,Healthcare
+NRDS,NerdWallet, Inc.,Stock
+NRDY,Nerdy Inc.,Technology
+NREF,NexPoint Real Estate Finance, Inc.,Stock
+NRG,NRG Energy, Inc.,Stock
+NRIM,Northrim BanCorp, Inc.,Stock
+NRIX,Nurix Therapeutics, Inc.,Stock
+NSA,National Storage Affiliates Trust,Real Estate
+NSC,Norfolk Southern Corporation,Industrials
+NSIT,Insight Enterprises, Inc.,Stock
+NSP,Insperity, Inc.,Stock
+NSR.AX,National Storage REIT,Real Estate
+NSSC,Napco Security Technologies, Inc.,Stock
+NST.AX,Northern Star Resources Limited,Basic Materials
+NTAP,NetApp Inc.,Technology
+NTB,The Bank of N.T. Butterfield & Son Limited,Financial Services
+NTCT,NetScout Systems, Inc.,Stock
+NTGR,NETGEAR, Inc.,Stock
+NTLA,Intellia Therapeutics, Inc.,Stock
+NTNX,Nutanix, Inc.,Stock
+NTR.TO,Nutrien Ltd.,Basic Materials
+NTRS,Northern Trust Corporation,Financial Services
+NTST,NETSTREIT Corp.,Real Estate
+NUE,Nucor Corporation,Materials
+NUF.AX,Nufarm Limited,Basic Materials
+NUS,Nu Skin Enterprises, Inc.,Stock
+NUTX,Nutex Health Inc.,Healthcare
+NUVB,Nuvation Bio Inc.,Healthcare
+NUVL,Nuvalent, Inc.,Stock
+NVA.TO,NuVista Energy Ltd,Energy
+NVAX,Novavax, Inc.,Stock
+NVCR,NovoCure Limited,Healthcare
+NVCT,Nuvectis Pharma, Inc.,Stock
+NVDA,NVIDIA Corporation,Technology
+NVEC,NVE Corporation,Technology
+NVGS,Navigator Holdings Ltd.,Energy
+NVR,NVR,Consumer Cyclical
+NVRI,Enviri Corporation,Industrials
+NVST,Envista Holdings Corporation,Healthcare
+NVT,nVent Electric plc,Industrials
+NVTS,Navitas Semiconductor Corporation,Technology
+NVX.AX,NOVONIX Limited,Industrials
+NWBI,Northwest Bancshares, Inc.,Stock
+NWC.TO,The North West Company Inc.,Consumer Defensive
+NWE,NorthWestern Energy Group, Inc.,Stock
+NWFL,Norwood Financial Corp.,Financial Services
+NWG.L,NatWest Group plc,Financial Services
+NWL.AX,Netwealth Group Limited,Technology
+NWL,Newell Brands Inc.,Consumer Defensive
+NWN,Northwest Natural Holding Company,Utilities
+NWPX,NWPX Infrastructure, Inc.,Stock
+NWS.AX,News Corporation,Communication Services
+NWS,News Corporation,Communication Services
+NWSA,News Corporation,Communication Services
+NX,Quanex Building Products Corporation,Industrials
+NXDR,Nextdoor Holdings, Inc.,Stock
+NXDT,NexPoint Diversified Real Estate Trust,Real Estate
+NXPI,NXP Semiconductors N.V.,Technology
+NXRT,NexPoint Residential Trust, Inc.,Stock
+NXST,Nexstar Media Group, Inc.,Stock
+NXT.AX,NEXTDC Limited,Technology
+NXT.L,NEXT plc,Consumer Cyclical
+NXT,Nextpower Inc.,Technology
+NXXT,NextNRG, Inc.,Stock
+NYT,The New York Times Company,Communication Services
+O,Realty Income Corporation,Real Estate
+OABI,OmniAb, Inc.,Stock
+OBK,Origin Bancorp, Inc.,Stock
+OBT,Orange County Bancorp, Inc.,Stock
+OC,Owens Corning,Industrials
+OCDO.L,Ocado Group plc,Consumer Defensive
+OCFC,OceanFirst Financial Corp.,Financial Services
+OCGN,Ocugen, Inc.,Stock
+OCUL,Ocular Therapeutix, Inc.,Stock
+ODC,Oil-Dri Corporation of America,Basic Materials
+ODFL,Old Dominion Freight Line Inc.,Industrials
+OEC,Orion S.A.,Basic Materials
+OFG,OFG Bancorp,Financial Services
+OFIX,Orthofix Medical Inc.,Healthcare
+OFLX,Omega Flex, Inc.,Stock
+OGC.TO,OceanaGold Corporation,Basic Materials
+OGE,OGE Energy Corp.,Utilities
+OGN,Organon & Co.,Healthcare
+OGS,ONE Gas, Inc.,Stock
+OHI,Omega Healthcare Investors, Inc.,Stock
+OI,O-I Glass, Inc.,Stock
+OII,Oceaneering International, Inc.,Stock
+OIS,Oil States International, Inc.,Stock
+OKE,ONEOK Inc.,Energy
+OKLO,Oklo Inc.,Utilities
+OKTA,Okta, Inc.,Stock
+OLED,Universal Display Corporation,Technology
+OLLI,Ollie's Bargain Outlet Holdings, Inc.,Stock
+OLMA,Olema Pharmaceuticals, Inc.,Stock
+OLN,Olin Corporation,Basic Materials
+OLP,One Liberty Properties, Inc.,Stock
+OLPX,Olaplex Holdings, Inc.,Stock
+OM,Outset Medical, Inc.,Stock
+OMC,Omnicom Group Inc.,Communication Services
+OMCL,Omnicell, Inc.,Stock
+OMDA,Omada Health, Inc.,Stock
+OMER,Omeros Corporation,Healthcare
+OMF,OneMain Holdings, Inc.,Stock
+OML.AX,oOh!media Limited,Communication Services
+ON,ON Semiconductor Corporation,Technology
+ONB,Old National Bancorp,Financial Services
+ONEW,OneWater Marine Inc.,Consumer Cyclical
+ONIT,Onity Group Inc.,Financial Services
+ONON,On Holding AG,Consumer Cyclical
+ONTF,ON24, Inc.,Stock
+ONTO,Onto Innovation Inc.,Technology
+OOMA,Ooma, Inc.,Stock
+OPAL,OPAL Fuels Inc.,Utilities
+OPBK,OP Bancorp,Financial Services
+OPCH,Option Care Health, Inc.,Stock
+OPFI,OppFi Inc.,Financial Services
+OPK,OPKO Health, Inc.,Stock
+OPLN,OPENLANE, Inc.,Stock
+OPRT,Oportun Financial Corporation,Financial Services
+OPRX,OptimizeRx Corporation,Healthcare
+OPTU,Optimum Communications, Inc.,Stock
+OR.PA,L'Oréal S.A.,Consumer Defensive
+OR.TO,OR Royalties Inc.,Basic Materials
+ORA.AX,Orora Limited,Consumer Cyclical
+ORA.PA,Orange S.A.,Communication Services
+ORA,Ormat Technologies, Inc.,Stock
+ORC,Orchid Island Capital, Inc.,Stock
+ORCL,Oracle Corporation,Technology
+ORG.AX,Origin Energy Limited,Utilities
+ORGO,Organogenesis Holdings Inc.,Healthcare
+ORI.AX,Orica Limited,Basic Materials
+ORI,Old Republic International Corporation,Financial Services
+ORIC,ORIC Pharmaceuticals, Inc.,Stock
+ORKA,Oruka Therapeutics, Inc.,Stock
+ORLY,O'Reilly Automotive Inc.,Consumer Cyclical
+ORN,Orion Group Holdings, Inc.,Stock
+ORRF,Orrstown Financial Services, Inc.,Stock
+OSBC,Old Second Bancorp, Inc.,Stock
+OSCR,Oscar Health, Inc.,Stock
+OSG,Octave Specialty Group, Inc.,Stock
+OSIS,OSI Systems, Inc.,Stock
+OSK,Oshkosh Corporation,Industrials
+OSPN,OneSpan Inc.,Technology
+OSUR,OraSure Technologies, Inc.,Stock
+OSW,OneSpaWorld Holdings Limited,Consumer Cyclical
+OTEX.TO,Open Text Corporation,Technology
+OTIS,Otis Worldwide Corporation,Industrials
+OTTR,Otter Tail Corporation,Industrials
+OUST,Ouster, Inc.,Stock
+OUT,OUTFRONT Media Inc.,Real Estate
+OVBC,Ohio Valley Banc Corp.,Financial Services
+OVLY,Oak Valley Bancorp,Financial Services
+OVV.TO,Ovintiv Inc.,Energy
+OVV,Ovintiv Inc.,Energy
+OWL,Blue Owl Capital Inc.,Financial Services
+OXM,Oxford Industries, Inc.,Stock
+OXY,Occidental Petroleum Corporation,Energy
+OZK,Bank OZK,Financial Services
+PACB,Pacific Biosciences of California, Inc.,Stock
+PACK,Ranpak Holdings Corp.,Consumer Cyclical
+PACS,PACS Group, Inc.,Stock
+PAG,Penske Automotive Group, Inc.,Stock
+PAGS,PagSeguro Digital Ltd.,Technology
+PAHC,Phibro Animal Health Corporation,Healthcare
+PAL,Proficient Auto Logistics, Inc.,Stock
+PAMT,PAMT CORP,Industrials
+PANL,Pangaea Logistics Solutions Ltd.,Industrials
+PANW,Palo Alto Networks Inc.,Technology
+PAR,PAR Technology Corporation,Technology
+PARR,Par Pacific Holdings, Inc.,Stock
+PATH,UiPath, Inc.,Stock
+PATK,Patrick Industries, Inc.,Stock
+PAX,Patria Investments Limited,Financial Services
+PAYC,Paycom Software, Inc.,Stock
+PAYO,Payoneer Global Inc.,Technology
+PAYS,Paysign, Inc.,Stock
+PAYX,Paychex, Inc.,Stock
+PB,Prosperity Bancshares, Inc.,Stock
+PBF,PBF Energy Inc.,Energy
+PBFS,Pioneer Bancorp, Inc.,Stock
+PBH.AX,PointsBet Holdings Limited,Consumer Cyclical
+PBH.TO,Premium Brands Holdings Corporation,Consumer Defensive
+PBH,Prestige Consumer Healthcare Inc.,Healthcare
+PBI,Pitney Bowes Inc.,Industrials
+PBYI,Puma Biotechnology, Inc.,Stock
+PCAR,PACCAR Inc.,Industrials
+PCB,PCB Bancorp,Financial Services
+PCG,PG&E Corporation,Utilities
+PCH,PotlatchDeltic Corporation,Real Estate
+PCOR,Procore Technologies, Inc.,Stock
+PCRX,Pacira BioSciences, Inc.,Stock
+PCT,PureCycle Technologies, Inc.,Stock
+PCTY,Paylocity Holding Corporation,Technology
+PCVX,Vaxcyte, Inc.,Stock
+PCYO,Pure Cycle Corporation,Utilities
+PD.TO,Precision Drilling Corporation,Energy
+PD,PagerDuty, Inc.,Stock
+PDD,PDD Holdings Inc.,Consumer Cyclical
+PDEX,Pro-Dex, Inc.,Stock
+PDFS,PDF Solutions, Inc.,Stock
+PDLB,Ponce Financial Group, Inc.,Stock
+PDM,Piedmont Realty Trust, Inc.,Stock
+PDN.AX,Paladin Energy Ltd,Energy
+PDYN,Palladyne AI Corp.,Technology
+PEAK,Healthpeak Properties Inc.,Real Estate
+PEB,Pebblebrook Hotel Trust,Real Estate
+PEBK,Peoples Bancorp of North Carolina, Inc.,Stock
+PEBO,Peoples Bancorp Inc.,Financial Services
+PECO,Phillips Edison & Company, Inc.,Stock
+PEG,Public Service Enterprise Group Inc.,Utilities
+PEGA,Pegasystems Inc.,Technology
+PEN,Penumbra, Inc.,Stock
+PENG,Penguin Solutions, Inc.,Stock
+PENN,PENN Entertainment, Inc.,Stock
+PEP,PepsiCo Inc.,Consumer Defensive
+PESI,Perma-Fix Environmental Services, Inc.,Stock
+PEY.TO,Peyto Exploration & Development Corp.,Energy
+PFBC,Preferred Bank,Financial Services
+PFE,Pfizer Inc.,Healthcare
+PFG,Principal Financial Group, Inc.,Stock
+PFGC,Performance Food Group Company,Consumer Defensive
+PFIS,Peoples Financial Services Corp.,Financial Services
+PFS,Provident Financial Services, Inc.,Stock
+PFSI,PennyMac Financial Services, Inc.,Stock
+PG,Procter & Gamble Co.,Consumer Defensive
+PGC,Peapack-Gladstone Financial Corporation,Financial Services
+PGEN,Precigen, Inc.,Stock
+PGNY,Progyny, Inc.,Stock
+PGR,The Progressive Corporation,Financial Services
+PGY,Pagaya Technologies Ltd.,Technology
+PH,Parker-Hannifin Corporation,Industrials
+PHAT,Phathom Pharmaceuticals, Inc.,Stock
+PHIN,PHINIA Inc.,Consumer Cyclical
+PHM,PulteGroup Inc.,Consumer Cyclical
+PHNX.L,Standard Life PLC,Financial Services
+PHR,Phreesia, Inc.,Stock
+PI,Impinj, Inc.,Stock
+PII,Polaris Inc.,Consumer Cyclical
+PINE,Alpine Income Property Trust, Inc.,Stock
+PINS,Pinterest, Inc.,Stock
+PIPR,Piper Sandler Companies,Financial Services
+PJT,PJT Partners Inc.,Financial Services
+PK,Park Hotels & Resorts Inc.,Real Estate
+PKBK,Parke Bancorp, Inc.,Stock
+PKE,Park Aerospace Corp.,Industrials
+PKG,Packaging Corporation of America,Materials
+PKOH,Park-Ohio Holdings Corp.,Industrials
+PKST,Peakstone Realty Trust,Real Estate
+PL,Planet Labs PBC,Industrials
+PLAB,Photronics, Inc.,Stock
+PLAY,Dave & Buster's Entertainment, Inc.,Stock
+PLBC,Plumas Bancorp,Financial Services
+PLD,Prologis Inc.,Real Estate
+PLMR,Palomar Holdings, Inc.,Stock
+PLNT,Planet Fitness, Inc.,Stock
+PLOW,Douglas Dynamics, Inc.,Stock
+PLPC,Preformed Line Products Company,Industrials
+PLS.AX,PLS Group Limited,Basic Materials
+PLSE,Pulse Biosciences, Inc.,Stock
+PLTK,Playtika Holding Corp.,Communication Services
+PLTR,Palantir Technologies Inc.,Technology
+PLUG,Plug Power Inc.,Industrials
+PLUS,ePlus inc.,Technology
+PLX,Protalix BioTherapeutics, Inc.,Stock
+PLXS,Plexus Corp.,Technology
+PM,Philip Morris International Inc.,Consumer Defensive
+PME.AX,Pro Medicus Limited,Healthcare
+PMT,PennyMac Mortgage Investment Trust,Real Estate
+PMTS,CPI Card Group Inc.,Financial Services
+PMV.AX,Premier Investments Limited,Consumer Cyclical
+PNBK,Patriot National Bancorp, Inc.,Stock
+PNC,PNC Financial Services Group Inc.,Financial Services
+PNFP,Pinnacle Financial Partners, Inc.,Stock
+PNI.AX,Pinnacle Investment Management Group Limited,Financial Services
+PNR,Pentair plc,Industrials
+PNRG,PrimeEnergy Resources Corporation,Energy
+PNTG,The Pennant Group, Inc.,Stock
+PNW,Pinnacle West Capital Corporation,Utilities
+PODD,Insulet Corporation,Healthcare
+POOL,Pool Corporation,Industrials
+POR,Portland General Electric Company,Utilities
+POST,Post Holdings, Inc.,Stock
+POU.TO,Paramount Resources Ltd.,Energy
+POW.TO,Power Corporation of Canada,Financial Services
+POWI,Power Integrations, Inc.,Stock
+POWL,Powell Industries, Inc.,Stock
+POWW,Outdoor Holding Company,Industrials
+PPC,Pilgrim's Pride Corporation,Consumer Defensive
+PPG,PPG Industries Inc.,Materials
+PPL.TO,Pembina Pipeline Corporation,Energy
+PPL,PPL Corporation,Utilities
+PPT.AX,Perpetual Limited,Financial Services
+PPTA,Perpetua Resources Corp.,Basic Materials
+PR,Permian Resources Corporation,Energy
+PRA,ProAssurance Corporation,Financial Services
+PRAA,PRA Group, Inc.,Stock
+PRAX,Praxis Precision Medicines, Inc.,Stock
+PRCH,Porch Group, Inc.,Stock
+PRCT,PROCEPT BioRobotics Corporation,Healthcare
+PRDO,Perdoceo Education Corporation,Consumer Defensive
+PRG,PROG Holdings, Inc.,Stock
+PRGO,Perrigo Company plc,Healthcare
+PRGS,Progress Software Corporation,Technology
+PRI,Primerica, Inc.,Stock
+PRIM,Primoris Services Corporation,Industrials
+PRK,Park National Corporation,Financial Services
+PRKS,United Parks & Resorts Inc.,Consumer Cyclical
+PRLB,Proto Labs, Inc.,Stock
+PRM,Perimeter Solutions, Inc.,Stock
+PRMB,Primo Brands Corporation,Consumer Defensive
+PRME,Prime Medicine, Inc.,Stock
+PROP,Prairie Operating Co., LLC,Stock
+PRSU,Pursuit Attractions and Hospitality, Inc.,Stock
+PRTA,Prothena Corporation plc,Healthcare
+PRTH,Priority Technology Holdings, Inc.,Stock
+PRU.AX,Perseus Mining Limited,Basic Materials
+PRU.L,Prudential plc,Financial Services
+PRU,Prudential Financial Inc.,Financial Services
+PRVA,Privia Health Group, Inc.,Stock
+PSA,Public Storage,Real Estate
+PSFE,Paysafe Limited,Technology
+PSH.L,Pershing Square Holdings Ord,Stock
+PSI.TO,Pason Systems Inc.,Energy
+PSIX,Power Solutions International, Inc.,Stock
+PSK.TO,PrairieSky Royalty Ltd.,Energy
+PSKY,Paramount Skydance Corporation,Communication Services
+PSMT,PriceSmart, Inc.,Stock
+PSN.L,Persimmon Plc,Consumer Cyclical
+PSN,Parsons Corporation,Technology
+PSNL,Personalis, Inc.,Stock
+PSON.L,Pearson plc,Communication Services
+PSTG,Everpure,Technology
+PSTL,Postal Realty Trust, Inc.,Stock
+PSX,Phillips 66,Energy
+PTC,PTC Inc.,Technology
+PTCT,PTC Therapeutics, Inc.,Stock
+PTEN,Patterson-UTI Energy, Inc.,Stock
+PTGX,Protagonist Therapeutics, Inc.,Stock
+PTLO,Portillo's Inc.,Consumer Cyclical
+PTON,Peloton Interactive, Inc.,Stock
+PUB.PA,Publicis Groupe S.A.,Communication Services
+PUBM,PubMatic, Inc.,Stock
+PUMP,ProPetro Holding Corp.,Energy
+PVH,PVH Corp.,Consumer Cyclical
+PVLA,Palvella Therapeutics, Inc.,Stock
+PVTB,116494,Stock
+PWP,Perella Weinberg Partners,Financial Services
+PWR,Quanta Services Inc.,Industrials
+PX,P10 Inc,Financial Services
+PXA.AX,PEXA Group Limited,Technology
+PXED,Phoenix Education Partners, Inc.,Stock
+PXT.TO,Parex Resources Inc.,Energy
+PYPL,PayPal Holdings Inc.,Financial Services
+PZZA,Papa John's International, Inc.,Stock
+Q,Qnity Electronics, Inc.,Stock
+QAN.AX,Qantas Airways Limited,Industrials
+QBE.AX,QBE Insurance Group Limited,Financial Services
+QBTS,D-Wave Quantum Inc.,Technology
+QCOM,QUALCOMM Incorporated,Technology
+QCP,Quality Care Properties, Inc.,Stock
+QCRH,QCR Holdings, Inc.,Stock
+QDEL,QuidelOrtho Corporation,Healthcare
+QIA.DE,Qiagen N.V.,Healthcare
+QLYS,Qualys, Inc.,Stock
+QNST,QuinStreet, Inc.,Stock
+QRVO,Qorvo, Inc.,Stock
+QS,QuantumScape Corporation,Consumer Cyclical
+QSI,Quantum-Si incorporated,Healthcare
+QSR.TO,Restaurant Brands International Inc.,Consumer Cyclical
+QSR,Restaurant Brands International Inc.,Consumer Cyclical
+QTRX,Quanterix Corporation,Healthcare
+QTWO,Q2 Holdings, Inc.,Stock
+QUAD,Quad/Graphics, Inc.,Stock
+QUB.AX,Qube Holdings Limited,Industrials
+QUBT,Quantum Computing Inc.,Technology
+QXO,QXO, Inc.,Stock
+RAL,Ralliant Corporation,Technology
+RAMP,LiveRamp Holdings, Inc.,Stock
+RAPP,Rapport Therapeutics, Inc.,Stock
+RARE,Ultragenyx Pharmaceutical Inc.,Healthcare
+RBA,RB Global, Inc.,Stock
+RBB,RBB Bancorp,Financial Services
+RBBN,Ribbon Communications Inc.,Technology
+RBC,RBC Bearings Incorporated,Industrials
+RBCAA,Republic Bancorp, Inc.,Stock
+RBKB,Rhinebeck Bancorp, Inc.,Stock
+RBLX,Roblox Corporation,Communication Services
+RC,Ready Capital Corporation,Real Estate
+RCAT,Red Cat Holdings, Inc.,Stock
+RCEL,AVITA Medical, Inc.,Stock
+RCKT,Rocket Pharmaceuticals, Inc.,Stock
+RCKY,Rocky Brands, Inc.,Stock
+RCL,Royal Caribbean Cruises Ltd.,Consumer Cyclical
+RCMT,RCM Technologies, Inc.,Stock
+RCUS,Arcus Biosciences, Inc.,Stock
+RDN,Radian Group Inc.,Financial Services
+RDNT,RadNet, Inc.,Stock
+RDVT,Red Violet, Inc.,Stock
+RDW,Redwire Corporation,Industrials
+REA.AX,REA Group Limited,Communication Services
+REAL,The RealReal, Inc.,Stock
+REAX,The Real Brokerage Inc.,Real Estate
+REFI,Chicago Atlantic Real Estate Finance, Inc.,Stock
+REG,Regency Centers Corporation,Real Estate
+REGN,Regeneron Pharmaceuticals Inc.,Healthcare
+REH.AX,Reece Limited,Industrials
+REL.L,RELX PLC,Industrials
+RELL,Richardson Electronics, Ltd.,Stock
+RELY,Remitly Global, Inc.,Stock
+REPL,Replimune Group, Inc.,Stock
+REPX,Riley Exploration Permian, Inc.,Stock
+RES,RPC, Inc.,Stock
+REX,REX American Resources Corporation,Basic Materials
+REXR,Rexford Industrial Realty, Inc.,Stock
+REYN,Reynolds Consumer Products Inc.,Consumer Cyclical
+REZI,Resideo Technologies, Inc.,Stock
+RF,Regions Financial Corporation,Financial Services
+RFF.AX,Rural Funds Group,Real Estate
+RGA,Reinsurance Group of America, Incorporated,Stock
+RGCO,RGC Resources, Inc.,Stock
+RGEN,Repligen Corporation,Healthcare
+RGLD,Royal Gold, Inc.,Stock
+RGNX,REGENXBIO Inc.,Healthcare
+RGP,Resources Connection, Inc.,Stock
+RGR,Sturm, Ruger & Company, Inc.,Stock
+RGTI,Rigetti Computing, Inc.,Stock
+RH,RH,Consumer Cyclical
+RHC.AX,Ramsay Health Care Limited,Healthcare
+RHI,Robert Half Inc.,Industrials
+RHLD,Resolute Holdings Management, Inc.,Stock
+RHP,Ryman Hospitality Properties, Inc.,Stock
+RI.PA,Pernod Ricard SA,Consumer Defensive
+RICK,RCI Hospitality Holdings, Inc.,Stock
+RIG,Transocean Ltd.,Energy
+RIGL,Rigel Pharmaceuticals, Inc.,Stock
+RIO.AX,Rio Tinto Group,Basic Materials
+RIO.L,Rio Tinto Group,Basic Materials
+RIOT,Riot Platforms, Inc.,Stock
+RITM,Rithm Capital Corp.,Real Estate
+RIVN,Rivian Automotive, Inc.,Stock
+RJF,Raymond James Financial, Inc.,Stock
+RKLB,Rocket Lab Corporation,Industrials
+RKT.L,Reckitt Benckiser Group plc,Consumer Defensive
+RKT,Rocket Companies, Inc.,Stock
+RL,Ralph Lauren Corporation,Consumer Cyclical
+RLAY,Relay Therapeutics, Inc.,Stock
+RLGT,Radiant Logistics, Inc.,Stock
+RLI,RLI Corp.,Financial Services
+RLJ,RLJ Lodging Trust,Real Estate
+RM,Regional Management Corp.,Financial Services
+RMAX,RE/MAX Holdings, Inc.,Stock
+RMBI,Richmond Mutual Bancorporation, Inc.,Stock
+RMBS,Rambus Inc.,Technology
+RMD.AX,ResMed Inc.,Healthcare
+RMD,ResMed Inc.,Healthcare
+RMNI,Rimini Street, Inc.,Stock
+RMR,The RMR Group Inc.,Real Estate
+RMS.AX,Ramelius Resources Limited,Basic Materials
+RMS.PA,Hermès International Société en commandite par actions,Consumer Cyclical
+RMV.L,Rightmove plc,Communication Services
+RNA,Atrium Therapeutics, Inc.,Stock
+RNAC,Cartesian Therapeutics, Inc.,Stock
+RNG,RingCentral, Inc.,Stock
+RNGR,Ranger Energy Services, Inc.,Stock
+RNR,RenaissanceRe Holdings Ltd.,Financial Services
+RNST,Renasant Corporation,Financial Services
+ROAD,Construction Partners, Inc.,Stock
+ROCK,Gibraltar Industries, Inc.,Stock
+ROG,Rogers Corporation,Technology
+ROIV,Roivant Sciences Ltd.,Healthcare
+ROK,Rockwell Automation Inc.,Industrials
+ROKU,Roku, Inc.,Stock
+ROL,Rollins, Inc.,Stock
+ROOT,Root, Inc.,Stock
+ROP,Roper Technologies Inc.,Technology
+ROST,Ross Stores Inc.,Consumer Cyclical
+RPAY,Repay Holdings Corporation,Technology
+RPC,Ridgepost Capital, Inc,Stock
+RPD,Rapid7, Inc.,Stock
+RPM,RPM International Inc.,Basic Materials
+RPRX,Royalty Pharma plc,Healthcare
+RPT,Rithm Property Trust Inc.,Real Estate
+RR.L,Rolls-Royce Holdings plc,Industrials
+RR,Richtech Robotics Inc.,Industrials
+RRBI,Red River Bancshares, Inc.,Stock
+RRC,Range Resources Corporation,Energy
+RRL.AX,Regis Resources Limited,Basic Materials
+RRR,Red Rock Resorts, Inc.,Stock
+RRX,Regal Rexnord Corporation,Industrials
+RS,Reliance, Inc.,Stock
+RSG,Republic Services Inc.,Industrials
+RSI,Rush Street Interactive, Inc.,Stock
+RSVR,Reservoir Media, Inc.,Stock
+RTX,RTX Corporation,Industrials
+RUM,Rumble Inc.,Communication Services
+RUN,Sunrun Inc.,Technology
+RUS.TO,Russel Metals Inc.,Industrials
+RUSHA,Rush Enterprises, Inc.,Stock
+RUSHB,Rush Enterprises, Inc.,Stock
+RVLV,Revolve Group, Inc.,Stock
+RVMD,Revolution Medicines, Inc.,Stock
+RVSB,Riverview Bancorp, Inc.,Stock
+RVTY,Revvity, Inc.,Stock
+RWC.AX,Reliance Worldwide Corporation Limited,Industrials
+RWE.DE,RWE Aktiengesellschaft,Utilities
+RWT,Redwood Trust, Inc.,Stock
+RXO,RXO, Inc.,Stock
+RXRX,Recursion Pharmaceuticals, Inc.,Stock
+RXST,RxSight, Inc.,Stock
+RXT,Rackspace Technology, Inc.,Stock
+RY.TO,Royal Bank of Canada,Financial Services
+RYAM,Rayonier Advanced Materials Inc.,Basic Materials
+RYAN,Ryan Specialty Holdings, Inc.,Stock
+RYI,Ryerson Holding Corp,Industrials
+RYN,Rayonier Inc.,Real Estate
+RYTM,Rhythm Pharmaceuticals, Inc.,Stock
+RYZ,Ryerson Holding Corporation,Industrials
+RZLT,Rezolute, Inc.,Stock
+RZLV,Rezolve AI PLC,Technology
+S,SentinelOne, Inc.,Stock
+SABR,Sabre Corporation,Technology
+SAF.PA,Safran SA,Industrials
+SAFE,Safehold Inc.,Real Estate
+SAFT,Safety Insurance Group, Inc.,Stock
+SAFX,XCF Global, Inc.,Stock
+SAH,Sonic Automotive, Inc.,Stock
+SAIC,Science Applications International Corporation,Technology
+SAIL,SailPoint, Inc.,Stock
+SAM,The Boston Beer Company, Inc.,Stock
+SAMG,Silvercrest Asset Management Group Inc.,Financial Services
+SAN.PA,Sanofi,Healthcare
+SANA,Sana Biotechnology, Inc.,Stock
+SANM,Sanmina Corporation,Technology
+SAP.DE,SAP SE,Technology
+SAP.TO,Saputo Inc.,Consumer Defensive
+SARO,StandardAero, Inc.,Stock
+SATL,Satellogic Inc.,Industrials
+SATS,EchoStar Corporation,Communication Services
+SB,Safe Bulkers, Inc.,Stock
+SBAC,SBA Communications Corporation,Real Estate
+SBC,SBC Medical Group Holdings Incorporated,Industrials
+SBCF,Seacoast Banking Corporation of Florida,Financial Services
+SBFG,SB Financial Group, Inc.,Stock
+SBGI,Sinclair, Inc.,Stock
+SBH,Sally Beauty Holdings, Inc.,Stock
+SBM.AX,St Barbara Limited,Basic Materials
+SBRA,Sabra Health Care REIT, Inc.,Stock
+SBRY.L,J Sainsbury plc,Consumer Defensive
+SBSI,Southside Bancshares, Inc.,Stock
+SBUX,Starbucks Corporation,Consumer Cyclical
+SCCO,Southern Copper Corporation,Basic Materials
+SCG.AX,Scentre Group,Real Estate
+SCHL,Scholastic Corporation,Communication Services
+SCHW,The Charles Schwab Corporation,Financial Services
+SCI,Service Corporation International,Consumer Cyclical
+SCL,Stepan Company,Basic Materials
+SCOR,comScore, Inc.,Stock
+SCP.AX,Scalare Partners Holdings Limited,Industrials
+SCSC,ScanSource, Inc.,Stock
+SCVL,Shoe Carnival, Inc.,Stock
+SD,SandRidge Energy, Inc.,Stock
+SDF.AX,Steadfast Group Limited,Financial Services
+SDGR,Schrödinger, Inc.,Stock
+SDR.L,Schroders plc,Financial Services
+SDRL,Seadrill Limited,Energy
+SEAT,Vivid Seats Inc.,Communication Services
+SEB,Seaboard Corporation,Industrials
+SEDG,SolarEdge Technologies, Inc.,Stock
+SEE,Sealed Air Corporation,Consumer Cyclical
+SEG,Seaport Entertainment Group Inc.,Real Estate
+SEI,Solaris Energy Infrastructure, Inc.,Stock
+SEIC,SEI Investments Company,Financial Services
+SEK.AX,SEEK Limited,Communication Services
+SEM,Select Medical Holdings Corporation,Healthcare
+SEMR,Semrush Holdings, Inc.,Stock
+SENEA,Seneca Foods Corporation,Consumer Defensive
+SENS,Senseonics Holdings, Inc.,Stock
+SEPN,Septerna, Inc.,Stock
+SERV,Serve Robotics Inc.,Industrials
+SES.TO,SECURE Waste Infrastructure Corp.,Industrials
+SEVN,Seven Hills Realty Trust,Real Estate
+SEZL,Sezzle Inc.,Financial Services
+SFBC,Sound Financial Bancorp, Inc.,Stock
+SFBS,ServisFirst Bancshares, Inc.,Stock
+SFD,Smithfield Foods, Inc.,Stock
+SFIX,Stitch Fix, Inc.,Stock
+SFL,SFL Corporation Ltd.,Industrials
+SFM,Sprouts Farmers Market, Inc.,Stock
+SFNC,Simmons First National Corporation,Financial Services
+SFR.AX,Sandfire Resources Limited,Basic Materials
+SFST,Southern First Bancshares, Inc.,Stock
+SG,Sweetgreen, Inc.,Stock
+SGC,Superior Group of Companies, Inc.,Stock
+SGE.L,The Sage Group plc,Technology
+SGH.AX,SGH Limited,Stock
+SGHC,Super Group (SGHC) Limited,Consumer Cyclical
+SGHT,Sight Sciences, Inc.,Stock
+SGI,Somnigroup International Inc.,Consumer Cyclical
+SGM.AX,Sims Limited,Basic Materials
+SGO.PA,Compagnie de Saint-Gobain S.A.,Industrials
+SGP.AX,Stockland,Real Estate
+SGR.AX,The Star Entertainment Group Limited,Consumer Cyclical
+SGRY,Surgery Partners, Inc.,Stock
+SGY.TO,Surge Energy Inc.,Energy
+SHAK,Shake Shack Inc.,Consumer Cyclical
+SHBI,Shore Bancshares, Inc.,Stock
+SHC,Sotera Health Company,Healthcare
+SHEL.L,Shell plc,Energy
+SHEN,Shenandoah Telecommunications Company,Communication Services
+SHL.AX,Sonic Healthcare Limited,Healthcare
+SHL.DE,Siemens Healthineers AG,Healthcare
+SHLS,Shoals Technologies Group, Inc.,Stock
+SHO,Sunstone Hotel Investors, Inc.,Stock
+SHOO,Steven Madden, Ltd.,Stock
+SHOP.TO,Shopify Inc.,Technology
+SHOP,Shopify Inc.,Technology
+SHW,The Sherwin-Williams Company,Materials
+SI,Shoulder Innovations, Inc.,Stock
+SIBN,SI-BONE, Inc.,Stock
+SIE.DE,Siemens Aktiengesellschaft,Industrials
+SIEB,Siebert Financial Corp.,Financial Services
+SIG.AX,Sigma Healthcare Limited,Healthcare
+SIG,Signet Jewelers Limited,Consumer Cyclical
+SIGA,SIGA Technologies, Inc.,Stock
+SIGI,Selective Insurance Group, Inc.,Stock
+SILA,Sila Realty Trust, Inc.,Stock
+SION,Sionna Therapeutics, Inc.,Stock
+SIRI,Sirius XM Holdings Inc.,Communication Services
+SITC,SITE Centers Corp.,Real Estate
+SITE,SiteOne Landscape Supply, Inc.,Stock
+SITM,SiTime Corporation,Technology
+SJ.TO,Stella-Jones Inc.,Basic Materials
+SJM,The J. M. Smucker Company,Consumer Defensive
+SKG.L,Smurfit Westrock Plc,Stock
+SKIL,Skillsoft Corp.,Consumer Defensive
+SKIN,The Beauty Health Company,Consumer Defensive
+SKLZ,Skillz Inc.,Communication Services
+SKT,Tanger Inc.,Real Estate
+SKWD,Skyward Specialty Insurance Group, Inc.,Stock
+SKY,Champion Homes, Inc.,Stock
+SKYH,Sky Harbour Group Corporation,Real Estate
+SKYT,SkyWater Technology, Inc.,Stock
+SKYW,SkyWest, Inc.,Stock
+SKYX,SKYX Platforms Corp.,Industrials
+SLAB,Silicon Laboratories Inc.,Technology
+SLB,Schlumberger Limited,Energy
+SLDB,Solid Biosciences Inc.,Healthcare
+SLDE,Slide Insurance Holdings, Inc.,Stock
+SLDP,Solid Power, Inc.,Stock
+SLF.TO,Sun Life Financial Inc.,Financial Services
+SLG,SL Green Realty Corp.,Real Estate
+SLGN,Silgan Holdings Inc.,Consumer Cyclical
+SLM,SLM Corporation,Financial Services
+SLND,Southland Holdings, Inc.,Stock
+SLNO,Soleno Therapeutics, Inc.,Stock
+SLP,Simulations Plus, Inc.,Stock
+SLQT,SelectQuote, Inc.,Stock
+SLS,SELLAS Life Sciences Group, Inc.,Stock
+SLSN,Solesence, Inc.,Stock
+SLVM,Sylvamo Corporation,Basic Materials
+SM,SM Energy Company,Energy
+SMA,SmartStop Self Storage REIT, Inc.,Stock
+SMC,Summit Midstream Corporation,Energy
+SMCI,Super Micro Computer Inc.,Technology
+SMG,The Scotts Miracle-Gro Company,Basic Materials
+SMHI,SEACOR Marine Holdings Inc.,Industrials
+SMID,Smith-Midland Corporation,Basic Materials
+SMMT,Summit Therapeutics Inc.,Healthcare
+SMPL,The Simply Good Foods Company,Consumer Defensive
+SMR,NuScale Power Corporation,Industrials
+SMT.L,Scottish Mortgage Ord,Stock
+SMTC,Semtech Corporation,Technology
+SMTI,Sanara MedTech Inc.,Healthcare
+SN.L,Smith & Nephew plc,Healthcare
+SNA,Snap-on Incorporated,Industrials
+SNAP,Snap Inc.,Communication Services
+SNBR,Sleep Number Corporation,Consumer Cyclical
+SNDK,Sandisk Corporation,Technology
+SNEX,StoneX Group Inc.,Financial Services
+SNFCA,Security National Financial Corporation,Financial Services
+SNOW,Snowflake Inc.,Technology
+SNPS,Synopsys Inc.,Technology
+SNV,Synovus Financial Corp.,Financial Services
+SNX,TD SYNNEX Corporation,Technology
+SO,The Southern Company,Utilities
+SOC,Sable Offshore Corp.,Energy
+SOL.AX,WHSP Holdings Limited,Financial Services
+SOLS,Solstice Advanced Materials, Inc.,Stock
+SOLV,Solventum Corporation,Healthcare
+SPB.TO,Superior Plus Corp.,Utilities
+SPG,Simon Property Group Inc.,Real Estate
+SPGI,S&P Global Inc.,Financial Services
+SPHR,Sphere Entertainment Co.,Communication Services
+SPNT,SiriusPoint Ltd.,Financial Services
+SPOT,Spotify Technology S.A.,Communication Services
+SPWR,SunPower Inc.,Technology
+SPX.L,Spirax Group plc,Industrials
+SR,Spire Inc.,Utilities
+SRCE,1st Source Corporation,Financial Services
+SRE,Sempra,Utilities
+SRNE,Sorrento Therapeutics, Inc.,Stock
+SRRK,Scholar Rock Holding Corporation,Healthcare
+SRV.AX,Servcorp Limited,Real Estate
+SSB,SouthState Bank Corporation,Financial Services
+SSE.L,SSE plc,Utilities
+SSP,The E.W. Scripps Company,Communication Services
+SSRM.TO,SSR Mining Inc.,Basic Materials
+SSRM,SSR Mining Inc.,Basic Materials
+ST,Sensata Technologies Holding plc,Technology
+STAA,STAAR Surgical Company,Healthcare
+STAN.L,Standard Chartered PLC,Financial Services
+STC,Stewart Information Services Corporation,Financial Services
+STE,STERIS plc,Healthcare
+STEP,StepStone Group Inc.,Financial Services
+STGW,Stagwell Inc.,Communication Services
+STKL,SunOpta Inc.,Consumer Defensive
+STLD,Steel Dynamics Inc.,Materials
+STMPA.PA,STMicroelectronics N.V.,Technology
+STN.TO,Stantec Inc.,Industrials
+STNE,StoneCo Ltd.,Technology
+STNG,Scorpio Tankers Inc.,Energy
+STO.AX,Santos Limited,Energy
+STRS,Stratus Properties Inc.,Real Estate
+STRT,Strattec Security Corporation,Consumer Cyclical
+STRZ,Starz Entertainment Corp.,Communication Services
+STT,State Street Corporation,Financial Services
+STX,Seagate Technology Holdings plc,Technology
+STZ,Constellation Brands Inc.,Consumer Defensive
+SU.PA,Schneider Electric S.E.,Industrials
+SU.TO,Suncor Energy Inc.,Energy
+SUL.AX,Super Retail Group Limited,Consumer Cyclical
+SUN.AX,Suncorp Group Limited,Financial Services
+SVC,Service Properties Trust,Real Estate
+SVRA,Savara Inc.,Healthcare
+SVT.L,Severn Trent PLC,Utilities
+SW,Smurfit Westrock Plc,Consumer Cyclical
+SWK,Stanley Black & Decker Inc.,Industrials
+SWKH,SWK Holdings Corporation,Financial Services
+SWKS,Skyworks Solutions Inc.,Technology
+SXI,Standex International Corporation,Industrials
+SXT,Sensient Technologies Corporation,Basic Materials
+SYF,Synchrony Financial,Financial Services
+SYK,Stryker Corporation,Healthcare
+SYNA,Synaptics Incorporated,Technology
+SYY,Sysco Corporation,Consumer Defensive
+T.TO,TELUS Corporation,Communication Services
+T,AT&T Inc.,Communication Services
+TAH.AX,Tabcorp Holdings Limited,Consumer Cyclical
+TALO,Talos Energy Inc.,Energy
+TAP,Molson Coors Beverage Company,Consumer Defensive
+TBCH,Turtle Beach Corporation,Technology
+TCBK,TriCo Bancshares,Financial Services
+TCL.AX,Transurban Group,Industrials
+TCX,Tucows Inc.,Technology
+TD.TO,The Toronto-Dominion Bank,Financial Services
+TDAY,USA TODAY Co., Inc.,Stock
+TDC,Teradata Corporation,Technology
+TDG,TransDigm Group Incorporated,Industrials
+TDUP,ThredUp Inc.,Consumer Cyclical
+TDW,Tidewater Inc.,Energy
+TDY,Teledyne Technologies Incorporated,Technology
+TE,T1 Energy Inc.,Industrials
+TEAD,Teads Holding Co.,Communication Services
+TEAM,Atlassian Corporation,Technology
+TECH,Bio-Techne Corporation,Healthcare
+TEL,TE Connectivity Ltd.,Technology
+TEP.PA,Teleperformance SE,Industrials
+TER,Teradyne Inc.,Technology
+TEX,Terex Corporation,Industrials
+TFC,Truist Financial Corporation,Financial Services
+TFII.TO,TFI International Inc.,Industrials
+TFSL,TFS Financial Corporation,Financial Services
+TFX,Teleflex Incorporated,Healthcare
+TG,Tredegar Corporation,Industrials
+TGLS,Tecnoglass Inc.,Basic Materials
+TGNA,TEGNA Inc.,Communication Services
+TGT,Target Corporation,Consumer Cyclical
+TH,Target Hospitality Corp.,Industrials
+THC,Tenet Healthcare Corporation,Healthcare
+THFF,First Financial Corporation,Financial Services
+THRM,Gentherm Incorporated,Consumer Cyclical
+THS,Treehouse Foods Inc,Consumer Defensive
+TIGO,Millicom International Cellular S.A.,Communication Services
+TIH.TO,Toromont Industries Ltd.,Industrials
+TIPT,Tiptree Inc.,Financial Services
+TITN,Titan Machinery Inc.,Industrials
+TJX,The TJX Companies Inc.,Consumer Cyclical
+TK,Teekay Corporation Ltd.,Energy
+TKR,The Timken Company,Industrials
+TLC.AX,The Lottery Corporation Limited,Consumer Cyclical
+TLG.TO,Troilus Mining Corp.,Basic Materials
+TLN,Talen Energy Corporation,Utilities
+TLS.AX,Telstra Group Limited,Communication Services
+TLS,Telos Corporation,Technology
+TLX.AX,Telix Pharmaceuticals Limited,Healthcare
+TMHC,Taylor Morrison Home Corporation,Consumer Cyclical
+TMO,Thermo Fisher Scientific Inc.,Healthcare
+TMP,Tompkins Financial Corporation,Financial Services
+TMUS,T-Mobile US Inc.,Communication Services
+TNC,Tennant Company,Industrials
+TNE.AX,Technology One Limited,Technology
+TNK,Teekay Tankers Ltd.,Energy
+TNL,Travel + Leisure Co.,Consumer Cyclical
+TNXP,Tonix Pharmaceuticals Holding Corp.,Healthcare
+TOL,Toll Brothers Inc.,Consumer Cyclical
+TOU.TO,Tourmaline Oil Corp.,Energy
+TOWN,TowneBank,Financial Services
+TPC,Tutor Perini Corporation,Industrials
+TPG.AX,TPG Telecom Limited,Communication Services
+TPG,TPG Inc.,Financial Services
+TPL,Texas Pacific Land Corporation,Energy
+TRC,Tejon Ranch Co.,Industrials
+TRGP,Targa Resources Corp.,Energy
+TRI.TO,Thomson Reuters Corporation,Industrials
+TRI,Thomson Reuters Corporation,Industrials
+TRMB,Trimble Inc.,Technology
+TRMK,Trustmark Corporation,Financial Services
+TRNO,Terreno Realty Corporation,Real Estate
+TROX,Tronox Holdings plc,Basic Materials
+TRP.TO,TC Energy Corporation,Energy
+TRS,TriMas Corporation,Consumer Cyclical
+TRST,TrustCo Bank Corp NY,Financial Services
+TRU,TransUnion,Financial Services
+TRV,The Travelers Companies Inc.,Financial Services
+TSCO.L,Tesco PLC,Consumer Defensive
+TSCO,Tractor Supply Company,Consumer Cyclical
+TSE,Trinseo PLC,Basic Materials
+TSEOF,Trinseo PLC,Basic Materials
+TSLA,Tesla Inc.,Automotive
+TSN,Tyson Foods Inc.,Consumer Defensive
+TT,Trane Technologies plc,Industrials
+TTAM,Titan America SA,Basic Materials
+TTC,The Toro Company,Industrials
+TTE.PA,TotalEnergies SE,Energy
+TTWO,Take-Two Interactive Software Inc.,Communication Services
+TVE.TO,Tamarack Valley Energy Ltd.,Energy
+TVGN,Tevogen Bio Holdings Inc.,Healthcare
+TVK.TO,TerraVest Industries Inc.,Energy
+TW.L,Taylor Wimpey plc,Consumer Cyclical
+TW,Tradeweb Markets Inc.,Financial Services
+TWE.AX,Treasury Wine Estates Limited,Consumer Defensive
+TWLO,Twilio Inc.,Technology
+TWO,Two Harbors Investment Corp.,Real Estate
+TWST,Twist Bioscience Corporation,Healthcare
+TXN,Texas Instruments Incorporated,Technology
+TXT,Textron Inc.,Industrials
+TYR.AX,Tyro Payments Limited,Technology
+TZOO,Travelzoo,Communication Services
+U,Unity Software Inc.,Technology
+UAL,United Airlines Holdings Inc.,Industrials
+UAMY,United States Antimony Corporation,Basic Materials
+UBCP,United Bancorp, Inc.,Stock
+UBER,Uber Technologies Inc.,Technology
+UBFO,United Security Bancshares,Financial Services
+UBOH,United Bancshares, Inc.,Stock
+UDR,UDR,Real Estate
+UE,Urban Edge Properties,Real Estate
+UEC,Uranium Energy Corp.,Energy
+UGI,UGI Corporation,Utilities
+UHS,Universal Health Services Inc.,Healthcare
+UHT,Universal Health Realty Income Trust,Real Estate
+UI,Ubiquiti Inc.,Technology
+UIS,Unisys Corporation,Technology
+ULS,UL Solutions Inc.,Industrials
+ULTA,Ulta Beauty Inc.,Consumer Cyclical
+UMBF,UMB Financial Corporation,Financial Services
+UNF,UniFirst Corporation,Industrials
+UNH,UnitedHealth Group Inc.,Healthcare
+UNIT,Uniti Group Inc.,Real Estate
+UNM,Unum Group,Financial Services
+UNP,Union Pacific Corporation,Industrials
+UPS,United Parcel Service Inc.,Industrials
+UPWK,Upwork Inc.,Communication Services
+URGN,UroGen Pharma Ltd.,Healthcare
+URI,United Rentals Inc.,Industrials
+URW.PA,Unibail-Rodamco-Westfield SE,Real Estate
+USAR,USA Rare Earth, Inc.,Stock
+USAU,U.S. Gold Corp.,Basic Materials
+USB,U.S. Bancorp,Financial Services
+USD,ProShares Ultra Semiconductors,Stock
+USFD,US Foods Holding Corp.,Consumer Defensive
+UTHR,United Therapeutics Corporation,Healthcare
+UTL,Unitil Corporation,Utilities
+UU.L,United Utilities Group PLC,Utilities
+UUUU,Energy Fuels Inc.,Energy
+UVSP,Univest Financial Corporation,Financial Services
+UVV,Universal Corporation,Consumer Defensive
+UWMC,UWM Holdings Corporation,Financial Services
+V,Visa Inc.,Financial Services
+VABK,Virginia National Bankshares Corporation,Financial Services
+VAC,Marriott Vacations Worldwide Corporation,Consumer Cyclical
+VAL,Valaris Limited,Energy
+VAS.AX,Vanguard Australian Shares Index ETF,Stock
+VC,Visteon Corporation,Consumer Cyclical
+VCEL,Vericel Corporation,Healthcare
+VCX.AX,Vicinity Centres,Real Estate
+VEA.AX,Viva Energy Group Limited,Energy
+VECO,Veeco Instruments Inc.,Technology
+VEDL.NS,Vedanta Limited,Basic Materials
+VEEV,Veeva Systems Inc.,Healthcare
+VET.TO,Vermilion Energy Inc.,Energy
+VFC,V.F. Corporation,Consumer Cyclical
+VIA,Via Transportation, Inc.,Stock
+VIAV,Viavi Solutions Inc.,Technology
+VICI,VICI Properties Inc.,Real Estate
+VICR,Vicor Corporation,Technology
+VIE.PA,Veolia Environnement SA,Industrials
+VIK,Viking Holdings Ltd,Consumer Cyclical
+VIRC,Virco Mfg. Corporation,Consumer Cyclical
+VISN,Vistance Networks, Inc.,Stock
+VIV.PA,Vivendi SE,Communication Services
+VLO,Valero Energy Corporation,Energy
+VLTO,Veralto Corporation,Industrials
+VLY,Valley National Bancorp,Financial Services
+VMC,Vulcan Materials Company,Materials
+VNA.DE,Vonovia SE,Real Estate
+VNDA,Vanda Pharmaceuticals Inc.,Healthcare
+VNO,Vornado Realty Trust,Real Estate
+VNT,Vontier Corporation,Technology
+VOD.L,Vodafone Group Public Limited Company,Communication Services
+VOXR,Vox Royalty Corp.,Basic Materials
+VREX,Varex Imaging Corporation,Healthcare
+VRNT,Verint Systems Inc.,Technology
+VRRM,Verra Mobility Corporation,Technology
+VRTX,Vertex Pharmaceuticals Inc.,Healthcare
+VSCO,Victoria's Secret & Co.,Consumer Cyclical
+VSEC,VSE Corporation,Industrials
+VSNT,Versant Media Group, Inc.,Stock
+VST,Vistra Corp.,Utilities
+VSTS,Vestis Corporation,Industrials
+VTEX,VTEX,Technology
+VTOL,Bristow Group Inc.,Energy
+VTR,Ventas Inc.,Real Estate
+VTRS,Viatris Inc.,Healthcare
+VUZI,Vuzix Corporation,Technology
+VVV,Valvoline Inc.,Consumer Cyclical
+VXRT,Vaxart, Inc.,Stock
+VYX,NCR Voyix Corporation,Technology
+VZ,Verizon Communications Inc.,Communication Services
+W,Wayfair Inc.,Consumer Cyclical
+WAB,Westinghouse Air Brake Technologies Corporation,Industrials
+WABC,Westamerica Bancorporation,Financial Services
+WAF.AX,West African Resources Limited,Basic Materials
+WAL,Western Alliance Bancorporation,Financial Services
+WALD,Waldencast plc,Consumer Defensive
+WAT,Waters Corporation,Healthcare
+WAY,Waystar Holding Corp.,Healthcare
+WBC.AX,Westpac Banking Corporation,Financial Services
+WBD,Warner Bros. Discovery Inc.,Communication Services
+WBS,Webster Financial Corporation,Financial Services
+WBTN,WEBTOON Entertainment Inc.,Communication Services
+WCN.TO,Waste Connections, Inc.,Stock
+WCP.TO,Whitecap Resources Inc.,Energy
+WDAY,Workday Inc.,Technology
+WDC,Western Digital Corporation,Technology
+WDFC,WD-40 Company,Basic Materials
+WDS.AX,Woodside Energy Group Ltd,Energy
+WEB.AX,Web Travel Group Limited,Consumer Cyclical
+WEC,WEC Energy Group Inc.,Utilities
+WEF.TO,Western Forest Products Inc.,Basic Materials
+WELL,Welltower Inc.,Real Estate
+WEN,The Wendy's Company,Consumer Cyclical
+WES.AX,Wesfarmers Limited,Consumer Cyclical
+WEST,Westrock Coffee Company,Consumer Defensive
+WEX,WEX Inc.,Technology
+WFC,Wells Fargo & Company,Financial Services
+WFG.TO,West Fraser Timber Co. Ltd.,Basic Materials
+WFRD,Weatherford International plc,Energy
+WGS,GeneDx Holdings Corp.,Healthcare
+WHC.AX,Whitehaven Coal Limited,Energy
+WHR,Whirlpool Corporation,Consumer Cyclical
+WINA,Winmark Corporation,Consumer Cyclical
+WING,Wingstop Inc.,Consumer Cyclical
+WK,Workiva Inc.,Technology
+WKC,World Kinect Corporation,Energy
+WLFC,Willis Lease Finance Corporation,Industrials
+WLK,Westlake Corporation,Basic Materials
+WLN.PA,Worldline SA,Technology
+WM,Waste Management Inc.,Industrials
+WMB,The Williams Companies Inc.,Energy
+WMG,Warner Music Group Corp.,Communication Services
+WMT,Walmart Inc.,Consumer Defensive
+WN.TO,George Weston Limited,Consumer Defensive
+WNC,Wabash National Corporation,Industrials
+WOR.AX,Worley Limited,Energy
+WOW.AX,Woolworths Group Limited,Consumer Defensive
+WPC,W. P. Carey Inc.,Real Estate
+WPK.TO,Winpak Ltd.,Consumer Cyclical
+WPM.TO,Wheaton Precious Metals Corp.,Basic Materials
+WPR.AX,Waypoint REIT,Real Estate
+WRB,W. R. Berkley Corporation,Financial Services
+WRBY,Warby Parker Inc.,Healthcare
+WRLD,World Acceptance Corporation,Financial Services
+WSC,WillScot Holdings Corporation,Industrials
+WSFS,WSFS Financial Corporation,Financial Services
+WSR,Whitestone REIT,Real Estate
+WST,West Pharmaceutical Services Inc.,Healthcare
+WTB.L,Whitbread plc,Consumer Cyclical
+WTC.AX,WiseTech Global Limited,Technology
+WTE.TO,Westshore Terminals Investment Corporation,Industrials
+WTFC,Wintrust Financial Corporation,Financial Services
+WTW,Willis Towers Watson Public Limited Company,Financial Services
+WU,The Western Union Company,Financial Services
+WULF,TeraWulf Inc.,Financial Services
+WVE,Wave Life Sciences Ltd.,Healthcare
+WY,Weyerhaeuser Company,Real Estate
+WYFI,WhiteFiber, Inc.,Stock
+WYNN,Wynn Resorts Limited,Consumer Cyclical
+X.TO,TMX Group Limited,Financial Services
+XEL,Xcel Energy Inc.,Utilities
+XENE,Xenon Pharmaceuticals Inc.,Healthcare
+XOM,Exxon Mobil Corporation,Energy
+XOMA,XOMA Royalty Corporation,Healthcare
+XP,XP Inc.,Financial Services
+XPER,Xperi Inc.,Technology
+XPRO,Expro Group Holdings N.V.,Energy
+XRAY,DENTSPLY SIRONA Inc.,Healthcare
+XRN,Chiron Real Estate Inc.,Real Estate
+XRO.AX,Xero Limited,Technology
+XRX,Xerox Holdings Corporation,Industrials
+XYL,Xylem Inc.,Industrials
+XYZ.AX,Block, Inc.,Stock
+YAL.AX,Yancoal Australia Ltd,Energy
+YELP,Yelp Inc.,Communication Services
+YORW,The York Water Company,Utilities
+YUM,Yum! Brands Inc.,Consumer Cyclical
+Z,Zillow Group, Inc.,Stock
+ZAL.DE,Zalando SE,Consumer Cyclical
+ZBRA,Zebra Technologies Corporation,Technology
+ZETA,Zeta Global Holdings Corp.,Technology
+ZEUS,Olympic Steel Inc,Basic Materials
+ZG,Zillow Group, Inc.,Stock
+ZGN,Ermenegildo Zegna N.V.,Consumer Cyclical
+ZIP.AX,Zip Co Limited,Financial Services
+ZTS,Zoetis Inc.,Healthcare
+ZUMZ,Zumiez Inc.,Consumer Cyclical
+ZVIA,Zevia PBC,Consumer Defensive
+ZWS,Zurn Elkay Water Solutions Corporation,Industrials
+ZYME,Zymeworks Inc.,Healthcare
