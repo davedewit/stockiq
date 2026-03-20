@@ -322,5 +322,36 @@ else
     date +%s > "$LAMBDA_SYNC_MARKER"
 fi
 
+# Auto-commit and push to GitHub (once per day)
+GIT_PUSH_MARKER="$WEBSITE_DIR/.last_git_push"
+GIT_PUSH_NEEDED=true
+if [ -f "$GIT_PUSH_MARKER" ]; then
+    LAST_PUSH=$(cat "$GIT_PUSH_MARKER")
+    CURRENT_TIME=$(date +%s)
+    if [ $((CURRENT_TIME - LAST_PUSH)) -lt 82800 ]; then
+        GIT_PUSH_NEEDED=false
+        echo "⏭️  Skipping git push (less than 23 hours ago)"
+    fi
+fi
+
+if [ "$GIT_PUSH_NEEDED" = true ]; then
+    echo "📤 Pushing changes to GitHub..."
+    cd /Users/ddewit/VSCODE/stockiq
+    if git diff --quiet && git diff --cached --quiet; then
+        echo "  ℹ️  No changes to commit"
+    else
+        git add -A >/dev/null 2>&1
+        TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+        git commit -m "Auto-update: $TIMESTAMP" >/dev/null 2>&1
+        if git push >/dev/null 2>&1; then
+            echo "  ✅ Pushed to GitHub"
+            date +%s > "$GIT_PUSH_MARKER"
+        else
+            echo "  ⚠️  Git push failed (will retry next deploy)"
+        fi
+    fi
+    cd "$WEBSITE_DIR"
+fi
+
 echo ""
 echo "✅ All done!"
