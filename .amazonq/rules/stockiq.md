@@ -104,13 +104,33 @@ aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R --paths "/*" 
 ### IAM
 - **Lambda Role:** `arn:aws:iam::114366766218:role/acp-lambda-role`
 
-## Lambda Deployment
+## Lambda Backup & Deployment
+
+### Local Backups
+- **Location:** `/Users/ddewit/VSCODE/stockiq/lambda-sync/`
+- **Auto-sync:** Runs during `deploy-to-s3.sh` (1-hour cooldown)
+- **Manual sync:** `/Users/ddewit/VSCODE/stockiq/sync-all-lambdas.sh`
+
+### Deploy Lambda
 ```bash
+# 1. Check AWS version first (compare timestamps)
+aws lambda get-function --function-name <function-name> --profile default --query 'Configuration.LastModified' --output text
+ls -lh /Users/ddewit/VSCODE/stockiq/lambda-sync/<function-name>/
+
+# 2. If AWS is newer, download it first
+aws lambda get-function --function-name <function-name> --profile default --query 'Code.Location' --output text | xargs curl -s -o /tmp/check.zip && unzip -p /tmp/check.zip *.py | head -20
+
+# 3. Deploy your changes
 cd /Users/ddewit/VSCODE/stockiq/lambda-sync/<function-name>
-zip lambda_function.zip lambda_function.py
+zip lambda_function.zip *.py
 aws lambda update-function-code --function-name <function-name> --zip-file fileb://lambda_function.zip --profile default
 rm lambda_function.zip
 ```
+
+### Notes
+- Check AWS version before first edit (steps 1-2) to avoid overwriting newer code
+- Skip check if you just deployed - local is already newest
+- All functions use `$LATEST` version (no aliases)
 
 ## User Authentication
 

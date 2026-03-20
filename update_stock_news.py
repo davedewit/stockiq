@@ -311,7 +311,7 @@ def fetch_stock_news(symbol):
         cutoff_date = datetime.now() - timedelta(days=2)
         
         news = []
-        for item in items[:10]:  # Check first 10 articles
+        for item in items[:30]:  # Check first 30 articles
             title = item.find('title').text if item.find('title') else ''
             link = item.find('link').text if item.find('link') else ''
             pub_date = item.find('pubDate').text if item.find('pubDate') else ''
@@ -646,7 +646,11 @@ def update_news_js(items):
             
             item_id = re.sub(r'[^a-z0-9]+', '-', item['title'].lower())[:50].strip('-')
             title = item['title'].replace("\\", "\\\\").replace("'", "\\'")
+            # Escape newlines for JavaScript
+            title = title.replace("\n", "\\n")
             preview = item['preview'].replace("\\", "\\\\").replace("'", "\\'")
+            # Escape newlines for JavaScript
+            preview = preview.replace("\n", "\\n")
             
             new_items_js.append(f"""    {{
         id: '{item_id}',

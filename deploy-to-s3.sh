@@ -40,12 +40,45 @@ BUCKET="stockiq-final-websitebucket-vqekic7enf9h"
 DISTRIBUTION_ID="EHXV50CPHY07R"
 AWS="/opt/homebrew/bin/aws"
 
+# Function to check internet connection
+check_internet() {
+    if ! ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1; then
+        echo "❌ No internet connection. Aborting deployment."
+        exit 1
+    fi
+}
+
+# Function to retry AWS commands
+retry_aws() {
+    local max_attempts=3
+    local attempt=1
+    while [ $attempt -le $max_attempts ]; do
+        if "$@"; then
+            return 0
+        fi
+        if [ $attempt -lt $max_attempts ]; then
+            echo "⚠️  Command failed. Retrying ($attempt/$max_attempts)..."
+            sleep 5
+        fi
+        attempt=$((attempt + 1))
+    done
+    echo "❌ Command failed after $max_attempts attempts. Aborting."
+    exit 1
+}
+
 # Change to website root directory
 WEBSITE_DIR="/Users/ddewit/VSCODE/website"
 cd "$WEBSITE_DIR"
 BACKUP_DIR_BASE="/Users/ddewit/VSCODE/backup"
 mkdir -p "$BACKUP_DIR_BASE"
 BACKUP_MARKER="$BACKUP_DIR_BASE/.last_backup"
+
+# Check internet before starting news updates
+if [ "$UPDATE_STOCK_NEWS" = "true" ]; then
+    echo "🌐 Checking internet connection..."
+    check_internet
+    echo "✅ Internet connection OK"
+fi
 
 # Update news from Yahoo Finance (only if user opted in)
 if [ "$UPDATE_STOCK_NEWS" = "true" ]; then
@@ -142,6 +175,11 @@ echo "📅 Updating news article dates..."
 TODAY=$(date -u +"%Y-%m-%dT00:00:00Z")
 sed -i '' "s/<meta property=\"article:modified_time\" content=\"[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}T[0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}Z\">/<meta property=\"article:modified_time\" content=\"$TODAY\">/" "$WEBSITE_DIR/news.html"
 
+# Check internet before S3 sync
+echo "🌐 Checking internet connection before S3 sync..."
+check_internet
+echo "✅ Internet connection OK"
+
 echo "🚀 Deploying to S3..."
 echo "📦 Bucket: $BUCKET"
 echo "📊 CloudFront: $DISTRIBUTION_ID"
@@ -152,7 +190,7 @@ echo "📁 Syncing files to S3 (only changed files)..."
 # Sync stocks/ folder - HTML files with 24 hour cache (exclude testing)
 if [ -d "$WEBSITE_DIR/stocks" ]; then
   echo "  📊 Syncing stock pages..."
-  $AWS s3 sync "$WEBSITE_DIR/stocks/" s3://$BUCKET/stocks/ \
+  retry_aws $AWS s3 sync "$WEBSITE_DIR/stocks/" s3://$BUCKET/stocks/ \
     --delete \
     --size-only \
     --exclude "testing/*" \
@@ -163,7 +201,7 @@ fi
 # Sync js/ folder - 24 hour cache (exclude testing)
 if [ -d "$WEBSITE_DIR/js" ]; then
   echo "  📜 Syncing JavaScript files..."
-  $AWS s3 sync "$WEBSITE_DIR/js/" s3://$BUCKET/js/ \
+  retry_aws $AWS s3 sync "$WEBSITE_DIR/js/" s3://$BUCKET/js/ \
     --delete \
     --exclude "testing/*" \
     --cache-control "public, max-age=86400"
@@ -196,7 +234,7 @@ done
 
 # Sync images - 7 day cache
 echo "  🖼️  Syncing images..."
-$AWS s3 sync "$WEBSITE_DIR" s3://$BUCKET/ \
+retry_aws $AWS s3 sync "$WEBSITE_DIR" s3://$BUCKET/ \
   --exclude "backups/*" \
   --exclude "build-dev/*" \
   --exclude "lambda-sync/*" \
@@ -219,7 +257,7 @@ $AWS s3 sync "$WEBSITE_DIR" s3://$BUCKET/ \
 
 # Sync special files
 echo "  📋 Syncing special files..."
-$AWS s3 sync "$WEBSITE_DIR" s3://$BUCKET/ \
+retry_aws $AWS s3 sync "$WEBSITE_DIR" s3://$BUCKET/ \
   --exclude "*" \
   --include "stocks.txt" \
   --include "robots.txt" \
@@ -230,7 +268,7 @@ $AWS s3 sync "$WEBSITE_DIR" s3://$BUCKET/ \
 echo "✅ Sync complete! Only changed files were uploaded."
 
 echo "🔄 Invalidating CloudFront cache..."
-INVALIDATION_ID=$($AWS cloudfront create-invalidation \
+INVALIDATION_ID=$(retry_aws $AWS cloudfront create-invalidation \
   --distribution-id $DISTRIBUTION_ID \
   --paths "/*" \
   --query 'Invalidation.Id' \
@@ -239,7 +277,7 @@ INVALIDATION_ID=$($AWS cloudfront create-invalidation \
 echo "✓ Invalidation created: $INVALIDATION_ID"
 echo "⏳ Waiting for invalidation to complete..."
 
-$AWS cloudfront wait invalidation-completed \
+retry_aws $AWS cloudfront wait invalidation-completed \
   --distribution-id $DISTRIBUTION_ID \
   --id $INVALIDATION_ID
 

@@ -745,8 +745,12 @@ const newsItems = [
         item_id = item['id']  
         emoji = item['emoji']
         title = item['title'].replace("\\", "\\\\").replace("'", "\\'")
+        # Escape newlines for JavaScript
+        title = title.replace("\n", "\\n")
         date = item['date']
         preview = item['preview'].replace("\\", "\\\\").replace("'", "\\'")
+        # Escape newlines for JavaScript
+        preview = preview.replace("\n", "\\n")
         stock_symbol = item.get('stock_symbol', '') or ''
         link = item.get('link', '') or ''
         
