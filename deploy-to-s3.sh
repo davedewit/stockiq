@@ -42,10 +42,21 @@ AWS="/opt/homebrew/bin/aws"
 
 # Function to check internet connection
 check_internet() {
-    if ! ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1; then
-        echo "❌ No internet connection. Aborting deployment."
-        exit 1
-    fi
+    local attempts=3
+    local delay=2
+    
+    for i in $(seq 1 $attempts); do
+        if ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1; then
+            return 0
+        fi
+        if [ $i -lt $attempts ]; then
+            echo "⚠️  Internet check failed (attempt $i/$attempts), retrying in ${delay}s..."
+            sleep $delay
+        fi
+    done
+    
+    echo "❌ No internet connection after $attempts attempts. Aborting deployment."
+    exit 1
 }
 
 # Function to retry AWS commands

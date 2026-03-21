@@ -19,6 +19,15 @@ echo "  pkill -9 -f \"aws s3 sync\"" >> ~/stockiq-daily.log
 echo "  pkill -9 -f \"deploy-to-s3.sh\"" >> ~/stockiq-daily.log
 echo "  pkill -9 -f \"update_stock_news.py\"" >> ~/stockiq-daily.log
 echo "" >> ~/stockiq-daily.log
+echo "To pause scheduled task:" >> ~/stockiq-daily.log
+echo "  launchctl bootout gui/\$(id -u) ~/Library/LaunchAgents/com.stockiq.reminder.plist" >> ~/stockiq-daily.log
+echo "To resume scheduled task:" >> ~/stockiq-daily.log
+echo "  launchctl bootstrap gui/\$(id -u) ~/Library/LaunchAgents/com.stockiq.reminder.plist" >> ~/stockiq-daily.log
+echo "To delete scheduled task permanently:" >> ~/stockiq-daily.log
+echo "  launchctl bootout gui/\$(id -u) ~/Library/LaunchAgents/com.stockiq.reminder.plist" >> ~/stockiq-daily.log
+echo "  rm ~/Library/LaunchAgents/com.stockiq.reminder.plist" >> ~/stockiq-daily.log
+echo "  rm ~/stockiq-reminder.scpt" >> ~/stockiq-daily.log
+echo "" >> ~/stockiq-daily.log
 echo "To manually run this task:" >> ~/stockiq-daily.log
 echo "  cd /Users/ddewit/VSCODE/stockiq && yes | ./deploy.sh >> ~/stockiq-daily.log 2>&1 &" >> ~/stockiq-daily.log
 echo "" >> ~/stockiq-daily.log

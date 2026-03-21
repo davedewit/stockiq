@@ -25,6 +25,29 @@ Detailed docs live in separate files — check these first:
 - **`/Users/ddewit/VSCODE/stockiq/update_stock_news.py`** — Contains NUMERIC_COMPANY_NAMES (144 non-US stocks)
 - **`/Users/ddewit/VSCODE/stockiq/lambda-sync/`** — Lambda function backups
 
+## Scheduled Task (Automated Daily Deploy)
+
+### Files
+- **AppleScript:** `/Users/ddewit/stockiq-reminder.scpt` (logic: Mon-Sat, 11am-4pm, once/day)
+- **Launchd plist:** `~/Library/LaunchAgents/com.stockiq.reminder.plist` (schedule: hourly or specific time)
+- **Lock file:** `/tmp/stockiq-deploy-YYYYMMDD.lock` (prevents duplicate runs)
+- **Log:** `~/stockiq-daily.log`
+
+### Change Schedule
+Edit plist: `StartInterval` (seconds) for periodic, or `StartCalendarInterval` for specific time. Then reload:
+```bash
+launchctl unload ~/Library/LaunchAgents/com.stockiq.reminder.plist
+launchctl load ~/Library/LaunchAgents/com.stockiq.reminder.plist
+```
+
+### Quick Commands
+```bash
+osascript ~/stockiq-reminder.scpt              # Test now
+tail -50 ~/stockiq-daily.log                   # View log
+ls -la /tmp/stockiq-deploy-*.lock              # Check if ran today
+rm /tmp/stockiq-deploy-$(date +%Y%m%d).lock   # Force retry today
+```
+
 ## Quick Reference Commands
 
 ```bash

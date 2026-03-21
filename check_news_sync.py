@@ -138,10 +138,11 @@ for page in stock_pages:
         news_section = re.search(r'<!-- NEWS_SECTION_START -->(.*?)<!-- NEWS_SECTION_END -->', content, re.DOTALL)
         if news_section:
             section_content = news_section.group(1)
-            # Count main article (always 1)
+            # Count articles: main article + collapsed articles
+            # Main article is always present if news section exists
             article_count = 1
-            # Count collapsed articles
-            collapsed_count = section_content.count('id="older-news-')
+            # Count collapsed articles within the news section only
+            collapsed_count = section_content.count('<div id="older-news-')
             article_count += collapsed_count
             total_articles_in_stock_pages += article_count
             
@@ -153,7 +154,7 @@ for page in stock_pages:
                 stocks_with_2_articles += 1
                 if not example_2_articles:
                     example_2_articles = page.stem
-            elif article_count == 3:
+            elif article_count >= 3:
                 stocks_with_3_articles += 1
                 if not example_3_articles:
                     example_3_articles = page.stem

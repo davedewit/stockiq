@@ -9,8 +9,8 @@ mkdir -p "$OUTPUT_DIR"
 echo "📦 Syncing unique StockIQ Lambda functions to $OUTPUT_DIR"
 echo ""
 
-# Get all Lambda functions with 'stockiq' in the name
-FUNCTIONS=$($AWS lambda list-functions --query 'Functions[?contains(FunctionName, `stockiq`)].FunctionName' --output text)
+# Get all Lambda functions
+FUNCTIONS=$($AWS lambda list-functions --query 'Functions[].FunctionName' --output text)
 
 TOTAL=$(echo "$FUNCTIONS" | wc -w)
 CURRENT=0
