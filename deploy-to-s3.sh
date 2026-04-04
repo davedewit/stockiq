@@ -302,7 +302,7 @@ echo ""
 
 # Notify search engines about sitemap update
 echo "🔔 Notifying search engines..."
-python3 "/Users/ddewit/VSCODE/stockiq/notify_search_engines.py"
+python3 "/Users/ddewit/VSCODE/website/notify_search_engines.py"
 
 # Show content statistics
 echo ""
