@@ -42,20 +42,20 @@ if [ -t 0 ]; then
     python3 "$SCRIPTS_DIR/check_news_sync.py"
     echo
     
-    read -p "Continue with deployment? (y/n): " -n 1 -r
+    read -p "Continue with deployment? [Y/n]: " -n 1 -r
     echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    if [[ $REPLY =~ ^[Nn]$ ]]; then
         echo "❌ Deployment cancelled"
         exit 0
     fi
     echo
     
-    read -p "Update stock market news? (y/n): " -n 1 -r
+    read -p "Update stock market news? [Y/n]: " -n 1 -r
     echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        export UPDATE_STOCK_NEWS=true
-    else
+    if [[ $REPLY =~ ^[Nn]$ ]]; then
         export UPDATE_STOCK_NEWS=false
+    else
+        export UPDATE_STOCK_NEWS=true
     fi
     
     "$SCRIPTS_DIR/deploy-to-s3.sh" 2>&1 | tee -a ~/stockiq-daily.log
