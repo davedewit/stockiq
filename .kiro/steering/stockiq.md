@@ -9,6 +9,9 @@
 - **Email:** AWS Cognito default sender (no-reply@verificationemail.com) - plain text only
 
 ## Rules Reference
+Start with **`site-overview.md`**: how the whole site works, what is generated vs hand-edited,
+current SEO setup, pitfalls and open ideas (reviewed 25 Sep 2026).
+
 Detailed docs live in separate files — check these first:
 - **`script-reference.md`** — All Python scripts, what they do, how to run them, workflow
 - **`stocks-txt-csv-format.md`** — CSV format rules, parsing, sector distribution, workflow
@@ -18,9 +21,10 @@ Detailed docs live in separate files — check these first:
 - **`future-work.md`** — People Also Watch fixes, crypto news integration
 
 ## Key Files
-- **`/Users/ddewit/VSCODE/website/stocks.txt`** — Source of truth (3,469 stocks: SYMBOL, Company Name, Sector)
-- **`/Users/ddewit/VSCODE/website/stocks/*.html`** — Generated stock pages (3,469 files)
-- **`/Users/ddewit/VSCODE/website/news.html`** — News archive (all stock + general articles)
+- **`/Users/ddewit/VSCODE/website/stocks.txt`** — Source of truth (3,467 stocks: SYMBOL, Company Name, Sector)
+- **`/Users/ddewit/VSCODE/website/stocks/*.html`** — Generated stock pages (3,467 files; ~962 large caps indexed, rest noindex)
+- **`/Users/ddewit/VSCODE/website/news.html`** — Recent news (newest 240 stock + 60 general articles, noindex; trimmed by finalize_news_html.py)
+- **`/Users/ddewit/VSCODE/stockiq/indexable_stocks.txt`** — Stock pages that are indexed and in the sitemap (written daily by update_stock_analysis.py)
 - **`/Users/ddewit/VSCODE/website/news.js`** — Sidebar (100-item pool, displays 5)
 - **`/Users/ddewit/VSCODE/stockiq/update_stock_news.py`** — Contains NUMERIC_COMPANY_NAMES (144 non-US stocks)
 - **`/Users/ddewit/VSCODE/stockiq/lambda-sync/`** — Lambda function backups
@@ -28,8 +32,8 @@ Detailed docs live in separate files — check these first:
 ## Scheduled Task (Automated Daily Deploy)
 
 ### Files
-- **AppleScript:** `/Users/ddewit/stockiq-reminder.scpt` (logic: Mon-Sat, 11am-4pm, once/day)
-- **Launchd plist:** `~/Library/LaunchAgents/com.stockiq.reminder.plist` (schedule: hourly or specific time)
+- **AppleScript:** `/Users/ddewit/stockiq-reminder.scpt` (logic: Mon-Sat, 11am-3pm, once/day)
+- **Launchd plist:** `~/Library/LaunchAgents/com.stockiq.reminder.plist` (StartInterval 600 = checks every 10 min)
 - **Lock file:** `/tmp/stockiq-deploy-YYYYMMDD.lock` (prevents duplicate runs)
 - **Log:** `~/stockiq-daily.log`
 
@@ -53,6 +57,9 @@ rm /tmp/stockiq-deploy-$(date +%Y%m%d).lock   # Force retry today
 ```bash
 # Daily deploy (news update + S3 sync)
 cd /Users/ddewit/VSCODE/stockiq && ./deploy.sh
+
+# Preview what a deploy would upload/push (no S3 or GitHub changes)
+DRY_RUN=true ./deploy-to-s3.sh
 
 # Deploy website only (no news update)
 ./deploy-to-s3.sh
@@ -205,7 +212,7 @@ aws s3 rm s3://stockiq-option-1-1-custom-analysis/charts/email@example.com/ --re
 - **Lambda not updating:** Check directory, function name, zip created, profile is `default`
 - **Password not clearing after activation:** login.html clears on `?pwd=clear` (50/100/200ms delays)
 - **"Already activated" error:** signup.html detects "already confirmed" → shows message → redirects to login
-- **News out of sync:** `python3 Sync_stock_to_news.py`
+- **News out of sync:** `python3 Sync_stock_to_news.py` (re-adds old articles to news.html; the next deploy trims them again)
 - **Sidebar shows no news:** `node -c /Users/ddewit/VSCODE/website/news.js`
 
 ## AI Chat System

@@ -21,7 +21,8 @@
 
 ## Monitoring
 - Check Google Search Console weekly for indexing progress
-- Current: 603/3,469 pages indexed (17.4%)
+- Mar 2026: 603/3,469 pages indexed (17.4%)
+- Sep 25 2026: sitemap cut to 979 URLs (962 large-cap stock pages + site pages); small caps set to noindex. Track indexing of those 962 from here (see site-overview.md)
 - Expected with backlinks: 100+ pages indexed within 2-4 weeks
 
 ## Key Rules
