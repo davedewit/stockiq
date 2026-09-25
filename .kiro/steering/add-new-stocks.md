@@ -34,15 +34,20 @@ python3 /Users/ddewit/VSCODE/stockiq/fetch_stock_data.py
 python3 /Users/ddewit/VSCODE/stockiq/generate-stock-pages.py
 ```
 - Creates HTML files for all stocks in stocks.txt
-- Preserves existing news sections
+- Preserves existing news, related and analysis sections
+- New pages start as "noindex, follow" with an empty data snapshot
 
-### 5. Add missing pages to sitemap
+### 5. Add data snapshot and decide indexing
 ```bash
-python3 /Users/ddewit/VSCODE/stockiq/generate_sitemap.py
+python3 /Users/ddewit/VSCODE/stockiq/update_stock_analysis.py TSLA
 ```
-- Finds HTML files not in sitemap
-- Adds only missing URLs
-- Dates will be updated by deploy script
+- Adds the data snapshot and sets "index, follow" if market cap >= $10B (USD)
+- Adds the stock to indexable_stocks.txt; smaller stocks stay noindex
+- Optional: the daily run does this automatically for every stock
+
+### 5b. Sitemap
+- Nothing to do: update_sitemap.py (run by the deploy) adds indexable stocks and
+  removes the rest. generate_sitemap.py also only adds stocks in indexable_stocks.txt.
 
 ### 6. Verify files created
 ```bash
@@ -73,7 +78,7 @@ cd /Users/ddewit/VSCODE/stockiq && ./deploy-to-s3.sh
 | test_stock_rss.py | Check if stock has RSS news available |
 | fetch_stock_data.py | Fetch company names/sectors from Yahoo Finance |
 | generate-stock-pages.py | Create HTML pages for all stocks |
-| generate_sitemap.py | Add missing stock URLs to sitemap |
+| generate_sitemap.py | Add missing indexable stock URLs to sitemap |
 | update_sitemap.py | Update lastmod dates (called by deploy) |
 | deploy-to-s3.sh | Deploy to S3 + CloudFront + search engines |
 
@@ -119,5 +124,5 @@ ls -lh /Users/ddewit/VSCODE/website/stocks/{TSLA,NVDA}.html
 |-------|----------|
 | Stock has no news | Don't add it (wastes crawl budget) |
 | HTML file not created | Check stocks.txt format and run generate-stock-pages.py again |
-| Stock not in sitemap | Run generate_sitemap.py |
+| Stock not in sitemap | Only large caps (>= $10B, in indexable_stocks.txt) belong there; run update_stock_analysis.py SYMBOL |
 | Sitemap dates not updated | Deploy script calls update_sitemap.py automatically |
