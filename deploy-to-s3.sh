@@ -438,7 +438,7 @@ if [ "$GIT_PUSH_NEEDED" = true ]; then
         fi
     done
     cd "$WEBSITE_DIR"
-    if [ "$ALL_PUSHED" = true ]; then
+    if [ "$ALL_PUSHED" = true ] && [ "$DRY_RUN" != "true" ]; then
         date +%s > "$GIT_PUSH_MARKER"
     fi
 fi
