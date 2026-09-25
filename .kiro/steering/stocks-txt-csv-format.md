@@ -44,7 +44,7 @@ grep -h "Sector:" /Users/ddewit/VSCODE/website/stocks/*.html | sed 's/.*Sector: 
 ```
 These two should match. If they don't, regenerate HTML pages (see Workflow below).
 
-## Expected Sector Distribution
+## Expected Sector Distribution (Sep 2026)
 ```
  567 Financial Services
  506 Healthcare
@@ -54,10 +54,10 @@ These two should match. If they don't, regenerate HTML pages (see Workflow below
  247 Real Estate
  210 Basic Materials
  181 Energy
- 175 Consumer Defensive
+ 176 Consumer Defensive
  150 Communication Services
   94 Utilities
-  35 General
+  34 Stock        (placeholder sector; shown as "General" on pages)
   25 Materials
    3 Automotive
 ```

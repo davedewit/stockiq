@@ -1,6 +1,10 @@
 # Script Reference Guide
 
 All key scripts have detailed docstrings. Read them first for complete info.
+For the big picture (pipeline, GitHub sync, SEO rules) see `site-overview.md`.
+Only the scripts in the daily pipeline and the add-stocks workflow matter day to day; the
+others in `stockiq/` are one-off or old tools (e.g. `run-tests.sh` points to test files
+that no longer exist).
 
 ## Quick Navigation
 
@@ -38,7 +42,7 @@ python3 /Users/ddewit/VSCODE/stockiq/fetch_stock_data.py
 ---
 
 ### generate-stock-pages.py
-**What it does:** Generates 3,466 HTML stock pages with SEO metadata
+**What it does:** Generates 3,467 HTML stock pages with SEO metadata
 
 **Read docstring:**
 ```bash
@@ -269,10 +273,11 @@ cd /Users/ddewit/VSCODE/stockiq && ./deploy-to-s3.sh
 **Use when:** You've already generated/edited HTML files and just need to push them live.
 Examples: regenerated stock pages, fixed a template, edited index.html.
 
-Does:
-- Syncs website to S3
-- Invalidates CloudFront cache
-- Notifies search engines
+Does (without news/data updates):
+- Local steps: backups, "People also watch" for pages missing it, sitemap sync, news cleanup
+  and trim
+- Uploads changed files to S3, invalidates CloudFront, notifies search engines
+- Syncs Lambda copies (hourly cooldown) and commits + pushes both git repos (23h cooldown)
 
 Preview without uploading: `DRY_RUN=true ./deploy-to-s3.sh`
 
@@ -306,7 +311,7 @@ python3 update_stock_news.py    # Repopulate with fresh news
 
 ## Key Files
 
-- **stocks.txt** - Source of truth (3,466 stocks with names/sectors)
+- **stocks.txt** - Source of truth (3,467 stocks with names/sectors)
   - Format: CSV with 3 columns: `SYMBOL,Company Name,Sector`
   - Company names with commas are quoted: `"Ajinomoto Co., Inc."`
   - Read with Python's csv.reader (not awk/cut/sed)
@@ -315,13 +320,13 @@ python3 update_stock_news.py    # Repopulate with fresh news
   - Hardcoded fallback for numeric symbols (0700.HK, 7203.T, etc.)
   - Auto-synced by fetch_stock_data.py
   
-- **website/stocks/*.html** - Generated stock pages (3,466 files)
-  - Each page has: stock info, sector, news section, SEO metadata
-  - News preserved between regenerations (<!-- NEWS_SECTION_START/END -->)
+- **website/stocks/*.html** - Generated stock pages (3,467 files; not in git)
+  - Sections: ANALYSIS (large caps only), NEWS, RELATED, each owned by one script
+  - All sections preserved between regenerations
   
-- **website/news.html** - News archive (all articles)
+- **website/news.html** - Recent news (240 stock + 60 general articles, noindex)
   
-- **website/news.js** - Sidebar (top 5 most recent articles)
+- **website/news.js** - Sidebar (100-item pool, shows 5)
 
 ---
 

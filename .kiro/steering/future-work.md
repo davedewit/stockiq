@@ -6,7 +6,7 @@
 
 ### Current State
 - 5 sector peers shown per stock page (between `<!-- RELATED_SECTION_START -->` and `<!-- RELATED_SECTION_END -->`)
-- Price shows `--` (hardcoded in HTML, never updates)
+- Prices load live via `stock-prices.js` (static HTML shows `--` until then)
 - Selection is **hybrid: 3 from PRIORITY_STOCKS dict + 2 random** from same sector
 
 ### Fix 1: Well-Known Stocks (Do First)
@@ -39,7 +39,7 @@ if len(result) < count:
 **Trim PRIORITY_STOCKS to 8-10 per sector:**
 - Technology: AAPL, MSFT, NVDA, GOOGL, META, AVGO, ORCL, AMD
 - Healthcare: JNJ, UNH, PFE, ABBV, MRK, TMO, ABT, LLY
-- Financial Services: JPM, BAC, WFC, GS, MS, BRK.B, V, MA
+- Financial Services: JPM, BAC, WFC, GS, MS, V, MA, AXP  (BRK.B has no page; it is not in stocks.txt)
 - Consumer Cyclical: AMZN, TSLA, HD, MCD, NKE, SBUX, TGT, LOW
 - Consumer Defensive: WMT, PG, KO, PEP, COST, CL, GIS, K
 - Energy: XOM, CVX, COP, SLB, EOG, PXD, MPC, VLO
@@ -58,52 +58,10 @@ python3 people_also_watch_stocks.py --all
 
 **SEO benefit:** Every page in a sector funnels internal link equity to the same 5-8 flagship pages → those pages rank higher.
 
-### Fix 2: Live Prices (Do Second, after Fix 1)
-Prices are `--` because they're hardcoded static HTML. Add JS to the shared file loaded on stock pages.
-
-**Step 1: Find shared JS file**
-```bash
-grep -n '<script' /Users/ddewit/VSCODE/website/stocks/AAPL.html
-```
-
-**Step 2: Add to that shared file**
-```javascript
-(function() {
-    const cards = document.querySelectorAll('#related-section a[href]');
-    if (!cards.length) return;
-
-    cards.forEach(card => {
-        const symbol = card.href.split('/').pop().replace('.html', '');
-        const priceDiv = card.querySelector('div:last-child');
-        if (!priceDiv) return;
-
-        const cached = sessionStorage.getItem('price_' + symbol);
-        if (cached) { updatePriceDiv(priceDiv, JSON.parse(cached)); return; }
-
-        fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`)
-            .then(r => r.json())
-            .then(data => {
-                const meta = data.chart.result[0].meta;
-                const price = meta.regularMarketPrice;
-                const prev = meta.chartPreviousClose;
-                const pct = ((price - prev) / prev * 100).toFixed(2);
-                const info = { price, pct };
-                sessionStorage.setItem('price_' + symbol, JSON.stringify(info));
-                updatePriceDiv(priceDiv, info);
-            })
-            .catch(() => {});
-    });
-
-    function updatePriceDiv(div, info) {
-        const color = info.pct >= 0 ? '#00c853' : '#ff1744';
-        const sign = info.pct >= 0 ? '+' : '';
-        div.style.color = color;
-        div.textContent = `$${info.price.toFixed(2)} ${sign}${info.pct}%`;
-    }
-})();
-```
-
-Target display: `$182.45 +1.2%` (green) or `$182.45 -0.8%` (red)
+### Live prices (done)
+Prices in the cards are filled in live by `website/stock-prices.js` (Lambda price proxy,
+refreshes every 5 s). The HTML shows `--` until it loads, and always when a page is opened
+from a local file.
 
 ---
 
@@ -136,6 +94,7 @@ else:
 **Step 4:** Create crypto HTML pages in `/website/crypto/` (same template as stock pages).
 
 ### When to Implement
-- Stock pages reach 50%+ indexing (currently ~17%)
-- Traffic grows to 100+ visitors/month
-- Don't implement while stock pages are still under 30% indexed
+- Only once the indexed stock pages (962 large caps since Sep 2026) are getting search traffic
+  (check Search Console), and traffic reaches 100+ visitors/month
+- New crypto pages should follow the same rule as stocks: real data on the page, and noindex
+  unless there is enough substance

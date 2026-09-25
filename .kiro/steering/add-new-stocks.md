@@ -19,6 +19,8 @@ echo -e "2\nTSLA\n" | python3 /Users/ddewit/VSCODE/stockiq/test_stock_rss.py
 ```bash
 echo "TSLA" >> /Users/ddewit/VSCODE/website/stocks.txt
 ```
+- Only stocks with market cap >= $10B get indexed by Google (see step 5); smaller ones
+  still get a page, but it is noindex
 - Just add the symbol (no company name or sector yet)
 
 ### 3. Fetch company data and update stocks.txt
@@ -69,7 +71,8 @@ cd /Users/ddewit/VSCODE/stockiq && ./deploy-to-s3.sh
 
 - `/Users/ddewit/VSCODE/website/stocks.txt` - Source of truth (SYMBOL, Company Name, Sector)
 - `/Users/ddewit/VSCODE/website/stocks/` - Generated HTML pages (3,467+ files)
-- `/Users/ddewit/VSCODE/website/sitemap.xml` - All URLs for search engines
+- `/Users/ddewit/VSCODE/website/sitemap.xml` - Indexable URLs only (large-cap stocks + site pages)
+- `/Users/ddewit/VSCODE/stockiq/indexable_stocks.txt` - Which stock pages are indexed
 
 ## Scripts
 
@@ -79,7 +82,8 @@ cd /Users/ddewit/VSCODE/stockiq && ./deploy-to-s3.sh
 | fetch_stock_data.py | Fetch company names/sectors from Yahoo Finance |
 | generate-stock-pages.py | Create HTML pages for all stocks |
 | generate_sitemap.py | Add missing indexable stock URLs to sitemap |
-| update_sitemap.py | Update lastmod dates (called by deploy) |
+| update_stock_analysis.py | Data snapshot + index/noindex decision (daily, or pass symbols) |
+| update_sitemap.py | Sync stock URLs to indexable list + lastmod dates (called by deploy) |
 | deploy-to-s3.sh | Deploy to S3 + CloudFront + search engines |
 
 ## Important Rules
@@ -99,8 +103,8 @@ echo -e "2\nNVDA\n" | python3 test_stock_rss.py
 echo -e "2\nAAPL\n" | python3 test_stock_rss.py
 
 # 2. Add to stocks.txt (only ones with news)
-echo "TSLA" >> stocks.txt
-echo "NVDA" >> stocks.txt
+echo "TSLA" >> /Users/ddewit/VSCODE/website/stocks.txt
+echo "NVDA" >> /Users/ddewit/VSCODE/website/stocks.txt
 
 # 3. Fetch company data
 python3 fetch_stock_data.py
@@ -108,13 +112,14 @@ python3 fetch_stock_data.py
 # 4. Regenerate pages
 python3 generate-stock-pages.py
 
-# 5. Add to sitemap
-python3 generate_sitemap.py
+# 5. Data snapshot + index decision (sitemap follows automatically on deploy)
+python3 update_stock_analysis.py TSLA NVDA
 
 # 6. Verify
 ls -lh /Users/ddewit/VSCODE/website/stocks/{TSLA,NVDA}.html
 
-# 7. Deploy
+# 7. Preview, then deploy (ask the owner before a real deploy)
+DRY_RUN=true ./deploy-to-s3.sh
 ./deploy-to-s3.sh
 ```
 

@@ -2,6 +2,16 @@
 
 **Current Score: 8.7/10** (Updated March 8, 2026)
 
+> **Status note (25 Sep 2026):** most of this plan dates from March 2026. Changes since then:
+> - Fake testimonials and the "2,400+ traders" claim were removed; FAQ accuracy claims removed;
+>   About page added. The "Social proof" item below no longer applies.
+> - SEO strategy changed: only ~962 large-cap stock pages (>= $10B) are indexed and in the
+>   sitemap, each with a daily data snapshot; the rest are noindex (see site-overview.md).
+>   The "index all 3,470 pages" goals below are superseded.
+> - Schema markup done (WebPage + Corporation on stock pages). FAQ page exists.
+> - Real prices: Starter $4.99 / Pro $14.99 / Elite $49.99; trial 15 analyses over 3 days.
+> - Price Alerts (item 1) has not been built. Backlinks progress since March is unrecorded.
+
 ## What's Already Great
 - ✅ Serverless infrastructure (Lambda, S3, CloudFront, DynamoDB)
 - ✅ 3,470 stock pages with automated news updates (~700 with news, growing daily)
@@ -11,7 +21,7 @@
 - ✅ Mobile responsive design with dark mode
 - ✅ Automated deployment and content management
 - ✅ Trial system with usage tracking
-- ✅ Social proof on homepage
+- ~~Social proof on homepage~~ (fake testimonials removed Sep 2026)
 - ✅ SEO-optimized pages with company names for ranking
 - ✅ Email notifications with full article content
 - ✅ **AI Stock Chat** - GPT-4o-mini powered assistant (March 8, 2026)
@@ -201,7 +211,7 @@
 
 **Implementation:**
 - Extract ticker symbols from article title + summary
-- Match against stocks.txt (4,260 symbols)
+- Match against stocks.txt (3,467 symbols)
 - Fetch real-time prices from Yahoo Finance API
 - Display below article with clickable links + price changes
 - Example: `ADBE +0.67% | ORCL -1.18% | AZO -2.69%`

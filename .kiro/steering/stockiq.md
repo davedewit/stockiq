@@ -10,7 +10,8 @@
 
 ## Rules Reference
 Start with **`site-overview.md`**: how the whole site works, what is generated vs hand-edited,
-current SEO setup, pitfalls and open ideas (reviewed 25 Sep 2026).
+**how GitHub pushes work (daily and manual)**, current SEO setup, pitfalls and open ideas
+(reviewed 25 Sep 2026).
 
 Detailed docs live in separate files — check these first:
 - **`script-reference.md`** — All Python scripts, what they do, how to run them, workflow

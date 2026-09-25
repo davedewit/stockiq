@@ -94,6 +94,51 @@ Order inside `deploy-to-s3.sh`:
 Preview without uploading or pushing: `cd stockiq && DRY_RUN=true ./deploy-to-s3.sh`.
 It still runs the local steps (backups, sitemap, news trim), then prints `(dryrun)` lines.
 
+## 5b. GitHub: pushing, pulling and the daily sync
+
+**Two repos, both on `main`:**
+- `website/` → `davedewit/stockiq-website`: site files, news.html, news.js, sitemap.xml.
+  `stocks/*.html` is **not** in git (gitignored), so stock pages exist only locally, on S3 and in backups.
+- `stockiq/` → `davedewit/stockiq`: scripts, `indexable_stocks.txt`, Kiro steering.
+  `lambda-sync/` and `.analysis_cache/` are not in git.
+
+**Pushing to GitHub does not change the live site.** Only `deploy-to-s3.sh` (daily or by hand)
+uploads to S3. The daily deploy also pushes to GitHub, at most once every 23h.
+
+**Daily run (automatic):** the last step of `deploy-to-s3.sh`, for each repo in turn:
+1. If there are changes: `git add -A` + commit "Auto-update: <UTC time>"
+2. `git pull --rebase` (brings in commits made elsewhere, e.g. by cloud sessions)
+3. `git push`
+4. `website/.last_git_push` is updated only if both repos succeed; otherwise it retries next run.
+
+If a rebase conflicts, the log (`~/stockiq-daily.log`) says "could not rebase onto GitHub
+(conflict) - not pushed". That repo then needs a manual look; the other repo still pushes.
+
+**When the owner says "push" / "update GitHub" (manual):**
+```bash
+cd /Users/ddewit/VSCODE/stockiq  && git status -sb    # repeat for ../website
+git add -A && git commit -m "<what changed and why>"   # descriptive message, not "Auto-update"
+git pull --rebase && git push
+```
+- Do both repos if both changed. Show the owner what will be pushed first (`git log @{u}..HEAD`).
+- Pushing by hand does not reset the daily 23h timer. The next daily run simply finds nothing
+  new, or pushes its own "Auto-update" commit.
+- If the owner also wants the site updated: run `DRY_RUN=true ./deploy-to-s3.sh`, get approval,
+  then `./deploy-to-s3.sh`.
+
+**Changes made elsewhere (Claude cloud sessions, GitHub web edits):**
+- They arrive as a branch (e.g. `claude/new-session-…`) or as commits on `main`.
+- To bring a branch in: `git fetch`, check that the branch doesn't touch files with local
+  uncommitted edits, then `git merge --ff-only origin/<branch>` (stash local marker/generated
+  changes first if needed). Then deploy to make it live.
+- Generated files (news.html, news.js, sitemap.xml) change every day locally. If a remote
+  commit also changed them, keep the **local** version; they are regenerated anyway.
+- Cloud sessions cannot see `stocks/` or run the pipeline. Stock page changes must be made in
+  `generate-stock-pages.py` or a section script, then run locally.
+
+**Check sync state:** `git status -sb` in both repos (ahead/behind). Compare the live site
+with local via `DRY_RUN=true ./deploy-to-s3.sh`: an empty upload list means S3 matches.
+
 ## 6. SEO setup (as of 25 Sep 2026)
 
 - **Indexed stock pages:** market cap ≥ **$10B USD** and fresh price data → `index, follow` + data

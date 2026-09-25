@@ -3,8 +3,8 @@
 ## Overview
 The system matches news articles to stocks using two parallel mechanisms:
 
-1. **US Stocks (3,322)** - Dynamic, read from stocks.txt
-2. **Non-US Stocks (144)** - Hardcoded fallback for numeric symbols
+1. **Letter symbols (3,323)** - US stocks plus letter-based foreign symbols (SHEL.L, BHP.AX...), read dynamically from stocks.txt
+2. **Numeric symbols (144)** - Hong Kong / Tokyo (0700.HK, 7203.T), hardcoded fallback dictionary
 
 Both are kept in sync by `fetch_stock_data.py`.
 
@@ -12,7 +12,7 @@ Both are kept in sync by `fetch_stock_data.py`.
 
 ## How It Works
 
-### US Stocks (AAPL, TSLA, etc.)
+### Letter symbols (AAPL, TSLA, SHEL.L, etc.)
 **File:** `update_stock_news.py` - `load_company_names()` function
 
 ```python
@@ -34,7 +34,7 @@ def load_company_names():
 - Extracted: `{'AAPL': 'APPLE'}`
 - News: "Apple Reports Earnings" → Matches AAPL
 
-### Non-US Stocks (0700.HK, 7203.T, etc.)
+### Numeric symbols (0700.HK, 7203.T, etc.)
 **File:** `update_stock_news.py` - `NUMERIC_COMPANY_NAMES` dictionary
 
 ```python
@@ -73,10 +73,9 @@ def find_matching_stock(title):
     title_upper = title.upper()
     
     # First check company names (most specific)
-    for symbol, names in COMPANY_NAMES.items():
-        for name in names:
-            if name in title_upper:
-                return symbol
+    for symbol, name in COMPANY_NAMES.items():
+        if name and name in title_upper:
+            return symbol
     
     # Then check symbols (only 3+ characters to avoid false matches)
     for symbol in COMPANY_NAMES.keys():
@@ -119,25 +118,25 @@ python3 /Users/ddewit/VSCODE/stockiq/fetch_stock_data.py
 
 | Type | Count | Source | Updated |
 |------|-------|--------|---------|
-| US stocks | 3,322 | stocks.txt | Dynamic (load_company_names) |
-| Non-US stocks | 144 | stocks.txt | Auto-sync (fetch_stock_data.py) |
-| **Total** | **3,466** | - | - |
+| Letter symbols | 3,323 | stocks.txt | Dynamic (load_company_names) |
+| Numeric symbols | 144 | stocks.txt | Auto-sync (fetch_stock_data.py) |
+| **Total** | **3,467** | - | - |
+
+(Counts as of Sep 2026.)
 
 ---
 
 ## Testing
 
-To verify the system works:
+To check matching quality (samples 50 random stocks and checks whether their latest
+news is really about them):
 
 ```bash
-python3 /Users/ddewit/VSCODE/stockiq/test_us_and_nonUS.py
+python3 /Users/ddewit/VSCODE/stockiq/test_false_positives.py
 ```
 
-This tests:
-- US stock matching (NVDA)
-- Non-US stock matching (0005.HK, 0700.HK)
-- Company name extraction
-- NUMERIC_COMPANY_NAMES dictionary
+To check whether a symbol gets any RSS news before adding it: `test_stock_rss.py`
+(see add-new-stocks.md).
 
 ---
 

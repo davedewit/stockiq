@@ -1,4 +1,7 @@
-# Backlinks Progress (March 2026)
+# Backlinks Progress
+
+Status below was last recorded in March 2026; progress since then is unknown. Update this
+file when new backlinks are added. Check Search Console → Links for the real count.
 
 ## Completed (Week 1)
 - ✅ X/Twitter: Bio + post (1 backlink)
