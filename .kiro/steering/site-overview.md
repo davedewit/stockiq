@@ -31,8 +31,8 @@ Browser ──> Cognito (user pool us-east-1_P4lqPzrlY, tokens in localStorage),
 Lambdas ──> Yahoo Finance + Finnhub (data), OpenAI gpt-4o-mini (AI chat), DynamoDB, S3
 ```
 
-- S3 versioning is **Suspended**: an overwrite cannot be rolled back from S3. Back up first
-  (`aws s3 sync s3://<bucket> ~/Backups/s3_<timestamp>`).
+- S3 versioning is **Suspended**: an overwrite cannot be rolled back from S3. Rollback comes
+  from the deploy script's daily backups in `~/VSCODE/backup/` (see section 3).
 - `stockiq/lambda-sync/` is a local mirror of the deployed Lambda code, refreshed hourly by the
   deploy script. It is gitignored. Read it to see what production runs.
 
@@ -42,8 +42,14 @@ Lambdas ──> Yahoo Finance + Finnhub (data), OpenAI gpt-4o-mini (AI chat), Dy
 |---|---|---|
 | `/Users/ddewit/VSCODE/website/` | `davedewit/stockiq-website` | What is served. `stocks/` and `.last_*` markers are gitignored, so stock pages exist only locally and on S3 |
 | `/Users/ddewit/VSCODE/stockiq/` | `davedewit/stockiq` | Scripts, Kiro steering. `lambda-sync/`, `.analysis_cache/`, `*.json` are gitignored |
-| `~/VSCODE/backup/` | – | Daily rsync backups made by the deploy (30-day retention) |
-| `~/Backups/` | – | Manual zips + full S3 download taken before big changes |
+| `~/VSCODE/backup/` | – | Daily backups made by every deploy: `website_backup_<UTC time>` and `stockiq_backup_<UTC time>`, 30-day retention. **This is the backup**, including `stocks/`, which GitHub does not have |
+
+**Restoring:** folder names use UTC (`website_backup_20260925_034730` = 13:47 AEST on 25 Sep).
+- Hand-edited files and scripts: `git checkout <commit> -- <file>` (both repos are on GitHub).
+- Stock pages: copy back from a backup, e.g.
+  `rsync -a ~/VSCODE/backup/website_backup_<time>/stocks/ ~/VSCODE/website/stocks/`,
+  then deploy (dry run first).
+- The live site is simply whatever the last deploy uploaded; restore locally, then redeploy.
 
 ## 4. Generated vs hand-edited (most important rule)
 
@@ -221,6 +227,13 @@ git pull --rebase && git push
 - `index.html`: market overview widgets, guides, "How StockIQ Works", email capture, comparison.
 - Stock pages load `sidebar.js`, `stock-prices.js` (live ticker), `ai-chat.js`, `auth.js`, `theme.js`.
 - Theme: light/dark by time of day unless the user overrides (`localStorage.theme`).
+- Live prices on stock pages (main ticker + "People also watch" cards) come from
+  `stock-prices.js` → Lambda price proxy, refreshed every 5 s. Pages opened from local files
+  show `--` (the proxy only answers the live site), which is expected.
+- Utility pages with no footer, not in the sitemap: `clear-cache.html`,
+  `market-data-sidebar.html`, `market-data-widget.html`.
+- Lambda function URLs are hard-coded in the JS/HTML. `stockiq/lambda-url-mapping.json` maps
+  each URL to its function name (regenerate with `generate-lambda-url-mappings.sh`).
 
 ## 9. Pitfalls learned the hard way
 
@@ -238,14 +251,26 @@ git pull --rebase && git push
   `finalize_news_html.py` trims them. `check_news_sync.py` only compares within the time window
   news.html still covers, so do not "fix" its window logic back.
 - `.kiro/steering/*` are real files now (the `.amazonq` mirror was removed Sep 2026).
-- A stray `test-news-layout.html` was publicly live on S3. Check S3 for files with no local
+- `website/.s3-excludes` is **not used** by any script; the deploy has its own include and
+  exclude rules. Leftover local files that are never uploaded: `sitemap copy.xml`,
+  `sitemap.xml.backup`, `sitemap_stocks.xml`, `blog.html.backup`, `Table.csv`,
+  `company_names_dict.txt`, `robots-http.txt`, `*.py`.
+- Running `generate-stock-pages.py` rewrites all 3,467 pages, so the next deploy uploads all
+  of them (~110 MB). That's fine, just slower.
+- A stray `test-news-layout.html` was publicly live on S3 (deleted 25 Sep 2026). Check S3 for files with no local
   copy occasionally (`aws s3api list-objects-v2 --delimiter /`).
 
 ## 10. Working rules for AI assistants
 
+- The owner works in **Kiro** and hadn't touched the site for months before Sep 2026. Explain
+  in plain terms what a script does and what will change, and confirm facts against the code
+  and live site rather than assuming.
+
 - Ask the owner before any S3 upload or GitHub push. Show the `DRY_RUN=true` output as the
   approval list. Remember the daily job deploys anything changed in `website/` automatically.
-- Back up (zip both folders + S3 download to `~/Backups/`) before large changes.
+- No extra backups are needed before changes: the daily deploy backups in `~/VSCODE/backup/`
+  (30 days, both folders incl. `stocks/`) plus GitHub are enough. The owner does not want
+  additional backup copies made.
 - Change generators and templates, not generated pages (section 4).
 - Verify claims against code or data before putting them on public pages (accuracy, user
   counts and testimonials were removed in Sep 2026 for being unsupported).
@@ -280,3 +305,33 @@ DRY_RUN=true ./deploy-to-s3.sh                               # what would upload
 grep -l 'content="index, follow"' ../website/stocks/*.html | wc -l   # indexed stock pages
 curl -s https://stockiq.tech/sitemap.xml | grep -c '<ns0:url>'      # live sitemap size
 ```
+
+**Test a template change safely** (before running `generate-stock-pages.py` for real):
+```bash
+T=$(mktemp -d); cp -R ../website/stocks $T/stocks; cp -R $T/stocks $T/orig
+sed "s#/Users/ddewit/VSCODE/website/stocks\"#$T/stocks\"#" generate-stock-pages.py > $T/gen.py
+python3 $T/gen.py && diff -r $T/orig $T/stocks | head -100    # check only intended lines change
+```
+Also check that every page's NEWS and RELATED sections are byte-identical before and after.
+
+**Screenshot a page** (headless Chrome): copy the page next to `styles.css` etc., or use the
+live URL:
+```bash
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --window-size=1300,2200 \
+  --screenshot=/tmp/page.png https://stockiq.tech/stocks/AAPL.html
+```
+Narrow window sizes look cut off in headless mode even for unchanged pages; that's a headless
+quirk, not a layout bug.
+
+## 13. Change log
+
+- **25 Sep 2026** (Claude Code session, full review):
+  - Merged cloud branch `claude/new-session-cuwqcx`: `about.html`, homepage testimonials
+    replaced, About link in footers, FAQ accuracy claims removed.
+  - About page scoring section corrected; GA4 added to content pages and all stock pages.
+  - Stock pages: new template (WebPage schema, filler cards removed, footer fixed), daily data
+    snapshot on 962 large caps (`update_stock_analysis.py` + `stock_metrics.py`), others noindex.
+  - Sitemap 3,486 → 979 URLs; news.html trimmed and noindex (`finalize_news_html.py`).
+  - `deploy-to-s3.sh`: stock pages uploaded by size+time (1,051 were stale), root html/css/js by
+    MD5, root JS now uploaded, `DRY_RUN` mode, both repos pushed.
+  - `.amazonq` mirror removed (Kiro only); steering docs reviewed; `verification-summary.md` removed.
