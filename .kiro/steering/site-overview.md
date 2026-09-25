@@ -88,56 +88,91 @@ Order inside `deploy-to-s3.sh`:
    - images (7d), and `stocks.txt robots.txt sitemap.xml`
 9. CloudFront invalidation `/*` (waits for completion), `notify_search_engines.py` (IndexNow; "202" means accepted)
 10. `sync-all-lambdas.sh` (hourly cooldown)
-11. Git: once per 23h, for **both** repos: commit if changed → `pull --rebase` → push.
-    Marker `website/.last_git_push` is only updated when both succeed.
+11. Git: for **both** repos, commit if changed → `pull --rebase` → push, unless the last
+    push by this step was under 23h ago. Full rules and timing examples in section 5b.
 
 Preview without uploading or pushing: `cd stockiq && DRY_RUN=true ./deploy-to-s3.sh`.
 It still runs the local steps (backups, sitemap, news trim), then prints `(dryrun)` lines.
 
-## 5b. GitHub: pushing, pulling and the daily sync
+## 5b. GitHub: how and when changes get pushed
 
-**Two repos, both on `main`:**
+**Short answer: yes, changes go to GitHub automatically.** Every deploy, whether it's the daily
+launchd run or a manual `./deploy.sh` / `./deploy-to-s3.sh`, ends with the same git step.
+There is only one push mechanism.
+
+**Two repos, both on `main`, both handled by that step:**
 - `website/` → `davedewit/stockiq-website`: site files, news.html, news.js, sitemap.xml.
   `stocks/*.html` is **not** in git (gitignored), so stock pages exist only locally, on S3 and in backups.
 - `stockiq/` → `davedewit/stockiq`: scripts, `indexable_stocks.txt`, Kiro steering.
   `lambda-sync/` and `.analysis_cache/` are not in git.
+- Before 25 Sep 2026 the step only handled `stockiq/`, which is why the website repo fell
+  months behind. Both are handled now.
 
-**Pushing to GitHub does not change the live site.** Only `deploy-to-s3.sh` (daily or by hand)
-uploads to S3. The daily deploy also pushes to GitHub, at most once every 23h.
+### The git step (end of `deploy-to-s3.sh`)
 
-**Daily run (automatic):** the last step of `deploy-to-s3.sh`, for each repo in turn:
-1. If there are changes: `git add -A` + commit "Auto-update: <UTC time>"
-2. `git pull --rebase` (brings in commits made elsewhere, e.g. by cloud sessions)
-3. `git push`
-4. `website/.last_git_push` is updated only if both repos succeed; otherwise it retries next run.
+1. **Cooldown check:** reads `website/.last_git_push` (a Unix timestamp). If less than
+   **23 hours** (82,800 s) have passed, it prints "Skipping git push (less than 23 hours ago)"
+   and does **nothing**: no commit and no push. Local changes simply wait.
+2. Otherwise, for `stockiq/` then `website/`:
+   - If `git status --porcelain` shows changes: `git add -A` and commit
+     `"Auto-update: <UTC time>"` (this includes any uncommitted hand edits)
+   - `git pull --rebase` (brings in commits made elsewhere). On conflict: `git rebase --abort`
+     and log "could not rebase onto GitHub (conflict) - not pushed, needs a manual look";
+     that repo is skipped, the other still runs
+   - If nothing is ahead of GitHub: "already up to date on GitHub". Otherwise `git push`
+     ("pushed to GitHub", or "git push failed (will retry next deploy)")
+3. The marker is rewritten with the current time **only if both repos succeeded** (pushed or
+   already up to date) and it is not a dry run. After any failure it retries on the next deploy.
 
-If a rebase conflicts, the log (`~/stockiq-daily.log`) says "could not rebase onto GitHub
-(conflict) - not pushed". That repo then needs a manual look; the other repo still pushes.
+The git step runs last, after S3, CloudFront and the Lambda sync. If the deploy aborts earlier
+(no internet, or an S3 command failing 3 times), there is no push that day.
+`DRY_RUN=true` only prints what it would commit and push, and never touches the marker.
 
-**When the owner says "push" / "update GitHub" (manual):**
+### Timing in practice
+
+- The daily run happens once a day, **Mon–Sat, between 11am and 3pm** (whenever the 10-minute
+  launchd check first lands in that window). **There is no run on Sunday.**
+- On normal days the runs are ~24h apart, so each daily run clears the 23h cooldown and pushes.
+- **Whichever deploy first runs after the cooldown clears does the push.** Any other deploy
+  inside the 23h skips the git step and only does S3.
+- **A push from a deploy at an unusual time delays the next automatic push.** Example: a
+  manual deploy pushes on Friday at 6pm → Saturday's 11am run is only 17h later and skips →
+  there is no Sunday run → Monday's run pushes. Commits made in between wait until then.
+- A plain `git push` typed by hand does **not** touch the marker, so it doesn't delay anything.
+  Only the deploy script's git step (or someone writing the file) updates it.
+- Check the state:
+  ```bash
+  date -r $(cat /Users/ddewit/VSCODE/website/.last_git_push)    # last push by the deploy script
+  git -C /Users/ddewit/VSCODE/stockiq status -sb                 # "ahead N" = N commits not yet pushed
+  git -C /Users/ddewit/VSCODE/website status -sb
+  grep -E "Skipping git push|pushed to GitHub|up to date on GitHub|could not rebase|push failed" ~/stockiq-daily.log
+  ```
+  (`~/stockiq-daily.log` is cleared at the start of each run, so it only shows the latest run.)
+
+### When the owner asks to "push" or "update GitHub" now
+
+The deploy's git step won't push during the cooldown, so push directly:
 ```bash
-cd /Users/ddewit/VSCODE/stockiq  && git status -sb    # repeat for ../website
+cd /Users/ddewit/VSCODE/stockiq && git status -sb      # then the same in ../website
 git add -A && git commit -m "<what changed and why>"   # descriptive message, not "Auto-update"
+git log @{u}..HEAD --oneline                           # show the owner what will go up
 git pull --rebase && git push
 ```
-- Do both repos if both changed. Show the owner what will be pushed first (`git log @{u}..HEAD`).
-- Pushing by hand does not reset the daily 23h timer. The next daily run simply finds nothing
-  new, or pushes its own "Auto-update" commit.
-- If the owner also wants the site updated: run `DRY_RUN=true ./deploy-to-s3.sh`, get approval,
-  then `./deploy-to-s3.sh`.
+- Do both repos if both have changes. This does not change the marker (see above).
+- Pushing to GitHub **does not update the live site**. Only the deploy script uploads to S3.
+  To update the site too: `DRY_RUN=true ./deploy-to-s3.sh`, get approval, then `./deploy-to-s3.sh`.
 
-**Changes made elsewhere (Claude cloud sessions, GitHub web edits):**
-- They arrive as a branch (e.g. `claude/new-session-…`) or as commits on `main`.
-- To bring a branch in: `git fetch`, check that the branch doesn't touch files with local
-  uncommitted edits, then `git merge --ff-only origin/<branch>` (stash local marker/generated
-  changes first if needed). Then deploy to make it live.
+### Changes made elsewhere (Claude cloud sessions, GitHub web edits)
+
+- They arrive as a branch (e.g. `claude/new-session-…`) or as commits on `main`. Commits on
+  `main` are pulled in automatically by the next push (`pull --rebase`); branches are not.
+- To bring a branch in: `git fetch`, check that the branch doesn't touch files with uncommitted
+  local edits, then `git merge --ff-only origin/<branch>`. Then deploy to make it live.
 - Generated files (news.html, news.js, sitemap.xml) change every day locally. If a remote
-  commit also changed them, keep the **local** version; they are regenerated anyway.
+  commit also changed them, keep the **local** version; they are regenerated anyway. A remote
+  edit to them is the most likely cause of a "could not rebase" warning.
 - Cloud sessions cannot see `stocks/` or run the pipeline. Stock page changes must be made in
   `generate-stock-pages.py` or a section script, then run locally.
-
-**Check sync state:** `git status -sb` in both repos (ahead/behind). Compare the live site
-with local via `DRY_RUN=true ./deploy-to-s3.sh`: an empty upload list means S3 matches.
 
 ## 6. SEO setup (as of 25 Sep 2026)
 

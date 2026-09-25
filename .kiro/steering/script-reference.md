@@ -258,7 +258,7 @@ Steps:
    - Invalidate CloudFront - Clears CDN cache
    - `notify_search_engines.py` - Pings Google/Bing about sitemap
    - `sync-all-lambdas.sh` - Syncs Lambda functions (every 15 min)
-   - Git: commits and pushes both repos (stockiq and website) once a day
+   - Git: commits and pushes both repos (stockiq and website), 23h cooldown (see site-overview.md 5b)
 5. Post-deployment verification - Runs `check_news_sync.py` to verify sync status
 
 **Time:** ~15-20 minutes
@@ -277,7 +277,7 @@ Does (without news/data updates):
 - Local steps: backups, "People also watch" for pages missing it, sitemap sync, news cleanup
   and trim
 - Uploads changed files to S3, invalidates CloudFront, notifies search engines
-- Syncs Lambda copies (hourly cooldown) and commits + pushes both git repos (23h cooldown)
+- Syncs Lambda copies (hourly cooldown) and commits + pushes both git repos (23h cooldown, see site-overview.md 5b)
 
 Preview without uploading: `DRY_RUN=true ./deploy-to-s3.sh`
 

@@ -37,6 +37,9 @@ Detailed docs live in separate files — check these first:
 - **Launchd plist:** `~/Library/LaunchAgents/com.stockiq.reminder.plist` (StartInterval 600 = checks every 10 min)
 - **Lock file:** `/tmp/stockiq-deploy-YYYYMMDD.lock` (prevents duplicate runs)
 - **Log:** `~/stockiq-daily.log`
+- **GitHub:** each run ends by committing and pushing both repos (stockiq + website), unless
+  the deploy script already pushed within the last 23h. No run on Sunday. Details and timing
+  examples: `site-overview.md` section 5b
 
 ### Change Schedule
 Edit plist: `StartInterval` (seconds) for periodic, or `StartCalendarInterval` for specific time. Then reload:
