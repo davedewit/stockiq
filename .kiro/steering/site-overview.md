@@ -203,6 +203,23 @@ git pull --rebase && git push
 - Bot checks in `auth.js` / `js/analysis-core.js` only skip login redirects and auto-run for
   crawlers; they do not hide content.
 
+### Anonymous usage limits and bot protection
+
+- Anonymous visitors get **1 analysis per day**. The page (`auth.js` → `checkStockAnalysisAccess`)
+  asks Lambda `stockiq-daily-usage-tracker-anonymous` for usage and redirects to signup when
+  usage ≥ 1. The limit is enforced **in the page**; the analysis Lambdas themselves are open URLs.
+- 26 Sep 2026: a scraper ran ~145 analyses from ~130 different IPs (Alibaba Cloud 47.82.x,
+  Tencent Cloud 43.119.x), each IP once, in bursts at 3–4am Sydney, with a normal Chrome
+  user agent. Per-IP limits and user-agent checks could not catch it.
+- Fix in the anonymous tracker (Sep 2026): uses the real source IP from the request (not the
+  one the browser reports), blocks `BLOCKED_IP_PREFIXES`, limits each /24 network to
+  `SUBNET_DAILY_LIMIT` (5) anonymous analyses per day (DynamoDB keys `subnet_<net>@<date>`, "@" so the daily email ignores them),
+  and adds headless/automation words to the user-agent check. Blocked requests are answered
+  with usage = 1, so the page stops by itself.
+- Registration abuse is handled separately by `stockiq-ip-blocking-service` (5 attempts/hour,
+  one account per IP per 4 days).
+- Daily usage email: `stockiq-usage-report-emailed` (03:00 AEST).
+
 ## 7. Scoring (two different systems)
 
 | Where | Model | Code |
