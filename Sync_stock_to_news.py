@@ -16,8 +16,8 @@ import os
 import re
 from datetime import datetime
 
-STOCKS_DIR = '/Users/ddewit/VSCODE/website/stocks'
-NEWS_HTML_PATH = '/Users/ddewit/VSCODE/website/news.html'
+STOCKS_DIR = '/Users/dave/VSCODE/website/stocks'
+NEWS_HTML_PATH = '/Users/dave/VSCODE/website/news.html'
 
 # Read news.html
 with open(NEWS_HTML_PATH, 'r') as f:

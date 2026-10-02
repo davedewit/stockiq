@@ -16,7 +16,7 @@ Detailed references: `stockiq.md` (AWS resources, Cognito, Lambdas, AI chat),
 - 3-day free trial (5 analyses/day = 15 total), then Starter $4.99, Pro $14.99, Elite $49.99 per month (Stripe).
 - Traffic is very low (a few visits/day; 13 visitors/month in March 2026), revenue $0.
   The main goal is organic search traffic, then conversions.
-- Owner edits in **Kiro** (not VS Code). The top folder is still named `/Users/ddewit/VSCODE`.
+- Owner edits in **Kiro** (not VS Code). The top folder is still named `/Users/dave/VSCODE`.
 
 ## 2. Architecture
 
@@ -40,8 +40,8 @@ Lambdas ──> Yahoo Finance + Finnhub (data), OpenAI gpt-4o-mini (AI chat), Dy
 
 | Folder | GitHub repo | Notes |
 |---|---|---|
-| `/Users/ddewit/VSCODE/website/` | `davedewit/stockiq-website` | What is served. `stocks/` and `.last_*` markers are gitignored, so stock pages exist only locally and on S3 |
-| `/Users/ddewit/VSCODE/stockiq/` | `davedewit/stockiq` | Scripts, Kiro steering. `lambda-sync/`, `.analysis_cache/`, `*.json` are gitignored |
+| `/Users/dave/VSCODE/website/` | `davedewit/stockiq-website` | What is served. `stocks/` and `.last_*` markers are gitignored, so stock pages exist only locally and on S3 |
+| `/Users/dave/VSCODE/stockiq/` | `davedewit/stockiq` | Scripts, Kiro steering. `lambda-sync/`, `.analysis_cache/`, `*.json` are gitignored |
 | `~/VSCODE/backup/` | – | Daily backups made by every deploy: `website_backup_<UTC time>` and `stockiq_backup_<UTC time>`, 30-day retention. **This is the backup**, including `stocks/`, which GitHub does not have |
 
 **Restoring:** folder names use UTC (`website_backup_20260925_034730` = 13:47 AEST on 25 Sep).
@@ -148,9 +148,9 @@ The git step runs last, after S3, CloudFront and the Lambda sync. If the deploy 
   Only the deploy script's git step (or someone writing the file) updates it.
 - Check the state:
   ```bash
-  date -r $(cat /Users/ddewit/VSCODE/website/.last_git_push)    # last push by the deploy script
-  git -C /Users/ddewit/VSCODE/stockiq status -sb                 # "ahead N" = N commits not yet pushed
-  git -C /Users/ddewit/VSCODE/website status -sb
+  date -r $(cat /Users/dave/VSCODE/website/.last_git_push)    # last push by the deploy script
+  git -C /Users/dave/VSCODE/stockiq status -sb                 # "ahead N" = N commits not yet pushed
+  git -C /Users/dave/VSCODE/website status -sb
   grep -E "Skipping git push|pushed to GitHub|up to date on GitHub|could not rebase|push failed" ~/stockiq-daily.log
   ```
   (`~/stockiq-daily.log` is cleared at the start of each run, so it only shows the latest run.)
@@ -159,7 +159,7 @@ The git step runs last, after S3, CloudFront and the Lambda sync. If the deploy 
 
 The deploy's git step won't push during the cooldown, so push directly:
 ```bash
-cd /Users/ddewit/VSCODE/stockiq && git status -sb      # then the same in ../website
+cd /Users/dave/VSCODE/stockiq && git status -sb      # then the same in ../website
 git add -A && git commit -m "<what changed and why>"   # descriptive message, not "Auto-update"
 git log @{u}..HEAD --oneline                           # show the owner what will go up
 git pull --rebase && git push
@@ -315,7 +315,7 @@ Ideas:
 ## 12. Quick checks
 
 ```bash
-cd /Users/ddewit/VSCODE/stockiq
+cd /Users/dave/VSCODE/stockiq
 python3 check_news_sync.py                                   # news sync + coverage
 python3 update_stock_analysis.py AAPL 7203.T --dry-run       # snapshot logic without writing
 DRY_RUN=true ./deploy-to-s3.sh                               # what would upload / push
@@ -326,7 +326,7 @@ curl -s https://stockiq.tech/sitemap.xml | grep -c '<ns0:url>'      # live sitem
 **Test a template change safely** (before running `generate-stock-pages.py` for real):
 ```bash
 T=$(mktemp -d); cp -R ../website/stocks $T/stocks; cp -R $T/stocks $T/orig
-sed "s#/Users/ddewit/VSCODE/website/stocks\"#$T/stocks\"#" generate-stock-pages.py > $T/gen.py
+sed "s#/Users/dave/VSCODE/website/stocks\"#$T/stocks\"#" generate-stock-pages.py > $T/gen.py
 python3 $T/gen.py && diff -r $T/orig $T/stocks | head -100    # check only intended lines change
 ```
 Also check that every page's NEWS and RELATED sections are byte-identical before and after.

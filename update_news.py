@@ -11,8 +11,8 @@ This script:
 6. Respects 2-hour cooldown to avoid duplicate updates
 
 Output:
-- Updates /Users/ddewit/VSCODE/website/news.html (archive)
-- Updates /Users/ddewit/VSCODE/website/news.js (sidebar - top 5)
+- Updates /Users/dave/VSCODE/website/news.html (archive)
+- Updates /Users/dave/VSCODE/website/news.js (sidebar - top 5)
 
 Usage:
     python3 update_news.py
@@ -46,9 +46,9 @@ from bs4 import XMLParsedAsHTMLWarning
 
 warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
-NEWS_JS_PATH = '/Users/ddewit/VSCODE/website/news.js'
-NEWS_HTML_PATH = '/Users/ddewit/VSCODE/website/news.html'
-STOCKS_DIR = '/Users/ddewit/VSCODE/website/stocks'
+NEWS_JS_PATH = '/Users/dave/VSCODE/website/news.js'
+NEWS_HTML_PATH = '/Users/dave/VSCODE/website/news.html'
+STOCKS_DIR = '/Users/dave/VSCODE/website/stocks'
 MAX_NEWS_ITEMS = 100
 MAX_BLOG_ARTICLES = 500
 

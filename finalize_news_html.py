@@ -26,7 +26,7 @@ import re
 import sys
 from datetime import datetime, timedelta
 
-NEWS_HTML_PATH = '/Users/ddewit/VSCODE/website/news.html'
+NEWS_HTML_PATH = '/Users/dave/VSCODE/website/news.html'
 MAX_STOCK_ARTICLES = 240
 MAX_GENERAL_ARTICLES = 60
 MAX_SENTENCES = 2

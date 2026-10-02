@@ -9,7 +9,7 @@ from pathlib import Path
 import os
 
 # Change to website directory
-website_dir = Path('/Users/ddewit/VSCODE/website')
+website_dir = Path('/Users/dave/VSCODE/website')
 os.chdir(website_dir)
 
 news_html_path = Path('news.html')

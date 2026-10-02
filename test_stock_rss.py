@@ -38,7 +38,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from dateutil import parser as date_parser
 
-STOCKS_DIR = '/Users/ddewit/VSCODE/website/stocks'
+STOCKS_DIR = '/Users/dave/VSCODE/website/stocks'
 CONFIG_FILE = os.path.expanduser('~/.test_stock_rss_config.json')
 
 CRITICAL_KEYWORDS = [
@@ -62,7 +62,7 @@ CRITICAL_KEYWORDS = [
 def load_company_names():
     try:
         import sys
-        sys.path.insert(0, '/Users/ddewit/VSCODE/stockiq')
+        sys.path.insert(0, '/Users/dave/VSCODE/stockiq')
         from update_stock_news import COMPANY_NAMES
         return COMPANY_NAMES
     except:

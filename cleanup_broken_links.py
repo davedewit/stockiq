@@ -14,8 +14,8 @@ Usage:
 import re
 from pathlib import Path
 
-NEWS_HTML_PATH = Path('/Users/ddewit/VSCODE/website/news.html')
-STOCKS_DIR = Path('/Users/ddewit/VSCODE/website/stocks')
+NEWS_HTML_PATH = Path('/Users/dave/VSCODE/website/news.html')
+STOCKS_DIR = Path('/Users/dave/VSCODE/website/stocks')
 
 def cleanup_broken_links():
     """Remove broken article links with empty hrefs"""

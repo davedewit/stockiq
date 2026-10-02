@@ -19,7 +19,7 @@ def load_company_names():
     company_names = {}
     skip_words = {'INC', 'CORP', 'LTD', 'LIMITED', 'PLC', 'CO', 'COMPANY', 'CORPORATION', 'INCORPORATED', 'GROUP', 'HOLDINGS', 'THE', 'AND', '&', 'SA', 'S.A', 'AG', 'SE', 'NV', 'N.V', 'N.V.', 'REIT', 'BANCORP', 'TRUST', 'BANK', 'AKTIENGESELLSCHAFT', 'CANADA', 'PROPERTIES'}
     
-    with open('/Users/ddewit/VSCODE/website/stocks.txt', 'r', encoding='utf-8') as f:
+    with open('/Users/dave/VSCODE/website/stocks.txt', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         for row in reader:
             if len(row) >= 2:

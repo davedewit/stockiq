@@ -29,10 +29,10 @@ echo "  rm ~/Library/LaunchAgents/com.stockiq.reminder.plist" >> ~/stockiq-daily
 echo "  rm ~/stockiq-reminder.scpt" >> ~/stockiq-daily.log
 echo "" >> ~/stockiq-daily.log
 echo "To manually run this task:" >> ~/stockiq-daily.log
-echo "  cd /Users/ddewit/VSCODE/stockiq && yes | ./deploy.sh >> ~/stockiq-daily.log 2>&1 &" >> ~/stockiq-daily.log
+echo "  cd /Users/dave/VSCODE/stockiq && yes | ./deploy.sh >> ~/stockiq-daily.log 2>&1 &" >> ~/stockiq-daily.log
 echo "" >> ~/stockiq-daily.log
 
-SCRIPTS_DIR="/Users/ddewit/VSCODE/stockiq"
+SCRIPTS_DIR="/Users/dave/VSCODE/stockiq"
 
 # Check if running interactively (from terminal) or non-interactively (from launchd)
 if [ -t 0 ]; then

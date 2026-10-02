@@ -15,8 +15,8 @@ if ! command -v node &> /dev/null; then
 fi
 
 # Get script directory
-SCRIPT_DIR="/Users/ddewit/VSCODE/stockiq"
-WEBSITE_DIR="/Users/ddewit/VSCODE/website"
+SCRIPT_DIR="/Users/dave/VSCODE/stockiq"
+WEBSITE_DIR="/Users/dave/VSCODE/website"
 
 # Change to testing directory for dependencies
 cd "$SCRIPT_DIR"

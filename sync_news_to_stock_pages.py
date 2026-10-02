@@ -15,8 +15,8 @@ import os
 import re
 from datetime import datetime, timedelta
 
-STOCKS_DIR = '/Users/ddewit/VSCODE/website/stocks'
-NEWS_HTML_PATH = '/Users/ddewit/VSCODE/website/news.html'
+STOCKS_DIR = '/Users/dave/VSCODE/website/stocks'
+NEWS_HTML_PATH = '/Users/dave/VSCODE/website/news.html'
 
 def extract_news_articles():
     """Extract stock news articles from news.html"""

@@ -10,7 +10,7 @@ Usage:
 
 import re
 
-NEWS_HTML_PATH = '/Users/ddewit/VSCODE/website/news.html'
+NEWS_HTML_PATH = '/Users/dave/VSCODE/website/news.html'
 
 def fix_categories():
     """Fix all stock news categories in news.html"""

@@ -15,10 +15,10 @@ Usage:
 import os
 import re
 
-STOCKS_DIR = '/Users/ddewit/VSCODE/website/stocks'
-NEWS_CACHE_FILE = '/Users/ddewit/VSCODE/website/.stock_news_cache.json'
-NEWS_JS_PATH = '/Users/ddewit/VSCODE/website/news.js'
-NEWS_HTML_PATH = '/Users/ddewit/VSCODE/website/news.html'
+STOCKS_DIR = '/Users/dave/VSCODE/website/stocks'
+NEWS_CACHE_FILE = '/Users/dave/VSCODE/website/.stock_news_cache.json'
+NEWS_JS_PATH = '/Users/dave/VSCODE/website/news.js'
+NEWS_HTML_PATH = '/Users/dave/VSCODE/website/news.html'
 
 def clear_stock_pages():
     """Remove news sections from all stock HTML files"""

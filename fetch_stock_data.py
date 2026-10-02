@@ -10,7 +10,7 @@ numeric symbols (e.g. 0700.HK, 7203.T) so news matching stays in sync.
 Usage:
     python3 fetch_stock_data.py
 
-Input/Output: /Users/ddewit/VSCODE/website/stocks.txt
+Input/Output: /Users/dave/VSCODE/website/stocks.txt
 
 Note: To re-fetch ALL stocks (not just 'Stock' placeholders), change:
     to_fetch = [s for s in all_stocks if s[2] == 'Stock']
@@ -52,7 +52,7 @@ def update_numeric_company_names(stocks):
     print("   Reading update_stock_news.py...", flush=True)
     
     # Read update_stock_news.py
-    update_script = '/Users/ddewit/VSCODE/stockiq/update_stock_news.py'
+    update_script = '/Users/dave/VSCODE/stockiq/update_stock_news.py'
     with open(update_script, 'r') as f:
         content = f.read()
     
@@ -83,7 +83,7 @@ def update_numeric_company_names(stocks):
 
 # Read all stocks
 all_stocks = []
-stocks_file = '/Users/ddewit/VSCODE/website/stocks.txt'
+stocks_file = '/Users/dave/VSCODE/website/stocks.txt'
 
 # Try to read existing stocks.txt, or start fresh
 if os.path.exists(stocks_file):
@@ -137,7 +137,7 @@ for i, (symbol, _, _) in enumerate(to_fetch, 1):
 
 # Write once at the end
 current_stocks = [s for s in all_stocks if s[0] not in to_remove]
-with open('/Users/ddewit/VSCODE/website/stocks.txt', 'w', newline='') as f:
+with open('/Users/dave/VSCODE/website/stocks.txt', 'w', newline='') as f:
     writer = csv.writer(f)
     for s in current_stocks:
         writer.writerow([s[0], s[1], s[2]])

@@ -27,12 +27,12 @@ For detailed stock matching system info, see [stock-matching-system.md](stock-ma
 
 **Read docstring:**
 ```bash
-head -40 /Users/ddewit/VSCODE/stockiq/fetch_stock_data.py
+head -40 /Users/dave/VSCODE/stockiq/fetch_stock_data.py
 ```
 
 **Run it:**
 ```bash
-python3 /Users/ddewit/VSCODE/stockiq/fetch_stock_data.py
+python3 /Users/dave/VSCODE/stockiq/fetch_stock_data.py
 ```
 
 **Output:**
@@ -46,16 +46,16 @@ python3 /Users/ddewit/VSCODE/stockiq/fetch_stock_data.py
 
 **Read docstring:**
 ```bash
-head -50 /Users/ddewit/VSCODE/stockiq/generate-stock-pages.py
+head -50 /Users/dave/VSCODE/stockiq/generate-stock-pages.py
 ```
 
 **Run it:**
 ```bash
-python3 /Users/ddewit/VSCODE/stockiq/generate-stock-pages.py
+python3 /Users/dave/VSCODE/stockiq/generate-stock-pages.py
 ```
 
 **Output:**
-- Creates /Users/ddewit/VSCODE/website/stocks/*.html (3,467 files)
+- Creates /Users/dave/VSCODE/website/stocks/*.html (3,467 files)
 - Preserves the NEWS, RELATED and ANALYSIS sections, plus the robots value,
   data-based descriptions and dateModified maintained by update_stock_analysis.py
 - Adds Open Graph, Twitter Card, JSON-LD (WebPage + Corporation) and the GA4 tag
@@ -70,8 +70,8 @@ decides which stock pages are indexed
 
 **Run it:**
 ```bash
-python3 /Users/ddewit/VSCODE/stockiq/update_stock_analysis.py            # all stocks
-python3 /Users/ddewit/VSCODE/stockiq/update_stock_analysis.py AAPL MSFT  # specific stocks
+python3 /Users/dave/VSCODE/stockiq/update_stock_analysis.py            # all stocks
+python3 /Users/dave/VSCODE/stockiq/update_stock_analysis.py AAPL MSFT  # specific stocks
 ```
 
 **Output:**
@@ -89,12 +89,12 @@ python3 /Users/ddewit/VSCODE/stockiq/update_stock_analysis.py AAPL MSFT  # speci
 
 **Read docstring:**
 ```bash
-head -50 /Users/ddewit/VSCODE/stockiq/update_stock_news.py
+head -50 /Users/dave/VSCODE/stockiq/update_stock_news.py
 ```
 
 **Run it:**
 ```bash
-python3 /Users/ddewit/VSCODE/stockiq/update_stock_news.py
+python3 /Users/dave/VSCODE/stockiq/update_stock_news.py
 ```
 
 **Output:**
@@ -115,12 +115,12 @@ python3 /Users/ddewit/VSCODE/stockiq/update_stock_news.py
 
 **Read docstring:**
 ```bash
-head -50 /Users/ddewit/VSCODE/stockiq/update_news.py
+head -50 /Users/dave/VSCODE/stockiq/update_news.py
 ```
 
 **Run it:**
 ```bash
-python3 /Users/ddewit/VSCODE/stockiq/update_news.py
+python3 /Users/dave/VSCODE/stockiq/update_news.py
 ```
 
 **Output:**
@@ -138,12 +138,12 @@ python3 /Users/ddewit/VSCODE/stockiq/update_news.py
 
 **Read docstring:**
 ```bash
-head -30 /Users/ddewit/VSCODE/stockiq/people_also_watch_stocks.py
+head -30 /Users/dave/VSCODE/stockiq/people_also_watch_stocks.py
 ```
 
 **Run it:**
 ```bash
-python3 /Users/ddewit/VSCODE/stockiq/people_also_watch_stocks.py
+python3 /Users/dave/VSCODE/stockiq/people_also_watch_stocks.py
 ```
 
 ---
@@ -153,12 +153,12 @@ python3 /Users/ddewit/VSCODE/stockiq/people_also_watch_stocks.py
 
 **Read docstring:**
 ```bash
-head -30 /Users/ddewit/VSCODE/stockiq/check_news_sync.py
+head -30 /Users/dave/VSCODE/stockiq/check_news_sync.py
 ```
 
 **Run it:**
 ```bash
-python3 /Users/ddewit/VSCODE/stockiq/check_news_sync.py
+python3 /Users/dave/VSCODE/stockiq/check_news_sync.py
 ```
 
 **Output:**
@@ -175,7 +175,7 @@ python3 /Users/ddewit/VSCODE/stockiq/check_news_sync.py
 
 **Read docstring:**
 ```bash
-head -20 /Users/ddewit/VSCODE/stockiq/clear_stock_news.py
+head -20 /Users/dave/VSCODE/stockiq/clear_stock_news.py
 ```
 
 **Use when:** You need to start completely fresh
@@ -187,7 +187,7 @@ head -20 /Users/ddewit/VSCODE/stockiq/clear_stock_news.py
 
 **Read docstring:**
 ```bash
-head -20 /Users/ddewit/VSCODE/stockiq/sync_news_to_stock_pages.py
+head -20 /Users/dave/VSCODE/stockiq/sync_news_to_stock_pages.py
 ```
 
 **Use when:** Stock pages are missing news that's in news.html
@@ -235,7 +235,7 @@ has fewer than 200 entries (failed analysis run).
 ### deploy.sh — Full deployment (news + S3 sync)
 
 ```bash
-cd /Users/ddewit/VSCODE/stockiq && ./deploy.sh
+cd /Users/dave/VSCODE/stockiq && ./deploy.sh
 ```
 
 **Use when:** You want to update news AND deploy. Runs the full pipeline.
@@ -267,7 +267,7 @@ Steps:
 ### deploy-to-s3.sh — Quick deployment (S3 sync only)
 
 ```bash
-cd /Users/ddewit/VSCODE/stockiq && ./deploy-to-s3.sh
+cd /Users/dave/VSCODE/stockiq && ./deploy-to-s3.sh
 ```
 
 **Use when:** You've already generated/edited HTML files and just need to push them live.

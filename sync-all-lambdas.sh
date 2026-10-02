@@ -3,7 +3,7 @@
 # Script to download unique StockIQ Lambda functions (skip duplicate workers)
 
 AWS="/opt/homebrew/bin/aws"
-OUTPUT_DIR="/Users/ddewit/VSCODE/stockiq/lambda-sync"
+OUTPUT_DIR="/Users/dave/VSCODE/stockiq/lambda-sync"
 mkdir -p "$OUTPUT_DIR"
 
 echo "📦 Syncing unique StockIQ Lambda functions to $OUTPUT_DIR"

@@ -19,9 +19,9 @@ Rate Limiting:
 - Prevents duplicate news from being added
 
 Output:
-- Updates /Users/ddewit/VSCODE/website/stocks/*.html (news section)
-- Updates /Users/ddewit/VSCODE/website/news.html (archive)
-- Updates /Users/ddewit/VSCODE/website/news.js (sidebar - top 5)
+- Updates /Users/dave/VSCODE/website/stocks/*.html (news section)
+- Updates /Users/dave/VSCODE/website/news.html (archive)
+- Updates /Users/dave/VSCODE/website/news.js (sidebar - top 5)
 
 Usage:
     python3 update_stock_news.py
@@ -39,9 +39,9 @@ import requests
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 
-STOCKS_DIR = '/Users/ddewit/VSCODE/website/stocks'
-NEWS_JS_PATH = '/Users/ddewit/VSCODE/website/news.js'
-NEWS_HTML_PATH = '/Users/ddewit/VSCODE/website/news.html'
+STOCKS_DIR = '/Users/dave/VSCODE/website/stocks'
+NEWS_JS_PATH = '/Users/dave/VSCODE/website/news.js'
+NEWS_HTML_PATH = '/Users/dave/VSCODE/website/news.html'
 
 # Load OpenAI API key
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
@@ -78,7 +78,7 @@ def load_company_names():
     company_names = {}
     skip_words = {'INC', 'CORP', 'LTD', 'LIMITED', 'PLC', 'CO', 'COMPANY', 'CORPORATION', 'INCORPORATED', 'GROUP', 'HOLDINGS', 'THE', 'AND', '&', 'SA', 'S.A', 'AG', 'SE', 'NV', 'N.V', 'N.V.', 'REIT', 'BANCORP', 'TRUST', 'BANK', 'AKTIENGESELLSCHAFT', 'CANADA', 'PROPERTIES'}
     
-    stocks_file = '/Users/ddewit/VSCODE/website/stocks.txt'
+    stocks_file = '/Users/dave/VSCODE/website/stocks.txt'
     
     if not os.path.exists(stocks_file):
         print(f"Error: stocks.txt not found at {stocks_file}")

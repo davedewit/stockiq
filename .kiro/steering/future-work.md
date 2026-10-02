@@ -12,7 +12,7 @@
 ### Fix 1: Well-Known Stocks (Do First)
 Replace hybrid logic with pure anchor stocks — always show top 5 well-known stocks from the sector.
 
-**File:** `/Users/ddewit/VSCODE/stockiq/people_also_watch_stocks.py`
+**File:** `/Users/dave/VSCODE/stockiq/people_also_watch_stocks.py`
 
 Replace in `get_related_stocks()` (~lines 70-90):
 ```python
@@ -51,7 +51,7 @@ if len(result) < count:
 
 After editing, re-run and deploy:
 ```bash
-cd /Users/ddewit/VSCODE/stockiq
+cd /Users/dave/VSCODE/stockiq
 python3 people_also_watch_stocks.py --all
 ./deploy.sh
 ```

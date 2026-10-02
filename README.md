@@ -12,9 +12,7 @@ Python automation for [StockIQ.tech](https://stockiq.tech) - AI-powered stock an
 ## 🛠️ Key Scripts
 
 - `update_stock_news.py` - Fetch news and update pages
-- `generate-stock-pages.py` - Generate SEO-optimized HTML (the stock page template)
-- `update_stock_analysis.py` - Daily data snapshot and score on large-cap stock pages; decides which pages are indexed
-- `finalize_news_html.py` - Trims news.html and keeps it noindex
+- `generate-stock-pages.py` - Generate SEO-optimized HTML
 - `fetch_stock_data.py` - Fetch company data from Yahoo Finance
 - `deploy-to-s3.sh` - Deploy to AWS S3 + CloudFront
 

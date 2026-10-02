@@ -99,7 +99,7 @@ def find_matching_stock(title):
 
 **When you run:**
 ```bash
-python3 /Users/ddewit/VSCODE/stockiq/fetch_stock_data.py
+python3 /Users/dave/VSCODE/stockiq/fetch_stock_data.py
 ```
 
 **It does:**
@@ -132,7 +132,7 @@ To check matching quality (samples 50 random stocks and checks whether their lat
 news is really about them):
 
 ```bash
-python3 /Users/ddewit/VSCODE/stockiq/test_false_positives.py
+python3 /Users/dave/VSCODE/stockiq/test_false_positives.py
 ```
 
 To check whether a symbol gets any RSS news before adding it: `test_stock_rss.py`

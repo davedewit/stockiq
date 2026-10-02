@@ -1,7 +1,7 @@
 #!/bin/bash
 
-SCRIPT_DIR="/Users/ddewit/VSCODE/stockiq"
-WEBSITE_DIR="/Users/ddewit/VSCODE/website"
+SCRIPT_DIR="/Users/dave/VSCODE/stockiq"
+WEBSITE_DIR="/Users/dave/VSCODE/website"
 cd "$WEBSITE_DIR"
 
 echo "Update refresh intervals for index.html and dashboard.html"

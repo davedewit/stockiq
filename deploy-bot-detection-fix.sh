@@ -3,7 +3,7 @@
 # Deploy bot detection fix to usage tracker Lambda functions
 
 AWS="/opt/homebrew/bin/aws"
-LAMBDA_DIR="/Users/ddewit/VSCODE/stockiq/lambda-sync"
+LAMBDA_DIR="/Users/dave/VSCODE/stockiq/lambda-sync"
 
 echo "🤖 Deploying bot detection fix to Lambda functions..."
 echo ""

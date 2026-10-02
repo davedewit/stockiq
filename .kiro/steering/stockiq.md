@@ -22,18 +22,18 @@ Detailed docs live in separate files — check these first:
 - **`future-work.md`** — People Also Watch fixes, crypto news integration
 
 ## Key Files
-- **`/Users/ddewit/VSCODE/website/stocks.txt`** — Source of truth (3,467 stocks: SYMBOL, Company Name, Sector)
-- **`/Users/ddewit/VSCODE/website/stocks/*.html`** — Generated stock pages (3,467 files; ~962 large caps indexed, rest noindex)
-- **`/Users/ddewit/VSCODE/website/news.html`** — Recent news (newest 240 stock + 60 general articles, noindex; trimmed by finalize_news_html.py)
-- **`/Users/ddewit/VSCODE/stockiq/indexable_stocks.txt`** — Stock pages that are indexed and in the sitemap (written daily by update_stock_analysis.py)
-- **`/Users/ddewit/VSCODE/website/news.js`** — Sidebar (100-item pool, displays 5)
-- **`/Users/ddewit/VSCODE/stockiq/update_stock_news.py`** — Contains NUMERIC_COMPANY_NAMES (144 non-US stocks)
-- **`/Users/ddewit/VSCODE/stockiq/lambda-sync/`** — Lambda function backups
+- **`/Users/dave/VSCODE/website/stocks.txt`** — Source of truth (3,467 stocks: SYMBOL, Company Name, Sector)
+- **`/Users/dave/VSCODE/website/stocks/*.html`** — Generated stock pages (3,467 files; ~962 large caps indexed, rest noindex)
+- **`/Users/dave/VSCODE/website/news.html`** — Recent news (newest 240 stock + 60 general articles, noindex; trimmed by finalize_news_html.py)
+- **`/Users/dave/VSCODE/stockiq/indexable_stocks.txt`** — Stock pages that are indexed and in the sitemap (written daily by update_stock_analysis.py)
+- **`/Users/dave/VSCODE/website/news.js`** — Sidebar (100-item pool, displays 5)
+- **`/Users/dave/VSCODE/stockiq/update_stock_news.py`** — Contains NUMERIC_COMPANY_NAMES (144 non-US stocks)
+- **`/Users/dave/VSCODE/stockiq/lambda-sync/`** — Lambda function backups
 
 ## Scheduled Task (Automated Daily Deploy)
 
 ### Files
-- **AppleScript:** `/Users/ddewit/stockiq-reminder.scpt` (logic: Mon-Sat, 11am-3pm, once/day)
+- **AppleScript:** `/Users/dave/stockiq-reminder.scpt` (logic: Mon-Sat, 11am-3pm, once/day)
 - **Launchd plist:** `~/Library/LaunchAgents/com.stockiq.reminder.plist` (StartInterval 600 = checks every 10 min)
 - **Lock file:** `/tmp/stockiq-deploy-YYYYMMDD.lock` (prevents duplicate runs)
 - **Log:** `~/stockiq-daily.log`
@@ -60,7 +60,7 @@ rm /tmp/stockiq-deploy-$(date +%Y%m%d).lock   # Force retry today
 
 ```bash
 # Daily deploy (news update + S3 sync)
-cd /Users/ddewit/VSCODE/stockiq && ./deploy.sh
+cd /Users/dave/VSCODE/stockiq && ./deploy.sh
 
 # Preview what a deploy would upload/push (no S3 or GitHub changes)
 DRY_RUN=true ./deploy-to-s3.sh
@@ -81,16 +81,16 @@ python3 Sync_stock_to_news.py
 python3 clear_stock_news.py
 
 # Check daily cron logs
-tail -f /Users/ddewit/stockiq-daily.log
+tail -f /Users/dave/stockiq-daily.log
 
 # Invalidate CloudFront cache
 aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R --paths "/*" --profile default
 ```
 
 ## Project Structure
-- **Scripts:** `/Users/ddewit/VSCODE/stockiq/`
-- **Website:** `/Users/ddewit/VSCODE/website/`
-- **Lambda:** `/Users/ddewit/VSCODE/stockiq/lambda-sync/`
+- **Scripts:** `/Users/dave/VSCODE/stockiq/`
+- **Website:** `/Users/dave/VSCODE/website/`
+- **Lambda:** `/Users/dave/VSCODE/stockiq/lambda-sync/`
 - **Python:** 3.9.6
 
 ## AWS Resources
@@ -107,7 +107,7 @@ aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R --paths "/*" 
 ### CloudFront
 - **Distribution ID:** `EHXV50CPHY07R`
 - **Function:** `stockiq-www-redirect` — www→non-www redirect + lowercase symbols→uppercase
-- **Backup:** `/Users/ddewit/VSCODE/stockiq/cloudfront-backup/` (`./restore-cloudfront-function.sh`)
+- **Backup:** `/Users/dave/VSCODE/stockiq/cloudfront-backup/` (`./restore-cloudfront-function.sh`)
 
 ### DynamoDB Tables
 - `stockiq-dashboard-analysis-history` — Analysis history
@@ -141,21 +141,21 @@ aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R --paths "/*" 
 ## Lambda Backup & Deployment
 
 ### Local Backups
-- **Location:** `/Users/ddewit/VSCODE/stockiq/lambda-sync/`
+- **Location:** `/Users/dave/VSCODE/stockiq/lambda-sync/`
 - **Auto-sync:** Runs during `deploy-to-s3.sh` (1-hour cooldown)
-- **Manual sync:** `/Users/ddewit/VSCODE/stockiq/sync-all-lambdas.sh`
+- **Manual sync:** `/Users/dave/VSCODE/stockiq/sync-all-lambdas.sh`
 
 ### Deploy Lambda
 ```bash
 # 1. Check AWS version first (compare timestamps)
 aws lambda get-function --function-name <function-name> --profile default --query 'Configuration.LastModified' --output text
-ls -lh /Users/ddewit/VSCODE/stockiq/lambda-sync/<function-name>/
+ls -lh /Users/dave/VSCODE/stockiq/lambda-sync/<function-name>/
 
 # 2. If AWS is newer, download it first
 aws lambda get-function --function-name <function-name> --profile default --query 'Code.Location' --output text | xargs curl -s -o /tmp/check.zip && unzip -p /tmp/check.zip *.py | head -20
 
 # 3. Deploy your changes
-cd /Users/ddewit/VSCODE/stockiq/lambda-sync/<function-name>
+cd /Users/dave/VSCODE/stockiq/lambda-sync/<function-name>
 zip lambda_function.zip *.py
 aws lambda update-function-code --function-name <function-name> --zip-file fileb://lambda_function.zip --profile default
 rm lambda_function.zip
@@ -217,7 +217,7 @@ aws s3 rm s3://stockiq-option-1-1-custom-analysis/charts/email@example.com/ --re
 - **Password not clearing after activation:** login.html clears on `?pwd=clear` (50/100/200ms delays)
 - **"Already activated" error:** signup.html detects "already confirmed" → shows message → redirects to login
 - **News out of sync:** `python3 Sync_stock_to_news.py` (re-adds old articles to news.html; the next deploy trims them again)
-- **Sidebar shows no news:** `node -c /Users/ddewit/VSCODE/website/news.js`
+- **Sidebar shows no news:** `node -c /Users/dave/VSCODE/website/news.js`
 
 ## AI Chat System
 - **Lambda:** `stockiq-ai-chat` | **Model:** GPT-4o-mini | **Cost:** ~$10-20/month

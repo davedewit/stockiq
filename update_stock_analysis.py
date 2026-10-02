@@ -23,10 +23,10 @@ Usage:
     python3 update_stock_analysis.py --max-info 0    # No cap on fundamentals refreshes (first fill)
     python3 update_stock_analysis.py --dry-run       # Compute and report, write nothing
 
-Input:  /Users/ddewit/VSCODE/website/stocks.txt
-Output: /Users/ddewit/VSCODE/website/stocks/*.html
-        /Users/ddewit/VSCODE/stockiq/indexable_stocks.txt
-Cache:  /Users/ddewit/VSCODE/stockiq/.analysis_cache/
+Input:  /Users/dave/VSCODE/website/stocks.txt
+Output: /Users/dave/VSCODE/website/stocks/*.html
+        /Users/dave/VSCODE/stockiq/indexable_stocks.txt
+Cache:  /Users/dave/VSCODE/stockiq/.analysis_cache/
 """
 
 import argparse
@@ -49,7 +49,7 @@ import yfinance as yf
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from stock_metrics import compute_analysis, score_label
 
-WEBSITE_DIR = '/Users/ddewit/VSCODE/website'
+WEBSITE_DIR = '/Users/dave/VSCODE/website'
 STOCKS_FILE = os.path.join(WEBSITE_DIR, 'stocks.txt')
 STOCKS_DIR = os.path.join(WEBSITE_DIR, 'stocks')
 SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))

@@ -10,14 +10,14 @@
 
 ### 1. Check RSS for new stocks
 ```bash
-echo -e "2\nTSLA\n" | python3 /Users/ddewit/VSCODE/stockiq/test_stock_rss.py
+echo -e "2\nTSLA\n" | python3 /Users/dave/VSCODE/stockiq/test_stock_rss.py
 ```
 - Only proceed if "Matched (ready now)" appears
 - Stock must have had a news article in the last ~20 days to be worth adding
 
 ### 2. Add stocks to stocks.txt
 ```bash
-echo "TSLA" >> /Users/ddewit/VSCODE/website/stocks.txt
+echo "TSLA" >> /Users/dave/VSCODE/website/stocks.txt
 ```
 - Only stocks with market cap >= $10B get indexed by Google (see step 5); smaller ones
   still get a page, but it is noindex
@@ -25,7 +25,7 @@ echo "TSLA" >> /Users/ddewit/VSCODE/website/stocks.txt
 
 ### 3. Fetch company data and update stocks.txt
 ```bash
-python3 /Users/ddewit/VSCODE/stockiq/fetch_stock_data.py
+python3 /Users/dave/VSCODE/stockiq/fetch_stock_data.py
 ```
 - Fetches company names and sectors from Yahoo Finance
 - Updates stocks.txt with proper CSV format
@@ -33,7 +33,7 @@ python3 /Users/ddewit/VSCODE/stockiq/fetch_stock_data.py
 
 ### 4. Regenerate stock pages
 ```bash
-python3 /Users/ddewit/VSCODE/stockiq/generate-stock-pages.py
+python3 /Users/dave/VSCODE/stockiq/generate-stock-pages.py
 ```
 - Creates HTML files for all stocks in stocks.txt
 - Preserves existing news, related and analysis sections
@@ -41,7 +41,7 @@ python3 /Users/ddewit/VSCODE/stockiq/generate-stock-pages.py
 
 ### 5. Add data snapshot and decide indexing
 ```bash
-python3 /Users/ddewit/VSCODE/stockiq/update_stock_analysis.py TSLA
+python3 /Users/dave/VSCODE/stockiq/update_stock_analysis.py TSLA
 ```
 - Adds the data snapshot and sets "index, follow" if market cap >= $10B (USD)
 - Adds the stock to indexable_stocks.txt; smaller stocks stay noindex
@@ -53,14 +53,14 @@ python3 /Users/ddewit/VSCODE/stockiq/update_stock_analysis.py TSLA
 
 ### 6. Verify files created
 ```bash
-ls -lh /Users/ddewit/VSCODE/website/stocks/TSLA.html
+ls -lh /Users/dave/VSCODE/website/stocks/TSLA.html
 ```
 - Confirm HTML file exists
 - Check file size (~23KB typical)
 
 ### 7. Deploy
 ```bash
-cd /Users/ddewit/VSCODE/stockiq && ./deploy-to-s3.sh
+cd /Users/dave/VSCODE/stockiq && ./deploy-to-s3.sh
 ```
 - Syncs to S3
 - Updates sitemap dates (update_sitemap.py)
@@ -69,10 +69,10 @@ cd /Users/ddewit/VSCODE/stockiq && ./deploy-to-s3.sh
 
 ## Key Files
 
-- `/Users/ddewit/VSCODE/website/stocks.txt` - Source of truth (SYMBOL, Company Name, Sector)
-- `/Users/ddewit/VSCODE/website/stocks/` - Generated HTML pages (3,467+ files)
-- `/Users/ddewit/VSCODE/website/sitemap.xml` - Indexable URLs only (large-cap stocks + site pages)
-- `/Users/ddewit/VSCODE/stockiq/indexable_stocks.txt` - Which stock pages are indexed
+- `/Users/dave/VSCODE/website/stocks.txt` - Source of truth (SYMBOL, Company Name, Sector)
+- `/Users/dave/VSCODE/website/stocks/` - Generated HTML pages (3,467+ files)
+- `/Users/dave/VSCODE/website/sitemap.xml` - Indexable URLs only (large-cap stocks + site pages)
+- `/Users/dave/VSCODE/stockiq/indexable_stocks.txt` - Which stock pages are indexed
 
 ## Scripts
 
@@ -103,8 +103,8 @@ echo -e "2\nNVDA\n" | python3 test_stock_rss.py
 echo -e "2\nAAPL\n" | python3 test_stock_rss.py
 
 # 2. Add to stocks.txt (only ones with news)
-echo "TSLA" >> /Users/ddewit/VSCODE/website/stocks.txt
-echo "NVDA" >> /Users/ddewit/VSCODE/website/stocks.txt
+echo "TSLA" >> /Users/dave/VSCODE/website/stocks.txt
+echo "NVDA" >> /Users/dave/VSCODE/website/stocks.txt
 
 # 3. Fetch company data
 python3 fetch_stock_data.py
@@ -116,7 +116,7 @@ python3 generate-stock-pages.py
 python3 update_stock_analysis.py TSLA NVDA
 
 # 6. Verify
-ls -lh /Users/ddewit/VSCODE/website/stocks/{TSLA,NVDA}.html
+ls -lh /Users/dave/VSCODE/website/stocks/{TSLA,NVDA}.html
 
 # 7. Preview, then deploy (ask the owner before a real deploy)
 DRY_RUN=true ./deploy-to-s3.sh

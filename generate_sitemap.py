@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Add missing stock pages to sitemap.xml
 
-Finds indexable stock pages (indexable_stocks.txt) not in the sitemap and adds them.
+Finds HTML files not in sitemap and adds them.
 Dates are updated separately by update_sitemap.py
 
 Usage:
@@ -11,19 +11,12 @@ import os
 import re
 from datetime import datetime
 
-WEBSITE_DIR = '/Users/ddewit/VSCODE/website'
+WEBSITE_DIR = '/Users/dave/VSCODE/website'
 SITEMAP_PATH = os.path.join(WEBSITE_DIR, 'sitemap.xml')
 STOCKS_DIR = os.path.join(WEBSITE_DIR, 'stocks')
 
 # Get all HTML files in stocks directory
 html_files = {f.replace('.html', '') for f in os.listdir(STOCKS_DIR) if f.endswith('.html')}
-
-# Only indexable pages belong in the sitemap (see update_stock_analysis.py);
-# update_sitemap.py also removes any that are no longer indexable
-INDEXABLE_FILE = '/Users/ddewit/VSCODE/stockiq/indexable_stocks.txt'
-if os.path.exists(INDEXABLE_FILE):
-    with open(INDEXABLE_FILE) as f:
-        html_files &= {line.strip() for line in f if line.strip()}
 
 # Read sitemap
 with open(SITEMAP_PATH, 'r') as f:

@@ -35,7 +35,7 @@ def load_stocks():
     """Load all stocks from stocks.txt using csv.reader (handles quoted company names with commas)."""
     import csv
     stocks = []
-    with open('/Users/ddewit/VSCODE/website/stocks.txt', 'r') as f:
+    with open('/Users/dave/VSCODE/website/stocks.txt', 'r') as f:
         reader = csv.reader(f)
         for row in reader:
             if len(row) >= 3:
@@ -143,7 +143,7 @@ def generate_related_section(related_stocks):
 
 def add_related_to_page(symbol, stocks_data):
     """Insert or replace the related stocks section in a single stock page HTML file."""
-    filepath = f'/Users/ddewit/VSCODE/website/stocks/{symbol}.html'
+    filepath = f'/Users/dave/VSCODE/website/stocks/{symbol}.html'
     
     try:
         with open(filepath, 'r') as f:
@@ -198,7 +198,7 @@ def main():
     # Count missing
     missing = []
     for s in stocks_data:
-        filepath = f'/Users/ddewit/VSCODE/website/stocks/{s["symbol"]}.html'
+        filepath = f'/Users/dave/VSCODE/website/stocks/{s["symbol"]}.html'
         try:
             with open(filepath, 'r') as f:
                 if 'People also watch' not in f.read():
