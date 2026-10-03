@@ -385,7 +385,7 @@ def fetch_google_news():
             with open(NEWS_HTML_PATH, 'r') as f:
                 html_content = f.read()
                 # Count only general market news from today (not stock news)
-                today_pattern = f'Published: {today_date} \| Category: Market News'
+                today_pattern = f'Published: {today_date} \\| Category: Market News'
                 today_count = len(re.findall(today_pattern, html_content, re.DOTALL))
             
             # Also check news.js sidebar for general news

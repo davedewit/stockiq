@@ -33,7 +33,7 @@ Detailed docs live in separate files — check these first:
 ## Scheduled Task (Automated Daily Deploy)
 
 ### Files
-- **AppleScript:** `/Users/dave/stockiq-reminder.scpt` (logic: Mon-Sat, 11am-3pm, once/day)
+- **Bash script:** `/Users/dave/stockiq-daily.sh` (logic: Mon-Sat, 11am-10pm, once/day)
 - **Launchd plist:** `~/Library/LaunchAgents/com.stockiq.reminder.plist` (StartInterval 600 = checks every 10 min)
 - **Lock file:** `/tmp/stockiq-deploy-YYYYMMDD.lock` (prevents duplicate runs)
 - **Log:** `~/stockiq-daily.log`
@@ -50,7 +50,7 @@ launchctl load ~/Library/LaunchAgents/com.stockiq.reminder.plist
 
 ### Quick Commands
 ```bash
-osascript ~/stockiq-reminder.scpt              # Test now
+bash ~/stockiq-daily.sh                        # Test now
 tail -50 ~/stockiq-daily.log                   # View log
 ls -la /tmp/stockiq-deploy-*.lock              # Check if ran today
 rm /tmp/stockiq-deploy-$(date +%Y%m%d).lock   # Force retry today

@@ -75,8 +75,8 @@ Stock page order: header, **ANALYSIS snapshot**, "Full report" CTA card, NEWS, R
 
 ## 5. Daily pipeline
 
-launchd `com.stockiq.reminder` fires every 10 min → `~/stockiq-reminder.scpt` runs once a day
-**Mon–Sat, 11am–3pm** (lock `/tmp/stockiq-deploy-YYYYMMDD.lock`) → `deploy.sh` →
+launchd `com.stockiq.reminder` fires every 10 min → `~/stockiq-daily.sh` runs once a day
+**Mon–Sat, 11am–10pm** (lock `/tmp/stockiq-deploy-YYYYMMDD.lock`) → `deploy.sh` →
 `deploy-to-s3.sh` with `UPDATE_STOCK_NEWS=true`. Log: `~/stockiq-daily.log` (cleared each run).
 
 Order inside `deploy-to-s3.sh`:
@@ -136,7 +136,7 @@ The git step runs last, after S3, CloudFront and the Lambda sync. If the deploy 
 
 ### Timing in practice
 
-- The daily run happens once a day, **Mon–Sat, between 11am and 3pm** (whenever the 10-minute
+- The daily run happens once a day, **Mon–Sat, between 11am and 10pm** (whenever the 10-minute
   launchd check first lands in that window). **There is no run on Sunday.**
 - On normal days the runs are ~24h apart, so each daily run clears the 23h cooldown and pushes.
 - **Whichever deploy first runs after the cooldown clears does the push.** Any other deploy
