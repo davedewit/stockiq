@@ -44,11 +44,24 @@
 | `stockiq-validate-symbol` | Validates stock symbols across exchanges |
 | `StockIQ-StockUpdater` | Stock data updater |
 
-### Screener Workers (~630 functions)
-Parallel workers for US, Europe, Asia, Other screeners:
-- `stockiq-asia-5-1-worker-1` through `stockiq-asia-5-4-worker-30`
-- Similar pattern for US, Europe, and other regions
-- All identical code, run in parallel, results aggregated by coordinator
+### Screener Workers (~651 functions)
+Parallel workers called by `stockiq-screener-coordinator`. Each worker receives a `stock_batch`
+of 10 symbols and returns scored results. All run in parallel, coordinator aggregates.
+
+| Group | Functions | Screener | Stocks |
+|---|---|---|---|
+| `stockiq-asia-5-1-worker-1..5` | 5 | ASX 50 | 50 |
+| `stockiq-asia-5-2-worker-1..10` | 10 | ASX 100 | 100 |
+| `stockiq-asia-5-3-worker-1..20` | 20 | ASX 200 | 196 |
+| `stockiq-asia-5-4-worker-1..30` | 30 | ASX 300 | 231 |
+| `stockiq-asia-5-5-worker-1..21` | 21 | **Japan Nikkei 225** | 210 |
+| `europe-4-1-worker-1..10` | 10 | UK FTSE 100 | 100 |
+| Various `stockiq-option-3-*` | ~560 | US screeners (S&P, Russell, NASDAQ, Dow) | varies |
+
+**Coordinator key format:** `{option}-{subOption}` e.g. `4-200` (ASX 200), `5-nikkei225` (Japan), `5-ftse100` (UK)
+
+**Worker code source for new non-US screeners:** copy from `stockiq-asia-5-1-worker-1` — it handles
+`.T`, `.AX`, `.L` suffixes correctly via Yahoo Finance. US workers use a different base.
 
 ### Auth & Users
 | Function | Purpose |

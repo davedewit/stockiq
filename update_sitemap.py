@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Update sitemap.xml lastmod dates based on actual file modification times.
+"""Rebuild sitemap.xml stock URLs from indexable_stocks.txt and update lastmod dates.
 
-For stock pages, checks the HTML content for news timestamps to determine
-the actual last content update (not just file system mtime which can be
-stale due to S3 --size-only sync).
+- Stock URLs: rebuilt from indexable_stocks.txt (only large-cap indexed pages)
+- Site pages (non-stock): preserved from existing sitemap, lastmod updated
+- Safety check: refuses to touch stock URLs if indexable_stocks.txt has < 200 entries
 
 Called automatically by deploy-to-s3.sh.
 
@@ -15,7 +15,10 @@ import os
 from datetime import datetime, timezone
 
 WEBSITE_DIR = '/Users/dave/VSCODE/website'
+SCRIPTS_DIR = '/Users/dave/VSCODE/stockiq'
 SITEMAP_PATH = os.path.join(WEBSITE_DIR, 'sitemap.xml')
+INDEXABLE_FILE = os.path.join(SCRIPTS_DIR, 'indexable_stocks.txt')
+MIN_INDEXABLE = 200  # Safety threshold
 
 
 def get_stock_page_lastmod(filepath):
@@ -23,70 +26,109 @@ def get_stock_page_lastmod(filepath):
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
-        # Find all data-timestamp attributes (news article dates)
         timestamps = re.findall(r'data-timestamp="([^"]+)"', content)
         if timestamps:
-            # Parse and find the most recent one
             dates = []
             for ts in timestamps:
                 try:
-                    # Python 3.9 doesn't handle +00:00 in fromisoformat
-                    # Strip timezone and parse as UTC
                     clean_ts = re.sub(r'[+-]\d{2}:\d{2}$', '', ts)
                     dt = datetime.fromisoformat(clean_ts)
                     dates.append(dt)
                 except (ValueError, TypeError):
                     continue
             if dates:
-                latest = max(dates)
-                return latest.strftime('%Y-%m-%d')
+                return max(dates).strftime('%Y-%m-%d')
     except (IOError, OSError):
         pass
     return None
 
 
-def get_file_mtime(url):
-    """Get file modification date for a given URL, returns None if file not found"""
-    path = url.replace('https://stockiq.tech/', '')
-    if not path:
-        path = 'index.html'
+def get_file_mtime(filepath):
+    """Get file modification date, falling back to today."""
+    try:
+        mtime = os.path.getmtime(filepath)
+        return datetime.fromtimestamp(mtime, tz=timezone.utc).strftime('%Y-%m-%d')
+    except OSError:
+        return datetime.now().strftime('%Y-%m-%d')
+
+
+def get_lastmod(symbol):
+    """Get lastmod for a stock page — news date if available, else file mtime."""
+    filepath = os.path.join(WEBSITE_DIR, 'stocks', f'{symbol}.html')
+    if not os.path.exists(filepath):
+        return datetime.now().strftime('%Y-%m-%d')
+    news_date = get_stock_page_lastmod(filepath)
+    if news_date:
+        return news_date
+    return get_file_mtime(filepath)
+
+
+def get_site_page_lastmod(url):
+    """Get lastmod for a non-stock site page."""
+    path = url.replace('https://stockiq.tech/', '') or 'index.html'
     filepath = os.path.join(WEBSITE_DIR, path)
     if not os.path.exists(filepath):
         return None
-
-    # For stock pages, use the latest news timestamp instead of file mtime
-    if path.startswith('stocks/') and path.endswith('.html'):
-        news_date = get_stock_page_lastmod(filepath)
-        if news_date:
-            return news_date
-
-    # Fall back to file modification time
-    mtime = os.path.getmtime(filepath)
-    return datetime.fromtimestamp(mtime, tz=timezone.utc).strftime('%Y-%m-%d')
+    return get_file_mtime(filepath)
 
 
+# --- Load indexable stocks ---
+if not os.path.exists(INDEXABLE_FILE):
+    print(f"❌ {INDEXABLE_FILE} not found — sitemap not updated")
+    exit(1)
+
+with open(INDEXABLE_FILE, 'r') as f:
+    indexable = [line.strip() for line in f if line.strip()]
+
+if len(indexable) < MIN_INDEXABLE:
+    print(f"⚠️  Only {len(indexable)} indexable stocks (< {MIN_INDEXABLE}) — sitemap stock URLs not updated (safety check)")
+    exit(0)
+
+# --- Load existing sitemap to extract non-stock site pages ---
 with open(SITEMAP_PATH, 'r') as f:
-    content = f.read()
+    existing = f.read()
 
-updated_count = 0
+# Extract non-stock URLs from existing sitemap
+site_page_blocks = []
+for match in re.finditer(r'<(?:ns0:)?url>.*?</(?:ns0:)?url>', existing, re.DOTALL):
+    block = match.group(0)
+    loc_match = re.search(r'<(?:ns0:)?loc>(.*?)</(?:ns0:)?loc>', block)
+    if loc_match:
+        url = loc_match.group(1)
+        if '/stocks/' not in url:
+            site_page_blocks.append(url)
 
-def replace_lastmod(match):
-    global updated_count
-    url_match = re.search(r'<(?:ns0:)?loc>(.*?)</(?:ns0:)?loc>', match.group(0))
-    if not url_match:
-        return match.group(0)
-    url = url_match.group(1)
-    mtime = get_file_mtime(url)
-    if mtime:
-        old_date = re.search(r'<(?:ns0:)?lastmod>([\d-]+)</(?:ns0:)?lastmod>', match.group(0))
-        if old_date and old_date.group(1) != mtime:
-            updated_count += 1
-        return re.sub(r'(<(?:ns0:)?lastmod>)[\d-]+(</(?:ns0:)?lastmod>)', rf'\g<1>{mtime}\g<2>', match.group(0))
-    return match.group(0)
+# --- Build new sitemap ---
+today = datetime.now().strftime('%Y-%m-%d')
+lines = ['<?xml version=\'1.0\' encoding=\'utf-8\'?>']
+lines.append('<ns0:urlset xmlns:ns0="http://www.sitemaps.org/schemas/sitemap/0.9">')
 
-updated = re.sub(r'<(?:ns0:)?url>.*?</(?:ns0:)?url>', replace_lastmod, content, flags=re.DOTALL)
+# Site pages first (with updated lastmod)
+for url in site_page_blocks:
+    lastmod = get_site_page_lastmod(url) or today
+    priority = '1.0' if url == 'https://stockiq.tech/' else '0.9' if 'analysis' in url else '0.8'
+    changefreq = 'daily' if url == 'https://stockiq.tech/' else 'weekly'
+    lines.append(f'  <ns0:url>')
+    lines.append(f'    <ns0:loc>{url}</ns0:loc>')
+    lines.append(f'    <ns0:lastmod>{lastmod}</ns0:lastmod>')
+    lines.append(f'    <ns0:changefreq>{changefreq}</ns0:changefreq>')
+    lines.append(f'    <ns0:priority>{priority}</ns0:priority>')
+    lines.append(f'  </ns0:url>')
+
+# Stock pages (only indexable ones)
+for symbol in indexable:
+    url = f'https://stockiq.tech/stocks/{symbol}.html'
+    lastmod = get_lastmod(symbol)
+    lines.append(f'  <ns0:url>')
+    lines.append(f'    <ns0:loc>{url}</ns0:loc>')
+    lines.append(f'    <ns0:lastmod>{lastmod}</ns0:lastmod>')
+    lines.append(f'    <ns0:changefreq>daily</ns0:changefreq>')
+    lines.append(f'    <ns0:priority>0.7</ns0:priority>')
+    lines.append(f'  </ns0:url>')
+
+lines.append('</ns0:urlset>')
 
 with open(SITEMAP_PATH, 'w') as f:
-    f.write(updated)
+    f.write('\n'.join(lines) + '\n')
 
-print(f"✅ Updated sitemap.xml — {updated_count} URLs got new lastmod dates")
+print(f"✅ Updated sitemap.xml — {len(site_page_blocks)} site pages + {len(indexable)} stock pages = {len(site_page_blocks) + len(indexable)} total URLs")

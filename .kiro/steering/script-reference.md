@@ -1,377 +1,64 @@
 # Script Reference Guide
 
-All key scripts have detailed docstrings. Read them first for complete info.
-For the big picture (pipeline, GitHub sync, SEO rules) see `site-overview.md`.
-Only the scripts in the daily pipeline and the add-stocks workflow matter day to day; the
-others in `stockiq/` are one-off or old tools (e.g. `run-tests.sh` points to test files
-that no longer exist).
-
-## Quick Navigation
-
-- [Core Scripts](#core-scripts) - Main workflow scripts
-- [Utility Scripts](#utility-scripts) - Maintenance and sync tools
-- [Workflow](#workflow) - Daily deployment and manual processes
-- [Key Files](#key-files) - Important data files
-- [Dependencies](#dependencies) - Required packages
-- [Troubleshooting](#troubleshooting) - Common issues and fixes
-- [Tips](#tips) - Best practices
-
-For detailed stock matching system info, see [stock-matching-system.md](stock-matching-system.md)
-
----
-
-## Core Scripts
-
-### fetch_stock_data.py
-**What it does:** Fetches company data from Yahoo Finance and syncs NUMERIC_COMPANY_NAMES
-
-**Read docstring:**
-```bash
-head -40 /Users/dave/VSCODE/stockiq/fetch_stock_data.py
-```
-
-**Run it:**
-```bash
-python3 /Users/dave/VSCODE/stockiq/fetch_stock_data.py
-```
-
-**Output:**
-- Updates stocks.txt with real company names/sectors
-- Updates NUMERIC_COMPANY_NAMES in update_stock_news.py (144 non-US stocks)
-
----
-
-### generate-stock-pages.py
-**What it does:** Generates 3,467 HTML stock pages with SEO metadata
-
-**Read docstring:**
-```bash
-head -50 /Users/dave/VSCODE/stockiq/generate-stock-pages.py
-```
-
-**Run it:**
-```bash
-python3 /Users/dave/VSCODE/stockiq/generate-stock-pages.py
-```
-
-**Output:**
-- Creates /Users/dave/VSCODE/website/stocks/*.html (3,467 files)
-- Preserves the NEWS, RELATED and ANALYSIS sections, plus the robots value,
-  data-based descriptions and dateModified maintained by update_stock_analysis.py
-- Adds Open Graph, Twitter Card, JSON-LD (WebPage + Corporation) and the GA4 tag
-- **The template is the only place to change stock page layout, head tags or footer.**
-  Not run daily; run it by hand after template changes.
-
----
-
-### update_stock_analysis.py
-**What it does:** Adds a daily data snapshot and 0-100 score to large-cap stock pages and
-decides which stock pages are indexed
-
-**Run it:**
-```bash
-python3 /Users/dave/VSCODE/stockiq/update_stock_analysis.py            # all stocks
-python3 /Users/dave/VSCODE/stockiq/update_stock_analysis.py AAPL MSFT  # specific stocks
-```
-
-**Output:**
-- Fills <!-- ANALYSIS_SECTION_START/END --> on pages with market cap >= $10B (USD, converted daily)
-  and sets robots "index, follow"; all other pages get an empty section and "noindex, follow"
-- Writes indexable_stocks.txt (used by update_sitemap.py)
-- Score model is copied from the single-stock Lambda into stock_metrics.py; if the Lambda's
-  scoring changes, copy the functions again
-- Fundamentals cached in .analysis_cache/ (weekly refresh for large caps, monthly otherwise)
-
----
-
-### update_stock_news.py
-**What it does:** Fetches news for stocks and updates individual stock pages
-
-**Read docstring:**
-```bash
-head -50 /Users/dave/VSCODE/stockiq/update_stock_news.py
-```
-
-**Run it:**
-```bash
-python3 /Users/dave/VSCODE/stockiq/update_stock_news.py
-```
-
-**Output:**
-- Updates individual stock HTML pages with news
-- Updates news.html archive
-- Updates news.js sidebar (top 5 articles)
-- Respects 23-hour cooldown per stock
-
-**Key features:**
-- Matches US stocks via load_company_names() (reads stocks.txt)
-- Matches non-US stocks via NUMERIC_COMPANY_NAMES (hardcoded fallback)
-- Filters by critical keywords (earnings, merger, FDA approval, etc.)
-
----
-
-### update_news.py
-**What it does:** Fetches market news and generates AI summaries
-
-**Read docstring:**
-```bash
-head -50 /Users/dave/VSCODE/stockiq/update_news.py
-```
-
-**Run it:**
-```bash
-python3 /Users/dave/VSCODE/stockiq/update_news.py
-```
-
-**Output:**
-- Updates news.html with market news
-- Updates news.js sidebar (top 5 articles)
-- Respects 2-hour cooldown between updates
-
-**Requirements:**
-- OPENAI_API_KEY environment variable
-
----
-
-### people_also_watch_stocks.py
-**What it does:** Adds "People also watch" section to stock pages
-
-**Read docstring:**
-```bash
-head -30 /Users/dave/VSCODE/stockiq/people_also_watch_stocks.py
-```
-
-**Run it:**
-```bash
-python3 /Users/dave/VSCODE/stockiq/people_also_watch_stocks.py
-```
-
----
-
-### check_news_sync.py
-**What it does:** Verifies news is in sync across all files and shows coverage stats
-
-**Read docstring:**
-```bash
-head -30 /Users/dave/VSCODE/stockiq/check_news_sync.py
-```
-
-**Run it:**
-```bash
-python3 /Users/dave/VSCODE/stockiq/check_news_sync.py
-```
-
-**Output:**
-- Shows how many stock pages have news
-- Coverage percentage (e.g., "20% of stock pages have news")
-- Sync status between stock pages, news.html, and news.js
-- Detects broken links and sync issues
-- Runs automatically at end of `./deploy.sh`
-
----
-
-### clear_stock_news.py
-**What it does:** Nuclear reset - clears ALL news from all stock pages
-
-**Read docstring:**
-```bash
-head -20 /Users/dave/VSCODE/stockiq/clear_stock_news.py
-```
-
-**Use when:** You need to start completely fresh
-
----
-
-### sync_news_to_stock_pages.py
-**What it does:** Reverse sync - pushes news from news.html back to stock pages
-
-**Read docstring:**
-```bash
-head -20 /Users/dave/VSCODE/stockiq/sync_news_to_stock_pages.py
-```
-
-**Use when:** Stock pages are missing news that's in news.html
-
----
-
-### Sync_stock_to_news.py
-**What it does:** Forward sync - pushes news from stock pages to news.html
-
-**Use when:** news.html is out of sync with stock pages
-
----
-
-### fix_news_categories.py
-**What it does:** Fixes news article categories
-
----
-
-### remove_news_duplicates.py
-**What it does:** Removes duplicate news articles
-
----
-
-### finalize_news_html.py
-**What it does:** Keeps news.html small and noindex: newest 240 stock + 60 general articles,
-summaries cut to 2 sentences. Runs in deploy-to-s3.sh after remove_news_duplicates.py.
-Sync_stock_to_news.py can re-add old articles; the next deploy trims them again.
-
----
-
-### update_sitemap.py
-**What it does:** Sets the sitemap's stock URLs to exactly indexable_stocks.txt, removes
-noindex pages (news.html), and updates lastmod dates. Leaves stock URLs alone if the list
-has fewer than 200 entries (failed analysis run).
-
----
-
-### notify_search_engines.py
-**What it does:** Notifies Google and Bing about sitemap updates
-
----
-
-## Workflow
-
-### deploy.sh — Full deployment (news + S3 sync)
-
-```bash
-cd /Users/dave/VSCODE/stockiq && ./deploy.sh
-```
-
-**Use when:** You want to update news AND deploy. Runs the full pipeline.
-**Do NOT use** just to push HTML changes — it triggers OpenAI API calls unnecessarily.
-
-Steps:
-1. Pre-flight check - Shows current news sync status
-2. Asks if you want to update stock news (y/n)
-3. Calls `deploy-to-s3.sh` with UPDATE_STOCK_NEWS flag
-4. Inside deploy-to-s3.sh:
-   - `update_news.py` - Fetches market news (2-hour cooldown)
-   - `update_stock_news.py` - Updates ~60-90 stocks with latest news (23-hour cooldown)
-   - `update_stock_analysis.py` - Data snapshots on large-cap pages, indexable list
-   - `people_also_watch_stocks.py` - Adds internal links to pages
-   - `update_sitemap.py` - Updates sitemap.xml with current date
-   - `cleanup_broken_links.py` - Removes broken article links
-   - `remove_news_duplicates.py` - Removes duplicate articles
-   - `finalize_news_html.py` - Trims news.html, keeps it noindex
-   - Deploy to S3 - Uploads changed files (stock pages by size+time; root html/css/js by MD5)
-   - Invalidate CloudFront - Clears CDN cache
-   - `notify_search_engines.py` - Pings Google/Bing about sitemap
-   - `sync-all-lambdas.sh` - Syncs Lambda functions (every 15 min)
-   - Git: commits and pushes both repos (stockiq and website), 23h cooldown (see site-overview.md 5b)
-5. Post-deployment verification - Runs `check_news_sync.py` to verify sync status
-
-**Time:** ~15-20 minutes
-**Cost:** ~$1-2 (OpenAI API for news summaries)
-
-### deploy-to-s3.sh — Quick deployment (S3 sync only)
-
-```bash
-cd /Users/dave/VSCODE/stockiq && ./deploy-to-s3.sh
-```
-
-**Use when:** You've already generated/edited HTML files and just need to push them live.
-Examples: regenerated stock pages, fixed a template, edited index.html.
-
-Does (without news/data updates):
-- Local steps: backups, "People also watch" for pages missing it, sitemap sync, news cleanup
-  and trim
-- Uploads changed files to S3, invalidates CloudFront, notifies search engines
-- Syncs Lambda copies (hourly cooldown) and commits + pushes both git repos (23h cooldown, see site-overview.md 5b)
-
-Preview without uploading: `DRY_RUN=true ./deploy-to-s3.sh`
-
-**Time:** ~5 minutes
-**Cost:** $0 (no API calls)
-
-### Manual Workflow
-
-**Add new stocks:**
-See [add-new-stocks.md](add-new-stocks.md) for complete workflow
-
-**Update news manually:**
-```bash
-python3 update_stock_news.py    # Update stock pages with news
-python3 update_news.py          # Update market news
-```
-
-**Sync news if out of sync:**
-```bash
-python3 Sync_stock_to_news.py   # Push stock page news → news.html
-python3 sync_news_to_stock_pages.py  # Push news.html → stock pages
-```
-
-**Start fresh:**
-```bash
-python3 clear_stock_news.py     # Remove all news
-python3 update_stock_news.py    # Repopulate with fresh news
-```
-
----
-
-## Key Files
-
-- **stocks.txt** - Source of truth (3,467 stocks with names/sectors)
-  - Format: CSV with 3 columns: `SYMBOL,Company Name,Sector`
-  - Company names with commas are quoted: `"Ajinomoto Co., Inc."`
-  - Read with Python's csv.reader (not awk/cut/sed)
-  
-- **update_stock_news.py** - Contains NUMERIC_COMPANY_NAMES (144 non-US stocks)
-  - Hardcoded fallback for numeric symbols (0700.HK, 7203.T, etc.)
-  - Auto-synced by fetch_stock_data.py
-  
-- **website/stocks/*.html** - Generated stock pages (3,467 files; not in git)
-  - Sections: ANALYSIS (large caps only), NEWS, RELATED, each owned by one script
-  - All sections preserved between regenerations
-  
-- **website/news.html** - Recent news (240 stock + 60 general articles, noindex)
-  
-- **website/news.js** - Sidebar (100-item pool, shows 5)
-
----
-
-## Dependencies
-
-All scripts require:
-- Python 3.9.6+
-- yfinance (stock data)
-- requests (HTTP)
-- BeautifulSoup (HTML parsing)
-- OpenAI API key (for news summarization)
-
-Install:
-```bash
-pip install yfinance requests beautifulsoup4 openai
-```
+All key scripts have detailed docstrings — run `head -50 script.py` to read them first.
+For the pipeline order and deploy commands see `site-overview.md` section 5.
+For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-stocks.md`.
+
+## Daily Pipeline Scripts (run by deploy-to-s3.sh)
+
+| Script | What it does | Cooldown |
+|---|---|---|
+| `update_news.py` | Yahoo/Google RSS → OpenAI summaries → news.html + news.js | 2 hours |
+| `update_stock_news.py` | Per-stock RSS → stock pages + news.html/news.js. Keeps last 3 articles per stock, removes articles 30+ days old | 23h per stock |
+| `update_stock_analysis.py` | Data snapshot + 0-100 score on large caps, sets index/noindex, writes indexable_stocks.txt. Runs on all 3,467 stocks — ~20 min, mostly free (Yahoo Finance). 404s for delisted stocks are normal and cached | none (runs every deploy) |
+| `people_also_watch_stocks.py --missing` | Adds "People also watch" section to pages missing it | none |
+| `update_sitemap.py` | **Rebuilds** stock URLs from indexable_stocks.txt (only large-cap pages), updates lastmod on site pages. Safety: skips if indexable list < 200 entries | none |
+| `cleanup_broken_links.py` | Removes dead article links from news.html | none |
+| `remove_news_duplicates.py` | Deduplicates news.html | none |
+| `finalize_news_html.py` | Trims news.html to 240 stock + 60 general articles, keeps noindex | none |
+
+## Manual / One-Off Scripts
+
+| Script | When to use |
+|---|---|
+| `fetch_stock_data.py` | After adding new stocks — fetches names/sectors from Yahoo, updates stocks.txt and NUMERIC_COMPANY_NAMES |
+| `generate-stock-pages.py` | After template changes — regenerates all 3,467 HTML pages (preserves NEWS/RELATED/ANALYSIS sections) |
+| `Sync_stock_to_news.py` | When news.html is out of sync — pushes stock page news → news.html |
+| `sync_news_to_stock_pages.py` | When stock pages are missing news that's in news.html |
+| `clear_stock_news.py` | Nuclear reset — clears ALL news from all stock pages |
+| `check_news_sync.py` | Verify news sync status and coverage stats |
+| `test_stock_rss.py` | Before adding a stock — check if it has RSS news (last ~20 days) |
+| `generate_sitemap.py` | Manual sitemap rebuild (update_sitemap.py is the daily version) |
+| `notify_search_engines.py` | Ping Google/Bing IndexNow after sitemap changes |
+
+## Deploy Scripts
+
+**`deploy.sh`** — Full deploy: asks about news update, then calls deploy-to-s3.sh. Use when you want news updated too. Costs ~$1-2 (OpenAI).
+
+**`deploy-to-s3.sh`** — S3 sync only (no news update unless `UPDATE_STOCK_NEWS=true`). Use after editing HTML/JS/CSS. Preview first with `DRY_RUN=true ./deploy-to-s3.sh`. Cost $0.
 
 ## Troubleshooting
 
-### Script runs but no output
-- Run without piping: `python3 script.py` (not `python3 script.py | tail -20`)
-- Output is buffered until script finishes
+| Issue | Fix |
+|---|---|
+| News not updating | Check 2h/23h cooldowns; verify `OPENAI_API_KEY` is set |
+| Stock page news gaps | Normal — script only picks up articles that clearly match the stock from last 2 days |
+| Stock data showing old date | `update_stock_analysis.py` not running — check it's in deploy-to-s3.sh (was missing until Oct 2026) |
+| Stock pages not regenerating | Run `generate-stock-pages.py`; check stocks.txt CSV format |
+| NUMERIC_COMPANY_NAMES out of sync | Run `fetch_stock_data.py` |
+| News out of sync | Run `Sync_stock_to_news.py` (next deploy trims it back) |
+| Sidebar shows no news | `node -c /Users/dave/VSCODE/website/news.js` |
+| Sitemap has too many URLs (all 3,485) | `generate_sitemap.py` was adding all HTML files — it's now fixed to use indexable_stocks.txt only. Run `python3 update_sitemap.py` to rebuild, then resubmit in Google Search Console |
+| analysis-functions.js not updating on live site | Deploy script now uploads all root `*.js` — but if running manually: `aws s3 cp analysis-functions.js s3://stockiq-final-websitebucket-vqekic7enf9h/ --cache-control "public, max-age=86400" --profile default --region us-east-1` |
 
-### OPENAI_API_KEY not found
-- Set environment variable: `export OPENAI_API_KEY=sk-...`
-- Or create file: `~/.openai_key` with your API key
+## Google Search Console
 
-### News not updating
-- Check 2-hour cooldown (update_news.py)
-- Check 23-hour cooldown per stock (update_stock_news.py)
-- Verify OPENAI_API_KEY is set
-- Check internet connection for RSS feeds
+- Sitemap URL: `https://stockiq.tech/sitemap.xml`
+- Should show ~970 URLs (953 large-cap stock pages + 17 site pages)
+- If it shows 3,485 URLs the sitemap bloated again — check `generate_sitemap.py` wasn't run, then run `python3 update_sitemap.py` and resubmit
+- Resubmit: Search Console → Sitemaps → three dots → Resubmit
+- Delete the broken `sitemap.xmp` entry if it still appears
+- After any sitemap change allow 1-2 weeks for Google to reprocess
 
-### Stock pages not regenerating
-- Run `generate-stock-pages.py` after updating stocks.txt
-- Check that stocks.txt has proper CSV format (quoted names)
-
-### NUMERIC_COMPANY_NAMES out of sync
-- Run `fetch_stock_data.py` to auto-sync
-- It extracts numeric symbols from stocks.txt and updates update_stock_news.py
-
-## Tips
-
-- Always read the docstring first: `head -50 script.py`
-- Check script output for real-time progress
-- All scripts have detailed docstrings with usage examples
-- File paths are hardcoded in scripts (no config files needed)
-- All scripts are idempotent (safe to run multiple times)
+## Python Path
+Scripts use `/opt/homebrew/bin/python3` (set as `$PYTHON` in deploy-to-s3.sh). Run manually with `python3` or `/opt/homebrew/bin/python3`.

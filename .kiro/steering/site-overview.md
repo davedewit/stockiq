@@ -82,15 +82,15 @@ launchd `com.stockiq.reminder` fires every 10 min → `~/stockiq-daily.sh` runs 
 Order inside `deploy-to-s3.sh`:
 1. `update_news.py`: Yahoo/Google RSS → OpenAI summaries → news.html + news.js (2-hour cooldown)
 2. `update_stock_news.py`: per-stock news into stock pages + news.html/news.js (23-hour cooldown per stock)
-3. `update_stock_analysis.py`: snapshots on large caps, robots, `indexable_stocks.txt`
+3. `update_stock_analysis.py`: data snapshots on all 3,467 stocks, sets index/noindex on large caps (≥$10B), writes `indexable_stocks.txt`. ~20 min, no API cost. 404s for delisted stocks are normal/cached. **Was missing from deploy until Oct 2026 — caused stock data to go stale.**
 4. Backups (website + stockiq; prod_scripts every 23h)
 5. `people_also_watch_stocks.py --missing`
-6. `update_sitemap.py`: stock URLs = `indexable_stocks.txt`, drops news.html, updates lastmod
+6. `update_sitemap.py`: **rebuilds** stock URLs from `indexable_stocks.txt` (not all HTML files), updates lastmod on site pages. Refuses if list < 200 entries.
 7. `cleanup_broken_links.py`, `remove_news_duplicates.py`, `finalize_news_html.py`
 8. S3 upload:
    - `stocks/`: `aws s3 sync --delete` (size + mtime), 24h cache
    - `js/`: sync --delete, 24h cache
-   - root `*.html` (1h cache), `*.css` (24h), `*.js` (24h; news.js 1h): uploaded when local MD5 ≠ S3 ETag (one listing call)
+   - root `*.html` (1h cache), `*.css` (24h), root `*.js` (24h; news.js 1h): uploaded when local size ≠ S3 size
    - images (7d), and `stocks.txt robots.txt sitemap.xml`
 9. CloudFront invalidation `/*` (waits for completion), `notify_search_engines.py` (IndexNow; "202" means accepted)
 10. `sync-all-lambdas.sh` (hourly cooldown)
@@ -274,6 +274,8 @@ git pull --rebase && git push
   `company_names_dict.txt`, `robots-http.txt`, `*.py`.
 - Running `generate-stock-pages.py` rewrites all 3,467 pages, so the next deploy uploads all
   of them (~110 MB). That's fine, just slower.
+- **Sitemap bloat:** `generate_sitemap.py` previously added all HTML files, undoing the 979-URL trim. Fixed Oct 2026 — it now uses `indexable_stocks.txt`. `update_sitemap.py` also fixed — it now rebuilds stock URLs from scratch rather than just updating dates. If sitemap ever shows 3,485 URLs again, run `python3 update_sitemap.py` and resubmit in Search Console.
+- **`update_stock_analysis.py` was missing from deploy-to-s3.sh** (Oct 2026). Stock data was stale from Sep 24. It's now in the pipeline. If stock pages ever show old dates again, check it's still in deploy-to-s3.sh.
 - A stray `test-news-layout.html` was publicly live on S3 (deleted 25 Sep 2026). Check S3 for files with no local
   copy occasionally (`aws s3api list-objects-v2 --delimiter /`).
 
@@ -352,3 +354,17 @@ quirk, not a layout bug.
   - `deploy-to-s3.sh`: stock pages uploaded by size+time (1,051 were stale), root html/css/js by
     MD5, root JS now uploaded, `DRY_RUN` mode, both repos pushed.
   - `.amazonq` mirror removed (Kiro only); steering docs reviewed; `verification-summary.md` removed.
+
+- **Oct 2026** (Kiro session, new MacBook setup + Japan screener + SEO fixes):
+  - Migrated all paths from `/Users/ddewit/` → `/Users/dave/` across 31 files.
+  - Python deps installed: requests, openai, yfinance, pytz, bs4, dateutil.
+  - Scheduled task converted from AppleScript to bash (`~/stockiq-daily.sh`), window extended to 11am–10pm.
+  - Dropbox one-way sync configured (`~/dropbox-sync.sh`, daily launchd job).
+  - Git identity updated to `dave@dewit.com.au`.
+  - `deploy-to-s3.sh`: fixed `$PYTHON` path variable; added `update_stock_analysis.py` to pipeline (was missing — caused stock data to go stale since Sep 25); added root JS sync loop (all `*.js` in website root now uploaded).
+  - `sync-all-lambdas.sh`: added `--profile default --region us-east-1`.
+  - `update_sitemap.py`: fully rewritten to **rebuild** stock URLs from `indexable_stocks.txt` on every run (old version only updated dates, never removed URLs — caused sitemap to stay at 3,485 URLs instead of ~970).
+  - `generate_sitemap.py`: fixed to use `indexable_stocks.txt` instead of all HTML files.
+  - Ran `update_stock_analysis.py` manually to refresh all 953 large-cap pages (data was stale since Sep 24). Sitemap rebuilt to 970 URLs and resubmitted to Google Search Console.
+  - **Japan Nikkei 225 screener** built end-to-end (21 workers, 210 stocks, full dashboard integration).
+  - Added `add-new-screener.md` steering doc. Trimmed roadmap, backlinks, script-reference docs.

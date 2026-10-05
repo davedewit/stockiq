@@ -123,6 +123,10 @@ else
     echo "⏭️  Skipping stock news update"
 fi
 
+# Update stock analysis snapshots and indexable_stocks.txt (runs daily, determines sitemap)
+echo "📈 Updating stock analysis snapshots..."
+$PYTHON "/Users/dave/VSCODE/stockiq/update_stock_analysis.py"
+
 # Remove backups older than 30 days (for both website and stockiq)
 echo "🧹 Removing backups older than 30 days..."
 find "$BACKUP_DIR_BASE" -maxdepth 1 -type d -name "*_backup_*" -mtime +30 -exec rm -rf {} +
@@ -229,6 +233,24 @@ for filepath in "$WEBSITE_DIR"/*.html; do
     $AWS s3 cp "$filepath" s3://$BUCKET/"$file" \
       --cache-control "public, max-age=3600" \
       --content-type "text/html; charset=utf-8"
+  fi
+done
+
+# Sync root JS files - 24 hour cache (except news.js which gets 1 hour)
+echo "  📜 Syncing root JavaScript files..."
+for filepath in "$WEBSITE_DIR"/*.js; do
+  file=$(basename "$filepath")
+  LOCAL_SIZE=$(wc -c < "$filepath")
+  S3_SIZE=$($AWS s3 ls s3://$BUCKET/"$file" 2>/dev/null | awk '{print $3}')
+  if [ "$LOCAL_SIZE" != "$S3_SIZE" ]; then
+    if [ "$file" = "news.js" ]; then
+      $AWS s3 cp "$filepath" s3://$BUCKET/"$file" \
+        --cache-control "public, max-age=3600"
+    else
+      $AWS s3 cp "$filepath" s3://$BUCKET/"$file" \
+        --cache-control "public, max-age=86400"
+    fi
+    echo "    ↑ $file"
   fi
 done
 
