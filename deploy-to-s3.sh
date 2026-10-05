@@ -39,6 +39,7 @@ fi
 BUCKET="stockiq-final-websitebucket-vqekic7enf9h"
 DISTRIBUTION_ID="EHXV50CPHY07R"
 AWS="/opt/homebrew/bin/aws"
+PYTHON="/opt/homebrew/bin/python3"
 
 # Function to check internet connection
 check_internet() {
@@ -102,12 +103,12 @@ if [ "$UPDATE_STOCK_NEWS" = "true" ]; then
             echo "⏭️  Skipping news update (last update was $((TIME_DIFF / 60)) minutes ago)"
         else
             echo "📰 Updating market news..."
-            python3 "/Users/dave/VSCODE/stockiq/update_news.py"
+            $PYTHON "/Users/dave/VSCODE/stockiq/update_news.py"
             date +%s > "$NEWS_UPDATE_MARKER"
         fi
     else
         echo "📰 Updating market news..."
-        python3 "/Users/dave/VSCODE/stockiq/update_news.py"
+        $PYTHON "/Users/dave/VSCODE/stockiq/update_news.py"
         date +%s > "$NEWS_UPDATE_MARKER"
     fi
 else
@@ -117,7 +118,7 @@ fi
 # Update individual stock pages with critical news (only if user opted in)
 if [ "$UPDATE_STOCK_NEWS" = "true" ]; then
     echo "📊 Checking for critical stock news..."
-    python3 "/Users/dave/VSCODE/stockiq/update_stock_news.py"
+    $PYTHON "/Users/dave/VSCODE/stockiq/update_stock_news.py"
 else
     echo "⏭️  Skipping stock news update"
 fi
@@ -167,19 +168,19 @@ fi
 
 # Add related stocks section to any pages missing it
 echo "🔗 Adding internal links to pages..."
-python3 "/Users/dave/VSCODE/stockiq/people_also_watch_stocks.py" --missing
+$PYTHON "/Users/dave/VSCODE/stockiq/people_also_watch_stocks.py" --missing
 
 # Update sitemap with current date
 echo "📅 Updating sitemap dates..."
-python3 "/Users/dave/VSCODE/stockiq/update_sitemap.py"
+$PYTHON "/Users/dave/VSCODE/stockiq/update_sitemap.py"
 
 # Clean up broken article links in news.html
 echo "🧹 Cleaning up broken links..."
-python3 "/Users/dave/VSCODE/stockiq/cleanup_broken_links.py"
+$PYTHON "/Users/dave/VSCODE/stockiq/cleanup_broken_links.py"
 
 # Remove duplicate articles from news.html
 echo "🗑️ Removing duplicate articles..."
-python3 "/Users/dave/VSCODE/stockiq/remove_news_duplicates.py"
+$PYTHON "/Users/dave/VSCODE/stockiq/remove_news_duplicates.py"
 
 # Update news article dates
 echo "📅 Updating news article dates..."
@@ -302,7 +303,7 @@ echo ""
 
 # Notify search engines about sitemap update
 echo "🔔 Notifying search engines..."
-python3 "/Users/dave/VSCODE/website/notify_search_engines.py"
+$PYTHON "/Users/dave/VSCODE/website/notify_search_engines.py"
 
 # Show content statistics
 echo ""

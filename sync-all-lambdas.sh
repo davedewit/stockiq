@@ -10,7 +10,7 @@ echo "📦 Syncing unique StockIQ Lambda functions to $OUTPUT_DIR"
 echo ""
 
 # Get all Lambda functions
-FUNCTIONS=$($AWS lambda list-functions --query 'Functions[].FunctionName' --output text)
+FUNCTIONS=$($AWS lambda list-functions --profile default --region us-east-1 --query 'Functions[].FunctionName' --output text)
 
 TOTAL=$(echo "$FUNCTIONS" | wc -w)
 CURRENT=0
@@ -39,7 +39,7 @@ for FUNCTION in $FUNCTIONS; do
 $FUNC_TYPE"
     
     # Get the function code location and last modified time
-    FUNC_INFO=$($AWS lambda get-function --function-name "$FUNCTION" --query '{Location: Code.Location, LastModified: Configuration.LastModified}' --output json 2>/dev/null)
+    FUNC_INFO=$($AWS lambda get-function --function-name "$FUNCTION" --profile default --region us-east-1 --query '{Location: Code.Location, LastModified: Configuration.LastModified}' --output json 2>/dev/null)
     CODE_URL=$(echo "$FUNC_INFO" | jq -r '.Location' 2>/dev/null)
     
     if [ -z "$CODE_URL" ] || [ "$CODE_URL" = "null" ]; then
