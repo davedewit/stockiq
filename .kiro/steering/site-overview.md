@@ -314,8 +314,16 @@ git pull --rebase && git push
 ## 11. Open items and optimisation ideas
 
 Flagged for the owner (not changed):
-- Homepage "First 1,000 subscribers: 5 winners get 1 YEAR FREE" giveaway. Confirm it runs, or remove it.
-- Homepage "Real-time data: zero delay" and "Bank-Level Security". Yahoo data is often delayed.
+- Homepage "Bank-Level Security" claim is still there and unsupported. (The giveaway, "zero delay",
+  "real-time", the accuracy percentages and the 12/42-section claims were removed 9 Oct 2026.)
+- Legal, needs a qualified review: no licence statement (AFSL) or company name/address anywhere, while the
+  product issues BUY/SELL/HOLD signals; terms and privacy still say "Last updated: December 2024".
+- About page screener weights add up to 102% (20+20+18+10+8+6+6+5+3+3+2+1). Find the wrong one in the
+  worker Lambda and fix the page.
+- "42+ filters" / "42+ data points" on the guide pages are unverified.
+- Homepage "View Pricing Plans" links to `#pricing`, but there is no pricing section; prices only appear on
+  the About and Terms pages. "Coming Soon" screener buttons and the Bloomberg comparison are still shown.
+- Mobile: owner reports the page zooms when tapping the AI chat input (input is already 16px; cause not found).
 - News `data-timestamp` values on stock pages get bumped past the article date
   (e.g. 0006.HK showed 16 Sep for a 10 Sep article). This inflates sitemap lastmod; the cause
   is not found yet (look in `update_stock_news.py`).
@@ -389,3 +397,15 @@ quirk, not a layout bug.
   - Cleaned up: sitemap copy.xml, blog.html.backup, stocks copy.txt, generate-stock-pages.py.backup, sitemap.xml.backup, github-repo/, stockiq/sitemap.xml, __pycache__.
   - **Japan Nikkei 225 screener** built end-to-end (21 workers, 210 stocks, full dashboard integration).
   - Added `add-new-screener.md` steering doc. Trimmed roadmap, backlinks, script-reference docs.
+
+- **9 Oct 2026** (Claude Code session, recovery + site text):
+  - Found and fixed the Oct 2 revert of `generate-stock-pages.py` and `deploy-to-s3.sh` (section 9). All
+    3,467 pages regenerated with the correct template; 956 indexable, rest noindex; deployed.
+  - Site text: removed unsupported accuracy claims, "real-time"/"zero delay", conflicting counts; added a
+    "general information only, not financial advice" footer line to public pages; FAQ and terms plan names
+    and limits now match the payment Lambda (Starter 15/day, Pro 50/day, Elite unlimited).
+  - Home page email signup reworded (no giveaway, no 6 AM promise); `stockiq-email-capture` now emails
+    `noreply@stockiq.tech` on each signup. Details: `stockiq.md` "Email Signup List".
+  - `.gitignore` in both repos restored (`.last_*`, `.analysis_cache/`, `__pycache__/`,
+    `stocks-backup-before-restore/`).
+  - `add-new-screener.md` completed against the Japan code (India next).

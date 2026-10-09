@@ -232,3 +232,36 @@ aws s3 rm s3://stockiq-option-1-1-custom-analysis/charts/email@example.com/ --re
 - **Cost per message:** ~$0.00015 (0.015 cents) | 100 msgs/month = $0.015
 - **Reports:** `stockiq-ai-chat-reporter` emails daily at 5pm UTC to `openai-usage@stockiq.tech`
 - **Tables:** `stockiq-ai-chat-limits` (rate limiting, TTL 2h), `stockiq-ai-chat-stats` (usage tracking, TTL 90d)
+
+## Email Signup List (home page, updated Oct 9, 2026)
+- **What it is:** the "Get AI Stock Picks by Email" block on `index.html` (`<section class="email-capture-section">`,
+  input `#email-capture`, button calls `captureEmail()`). **No email is sent to subscribers yet** - it is an
+  early-interest list. The owner will send something manually if it passes ~5 real signups.
+- **Flow:** `captureEmail()` (the `async` one near the end of `index.html`; an older same-named function
+  earlier in the file is overridden and unused) POSTs `{action:'subscribe', email, source:'homepage'}` to the
+  Lambda Function URL -> Lambda saves the row -> Lambda emails the owner.
+- **Lambda:** `stockiq-email-capture` | URL `https://r5aierjvyfe2kdjoql5p23jmuy0rtisk.lambda-url.us-east-1.on.aws/`
+  | handler file `email-capture-with-count.py` (zip that file, not `lambda_function.py`) | Python 3.11
+  | role `mylambdafunction-role-haabf70x` (has DynamoDB + `ses:SendEmail`).
+- **Actions:** `subscribe` (new, duplicate, or resubscribe) and `get_count` (number with status `subscribed`).
+- **Storage:** DynamoDB `stockiq-email-subscribers`, key `email`. Fields: `status`, `source`, `subscribed_at`,
+  `ip_address` (real request IP), `user_agent`, `subscriber_id`. No S3.
+- **Owner notification:** SES, from `noreply@stockiq.tech` to `noreply@stockiq.tech` (constants
+  `NOTIFICATION_EMAIL` / `ADMIN_EMAIL` at the top of the file). Sent on new signup and resubscribe, not on
+  duplicates. A failed email never fails the signup. Subject: `StockIQ: New signup (N total) - <email>`.
+- **Don't promise what doesn't exist:** the block used to say "daily picks at 6 AM EST" and "5 winners get
+  1 YEAR FREE". Both were removed Oct 2026. Only add such wording back if the owner is actually running it.
+- **Known gaps:** the Function URL is public (a bot could flood signups and notification emails; no cap yet);
+  the Lambda has **no CloudWatch log group**, so errors leave no trace; there is no unsubscribe link or
+  sending job.
+- **Commands:**
+  ```bash
+  # List signups
+  aws dynamodb scan --table-name stockiq-email-subscribers --profile default --region us-east-1 \
+    --query 'Items[].{email:email.S,at:subscribed_at.S,source:source.S,status:status.S}' --output table
+  # Deploy after editing lambda-sync/stockiq-email-capture/email-capture-with-count.py
+  cd /Users/dave/VSCODE/stockiq/lambda-sync/stockiq-email-capture
+  zip -j /tmp/email-capture.zip email-capture-with-count.py
+  aws lambda update-function-code --function-name stockiq-email-capture \
+    --zip-file fileb:///tmp/email-capture.zip --profile default --region us-east-1
+  ```
