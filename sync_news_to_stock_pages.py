@@ -93,10 +93,16 @@ def update_stock_page(symbol, article):
             news_section.strip(),
             content
         )
+    elif '<!-- RELATED_SECTION_START -->' in content:
+        # No news markers on the page: news goes just before "People also watch"
+        content = content.replace('<!-- RELATED_SECTION_START -->',
+                                  news_section.strip() + '\n\n        <!-- RELATED_SECTION_START -->', 1)
     else:
-        # Insert before features grid
+        # Old template (pre-Sep 2026): insert before features grid
         pattern = r'(<div style="display: grid; grid-template-columns: repeat\(auto-fit, minmax\(300px, 1fr\)\);)'
-        content = re.sub(pattern, f'{news_section}\\1', content, count=1)
+        if not re.search(pattern, content):
+            return False  # nowhere to put it; leave the page alone
+        content = re.sub(pattern, lambda m: news_section + m.group(1), content, count=1)
     
     with open(file_path, 'w') as f:
         f.write(content)

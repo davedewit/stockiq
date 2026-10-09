@@ -120,6 +120,16 @@ total_stock_pages = len(stock_pages)
 # Count stock pages with news and count articles per page
 stock_with_news = 0
 stock_symbols_with_news = set()
+latest_news_time = {}  # symbol -> timestamp of the newest article on its stock page
+
+
+def parse_ts(ts):
+    """Parse an ISO timestamp to a naive UTC datetime (None if unparseable)."""
+    try:
+        dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+        return dt.replace(tzinfo=None) - (dt.utcoffset() or timedelta(0))
+    except ValueError:
+        return None
 stocks_with_1_article = 0
 stocks_with_2_articles = 0
 stocks_with_3_articles = 0
@@ -133,6 +143,9 @@ for page in stock_pages:
     if '<div style="background: var(--bg-secondary); border-left: 4px solid #ffc107' in content:
         stock_with_news += 1
         stock_symbols_with_news.add(page.stem)
+        latest_ts = re.search(r'<!-- NEWS_SECTION_START -->.*?data-timestamp="([^"]+)"', content, re.DOTALL)
+        if latest_ts:
+            latest_news_time[page.stem] = parse_ts(latest_ts.group(1))
         
         # Count articles in this stock page
         news_section = re.search(r'<!-- NEWS_SECTION_START -->(.*?)<!-- NEWS_SECTION_END -->', content, re.DOTALL)
@@ -177,8 +190,20 @@ for match in re.finditer(r'\b([A-Z]{2,5})\b(?=\))', news_html):
     if symbol in stock_symbols_with_news:
         stock_symbols_in_news.add(symbol)
 
+# news.html keeps only the newest articles (finalize_news_html.py), so only compare
+# stock pages whose newest article falls inside the window news.html still covers
+stock_article_html = [a for a in re.findall(r'<article class="blog-post".*?</article>', news_html, re.DOTALL) if 'Stock News' in a]
+news_times = [t for t in (parse_ts(m.group(1)) for m in (re.search(r'data-timestamp="([^"]+)"', a) for a in stock_article_html) if m) if t]
+window_start = min(news_times) if news_times else None
+if window_start:
+    symbols_in_window = {s for s in stock_symbols_with_news
+                         if latest_news_time.get(s) and latest_news_time[s] >= window_start}
+else:
+    symbols_in_window = set(stock_symbols_with_news)
+stock_with_news_in_window = len(symbols_in_window)
+
 # Find mismatches
-missing_from_news = stock_symbols_with_news - stock_symbols_in_news
+missing_from_news = symbols_in_window - stock_symbols_in_news
 extra_in_news = stock_symbols_in_news - stock_symbols_with_news
 
 # Load history for comparison
@@ -294,7 +319,7 @@ if len(timestamps) > 1:
 
 # Stock pages can have max 3 articles per symbol, but news.html can accumulate more
 # Only flag as mismatch if stock_with_news > stock_articles (stock pages have news but not in news.html)
-if stock_with_news > stock_articles:
+if stock_with_news_in_window > stock_articles:
     issues.append("sync_mismatch")
     
 if missing_from_news:
@@ -317,9 +342,9 @@ if not issues:
     print(f"✅ Checked {total_stock_pages} stock pages and news.html - no broken links found")
     print()
     print("📈 Coverage: {:.1f}% of stock pages have news".format(stock_with_news / total_stock_pages * 100))
-elif stock_with_news == stock_articles and not extra_in_news and total_items <= 100 and not broken_links:
+elif stock_with_news_in_window <= stock_articles and not missing_from_news and not extra_in_news and total_items <= 100 and not broken_links:
     print("\n✅ FRESH PERFECT SYNC (first articles only)")
-    print(f"   Stock pages with news: {stock_with_news}")
+    print(f"   Stock pages with news: {stock_with_news} ({stock_with_news_in_window} within the news.html window)")
     print(f"   Stock articles in news.html: {stock_articles}")
     print(f"✅ Checked {total_stock_pages} stock pages and news.html - no broken links found")
     print()
@@ -370,7 +395,7 @@ else:
         print()
     
     if "sync_mismatch" in issues:
-        diff = stock_with_news - stock_articles
+        diff = stock_with_news_in_window - stock_articles
         print(f"❌ Sync Mismatch: {abs(diff)} articles {'missing from' if diff > 0 else 'extra in'} news.html")
         print()
     

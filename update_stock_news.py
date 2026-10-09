@@ -755,9 +755,6 @@ def update_stock_page(symbol, news_html):
         )
         # Convert old articles to collapsed format
         collapsed_articles = []
-        if len(articles) > 0:
-            # Add "History" header before collapsed articles
-            collapsed_articles.append('<h4 style="margin: 30px 0 10px 0; color: var(--text-secondary); font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px;">History</h4>')
         
         for i, article in enumerate(articles[:2]):
             from dateutil import parser as date_parser
@@ -796,6 +793,9 @@ def update_stock_page(symbol, news_html):
         </div>'''
                 collapsed_articles.append(collapsed)
         
+        if collapsed_articles:
+            # "History" header goes before the collapsed articles, and only when there are some
+            collapsed_articles.insert(0, '<h4 style="margin: 30px 0 10px 0; color: var(--text-secondary); font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px;">History</h4>')
         existing_articles = collapsed_articles
     
     # Combine new article + collapsed old articles (max 3 total)
@@ -806,32 +806,26 @@ def update_stock_page(symbol, news_html):
     total_articles = len(all_articles)
     article_count_msg = f" (now {total_articles} article{'s' if total_articles > 1 else ''})"
     
-    # Remove old news section
-    content = re.sub(
-        r'<!-- NEWS_SECTION_START -->.*?<!-- NEWS_SECTION_END -->',
-        '',
-        content,
-        flags=re.DOTALL
-    )
-    
-    # Insert combined news section
-    news_section = f"""
-
-        <!-- NEWS_SECTION_START -->
+    news_block = f"""<!-- NEWS_SECTION_START -->
         {combined_html}
-        <!-- NEWS_SECTION_END -->
-"""
-    
-    # Find insertion point - after CTA closing </div>, before features grid
-    pattern = r'(</div>\s*)(\s*<div style="display: grid; grid-template-columns: repeat\(auto-fit, minmax\(300px, 1fr\)\);)'
-    
-    if re.search(pattern, content, re.DOTALL):
-        content = re.sub(pattern, r'\1' + news_section + r'\2', content, count=1, flags=re.DOTALL)
+        <!-- NEWS_SECTION_END -->"""
+    marker_pattern = r'<!-- NEWS_SECTION_START -->.*?<!-- NEWS_SECTION_END -->'
+    related_marker = '<!-- RELATED_SECTION_START -->'
+    grid_pattern = r'(<div style="display: grid; grid-template-columns: repeat\(auto-fit, minmax\(300px, 1fr\)\);)'
+
+    if re.search(marker_pattern, content, flags=re.DOTALL):
+        # Normal case: replace what is between the markers, in place
+        content = re.sub(marker_pattern, lambda m: news_block, content, count=1, flags=re.DOTALL)
+    elif related_marker in content:
+        # Page has no news markers yet: news goes just before "People also watch"
+        content = content.replace(related_marker, news_block + '\n\n        ' + related_marker, 1)
+    elif re.search(grid_pattern, content):
+        # Old template (pre-Sep 2026): before the features grid
+        content = re.sub(grid_pattern, lambda m: news_block + '\n\n        ' + m.group(1), content, count=1)
     else:
-        # Fallback: insert before features grid
-        pattern = r'(<div style="display: grid; grid-template-columns: repeat\(auto-fit, minmax\(300px, 1fr\)\);)'
-        content = re.sub(pattern, news_section + r'\1', content, count=1)
-    
+        print(f"⚠️  {symbol}: no place to insert news (no NEWS/RELATED markers) - page left unchanged")
+        return False
+
     with open(file_path, 'w') as f:
         f.write(content)
     
