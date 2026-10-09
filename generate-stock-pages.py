@@ -57,11 +57,11 @@ def generate_stock_page(stock, robots="noindex, follow", date_modified="2026-09-
     
     # Handle generic "Stock" sector
     if sector == "Stock":
-        meta_desc = f"Analyze {name} ({symbol}) stock with AI-powered insights, technical indicators, and real-time data. Free stock analysis tool."
+        meta_desc = f"Analyze {name} ({symbol}) stock with AI-powered insights, technical indicators, and market data. Free stock analysis tool."
         sector_display = "General"
         about_text = f"{name} ({symbol}) is a publicly traded company. The snapshot on this page updates daily; run a full report for the complete breakdown."
     else:
-        meta_desc = f"Analyze {name} ({symbol}) stock with AI-powered insights, technical indicators, and real-time data. Free stock analysis tool for {sector} sector."
+        meta_desc = f"Analyze {name} ({symbol}) stock with AI-powered insights, technical indicators, and market data. Free stock analysis tool for {sector} sector."
         sector_display = sector
         about_text = f"{name} ({symbol}) is listed in the {sector} sector. The snapshot on this page updates daily; run a full report for the complete breakdown."
     
@@ -356,7 +356,7 @@ if (hasPaid) {{
 
     <footer class="footer">
         <p>&copy; 2026 StockIQ - Professional Investment Research Platform</p>
-        <p>Powered by AI • Real-time Data • Comprehensive Analysis</p>
+        <p>Powered by AI • Market Data • Comprehensive Analysis</p>
         <p>
             <a href="../terms.html" style="color: #007bff; text-decoration: none;">Terms of Service</a> • 
             <a href="../privacy-policy.html" style="color: #007bff; text-decoration: none;">Privacy Policy</a> • 

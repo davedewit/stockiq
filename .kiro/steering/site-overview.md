@@ -292,6 +292,17 @@ git pull --rebase && git push
   and the output must contain `(dryrun)` lines and no `upload:` lines. That commit touched 24 scripts
   (`git diff --stat 2485162 7e14c8f`); `check_news_sync.py`, `update_sitemap.py` and
   `generate_sitemap.py` were also changed and have not been re-audited against their Sep 25 versions.
+- **News script wiped news on the current template (fixed 9 Oct 2026):** `update_stock_news.py`
+  (`update_stock_page`) removed the page's NEWS section and then looked for a "features grid" to insert
+  before. That grid only exists in the pre-Sep 25 template, so on current pages a new article **deleted the
+  news section and its markers** and still returned success. This is why pages kept losing their markers and
+  why "news in the sidebar but not on the stock page" kept happening. It now replaces the content between the
+  NEWS markers in place, falls back to inserting before `RELATED_SECTION_START`, and returns False (page
+  untouched) if neither exists. `sync_news_to_stock_pages.py` had the same fallback and is fixed too. The
+  "History" heading is now only written when there is an older article under it (448 pages had an empty one;
+  cleaned up). **Any script that writes into stock pages must anchor on the section markers, never on other
+  template HTML.**
+- `check_news_sync.py` had its news-window logic removed by the same Oct 2 commit; restored from 2485162.
 - **`update_stock_analysis.py` was missing from deploy-to-s3.sh** (Oct 2026). Stock data was stale from Sep 24. It's now in the pipeline. If stock pages ever show old dates again, check it's still in deploy-to-s3.sh.
 - A stray `test-news-layout.html` was publicly live on S3 (deleted 25 Sep 2026). Check S3 for files with no local
   copy occasionally (`aws s3api list-objects-v2 --delimiter /`).
