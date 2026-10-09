@@ -308,7 +308,7 @@ def fetch_stock_news(symbol):
         
         # Only consider articles from last 2 days
         from dateutil import parser as date_parser
-        cutoff_date = datetime.now() - timedelta(days=2)
+        cutoff_date = datetime.now() - timedelta(days=4)
         
         news = []
         for item in items[:30]:  # Check first 30 articles
