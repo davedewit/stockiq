@@ -49,7 +49,7 @@ For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-s
 | News out of sync | Run `Sync_stock_to_news.py` (next deploy trims it back) |
 | Sidebar shows no news | `node -c /Users/dave/VSCODE/website/news.js` |
 | Sitemap has too many URLs (all 3,485) | `generate_sitemap.py` was adding all HTML files — it's now fixed to use indexable_stocks.txt only. Run `python3 update_sitemap.py` to rebuild, then resubmit in Google Search Console |
-| analysis-functions.js not updating on live site | Deploy script now uploads all root `*.js` — but if running manually: `aws s3 cp analysis-functions.js s3://stockiq-final-websitebucket-vqekic7enf9h/ --cache-control "public, max-age=86400" --profile default --region us-east-1` |
+| Stock page news wiped after running generate-stock-pages.py | Script only preserved news from pages with NEWS_SECTION_START markers — fixed Oct 2026, now also handles old format and shows pre/post count. If news drops: run `python3 sync_news_to_stock_pages.py` to recover from news.html |
 
 ## Google Search Console
 
@@ -62,3 +62,4 @@ For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-s
 
 ## Python Path
 Scripts use `/opt/homebrew/bin/python3` (set as `$PYTHON` in deploy-to-s3.sh). Run manually with `python3` or `/opt/homebrew/bin/python3`.
+| analysis-functions.js not updating on live site | Deploy script now uploads all root `*.js` — but if running manually: `aws s3 cp analysis-functions.js s3://stockiq-final-websitebucket-vqekic7enf9h/ --cache-control "public, max-age=86400" --profile default --region us-east-1` |

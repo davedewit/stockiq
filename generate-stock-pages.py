@@ -581,6 +581,13 @@ def main():
                 '<!-- RELATED_SECTION_START -->\n        <!-- RELATED_SECTION_END -->',
                 f'<!-- RELATED_SECTION_START -->{existing_related}<!-- RELATED_SECTION_END -->'
             )
+
+        # Insert preserved analysis section
+        if existing_analysis:
+            html = html.replace(
+                '<!-- ANALYSIS_SECTION_START -->\n        <!-- ANALYSIS_SECTION_END -->',
+                f'<!-- ANALYSIS_SECTION_START -->{existing_analysis}<!-- ANALYSIS_SECTION_END -->'
+            )
         
         # Write HTML file
         with open(filepath, 'w', encoding='utf-8') as f:
@@ -601,6 +608,18 @@ def main():
                     removed += 1
         if removed:
             print(f"🗑️  Removed {removed} orphaned pages")
+
+    # Post-generation safety check — verify news wasn't wiped
+    if not single_stock:
+        after_news = sum(1 for s in STOCKS 
+            if os.path.exists(os.path.join(stocks_dir, f"{s['symbol']}.html"))
+            and 'Read full article' in open(os.path.join(stocks_dir, f"{s['symbol']}.html")).read())
+        print(f"\n📰 News check: {after_news} pages have news after generation")
+        if 'pages_with_news' in dir() and after_news < pages_with_news * 0.9:
+            print(f"⚠️  WARNING: News dropped from {pages_with_news} to {after_news} pages!")
+            print(f"   Run: python3 sync_news_to_stock_pages.py to recover")
+        else:
+            print(f"✅ News preserved correctly")
 
     print(f"\n✅ Generated {len(STOCKS)} stock pages in /stocks/ directory")
 
