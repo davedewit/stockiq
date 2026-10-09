@@ -336,7 +336,11 @@ Flagged for the owner (not changed):
   Lambdas and used for logic, but are only ever shown through a label function:
   `signalLabel()` / `horizonLabel()` in `analysis-functions.js`, `signal_label()` / `horizon_label()` in the
   coordinator and crypto orchestrator, `signal_label()` in the report Lambda. Labels: Strongly positive, Positive,
-  Slightly positive, Mixed, Slightly negative, Negative, Strongly negative. Stop loss / take profit are shown as
+  Slightly positive, Mixed, Slightly negative, Negative, Strongly negative. **Codes in use:** stock workers return
+  `STRONG_BUY, BUY, MODERATE_BUY, HOLD, MODERATE_SELL, SELL, STRONG_SELL` (underscores); crypto workers return
+  `STRONG BUY, BUY, CONSIDER, HOLD, AVOID, SELL, STRONG SELL` (spaces). The label functions accept both forms.
+  An unknown code shows as "Unrated", so if "Unrated" ever appears in a report, a worker has a new code that
+  needs adding to all three label maps. Stop loss / take profit are shown as
   "Lower / Upper reference level"; buy limit / buy stop as "Pullback / Breakout level"; "Profit probability" as
   "Model probability estimate"; strategy as "Horizon". CSV headers changed to match (`Signal`, `Lower_Level`,
   `Upper_Level`, `Model_Probability_%`, `Horizon`, `Horizon_Days`). Scoring and numbers were not changed
@@ -349,7 +353,10 @@ Flagged for the owner (not changed):
   - **Keep it this way:** any new formatter must print `signalLabel(x.recommendation)`, never the raw code, and
     must not print "buy", "sell", "stop loss", "take profit", "target", "position size" or "recommendation".
     The dashboard tracker parses only the symbol and price at the start of numbered lines; don't change those.
-  - Not changed: the ~630 screener worker Lambdas still return the raw codes and a few descriptive breakdown
+  - **The ~630 screener workers were NOT changed and do not need to be.** They return data only (47 fields per
+    stock, no report text); all wording is applied afterwards in two places: `analysis-functions.js` (on-page runs)
+    and `stockiq-screener-coordinator` (background runs). A wording change never requires redeploying workers.
+  - Not changed: the workers still return the raw codes and a few descriptive breakdown
     strings ("RSI Buy Zone"); three Lambdas with old wording are not called by the site
     (`stockiq-option-3-1-us-screener`, `stockiq-option-3-1-sp100`, `stockiq-option-3-dynamic-coordinator`).
 - **Why the page score and the app score differ (AAPL 71 vs 47, checked 9 Oct 2026).** Same model, different
