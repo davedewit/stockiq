@@ -225,7 +225,7 @@ aws s3 rm s3://stockiq-option-1-1-custom-analysis/charts/email@example.com/ --re
 - **Frontend:** `ai-chat.js` (22.5KB) on all pages
 - **Features:** 3-message conversation memory, live stock prices, links to stock pages
 - **Rate limits:** Anonymous: 3 msg/hr | Trial/free: 10 msg/hr | Paid: 50 msg/hr | @dewit.com.au: unlimited
-- **Positioning:** index.html right 370px (avoids sidebar) | stock pages right 20px
+- **Positioning:** bottom-right, 20px from the edge on every page. Only on pages that have the `#news-panel` sidebar (home page) and only from 1401px wide, it moves to right 370px to clear the panel (`body.has-news-panel`, set in ai-chat.js)
 - **UI:** 380x600px desktop, gradient header, message bubbles with tails, input font-size 16px (prevents mobile zoom)
 - **Conversation history:** Last 6 messages (3 exchanges) sent as context, stored in sessionStorage
 - **Token usage:** ~650 tokens/message average (system prompt + history + current)

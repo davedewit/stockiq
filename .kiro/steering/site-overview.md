@@ -325,15 +325,19 @@ git pull --rebase && git push
 ## 11. Open items and optimisation ideas
 
 Flagged for the owner (not changed):
-- Homepage "Bank-Level Security" claim is still there and unsupported. (The giveaway, "zero delay",
-  "real-time", the accuracy percentages and the 12/42-section claims were removed 9 Oct 2026.)
 - Legal, needs a qualified review: no licence statement (AFSL) or company name/address anywhere, while the
-  product issues BUY/SELL/HOLD signals; terms and privacy still say "Last updated: December 2024".
-- About page screener weights add up to 102% (20+20+18+10+8+6+6+5+3+3+2+1). Find the wrong one in the
-  worker Lambda and fix the page.
-- "42+ filters" / "42+ data points" on the guide pages are unverified.
-- Homepage "View Pricing Plans" links to `#pricing`, but there is no pricing section; prices only appear on
-  the About and Terms pages. "Coming Soon" screener buttons and the Bloomberg comparison are still shown.
+  product issues BUY/SELL/HOLD signals; terms give no currency for the prices.
+- Screener weights really do total 102% in the worker code (0.18+0.08+0.06+0.20+0.20+0.10+0.06+0.05+0.03+
+  0.03+0.02+0.01). The About and FAQ pages now say so. Changing the code would change every screener score.
+- Dashboard plan cards list features that are not verified to differ by plan ("Advanced screening & alerts",
+  "Portfolio tracking", "White-label options", "Dedicated support"), while the FAQ says all plans get the same
+  features. Old accounts also carry legacy limits (Starter 50/day, Pro 200/day); new purchases get 15/50/unlimited.
+- Home page comparison table still benchmarks against Bloomberg ($24,000/yr) and Morningstar.
+- Analysis page: 12 "Coming Soon" screener buttons; Nikkei 225 is labelled 210 stocks (the real count covered).
+- Guides are ~800 words of definitions with no worked examples.
+- Usage badge (`#trial-status-display`, created in `auth.js`, fixed top-right) overlaps the index cards under
+  the nav. Bottom-left is taken by the anonymous "Start 3-Day Free Trial" sticky button, so it needs a proper
+  placement decision, not a quick move.
 - Mobile: owner reports the page zooms when tapping the AI chat input (input is already 16px; cause not found).
 - News `data-timestamp` values on stock pages get bumped past the article date
   (e.g. 0006.HK showed 16 Sep for a 10 Sep article). This inflates sitemap lastmod; the cause

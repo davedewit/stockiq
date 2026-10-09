@@ -74,13 +74,14 @@ without verifying each on Yahoo.
 ### 2a. Get the base worker code
 Copy from the existing non-US worker (handles `.T`, `.AX`, `.L`, `.BO`, `.NS` etc.):
 ```bash
-ls /Users/dave/VSCODE/stockiq/lambda-sync/stockiq-asia-5-5-worker-1/
-# Contains lambda_function.py
+ls -d /Users/dave/VSCODE/stockiq/lambda-sync/stockiq-asia-5-5-worker-*/
+# The local mirror keeps ONE worker per group (duplicates are skipped), so the folder is
+# whichever number was synced, e.g. stockiq-asia-5-5-worker-10. It contains lambda_function.py
 ```
 
 ### 2b. Create all workers in one go
 ```bash
-cd /Users/dave/VSCODE/stockiq/lambda-sync/stockiq-asia-5-5-worker-1  # use as source
+cd /Users/dave/VSCODE/stockiq/lambda-sync/stockiq-asia-5-5-worker-*/  # the one Nikkei worker in the mirror
 zip /tmp/worker.zip lambda_function.py
 
 TOTAL_WORKERS=3   # adjust to ceil(stocks/10)
