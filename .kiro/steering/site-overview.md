@@ -359,6 +359,41 @@ Flagged for the owner (not changed):
   - Not changed: the workers still return the raw codes and a few descriptive breakdown
     strings ("RSI Buy Zone"); three Lambdas with old wording are not called by the site
     (`stockiq-option-3-1-us-screener`, `stockiq-option-3-1-sp100`, `stockiq-option-3-dynamic-coordinator`).
+- **Full end-to-end check of every analysis button (9 Oct 2026).** All 21 distinct buttons on analysis.html were
+  run with real data through the real page code (in Node, with history/usage writes blocked) and all 15
+  screeners through the coordinator (saves intercepted). Result: everything runs; all 709 worker calls
+  succeeded; output is well-formed. Fixed during the check:
+  - `MODERATE_BUY` / `MODERATE_SELL` were missing from the label maps (a third of screener results).
+  - `BRK.B` / `BF.B` never returned data: Yahoo needs `BRK-B` / `BF-B`. Fixed in the page lists and the coordinator.
+  - S&P 500 (503 symbols, 50 workers) and NASDAQ 100 (101, 10 workers): the symbols past workers x 10 were never
+    sent. The last worker now takes the remainder (workers accept more than 10), in both page code and coordinator.
+  - S&P 1500 coordinator list has 19 duplicate symbols: results are now de-duplicated by symbol.
+  - Dashboard performance tracker dropped single-letter tickers (W, S, F, T ...) and dash tickers: regex widened.
+  - Crypto report legend said "GOOD ENTRY / OK ENTRY / RISKY ENTRY"; now describes when a coin was flagged.
+  **Not fixed, needs owner decisions:**
+  - **Stale constituent lists.** Stocks returning no data (dead tickers: taken over, renamed, delisted):
+    S&P 100 1, NASDAQ 100 2, S&P 500 13, S&P 400+600 132 (14%), S&P 1500 145, Russell 1000 132 (13%),
+    Russell 2000 174, ASX 50 3, ASX 100 16 (16%), ASX 200 29 (15%), ASX 300 14, **FTSE 100 25 (25%)**, Nikkei 10.
+    Button labels overstate coverage ("ASX 300 (300 stocks)" has 231 in its list and returns 217; "S&P 400+600
+    (1000 stocks)" returns 823). The lists live in two places that must be kept the same: the `*Universe`
+    arrays in `analysis-functions.js` and `STOCK_UNIVERSES` in the coordinator. Refresh from current index
+    constituents; the output footer already reports the real analysed count.
+  - **Crypto screener matches the wrong coins.** Workers take CoinSpot's symbol list and look each one up on
+    Yahoo as `SYMBOL-USD`. Different coins share symbols, so e.g. `CORE` is priced as "cVault.finance" ($5,698)
+    and `TON` as "TON Token" ($0.004), and the wrong asset can rank #1. 142 of 529 coins (27%) have no Yahoo
+    data at all and come back with price 0 and score 0 (shown as "Mixed", counted in "Coins Analyzed").
+    Fix belongs in the crypto workers: sanity-check the Yahoo price against CoinSpot's own price and drop
+    mismatches and zero-price coins.
+  - A worker returns nothing for some valid symbols even when asked directly (WBD, PSKY): not investigated.
+  - `market-data-sidebar.html` and `market-data-widget.html` are live but call a Lambda URL that no longer exists
+    (403). Nothing links to them. Delete them from S3 and the repo, or repoint them.
+  - `lambda-url-mapping.json` is stale: 24 addresses used by the site are not in it (21 Nikkei workers, AI chat,
+    `stock-prices.js`). Regenerate with `generate-lambda-url-mappings.sh`.
+  - Reports already saved in users' history keep the old BUY/SELL wording; only new runs are reworded.
+  **How to repeat the check:** the harnesses are not in the repo; the method is (1) load `analysis-functions.js`
+  in a Node `vm` with stub DOM, real `fetch`, and `displayResults` / `saveAnalysisToHistory` overridden, then call
+  `runAnalysis(option, subOption, event)` per button; (2) import the coordinator locally, patch `urlopen` to
+  intercept the dashboard save URL, call `lambda_handler` per key (needs `AWS_DEFAULT_REGION=us-east-1`).
 - **Why the page score and the app score differ (AAPL 71 vs 47, checked 9 Oct 2026).** Same model, different
   inputs: (1) the page uses the previous close, the app uses the live price, and the trend factor is a cliff:
   0.1% below the 20-day average turned "Strong Uptrend +12" into "Below 20-day MA -6" (18 points); (2) the page
