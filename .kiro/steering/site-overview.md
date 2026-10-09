@@ -274,7 +274,7 @@ git pull --rebase && git push
   `company_names_dict.txt`, `robots-http.txt`, `*.py`.
 - Running `generate-stock-pages.py` rewrites all 3,467 pages, so the next deploy uploads all
   of them (~110 MB). That's fine, just slower.
-- **Sitemap bloat:** `generate_sitemap.py` previously added all HTML files, undoing the 979-URL trim. Fixed Oct 2026 — it now uses `indexable_stocks.txt`. `update_sitemap.py` also fixed — it now rebuilds stock URLs from scratch rather than just updating dates. If sitemap ever shows 3,485 URLs again, run `python3 update_sitemap.py` and resubmit in Search Console.
+- **generate-stock-pages.py wipes news on pages without markers:** If stock pages were created before `<!-- NEWS_SECTION_START/END -->` markers existed, regenerating wipes their news silently. Fixed Oct 2026 — script now has a fallback to extract news from old-format pages, plus a pre-run count showing how many pages have news. If running after a long gap, check that count before and after. Always run `sync_news_to_stock_pages.py` after regenerating if news is lost.
 - **`update_stock_analysis.py` was missing from deploy-to-s3.sh** (Oct 2026). Stock data was stale from Sep 24. It's now in the pipeline. If stock pages ever show old dates again, check it's still in deploy-to-s3.sh.
 - A stray `test-news-layout.html` was publicly live on S3 (deleted 25 Sep 2026). Check S3 for files with no local
   copy occasionally (`aws s3api list-objects-v2 --delimiter /`).

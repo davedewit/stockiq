@@ -527,6 +527,13 @@ def main():
     
     print(f"🚀 Generating {len(STOCKS)} stock page(s)...")
     
+    # Safety check: count how many existing pages have news before wiping anything
+    if not single_stock:
+        pages_with_news = sum(1 for s in STOCKS 
+            if os.path.exists(os.path.join(stocks_dir, f"{s['symbol']}.html"))
+            and 'Read full article' in open(os.path.join(stocks_dir, f"{s['symbol']}.html")).read())
+        print(f"📰 {pages_with_news} pages currently have news — will preserve all")
+    
     # Skip orphan cleanup if running for single stock (flag mode)
     skip_cleanup = single_stock is not None
     
@@ -537,15 +544,26 @@ def main():
         # Preserve existing news section if file exists
         existing_news = ""
         existing_related = ""
+        existing_analysis = ""
         if os.path.exists(filepath):
             with open(filepath, 'r', encoding='utf-8') as f:
                 old_content = f.read()
+            # News section - with markers
             match = re.search(r'<!-- NEWS_SECTION_START -->(.*?)<!-- NEWS_SECTION_END -->', old_content, re.DOTALL)
             if match:
                 existing_news = match.group(1)
+            elif 'Read full article' in old_content:
+                # Old format without markers — extract everything between h2 news header and related section
+                # Don't silently wipe news just because markers are missing
+                fallback = re.search(r'(<!-- NEWS_SECTION_START -->.*?<!-- NEWS_SECTION_END -->|<h2[^>]*>[^<]*[Nn]ews[^<]*</h2>.*?)(?=<!-- RELATED_SECTION_START -->|<!-- ANALYSIS_SECTION_START -->|</main>|</body>)', old_content, re.DOTALL)
+                if fallback:
+                    existing_news = fallback.group(1)
             match = re.search(r'<!-- RELATED_SECTION_START -->(.*?)<!-- RELATED_SECTION_END -->', old_content, re.DOTALL)
             if match:
                 existing_related = match.group(1)
+            match = re.search(r'<!-- ANALYSIS_SECTION_START -->(.*?)<!-- ANALYSIS_SECTION_END -->', old_content, re.DOTALL)
+            if match:
+                existing_analysis = match.group(1)
         
         # Generate new HTML
         html = generate_stock_page(stock)
