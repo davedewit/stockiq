@@ -319,12 +319,25 @@ git pull --rebase && git push
   (30 days, both folders incl. `stocks/`) plus GitHub are enough. The owner does not want
   additional backup copies made.
 - Change generators and templates, not generated pages (section 4).
+- **Wording that lowers legal risk (owner's instruction, 9 Oct 2026; StockIQ holds no financial services
+  licence):** describe, don't advise. On pages, in emails and in the AI chat: no "you should buy/sell", no
+  "picks", "winning stocks", "recommendations", price targets or predictions presented as StockIQ's view; say
+  "scores", "signals", "screener rankings", "what the data shows". The AI chat prompt (`stockiq-ai-chat`) must
+  keep its rule never to give buy/sell/hold calls, price targets or picks. Keep the footer disclaimer and the
+  no-licence statement (terms.html, about.html). Educational text about how technical analysis works is fine.
 - Verify claims against code or data before putting them on public pages (accuracy, user
   counts and testimonials were removed in Sep 2026 for being unsupported).
 
 ## 11. Open items and optimisation ideas
 
 Flagged for the owner (not changed):
+- **Biggest remaining risk item: the paid product's own output.** Single-stock reports and trading signals
+  (Lambdas `stockiq-option-1-1-custom-analysis`, `stockiq-option-2-trading-signals`, `stockiq-option-2-2-auto-signals`,
+  the screener workers, and the formatters in `analysis-functions.js`) still print BUY/SELL/HOLD labels, entry/exit
+  prices and price targets (~60 places). Not changed: it alters what paying users see and the logged-in flows
+  cannot be tested from a script. Suggested approach: reuse the neutral labels the public stock pages already
+  use ("Positive signals", "Mixed", ...) and relabel entry/exit/targets as support/resistance levels. The FAQ
+  still describes these features as they are.
 - Legal (owner's facts, 9 Oct 2026): the business is "StockIQ", online-only with no physical address, and
   holds **no financial services licence**. Billing is in **USD** (confirmed on the three live Stripe prices:
   $4.99 / $14.99 / $49.99 per month). The terms, About page, pricing section and FAQ now say all of this.
