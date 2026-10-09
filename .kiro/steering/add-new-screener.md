@@ -358,6 +358,20 @@ aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R \
 
 ## Common Pitfalls
 
+**Rules learned from the Oct 2026 full check (apply to every screener):**
+- The stock list lives in two places that must be identical: the `*Universe` array in `analysis-functions.js`
+  and `STOCK_UNIVERSES` in the coordinator. No duplicates.
+- Use the ticker format Yahoo accepts (share classes use a dash: `BRK-B`, not `BRK.B`). Probe every symbol
+  before adding it; a symbol that returns 404 is silently dropped and the list ends up short.
+- If the list is not an exact multiple of 10, the last worker must take the remainder, and an empty batch must
+  never be sent (some workers fall back to a built-in list and return unrelated stocks).
+- Workers return codes with underscores (`STRONG_BUY`, `MODERATE_BUY`, `HOLD`, `MODERATE_SELL` ...). Output must
+  go through `signalLabel()` / `signal_label()`; never print the raw code or "buy / sell / target / stop loss".
+- CSV columns must read the field names workers actually return (`change_24h`, `distance_from_52w_low`,
+  `52w_high`, `52w_low`). Screener workers have no real fundamentals, so do not export P/E, beta, dividend,
+  sector, market cap or earnings risk.
+- Put the real list size on the button and in the header, not the index's nominal size.
+
 | Problem | Cause | Fix |
 |---|---|---|
 | Workers return 403 | Missing `lambda:InvokeFunctionUrl` permission | Run `aws lambda add-permission` for each worker (Step 2d) |

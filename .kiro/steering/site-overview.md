@@ -268,6 +268,8 @@ git pull --rebase && git push
   `finalize_news_html.py` trims them. `check_news_sync.py` only compares within the time window
   news.html still covers, so do not "fix" its window logic back.
 - `.kiro/steering/*` are real files now (the `.amazonq` mirror was removed Sep 2026).
+  `stockiq/CLAUDE.md` (added 9 Oct 2026) only points Claude Code at these same files; keep the
+  content here, not in `CLAUDE.md`. If a steering file is added or renamed, update its list.
 - `website/.s3-excludes` is **not used** by any script; the deploy has its own include and
   exclude rules. Leftover local files that are never uploaded: `sitemap copy.xml`,
   `sitemap.xml.backup`, `sitemap_stocks.xml`, `blog.html.backup`, `Table.csv`,
@@ -370,26 +372,43 @@ Flagged for the owner (not changed):
   - S&P 1500 coordinator list has 19 duplicate symbols: results are now de-duplicated by symbol.
   - Dashboard performance tracker dropped single-letter tickers (W, S, F, T ...) and dash tickers: regex widened.
   - Crypto report legend said "GOOD ENTRY / OK ENTRY / RISKY ENTRY"; now describes when a coin was flagged.
-  **Not fixed, needs owner decisions:**
-  - **Stale constituent lists.** Stocks returning no data (dead tickers: taken over, renamed, delisted):
-    S&P 100 1, NASDAQ 100 2, S&P 500 13, S&P 400+600 132 (14%), S&P 1500 145, Russell 1000 132 (13%),
-    Russell 2000 174, ASX 50 3, ASX 100 16 (16%), ASX 200 29 (15%), ASX 300 14, **FTSE 100 25 (25%)**, Nikkei 10.
-    Button labels overstate coverage ("ASX 300 (300 stocks)" has 231 in its list and returns 217; "S&P 400+600
-    (1000 stocks)" returns 823). The lists live in two places that must be kept the same: the `*Universe`
-    arrays in `analysis-functions.js` and `STOCK_UNIVERSES` in the coordinator. Refresh from current index
-    constituents; the output footer already reports the real analysed count.
-  - **Crypto screener matches the wrong coins.** Workers take CoinSpot's symbol list and look each one up on
-    Yahoo as `SYMBOL-USD`. Different coins share symbols, so e.g. `CORE` is priced as "cVault.finance" ($5,698)
-    and `TON` as "TON Token" ($0.004), and the wrong asset can rank #1. 142 of 529 coins (27%) have no Yahoo
-    data at all and come back with price 0 and score 0 (shown as "Mixed", counted in "Coins Analyzed").
-    Fix belongs in the crypto workers: sanity-check the Yahoo price against CoinSpot's own price and drop
-    mismatches and zero-price coins.
-  - A worker returns nothing for some valid symbols even when asked directly (WBD, PSKY): not investigated.
-  - `market-data-sidebar.html` and `market-data-widget.html` are live but call a Lambda URL that no longer exists
-    (403). Nothing links to them. Delete them from S3 and the repo, or repoint them.
-  - `lambda-url-mapping.json` is stale: 24 addresses used by the site are not in it (21 Nikkei workers, AI chat,
-    `stock-prices.js`). Regenerate with `generate-lambda-url-mappings.sh`.
-  - Reports already saved in users' history keep the old BUY/SELL wording; only new runs are reworded.
+  **Second pass, same day (owner asked to fix everything possible):**
+  - **Dead tickers removed.** 630 list entries that returned HTTP 404 from Yahoo twice were removed from the
+    `*Universe` arrays in `analysis-functions.js` and from `STOCK_UNIVERSES` in the coordinator, and duplicates
+    dropped. The two places now hold the same lists. Real sizes: Dow 30, S&P 100 99, NASDAQ 100 101, S&P 500 495,
+    S&P 400+600 830, S&P 1500 1,307, Russell 1000 877, Russell 2000 1,829, ASX 50 47, ASX 100 84, ASX 200 168,
+    ASX 300 219, FTSE 100 76, Nikkei 200. Button labels, report headers and the coordinator's `universe_sizes`
+    use these numbers. **This only removed dead symbols; it did not add current index members**, so the lists
+    are honest but not complete (FTSE "100" has 76). Refreshing them from current constituents is still open.
+    Russell 1000/2000 on the page path use lists built into the workers (the page sends only `worker_id`).
+  - **Never send a worker an empty batch.** The S&P 500 workers fall back to their own built-in list and return
+    unrelated stocks. The page code now skips empty batches (the coordinator already did).
+  - **CSV columns that were never real:** `Distance_From_Low_%`, `52W_High`, `52W_Low` (and `24h_Change_%` on
+    the page) read field names the workers do not return; fixed (workers use `distance_from_52w_low`,
+    `52w_high`, `52w_low`, `change_24h`). `PE_Ratio`, `Market_Cap`, `Beta`, `Dividend_Yield_%`, `Sector` and
+    `Earnings_Risk` were removed from the stock CSV because **the screener workers do not fetch fundamentals**:
+    `get_fundamentals()` returns hard-coded guesses for ~50 large stocks and defaults for the rest (P/E 25, beta
+    1.0, dividend 0, size "Mid"), "earnings risk" is just the calendar month, and "sentiment" is the day's price
+    move. The "Financial health" factor therefore adds the same +0.12 to nearly every stock. about.html now
+    says the screeners use price and volume only. Real fundamentals would mean changing ~630 workers.
+  - **Crypto screener.** The orchestrator now leaves out coins with no price and the 32 symbols in
+    `MISMATCHED_SYMBOLS` (priced as a different coin on Yahoo: CORE, TON, ARB, MNT, GFI ...), and reports how
+    many were left out (355 of 529 kept). The same list is in `formatSingleCoinResult` as a warning. To rebuild
+    the list: fetch CoinGecko `/coins/markets` (top ~6,000), take the best-ranked coin per symbol, and flag any
+    coin whose screener price is outside 0.75x-1.33x of it. 35 coins could not be checked (not in the top 6,000).
+    The crypto *workers* are unchanged, so single-coin analysis still prices a mismatched symbol wrongly (it now
+    warns).
+  - Deleted the two orphan pages (`market-data-sidebar.html`, `market-data-widget.html`) from the repo and S3.
+  - `lambda-url-mapping.json` regenerated (982 functions, 967 with URLs).
+  **Still open:**
+  - **ASX "24h change" is 0 for every stock once the ASX has closed.** Yahoo returns the final session bar
+    plus a second bar with the same close, and the ASX workers compute change from the last two closes. This
+    zeroes the day change, the "sentiment" factor and `Momentum_Signal` for ASX screeners. Not checked during
+    ASX trading hours. Fix is in the ASX workers (`stockiq-asia-5-1..5-4`, 65 Lambdas).
+  - A worker returns nothing for a few valid symbols even when asked directly (WBD, PSKY): not investigated.
+  - `uniqueSymbolsCount` constants in `saveAnalysisToHistory` (`analysis-functions.js`) still use the old sizes.
+  - Reports already saved in users' history keep the old BUY/SELL wording; they expire under the 30/90-day
+    auto-delete, so they were left alone.
   **How to repeat the check:** the harnesses are not in the repo; the method is (1) load `analysis-functions.js`
   in a Node `vm` with stub DOM, real `fetch`, and `displayResults` / `saveAnalysisToHistory` overridden, then call
   `runAnalysis(option, subOption, event)` per button; (2) import the coordinator locally, patch `urlopen` to
