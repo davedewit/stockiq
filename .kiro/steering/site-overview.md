@@ -325,8 +325,11 @@ git pull --rebase && git push
 ## 11. Open items and optimisation ideas
 
 Flagged for the owner (not changed):
-- Legal, needs a qualified review: no licence statement (AFSL) or company name/address anywhere, while the
-  product issues BUY/SELL/HOLD signals; terms give no currency for the prices.
+- Legal (owner's facts, 9 Oct 2026): the business is "StockIQ", online-only with no physical address, and
+  holds **no financial services licence**. Billing is in **USD** (confirmed on the three live Stripe prices:
+  $4.99 / $14.99 / $49.99 per month). The terms, About page, pricing section and FAQ now say all of this.
+  Not legally reviewed: whether issuing BUY/SELL/HOLD signals without a licence is acceptable under Australian
+  law is a question for a lawyer, not something the wording settles.
 - Screener weights really do total 102% in the worker code (0.18+0.08+0.06+0.20+0.20+0.10+0.06+0.05+0.03+
   0.03+0.02+0.01). The About and FAQ pages now say so. Changing the code would change every screener score.
 - Dashboard plan cards list features that are not verified to differ by plan ("Advanced screening & alerts",

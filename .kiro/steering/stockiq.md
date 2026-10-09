@@ -5,7 +5,8 @@
 - **Purpose:** Professional stock analysis platform with AI-powered investment research tools
 - **Tech Stack:** Static website (HTML/CSS/JS) + AWS Lambda + DynamoDB + S3
 - **Authentication:** AWS Cognito (email/password, Google OAuth, Facebook OAuth)
-- **Payment:** Stripe integration
+- **Payment:** Stripe integration, monthly plans billed in **USD**: Starter $4.99 (15 analyses/day), Pro $14.99 (50/day), Elite $49.99 (unlimited). Live price IDs are in `stockiq-payment-handler`; currency lives on the Stripe price, not in the code
+- **Business:** "StockIQ", online-only, no physical address, no financial services licence (stated in terms.html and about.html)
 - **Email:** AWS Cognito default sender (no-reply@verificationemail.com) - plain text only
 
 ## Rules Reference
