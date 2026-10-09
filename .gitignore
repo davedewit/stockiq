@@ -1,3 +1,5 @@
 lambda-sync/
 .DS_Store
 *.json
+.analysis_cache/
+__pycache__/

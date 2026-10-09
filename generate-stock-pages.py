@@ -3,8 +3,10 @@
 Generate individual HTML stock pages for SEO.
 
 Reads stocks.txt (3,467 stocks) and generates /website/stocks/{SYMBOL}.html for each.
-Preserves existing news (<!-- NEWS_SECTION_START/END -->) and related sections
-(<!-- RELATED_SECTION_START/END -->) when regenerating.
+Preserves existing news (<!-- NEWS_SECTION_START/END -->), related
+(<!-- RELATED_SECTION_START/END -->) and analysis (<!-- ANALYSIS_SECTION_START/END -->)
+sections when regenerating, plus the robots value, data-based descriptions and
+dateModified that update_stock_analysis.py maintains.
 
 Usage:
     python3 generate-stock-pages.py           # Regenerate all 3,467 pages
@@ -42,8 +44,13 @@ def load_stocks():
 
 
 
-def generate_stock_page(stock):
-    """Generate full HTML page for a stock including SEO metadata, JSON-LD schemas, nav, and CTA."""
+def generate_stock_page(stock, robots="noindex, follow", date_modified="2026-09-25"):
+    """Generate full HTML page for a stock including SEO metadata, JSON-LD schema, nav, and CTA.
+
+    robots and date_modified are normally carried over from the existing page, where
+    update_stock_analysis.py maintains them.
+    """
+    import json
     symbol = stock["symbol"]
     name = stock["name"]
     sector = stock["sector"]
@@ -52,11 +59,11 @@ def generate_stock_page(stock):
     if sector == "Stock":
         meta_desc = f"Analyze {name} ({symbol}) stock with AI-powered insights, technical indicators, and real-time data. Free stock analysis tool."
         sector_display = "General"
-        about_text = f"{name} ({symbol}) is a publicly traded company. Use StockIQ's free analysis tool to get comprehensive insights into {symbol} stock performance, technical indicators, and AI-powered trading recommendations."
+        about_text = f"{name} ({symbol}) is a publicly traded company. The snapshot on this page updates daily; run a full report for the complete breakdown."
     else:
         meta_desc = f"Analyze {name} ({symbol}) stock with AI-powered insights, technical indicators, and real-time data. Free stock analysis tool for {sector} sector."
         sector_display = sector
-        about_text = f"{name} ({symbol}) is a leading company in the {sector} sector. Use StockIQ's free analysis tool to get comprehensive insights into {symbol} stock performance, technical indicators, and AI-powered trading recommendations."
+        about_text = f"{name} ({symbol}) is listed in the {sector} sector. The snapshot on this page updates daily; run a full report for the complete breakdown."
     
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -66,7 +73,7 @@ def generate_stock_page(stock):
     <title>{name} ({symbol}) Stock Analysis - Free AI-Powered Research | StockIQ</title>
     <meta name="description" content="{meta_desc}">
     <meta name="keywords" content="{symbol} stock analysis, {name} analysis, {symbol} technical analysis">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="{robots}">
     <link rel="canonical" href="https://stockiq.tech/stocks/{symbol}.html">
     
     <!-- Open Graph Tags for Social Sharing -->
@@ -87,44 +94,31 @@ def generate_stock_page(stock):
     <script type="application/ld+json">
     {{
       "@context": "https://schema.org",
-      "@type": "NewsArticle",
-      "headline": "{name} ({symbol}) Stock Analysis - Free AI-Powered Research",
-      "description": "{meta_desc}",
-      "image": "https://stockiq.tech/og-image.png",
-      "datePublished": "2026-03-14T00:00:00Z",
-      "dateModified": "2026-03-14T00:00:00Z",
-      "author": {{
-        "@type": "Organization",
-        "name": "StockIQ",
-        "url": "https://stockiq.tech"
-      }},
+      "@type": "WebPage",
+      "name": {json.dumps(f"{name} ({symbol}) Stock Analysis")},
+      "url": "https://stockiq.tech/stocks/{symbol}.html",
+      "dateModified": "{date_modified}",
       "publisher": {{
         "@type": "Organization",
         "name": "StockIQ",
-        "logo": {{
-          "@type": "ImageObject",
-          "url": "https://stockiq.tech/stockiq-logo.png"
-        }}
+        "url": "https://stockiq.tech",
+        "logo": "https://stockiq.tech/stockiq-logo.png"
       }},
-      "mainEntity": {{
-        "@type": "FinancialInstrument",
-        "name": "{name}",
-        "ticker": "{symbol}",
-        "industry": "{sector}"
+      "about": {{
+        "@type": "Corporation",
+        "name": {json.dumps(name)},
+        "tickerSymbol": {json.dumps(symbol)}
       }}
     }}
     </script>
     
-    <!-- Financial Instrument Schema -->
-    <script type="application/ld+json">
-    {{
-      "@context": "https://schema.org",
-      "@type": "FinancialInstrument",
-      "name": "{name}",
-      "ticker": "{symbol}",
-      "industry": "{sector}",
-      "url": "https://stockiq.tech/stocks/{symbol}.html"
-    }}
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WVETNMPF8V"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){{dataLayer.push(arguments);}}
+    gtag('js', new Date());
+    gtag('config', 'G-WVETNMPF8V');
     </script>
     
     <link rel="stylesheet" href="../styles.css">
@@ -342,12 +336,11 @@ if (hasPaid) {{
             </p>
         </div>
 
+        <!-- ANALYSIS_SECTION_START -->
+        <!-- ANALYSIS_SECTION_END -->
+
         <div style="background: var(--card-bg); border-radius: 12px; padding: 40px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <h2 style="margin: 0;">Analyze {name} ({symbol}) Stock</h2><p style="margin: 0 0 20px 0; color: var(--text-secondary);">{about_text}</p>
-            <p style="margin-bottom: 20px; color: var(--text-secondary);">
-                Get instant AI-powered analysis including technical indicators, fundamental analysis, 
-                risk assessment, and trading insights for {name} stock.
-            </p>
+            <h2 style="margin: 0;">Full {symbol} report</h2><p style="margin: 0 0 20px 0; color: var(--text-secondary);">{about_text}</p>
             <a href="../analysis.html?symbol={symbol}&option=1&subOption=custom" class="cta-button">
                 Analyze {symbol} Now →
             </a>
@@ -355,50 +348,6 @@ if (hasPaid) {{
 
         <!-- NEWS_SECTION_START -->
         <!-- NEWS_SECTION_END -->
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 40px;">
-            <div style="background: var(--card-bg); border-radius: 12px; padding: 30px;">
-                <h3>📈 Technical Analysis</h3>
-                <p style="color: var(--text-secondary); margin-top: 10px;">
-                    RSI, MACD, moving averages, support/resistance levels, and momentum indicators for {name} ({symbol}) stock.
-                </p>
-            </div>
-            <div style="background: var(--card-bg); border-radius: 12px; padding: 30px;">
-                <h3>🤖 AI Insights</h3>
-                <p style="color: var(--text-secondary); margin-top: 10px;">
-                    AI-powered analysis of {name} ({symbol}) fundamentals, growth prospects, and market position.
-                </p>
-            </div>
-            <div style="background: var(--card-bg); border-radius: 12px; padding: 30px;">
-                <h3>⚠️ Risk Assessment</h3>
-                <p style="color: var(--text-secondary); margin-top: 10px;">
-                    Comprehensive risk analysis including volatility, sector risks, and market conditions for {name} stock.
-                </p>
-            </div>
-        </div>
-
-        <div style="background: var(--card-bg); border-radius: 12px; padding: 40px;">
-            <h2>Why Analyze {name} ({symbol}) with StockIQ?</h2>
-            <ul style="list-style: none; padding: 0; margin-top: 20px;">
-                <li style="padding: 10px 0; border-bottom: 1px solid var(--border-color);">
-                    ✅ Free AI-powered analysis of {name} ({symbol}) stock
-                </li>
-                <li style="padding: 10px 0; border-bottom: 1px solid var(--border-color);">
-                    ✅ Real-time technical indicators for {name} stock
-                </li>
-                <li style="padding: 10px 0; border-bottom: 1px solid var(--border-color);">
-                    ✅ Comprehensive risk assessment for {symbol}
-                </li>
-                <li style="padding: 10px 0;">
-                    ✅ No credit card required
-                </li>
-            </ul>
-            <div style="margin-top: 30px; text-align: center;">
-                <a href="../analysis.html?symbol={symbol}&option=1&subOption=custom" class="cta-button">
-                    Start Analyzing {symbol} Free →
-                </a>
-            </div>
-        </div>
 
         <!-- RELATED_SECTION_START -->
         <!-- RELATED_SECTION_END -->
@@ -409,35 +358,17 @@ if (hasPaid) {{
         <p>&copy; 2026 StockIQ - Professional Investment Research Platform</p>
         <p>Powered by AI • Real-time Data • Comprehensive Analysis</p>
         <p>
-            <a href="../terms.html" style="color: #007bff; text-decoration: none;">Terms</a> • 
-            <a href="../privacy-policy.html" style="color: #007bff; text-decoration: none;">Privacy</a> • 
-            <a href="../support.html" style="color: #007bff; text-decoration: none;">Support</a>
+            <a href="../terms.html" style="color: #007bff; text-decoration: none;">Terms of Service</a> • 
+            <a href="../privacy-policy.html" style="color: #007bff; text-decoration: none;">Privacy Policy</a> • 
+            <a href="../refunds.html" style="color: #007bff; text-decoration: none;">Refund Policy</a> • 
+            <a href="../support.html" style="color: #007bff; text-decoration: none;">Support</a> • 
+            <a href="../contact.html" style="color: #007bff; text-decoration: none;">Contact</a> • 
+            <a href="../data-deletion.html" style="color: #007bff; text-decoration: none;">Data Deletion</a> • 
+            <a href="../news.html" style="color: #007bff; text-decoration: none;">News</a> • 
+            <a href="../blog.html" style="color: #007bff; text-decoration: none;">Blog</a> • 
+            <a href="../about.html" style="color: #007bff; text-decoration: none;">About</a> • 
+            <a href="../faq.html" style="color: #007bff; text-decoration: none;">FAQ</a>
         </p>
-        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
-            <p style="font-weight: 600; margin-bottom: 10px;">Popular Stocks:</p>
-            <p style="line-height: 1.8;">
-                <a href="AAPL.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">AAPL</a> •
-                <a href="TSLA.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">TSLA</a> •
-                <a href="NVDA.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">NVDA</a> •
-                <a href="MSFT.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">MSFT</a> •
-                <a href="GOOGL.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">GOOGL</a> •
-                <a href="AMZN.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">AMZN</a> •
-                <a href="META.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">META</a> •
-                <a href="JPM.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">JPM</a> •
-                <a href="V.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">V</a> •
-                <a href="JNJ.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">JNJ</a> •
-                <a href="WMT.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">WMT</a> •
-                <a href="PG.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">PG</a> •
-                <a href="XOM.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">XOM</a> •
-                <a href="BAC.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">BAC</a> •
-                <a href="DIS.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">DIS</a> •
-                <a href="NFLX.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">NFLX</a> •
-                <a href="ORCL.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">ORCL</a> •
-                <a href="AMD.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">AMD</a> •
-                <a href="INTC.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">INTC</a> •
-                <a href="CSCO.html" style="color: #007bff; text-decoration: none; margin: 0 8px;">CSCO</a>
-            </p>
-        </div>
         <p style="margin-top: 15px;">
             <a href="https://instagram.com/stockiq.tech" target="_blank" style="color: #E4405F; text-decoration: none; font-size: 24px;" title="Follow us on Instagram">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -528,12 +459,14 @@ def main():
     print(f"🚀 Generating {len(STOCKS)} stock page(s)...")
     
     # Safety check: count how many existing pages have news before wiping anything
+    pages_with_news = 0
     if not single_stock:
-        pages_with_news = sum(1 for s in STOCKS 
-            if os.path.exists(os.path.join(stocks_dir, f"{s['symbol']}.html"))
-            and 'Read full article' in open(os.path.join(stocks_dir, f"{s['symbol']}.html")).read())
-        print(f"📰 {pages_with_news} pages currently have news — will preserve all")
-    
+        for s_ in STOCKS:
+            p_ = os.path.join(stocks_dir, f"{s_['symbol']}.html")
+            if os.path.exists(p_) and 'Read full article' in open(p_, encoding='utf-8').read():
+                pages_with_news += 1
+        print(f"📰 {pages_with_news} pages currently have news - will preserve all")
+
     # Skip orphan cleanup if running for single stock (flag mode)
     skip_cleanup = single_stock is not None
     
@@ -541,21 +474,23 @@ def main():
         symbol = stock["symbol"]
         filepath = os.path.join(stocks_dir, f"{symbol}.html")
         
-        # Preserve existing news section if file exists
+        # Preserve existing news, related and analysis sections (and the values
+        # update_stock_analysis.py maintains) if the file exists
         existing_news = ""
         existing_related = ""
         existing_analysis = ""
+        robots = "noindex, follow"
+        date_modified = "2026-09-25"
+        old_content = ""
         if os.path.exists(filepath):
             with open(filepath, 'r', encoding='utf-8') as f:
                 old_content = f.read()
-            # News section - with markers
             match = re.search(r'<!-- NEWS_SECTION_START -->(.*?)<!-- NEWS_SECTION_END -->', old_content, re.DOTALL)
             if match:
                 existing_news = match.group(1)
             elif 'Read full article' in old_content:
-                # Old format without markers — extract everything between h2 news header and related section
-                # Don't silently wipe news just because markers are missing
-                fallback = re.search(r'(<!-- NEWS_SECTION_START -->.*?<!-- NEWS_SECTION_END -->|<h2[^>]*>[^<]*[Nn]ews[^<]*</h2>.*?)(?=<!-- RELATED_SECTION_START -->|<!-- ANALYSIS_SECTION_START -->|</main>|</body>)', old_content, re.DOTALL)
+                # Old format without markers: don't silently wipe news just because markers are missing
+                fallback = re.search(r'(<h2[^>]*>[^<]*[Nn]ews[^<]*</h2>.*?)(?=<!-- RELATED_SECTION_START -->|<!-- ANALYSIS_SECTION_START -->|</main>|</body>)', old_content, re.DOTALL)
                 if fallback:
                     existing_news = fallback.group(1)
             match = re.search(r'<!-- RELATED_SECTION_START -->(.*?)<!-- RELATED_SECTION_END -->', old_content, re.DOTALL)
@@ -564,9 +499,28 @@ def main():
             match = re.search(r'<!-- ANALYSIS_SECTION_START -->(.*?)<!-- ANALYSIS_SECTION_END -->', old_content, re.DOTALL)
             if match:
                 existing_analysis = match.group(1)
+            match = re.search(r'<meta name="robots" content="([^"]*)">', old_content)
+            if match:
+                robots = match.group(1)
+            match = re.search(r'"dateModified": "([0-9-]{10})', old_content)
+            if match:
+                date_modified = match.group(1)
         
         # Generate new HTML
-        html = generate_stock_page(stock)
+        html = generate_stock_page(stock, robots, date_modified)
+        
+        # Insert preserved analysis section, and keep its data-based descriptions
+        if existing_analysis.strip():
+            html = html.replace(
+                '<!-- ANALYSIS_SECTION_START -->\n        <!-- ANALYSIS_SECTION_END -->',
+                f'<!-- ANALYSIS_SECTION_START -->{existing_analysis}<!-- ANALYSIS_SECTION_END -->'
+            )
+            for pattern in (r'<meta name="description" content="[^"]*">',
+                            r'<meta property="og:description" content="[^"]*">',
+                            r'<meta name="twitter:description" content="[^"]*">'):
+                old_tag = re.search(pattern, old_content)
+                if old_tag:
+                    html = re.sub(pattern, lambda m: old_tag.group(0), html, count=1)
         
         # Insert preserved news section
         if existing_news:
@@ -580,13 +534,6 @@ def main():
             html = html.replace(
                 '<!-- RELATED_SECTION_START -->\n        <!-- RELATED_SECTION_END -->',
                 f'<!-- RELATED_SECTION_START -->{existing_related}<!-- RELATED_SECTION_END -->'
-            )
-
-        # Insert preserved analysis section
-        if existing_analysis:
-            html = html.replace(
-                '<!-- ANALYSIS_SECTION_START -->\n        <!-- ANALYSIS_SECTION_END -->',
-                f'<!-- ANALYSIS_SECTION_START -->{existing_analysis}<!-- ANALYSIS_SECTION_END -->'
             )
         
         # Write HTML file
@@ -609,17 +556,19 @@ def main():
         if removed:
             print(f"🗑️  Removed {removed} orphaned pages")
 
-    # Post-generation safety check — verify news wasn't wiped
+    # Post-generation safety check: verify news wasn't wiped
     if not single_stock:
-        after_news = sum(1 for s in STOCKS 
-            if os.path.exists(os.path.join(stocks_dir, f"{s['symbol']}.html"))
-            and 'Read full article' in open(os.path.join(stocks_dir, f"{s['symbol']}.html")).read())
+        after_news = 0
+        for s_ in STOCKS:
+            p_ = os.path.join(stocks_dir, f"{s_['symbol']}.html")
+            if os.path.exists(p_) and 'Read full article' in open(p_, encoding='utf-8').read():
+                after_news += 1
         print(f"\n📰 News check: {after_news} pages have news after generation")
-        if 'pages_with_news' in dir() and after_news < pages_with_news * 0.9:
+        if after_news < pages_with_news * 0.9:
             print(f"⚠️  WARNING: News dropped from {pages_with_news} to {after_news} pages!")
-            print(f"   Run: python3 sync_news_to_stock_pages.py to recover")
+            print("   Run: python3 sync_news_to_stock_pages.py to recover")
         else:
-            print(f"✅ News preserved correctly")
+            print("✅ News preserved correctly")
 
     print(f"\n✅ Generated {len(STOCKS)} stock pages in /stocks/ directory")
 
