@@ -95,7 +95,7 @@ New screeners: use `5-<subOption>`.
 |---|---|
 | `stockiq-dynamic-stock-lists` | Dynamic stock list API |
 | `stockiq-stock-list-api` | Stock list API |
-| `stockiq-email-capture` | Home page email list: saves to `stockiq-email-subscribers`, emails the owner (SES, `noreply@stockiq.tech` → `dave@dewit.com.au`) on each new signup. Handler file is `email-capture-with-count.py`; role `mylambdafunction-role-haabf70x`; **no CloudWatch log group exists**, so errors are not logged |
+| `stockiq-email-capture` | Home page email list: saves to `stockiq-email-subscribers`, emails the owner (SES, from and to `noreply@stockiq.tech`) on each new signup. Handler file is `email-capture-with-count.py`; role `mylambdafunction-role-haabf70x`; **no CloudWatch log group exists**, so errors are not logged |
 | `stockiq-ai-chat` | GPT-4o-mini chat (128MB, 30s, 300 tokens) |
 | `stockiq-ai-chat-reporter` | Daily AI usage email at 5pm UTC |
 | `stockiq-market-data-sidebar` | Sidebar market data |
