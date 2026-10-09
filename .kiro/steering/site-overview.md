@@ -275,6 +275,23 @@ git pull --rebase && git push
 - Running `generate-stock-pages.py` rewrites all 3,467 pages, so the next deploy uploads all
   of them (~110 MB). That's fine, just slower.
 - **generate-stock-pages.py wipes news on pages without markers:** If stock pages were created before `<!-- NEWS_SECTION_START/END -->` markers existed, regenerating wipes their news silently. Fixed Oct 2026 — script now has a fallback to extract news from old-format pages, plus a pre-run count showing how many pages have news. If running after a long gap, check that count before and after. Always run `sync_news_to_stock_pages.py` after regenerating if news is lost.
+- **Generator template reverted silently (found 9 Oct 2026):** the Oct 2 "Auto-update" commit (7e14c8f)
+  rewrote `generate-stock-pages.py` back to the pre-Sep 25 template (no ANALYSIS markers, fake
+  `NewsArticle` schema, no GA4, hardcoded `index, follow`). A regeneration on Oct 9 then rebuilt all
+  3,467 pages with it and the deploy uploaded them, making every page indexable and removing every
+  snapshot. Fixed by restoring the Sep 25 version (commit 2485162) plus the Oct 9 news-preservation
+  fixes. **After ANY regeneration, run `update_stock_analysis.py`** (it sets index/noindex, snapshots and
+  `indexable_stocks.txt`; with no ANALYSIS markers it silently writes nothing). **Before every deploy,
+  sanity check:** `grep -l 'content="index, follow"' ../website/stocks/*.html | wc -l` should be ~950, not 3,467,
+  and `wc -l indexable_stocks.txt` should be ~950. Also review `git diff --stat` on scripts after the
+  "Auto-update" commits; they bundle everything and hide reverts.
+- **The same Oct 2 commit also reverted `deploy-to-s3.sh`** (found 9 Oct 2026): `DRY_RUN` was gone
+  (a "dry run" did a real deploy), stock pages synced with `--size-only` again, and only `stockiq/`
+  was pushed to GitHub. Restored from commit 2485162 plus the `$PYTHON` variable. **Before trusting
+  `DRY_RUN=true`, check the script still supports it:** `grep -c DRY_RUN deploy-to-s3.sh` must be > 0,
+  and the output must contain `(dryrun)` lines and no `upload:` lines. That commit touched 24 scripts
+  (`git diff --stat 2485162 7e14c8f`); `check_news_sync.py`, `update_sitemap.py` and
+  `generate_sitemap.py` were also changed and have not been re-audited against their Sep 25 versions.
 - **`update_stock_analysis.py` was missing from deploy-to-s3.sh** (Oct 2026). Stock data was stale from Sep 24. It's now in the pipeline. If stock pages ever show old dates again, check it's still in deploy-to-s3.sh.
 - A stray `test-news-layout.html` was publicly live on S3 (deleted 25 Sep 2026). Check S3 for files with no local
   copy occasionally (`aws s3api list-objects-v2 --delimiter /`).

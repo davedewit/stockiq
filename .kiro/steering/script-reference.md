@@ -10,7 +10,7 @@ For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-s
 |---|---|---|
 | `update_news.py` | Yahoo/Google RSS → OpenAI summaries → news.html + news.js | 2 hours |
 | `update_stock_news.py` | Per-stock RSS → stock pages + news.html/news.js. Keeps last 3 articles per stock, removes articles 30+ days old. Fetches articles from last **4 days** (extended from 2 days Oct 2026 — laptop sometimes off for days) | 23h per stock |
-| `update_stock_analysis.py` | Data snapshot + 0-100 score on large caps, sets index/noindex, writes indexable_stocks.txt. Runs on all 3,467 stocks — ~20 min, mostly free (Yahoo Finance). 404s for delisted stocks are normal and cached | none (runs every deploy) |
+| `update_stock_analysis.py` | Data snapshot + 0-100 score on large caps, sets index/noindex, writes indexable_stocks.txt. Runs on all 3,467 stocks — ~20 min, mostly free (Yahoo Finance). 404s for delisted stocks are normal and cached | none (runs in the daily run, i.e. when `UPDATE_STOCK_NEWS=true`; skipped by a plain `./deploy-to-s3.sh`) |
 | `people_also_watch_stocks.py --missing` | Adds "People also watch" section to pages missing it | none |
 | `update_sitemap.py` | **Rebuilds** stock URLs from indexable_stocks.txt (only large-cap pages), updates lastmod on site pages. Safety: skips if indexable list < 200 entries | none |
 | `cleanup_broken_links.py` | Removes dead article links from news.html | none |

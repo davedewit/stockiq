@@ -34,8 +34,11 @@ Key files touched for every new screener:
 ## Step 1 — Plan
 
 Decide:
-- **Option number** — existing options: 3=US, 4=Europe (ASX/FTSE), 5=Asia (FTSE/Nikkei), 7=Crypto.
-  Add new Asia/Pacific screeners under option 5. New regions may need a new option.
+- **Option number** — new Asia/Pacific screeners go under **option 5**; coordinator key is
+  `5-<subOption>` (e.g. `5-sensex`). Legacy screeners are inconsistent (the frontend sends ASX as
+  option 5 subOption 50..300 but the coordinator keys are `4-50`..`4-300`; FTSE is frontend option 4
+  but coordinator `5-ftse100`). Don't copy those; follow the Nikkei pattern where frontend,
+  dashboard and coordinator all use `5` + the same subOption string.
 - **subOption string** — e.g. `nikkei225`, `sensex`, `kospi`
 - **Stock list** — get the official index constituents. Verify they work on Yahoo Finance with the
   correct suffix (`.T`=Tokyo, `.BO`=Bombay/BSE, `.NS`=NSE India, `.KS`=Korea, `.HK`=Hong Kong).
@@ -54,6 +57,15 @@ for s in symbols:
 "
 ```
 If they return "NOT FOUND" don't proceed — the workers will get no data.
+
+Also check the final list has the expected count and **no duplicates** (Nikkei: 210 unique, all
+verified; the index nominally has 225 but only 210 were valid Yahoo symbols — report the real count
+to the owner, who asked about this):
+```python
+print(len(stocks), len(set(stocks)))   # both must match
+```
+Use the official index constituent list and say where it came from; don't invent tickers from memory
+without verifying each on Yahoo.
 
 ---
 
@@ -210,6 +222,18 @@ Copy `formatNikkeiResult()` and adapt:
 - Change `result.type = 'option_5nikkei225_screener'`  → `'option_5sensex_screener'`
 - Change `result.companyName = 'Japan Nikkei 225 Screener'` → `'India BSE Sensex Screener'`
 
+### 4d. Three more lookups in analysis-functions.js (easy to miss — grep `nikkei225` to find them)
+All three are keyed on the subOption/company name; without them history saving and re-run break:
+1. **Re-run URL map** (~line 639, `'Japan Nikkei 225 Screener': 'analysis.html?option=5&subOption=nikkei225&autorun=true'`)
+   → add `'India BSE Sensex Screener': 'analysis.html?option=5&subOption=sensex&autorun=true'`
+2. **saveAnalysisToHistory symbols** (~line 3141, inside `option === 5`):
+   ```javascript
+   } else if (subOption === 'sensex') { symbols = ['INDIA_SCREENER']; uniqueSymbolsCount = 30; }
+   ```
+   Must go before the final `else` (which falls back to `ASIA_MARKETS`).
+3. **subNames map** (~line 3206): `'sensex': 'India BSE Sensex Screener'` — otherwise the saved
+   history entry is titled "ASX Stock Screener".
+
 **Important:** `const name` is declared once per forEach loop — do NOT declare it twice (caused a
 site-breaking SyntaxError on Nikkei build). Always run `node -c analysis-functions.js` after editing.
 
@@ -241,6 +265,8 @@ Four places to update:
 if (companyName.includes('India BSE') || symbol === 'INDIA_SCREENER') return 'india_screener';
 ```
 
+Place the check **before** the generic ones in that function (Japan sits above `includes('ASX')`).
+
 ### 6b. getSubOptionFromCompanyName() — for re-run URL
 ```javascript
 'India BSE Sensex Screener': 'sensex',
@@ -249,7 +275,13 @@ if (companyName.includes('India BSE') || symbol === 'INDIA_SCREENER') return 'in
 ### 6c. screenerMappings in getRerunUrl() — for refresh button
 ```javascript
 'India BSE Sensex Screener': 'analysis.html?option=5&subOption=sensex&autorun=true',
+'India BSE Sensex Analysis': 'analysis.html?option=5&subOption=sensex&autorun=true',  // Japan has both names
 ```
+
+### 6e. trackScreenerPerformance() regex — currency symbol (🎯 button)
+Two regexes (~line 3612) use the currency class `[$£€¥]`. **`₹` is not in it**, so India's 🎯 button
+finds no symbols. Add `₹` to both: `[$£€¥₹]`. (Same for any new currency, e.g. `₩` for Korea.)
+The `.{0,30}?` that bridges the company name is already there (Japan fix) — keep it.
 
 ### 6d. processAnalysisGroup() — for "Run in Background"
 ```javascript
@@ -311,13 +343,13 @@ aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R \
 | Russell 2000 | 3 | 6 | 200 | 2000 | (none) |
 | NASDAQ 100 | 3 | 7 | 10 | 100 | (none) |
 | Dow Jones 30 | 3 | 8 | 3 | 30 | (none) |
-| ASX 50 | 4 | 50 | 5 | 50 | `.AX` |
-| ASX 100 | 4 | 100 | 10 | 100 | `.AX` |
-| ASX 200 | 4 | 200 | 20 | 196 | `.AX` |
-| ASX 300 | 4 | 300 | 30 | 231 | `.AX` |
-| UK FTSE 100 | 5 | ftse100 | 10 | 100 | `.L` |
+| ASX 50 | 5 (coordinator `4-50`) | 50 | 5 | 50 | `.AX` |
+| ASX 100 | 5 (coordinator `4-100`) | 100 | 10 | 100 | `.AX` |
+| ASX 200 | 5 (coordinator `4-200`) | 200 | 20 | 196 | `.AX` |
+| ASX 300 | 5 (coordinator `4-300`) | 300 | 30 | 231 | `.AX` |
+| UK FTSE 100 | 4 (coordinator `5-ftse100`) | ftse100 | 10 | 100 | `.L` |
 | **Japan Nikkei 225** | **5** | **nikkei225** | **21** | **210** | **`.T`** |
-| India BSE Sensex | 5 | sensex | TBD | TBD | `.BO` or `.NS` |
+| India BSE Sensex | 5 | sensex | 3 (30 stocks) | 30 | `.BO` or `.NS` (test both on Yahoo) |
 | South Korea KOSPI | 5 | kospi | TBD | TBD | `.KS` |
 | Crypto | 7 | 1 | 1 (orchestrator) | 548 | `-USD` |
 

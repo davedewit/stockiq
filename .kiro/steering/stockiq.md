@@ -20,6 +20,7 @@ Detailed docs live in separate files — check these first:
 - **`roadmap-to-9.md`** — Current score (8.7/10), priorities, timeline
 - **`backlinks-progress.md`** — Backlink strategy and progress
 - **`future-work.md`** — People Also Watch fixes, crypto news integration
+- **`add-new-screener.md`** — Full step-by-step for adding a regional screener (India/Korea next); read before starting one
 
 ## Key Files
 - **`/Users/dave/VSCODE/website/stocks.txt`** — Source of truth (3,467 stocks: SYMBOL, Company Name, Sector)
@@ -91,7 +92,7 @@ aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R --paths "/*" 
 - **Scripts:** `/Users/dave/VSCODE/stockiq/`
 - **Website:** `/Users/dave/VSCODE/website/`
 - **Lambda:** `/Users/dave/VSCODE/stockiq/lambda-sync/`
-- **Python:** 3.9.6
+- **Python:** 3.14 (`/opt/homebrew/bin/python3`)
 
 ## AWS Resources
 
@@ -219,9 +220,15 @@ aws s3 rm s3://stockiq-option-1-1-custom-analysis/charts/email@example.com/ --re
 - **News out of sync:** `python3 Sync_stock_to_news.py` (re-adds old articles to news.html; the next deploy trims them again)
 - **Sidebar shows no news:** `node -c /Users/dave/VSCODE/website/news.js`
 
-## AI Chat System
-- **Lambda:** `stockiq-ai-chat` | **Model:** GPT-4o-mini | **Cost:** ~$10-20/month
-- **Frontend:** `ai-chat.js` on all pages
-- **Rate limits:** Anonymous/trial: 10 msg/hr | Paid: 50 msg/hr | @dewit.com.au: unlimited
+## AI Chat System (Updated Oct 9, 2026)
+- **Lambda:** `stockiq-ai-chat` | **Model:** GPT-4o-mini | **Cost:** ~$0.02/month (Oct 2026)
+- **Frontend:** `ai-chat.js` (22.5KB) on all pages
+- **Features:** 3-message conversation memory, live stock prices, links to stock pages
+- **Rate limits:** Anonymous: 3 msg/hr | Trial/free: 10 msg/hr | Paid: 50 msg/hr | @dewit.com.au: unlimited
 - **Positioning:** index.html right 370px (avoids sidebar) | stock pages right 20px
+- **UI:** 380x600px desktop, gradient header, message bubbles with tails, input font-size 16px (prevents mobile zoom)
+- **Conversation history:** Last 6 messages (3 exchanges) sent as context, stored in sessionStorage
+- **Token usage:** ~650 tokens/message average (system prompt + history + current)
+- **Cost per message:** ~$0.00015 (0.015 cents) | 100 msgs/month = $0.015
 - **Reports:** `stockiq-ai-chat-reporter` emails daily at 5pm UTC to `openai-usage@stockiq.tech`
+- **Tables:** `stockiq-ai-chat-limits` (rate limiting, TTL 2h), `stockiq-ai-chat-stats` (usage tracking, TTL 90d)

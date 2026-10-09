@@ -58,9 +58,10 @@ of 10 symbols and returns scored results. All run in parallel, coordinator aggre
 | `europe-4-1-worker-1..10` | 10 | UK FTSE 100 | 100 |
 | Various `stockiq-option-3-*` | ~560 | US screeners (S&P, Russell, NASDAQ, Dow) | varies |
 
-**Coordinator key format:** `{option}-{subOption}` e.g. `4-200` (ASX 200), `5-nikkei225` (Japan), `5-ftse100` (UK)
+**Coordinator key format:** `{option}-{subOption}` e.g. `4-200` (ASX 200), `5-nikkei225` (Japan), `5-ftse100` (UK).
+New screeners: use `5-<subOption>`.
 
-**Worker code source for new non-US screeners:** copy from `stockiq-asia-5-1-worker-1` — it handles
+**Worker code source for new non-US screeners:** copy from `stockiq-asia-5-5-worker-1` (Nikkei; see `add-new-screener.md`) — it handles
 `.T`, `.AX`, `.L` suffixes correctly via Yahoo Finance. US workers use a different base.
 
 ### Auth & Users
