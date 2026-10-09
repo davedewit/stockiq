@@ -86,7 +86,7 @@ Order inside `deploy-to-s3.sh`:
 4. Backups (website + stockiq; prod_scripts every 23h)
 5. `people_also_watch_stocks.py --missing`
 6. `update_sitemap.py`: **rebuilds** stock URLs from `indexable_stocks.txt` (not all HTML files), updates lastmod on site pages. Refuses if list < 200 entries.
-7. `cleanup_broken_links.py`, `remove_news_duplicates.py`, `finalize_news_html.py`
+7. `cleanup_broken_links.py`, `remove_news_duplicates.py`, `finalize_news_html.py` (trim news.html to 240 stock + 60 general, keep noindex)
 8. S3 upload:
    - `stocks/`: `aws s3 sync --delete` (size + mtime), 24h cache
    - `js/`: sync --delete, 24h cache
@@ -361,10 +361,14 @@ quirk, not a layout bug.
   - Scheduled task converted from AppleScript to bash (`~/stockiq-daily.sh`), window extended to 11am–10pm.
   - Dropbox one-way sync configured (`~/dropbox-sync.sh`, daily launchd job).
   - Git identity updated to `dave@dewit.com.au`.
-  - `deploy-to-s3.sh`: fixed `$PYTHON` path variable; added `update_stock_analysis.py` to pipeline (was missing — caused stock data to go stale since Sep 25); added root JS sync loop (all `*.js` in website root now uploaded).
+  - `deploy-to-s3.sh`: fixed `$PYTHON` path variable; added `update_stock_analysis.py` (was missing — stock data stale since Sep 25); added root JS sync loop; added `finalize_news_html.py` (was also missing).
   - `sync-all-lambdas.sh`: added `--profile default --region us-east-1`.
-  - `update_sitemap.py`: fully rewritten to **rebuild** stock URLs from `indexable_stocks.txt` on every run (old version only updated dates, never removed URLs — caused sitemap to stay at 3,485 URLs instead of ~970).
+  - `update_sitemap.py`: fully rewritten to rebuild stock URLs from `indexable_stocks.txt` (old version never removed URLs — sitemap stuck at 3,485 instead of ~970).
   - `generate_sitemap.py`: fixed to use `indexable_stocks.txt` instead of all HTML files.
-  - Ran `update_stock_analysis.py` manually to refresh all 953 large-cap pages (data was stale since Sep 24). Sitemap rebuilt to 970 URLs and resubmitted to Google Search Console.
+  - `generate-stock-pages.py`: fixed to preserve news/analysis from pages without NEWS_SECTION_START markers; added pre/post news count safety check.
+  - `update_stock_news.py`: article fetch window extended 2 → 4 days (laptop sometimes off for days).
+  - Ran `update_stock_analysis.py` manually — refreshed 953 large-cap pages (data was 11 days stale). Sitemap rebuilt to 970 URLs, resubmitted to Google Search Console.
+  - Restored news from backup after generate-stock-pages.py wipe; ran `sync_news_to_stock_pages.py` to resync.
+  - Cleaned up: sitemap copy.xml, blog.html.backup, stocks copy.txt, generate-stock-pages.py.backup, sitemap.xml.backup, github-repo/, stockiq/sitemap.xml, __pycache__.
   - **Japan Nikkei 225 screener** built end-to-end (21 workers, 210 stocks, full dashboard integration).
   - Added `add-new-screener.md` steering doc. Trimmed roadmap, backlinks, script-reference docs.

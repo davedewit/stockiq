@@ -186,6 +186,10 @@ $PYTHON "/Users/dave/VSCODE/stockiq/cleanup_broken_links.py"
 echo "🗑️ Removing duplicate articles..."
 $PYTHON "/Users/dave/VSCODE/stockiq/remove_news_duplicates.py"
 
+# Trim news.html to 240 stock + 60 general articles and keep noindex
+echo "✂️  Finalizing news.html..."
+$PYTHON "/Users/dave/VSCODE/stockiq/finalize_news_html.py"
+
 # Update news article dates
 echo "📅 Updating news article dates..."
 TODAY=$(date -u +"%Y-%m-%dT00:00:00Z")

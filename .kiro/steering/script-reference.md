@@ -9,7 +9,7 @@ For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-s
 | Script | What it does | Cooldown |
 |---|---|---|
 | `update_news.py` | Yahoo/Google RSS → OpenAI summaries → news.html + news.js | 2 hours |
-| `update_stock_news.py` | Per-stock RSS → stock pages + news.html/news.js. Keeps last 3 articles per stock, removes articles 30+ days old | 23h per stock |
+| `update_stock_news.py` | Per-stock RSS → stock pages + news.html/news.js. Keeps last 3 articles per stock, removes articles 30+ days old. Fetches articles from last **4 days** (extended from 2 days Oct 2026 — laptop sometimes off for days) | 23h per stock |
 | `update_stock_analysis.py` | Data snapshot + 0-100 score on large caps, sets index/noindex, writes indexable_stocks.txt. Runs on all 3,467 stocks — ~20 min, mostly free (Yahoo Finance). 404s for delisted stocks are normal and cached | none (runs every deploy) |
 | `people_also_watch_stocks.py --missing` | Adds "People also watch" section to pages missing it | none |
 | `update_sitemap.py` | **Rebuilds** stock URLs from indexable_stocks.txt (only large-cap pages), updates lastmod on site pages. Safety: skips if indexable list < 200 entries | none |
@@ -50,8 +50,9 @@ For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-s
 | Sidebar shows no news | `node -c /Users/dave/VSCODE/website/news.js` |
 | Sitemap has too many URLs (all 3,485) | `generate_sitemap.py` was adding all HTML files — it's now fixed to use indexable_stocks.txt only. Run `python3 update_sitemap.py` to rebuild, then resubmit in Google Search Console |
 | Stock page news wiped after running generate-stock-pages.py | Script only preserved news from pages with NEWS_SECTION_START markers — fixed Oct 2026, now also handles old format and shows pre/post count. If news drops: run `python3 sync_news_to_stock_pages.py` to recover from news.html |
-
-## Google Search Console
+| analysis-functions.js not updating on live site | Deploy script uploads all root `*.js` — but if running manually: `aws s3 cp analysis-functions.js s3://stockiq-final-websitebucket-vqekic7enf9h/ --cache-control "public, max-age=86400" --profile default --region us-east-1` |
+| Stock news appears in sidebar but not on the stock page | Stock page is missing NEWS_SECTION_START/END markers — run `python3 generate-stock-pages.py` (now safe, preserves content), then `python3 update_stock_news.py SYMBOL` |
+| news.html has fewer articles than expected | Restored from backup needed — check `~/VSCODE/backup/website_backup_<latest>/news.html`, copy back, then run `python3 sync_news_to_stock_pages.py` |
 
 - Sitemap URL: `https://stockiq.tech/sitemap.xml`
 - Should show ~970 URLs (953 large-cap stock pages + 17 site pages)
@@ -62,4 +63,3 @@ For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-s
 
 ## Python Path
 Scripts use `/opt/homebrew/bin/python3` (set as `$PYTHON` in deploy-to-s3.sh). Run manually with `python3` or `/opt/homebrew/bin/python3`.
-| analysis-functions.js not updating on live site | Deploy script now uploads all root `*.js` — but if running manually: `aws s3 cp analysis-functions.js s3://stockiq-final-websitebucket-vqekic7enf9h/ --cache-control "public, max-age=86400" --profile default --region us-east-1` |
