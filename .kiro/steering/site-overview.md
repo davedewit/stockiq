@@ -331,13 +331,21 @@ git pull --rebase && git push
 ## 11. Open items and optimisation ideas
 
 Flagged for the owner (not changed):
-- **Biggest remaining risk item: the paid product's own output.** Single-stock reports and trading signals
-  (Lambdas `stockiq-option-1-1-custom-analysis`, `stockiq-option-2-trading-signals`, `stockiq-option-2-2-auto-signals`,
-  the screener workers, and the formatters in `analysis-functions.js`) still print BUY/SELL/HOLD labels, entry/exit
-  prices and price targets (~60 places). Not changed: it alters what paying users see and the logged-in flows
-  cannot be tested from a script. Suggested approach: reuse the neutral labels the public stock pages already
-  use ("Positive signals", "Mixed", ...) and relabel entry/exit/targets as support/resistance levels. The FAQ
-  still describes these features as they are.
+- **Advice-style wording in the paid product's output (in progress, started 9 Oct 2026).**
+  - DONE: single-stock report (`stockiq-option-1-1-custom-analysis`, `lambda_function2.py`). It no longer prints
+    BUY/SELL/HOLD, "Buy immediately", stop loss / take profit, position size or urgency. Internal codes
+    (`STRONG BUY` ... `STRONG SELL`) are still used for logic but shown through `signal_label()` as "Strongly
+    positive / Positive / Mixed / Negative / Strongly negative signals" (same as the public stock pages); the
+    calculated levels are shown as "Lower/Upper reference level". Scoring and numbers are unchanged (checked
+    old vs new on 8 stocks with identical data). Previous code: `~/VSCODE/backup/stockiq-option-1-1-custom-analysis_before_neutral_wording_20261009.zip`
+    (Lambda code is not in git, so this zip is the only copy of the old version).
+  - NOT DONE: trading signals (`stockiq-option-2-trading-signals`, `stockiq-option-2-2-auto-signals`), the
+    screener workers' labels and the screener/crypto formatters in `analysis-functions.js` ("Recommendation:",
+    "Targets: Stop ... | Take Profit ...", "TOP 5 BUY RECOMMENDATIONS"), CSV export column names, and the
+    dashboard performance popup ("Prediction Correct / The AI predicted upward movement"). The FAQ still
+    describes signals with entry/exit prices. Do these one at a time, checking each while logged in.
+  - Noticed, not investigated: AAPL's public page showed a score of 71 while a live report scored 47 the next
+    day. The docs say page and app scores "can differ slightly"; this gap is not slight.
 - Legal (owner's facts, 9 Oct 2026): the business is "StockIQ", online-only with no physical address, and
   holds **no financial services licence**. Billing is in **USD** (confirmed on the three live Stripe prices:
   $4.99 / $14.99 / $49.99 per month). The terms, About page, pricing section and FAQ now say all of this.

@@ -117,7 +117,7 @@ def calculate_unified_investment_score(closes, highs, lows, volumes, rsi, macd_l
     if rsi:
         if rsi < 30:
             score += 15
-            score_breakdown.append("RSI Oversold: +15 (Strong buy signal)")
+            score_breakdown.append("RSI Oversold: +15 (Oversold reading)")
         elif rsi > 70:
             score -= 15
             score_breakdown.append("RSI Overbought: -15 (Caution signal)")
