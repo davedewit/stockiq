@@ -154,10 +154,10 @@ def calculate_unified_investment_score(closes, highs, lows, volumes, rsi, macd_l
         if pe_ratio:
             if pe_ratio < 15:
                 score += 10
-                score_breakdown.append(f"Low P/E ({pe_ratio:.1f}): +10 (Undervalued)")
+                score_breakdown.append(f"Low P/E ({pe_ratio:.1f}): +10 (Low valuation)")
             elif pe_ratio > 30:
                 score -= 10
-                score_breakdown.append(f"High P/E ({pe_ratio:.1f}): -10 (Overvalued)")
+                score_breakdown.append(f"High P/E ({pe_ratio:.1f}): -10 (High valuation)")
         
         revenue_growth = fundamentals.get('revenue_growth')
         if revenue_growth and revenue_growth > 15:
@@ -220,7 +220,7 @@ def calculate_unified_investment_score(closes, highs, lows, volumes, rsi, macd_l
                 score_breakdown.append(f"Strong ROE ({roe:.1f}%): +5")
             elif roe < 0:
                 score -= 10
-                score_breakdown.append(f"Negative ROE ({roe:.1f}%): -10 (Destroying value)")
+                score_breakdown.append(f"Negative ROE ({roe:.1f}%): -10 (Negative return)")
             elif roe < 5:
                 score -= 6
                 score_breakdown.append(f"Weak ROE ({roe:.1f}%): -6")
@@ -230,10 +230,10 @@ def calculate_unified_investment_score(closes, highs, lows, volumes, rsi, macd_l
         if price_to_book is not None:
             if price_to_book < 1.0:
                 score += 5
-                score_breakdown.append(f"Low P/B ({price_to_book:.2f}): +5 (Undervalued)")
+                score_breakdown.append(f"Low P/B ({price_to_book:.2f}): +5 (Low valuation)")
             elif price_to_book > 5.0:
                 score -= 5
-                score_breakdown.append(f"High P/B ({price_to_book:.2f}): -5 (Overvalued)")
+                score_breakdown.append(f"High P/B ({price_to_book:.2f}): -5 (High valuation)")
     
     # Long-term Trend - MA200 (±8 points)
     if ma200 and len(closes) >= 200:
@@ -294,10 +294,10 @@ def calculate_unified_investment_score(closes, highs, lows, volumes, rsi, macd_l
     # Range Position - Overextension Check (±5 points)
     if range_position > 95:
         score -= 5
-        score_breakdown.append(f"Near 52-Week High ({range_position:.0f}%): -5 (Limited upside)")
+        score_breakdown.append(f"Near 52-Week High ({range_position:.0f}%): -5 (High in its range)")
     elif range_position < 5:
         score += 5
-        score_breakdown.append(f"Near 52-Week Low ({range_position:.0f}%): +5 (Potential value)")
+        score_breakdown.append(f"Near 52-Week Low ({range_position:.0f}%): +5 (Low in its range)")
     
     final_score = max(0, min(100, score))
     return final_score, score_breakdown

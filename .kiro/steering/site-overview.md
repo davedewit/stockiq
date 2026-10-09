@@ -331,21 +331,35 @@ git pull --rebase && git push
 ## 11. Open items and optimisation ideas
 
 Flagged for the owner (not changed):
-- **Advice-style wording in the paid product's output (in progress, started 9 Oct 2026).**
-  - DONE: single-stock report (`stockiq-option-1-1-custom-analysis`, `lambda_function2.py`). It no longer prints
-    BUY/SELL/HOLD, "Buy immediately", stop loss / take profit, position size or urgency. Internal codes
-    (`STRONG BUY` ... `STRONG SELL`) are still used for logic but shown through `signal_label()` as "Strongly
-    positive / Positive / Mixed / Negative / Strongly negative signals" (same as the public stock pages); the
-    calculated levels are shown as "Lower/Upper reference level". Scoring and numbers are unchanged (checked
-    old vs new on 8 stocks with identical data). Previous code: `~/VSCODE/backup/stockiq-option-1-1-custom-analysis_before_neutral_wording_20261009.zip`
-    (Lambda code is not in git, so this zip is the only copy of the old version).
-  - NOT DONE: trading signals (`stockiq-option-2-trading-signals`, `stockiq-option-2-2-auto-signals`), the
-    screener workers' labels and the screener/crypto formatters in `analysis-functions.js` ("Recommendation:",
-    "Targets: Stop ... | Take Profit ...", "TOP 5 BUY RECOMMENDATIONS"), CSV export column names, and the
-    dashboard performance popup ("Prediction Correct / The AI predicted upward movement"). The FAQ still
-    describes signals with entry/exit prices. Do these one at a time, checking each while logged in.
-  - Noticed, not investigated: AAPL's public page showed a score of 71 while a live report scored 47 the next
-    day. The docs say page and app scores "can differ slightly"; this gap is not slight.
+- **Advice-style wording in the paid product's output: done 9 Oct 2026.** The product now describes, it does
+  not advise. Internal codes (`STRONG BUY` ... `STRONG SELL`, `CONSIDER`, `AVOID`) are still produced by the
+  Lambdas and used for logic, but are only ever shown through a label function:
+  `signalLabel()` / `horizonLabel()` in `analysis-functions.js`, `signal_label()` / `horizon_label()` in the
+  coordinator and crypto orchestrator, `signal_label()` in the report Lambda. Labels: Strongly positive, Positive,
+  Slightly positive, Mixed, Slightly negative, Negative, Strongly negative. Stop loss / take profit are shown as
+  "Lower / Upper reference level"; buy limit / buy stop as "Pullback / Breakout level"; "Profit probability" as
+  "Model probability estimate"; strategy as "Horizon". CSV headers changed to match (`Signal`, `Lower_Level`,
+  `Upper_Level`, `Model_Probability_%`, `Horizon`, `Horizon_Days`). Scoring and numbers were not changed
+  (old vs new compared on identical data for the report, all 8 page formatters and a Dow 30 background run).
+  - Changed: `stockiq-option-1-1-custom-analysis` (report; also fixes the company name, which was cut at the
+    first comma because stocks.txt was split with `split(',')`), `stockiq-screener-coordinator` (background runs),
+    `stockiq-option-7-1-orchestrator` (crypto), `analysis-functions.js`, the dashboard performance popup
+    (it used to say "The AI predicted upward movement" whenever the price was up), and the FAQ.
+  - Previous Lambda code (not in git): `~/VSCODE/backup/*_before_neutral_wording_20261009.zip` (3 files).
+  - **Keep it this way:** any new formatter must print `signalLabel(x.recommendation)`, never the raw code, and
+    must not print "buy", "sell", "stop loss", "take profit", "target", "position size" or "recommendation".
+    The dashboard tracker parses only the symbol and price at the start of numbered lines; don't change those.
+  - Not changed: the ~630 screener worker Lambdas still return the raw codes and a few descriptive breakdown
+    strings ("RSI Buy Zone"); three Lambdas with old wording are not called by the site
+    (`stockiq-option-3-1-us-screener`, `stockiq-option-3-1-sp100`, `stockiq-option-3-dynamic-coordinator`).
+- **Why the page score and the app score differ (AAPL 71 vs 47, checked 9 Oct 2026).** Same model, different
+  inputs: (1) the page uses the previous close, the app uses the live price, and the trend factor is a cliff:
+  0.1% below the 20-day average turned "Strong Uptrend +12" into "Below 20-day MA -6" (18 points); (2) the page
+  had "Near 52-week high -5", the app did not after the drop (+5); (3) the app (Finnhub) had no revenue growth
+  for AAPL while the page (Yahoo) had "+8"; (4) during market hours the app compares part-day volume with a
+  full-day average and scores "Low Volume -3". 71 - 18 + 5 - 8 - 3 = 47. Not fixed (these are scoring changes):
+  the part-day volume penalty is an artefact worth removing, and a fallback to Yahoo for missing Finnhub
+  fundamentals would make the two agree more often. If either is changed, change `stock_metrics.py` too.
 - Legal (owner's facts, 9 Oct 2026): the business is "StockIQ", online-only with no physical address, and
   holds **no financial services licence**. Billing is in **USD** (confirmed on the three live Stripe prices:
   $4.99 / $14.99 / $49.99 per month). The terms, About page, pricing section and FAQ now say all of this.
