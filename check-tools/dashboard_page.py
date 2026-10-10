@@ -9,6 +9,7 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
           limits (types your own loss limit), split (prints the line that says whose result is whose),
           cards (prints the summary cards and every account value shown since the page opened: there should be one),
           pace (hands the three pace settings to the risk level, moves the slider, sets one by hand, moves it again),
+          trailstop (chooses the full trailing stop loss in "Your own limits"),
           listswitch (switches the list to "buys and sells only" and reloads the page to see that it is remembered)
 Open the page with headless Chrome: --dump-dom for the printed results, --screenshot for the look (site-overview.md, section 12)."""
 import json, sys
@@ -29,7 +30,7 @@ let portfolio = { v: 1, startingCash: 100000, cash: 15899.07, createdAt: iso(-4)
   { id: 'a1', symbol: 'WEMIX-USD', label: 'WEMIX-USD', name: 'WEMIX USD', currency: 'USD', qty: 1250 / 0.1868991, buyPrice: 0.1868991, buyFx: 1, costUsd: 1250, boughtAt: iso(-2.9), spyAtBuy: 700, note: 'AI: rank 1, RSI 14, down 3.8%% in 7 days on 1.0x volume', by: 'ai', screener: '7-1' }] };
 let version = 3;
 const OPTIONS = %s;
-let auto = { settings: { enabled: true, risk: 3, budgetUsd: 10000, periodDays: 10, everyHours: 0.5, maxHoldDays: 0.25, screeners: ['7-1'], aiSell: true, selfTune: true, emails: true, stopPct: null, takePct: null, auto: [] }, coinShare: 1, state: { lastRun: iso(-0.1) }, minSample: 8, practiceCash: 100000, lessons: null, resting: {}, recent: [],
+let auto = { settings: { enabled: true, risk: 3, budgetUsd: 10000, periodDays: 10, everyHours: 0.5, maxHoldDays: 0.25, screeners: ['7-1'], aiSell: true, selfTune: true, emails: true, stopPct: null, takePct: null, auto: [], trailMode: 'gains' }, coinShare: 1, state: { lastRun: iso(-0.1) }, minSample: 8, practiceCash: 100000, lessons: null, resting: {}, recent: [],
   scorecard: { n: 0, groups: {} }, rules: { name: 'Balanced', stop: -10, take: 18, trail: 0.5, top: 10, max_rsi: 76, arm: 9, changed: {}, yours: [], level: { stop: -10, take: 18 } }, realizedUsd: 7.91,
   tune: { trial: null, past: [], nextReviewIn: 20, batch: 20, group: 10, finished: 0 }, month: { last30: { n: 0, up: 0, usd: 0, pct: 0 }, before30: { n: 0, up: 0, usd: 0, pct: 0 } },
   nextCheck: { at: iso(0.4), markets: ['coin'] }, holding: { count: 1, investedUsd: 1250 },
@@ -109,6 +110,8 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
       const h = q('#ap-hold'); h.value = String(0.25); h.dispatchEvent(new Event('change', { bubbles: true })); await wait(900); show('chose 6 hours for the holding time myself');
       const r2 = q('#ap-risk'); r2.value = '1'; r2.dispatchEvent(new Event('input', { bubbles: true })); r2.dispatchEvent(new Event('change', { bubbles: true })); await wait(1500); show('moved the slider to Cautious');   // the panel was redrawn: take the slider afresh
       out('  it says: ' + q('#ap-pace').textContent.slice(0, 110)); }
+    if (step === 'trailstop') { const t = q('#ap-trail'); out('trailing stop: "' + t.selectedOptions[0].textContent + '" | ' + q('#ap-trail-text').textContent.slice(0, 90)); t.value = 'full'; t.dispatchEvent(new Event('change', { bubbles: true })); await wait(900);
+      out('  chose the full trailing stop loss: saved trailMode=' + auto.settings.trailMode + ' | "' + q('#ap-trail').selectedOptions[0].textContent + '" | ' + q('#ap-trail-text').textContent.slice(0, 110)); out('  it says: ' + q('#ap-pace').textContent.slice(60, 260)); }
     if (step === 'off') { q('#ap-enabled').click(); await wait(700); out('switched the autopilot off: ' + cellText('WEMIX')); }
     if (step === 'open') { document.querySelectorAll('#practice-autopilot details').forEach(d => { d.open = true; }); const s = q('#pp-sold'); if (s) s.open = true; out('unfolded the details'); }
   }

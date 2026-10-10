@@ -211,12 +211,21 @@
         const kinds = d.screeners.map(k => (data.options.screeners[k] || {}).kind);
         return kinds.includes('crypto') && kinds.some(k => k !== 'crypto');
     }
+    // The stop that follows a holding: the user's choice (settings.trailMode; TRAIL_MODES in the stockiq-ai-trader Lambda)
+    const TRAILS = {
+        gains: { name: 'Protects a gain (starts once a holding has risen)', says: 'when a stop that follows a rising holding is hit (it starts once the holding has risen beyond its own normal wobble and is set from how much that holding normally moves: wider for a jumpy coin, closer when its screener figures weaken or time is short)',
+                 help: 'The stop only starts once a holding has risen beyond its normal wobble; from then on it follows the price up and sells if it slips back too far. A holding that just drifts down is left to the loss limit, the time limit and its screener figures.' },
+        full: { name: 'From the moment it is bought (a full trailing stop loss)', says: 'when its trailing stop is hit (the stop sits under the price from the moment of buying and follows it up; it is set from how much that holding normally moves: wider for a jumpy coin, closer when its screener figures weaken or time is short)',
+                help: 'The stop sits under the price from the moment of buying and follows it up, so a holding that falls is cut early as well. It loses less on a faller, but ordinary dips will shake it out more often.' },
+        off: { name: 'Off', says: '', help: 'Nothing follows the price. It sells only at your loss limit and gain mark, at the time limit, and when its screener figures turn.' }
+    };
+    const trailOf = (d) => TRAILS[d.trailMode] ? d.trailMode : 'gains';
     function paceText(d) {
         const r = levelRules(d.risk);
         if (!r || !(d.maxHoldDays > 0) || !(d.everyHours > 0)) return '';
         const late = d.maxHoldDays * 24 < d.everyHours - 1e-9, quick = d.everyHours < 3 || d.maxHoldDays < 1;
         const shares = d.screeners.some(k => (data.options.screeners[k] || {}).kind !== 'crypto');
-        return `It sells a holding once it has had it for ${holdText(d.maxHoldDays)}, whatever the price, and sooner at ${r.stop}% or +${r.take}%, when a stop that follows a rising holding is hit (it starts once the holding has risen beyond its own normal wobble and is set from how much that holding normally moves: wider for a jumpy coin, closer when its screener figures weaken or time is short), or when its screener signal turns negative or it slips far down the ranking. The money is then free for the next buy. At every check-in the AI model also reviews each holding against the latest screener figures and recent headlines, and may sell it earlier than these rules.`
+        return `It sells a holding once it has had it for ${holdText(d.maxHoldDays)}, whatever the price, and sooner at ${r.stop}% or +${r.take}%${TRAILS[trailOf(d)].says ? ', ' + TRAILS[trailOf(d)].says + ',' : ''} or when its screener signal turns negative or it slips far down the ranking. The money is then free for the next buy. At every check-in the AI model also reviews each holding against the latest screener figures and recent headlines, and may sell it earlier than these rules.`
             + (late ? ` It only checks in ${everyText(d.everyHours)}, though, so in practice a holding is sold at the next check-in, about ${holdText(d.everyHours / 24)} after it was bought. Check in more often for it to be sold on time.` : '')
             + (quick && shares ? ' Shares are only traded while their market is open and their rankings change little within a day, so quick settings mostly make a difference for coins.' : '')
             + (quick ? ' No trading costs are taken off here: real trading this often would lose part of every trade to fees.' : '');
@@ -250,7 +259,7 @@
     function recordHtml() {
         const c = data.scorecard, need = data.minSample || 8, plans = data.plans || [], on = data.settings.enabled;
         const held = plans.length
-            ? `<div>Holding now: ${plans.map(p => `<strong style="color: var(--text-primary);">${esc(p.label)}</strong> (bought ${esc(when(p.boughtAt))}; ${on ? `it sells it at the check-in around ${esc(when(p.sellBy))} at the latest, sooner at ${p.stop}% or +${p.take}%` : 'the autopilot is off, so it stays until you sell it'}${on && typeof p.floor === 'number' ? `; it has been up ${pc(p.peak)} at its best and is sold if it slips back to ${pc(p.floor)}` : on && typeof p.arm === 'number' ? `; a stop follows it once it has been up ${p.arm}%` : ''}${on && typeof p.move === 'number' ? ` (it normally moves about ${p.move.toFixed(1)}% between check-ins and may slip ${p.room} such moves from its best${p.tight ? '; the AI review asked for a tighter stop' : ''})` : ''}${on && p.view ? `; the AI model's latest review, ${esc(when(p.view.t))}${p.view.larger ? ', by the larger model' : ''}: ${p.view.sell ? 'sell' : p.view.tighten ? 'keep, with a tighter stop' : 'keep'} (${esc(p.view.text)})` : ''})`).join('; ')}.</div>`
+            ? `<div>Holding now: ${plans.map(p => `<strong style="color: var(--text-primary);">${esc(p.label)}</strong> (bought ${esc(when(p.boughtAt))}; ${on ? `it sells it at the check-in around ${esc(when(p.sellBy))} at the latest, sooner at ${p.stop}% or +${p.take}%` : 'the autopilot is off, so it stays until you sell it'}${on && p.mode === 'full' && typeof p.floor === 'number' && !(p.peak >= p.arm) ? `; its trailing stop is at ${pc(p.floor)} and follows the price up` : on && typeof p.floor === 'number' ? `; it has been up ${pc(p.peak)} at its best and is sold if it slips back to ${pc(p.floor)}` : on && p.mode === 'off' ? '; no stop follows it' : on && typeof p.arm === 'number' ? `; a stop follows it once it has been up ${p.arm}%` : ''}${on && typeof p.move === 'number' ? ` (it normally moves about ${p.move.toFixed(1)}% between check-ins and may slip ${p.room} such moves from its best${p.tight ? '; the AI review asked for a tighter stop' : ''})` : ''}${on && p.view ? `; the AI model's latest review, ${esc(when(p.view.t))}${p.view.larger ? ', by the larger model' : ''}: ${p.view.sell ? 'sell' : p.view.tighten ? 'keep, with a tighter stop' : 'keep'} (${esc(p.view.text)})` : ''})`).join('; ')}.</div>`
             : `<div>Holding nothing right now.</div>`;
         const m = data.month && data.month.last30, before = data.month && data.month.before30;
         const month = m && m.n ? `<div style="margin-top: 4px;">Last 30 days: <span style="color: ${tint(m.usd)}; font-weight: 600;">${usd2(m.usd)}</span> from ${m.n} finished trade${m.n === 1 ? '' : 's'} (${m.up} up)${m.pct !== null ? `, which is <span style="color: ${tint(m.pct)}; font-weight: 600;">${(m.pct >= 0 ? '+' : '') + m.pct.toFixed(2)}%</span> of the ${usd0(data.settings.budgetUsd)} budget` : ''}.${before && before.n ? ` The 30 days before: ${usd2(before.usd)} from ${before.n}${before.pct !== null ? ' (' + (before.pct >= 0 ? '+' : '') + before.pct.toFixed(2) + '%)' : ''}.` : ''}${typeof m.afterCosts === 'number' && data.costEachWay ? ` No trading costs are taken from the fake money: with a typical ${data.costEachWay}% on each buy and each sell that would be <span style="color: ${tint(m.afterCosts)}; font-weight: 600;">${usd2(m.afterCosts)}</span>.` : ''}</div>` : '';
@@ -273,7 +282,7 @@
 
     // ---------------------------------------------------------------- "Improving its own rules": what it has changed, is trying, has tried
     function ruleWords(r) {
-        return `sells at ${r.stop}% or +${r.take}%; a stop follows a rising holding, set from how much that holding normally moves and from its screener figures now; buys from the top ${r.top} of a ranking` + (r.max_rsi >= 100 ? '' : ` with RSI under ${r.max_rsi}`);
+        return `sells at ${r.stop}% or +${r.take}%; ${r.trailMode === 'off' ? 'no stop follows a holding (switched off)' : r.trailMode === 'full' ? 'a trailing stop follows each holding from the moment it is bought, set from how much that holding normally moves and from its screener figures now' : 'a stop follows a rising holding, set from how much that holding normally moves and from its screener figures now'}; buys from the top ${r.top} of a ranking` + (r.max_rsi >= 100 ? '' : ` with RSI under ${r.max_rsi}`);
     }
     function tuneHtml() {
         const t = data.tune, r = data.rules;
@@ -336,6 +345,8 @@
                         <label>Sell at a loss of <input id="ap-stop" type="number" min="1.5" max="30" step="0.5" inputmode="decimal" placeholder="${hint(d.risk, 'stop')}" value="${d.stopPct || ''}" aria-label="Your own loss limit in percent">%</label>
                         <label>Sell at a gain of <input id="ap-take" type="number" min="2" max="80" step="0.5" inputmode="decimal" placeholder="${hint(d.risk, 'take')}" value="${d.takePct || ''}" aria-label="Your own gain mark in percent">%</label>
                         <span>Optional. Leave a field empty to use the level's (shown in grey). What you set here, its own trials leave alone.</span>
+                        ${'trailMode' in data.settings ? `<label style="flex-basis: 100%;">Trailing stop <select id="ap-trail" style="padding: 6px 8px; margin: 0 4px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 16px; max-width: 100%;">${Object.keys(TRAILS).map(k => `<option value="${k}" ${trailOf(d) === k ? 'selected' : ''}>${TRAILS[k].name}</option>`).join('')}</select></label>
+                        <span id="ap-trail-text" style="flex-basis: 100%;">${esc(TRAILS[trailOf(d)].help)}</span>` : ''}
                     </div>
                 </div>
 
@@ -401,6 +412,7 @@
             stopPct: ownLimit('ap-stop', 'stopPct'), takePct: ownLimit('ap-take', 'takePct')
         };
         if ('auto' in data.settings) draft.auto = PACE_FIELDS.filter(k => left.includes(k));
+        if ('trailMode' in data.settings) { const pick = byId('ap-trail'); draft.trailMode = pick && TRAILS[pick.value] ? pick.value : trailOf(data.settings); }
     }
     // Bring the button, the "saved" line and the explanatory lines up to date without redrawing (typing keeps its place)
     function syncDraft() {
@@ -412,6 +424,7 @@
         set('ap-status', el => { el.textContent = statusText(); if (el.classList) el.classList.toggle('on', on); });
         set('ap-switch-text', el => { el.textContent = draft.enabled ? 'On' : 'Off'; });
         set('ap-risk-text', el => { el.textContent = riskText(draft.risk); });
+        set('ap-trail-text', el => { el.textContent = TRAILS[trailOf(draft)].help; });
         const lvl = paceOf(draft.risk);
         if (lvl) {
             set('ap-period', el => { el.placeholder = String(lvl.periodDays); });
