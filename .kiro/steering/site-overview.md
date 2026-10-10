@@ -563,8 +563,11 @@ code before relying on a detail (section 10).
 - **Quick set-ups**: "Quick coin trading", "Steady shares", "Shares and coins".
 - **Risk level** slider (Cautious … Adventurous) with a sentence of what the level means, and
   **Your own limits**: two optional fields, "Sell at a loss of __ %" and "Sell at a gain of __ %".
-- Budget for the AI, Build up to it over (days), Checks in, Keeps a holding at most, and **two
-  lines that describe what exactly these settings will do**.
+- Budget for the AI, and the three **pace** fields: Build up to it over (days), Checks in, Keeps a
+  holding at most. Each pace field is tagged "automatic" (it follows the risk level and moves with
+  the slider; shown as an empty box with the level's value in grey, or "Automatic: …" in a menu) or
+  "set by you" (it stays put); a link hands all three back to the level. Then **two lines that
+  describe what exactly these settings will do**.
 - Screeners it buys from, grouped by market (all 15).
 - **What it may do by itself**: three switches (sell early on the AI model's review, try changes
   to its own rules, email me its reviews).
@@ -583,7 +586,7 @@ code before relying on a detail (section 10).
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=10` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=12`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=13`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | Two containers (about line 1250) and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
@@ -628,9 +631,10 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
 | `enabled` | on / off (default off) | Only for users in `AI_TRADER_USERS` |
 | `risk` | 1–5 (default 3) | The level: see the table below |
 | `budgetUsd` | 100 … 1,000,000 (default 10,000) | The most it has invested at once |
-| `periodDays` | 1–90 (default 10) | "Build up to it over": the budget is released in equal steps over this long. **Not the holding time** (the owner mixed them up twice) |
-| `everyHours` | 0.5, 1, 3, 6, 12, 24 (default 24) | How often it checks in |
-| `maxHoldDays` | 0.5 h … 60 days, stored in days (default 20) | The longest it keeps a holding |
+| `periodDays` | 1–90 | "Build up to it over": the budget is released in equal steps over this long. **Not the holding time** (the owner mixed them up twice) |
+| `everyHours` | 0.5, 1, 3, 6, 12, 24 | How often it checks in |
+| `maxHoldDays` | 0.5 h … 60 days, stored in days | The longest it keeps a holding |
+| `auto` | any of `periodDays`, `everyHours`, `maxHoldDays` | **Which of those three are left to the risk level.** For a listed one `clean_settings` puts in the level's own value (`PACE`) every time, so the rest of the code only ever sees numbers. A new user leaves all three; settings saved before 10 Oct evening have none (all set by hand) |
 | `screeners` | any of the 15 keys (default none) | Coordinator keys: `3-8 3-100 3-7 3-3 3-2 3-4 3-5 3-6 4-50 4-100 4-200 4-300 5-ftse100 5-nikkei225 7-1` |
 | `aiSell`, `selfTune`, `emails` | on unless switched off | "What it may do by itself" |
 | `stopPct`, `takePct` | empty, or 1.5–30 and 2–80 | The owner's own loss limit and gain mark, as sizes in percent |
@@ -643,6 +647,11 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
 | 4 Bold | 6 | 15 | 82 | 70% | −14% | +28% | 50% |
 | 5 Adventurous | 4 | 20 | no limit | no limit | −20% | +45% | 100% |
 
+- **The pace each level sets** (`PACE`, sent to the panel as `options.pace`; added 10 Oct when the
+  owner asked why the slider did not move these fields): Cautious 10 days / once a day / 20 days;
+  Careful 7 / twice a day / 10; Balanced 5 / every 6 hours / 5; Bold 2 / every 3 hours / 2;
+  Adventurous 1 day / every hour / 1 day (build-up / check-in / longest holding). So one slider can
+  drive everything, and anything set by hand overrides it. The quick set-ups set these by hand.
 - **With only coin screeners ticked the whole budget may go into coins at any level**
   (`coin_share`); the last column only applies to a mix. The panel's wording follows (`mixed`).
 - The rules in force for a user are `rules_for(settings, state)`: the level, then what the
@@ -795,7 +804,10 @@ that it at least does not fool itself.
   the coin share, the $25 smallest buy): change one, change the other, and run
   `autopilot_plan_check.py`.
 - `levelRules` gives the rules to describe: the level's (`options.risk`), what it changed itself
-  (`rules.level`), then the owner's own limits as typed. Quick set-ups are `PRESETS` (they never
+  (`rules.level`), then the owner's own limits as typed. `readDraft` turns an empty build-up box or
+  "Automatic" in a menu into the level's own value (`paceOf`) and lists the field in `auto`; while
+  the slider moves, `syncDraft` updates the greyed value, the "Automatic: …" menu entries and the
+  descriptions. `auto` is only sent if the Lambda sent it. Quick set-ups are `PRESETS` (they never
   touch the budget or the switch).
 - "Buys and sells only" is a way of looking at the list, not a setting: it is remembered in the
   browser (`localStorage` key `stockiqAutopilotTradesOnly`) and nothing is sent to the Lambda.
@@ -831,16 +843,18 @@ that it at least does not fool itself.
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 176 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 88 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 183 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 97 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 63 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
    ```
+   `ai_trader_test.py` sets the pace by hand at its top (it patches `DEFAULTS`), as a user who chose
+   his own values; the real defaults, where the level sets the pace, are tested in their own part.
    **Never run `practice_test.js` on the real `practice-portfolio.js`**: it holds the live storage
    address and would write to the live table (it happened once). Add checks for what you change.
 4. **See it in a browser** without a login: `dashboard_page.py` (both sections, stand-in server,
-   steps such as `type,sale,trial,preset,sellall,limits,split,cards,listswitch,open`) with headless
+   steps such as `type,sale,trial,preset,sellall,limits,split,cards,pace,listswitch,open`) with headless
    Chrome; `--dump-dom` for what it printed, `--screenshot` for the look (section 12).
 5. **Try the staged function on a copy of the real record**: read the owner's item from both tables
    (read-only), load it into stand-in storage under another name, run `run_user` / `public` with
@@ -867,14 +881,17 @@ Traps met on 10 Oct: a deploy script checking `pgrep -f deploy-to-s3.sh` finds i
 is written and run in one command (run it on its own, or match the process as the last script
 does); in zsh write `"${C}:path"` for `git show` (`$C:c…` is read as a modifier and left an empty
 file once); a stand-in page that does not finish has a syntax error in its own script (check each
-`<script>` block with `node --check`); test expectations with dates must allow for the local time
+`<script>` block with `node --check`); in a browser step, take an element afresh after the panel
+has redrawn (a kept reference is to the old one and nothing happens); test expectations with dates must allow for the local time
 zone; SES and the news feeds are only used when running as the Lambda, so tests need stand-ins
 (`mail=`, `headlines=`); two sessions building at once collided (the fingerprint check caught it).
 
 ### Where things stood on the evening of 10 Oct 2026
 
-- The owner's autopilot is on: Balanced, $10,000 built up over 8 days, checking every 30 minutes,
-  holdings kept at most 6 hours, crypto screener only, all three switches on, no limits of his own.
+- The owner's autopilot is on: Balanced, $10,000 built up over 1 day, checking every 30 minutes,
+  holdings kept at most 6 hours (all three set by hand, so the slider does not move them until he
+  presses "Let the risk level set all three"), crypto screener only, all three switches on, no
+  limits of his own.
 - One finished trade: WEMIX, +0.6% (+$7.91), sold when its score fell below zero (rank 1 → 149).
   It holds one coin (CFX). His own buys in the practice portfolio are two Bitcoin lines.
 - Seen for real since: a headline reaching the model (15:10 UTC), clean scheduled check-ins on each
@@ -1280,6 +1297,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     packaged as `check-tools/pending-<name>/deploy.sh` runs without a hand-off. Keep packaging deploys
     that way (live-code check, rollback copy, `DRY_RUN=true`), run the dry run, then run it.
   - Autopilot activity list: "Buys and sells only" became a switch remembered in the browser.
+  - **The pace follows the risk level** (section 8c): the three pace settings can be left to the
+    level ("automatic") or set by hand. Rollback zip:
+    `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_pace_20261010.zip`.
   - **Gain protection reworked; clearer account figures** (section 8c): a gain is protected from a
     rise that follows the holding time, and a big gain gives back less; the AI review sees each
     holding's path and a larger model is used, capped, when a gain is at stake; the practice
