@@ -79,7 +79,7 @@ The first (224 checks) runs the Lambda's code with stand-ins for the database, t
 the AI model, headlines and email: budget pacing, risk filters, the coin share, every sell rule, the
 AI model's hold-or-sell review, headlines, the record and what it learns from it, trials of its own
 rules, the owner's own limits and switches, "sell everything", a clash with the user, missing data,
-when it is due. The second (111 checks) drives the controls with a stand-in API (the file's real
+when it is due. The second (117 checks) drives the controls with a stand-in API (the file's real
 address is never called, because the test replaces `fetch`) and a stand-in for the browser's storage.
 Add a check for whatever you change; when wording changes, the checks that quote it must change too.
 
@@ -96,10 +96,13 @@ scripts with a stand-in server: nothing live is called. It starts with two holdi
 the autopilot, performs the steps and prints what the page shows.
 
 ```bash
-python3 check-tools/dashboard_page.py ../website/practice-portfolio.js ../website/practice-autopilot.js /tmp/dash.html dark "type,sale,trial,open"
+python3 check-tools/dashboard_page.py ../website/practice-portfolio.js ../website/practice-autopilot.js /tmp/dash.html dark "tabs,type,sale,trial,open" ../website/dashboard.html
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars --window-size=1250,2500 \
   --virtual-time-budget=15000 --screenshot=/tmp/dash.png --dump-dom file:///tmp/dash.html > /tmp/dash.dom
 ```
+
+The last argument is optional: with `dashboard.html` given, the page's real tab bar and tab script are used and the
+two sections sit in their own tabs, as on the site (step `tabs` presses each tab and the autopilot's two parts).
 
 Steps: `type` (types in the buy row), `sale` (the autopilot sells in the background and the page refreshes
 itself), `trial` (a trial of its own rules starts), `off` (the autopilot is switched off), `open` (unfolds the

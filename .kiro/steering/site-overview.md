@@ -282,7 +282,11 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   Logic in `analysis-functions.js` (~350 KB, holds the stock lists and all formatters) +
   `js/analysis-core.js`. How the screeners, signals and crypto work: section 8b.
 - `dashboard.html`: report history, favourites, plans/upgrade (Stripe), manage subscription,
-  "Run in Background" (through `stockiq-screener-coordinator`), 🎯 performance tracker.
+  "Run in Background" (through `stockiq-screener-coordinator`), 🎯 performance tracker. **Since 10 Oct
+  2026 it has tabs under the heading: Reports (the statistics, Report History, auto-delete),
+  Practice portfolio, AI autopilot** (section 8c). The plan sections ("Upgrade Your Plan", "Manage
+  Subscription") stay below every tab, because other pages link to `dashboard.html#upgrade` and
+  code scrolls there.
 - `index.html`: market overview widgets, guides, "How StockIQ Works", **Pricing section**
   (`#pricing`, three plans in USD), email signup ("Get Screener Highlights by Email", details in
   `stockiq.md`), comparison table.
@@ -538,9 +542,21 @@ money: no real trade is ever placed, and nothing here may ever be connected to r
 section is written from the code as deployed on the evening of 10 Oct 2026. Verify against the
 code before relying on a detail (section 10).
 
-### What the owner sees on the dashboard, top to bottom
+### What the owner sees on the dashboard
 
-**Practice portfolio** (above Report History, container `#practice-portfolio`):
+The dashboard was one long page until the owner asked for it to be tidied (10 Oct). It now has
+**three tabs** under the heading: 📈 Reports, 💵 Practice portfolio, 🤖 AI autopilot. One panel is
+shown at a time; the choice is remembered in the browser (`localStorage` key
+`stockiqDashboardTab`) and kept in the address (`dashboard.html#practice`, `#autopilot`), so a
+refresh or a link lands on the same tab; any other address (`#upgrade`) opens Reports. The AI
+autopilot tab only appears once its panel has content (it is empty for users the autopilot is not
+open to). The markup is `data-dash-tab` buttons and `data-dash-panel` blocks, with a small inline
+script between the `DASH_TABS_SCRIPT_START/END` comments in `dashboard.html`
+(`window.dashboardTabs.show(name)` switches from code). Report code keeps working while its panel
+is hidden. **Keep the Reports panel first in the page**: one report routine finds "Recent Reports"
+with `document.querySelector('h3')`.
+
+**Practice portfolio** (its own tab, container `#practice-portfolio`):
 - Four cards: Account value (the cash plus every holding at its latest price; under it the change
   since the start, split into what has been sold and what is still held), Practice cash left, In
   holdings, and "For comparison" (the same money in an S&P 500 index fund instead; it says "no change
@@ -558,8 +574,13 @@ code before relying on a detail (section 10).
 - "Sold (N)" folded list with a summary, "Clear sold list" and an × per line (clearing only tidies
   the list: what a sale brought in is already in the cash). "Refresh prices", "Reset fake money".
 
-**AI autopilot** (directly under it, container `#practice-autopilot`; shown only to allowed users):
-- On/off switch and a status box (what it holds, last and next check-in).
+**AI autopilot** (its own tab, container `#practice-autopilot`; shown only to allowed users). The
+on/off switch, the status box (what it holds, last and next check-in) and the buttons "Check in
+now" / "Sell everything it holds" sit at the top; below them the panel is in **two parts, Activity
+and Settings**, so neither is a long scroll (it opens on Settings until it is switched on with a
+screener, then on Activity; the part last looked at is remembered, `stockiqAutopilotPart`). Both
+parts are always in the page and one is hidden, so settings are read and saved whichever is on
+show. Settings holds the first six items below, Activity the last three:
 - **Quick set-ups**: "Quick coin trading", "Steady shares", "Shares and coins".
 - **Risk level** slider (Cautious … Adventurous) with a sentence of what the level means, and
   **Your own limits**: two optional fields, "Sell at a loss of __ %" and "Sell at a gain of __ %",
@@ -573,8 +594,8 @@ code before relying on a detail (section 10).
 - Screeners it buys from, grouped by market (all 15).
 - **What it may do by itself**: three switches (sell early on the AI model's review, try changes
   to its own rules, email me its reviews).
-- "Check in now", "Sell everything it holds (N)", and a line saying "Saving…" / "✓ Saved." /
-  "Not saved: reason". There is no save button: every change saves itself.
+- (At the top, beside the buttons: a line saying "Saving…" / "✓ Saved." / "Not saved: reason".
+  There is no save button: every change saves itself.)
 - **How it is doing**: what it holds now and when each will be sold, with the AI model's latest
   review of it; the last 30 days in dollars and as a share of the budget; finished trades (up /
   down, average); a folded breakdown; notes the AI model wrote from the record.
@@ -588,8 +609,8 @@ code before relying on a detail (section 10).
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=11` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=17`) | Controls and reports only; decisions are made by the Lambda |
-| Page | `website/dashboard.html` | Two containers (about line 1250) and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=18`) | Controls and reports only; decisions are made by the Lambda |
+| Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
 | Schedule | EventBridge `stockiq-ai-trader-schedule`, `cron(10,40 * * * ? *)` | Every 30 minutes; `SLOT_MINUTES` in the Lambda must match. **Disable this rule to stop everything** |
@@ -896,7 +917,7 @@ that it at least does not fool itself.
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
    python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 224 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 111 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 117 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 64 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
@@ -906,8 +927,12 @@ that it at least does not fool itself.
    It also sets `STAY_CHECKS` to 1 so that older tests buy a coin at once; the real wait has its own part.
    **Never run `practice_test.js` on the real `practice-portfolio.js`**: it holds the live storage
    address and would write to the live table (it happened once). Add checks for what you change.
-4. **See it in a browser** without a login: `dashboard_page.py` (both sections, stand-in server,
-   steps such as `type,sale,trial,preset,sellall,limits,trailstop,split,cards,pace,listswitch,open`) with headless
+4. **See it in a browser** without a login: `dashboard_page.py` (both sections, stand-in server;
+   give it `dashboard.html` as a sixth argument and it puts the page's real tab bar and tab script
+   into the test page, step `tabs`). After any edit to `dashboard.html` also check that the
+   sections still balance and that every inline script parses (`node --check` on each `<script>`
+   block): the logged-in page itself cannot be opened from here, it redirects to Sign In.
+   Steps such as `type,sale,trial,preset,sellall,limits,trailstop,split,cards,pace,listswitch,open`) with headless
    Chrome; `--dump-dom` for what it printed, `--screenshot` for the look (section 12).
 5. **Try the staged function on a copy of the real record**: read the owner's item from both tables
    (read-only), load it into stand-in storage under another name, run `run_user` / `public` with
@@ -1356,6 +1381,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     packaged as `check-tools/pending-<name>/deploy.sh` runs without a hand-off. Keep packaging deploys
     that way (live-code check, rollback copy, `DRY_RUN=true`), run the dry run, then run it.
   - Autopilot activity list: "Buys and sells only" became a switch remembered in the browser.
+  - **Dashboard tidied into tabs** (sections 8 and 8c): Reports, Practice portfolio and AI autopilot
+    each have a tab; the autopilot panel is split into Activity and Settings with its switch and
+    buttons kept at the top. Website files only.
   - **"Check in now" acts, and says why when it cannot** (section 8c): a check-in asked for by hand
     releases the next part of the budget early; the reason for an empty check-in is in the message
     and stays visible with "Buys and sells only" on. When trying a staged function on a copy of the
