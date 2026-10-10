@@ -83,7 +83,7 @@ python3 check-tools/dashboard_page.py ../website/practice-portfolio.js ../websit
 
 Steps: `type` (types in the buy row), `sale` (the autopilot sells in the background and the page refreshes
 itself), `trial` (a trial of its own rules starts), `off` (the autopilot is switched off), `open` (unfolds the
-details), `preset` (presses a quick set-up), `sellall` (presses "Sell everything it holds" and says yes). The printed results are in the `<pre id="out">` of the dumped page.
+details), `preset` (presses a quick set-up), `sellall` (presses "Sell everything it holds" and says yes), `limits` (types your own loss limit), `split` (prints the line that says whose result is whose). The printed results are in the `<pre id="out">` of the dumped page.
 
 ## autopilot_plan_check.py (with autopilot_plan_check.js)
 

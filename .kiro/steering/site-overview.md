@@ -297,6 +297,12 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   holding now stays). The S&P 500 columns and the "N of M ahead of the S&P 500" sentences were
   removed on 10 Oct at the owner's request (he found them confusing, and they mean little for
   coins); one figure remains, the "For comparison" card (the same money in an S&P 500 index fund).
+  **Whose result is whose** (`splitGain`, 10 Oct): under the cards a line splits the change since
+  the start into "your own buys" and "the autopilot" (what it has sold, and what it still holds at
+  the latest price). The owner had taken a +$226 total for the autopilot's doing when +$202 of it
+  was his own Bitcoin; the sums were right, the single total was misleading. The autopilot's sold
+  figure comes from its own running total (`realizedUsd` from the Lambda), so clearing the sold
+  list does not move it into "your own".
   `spyAtBuy` / `spyAtSell` are still stored on each holding: the autopilot's record uses them. The "Sold" list
   ends with a summary (put in, got back, result), a "Clear sold list" button and an × on each line; clearing only tidies the list, because
   what a sale brought in is already in the practice cash (added 10 Oct 2026, script `?v=3`). The
@@ -409,7 +415,10 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
     it buys again at the next check-in, and the page says so. (4) Under "Improving its own rules":
     "put it back" beside a rule it changed and "Stop this trial" (action `tune`, `tune_by_hand`;
     nothing outside `TUNABLE` can be touched through it). (5) The activity list can be cut down to
-    buys and sells.
+    buys and sells. (6) **Your own loss limit and gain mark** (two optional fields under the risk
+    level; settings `stopPct` / `takePct`, sizes in percent, 1.5–30 and 2–80): they come before the
+    level's and before its own changes (`rules_for`), its trials leave a rule the user has set alone
+    (`set_by_user`), and an empty field falls back to the level's, shown in grey (`rules.level`).
   - **Coins when only coin screeners are ticked** (changed 10 Oct 2026): the whole budget may go
     into coins at any level (`coin_share`). The level's coin share (0%, 0%, 25%, 50%, 100%) now only
     applies when shares and coins are both ticked. Before, coins only at Balanced stopped at $2,500
@@ -507,9 +516,9 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   - Code: `website/practice-autopilot.js` (controls only), Lambda in `lambda-sync/stockiq-ai-trader/`.
     The AI key is the same `OPENAI_API_KEY` as the AI chat, copied to this Lambda's environment.
   - Tests: `python3 check-tools/ai_trader_test.py lambda-sync/stockiq-ai-trader/lambda_function.py`
-    (157 checks, stand-in database, screeners, model, headlines and mailer),
-    `node check-tools/autopilot_test.js <practice-autopilot.js>` (74 checks, the controls),
-    `node check-tools/practice_test.js <placeholder copy>` (55 checks, the portfolio section) and
+    (164 checks, stand-in database, screeners, model, headlines and mailer),
+    `node check-tools/autopilot_test.js <practice-autopilot.js>` (81 checks, the controls),
+    `node check-tools/practice_test.js <placeholder copy>` (59 checks, the portfolio section) and
     `python3 check-tools/autopilot_plan_check.py <lambda_function.py> <practice-autopilot.js> 150`
     (the panel's description against the Lambda's own rules; it is how the rounding fault was found).
   - **What the activity list says** (10 Oct): a sale carries its story under "Why, and the details"
@@ -533,8 +542,7 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   - Ideas not built: a chart of its results over time; a weekly summary email even when there is no
     review; a coin yardstick (Bitcoin) in place of the S&P 500 fund for coin trades, which is also what
     "resting" a screener is judged against; letting the trials cover the user's own settings (holding
-    time, how often it checks in); a way to set the level's own numbers by hand (loss limit, gain
-    mark) from the page; per-user cost limits before opening it up.
+    time, how often it checks in); per-user cost limits before opening it up.
 - Stock pages load `sidebar.js`, `stock-prices.js` (live ticker), `ai-chat.js`, `auth.js`, `theme.js`.
 - AI chat button: bottom-right on every page; on the home page it moves left of the news panel
   only from 1401px wide (the panel is hidden below that).
@@ -1032,7 +1040,7 @@ file with no site scripts does not hang). Nothing live is called. Written for th
 copy and adapt the stand-in answers for another panel.
 `python3 check-tools/dashboard_page.py <practice-portfolio.js> <practice-autopilot.js> <out.html> <light|dark> "<steps>"`
 does the same with **both** practice sections together (two holdings bought by hand, one by the
-autopilot; steps `type`, `sale`, `trial`, `off`, `open`, `preset`, `sellall`): use it to see how they work with each other,
+autopilot; steps `type`, `sale`, `trial`, `off`, `open`, `preset`, `sellall`, `limits`, `split`): use it to see how they work with each other,
 for example that a sale made in the background appears without losing what is being typed.
 A deploy script that checks `pgrep -f deploy-to-s3.sh` must be run as its own command: written and run
 in one command, the check finds its own text and stops.
@@ -1113,6 +1121,11 @@ in one command, the check finds its own text and stops.
     fields on the practice buy row. Two sessions built an autopilot at the same moment on 10 Oct;
     the deploy script's fingerprint check caught it and the second build was dropped. **Run one
     session on the site at a time.**
+  - **Your own loss limit and gain mark; whose result is whose** (section 8): two optional fields
+    on the autopilot panel, and a line on the practice portfolio that separates the owner's own buys
+    from the autopilot's. Rollback zip: `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_limits_20261010.zip`.
+    In zsh, write `"${C}:path"` for `git show`: `$C:c…` is read as a modifier and fails (it left an
+    empty deploy script in one work-in-progress commit, corrected in the next).
   - **Autopilot managed from the dashboard** (section 8): quick set-ups, switches for what it may do
     by itself, "Sell everything it holds", undoing its own rule changes; headlines when choosing what
     to buy; coins use the whole budget when only coin screeners are ticked; a sale on a score below
