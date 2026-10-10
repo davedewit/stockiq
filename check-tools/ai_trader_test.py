@@ -267,12 +267,12 @@ check('a clash with the user: the unsaved buys are not remembered', s.get('confl
 D.t.clear(); PRICES.clear(); MODEL['answer'] = None; SNAP['3-100'] = rows()
 rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=20, screeners=['3-100']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
 s, rec = run(t0); p = portfolio(); first = p['holdings'][0]; sym = first['symbol']; base = first['buyPrice']
-check('a buy says what the plan for it is', any('sell 20 days after buying at the latest; sooner at -10% or +18%; once it has been up 9%, sell if it slips back far enough to keep part of that gain' in d for e in rec['log'] if e['type'] == 'buy' for d in e.get('detail', [])), [e.get('detail') for e in rec['log'] if e['type'] == 'buy'][:1])
+check('a buy says what the plan for it is', any('The plan for it: keep it for up to 20 days. Sell sooner if it falls to -10% or reaches +18%. Rising is not a reason to sell it: while it keeps going up it is kept. Once it has been up 9%, a stop starts following it up, and it is sold only if it then falls back too far from its best. Also sell if its screener signal turns negative or it slips far down the ranking.' == d for e in rec['log'] if e['type'] == 'buy' for d in e.get('detail', [])), [e.get('detail') for e in rec['log'] if e['type'] == 'buy'][:1])
 PRICES[sym] = base * 1.12; s, rec = run(t0 + dt.timedelta(days=1))
 check('up 12% (under the +18% mark): kept, and its best so far is remembered', sym in [h['symbol'] for h in portfolio()['holdings']] and rec['state']['open'][first['id']]['peak'] == 12.0, rec['state']['open'].get(first['id']))
 PRICES[sym] = base * 1.05; s, rec = run(t0 + dt.timedelta(days=2)); sale = [e for e in rec['log'] if e['type'] == 'sell'][-1]
 check('slipped back to +5% from a best of +12%: sold to keep part of the gain', sym not in [h['symbol'] for h in portfolio()['holdings']] and sale['kind'] == 'trail' and 'Was up +12.0% at its best and has slipped back to +5.0%: sold to keep part of the gain' in sale['text'] and sale['pct'] == 5.0, sale)
-check('the sale carries its story: what it was bought on, how long, best and worst, the figures at the sale, the rules', len(sale['detail']) >= 5 and sale['detail'][0].startswith('Bought at rank ') and 'Held 2 days. It was set to keep a holding at most 20 days.' in sale['detail'] and '+12.0% at its best' in ' '.join(sale['detail']) and 'sell at -10% or +18%' in ' '.join(sale['detail']) and not any('S&P 500 fund' in d for d in sale['detail']), sale['detail'])
+check('the sale carries its story: what it was bought on, how long, best and worst, the figures at the sale, the rules', len(sale['detail']) >= 5 and sale['detail'][0].startswith('Bought at rank ') and 'Held 2 days. It was set to keep a holding at most 20 days.' in sale['detail'] and '+12.0% at its best' in ' '.join(sale['detail']) and 'sell if it falls to -10% or reaches +18%' in ' '.join(sale['detail']) and not any('S&P 500 fund' in d for d in sale['detail']), sale['detail'])
 done = rec['history'][-1]
 check('the finished trade keeps the dollars, the best and worst, and how it was sold', done['exit'] == 'trail' and done['usd'] == 50.0 and done['cost'] == 1000.0 and done['peak'] == 12.0 and done['low'] == 0.0 and done['id'] == first['id'] and rec['state']['closedCount'] == 1 and m.scorecard(rec['history'])['groups']['exit'][0]['label'] == 'sold to keep part of a gain', done)
 check('its price is looked at again later', rec['state']['watch'][-1]['symbol'] == sym and rec['state']['watch'][-1]['due'] == m.iso(t0 + dt.timedelta(days=2) + dt.timedelta(days=5)), rec['state'].get('watch'))
@@ -408,7 +408,7 @@ PRICES[a['symbol']] = a['buyPrice'] * 1.02; PRICES[b['symbol']] = b['buyPrice'] 
 s, rec = run(t0 + 2 * half); sales = {e['symbol']: e for e in rec['log'] if e['type'] == 'sell'}
 check('slipping back from +4% to +2%: sold to keep the gain, not held to the time limit', sales.get(a['label'], {}).get('kind') == 'trail' and 'Was up +4.0% at its best and has slipped back to +2.0%: sold to keep part of the gain' in sales[a['label']]['text'], sales.get(a['label']))
 check('slipping back from +17% to +12%: sold there, not at half', sales.get(b['label'], {}).get('kind') == 'trail' and 'Was up +17.0% at its best and has slipped back to +12.0%' in sales[b['label']]['text'] and any('Its path since buying, at each check-in: 0.5h +17.0%, 1h +12.0%.' == d for d in sales[b['label']]['detail']), sales.get(b['label']))
-check('the plan under a sale names the protection that applied', any('once it has been up 1%, sell if it slips back far enough to keep part of that gain' in d for d in sales[a['label']]['detail']), sales[a['label']]['detail'])
+check('the plan under a sale names the protection that applied', any('Rising is not a reason to sell it: while it keeps going up it is kept. Once it has been up 1%, a stop starts following it up, and it is sold only if it then falls back too far from its best.' in d for d in sales[a['label']]['detail']), sales[a['label']]['detail'])
 D.t.clear(); PRICES.clear(); STRONG.clear(); MODEL['answer'] = None
 rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=0.5, maxHoldDays=20, screeners=['7-1']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
 s, rec = run(t0); a = portfolio()['holdings'][0]; PRICES[a['symbol']] = a['buyPrice'] * 1.10
@@ -530,12 +530,12 @@ def held(kind):
     s, rec = run(t0 + dt.timedelta(hours=1)); return a, s, rec
 a, s, rec = held('gains'); check('down 4% an hour after buying, "protects a gain": kept (the loss limit is -10%)', a['id'] in [h['id'] for h in portfolio()['holdings']] and s['sold'] == 0)
 a, s, rec = held('full'); sale = [e for e in rec['log'] if e['type'] == 'sell'][-1]
-check('the same with the full trailing stop: cut early, and it says so', a['id'] not in [h['id'] for h in portfolio()['holdings']] and sale['kind'] == 'cut' and 'Its trailing stop was hit: -4.0% since it was bought (its best was +0.0%; the stop trailed 3 of its typical moves of about 1.3% below that)' in sale['text'] and any('a trailing stop follows it from the moment it was bought' in d for d in sale['detail']), sale)
+check('the same with the full trailing stop: cut early, and it says so', a['id'] not in [h['id'] for h in portfolio()['holdings']] and sale['kind'] == 'cut' and 'Its trailing stop was hit: -4.0% since it was bought (its best was +0.0%; the stop trailed 3 of its typical moves of about 1.3% below that)' in sale['text'] and any('A trailing stop sits under its price from the moment it was bought and follows it up: it is sold if it falls back about 3.9 points from its best.' in d for d in sale['detail']), sale)
 check('such a sale is its own kind in the record', rec['history'][-1]['exit'] == 'cut' and m.scorecard(rec['history'])['groups']['exit'][0]['label'] == 'sold by its trailing stop before it had risen')
 a, s, rec = held('off'); PRICES[a['symbol']] = a['buyPrice'] * 1.08; s, rec = run(t0 + dt.timedelta(hours=2)); PRICES[a['symbol']] = a['buyPrice'] * 1.01; s, rec = run(t0 + dt.timedelta(hours=3))
 code_, body = call(action='get', userId=U); plan = [pl for pl in body['plans'] if pl['id'] == a['id']]
 check('with it switched off nothing follows the price: up 8% then back to +1% is kept, and the dashboard is told there is no stop', len(plan) == 1 and plan[0]['arm'] is None and plan[0]['floor'] is None and plan[0]['mode'] == 'off' and body['rules']['trailMode'] == 'off' and s['sold'] == 0, plan)
-check('a buy says which kind applies to it', any('no stop follows it (switched off)' in d for e in rec['log'] if e['type'] == 'buy' for d in e.get('detail', [])))
+check('a buy says which kind applies to it', any('No stop follows it (switched off).' in d for e in rec['log'] if e['type'] == 'buy' for d in e.get('detail', [])))
 PRICES.clear(); ATR.clear(); D.t.clear()
 
 # --- "Check in now" is a request to act: it releases the next part of the budget early, and says why if nothing can be done
@@ -558,6 +558,31 @@ class Soon(dt.datetime):
 real_datetime = m.datetime; m.datetime = Soon; code_, b = call(action='run', userId=U); m.datetime = real_datetime
 check('the page that pressed the button is told why when nothing was done', code_ == 200 and 'why' in b['summary'] and (b['summary']['bought'] > 0 or b['summary']['why']), b.get('summary'))
 PRICES.clear(); SNAP['3-100'] = rows(); D.t.clear()
+
+# --- the plan is put in words nobody can misread; switching what it buys from; an early release that buys nothing is taken back
+check('the plan in words: the point where the stop starts is not a selling price', m.stop_words('gains', 4.5, 3.9) == 'Rising is not a reason to sell it: while it keeps going up it is kept. Once it has been up 4.5%, a stop starts following it up, and it is sold only if it then falls back about 3.9 points from its best.' and m.stop_words('full', 1.9, 3.9).startswith('A trailing stop sits under its price from the moment it was bought') and m.stop_words('off', None) == 'No stop follows it (switched off).')
+D.t.clear(); PRICES.clear(); ATR.clear(); MODEL['answer'] = None; SNAP['7-1'] = rows('crypto', '7-1'); SNAP['3-100'] = rows()
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=5, screeners=['7-1']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+s, rec = run(t0); coins = [h['id'] for h in portfolio()['holdings']]; ATR.update({h['symbol']: 6.3 for h in portfolio()['holdings']})
+plan = [d for e in rec['log'] if e['type'] == 'buy' for d in e['detail']][0]
+rec = m.load_item(U); rec['settings']['screeners'] = ['3-100']; m.save_item(U, rec)                       # the owner switches from coins to the S&P 100
+s, rec = run(t0 + dt.timedelta(days=1)); held = portfolio()['holdings']; new = [h for h in held if h['id'] not in coins]
+check('switched from the coin screener to a share screener: the coins it holds stay and are still its own', len([h for h in held if h['id'] in coins]) == 3 and all(h['symbol'].endswith('-USD') for h in held if h['id'] in coins) and m.its_markets(rec) == {'crypto', 'us'})
+check('new buys come only from the screener now ticked, with what is left of the budget', s['bought'] == 3 and all(not h['symbol'].endswith('-USD') and h['screener'] == '3-100' for h in new) and abs(sum(h['costUsd'] for h in held) - 6000) < 0.01, [(h['symbol'], h['costUsd']) for h in held])
+first = [h for h in held if h['id'] in coins][0]; PRICES[first['symbol']] = first['buyPrice'] * 0.89
+s, rec = run(t0 + dt.timedelta(days=2)); sale = [e for e in rec['log'] if e['type'] == 'sell'][-1]
+check('a coin from the screener no longer ticked is still sold by its rules (here the loss limit)', first['id'] not in [h['id'] for h in portfolio()['holdings']] and sale['symbol'] == first['label'] and 'past the -10% limit' in sale['text'], sale['text'])
+SNAP['7-1'] = [dict(r, score=-1.0, signal='SELL') for r in rows('crypto', '7-1')]
+s, rec = run(t0 + dt.timedelta(days=3)); left = [h for h in portfolio()['holdings'] if h['symbol'].endswith('-USD')]
+check('and it still reads that screener for them: when their signal turns negative they are sold', left == [] and s['sold'] == 2, [h['symbol'] for h in left])
+check('once nothing is left from the coin screener, the coin market is no longer its concern', m.its_markets(rec) == {'us'})
+SNAP['7-1'] = rows('crypto', '7-1'); SNAP['3-100'] = [dict(r, signal='HOLD') for r in rows()]                # nothing on the shortlist can be bought
+D.t.clear(); rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=4, everyHours=24, maxHoldDays=20, screeners=['3-100']); rec['state'].update(startedAt=m.iso(t0)); m.save_item(U, rec)
+D.Table(m.PORTFOLIO_TABLE).rows[U] = {'userId': U, 'data': json.dumps(dict(m.new_portfolio(t0), holdings=[{'id': 'a1', 'symbol': 'S20', 'label': 'S20', 'currency': 'USD', 'qty': 20.0, 'buyPrice': 100.0, 'buyFx': 1, 'costUsd': 2000.0, 'boughtAt': m.iso(t0), 'spyAtBuy': 700.0, 'by': 'ai', 'screener': '3-100'}], cash=98000.0)), 'version': 1}
+SNAP['3-100'] = [dict(r, signal='HOLD') for r in rows()]; PRICES['S20'] = 100.0
+rec = m.load_item(U); s = m.run_user(U, rec, t0 + dt.timedelta(hours=2), snapshot=snapshot, quote=quote, model=model, manual=True, mail=lambda a, b: None, headlines=lambda h, n: [])
+check('"Check in now" with nothing fit to buy: the budget released early is taken back, and it says why', s['bought'] == 0 and not rec['state'].get('ahead') and 'Nothing on the shortlist passed' in (s.get('why') or ''), (s.get('why'), rec['state'].get('ahead')))
+PRICES.clear(); ATR.clear(); SNAP['3-100'] = rows(); SNAP['7-1'] = rows('crypto', '7-1'); D.t.clear()
 
 # --- improving its own rules: what the record suggests, a trial beside the current rule, keep or drop, an email each time
 TR = lambda pct, peak=None, low=None, rank=2, rsi=50, exit='time', **k: dict(risk=3, pct=pct, peak=pct if peak is None else peak, low=min(pct, 0) if low is None else low, rank=rank, rsi=rsi, exit=exit, screener='3-100', label='X', **k)
