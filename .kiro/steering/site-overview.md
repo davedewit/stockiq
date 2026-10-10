@@ -416,6 +416,39 @@ crypto orchestrator or any worker.
   `prediction_memory.py`. Handler `orchestrator.lambda_handler`.
 - The page shows the orchestrator's `report` text directly (`type: 'coinspot_comprehensive'`);
   internal names still say "coinspot" although the list is no longer CoinSpot's.
+- Equal scores are ranked in coin-list order (largest market cap first), so the top 10 is the
+  same on every run. (It used to depend on which worker answered first.)
+
+**Top-10 history (rebuilt 10 Oct 2026).** Each top-10 coin in a report shows how long it has been
+in the top 10 and what its price has done since: "In the top 10 since 10 Oct 06:02 UTC: $a → $b
+(+5.0%)", the time, the score then and now, and "in the top 10 at N of M checks since then".
+- EventBridge rule `stockiq-coinspot-predictions-schedule` (every 30 minutes) invokes **the
+  orchestrator itself**. A scheduled run records the top 10; a user's run (through the Function
+  URL, or the coordinator) only reads. One coin list and one ranking, so the history always
+  describes the list the user sees. A URL call can never write: it always has `requestContext`.
+- Table `stockiq-coinspot-prediction-status`: one row per coin (`streak_start`, `streak_price`,
+  `streak_score`, `last_seen`, `checks_in_top10`, `ticker`) plus the marker row `_last_check`
+  (`last_check`, `check_no`). A coin keeps its run across one missed check (65 minutes); after
+  that a new run starts. If the last check is older than 100 minutes the report says history is
+  not available. A check that ranked under 80% of the list is not recorded. Rows without
+  `last_seen` are left over from the old updater and are ignored.
+- **Track-record log:** every time a coin enters the top 10, a permanent row goes into
+  `stockiq-coinspot-predictions` (`log_version` 2: entry time, ticker, price, score, rank, the
+  coin's 24h / 7d / 30d change, RSI, volume ratio). Nothing reads it yet. Its purpose: after a
+  few weeks, measure what coins did in the 24 hours / 7 days after entering the top 10 compared
+  with the average coin. **Nobody knows yet whether the score predicts anything**; the owner's aim
+  is to make it easier to see which coins tend to do well, and this log is the evidence for that.
+  Present any result as past performance, never as "likely to profit".
+- Icons: 🟢 an hour or more, 🟡 under an hour, 🔵 new or no history. Keep an emoji from the
+  U+1F300–1F9FF range before the symbol: the dashboard uses it to recognise a crypto report.
+- The report's wrapper carries `data-top10-tickers='IMX:IMX10603,…'`. The dashboard 🎯 tracker
+  reads it to look up the right coin (old saved reports have none and fall back to `SYMBOL-USD`).
+- `crypto-filter-buttons.js` adds the "Time in the top 10" slider to crypto results; it filters
+  the top 10 on `hours_in_top10` and re-uses `signalLabel()`.
+- What it replaced: `stockiq-coinspot-predictions-updater` ran every 15 minutes as an old copy
+  of the orchestrator, ranking the workers' built-in list, so its history matched almost none of
+  the coins users saw; "consistency" stars partly came from the letters of the coin's symbol and
+  the report printed LOW / MEDIUM / HIGH RISK. That function is no longer triggered (still exists).
 
 ### Access checks and usage counting
 
@@ -568,26 +601,11 @@ Needs the owner's decision or more work (nothing here is fixed):
 - **Screener quality** (section 8b): no real fundamentals in the workers; ASX 24-hour change is 0
   after the ASX close; a few valid symbols return nothing (WBD, PSKY); Russell 1000/2000 lists
   not refreshed; ASX 300 is approximate. All but the lists need worker redeploys.
-- **Crypto top-10 history is broken (found 10 Oct 2026). The fix is built, tested locally and
-  approved by the owner, but NOT deployed:** the Claude Code session was not permitted to run a
-  production deploy. It is packaged in `stockiq/check-tools/pending-crypto-history/`; the owner runs
-  `bash deploy.sh` there (`DRY_RUN=true bash deploy.sh` previews; it checks the live code first and
-  keeps rollback zips). After it has run: verify a live crypto report, update section 8b "Crypto",
-  `lambda-reference.md` and this item, and delete the pending folder. It also adds a permanent log
-  of every top-10 entry (`stockiq-coinspot-predictions`, rows with `log_version` 2) so the
-  ranking's track record can be measured after a few weeks. EventBridge rule `stockiq-coinspot-predictions-schedule`
-  (every 15 min) runs `stockiq-coinspot-predictions-updater`, an old copy of the orchestrator that
-  still uses the workers' batch mode, i.e. the old built-in coin list with wrong-coin prices (and
-  the worker 26 address typo). It writes "first flagged" rows to `stockiq-coinspot-prediction-status`
-  for its own top 10, which is not the top 10 users see: on 10 Oct, 8 of the 10 coins in a real
-  report had no history ("RECENT … UNKNOWN NEW HIGH RISK") and the other two matched by chance.
-  The "consistency" stars include a number derived from the letters of the coin's symbol, and the
-  report prints "LOW / MEDIUM / HIGH RISK" labels. `crypto-filter-buttons.js` (the "Entry Timing"
-  slider on crypto results) rebuilds the report with raw BUY/SELL codes and "GOOD ENTRY" wording.
-  The dashboard 🎯 tracker looks up `SYMBOL-USD`, which is the wrong coin for the ~125 coins that
-  need a numbered ticker. Planned fix: the schedule calls the orchestrator itself (one coin list,
-  one ranking; user runs only read), rows hold the start of the coin's current run in the top 10,
-  no risk labels or stars, report carries the tickers for the tracker, schedule every 30 minutes.
+- **Crypto track record (review from early Nov 2026).** The entry log (section 8b "Crypto") started
+  10 Oct 2026. Once it holds a few hundred entries, compare each coin's price 24 hours and 7 days
+  after entering the top 10 with the average coin over the same days. Leftovers that can be
+  deleted when the owner agrees: Lambda `stockiq-coinspot-predictions-updater` (no longer
+  triggered) and the old-format rows in both crypto tables.
 - **Page score vs app score.** Same model, different inputs (checked on AAPL, 71 vs 47): the page
   uses the previous close and Yahoo fundamentals, the app uses the live price and Finnhub. A
   price 0.1% under the 20-day average swung the trend factor by 18 points; Finnhub had no revenue
@@ -750,5 +768,10 @@ quirk, not a layout bug. The home page shows its right-hand news panel only from
     use of the day (anonymous single coin; trial users on 13 screeners). Removed.
   - Orphan pages `market-data-sidebar.html` / `market-data-widget.html` deleted;
     `lambda-url-mapping.json` regenerated (982 functions, 967 with URLs).
+  - **Crypto top-10 history rebuilt** (section 8b "Crypto"): the 15-minute updater was tracking the old
+    coin list; the schedule now runs the orchestrator itself every 30 minutes, risk labels and stars
+    removed, results slider reworded, dashboard tracker uses the right ticker, permanent entry log
+    added. Deployed by the owner with a packaged script, because the Claude Code session was not
+    permitted to run production deploys (Lambda, S3); read-only AWS calls and git pushes were fine.
   - Docs consolidated: section 8b added, section 11 reduced to open items, `CLAUDE.md` (added
     9 Oct) loads these steering files into Claude Code sessions.

@@ -39,7 +39,7 @@
 | `stockiq-option-3-1-us-screener` | US stock screener coordinator (Option 3) |
 | `stockiq-option-3-dynamic-coordinator` | Dynamic screener coordinator |
 | `stockiq-option-3-1-sp100` | S&P 100 screener |
-| `stockiq-option-7-1-orchestrator` | Crypto screener (Option 7). Holds the coin list (`COINS`) and calls the 54 `stockiq-option-7-1-worker-N` functions in single-coin mode, one call per coin. 2,048 MB. Handler `orchestrator.lambda_handler`; the zip must contain `orchestrator.py`, `orchestrator_simple.py`, `prediction_memory.py` |
+| `stockiq-option-7-1-orchestrator` | Crypto screener (Option 7). Holds the coin list (`COINS`) and calls the 54 `stockiq-option-7-1-worker-N` functions in single-coin mode, one call per coin. 2,048 MB. Also invoked every 30 minutes by EventBridge rule `stockiq-coinspot-predictions-schedule` to record the top 10 (history and entry log, see `site-overview.md` 8b); user calls only read that history. Handler `orchestrator.lambda_handler`; the zip must contain `orchestrator.py`, `orchestrator_simple.py`, `prediction_memory.py` |
 | `stockiq-screener-coordinator` | Main screener coordinator |
 | `stockiq-chart-generator` | Chart generation |
 | `stockiq-validate-symbol` | Validates stock symbols across exchanges |
@@ -110,7 +110,7 @@ New screeners: use `5-<subOption>`.
 | `stockiq-market-data-sidebar` | Sidebar market data |
 
 ### NO_URL (event-driven, no public URL)
-`stockiq-acp-webhook`, `stockiq-auto-delete-scheduler`, `stockiq-coinspot-predictions-updater`,
+`stockiq-acp-webhook`, `stockiq-auto-delete-scheduler`, `stockiq-coinspot-predictions-updater` (unused since 10 Oct 2026: its schedule now runs the orchestrator),
 `stockiq-daily-user-notification`, `stockiq-lambda-usage-reporter`, `stockiq-lambda-version-manager`,
 `stockiq-payment-notification`, `stockiq-usage-report-emailed`, `stockiq-stock-analysis`,
 `PostReader_*` (unused old functions)
