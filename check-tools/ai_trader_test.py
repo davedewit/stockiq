@@ -276,6 +276,9 @@ other = portfolio()['holdings'][0]; far = [dict(r, rank=r['rank'] + 60, score=1.
 info = {}; sells = m.review_sells(portfolio(), rec['settings'], {'3-100': far}, {other['symbol']: {'price': other['buyPrice']}}, t0 + dt.timedelta(days=8), opened=rec['state']['open'], info=info)
 check('far down the ranking with under half its score: sold', len(sells) == 1 and info[other['id']]['kind'] == 'fade' and 'Slipped to rank' in sells[0][2] and 'less than half the score it was bought on' in sells[0][2], sells and sells[0][2])
 near = [dict(r, rank=r['rank'] + 60) if r['symbol'] == other['symbol'] else r for r in rows()]
+below = [dict(r, score=-1.0, signal='HOLD', rank=149) if r['symbol'] == other['symbol'] else r for r in rows()]
+said = m.review_sells(portfolio(), rec['settings'], {'3-100': below}, {other['symbol']: {'price': other['buyPrice']}}, t0 + dt.timedelta(days=8), opened=rec['state']['open'])
+check('a score below zero with a signal that is only mixed: the reason says the score, not the signal', len(said) == 1 and 'Its screener score fell below zero (score -1.0, rank 149)' in said[0][2] and 'signal turned negative' not in said[0][2], said and said[0][2])
 check('far down the ranking but the score has held: kept', m.review_sells(portfolio(), rec['settings'], {'3-100': near}, {other['symbol']: {'price': other['buyPrice']}}, t0 + dt.timedelta(days=8), opened=rec['state']['open']) == [])
 s, b = call(action='get', userId=U); plan = b['plans'][0]
 check('the dashboard gets a plan for each holding: sell-by time and marks', len(b['plans']) == len([h for h in portfolio()['holdings'] if h.get('by') == 'ai']) and plan['auto'] is True and plan['stop'] == -10 and plan['take'] == 18 and plan['arm'] == 9 and m.parse_time(plan['sellBy']) - m.parse_time(plan['boughtAt']) == dt.timedelta(days=20), plan)

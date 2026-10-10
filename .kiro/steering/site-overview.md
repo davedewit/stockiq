@@ -396,6 +396,29 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
     in the model's prompt at each decision. **These inform the choice among the shortlist only: every
     limit is still enforced by code, and nothing adapts on fewer than 8 trades** (`MIN_SAMPLE`).
     Honest limit: with a handful of trades the record is mostly chance, and the panel says so.
+  - **Managing it from the dashboard** (added 10 Oct 2026; the owner asked for it to be "easier to
+    control how it all is managed via the website"). (1) **Quick set-ups** (`PRESETS` in
+    `practice-autopilot.js`): "Quick coin trading", "Steady shares", "Shares and coins" fill in the
+    level, build-up days, check-in, holding time and screeners in one press; never the budget or the
+    on/off switch. They exist because the owner twice mistook "Build up to it over" for the holding
+    time. (2) **"What it may do by itself"**: three switches saved with the settings (`aiSell`,
+    `selfTune`, `emails`; on unless switched off): sell early on the AI model's review, try changes
+    to its own rules (off also ends a running trial, unchanged), email its reviews. (3) **"Sell
+    everything it holds"** (action `sellall`, `sell_everything`): asks first, sells only the
+    autopilot's holdings at the latest prices, recorded as "sold by you"; if the autopilot stays on
+    it buys again at the next check-in, and the page says so. (4) Under "Improving its own rules":
+    "put it back" beside a rule it changed and "Stop this trial" (action `tune`, `tune_by_hand`;
+    nothing outside `TUNABLE` can be touched through it). (5) The activity list can be cut down to
+    buys and sells.
+  - **Coins when only coin screeners are ticked** (changed 10 Oct 2026): the whole budget may go
+    into coins at any level (`coin_share`). The level's coin share (0%, 0%, 25%, 50%, 100%) now only
+    applies when shares and coins are both ticked. Before, coins only at Balanced stopped at $2,500
+    of $10,000 and at Cautious bought nothing, which the owner ran into twice. The panel's
+    description follows the same rule (`planText`, `mixed`); keep the two alike.
+  - **Headlines when choosing what to buy** (added 10 Oct 2026): the up-to-12 candidates on the
+    shortlist are shown to the AI model with recent headlines that name them (`candidate_news`, the
+    same feeds and filter as for holdings; a share's company name comes from its quote; kept two
+    hours in `state.seen`). A buy's details list the headlines it was shown.
   - **Hold or sell, reviewed by the AI model at every check-in** (added 10 Oct 2026; the owner's point
     that the fresh screener data and news could decide "if it holds or sells"). After the fixed rules
     have run, `ai_review` gives the model each holding they are keeping: what it was bought on, the
@@ -484,8 +507,8 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   - Code: `website/practice-autopilot.js` (controls only), Lambda in `lambda-sync/stockiq-ai-trader/`.
     The AI key is the same `OPENAI_API_KEY` as the AI chat, copied to this Lambda's environment.
   - Tests: `python3 check-tools/ai_trader_test.py lambda-sync/stockiq-ai-trader/lambda_function.py`
-    (143 checks, stand-in database, screeners, model, headlines and mailer),
-    `node check-tools/autopilot_test.js <practice-autopilot.js>` (62 checks, the controls),
+    (157 checks, stand-in database, screeners, model, headlines and mailer),
+    `node check-tools/autopilot_test.js <practice-autopilot.js>` (74 checks, the controls),
     `node check-tools/practice_test.js <placeholder copy>` (55 checks, the portfolio section) and
     `python3 check-tools/autopilot_plan_check.py <lambda_function.py> <practice-autopilot.js> 150`
     (the panel's description against the Lambda's own rules; it is how the rounding fault was found).
@@ -510,8 +533,8 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   - Ideas not built: a chart of its results over time; a weekly summary email even when there is no
     review; a coin yardstick (Bitcoin) in place of the S&P 500 fund for coin trades, which is also what
     "resting" a screener is judged against; letting the trials cover the user's own settings (holding
-    time, how often it checks in); headlines for the candidates when buying, not only for holdings;
-    per-user cost limits before opening it up.
+    time, how often it checks in); a way to set the level's own numbers by hand (loss limit, gain
+    mark) from the page; per-user cost limits before opening it up.
 - Stock pages load `sidebar.js`, `stock-prices.js` (live ticker), `ai-chat.js`, `auth.js`, `theme.js`.
 - AI chat button: bottom-right on every page; on the home page it moves left of the news panel
   only from 1401px wide (the panel is hidden below that).
@@ -1009,7 +1032,7 @@ file with no site scripts does not hang). Nothing live is called. Written for th
 copy and adapt the stand-in answers for another panel.
 `python3 check-tools/dashboard_page.py <practice-portfolio.js> <practice-autopilot.js> <out.html> <light|dark> "<steps>"`
 does the same with **both** practice sections together (two holdings bought by hand, one by the
-autopilot; steps `type`, `sale`, `trial`, `off`, `open`): use it to see how they work with each other,
+autopilot; steps `type`, `sale`, `trial`, `off`, `open`, `preset`, `sellall`): use it to see how they work with each other,
 for example that a sale made in the background appears without losing what is being typed.
 A deploy script that checks `pgrep -f deploy-to-s3.sh` must be run as its own command: written and run
 in one command, the check finds its own text and stops.
@@ -1090,6 +1113,11 @@ in one command, the check finds its own text and stops.
     fields on the practice buy row. Two sessions built an autopilot at the same moment on 10 Oct;
     the deploy script's fingerprint check caught it and the second build was dropped. **Run one
     session on the site at a time.**
+  - **Autopilot managed from the dashboard** (section 8): quick set-ups, switches for what it may do
+    by itself, "Sell everything it holds", undoing its own rule changes; headlines when choosing what
+    to buy; coins use the whole budget when only coin screeners are ticked; a sale on a score below
+    zero now says so (it said "signal turned negative"). Rollback zips:
+    `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_controls_20261010.zip` and `…_wording_…`.
   - **The AI model reviews each holding at every check-in** (section 8): fresh screener figures and
     real headlines fetched by the function; it may sell earlier than the rules, and its early sells are
     paused if they prove too early. Rollback zip: `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_review_20261010.zip`.
