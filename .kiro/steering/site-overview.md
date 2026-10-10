@@ -586,7 +586,7 @@ code before relying on a detail (section 10).
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=10` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=14`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=15`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | Two containers (about line 1250) and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
@@ -659,7 +659,10 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
 - A screener belongs to a market and is only traded while that market is open (`MARKET_HOURS`,
   UTC, Mon–Fri: US 14:35–19:55, Australia 00:05–04:55, Japan 00:05–05:55, UK 08:05–15:25; coins
   always). Each market keeps its own last-checked time, so a user with US and Australian screeners
-  is checked in both sessions. "Check in now" acts on everything (10-minute gap between presses).
+  is checked in both sessions. **The markets of what it still holds count too** (`its_markets`):
+  on 10 Oct the owner un-ticked the crypto screener while it held a coin, and because only the
+  ticked screeners' markets were looked at, the coin was left unattended (no time limit, no stop)
+  until that was fixed the same afternoon. "Check in now" acts on everything (10-minute gap between presses).
 - Add a screener: one line in `SCREENERS` (name, coordinator option and subOption, kind, market,
   group). The panel lists whatever the Lambda sends.
 
@@ -721,6 +724,14 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
 7. The shortlist (`shortlist`): the top of each chosen screener with a positive score and signal,
    not already held, not sold within two days (or twice the holding time if shorter), inside the
    level's RSI and 30-day-move limits; ordered by place in its own screener.
+   **A coin must have stayed there** (`note_stays`, `STAY_CHECKS` = 2): when it checks in every
+   3 hours or less, a coin is only bought once it has been on the shortlist at two check-ins
+   running, so the first coin buy comes at the second check-in (note key `stay`). Reason, from the
+   live data of 10 Oct: the site's own top-10 history showed 8 of 26 coins gone again after one
+   30-minute check, and the owner's first coin went from rank 1 to rank 149 in four hours. Shares
+   are never held back, and nor are coins when it checks in less often (a day is too long to wait).
+   Each buy remembers how long it had stayed (`stay`), the model is told, and the record is split
+   by it ("By how long it had stayed near the top when bought").
 8. The AI model chooses among the first 12 (`choose`), each shown with recent headlines
    (`candidate_news`), and gives a reason naming the figures. **The code enforces every limit**: it
    can only pick from the shortlist; if it fails the top of the shortlist is bought and the log says
@@ -756,7 +767,12 @@ calls out.
 - **Scorecard** (`scorecard`): overall and by screener, rank band, RSI band, who chose, and exit.
   Shown as "How it is doing" and given to the model at each decision (`memory_text`).
 - **Resting a screener** (`review_resting`): when its last 12 trades (at least 8) average 1.5% or
-  more behind the S&P 500 fund, it is rested 14 days, then tried again with a clean slate.
+  more behind the S&P 500 fund, it is rested 14 days, then tried again with a clean slate. **A coin
+  screener is judged on its own results** (an average loss of 1.5% or more), not against the fund:
+  the share market says nothing about a coin and is shut at weekends.
+- **After costs.** No trading cost is taken from the fake money. `month_figures` also works out the
+  last 30 days after a typical 0.1% on each buy and each sell (`COST_EACH_WAY`, `afterCosts`); the
+  panel and the review emails show it beside the plain figure. It matters most for quick trading.
 - **Notes** (`write_lessons`): after every 5 more finished trades the model writes up to four short
   notes on what the record shows.
 - **Pausing the AI model's early sells** (`review_ai_sells`): when the last 8–12 holdings it sold
@@ -795,8 +811,8 @@ that it at least does not fool itself.
   where relevant `kind, pct, detail[], key, n, first`); `history`; `state` with `startedAt`
   (when the budget's build-up began; reset when it is switched on or the budget or build-up
   changes), `lastRun`, `lastRunBy`, `open` (remembered buys), `exits`, `rest`, `restSince`,
-  `lessons`, `tune` (`values`, `trial`, `past`, `mark`, `seq`), `watch`, `news`, `seen`, `aiSell`,
-  `closedCount`, `realizedUsd`.
+  `lessons`, `tune` (`values`, `trial`, `past`, `mark`, `seq`), `watch`, `news`, `seen`, `stay`,
+  `strong`, `aiSell`, `closedCount`, `realizedUsd`.
 - `public()` (every action returns it): `settings, state, log, scorecard, lessons, resting, recent,
   minSample, practiceCash, rules` (in force, with `yours`, `level`, `changed`, `arm`), `tune`
   (`trial` with its figures, `past`, `nextReviewIn`, `batch`, `group`), `aiSellPausedUntil`,
@@ -860,14 +876,15 @@ that it at least does not fool itself.
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 198 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 97 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 209 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 101 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 63 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
    ```
    `ai_trader_test.py` sets the pace by hand at its top (it patches `DEFAULTS`), as a user who chose
    his own values; the real defaults, where the level sets the pace, are tested in their own part.
+   It also sets `STAY_CHECKS` to 1 so that older tests buy a coin at once; the real wait has its own part.
    **Never run `practice_test.js` on the real `practice-portfolio.js`**: it holds the live storage
    address and would write to the live table (it happened once). Add checks for what you change.
 4. **See it in a browser** without a login: `dashboard_page.py` (both sections, stand-in server,
@@ -903,33 +920,39 @@ has redrawn (a kept reference is to the old one and nothing happens); test expec
 zone; SES and the news feeds are only used when running as the Lambda, so tests need stand-ins
 (`mail=`, `headlines=`); two sessions building at once collided (the fingerprint check caught it).
 
-### Where things stood on the evening of 10 Oct 2026
+### Where things stood late on 10 Oct 2026 (about 15:45 UTC)
 
-- The owner's autopilot is on: Balanced, $10,000 built up over 1 day, checking every 30 minutes,
-  holdings kept at most 6 hours (all three set by hand, so the slider does not move them until he
-  presses "Let the risk level set all three"), crypto screener only, all three switches on, no
-  limits of his own.
-- One finished trade: WEMIX, +0.6% (+$7.91), sold when its score fell below zero (rank 1 → 149).
-  It holds one coin (CFX). His own buys in the practice portfolio are two Bitcoin lines.
-- Seen for real since: a headline reaching the model (15:10 UTC), clean scheduled check-ins on each
-  new version, both AI models answering the test question.
-- Not yet seen for real: a sale made by the AI model's review, a sale by the stop that follows a
-  rising holding, a "tighten" answer, a review of its own rules (the first comes after 20 finished trades), a trial, the
-  emails that go with them (a set-up email was sent; arrival not confirmed), and the logged-in
-  dashboard itself (all checks used a stand-in server). **Worth checking first in a new session:**
-  the function's log and the owner's record for errors and for the first of each of these.
+- The owner was trying settings out all evening, so read his record rather than trust this line.
+  Last seen: Adventurous, $50,000 built up over 1 day (set by hand), check-ins and holding time left
+  to the level (every hour, 1 day), crypto screener ticked, all three switches on.
+- Two finished trades, both up: WEMIX +0.6% (+$7.91; its score fell below zero, rank 1 → 149) and
+  CFX +1.0% (+$12.79; **the first real sale by the stop that follows a rising holding**: it had been
+  up 6.15% and was sold on the way down). It holds one Nikkei share (4307.T), bought with "Check in
+  now" while Japan was closed; the fix above means it is looked after when Japan opens on Monday.
+- **A limit that sale showed:** the stop stood at about +2.3% but the sale came at +1.0%, because the
+  price is only seen at check-ins and it fell through between two of them. The autopilot does not
+  watch prices in between. Shorter check-in gaps narrow this; nothing removes it.
+- Seen for real: clean scheduled check-ins on every version, a headline reaching the model, both AI
+  models answering the test question, the stop's sale with its explanation.
+- Not yet seen for real: a sale made by the AI model's review, a "tighten" answer, the larger model
+  being used, a coin being held back until it has stayed, a review of its own rules (after 20
+  finished trades), a trial, the emails that go with them (a set-up email was sent; arrival not
+  confirmed), and the logged-in dashboard itself (all checks used a stand-in server). **Worth
+  checking first in a new session:** the function's log and the owner's record for errors and for
+  the first of each of these.
 - It is the owner's account only (`AI_TRADER_USERS`). Opening it to users is his decision and
   touches the same legal question as the signals (an AI choosing stocks, even with fake money,
   reads as picks); each user's check-in also runs screeners and AI calls, so cost limits first.
 - Cost: a crypto check-in is a full crypto screener run (about 540 worker calls) unless a copy
   under 20 minutes old exists, so one user on 30-minute check-ins adds about 780,000 Lambda calls
-  a month, plus up to two small AI calls per check-in: cents to a few dollars a month in all.
+  a month, plus up to two small AI calls per check-in and at most 8 larger ones a day: a few
+  dollars a month in all at the very most.
 
 ### Ideas offered and not built
 
 A chart of the account and of the autopilot's result over time; a weekly summary email even when
-there is no review; a coin yardstick (Bitcoin) instead of the S&P 500 fund for coin trades, which
-is also what "resting" a screener is judged against; trials that cover the owner's settings
+there is no review; a coin yardstick (Bitcoin) for coin trades in the breakdown; watching prices
+between check-ins (a stop can only act at a check-in); trials that cover the owner's settings
 (holding time, how often it checks in); selling part of a holding; sorting the tables; recording
 which report a manual buy came from; dividends; per-user cost limits before opening it up.
 
@@ -1314,6 +1337,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     packaged as `check-tools/pending-<name>/deploy.sh` runs without a hand-off. Keep packaging deploys
     that way (live-code check, rollback copy, `DRY_RUN=true`), run the dry run, then run it.
   - Autopilot activity list: "Buys and sells only" became a switch remembered in the browser.
+  - **Found in the live data and fixed** (section 8c): a holding whose screener had been un-ticked
+    was left unattended (`its_markets`); a coin is now bought only once it has stayed near the top
+    for two check-ins; coin screeners are rested on their own results; results are also shown after
+    a typical trading cost. Rollback zips: `…_before_autopilot_orphan_…` and `…_steady_…`.
   - **The stop that follows a rising holding is set from the holding's own movement** (section 8c):
     its daily range scaled to the check-in gap, with room that widens or tightens with its screener
     figures, the time left and the AI review's new "tighten" answer. Rollback zip:
