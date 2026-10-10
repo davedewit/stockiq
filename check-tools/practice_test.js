@@ -118,6 +118,19 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
   const none = JSON.parse(store['tester@example.com'].data);
   check('clear sold list empties it and leaves the money alone', none.closed.length === 0 && none.cash === two.cash && none.holdings.length === two.holdings.length && /Sold list cleared/.test(text()) && !/Sold \(/.test(text()) && !/data-pp="clearsold"/.test(container.innerHTML), { n: none.closed.length, cash: [two.cash, none.cash] });
   check('just bought, nothing has moved: no verdict against the market is shown', !/ahead of what an S&P 500 fund did/.test(text()) && !/0 of \d holding/.test(text()), (text().match(/\d of \d holding[^.]*\./) || [''])[0]);
+  // whose holding it is: the autopilot's holdings say when and at what they will be sold (the plan comes from practice-autopilot.js)
+  { const d = JSON.parse(store['tester@example.com'].data); d.holdings[0].by = 'ai'; d.holdings[0].screener = '7-1'; store['tester@example.com'].data = JSON.stringify(d);
+    await ctx.window.practicePortfolio.reload(); await sleep(50); await waitIdle(); const hid = d.holdings[0].id;
+    check('a holding is marked as bought by you or by the autopilot', /🤖 Bought by the autopilot\./.test(text()) && /Bought by you: it stays until you sell it\./.test(text()), text().slice(0, 500));
+    ctx.window.practicePortfolio.setPlans([{ id: hid, auto: true, sellBy: '2026-10-10T16:42:41Z', stop: -10, take: 18, arm: 9 }]);
+    check('with the autopilot on: when and at what it will be sold', /🤖 Autopilot: it sells this by itself, at the check-in around [^.]*\d\d:\d\d[^.]* at the latest, sooner at -10% or \+18%, or to keep part of a gain once it has been up 9%\./.test(text()), (text().match(/🤖 Autopilot:[^.]*\.[^.]*\./) || [''])[0]);
+    ctx.window.practicePortfolio.setPlans([{ id: hid, auto: true, sellBy: '2026-10-10T16:42:41Z', stop: -10, take: 9, arm: 4.5, trial: true }]);
+    check('a holding in a trial of its rules says so', /sooner at -10% or \+9%, or to keep part of a gain once it has been up 4\.5%\. Part of a trial of one of its own rules\./.test(text()));
+    ctx.window.practicePortfolio.setPlans([{ id: hid, auto: false, sellBy: '2026-10-10T16:42:41Z', stop: -10, take: 18, arm: 9 }]);
+    check('with the autopilot off: it says the holding now stays', /🤖 Bought by the autopilot, which is switched off: it stays until you sell it or switch the autopilot back on\./.test(text()));
+    check('the plan line itself', pure.planLine({ by: 'me' }, null) === 'Bought by you: it stays until you sell it.' && pure.planLine({ by: 'ai' }, undefined) === '🤖 Bought by the autopilot.');
+  }
+  check('no S&P columns or verdicts in the tables; one comparison figure in the summary', !/S&P 500 since|S&P 500 same time|ahead of what|did better than the S&P/.test(text()) && /For comparison/.test(text()) && /the same money in an S&P 500 index fund instead/.test(text()), text().slice(0, 300));
   // another window changed it
   store['tester@example.com'].version += 1; await buy('KO', 100); check('change from another window is caught, not overwritten', /changed in another window/i.test(text()), (text().match(/This portfolio[^.]*\./) || [''])[0]);
   await buy('KO', 100); check('and works after the reload', /Practice buy recorded: \$100\.00 of KO/.test(text()));

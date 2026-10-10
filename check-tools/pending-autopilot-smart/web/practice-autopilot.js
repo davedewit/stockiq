@@ -5,6 +5,8 @@
 // How the controls behave: EVERY change is saved by itself (the switch at once, typing after a short pause), so a
 // refresh always shows what was last set. There is no save button; a line beside "Check in now" says
 // "Saving…", "Saved" or why something could not be saved.
+// What it shows keeps itself up to date: while the page is open it asks the Lambda again every minute (not while
+// something is being typed or saved), and tells practice-portfolio.js when the autopilot has bought or sold.
 (function () {
     const API = 'https://qy6s553i647agmxthtecc24fje0zskms.lambda-url.us-east-1.on.aws/';
     const CSS = `
@@ -56,11 +58,18 @@
         #practice-autopilot .ap-section h4 { margin: 0 0 6px; font-size: 0.95rem; color: var(--text-primary); }
         #practice-autopilot .ap-log { padding: 8px 0; border-bottom: 1px solid var(--border-color); line-height: 1.45; }
         #practice-autopilot .ap-log time { white-space: nowrap; margin-right: 6px; }
+        #practice-autopilot .ap-log details, #practice-autopilot .ap-section details { margin-top: 4px; }
+        #practice-autopilot .ap-log summary, #practice-autopilot .ap-section summary { cursor: pointer; color: var(--text-primary); font-size: 0.8rem; }
+        #practice-autopilot .ap-log ul, #practice-autopilot .ap-section ul { margin: 4px 0 0 18px; padding: 0; }
+        #practice-autopilot .ap-fresh { float: right; font-size: 0.8rem; font-weight: normal; color: var(--text-secondary); }
+        #practice-autopilot .ap-fresh a { margin-left: 8px; }
         @media (max-width: 640px) { #practice-autopilot .ap-group { grid-template-columns: 1fr; } #practice-autopilot .ap-group-name { padding-top: 0; } #practice-autopilot .ap-chip { white-space: normal; } #practice-autopilot .ap-input { white-space: normal; } }
     `;
 
     let data = null, draft = null, working = '', notice = null, showAll = false;
     let saveTimer = null, saving = false, saveError = null, savedOnce = false, breakdownOpen = false;
+    let loadedAt = null, refreshing = false, openDetails = {};       // openDetails: which "Details" are unfolded, kept across redraws
+    const REFRESH_MS = 60000;
     const userId = () => { const u = localStorage.getItem('userId'); return u && u !== 'anonymous' ? u : null; };
     const box = () => document.getElementById('practice-autopilot');
     const byId = (id) => document.getElementById(id);
@@ -69,6 +78,9 @@
     const when = (iso) => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); };
     const day = (iso) => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }); };
     const pc = (n) => (n === null || n === undefined) ? '–' : (n >= 0 ? '+' : '') + n.toFixed(1) + '%';
+    const usd2 = (n) => (n < 0 ? '-' : '+') + '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const clock = (d) => d ? d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
+    const fold = (key, title, lines) => lines && lines.length ? `<details data-ap-fold="${esc(key)}" ${openDetails[key] ? 'open' : ''}><summary>${esc(title)}</summary><ul>${lines.map(x => `<li>${esc(x)}</li>`).join('')}</ul></details>` : '';
     const tint = (n) => (n === null || n === undefined) ? 'var(--text-secondary)' : n >= 0 ? '#22c55e' : '#ef4444';
     const everyText = (v) => v === 24 ? 'once a day' : v === 12 ? 'twice a day' : v === 1 ? 'every hour' : v < 1 ? `every ${Math.round(v * 60)} minutes` : `every ${v} hours`;
     // a holding time given in days: 30 minutes, 3 hours, 5 days
@@ -91,8 +103,13 @@
     }
 
     // ---------------------------------------------------------------- wording, from the numbers the Lambda sends
-    function riskText(level) {
+    // A level's rules. For the level in use these are the rules in force, which the autopilot may have changed itself.
+    function levelRules(level) {
         const r = data.options.risk[String(level)];
+        return r && data.rules && String(data.settings.risk) === String(level) ? Object.assign({}, r, { stop: data.rules.stop, take: data.rules.take, top: data.rules.top, trail: data.rules.trail }) : r;
+    }
+    function riskText(level) {
+        const r = levelRules(level);
         if (!r) return '';
         return `${r.name}: spreads the budget over up to ${r.positions} holdings, looks at the top ${r.top} of each screener, sells a holding at ${r.stop}% or +${r.take}%`
             + (r.crypto > 0 ? `, up to ${Math.round(r.crypto * 100)}% of the budget in coins.` : ', no coins.');
@@ -142,11 +159,11 @@
             + (d.budgetUsd > cash ? ` The practice portfolio starts with ${usd0(cash)}, so it can never invest more than the cash that is left.` : '');
     }
     function paceText(d) {
-        const r = data.options.risk[String(d.risk)];
+        const r = levelRules(d.risk);
         if (!r || !(d.maxHoldDays > 0) || !(d.everyHours > 0)) return '';
         const late = d.maxHoldDays * 24 < d.everyHours - 1e-9, quick = d.everyHours < 3 || d.maxHoldDays < 1;
         const shares = d.screeners.some(k => (data.options.screeners[k] || {}).kind !== 'crypto');
-        return `It sells a holding once it has had it for ${holdText(d.maxHoldDays)}, whatever the price, and sooner at ${r.stop}% or +${r.take}% or when its screener signal turns negative. The money is then free for the next buy.`
+        return `It sells a holding once it has had it for ${holdText(d.maxHoldDays)}, whatever the price, and sooner at ${r.stop}% or +${r.take}%, to keep part of a gain once it has been up ${r.take / 2}%, or when its screener signal turns negative or it slips far down the ranking. The money is then free for the next buy.`
             + (late ? ` It only checks in ${everyText(d.everyHours)}, though, so in practice a holding is sold at the next check-in, about ${holdText(d.everyHours / 24)} after it was bought. Check in more often for it to be sold on time.` : '')
             + (quick && shares ? ' Shares are only traded while their market is open and their rankings change little within a day, so quick settings mostly make a difference for coins.' : '')
             + (quick ? ' No trading costs are taken off here: real trading this often would lose part of every trade to fees.' : '');
@@ -178,20 +195,50 @@
 
     // ---------------------------------------------------------------- "How it is doing": its own closed trades
     function recordHtml() {
-        const c = data.scorecard, need = data.minSample || 8;
-        if (!c || !c.n) return `<div class="ap-section"><h4>How it is doing</h4><div>Nothing it bought has been sold yet. Each sale is recorded here with its result against the S&amp;P 500 over the same days, and the autopilot uses that record at later check-ins.</div></div>`;
+        const c = data.scorecard, need = data.minSample || 8, plans = data.plans || [], on = data.settings.enabled;
+        const held = plans.length
+            ? `<div>Holding now: ${plans.map(p => `<strong style="color: var(--text-primary);">${esc(p.label)}</strong> (bought ${esc(when(p.boughtAt))}; ${on ? `it sells it at the check-in around ${esc(when(p.sellBy))} at the latest, sooner at ${p.stop}% or +${p.take}%` : 'the autopilot is off, so it stays until you sell it'})`).join('; ')}.</div>`
+            : `<div>Holding nothing right now.</div>`;
+        const m = data.month && data.month.last30, before = data.month && data.month.before30;
+        const month = m && m.n ? `<div style="margin-top: 4px;">Last 30 days: <span style="color: ${tint(m.usd)}; font-weight: 600;">${usd2(m.usd)}</span> from ${m.n} finished trade${m.n === 1 ? '' : 's'} (${m.up} up)${m.pct !== null ? `, which is <span style="color: ${tint(m.pct)}; font-weight: 600;">${(m.pct >= 0 ? '+' : '') + m.pct.toFixed(2)}%</span> of the ${usd0(data.settings.budgetUsd)} budget` : ''}.${before && before.n ? ` The 30 days before: ${usd2(before.usd)} from ${before.n}${before.pct !== null ? ' (' + (before.pct >= 0 ? '+' : '') + before.pct.toFixed(2) + '%)' : ''}.` : ''}</div>` : '';
+        if (!c || !c.n) return `<div class="ap-section"><h4>How it is doing</h4>${held}<div style="margin-top: 4px;">No finished trades yet: nothing it bought has been sold. Each sale will be listed here with its result, and the autopilot uses that record at later check-ins.</div></div>`;
         const cell = 'padding: 4px 8px; text-align: right; white-space: nowrap;';
-        const row = (g) => `<tr><td style="padding: 4px 8px 4px 0; color: var(--text-primary);">${esc(g.label)}</td><td style="${cell}">${g.n}</td><td style="${cell} color: ${tint(g.avg)};">${pc(g.avg)}</td><td style="${cell} color: ${tint(g.vs)};">${pc(g.vs)}</td><td style="${cell}">${g.judged ? g.beat + ' of ' + g.judged : '–'}</td></tr>`;
+        const row = (g) => `<tr><td style="padding: 4px 8px 4px 0; color: var(--text-primary);">${esc(g.label)}</td><td style="${cell}">${g.n}</td><td style="${cell} color: ${tint(g.avg)};">${pc(g.avg)}</td><td style="${cell}">${g.up} of ${g.n}</td><td style="${cell} color: ${tint(g.vs)};">${pc(g.vs)}</td></tr>`;
         const section = (title, list) => list && list.length ? `<tr><td colspan="5" style="padding: 8px 0 2px; color: var(--text-secondary);">${title}</td></tr>` + list.map(row).join('') : '';
         const g = c.groups || {};
-        const lessons = data.lessons && data.lessons.items && data.lessons.items.length ? `<div style="margin-top: 10px;"><strong style="color: var(--text-primary); font-size: 0.9rem;">What it has noted from its record</strong> <span style="font-size: 0.8rem;">(written by the AI model on ${esc(day(data.lessons.at))} from ${data.lessons.n} closed trades)</span><ul style="margin: 4px 0 0 18px; padding: 0;">${data.lessons.items.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
+        const lessons = data.lessons && data.lessons.items && data.lessons.items.length ? `<div style="margin-top: 10px;"><strong style="color: var(--text-primary); font-size: 0.9rem;">What it has noted from its record</strong> <span style="font-size: 0.8rem;">(written by the AI model on ${esc(day(data.lessons.at))} from ${data.lessons.n} finished trades)</span><ul style="margin: 4px 0 0 18px; padding: 0;">${data.lessons.items.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
         return `<div class="ap-section"><h4>How it is doing</h4>
-            <div>${c.n} closed trade${c.n === 1 ? '' : 's'}: average <span style="color: ${tint(c.avg)}; font-weight: 600;">${pc(c.avg)}</span>${c.vs !== null ? `, <span style="color: ${tint(c.vs)}; font-weight: 600;">${pc(c.vs)}</span> against the S&amp;P 500 over the same days, ahead in ${c.beat} of ${c.judged}` : ''}.${c.n < need ? ` Fewer than ${need} trades: too few to conclude anything yet.` : ''}</div>
-            <details id="ap-breakdown" ${breakdownOpen ? 'open' : ''} style="margin-top: 6px;"><summary style="cursor: pointer; color: var(--text-primary);">Breakdown</summary><div style="overflow-x: auto;"><table style="border-collapse: collapse; font-size: 0.85rem;">
-                <tr><td></td><td style="${cell}">Trades</td><td style="${cell}">Average</td><td style="${cell}">Against the market</td><td style="${cell}">Ahead</td></tr>
+            ${held}${month}
+            <div style="margin-top: 4px;">${c.n} finished trade${c.n === 1 ? '' : 's'} in all: ${c.up} up, ${c.n - c.up} down or level, average <span style="color: ${tint(c.avg)}; font-weight: 600;">${pc(c.avg)}</span> each.${c.n < need ? ` Fewer than ${need} trades: too few to conclude anything yet.` : ''}</div>
+            <details id="ap-breakdown" ${breakdownOpen ? 'open' : ''} style="margin-top: 6px;"><summary>Breakdown</summary><div style="overflow-x: auto;"><table style="border-collapse: collapse; font-size: 0.85rem;">
+                <tr><td></td><td style="${cell}">Trades</td><td style="${cell}">Average</td><td style="${cell}">Up</td><td style="${cell}" title="The average result minus what an S&amp;P 500 index fund did over the same time">Against an index fund</td></tr>
                 ${section('By screener', g.screener)}${section('By place in the ranking when bought', g.rank)}${section('By RSI when bought', g.rsi)}${section('By who chose', g.chosen)}${section('By how it was sold', g.exit)}
-            </table></div><div style="font-size: 0.8rem; margin-top: 4px;">A group needs ${need} trades before the autopilot acts on it. A screener whose recent trades clearly lag the market is rested for two weeks. Past results of fake-money trades; they say nothing certain about the future.</div></details>
+            </table></div><div style="font-size: 0.8rem; margin-top: 4px;">A group needs ${need} trades before the autopilot acts on it. A screener whose recent trades clearly lag an S&amp;P 500 index fund is rested for two weeks. Past results of fake-money trades; they say nothing certain about the future.</div></details>
             ${lessons}
+        </div>`;
+    }
+
+    // ---------------------------------------------------------------- "Improving its own rules": what it has changed, is trying, has tried
+    function ruleWords(r) {
+        return `sells at ${r.stop}% or +${r.take}%; once a holding has been up ${r.arm}%, sells if it gives back ${Math.round(r.trail * 100)}% of its best gain; buys from the top ${r.top} of a ranking` + (r.max_rsi >= 100 ? '' : ` with RSI under ${r.max_rsi}`);
+    }
+    function tuneHtml() {
+        const t = data.tune, r = data.rules;
+        if (!t || !r) return '';
+        const names = { stop: 'loss limit', take: 'gain mark', trail: 'share of a gain it gives back', top: 'how far down a ranking it buys', max_rsi: 'RSI limit' };
+        const changed = Object.keys(r.changed || {});
+        const trial = t.trial, group = t.group || 10;
+        const side = (n, avg) => `${n} finished${n ? ' (average ' + pc(avg) + ')' : ''}`;
+        const now = trial
+            ? `<div style="margin-top: 6px;"><strong style="color: var(--text-primary);">Trying now</strong> (since ${esc(day(trial.since))}): ${esc(trial.text)}. Why: ${esc(trial.why)}. ${esc(trial.how)} So far: with the change ${side(trial.with, trial.avgWith)}, without it ${side(trial.without, trial.avgWithout)}. It decides after ${group} each way and keeps the change only if that group did clearly better.</div>`
+            : `<div style="margin-top: 6px;">${t.nextReviewIn === 0 ? 'It reviews its rules at the next sale.' : `Next review of its rules after ${t.nextReviewIn} more finished trade${t.nextReviewIn === 1 ? '' : 's'}`}${t.nextReviewIn === 0 ? '' : ` (it reviews them every ${t.batch}).`} If the record suggests a change worth trying, it tries it beside the current rule over the same days.</div>`;
+        const verdicts = { kept: 'kept', dropped: 'not kept', stopped: 'stopped' };
+        const past = (t.past || []).slice().reverse();
+        return `<div class="ap-section"><h4>Improving its own rules</h4>
+            <div>Its rules now (${esc(r.name)} level): ${esc(ruleWords(r))}.${changed.length ? ` Changed by itself after a trial: ${esc(changed.map(k => names[k] + ' (the level starts at ' + r.changed[k] + ')').join(', '))}.` : ''}</div>
+            ${now}
+            ${past.length ? fold('past-trials', `Earlier trials (${past.length})`, past.map(p => `${day(p.since)} to ${day(p.ended)}: ${p.text}: ${verdicts[p.verdict] || p.verdict}. ${p.result ? p.result.charAt(0).toUpperCase() + p.result.slice(1) + '.' : ''}`)) : ''}
+            <div style="font-size: 0.8rem; margin-top: 6px;">It can only change these five rules, inside fixed limits, for its own fake-money trades. It never changes your settings, the budget or anything else on the site. Each review is emailed to your account address.</div>
         </div>`;
     }
 
@@ -201,8 +248,9 @@
         if (!el) return;
         if (!data || !data.allowed) { el.innerHTML = ''; return; }
         ensureStyle();
-        const fold = byId('ap-breakdown');
-        if (fold && typeof fold.open === 'boolean') breakdownOpen = fold.open;
+        const breakdown = byId('ap-breakdown');
+        if (breakdown && typeof breakdown.open === 'boolean') breakdownOpen = breakdown.open;
+        if (document.querySelectorAll) Array.from(document.querySelectorAll('[data-ap-fold]')).forEach(x => { if (typeof x.open === 'boolean') openDetails[x.getAttribute('data-ap-fold')] = x.open; });
         const d = draft, o = data.options, on = data.settings.enabled, ready = on && data.settings.screeners.length > 0, state = savedState();
         const select = (id, list, value, label) => `<select id="${id}">${list.map(v => `<option value="${v}" ${v === value ? 'selected' : ''}>${label(v)}</option>`).join('')}</select>`;
         const icons = { buy: '🟢', sell: '🔴', note: 'ℹ️' };
@@ -250,9 +298,10 @@
                 <div id="ap-notice" class="${notice ? 'ap-note ' + (notice.bad ? 'bad' : 'good') : ''}" role="status">${notice ? esc(notice.text) : ''}</div>
 
                 ${recordHtml()}
-                ${log.length ? `<div class="ap-section"><h4>What it has done</h4>
-                    ${shown.map(e => `<div class="ap-log"><time>${icons[e.type] || ''} ${esc(when(e.t))}</time> ${e.type === 'buy' ? `<strong style="color: var(--text-primary);">Bought ${esc(e.symbol)}</strong> with ${usd0(e.usd)}. ` : e.type === 'sell' ? `<strong style="color: var(--text-primary);">Sold ${esc(e.symbol)}</strong>. ` : ''}${esc(e.text)}</div>`).join('')}
-                    ${log.length > shown.length ? `<a href="#" data-ap="more" style="display: inline-block; margin-top: 8px;">Show all ${log.length}</a>` : ''}</div>` : ''}
+                ${tuneHtml()}
+                <div class="ap-section"><h4>What it has done <span class="ap-fresh"><span id="ap-fresh">${loadedAt ? 'Up to date at ' + esc(clock(loadedAt)) + '. Refreshes by itself every minute.' : ''}</span><a href="#" data-ap="refresh">↻ Refresh now</a></span></h4>
+                    ${log.length ? shown.map(e => `<div class="ap-log"><time>${icons[e.type] || ''} ${esc(when(e.t))}</time> ${e.type === 'buy' ? `<strong style="color: var(--text-primary);">Bought ${esc(e.symbol)}</strong> with ${usd0(e.usd)}. ` : e.type === 'sell' ? `<strong style="color: var(--text-primary);">Sold ${esc(e.symbol)}</strong>${typeof e.pct === 'number' ? ` <span style="color: ${tint(e.pct)}; font-weight: 600;">${pc(e.pct)}</span>` : ''}. ` : ''}${esc(e.text)}${e.n > 1 ? ` <span style="font-size: 0.8rem;">(the same at ${e.n} check-ins in a row, since ${esc(when(e.first))})</span>` : ''}${fold(e.type + e.t + e.symbol, e.type === 'sell' ? 'Why, and the details' : 'The plan for it', e.detail)}</div>`).join('') : '<div>Nothing yet. Its buys, sells and check-ins will be listed here.</div>'}
+                    ${log.length > shown.length ? `<a href="#" data-ap="more" style="display: inline-block; margin-top: 8px;">Show all ${log.length}</a>` : ''}</div>
             </div>`;
     }
 
@@ -309,7 +358,7 @@
         try {
             const result = await api('save', { settings: draft }, leaving);
             const unchangedSince = JSON.stringify(draft) === sent;
-            data = result;
+            data = result; loadedAt = new Date(); sharePlans();
             if (unchangedSince) draft = JSON.parse(JSON.stringify(result.settings));
             savedOnce = true; accepted = sent;
             const on = data.settings.enabled;
@@ -320,7 +369,28 @@
         if (!saveError && isDirty()) { queueSave(300); return; }
         if (editing()) syncDraft(); else render();
     }
-    function take(result) { data = result; draft = JSON.parse(JSON.stringify(result.settings)); accepted = null; }
+    function take(result) { data = result; draft = JSON.parse(JSON.stringify(result.settings)); accepted = null; loadedAt = new Date(); sharePlans(); }
+    // practice-portfolio.js marks the autopilot's holdings with when and at what they will be sold
+    function sharePlans() { if (data && data.allowed && window.practicePortfolio && window.practicePortfolio.setPlans) window.practicePortfolio.setPlans(data.plans || []); }
+    // What changes when the autopilot acts: its activity list and what it holds
+    const stamp = (r) => JSON.stringify([r.log && r.log.length, r.log && r.log.slice(-1), r.plans, r.state, r.tune, r.scorecard && r.scorecard.n]);
+    // Ask again without disturbing anything: not while a change is being typed, saved or run
+    async function refresh(byHand) {
+        if (!data || !data.allowed || refreshing || working || saving || saveTimer || isDirty() || (editing() && !byHand)) return;
+        if (!byHand && document.visibilityState === 'hidden') return;
+        refreshing = true;
+        try {
+            const r = await api('get');
+            if (r.allowed && !working && !saving && !saveTimer && !isDirty()) {
+                const traded = JSON.stringify([r.plans, r.scorecard && r.scorecard.n]) !== JSON.stringify([data.plans, data.scorecard && data.scorecard.n]);
+                const changed = stamp(r) !== stamp(data) || JSON.stringify(r.settings) !== JSON.stringify(data.settings);
+                take(r);
+                if (changed || byHand) { if (editing()) syncDraft(); else render(); } else { const f = byId('ap-fresh'); if (f) f.textContent = 'Up to date at ' + clock(loadedAt) + '. Refreshes by itself every minute.'; }
+                if (traded && window.practicePortfolio && window.practicePortfolio.reload) window.practicePortfolio.reload();
+            }
+        } catch (e) { if (byHand) { notice = { text: 'Could not refresh: ' + e.message, bad: true }; render(); } }
+        refreshing = false;
+    }
 
     async function load() {
         if (!userId() || !box()) return;
@@ -344,6 +414,7 @@
         if (t.tagName === 'A') e.preventDefault();
         const action = t.getAttribute('data-ap');
         if (action === 'more') { readDraft(); showAll = true; render(); }
+        else if (action === 'refresh') refresh(true);
         else if (action === 'run') {
             act('run', async () => {
                 const r = await api('run');
@@ -370,6 +441,7 @@
     if (typeof window !== 'undefined' && window.addEventListener) window.addEventListener('pagehide', leaving);
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') leaving(); });
 
-    window.practiceAutopilot = { reload: load, flush };
+    if (typeof setInterval === 'function') setInterval(() => refresh(false), REFRESH_MS);
+    window.practiceAutopilot = { reload: load, flush, refresh };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load); else load();
 })();

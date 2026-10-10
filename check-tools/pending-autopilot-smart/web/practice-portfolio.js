@@ -134,8 +134,18 @@
     }
     function colour(n) { return Math.round(n * 100) / 100 >= 0 ? '#22c55e' : '#ef4444'; }
     function day(iso) { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }); }
+    function when(iso) { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); }
+    // Whose holding it is and what will happen to it. `plan` comes from the autopilot (practice-autopilot.js) for the
+    // holdings it bought: it sells those by itself. Everything else stays until the user sells it.
+    function planLine(h, plan) {
+        if (h.by !== 'ai') return 'Bought by you: it stays until you sell it.';
+        if (!plan) return '🤖 Bought by the autopilot.';
+        if (!plan.auto) return '🤖 Bought by the autopilot, which is switched off: it stays until you sell it or switch the autopilot back on.';
+        return `🤖 Autopilot: it sells this by itself, at the check-in around ${when(plan.sellBy)} at the latest, sooner at ${plan.stop}% or +${plan.take}%`
+            + `, or to keep part of a gain once it has been up ${plan.arm}%.` + (plan.trial ? ' Part of a trial of one of its own rules.' : '');
+    }
 
-    const pure = { newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, usd, pct, money, esc, STARTING_CASH, DEFAULT_AMOUNT };
+    const pure = { newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, planLine, usd, pct, money, esc, STARTING_CASH, DEFAULT_AMOUNT };
     if (typeof module !== 'undefined' && module.exports) module.exports = pure;
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
@@ -207,8 +217,27 @@
             state = r.portfolio || newState(new Date().toISOString());
             version = r.version || 0; loadError = null;
         } catch (e) { loadError = e.message; }
-        loaded = true; render();
-        if (state) { await refreshQuotes(); render(); }
+        loaded = true; redraw();
+        if (state) { await refreshQuotes(); redraw(); }
+    }
+    // Redraw without losing what is being typed in the buy row (the autopilot can change the portfolio in the background)
+    function redraw() {
+        const ids = ['pp-symbol', 'pp-amount', 'pp-qty', 'pp-note'], active = document.activeElement && document.activeElement.id;
+        const keep = ids.map(id => [id, document.getElementById(id) ? document.getElementById(id).value : null]);
+        render();
+        keep.forEach(([id, v]) => { const el = document.getElementById(id); if (el && v) el.value = v; });
+        const clear = document.getElementById('pp-clear'), search = document.getElementById('pp-symbol');
+        if (clear && search) clear.style.display = search.value ? 'block' : 'none';
+        if (ids.includes(active)) { const el = document.getElementById(active); if (el && el.focus) el.focus(); }
+    }
+    // From practice-autopilot.js: for each holding the autopilot bought, when and at what it will sell it
+    let plans = {};
+    function setPlans(list) {
+        const next = {};
+        (list || []).forEach(p => { next[p.id] = p; });
+        if (JSON.stringify(next) === JSON.stringify(plans)) return;
+        plans = next;
+        if (loaded && state && !working) redraw();
     }
     // Change a copy, save it, and only then show it: what is on screen is always what is stored
     async function change(mutate) {
@@ -267,40 +296,33 @@
         const card = (label, value, sub) => `<div style="flex: 1; min-width: 150px; background: var(--bg-secondary); border-radius: 8px; padding: 12px 14px;"><div style="font-size: 0.8rem; color: var(--text-secondary);">${label}</div><div style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">${value}</div><div style="font-size: 0.8rem; color: var(--text-secondary);">${sub || '&nbsp;'}</div></div>`;
         const cell = 'padding: 8px 6px; border-bottom: 1px solid var(--border-color); text-align: right; white-space: nowrap;';
         const left = cell.replace('text-align: right', 'text-align: left');
-        const spy = quotes[BENCHMARK] ? quotes[BENCHMARK].price : null;
 
         const rows = state.holdings.slice().reverse().map(h => {
             const v = valueOf(h, quotes);
-            const market = spy > 0 && h.spyAtBuy > 0 ? (spy / h.spyAtBuy - 1) * 100 : null;
             return `<tr>
-                <td style="${left}">${h.by === 'ai' ? '<span title="Bought by the AI autopilot">🤖</span> ' : ''}<strong style="color: var(--text-primary);">${esc(h.label)}</strong><div style="font-size: 0.75rem; color: var(--text-secondary); white-space: normal;">${esc(h.name)}${h.note ? ' · ' + esc(h.note) : ''}</div></td>
-                <td style="${cell}">${esc(day(h.boughtAt))}</td>
+                <td style="${left}">${h.by === 'ai' ? '<span title="Bought by the AI autopilot">🤖</span> ' : ''}<strong style="color: var(--text-primary);">${esc(h.label)}</strong><div style="font-size: 0.75rem; color: var(--text-secondary); white-space: normal;">${esc(h.name)}${h.note ? ' · ' + esc(h.note) : ''}</div><div style="font-size: 0.75rem; color: var(--text-secondary); white-space: normal; max-width: 420px;">${esc(planLine(h, plans[h.id]))}</div></td>
+                <td style="${cell}">${esc(when(h.boughtAt))}</td>
                 <td style="${cell}">${money(h.buyPrice, h.currency)}</td>
                 <td style="${cell}">${v.priced ? money(v.price, h.currency) : '<span title="No price available right now">–</span>'}</td>
                 <td style="${cell}">${usd(h.costUsd)} → ${usd(v.valueUsd)}</td>
                 <td style="${cell} font-weight: 600; color: ${v.priced ? colour(v.changePct) : 'var(--text-secondary)'};">${v.priced ? pct(v.changePct) + ' (' + usd(v.gainUsd) + ')' : 'no price'}</td>
-                <td style="${cell}">${market === null ? '–' : pct(market)}</td>
                 <td style="${cell}"><button data-pp="sell" data-id="${esc(h.id)}" style="${BTN}" ${working ? 'disabled' : ''}>Sell</button></td>
             </tr>`;
         }).join('');
 
         const closed = state.closed.slice().reverse().map(h => {
             const change = (h.proceedsUsd / h.costUsd - 1) * 100;
-            const market = h.spyAtBuy > 0 && h.spyAtSell > 0 ? (h.spyAtSell / h.spyAtBuy - 1) * 100 : null;
-            return `<tr><td style="${left}">${h.by === 'ai' ? '<span title="Bought by the AI autopilot">🤖</span> ' : ''}<strong style="color: var(--text-primary);">${esc(h.label)}</strong></td><td style="${cell}">${esc(day(h.boughtAt))} → ${esc(day(h.soldAt))}</td><td style="${cell}">${money(h.buyPrice, h.currency)} → ${money(h.sellPrice, h.currency)}</td><td style="${cell}">${usd(h.costUsd)} → ${usd(h.proceedsUsd)}</td><td style="${cell} font-weight: 600; color: ${colour(change)};">${pct(change)} (${usd(h.proceedsUsd - h.costUsd)})</td><td style="${cell}">${market === null ? '–' : pct(market)}</td><td style="${cell}"><span data-pp="unsold" data-id="${esc(h.id)}" title="Remove this line from the sold list" style="cursor: pointer; font-size: 16px; padding: 0 4px;">×</span></td></tr>`;
+            return `<tr><td style="${left}">${h.by === 'ai' ? '<span title="Bought by the AI autopilot">🤖</span> ' : ''}<strong style="color: var(--text-primary);">${esc(h.label)}</strong></td><td style="${cell}">${esc(when(h.boughtAt))} → ${esc(when(h.soldAt))}</td><td style="${cell}">${money(h.buyPrice, h.currency)} → ${money(h.sellPrice, h.currency)}</td><td style="${cell}">${usd(h.costUsd)} → ${usd(h.proceedsUsd)}</td><td style="${cell} font-weight: 600; color: ${colour(change)};">${pct(change)} (${usd(h.proceedsUsd - h.costUsd)})</td><td style="${cell}"><span data-pp="unsold" data-id="${esc(h.id)}" title="Remove this line from the sold list" style="cursor: pointer; font-size: 16px; padding: 0 4px;">×</span></td></tr>`;
         }).join('');
         const sold = soldSummary(state);
-        const soldLine = sold.count ? `${sold.count} sold: put in ${usd(sold.cost)}, got back ${usd(sold.proceeds)}, <span style="color: ${colour(sold.gainUsd)}; font-weight: 600;">${pct(sold.gainPct)} (${usd(sold.gainUsd)})</span>${sold.compared ? `. ${sold.ahead} of ${sold.compared} did better than the S&amp;P 500 over the same days${sold.level ? ' (' + sold.level + ' about the same)' : ''}` : ''}.` : '';
-        // only holdings where something has moved since the buy are counted; none yet, no line
-        const aheadLine = s.compared ? `Since ${s.compared === 1 ? 'it was' : 'they were'} bought, ${s.ahead} of ${s.compared} holding${s.compared === 1 ? ' is' : 's are'} ahead of what an S&amp;P 500 fund did over the same days${s.level ? ' (' + s.level + ' about level)' : ''}.` : '';
-
+        const soldLine = sold.count ? `${sold.count} sold: put in ${usd(sold.cost)}, got back ${usd(sold.proceeds)}, <span style="color: ${colour(sold.gainUsd)}; font-weight: 600;">${pct(sold.gainPct)} (${usd(sold.gainUsd)})</span>.` : '';
         const th = (t, align) => `<th style="padding: 6px; text-align: ${align || 'right'}; font-weight: 600; white-space: nowrap;">${t}</th>`;
         el.innerHTML = `
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
                 ${card('Account value', usd(s.accountValue), `<span style="color: ${colour(s.gainUsd)}; font-weight: 600;">${pct(s.gainPct)} (${usd(s.gainUsd)})</span> since the start`)}
                 ${card('Practice cash left', usd(s.cash), 'of ' + usd(state.startingCash))}
                 ${card('In holdings', usd(s.holdingsValue), s.openGainPct === null ? 'nothing held yet' : `<span style="color: ${colour(s.openGainPct)}; font-weight: 600;">${pct(s.openGainPct)}</span> on ${usd(s.cost)} put in`)}
-                ${card('Same money in the S&amp;P 500', s.marketPct === null ? '–' : `<span style="color: ${colour(s.marketPct)};">${pct(s.marketPct)}</span>`, 'an S&amp;P 500 fund bought on the same days')}
+                ${card('For comparison', s.marketPct === null ? '–' : `<span style="color: ${colour(s.marketPct)};">${pct(s.marketPct)}</span>`, 'the same money in an S&amp;P 500 index fund instead')}
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 6px;">
                 <div style="position: relative; flex: 2; min-width: 200px;">
@@ -314,8 +336,8 @@
                 <button data-pp="buy" style="${BTN} padding: 10px 18px; font-size: 0.95rem;" ${working ? 'disabled' : ''}>${working ? 'Working…' : 'Practice buy'}</button>
             </div>
             <div id="pp-notice" style="min-height: 1.2em; font-size: 0.85rem; margin-bottom: 10px; color: ${notice && notice.bad ? '#ef4444' : 'var(--text-secondary)'};">${notice ? esc(notice.text) : 'Enter practice US dollars or a quantity: the other is worked out from the latest price. A buy is recorded at the latest traded price.'}</div>
-            ${state.holdings.length ? `<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; color: var(--text-secondary);"><tr>${th('Holding', 'left')}${th('Bought')}${th('Price then')}${th('Price now')}${th('Value')}${th('Change')}${th('S&amp;P 500 since')}${th('')}</tr>${rows}</table></div>${aheadLine ? `<div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 6px;">${aheadLine}</div>` : ''}` : '<p style="color: var(--text-secondary); margin: 6px 0 10px;">Nothing held yet. Enter a stock above, or use “Practice buy” on a line of a screener’s Top 10 Performance (🎯).</p>'}
-            ${state.closed.length ? `<details id="pp-sold" ${soldOpen ? 'open' : ''} style="margin-top: 12px;"><summary style="cursor: pointer; color: var(--text-primary);">Sold (${state.closed.length})</summary><div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; color: var(--text-secondary);"><tr>${th('Holding', 'left')}${th('Held')}${th('Price')}${th('Value')}${th('Result')}${th('S&amp;P 500 same time')}${th('')}</tr>${closed}</table></div><div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; font-size: 0.8rem; color: var(--text-secondary);"><span>${soldLine}</span><button data-pp="clearsold" style="${BTN2}" title="Empties the sold list. Your practice cash and account value stay as they are" ${working ? 'disabled' : ''}>Clear sold list</button></div></details>` : ''}
+            ${state.holdings.length ? `<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; color: var(--text-secondary);"><tr>${th('Holding', 'left')}${th('Bought')}${th('Price then')}${th('Price now')}${th('Value')}${th('Change')}${th('')}</tr>${rows}</table></div>` : '<p style="color: var(--text-secondary); margin: 6px 0 10px;">Nothing held yet. Enter a stock above, or use “Practice buy” on a line of a screener’s Top 10 Performance (🎯).</p>'}
+            ${state.closed.length ? `<details id="pp-sold" ${soldOpen ? 'open' : ''} style="margin-top: 12px;"><summary style="cursor: pointer; color: var(--text-primary);">Sold (${state.closed.length})</summary><div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; color: var(--text-secondary);"><tr>${th('Holding', 'left')}${th('Held')}${th('Price')}${th('Value')}${th('Result')}${th('')}</tr>${closed}</table></div><div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; font-size: 0.8rem; color: var(--text-secondary);"><span>${soldLine}</span><button data-pp="clearsold" style="${BTN2}" title="Empties the sold list. Your practice cash and account value stay as they are" ${working ? 'disabled' : ''}>Clear sold list</button></div></details>` : ''}
             <div style="display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
                 <button data-pp="refresh" style="${BTN2}" ${working ? 'disabled' : ''}>↻ Refresh prices</button>
                 <button data-pp="reset" style="${BTN2}" title="Clears every practice holding and the sold list and puts the fake money back to ${usd(STARTING_CASH)}" ${working ? 'disabled' : ''}>Reset fake money to ${usd(STARTING_CASH)}</button>
@@ -444,6 +466,6 @@
     };
 
     // for practice-autopilot.js: show what the autopilot has just bought or sold
-    window.practicePortfolio = { reload: load };
+    window.practicePortfolio = { reload: load, setPlans };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load); else load();
 })();
