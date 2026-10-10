@@ -24,6 +24,10 @@ let ok = true; const check = (name, cond, extra) => { ok = ok && !!cond; console
     const ss = pure.soldSummary(s2); check('sold summary adds up', ss.count === 2 && ss.cost === 2000 && Math.abs(ss.proceeds - 2110) < 0.01 && Math.abs(ss.gainPct - 5.5) < 0.01 && ss.compared === 2 && ss.ahead === 1, ss);
     const cashBefore = s2.cash; check('clearing one sold line', pure.applyClearSold(s2, a1.id) === 1 && s2.closed.length === 1 && s2.closed[0].symbol === 'BBB' && s2.cash === cashBefore);
     check('clearing the whole sold list', pure.applyClearSold(s2, null) === 1 && s2.closed.length === 0 && s2.cash === cashBefore && pure.soldSummary(s2).gainPct === null && pure.applyClearSold(s2, null) === 0); }
+  { const yen = pure.fxFor('JPY'), pence = pure.fxFor('GBp'), aud = pure.fxFor('AUD');
+    check('exchange rates: yen from the per-dollar quote, pence and Australian dollars direct', yen.symbol === 'USDJPY=X' && Math.abs(pure.fxRate(yen, 158.246) - 0.0063193) < 1e-7 && pence.symbol === 'GBPUSD=X' && Math.abs(pure.fxRate(pence, 1.3233) - 0.013233) < 1e-9 && aud.symbol === 'AUDUSD=X' && pure.fxRate(aud, 0.6988) === 0.6988 && pure.fxRate(pure.fxFor('USD'), 0) === 1 && pure.fxRate(yen, 0) === null, [yen, pence, aud]);
+    const st = pure.newState('x'); const h = pure.applyBuy(st, { symbol: '7203.T', currency: 'JPY', price: 2910.5, fx: pure.fxRate(yen, 158.246), amountUsd: 1000, now: '2026-10-10T00:00:00Z' });
+    check('a yen holding is valued with the same precise rate', Math.abs(pure.valueOf(h, { '7203.T': { price: 2910.5 }, 'USDJPY=X': { price: 158.246 } }).changePct) < 1e-9 && Math.abs(pure.valueOf(h, { '7203.T': { price: 2910.5 }, 'USDJPY=X': { price: 156.6792 } }).changePct - 1.0) < 0.001); }
   check('formatting', pure.usd(-1234.5) === '-$1,234.50' && pure.money(2662, 'GBp') === '2662.00p' && pure.money(60.94, 'AUD') === 'A$60.940' && pure.esc('<b>"x"') === '&lt;b&gt;&quot;x&quot;');
 }
 // --- the page
@@ -78,6 +82,22 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
   check('lookup: no match says so', /No matches found/.test(sug.innerHTML), sug.innerHTML);
   await type('BHP.AX'); await sleep(700); check('lookup: a full code needs no lookup', sug.style.display === 'none');
   click('clear'); check('lookup: clear button empties the box', document.getElementById('pp-symbol').value === '');
+  // dollars or quantity: no default amount, and each fills in the other from the latest price
+  check('no amount is pre-filled', /id="pp-amount"[^>]*placeholder="Enter \$"/.test(container.innerHTML) && !/id="pp-amount"[^>]*value=/.test(container.innerHTML) && /id="pp-qty"[^>]*placeholder="or quantity"/.test(container.innerHTML));
+  const typeIn = (id, v) => { document.getElementById(id).value = String(v); handlers.input.forEach(f => f({ target: document.getElementById(id) })); };
+  document.getElementById('pp-symbol').value = ''; document.getElementById('pp-amount').value = ''; document.getElementById('pp-qty').value = '';
+  click('pick', { 'data-symbol': 'KO' }); for (let i = 0; i < 80 && !/Coca/.test(document.getElementById('pp-notice').textContent || ''); i++) await sleep(250);
+  const koPrice = parseFloat((document.getElementById('pp-notice').textContent.match(/latest price \$([0-9.]+)/) || [])[1]);
+  typeIn('pp-amount', 500); check('typing dollars fills in the quantity', koPrice > 0 && Math.abs(parseFloat(document.getElementById('pp-qty').value) - 500 / koPrice) < 0.001, [koPrice, document.getElementById('pp-qty').value]);
+  typeIn('pp-qty', 3); check('typing a quantity fills in the dollars', Math.abs(parseFloat(document.getElementById('pp-amount').value) - 3 * koPrice) < 0.011, document.getElementById('pp-amount').value);
+  const cashBefore = JSON.parse(store['tester@example.com'].data).cash; click('buy'); await sleep(50); await waitIdle();
+  const koBuy = JSON.parse(store['tester@example.com'].data); const ko = koBuy.holdings.slice(-1)[0];
+  check('buying by quantity buys exactly that many', ko.symbol === 'KO' && Math.abs(ko.qty - 3) < 1e-9 && Math.abs(cashBefore - koBuy.cash - ko.costUsd) < 0.011 && Math.abs(ko.costUsd - 3 * ko.buyPrice) < 0.011, ko);
+  document.getElementById('pp-symbol').value = 'BHP.AX'; handlers.change.forEach(f => f({ target: document.getElementById('pp-symbol') })); for (let i = 0; i < 80 && !ctx.__q; i++) { await sleep(250); typeIn('pp-qty', 10); if (parseFloat(document.getElementById('pp-amount').value) > 0) ctx.__q = 1; }
+  check('a code typed by hand in another currency: quantity gives US dollars', parseFloat(document.getElementById('pp-amount').value) > 100 && parseFloat(document.getElementById('pp-amount').value) < 2000, document.getElementById('pp-amount').value);
+  document.getElementById('pp-amount').value = ''; document.getElementById('pp-qty').value = ''; document.getElementById('pp-symbol').value = 'KO'; click('buy'); await sleep(50);
+  check('no dollars and no quantity: asks for one', /Enter how many practice dollars to put in, or a quantity/.test(text()) && JSON.parse(store['tester@example.com'].data).holdings.length === koBuy.holdings.length);
+  { const sellId = JSON.parse(store['tester@example.com'].data).holdings.slice(-1)[0].id; click('sell', { 'data-id': sellId }); await sleep(50); await waitIdle(); click('clearsold'); await sleep(50); await waitIdle(); }
   check('reset is a visible button', /<button data-pp="reset"[^>]*>Reset fake money to \$100,000\.00<\/button>/.test(container.innerHTML) && /<button data-pp="refresh"/.test(container.innerHTML));
   // Top 10 popup button
   const btn = { disabled: false, textContent: '＋ Practice buy' }; await ctx.window.practiceBuyFromTop10(btn, 'IMX10603-USD', 'IMX-USD');

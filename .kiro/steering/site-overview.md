@@ -286,7 +286,10 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
 - **Practice portfolio** (dashboard, added 10 Oct 2026; the owner's "fake money" idea). A section above
   Report History: type a stock code or name, pick an amount of practice US dollars (default $1,000,
   from a $100,000 start) and "Practice buy"; each buy becomes a line that is then monitored: price
-  then and now, value, change, and what an S&P 500 fund (SPY) did since the same day. "Sell" closes
+  then and now, value, change, and what an S&P 500 fund (SPY) did since the same day. The buy row has
+  no pre-filled amount: "Enter $" and "or quantity" sit side by side, and whichever is typed, the
+  other is worked out from the latest price once the code is known (`fillOther`, `priceFor`); a buy
+  by quantity buys exactly that many. "Sell" closes
   the line at the latest price; the "Reset fake money to $100,000" button clears everything. Under the
   holdings a line says how many are ahead of the S&P 500 since they were bought. The "Sold" list
   ends with a summary (put in, got back, result, how many did better than the S&P 500 over the same
@@ -320,7 +323,9 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   owner's account only for now**). Under the practice portfolio on the dashboard: switch it on, set a
   risk level (slider 1–5, Cautious to Adventurous), a budget and the number of days to spread it over,
   how often it checks in (every 3 / 6 / 12 / 24 hours), the longest it keeps a holding, and which
-  screeners it buys from (Dow 30, S&P 100, NASDAQ 100, S&P 500, crypto). "Check in now" runs one
+  screeners it buys from: **all 15** since the 10 Oct upgrade (the eight US lists, ASX 50/100/200/300,
+  FTSE 100, Nikkei 225, crypto), shown in groups by market. Add a screener by adding a line to
+  `SCREENERS` in the Lambda (name, coordinator option and subOption, kind, market, group). "Check in now" runs one
   check-in on demand (10-minute gap). "What it has done" lists every buy, sell and skipped check-in
   with the reason. Its holdings carry a 🤖 in the portfolio table and can be sold by hand.
   - **How a check-in works** (Lambda `stockiq-ai-trader`): (1) fetch the chosen screeners' latest
@@ -336,9 +341,37 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
     model can only pick from the shortlist; if it fails, the top of the shortlist is used and the
     log says "chosen by rank". It never touches a holding the user bought. At most 3 buys a check-in.
   - **When it runs:** EventBridge rule `stockiq-ai-trader-schedule` (`cron(40 * * * ? *)`, hourly)
-    runs every user who is switched on and due. Users with a stock screener selected are only run
-    Mon–Fri 14:35–19:55 UTC (inside US market hours all year); coin-only users at any time.
-  - **Storage:** table `stockiq-ai-trader` (key `userId`: settings, state, last 60 log entries). Buys
+    runs every user who is switched on and due. **Each screener belongs to a market** and a scheduled
+    check-in only buys from, and sells holdings of, the markets that are open (`MARKET_HOURS`, UTC,
+    Mon–Fri, chosen to sit inside the real hours in summer and winter time: US 14:35–19:55,
+    Australia 00:05–04:55, Japan 00:05–05:55, UK 08:05–15:25; coins always). Each market keeps its own
+    last-checked time (`state.lastRunBy`), so someone with US and Australian screeners is checked in
+    both sessions. "Check in now" acts on everything and notes which markets are shut.
+  - **Other currencies:** shares outside the US are bought in their own currency and valued in US
+    dollars: `fx_pair` / `usd_rate` in the Lambda and `fxFor` / `fxRate` in `practice-portfolio.js`,
+    **which must follow the same rule**: AUD, GBP, EUR and NZD use the dollars-per-unit quote
+    (`AUDUSD=X`); every other currency uses the per-dollar quote turned over (`USDJPY=X`), because
+    Yahoo rounds `JPYUSD=X` to 0.0063. London prices are pence (÷100). The sell rules measure the
+    change in US dollars, as the dashboard shows it. No exchange rate: the buy is skipped.
+  - **Stored screener results:** `get_snapshot` keeps each screener's rows for 45 minutes as items
+    `_snapshot#<key>` in table `stockiq-ai-trader` (top 150 rows in full, the rest as score, signal
+    and rank), so several users or check-ins do not run the same screener twice. A cold Russell 2000
+    run takes about 35 s; a four-screener check-in about 45 s (Lambda: 300 s, 512 MB).
+  - **Learning from its own results** (added 10 Oct 2026, the owner's "it learns and fixes itself"):
+    each buy is remembered with the figures it was bought on (`state.open`); when the holding is sold,
+    by a rule or by hand, `settle` writes the result to `history` (last 300: change, the S&P 500 fund
+    over the same days, days held, how it was sold). From that: (1) `scorecard`: overall and by
+    screener, rank band, RSI band, who chose (AI model or rank) and exit; shown on the dashboard as
+    "How it is doing"; (2) `review_resting`: a screener whose last 12 trades (at least 8) average 1.5%
+    or more behind the market is rested for 14 days, then tried again with a clean slate;
+    (3) `write_lessons`: after every 5 more closed trades the AI model writes up to 4 short notes on
+    what the record shows ("What it has noted from its record"); (4) the scorecard and notes are put
+    in the model's prompt at each decision. **These inform the choice among the shortlist only: every
+    limit is still enforced by code, and nothing adapts on fewer than 8 trades** (`MIN_SAMPLE`).
+    Honest limit: with a handful of trades the record is mostly chance, and the panel says so. It
+    does not re-tune its own stop / gain limits or risk filters; that would need far more trades.
+  - **Storage:** table `stockiq-ai-trader` (key `userId`: settings, state, last 60 log entries, last
+    300 closed trades; `_snapshot#…` items are the stored screener results). Buys
     and sells are written into `stockiq-paper-portfolios` with the same version check the dashboard
     uses; holdings it bought carry `by: 'ai'` and `screener`. If the user changes the portfolio at
     the same moment, nothing is traded and it tries again at the next check-in.
@@ -350,8 +383,8 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   - Code: `website/practice-autopilot.js` (controls only), Lambda in `lambda-sync/stockiq-ai-trader/`.
     The AI key is the same `OPENAI_API_KEY` as the AI chat, copied to this Lambda's environment.
   - Tests: `python3 check-tools/ai_trader_test.py lambda-sync/stockiq-ai-trader/lambda_function.py`
-    (34 checks, stand-in database, screeners and model) and
-    `node check-tools/autopilot_test.js <practice-autopilot.js>` (the controls).
+    (65 checks, stand-in database, screeners and model) and
+    `node check-tools/autopilot_test.js <practice-autopilot.js>` (14 checks, the controls).
   - Honest framing, keep it: the backtests (sections 7b and 11) found no reliable edge in the
     screener scores, so this is an experiment to watch, and the panel says so. Its own results will
     be the forward test. Turn everything off: disable the EventBridge rule.
@@ -915,6 +948,12 @@ quirk, not a layout bug. The home page shows its right-hand news panel only from
   - **Dashboard Top 10 Performance rebuilt** (section 8b): faults above fixed, over-time table against
     the index added. **Fake-money test** of the Dow 30 and S&P 100 screeners run (section 11).
   - **Practice portfolio** added to the dashboard (section 8), with a new table and Lambda.
+  - **AI autopilot upgraded** (section 8): all 15 screeners with per-market hours and currencies,
+    stored screener results, and a record of its own closed trades that it learns from (scorecard,
+    resting a lagging screener, AI-written notes fed back into its choices). Dollars-or-quantity
+    fields on the practice buy row. Two sessions built an autopilot at the same moment on 10 Oct;
+    the deploy script's fingerprint check caught it and the second build was dropped. **Run one
+    session on the site at a time.**
   - **AI autopilot** for the practice portfolio (section 8): new Lambda, table and hourly schedule.
   - **Deploy permission:** from the afternoon of 10 Oct the session's safety check refused production
     deploys and refused to let Claude change its own settings. The owner added the allow rule
