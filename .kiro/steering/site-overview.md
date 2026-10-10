@@ -290,12 +290,15 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   no pre-filled amount: "Enter $" and "or quantity" sit side by side, and whichever is typed, the
   other is worked out from the latest price once the code is known (`fillOther`, `priceFor`); a buy
   by quantity buys exactly that many. "Sell" closes
-  the line at the latest price; the "Reset fake money to $100,000" button clears everything. Under the
-  holdings a line says how many are ahead of the S&P 500 since they were bought; a holding is only
-  counted once it or the market has moved 0.05% (`versusMarket`), so a buy made a moment ago is not
-  called "0 of 1 ahead", and ties are reported as "about level". The "Sold" list
-  ends with a summary (put in, got back, result, how many did better than the S&P 500 over the same
-  days), a "Clear sold list" button and an × on each line; clearing only tidies the list, because
+  the line at the latest price; the "Reset fake money to $100,000" button clears everything. **Each
+  holding says whose it is** (`planLine`): "Bought by you: it stays until you sell it", or for one
+  the autopilot bought, when and at what the autopilot will sell it (the plan comes from
+  `practice-autopilot.js` through `practicePortfolio.setPlans`; if the autopilot is off it says the
+  holding now stays). The S&P 500 columns and the "N of M ahead of the S&P 500" sentences were
+  removed on 10 Oct at the owner's request (he found them confusing, and they mean little for
+  coins); one figure remains, the "For comparison" card (the same money in an S&P 500 index fund).
+  `spyAtBuy` / `spyAtSell` are still stored on each holding: the autopilot's record uses them. The "Sold" list
+  ends with a summary (put in, got back, result), a "Clear sold list" button and an × on each line; clearing only tidies the list, because
   what a sale brought in is already in the practice cash (added 10 Oct 2026, script `?v=3`). The
   search box works like the home page's (same `stockiq-validate-symbol` lookup, "Checking
   exchanges...", "No matches found"); picking a suggestion shows the company name and latest price
@@ -334,7 +337,11 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   - **How a check-in works** (Lambda `stockiq-ai-trader`): (1) fetch the chosen screeners' latest
     results from `stockiq-screener-coordinator` (called with no `userId`, so nothing is saved to
     anyone's history); (2) sell its own holdings by fixed rules: down past the level's limit, up to
-    the level's mark, held the longest allowed time, or the screener signal turned negative; (3) work
+    the level's mark, held the longest allowed time, the screener signal turned negative, and (added
+    10 Oct) two more: **keeping part of a gain** (once a holding has been up half the gain mark, it is
+    sold when it has given back half of its best gain; `TRAIL_ARM`, `trail`) and **slipped down the
+    ranking** (below 5 times the level's ranking limit with under half the score it was bought on;
+    `FADE`). Each holding's best and worst change, as seen at check-ins, is kept in `state.open`; (3) work
     out what may be spent: the budget is released in equal steps over the chosen days, money from
     sales is re-used, never more than the budget invested, never more than the practice cash;
     (4) shortlist the top of each screener, filtered by the risk level (`RISK` table in the code: how
@@ -388,8 +395,36 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
     what the record shows ("What it has noted from its record"); (4) the scorecard and notes are put
     in the model's prompt at each decision. **These inform the choice among the shortlist only: every
     limit is still enforced by code, and nothing adapts on fewer than 8 trades** (`MIN_SAMPLE`).
-    Honest limit: with a handful of trades the record is mostly chance, and the panel says so. It
-    does not re-tune its own stop / gain limits or risk filters; that would need far more trades.
+    Honest limit: with a handful of trades the record is mostly chance, and the panel says so.
+  - **Improving its own rules, in bounded trials** (added 10 Oct 2026 after the owner asked for it to
+    "continually improve itself" and email him what it found). What it may change is fixed in
+    `TUNABLE`: the loss limit, the gain mark, the share of a gain it gives back, how far down a
+    ranking it buys and the highest RSI it buys at, each inside hard bounds, per risk level
+    (`state.tune.values`, applied by `rules_for`). **It changes nothing else: not the budget, not the
+    user's settings, not any code or page. The owner asked for "it can modify anything on my site";
+    that was deliberately not built** (an unattended program rewriting live code cannot check its own
+    work, and nothing here should ever touch real money). The cycle (`review_tuning`):
+    (1) every 20 finished trades (`TUNE_BATCH`) `propose` looks back over up to 60 trades for the one
+    change that would have helped most in hindsight (at least 0.2 points a trade): a nearer gain mark
+    or loss limit from each trade's best and worst while held; a further one when holdings went on
+    rising after being sold (`after`, filled in by `look_back`, which re-prices a sold holding once
+    the same length of time has passed again); nearer or further down the ranking and a lower or
+    higher RSI limit from how those groups of buys did. (2) It does not adopt it: it runs a **trial
+    beside the current rule over the same days**. For a selling rule every second buy follows the
+    changed rule (`x`, `v` on each remembered buy; `own_rules`); for a buying rule it buys by the
+    wider of the two and compares the two groups of buys. (3) After 10 finished trades each way
+    (`TUNE_GROUP`) it keeps the change only if that group's average result beat the other by more
+    than one standard error (`trial_figures`); otherwise the rule stays as it was. A change dropped
+    lately is not retried for three trials; a trial ends unchanged after 30 days or when the risk
+    level is changed. (4) **Each step is emailed** (`send_mail`, SES, from `autopilot@stockiq.tech`
+    to the account's own address; only the deployed function sends, never a test run) with the
+    record so far, the last 30 days in dollars and as a share of the budget, and suggestions about
+    settings only the user can change. `aws lambda invoke --payload '{"mail_test": true}'` sends one
+    set-up email to check delivery. The panel's "Improving its own rules" section shows the rules in
+    force, the running trial and earlier ones. **Honest limits, keep saying them:** the backtests
+    found no reliable edge in the scores, tuning exit rules on a few dozen trades is mostly noise,
+    and a goal like "70% a month" is not something this or anything else delivers. The trial design
+    exists so that it at least does not fool itself: it only keeps what beats its own control group.
   - **Storage:** table `stockiq-ai-trader` (key `userId`: settings, state, last 60 log entries, last
     300 closed trades; `_snapshot#…` items are the stored screener results). Buys
     and sells are written into `stockiq-paper-portfolios` with the same version check the dashboard
@@ -432,16 +467,34 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   - Code: `website/practice-autopilot.js` (controls only), Lambda in `lambda-sync/stockiq-ai-trader/`.
     The AI key is the same `OPENAI_API_KEY` as the AI chat, copied to this Lambda's environment.
   - Tests: `python3 check-tools/ai_trader_test.py lambda-sync/stockiq-ai-trader/lambda_function.py`
-    (88 checks, stand-in database, screeners and model),
-    `node check-tools/autopilot_test.js <practice-autopilot.js>` (44 checks, the controls) and
+    (128 checks, stand-in database, screeners, model and mailer),
+    `node check-tools/autopilot_test.js <practice-autopilot.js>` (59 checks, the controls),
+    `node check-tools/practice_test.js <placeholder copy>` (55 checks, the portfolio section) and
     `python3 check-tools/autopilot_plan_check.py <lambda_function.py> <practice-autopilot.js> 150`
     (the panel's description against the Lambda's own rules; it is how the rounding fault was found).
+  - **What the activity list says** (10 Oct): a sale carries its story under "Why, and the details"
+    (what it was bought on, how long it was held against the setting, best and worst while held, the
+    figures at the sale, the rules that applied); a buy carries its plan. A check-in that changed
+    nothing for the same reason as the one before is counted on one line (`key`, `add_log`), so
+    30-minute check-ins do not push the trades out of the list. "Nothing to spend yet" names the
+    setting it comes from ("Build up to it over", which the owner took for the holding time) and says
+    when the next part is released (`next_release`); when the level's coin share is used up it says
+    so and the AI model is not called. **Screener results are fresh at every check-in** (the owner
+    asked): `get_snapshot` runs the screener then, unless a copy under 20 minutes old exists.
+  - **The panel keeps itself up to date**: every minute while the page is visible (not while
+    something is being typed or saved) it asks the Lambda again; when the autopilot has traded it
+    reloads the practice portfolio, which keeps whatever is being typed in its buy row (`redraw`).
+    "How it is doing" starts with what it holds and when each will be sold, then the last 30 days in
+    dollars and as a share of the budget, then finished trades as up / down and average; the
+    comparison with an index fund is only in the folded "Breakdown".
   - Honest framing, keep it: the backtests (sections 7b and 11) found no reliable edge in the
     screener scores, so this is an experiment to watch, and the panel says so. Its own results will
     be the forward test. Turn everything off: disable the EventBridge rule.
-  - Ideas not built: results of the AI's holdings shown separately from manual ones; a daily summary
-    email; ASX / FTSE / Nikkei screeners (need currency handling in the trader); letting the model
-    also decide sells; per-user cost limits before opening it up.
+  - Ideas not built: a chart of its results over time; a weekly summary email even when there is no
+    review; a coin yardstick (Bitcoin) in place of the S&P 500 fund for coin trades, which is also what
+    "resting" a screener is judged against; letting the trials cover the user's own settings (holding
+    time, how often it checks in); letting the model also decide sells; per-user cost limits before
+    opening it up.
 - Stock pages load `sidebar.js`, `stock-prices.js` (live ticker), `ai-chat.js`, `auth.js`, `theme.js`.
 - AI chat button: bottom-right on every page; on the home page it moves left of the news panel
   only from 1401px wide (the panel is hidden below that).
@@ -937,6 +990,12 @@ server, then performs the steps (clicks, typing) and prints what happened into t
 headless Chrome using `--dump-dom` for the printed results and `--screenshot` for the look (a local
 file with no site scripts does not hang). Nothing live is called. Written for the autopilot panel;
 copy and adapt the stand-in answers for another panel.
+`python3 check-tools/dashboard_page.py <practice-portfolio.js> <practice-autopilot.js> <out.html> <light|dark> "<steps>"`
+does the same with **both** practice sections together (two holdings bought by hand, one by the
+autopilot; steps `type`, `sale`, `trial`, `off`, `open`): use it to see how they work with each other,
+for example that a sale made in the background appears without losing what is being typed.
+A deploy script that checks `pgrep -f deploy-to-s3.sh` must be run as its own command: written and run
+in one command, the check finds its own text and stops.
 
 **Run every analysis button end to end:** section 8b, last part.
 
@@ -1014,6 +1073,10 @@ copy and adapt the stand-in answers for another panel.
     fields on the practice buy row. Two sessions built an autopilot at the same moment on 10 Oct;
     the deploy script's fingerprint check caught it and the second build was dropped. **Run one
     session on the site at a time.**
+  - **Autopilot made clearer and able to review itself** (section 8): whose holding is whose and when
+    the autopilot will sell; S&P columns removed from the practice portfolio; details under each buy
+    and sale; the panel refreshes itself; two more selling rules; bounded trials of its own rules with
+    an email at each step. Rollback zip: `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_smart_20261010.zip`.
   - **Autopilot description follows every setting** (section 8, "How the panel behaves"): the two
     lines under the fields are built from the check-in, holding time, level, budget and ticked
     screeners. Checking them against the Lambda found a rounding fault (the last holding of an

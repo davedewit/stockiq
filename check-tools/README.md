@@ -69,6 +69,22 @@ model: budget pacing, risk filters, the coin share, every sell rule, a clash wit
 data, when it is due. The second drives the controls with a stand-in API (the file's real address is
 never called, because the test replaces `fetch`).
 
+## dashboard_page.py
+
+Both practice sections of the dashboard (the portfolio and the autopilot) in one test page, run by the two real
+scripts with a stand-in server: nothing live is called. It starts with two holdings bought by hand and one by
+the autopilot, performs the steps and prints what the page shows.
+
+```bash
+python3 check-tools/dashboard_page.py ../website/practice-portfolio.js ../website/practice-autopilot.js /tmp/dash.html dark "type,sale,trial,open"
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars --window-size=1250,2500 \
+  --virtual-time-budget=15000 --screenshot=/tmp/dash.png --dump-dom file:///tmp/dash.html > /tmp/dash.dom
+```
+
+Steps: `type` (types in the buy row), `sale` (the autopilot sells in the background and the page refreshes
+itself), `trial` (a trial of its own rules starts), `off` (the autopilot is switched off), `open` (unfolds the
+details). The printed results are in the `<pre id="out">` of the dumped page.
+
 ## autopilot_plan_check.py (with autopilot_plan_check.js)
 
 Does the autopilot panel describe what the autopilot function really does? The panel works out, for
