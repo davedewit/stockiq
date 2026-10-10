@@ -588,7 +588,7 @@ code before relying on a detail (section 10).
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=11` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=16`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=17`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | Two containers (about line 1250) and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
@@ -732,6 +732,11 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
 6. What may be spent (`allowance`): the budget released in equal steps per check-in over
    `periodDays`, rounded up to whole holdings, never more than the budget or the practice cash; at
    most 3 buys a check-in; buys are in whole cents and the last one takes exactly what is left.
+   **"Check in now" is a request to act**: when only the pace of the build-up stands in the way, a
+   check-in asked for by hand releases the next part of the budget early (`state.ahead`, counted
+   into the steps; reset when the build-up restarts) and notes it. The schedule then carries on
+   from there, no faster. Added 10 Oct after the owner pressed the button expecting a buy and got
+   none. The answer to `run` also carries `summary.why`, the reason when nothing was traded.
 7. The shortlist (`shortlist`): the top of each chosen screener with a positive score and signal,
    not already held, not sold within two days (or twice the holding time if shorter), inside the
    level's RSI and 30-day-move limits; ordered by place in its own screener.
@@ -823,7 +828,7 @@ that it at least does not fool itself.
   (when the budget's build-up began; reset when it is switched on or the budget or build-up
   changes), `lastRun`, `lastRunBy`, `open` (remembered buys), `exits`, `rest`, `restSince`,
   `lessons`, `tune` (`values`, `trial`, `past`, `mark`, `seq`), `watch`, `news`, `seen`, `stay`,
-  `strong`, `aiSell`, `closedCount`, `realizedUsd`.
+  `strong`, `ahead`, `aiSell`, `closedCount`, `realizedUsd`.
 - `public()` (every action returns it): `settings, state, log, scorecard, lessons, resting, recent,
   minSample, practiceCash, rules` (in force, with `yours`, `level`, `changed`, `arm`), `tune`
   (`trial` with its figures, `past`, `nextReviewIn`, `batch`, `group`), `aiSellPausedUntil`,
@@ -854,7 +859,10 @@ that it at least does not fool itself.
   descriptions. `auto` is only sent if the Lambda sent it. Quick set-ups are `PRESETS` (they never
   touch the budget or the switch).
 - "Buys and sells only" is a way of looking at the list, not a setting: it is remembered in the
-  browser (`localStorage` key `stockiqAutopilotTradesOnly`) and nothing is sent to the Lambda.
+  browser (`localStorage` key `stockiqAutopilotTradesOnly`) and nothing is sent to the Lambda. With
+  it on, the latest check-in's own line is still shown above the trades when it is newer than the
+  last trade, and after "Check in now" the message itself gives the reason if nothing was traded
+  (the owner had the switch on, so the note that explained an empty check-in was hidden from him).
 - Styles are one `<style id="ap-style">` block the script adds.
 
 ### Smaller facts worth knowing
@@ -887,8 +895,8 @@ that it at least does not fool itself.
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 218 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 107 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 224 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 111 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 64 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
@@ -1348,6 +1356,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     packaged as `check-tools/pending-<name>/deploy.sh` runs without a hand-off. Keep packaging deploys
     that way (live-code check, rollback copy, `DRY_RUN=true`), run the dry run, then run it.
   - Autopilot activity list: "Buys and sells only" became a switch remembered in the browser.
+  - **"Check in now" acts, and says why when it cannot** (section 8c): a check-in asked for by hand
+    releases the next part of the budget early; the reason for an empty check-in is in the message
+    and stays visible with "Buys and sells only" on. When trying a staged function on a copy of the
+    real record, give the stand-in prices the real buying price of what is held: a made-up price
+    makes a holding look sold at a huge loss. Rollback zip: `…_before_autopilot_now_20261010.zip`.
   - **The kind of trailing stop is a choice** (section 8c): "Your own limits" gains a "Trailing stop"
     menu: protects a gain (as before), a full trailing stop loss from the moment of buying, or off.
     Rollback zip: `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_trail_20261010.zip`.
