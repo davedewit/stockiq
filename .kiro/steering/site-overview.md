@@ -562,7 +562,9 @@ code before relying on a detail (section 10).
 - On/off switch and a status box (what it holds, last and next check-in).
 - **Quick set-ups**: "Quick coin trading", "Steady shares", "Shares and coins".
 - **Risk level** slider (Cautious … Adventurous) with a sentence of what the level means, and
-  **Your own limits**: two optional fields, "Sell at a loss of __ %" and "Sell at a gain of __ %".
+  **Your own limits**: two optional fields, "Sell at a loss of __ %" and "Sell at a gain of __ %",
+  and a **Trailing stop** menu (protects a gain / from the moment it is bought / off) with a line
+  saying what the chosen kind does.
 - Budget for the AI, and the three **pace** fields: Build up to it over (days), Checks in, Keeps a
   holding at most. Each pace field is tagged "automatic" (it follows the risk level and moves with
   the slider; shown as an empty box with the level's value in grey, or "Automatic: …" in a menu) or
@@ -585,8 +587,8 @@ code before relying on a detail (section 10).
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=10` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=15`) | Controls and reports only; decisions are made by the Lambda |
+| Portfolio section | `website/practice-portfolio.js` (`?v=11` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=16`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | Two containers (about line 1250) and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
@@ -638,6 +640,7 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
 | `screeners` | any of the 15 keys (default none) | Coordinator keys: `3-8 3-100 3-7 3-3 3-2 3-4 3-5 3-6 4-50 4-100 4-200 4-300 5-ftse100 5-nikkei225 7-1` |
 | `aiSell`, `selfTune`, `emails` | on unless switched off | "What it may do by itself" |
 | `stopPct`, `takePct` | empty, or 1.5–30 and 2–80 | The owner's own loss limit and gain mark, as sizes in percent |
+| `trailMode` | `gains` (default), `full`, `off` | The kind of stop that follows a holding. `gains`: it starts once the holding has risen beyond its normal wobble. `full`: a full trailing stop loss, under the price from the moment of buying, so a faller is cut early (exit kind `cut`). `off`: none |
 
 | Level | Holdings | Buys from the top | RSI under | 30-day move within | Loss limit | Gain mark | Coins, when shares are ticked too |
 |---|---|---|---|---|---|---|---|
@@ -699,6 +702,14 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
      "tighten". Never under 1 or over 3.5, and it is always sold while a fifth of the best gain is
      left (`STOP_KEEP`). Example: CFX up 6.15% at its best with strong figures is sold if it slips to
      about +3.4%; with weakened figures at about +4.6%; a calm coin at about +5.3%.
+   - **The owner chooses the kind** (`trailMode`, added after he asked "should this have a trailing
+     stop loss?": it had one, but only for gains, and nothing on the panel showed it). `gains` is
+     the above. `full` puts the stop under the price from the moment of buying
+     (`best − room × typical move`, with the best starting at the buying price), so a holding that
+     only falls is sold after that many typical moves instead of waiting for the loss limit; such a
+     sale is exit kind `cut` ("sold by its trailing stop before it had risen"), so the record shows
+     whether it saves more than normal dips cost. `off` sets no following stop. `stop_words` puts
+     the chosen kind into the plan of a buy and the story of a sale.
    - The reasons are kept and shown under the sale ("The stop that followed it: …") and the stop as
      last worked out is stored with the holding (`state.open[id].stop`) for the dashboard.
    - Without daily prices for a holding the simpler rule by holding time still applies (`gain_arm`,
@@ -761,7 +772,7 @@ calls out.
 - **The record.** Each finished trade goes into `history` (last 300): what it was bought on (rank,
   score, RSI, 7- and 30-day change, volume, who chose), result in percent and dollars, the S&P 500
   fund over the same time (`market`, `vs`), how long it was held, how it was sold (`exit`: `stop`,
-  `take`, `trail`, `time`, `signal`, `fade`, `ai`, `hand`), its best and worst while held, and,
+  `take`, `trail`, `cut`, `time`, `signal`, `fade`, `ai`, `hand`), its best and worst while held, and,
   filled in later by `look_back`, **what it did after it was sold** (`after`: the further change
   once the same length of time had passed again).
 - **Scorecard** (`scorecard`): overall and by screener, rank band, RSI band, who chose, and exit.
@@ -817,7 +828,7 @@ that it at least does not fool itself.
   minSample, practiceCash, rules` (in force, with `yours`, `level`, `changed`, `arm`), `tune`
   (`trial` with its figures, `past`, `nextReviewIn`, `batch`, `group`), `aiSellPausedUntil`,
   `coinShare, realizedUsd, month` (`last30`, `before30`), `now, nextCheck, holding, plans` (per
-  holding: `sellBy, stop, take, arm, floor, move, room, tight, trail, peak, trial, view, auto`) and `options` (screeners,
+  holding: `sellBy, stop, take, arm, floor, move, room, tight, mode, trail, peak, trial, view, auto`) and `options` (screeners,
   check-in and holding-time choices, the level table). **The panel is drawn from these; change the
   two together.**
 - Other actions: `sellall` (`sell_everything`: only the autopilot's holdings, recorded as sold by
@@ -876,10 +887,10 @@ that it at least does not fool itself.
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 209 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 101 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 218 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 107 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
-     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 63 checks
+     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 64 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
    ```
    `ai_trader_test.py` sets the pace by hand at its top (it patches `DEFAULTS`), as a user who chose
@@ -888,7 +899,7 @@ that it at least does not fool itself.
    **Never run `practice_test.js` on the real `practice-portfolio.js`**: it holds the live storage
    address and would write to the live table (it happened once). Add checks for what you change.
 4. **See it in a browser** without a login: `dashboard_page.py` (both sections, stand-in server,
-   steps such as `type,sale,trial,preset,sellall,limits,split,cards,pace,listswitch,open`) with headless
+   steps such as `type,sale,trial,preset,sellall,limits,trailstop,split,cards,pace,listswitch,open`) with headless
    Chrome; `--dump-dom` for what it printed, `--screenshot` for the look (section 12).
 5. **Try the staged function on a copy of the real record**: read the owner's item from both tables
    (read-only), load it into stand-in storage under another name, run `run_user` / `public` with
@@ -1337,6 +1348,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     packaged as `check-tools/pending-<name>/deploy.sh` runs without a hand-off. Keep packaging deploys
     that way (live-code check, rollback copy, `DRY_RUN=true`), run the dry run, then run it.
   - Autopilot activity list: "Buys and sells only" became a switch remembered in the browser.
+  - **The kind of trailing stop is a choice** (section 8c): "Your own limits" gains a "Trailing stop"
+    menu: protects a gain (as before), a full trailing stop loss from the moment of buying, or off.
+    Rollback zip: `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_trail_20261010.zip`.
   - **Found in the live data and fixed** (section 8c): a holding whose screener had been un-ticked
     was left unattended (`its_markets`); a coin is now bought only once it has stayed near the top
     for two check-ins; coin screeners are rested on their own results; results are also shown after
