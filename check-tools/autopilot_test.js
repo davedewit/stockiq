@@ -284,6 +284,21 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     delete w.els['ap-trail'];
     check('no broken values around the trailing stop', !/undefined|NaN|\[object|Infinity/.test(html()));
   }
+  // "Check in now" says why when nothing was done, and the reason is not lost behind "Buys and sells only"
+  { kept.stockiqAutopilotTradesOnly = '1';
+    const why = 'Nothing to spend yet: $12,500 of the $50,000 budget is invested. The rest is released in steps over the 1 day set under "Build up to it over"; the next $6,250 in about 6 hours.';
+    const st = { settings: { ...settings, enabled: true, screeners: ['7-1'] }, state: {}, practiceCash: 100000, plans: [{ id: 'a1', label: '4307.T', boughtAt: '2026-10-10T15:33:45Z', sellBy: '2026-10-15T15:33:45Z', auto: true, stop: -10, take: 18, arm: 2 }],
+      log: [{ t: '2026-10-10T15:33:45Z', type: 'buy', symbol: '4307.T', usd: 12500, text: 'rank 1, RSI 68' }] };
+    const w = page(b => { if (b.action === 'run') { st.log.push({ t: '2026-10-10T16:20:22Z', type: 'note', symbol: '', usd: 0, key: 'pace', text: 'Checked in. ' + why }); return { status: 200, body: { success: true, allowed: true, options: OPTIONS, summary: { bought: 0, sold: 0, why }, ...st } }; }
+      return { status: 200, body: { success: true, allowed: true, options: OPTIONS, ...st } }; }); await sleep(30);
+    check('the button says that pressing it can release the next part of the budget', /title="Runs one check-in now instead of waiting for the next one\. If the budget is still being built up, pressing this releases the next part of it early"/.test(w.container.innerHTML));
+    w.form(st.settings); w.click('run'); await sleep(40);
+    check('nothing bought or sold: the message itself says why', /Checked in: nothing bought or sold\. Nothing to spend yet: \$12,500 of the \$50,000 budget is invested\. The rest is released in steps over the 1 day set under "Build up to it over"; the next \$6,250 in about 6 hours\./.test(w.text()) && !/Details are listed below/.test(w.text()), w.text().slice(w.text().indexOf('Checked in:'), w.text().indexOf('Checked in:') + 240));
+    check('and with "Buys and sells only" on, the latest check-in\'s line is still shown above the trades', /What it has done [^ℹ]*ℹ️ [^L]*Latest check-in: Nothing to spend yet: \$12,500 of the \$50,000 budget is invested\./.test(w.text()) && /Bought 4307\.T/.test(w.text()) && (w.text().match(/Nothing to spend yet/g) || []).length === 2, w.text().slice(w.text().indexOf('What it has done'), w.text().indexOf('What it has done') + 330));
+    st.log.push({ t: '2026-10-10T16:40:22Z', type: 'buy', symbol: 'SOL-USD', usd: 6250, text: 'rank 2' }); await w.ctx.practiceAutopilot.refresh(true); await sleep(30);
+    check('once a trade is the newest thing, that line is gone', !/Latest check-in:/.test(w.text()) && /Bought SOL-USD/.test(w.text()));
+    kept.stockiqAutopilotTradesOnly = '0';
+  }
   // your own loss limit and gain mark
   { const st = { settings: { ...settings, screeners: ['3-100'], aiSell: true, selfTune: true, emails: true, stopPct: null, takePct: null }, state: {}, log: [], practiceCash: 100000, realizedUsd: 7.91,
       rules: { name: 'Balanced', stop: -10, take: 18, trail: 0.5, top: 10, max_rsi: 76, arm: 9, changed: {}, yours: [], level: { stop: -10, take: 18 } }, plans: [], tune: { past: [], trial: null, nextReviewIn: 20, batch: 20, group: 10 } };

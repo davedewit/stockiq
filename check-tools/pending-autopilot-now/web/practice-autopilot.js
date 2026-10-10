@@ -322,6 +322,8 @@
         const all = (data.log || []).slice().reverse(), log = tradesOnly ? all.filter(e => e.type !== 'note') : all;
         const shown = showAll ? log : log.slice(0, 8);
         const holds = (data.plans || []).length;
+        // with "Buys and sells only" on, the latest check-in's own line is still shown if it is newer than the last trade: it says why nothing happened
+        const latest = tradesOnly && all.length && all[0].type === 'note' && all[0].key ? all[0] : null;
         const mayRow = (id, key, title, text) => `<label class="ap-may"><input id="${id}" type="checkbox" ${d[key] !== false ? 'checked' : ''}> <strong>${title}</strong><small>${text}</small></label>`;
         const levels = Object.keys(o.risk).sort();
         const chosen = d.screeners.length;
@@ -376,7 +378,7 @@
                 </div>
 
                 <div class="ap-actions">
-                    <button id="ap-run" data-ap="run" class="ap-btn ${ready ? 'primary' : ''}" ${working || !ready || state.text === 'Saving…' ? 'disabled' : ''} title="${!on ? 'Switch the autopilot on first' : !ready ? 'Tick at least one screener first' : 'Runs one check-in now instead of waiting for the next one'}">${working === 'run' ? 'Checking in… this can take up to a minute' : 'Check in now'}</button>
+                    <button id="ap-run" data-ap="run" class="ap-btn ${ready ? 'primary' : ''}" ${working || !ready || state.text === 'Saving…' ? 'disabled' : ''} title="${!on ? 'Switch the autopilot on first' : !ready ? 'Tick at least one screener first' : 'Runs one check-in now instead of waiting for the next one. If the budget is still being built up, pressing this releases the next part of it early'}">${working === 'run' ? 'Checking in… this can take up to a minute' : 'Check in now'}</button>
                     <button id="ap-sellall" data-ap="sellall" class="ap-btn" ${working || !holds ? 'disabled' : ''} title="${holds ? 'Sells every holding the autopilot bought, now, at the latest prices. Holdings you bought yourself are not touched' : 'It holds nothing right now'}">${working === 'sellall' ? 'Selling…' : 'Sell everything it holds' + (holds ? ' (' + holds + ')' : '')}</button>
                     <span id="ap-saved" class="ap-saved ${state.bad ? 'bad' : ''}">${esc(state.text)}</span>
                 </div>
@@ -385,6 +387,7 @@
                 ${recordHtml()}
                 ${tuneHtml()}
                 <div class="ap-section"><h4>What it has done <span class="ap-fresh"><span id="ap-fresh">${loadedAt ? 'Up to date at ' + esc(clock(loadedAt)) + '. Refreshes by itself every minute.' : ''}</span><a href="#" data-ap="refresh">↻ Refresh now</a><label class="ap-mini" title="On: only its buys and sells are listed. Off: its check-ins and notes too. Remembered in this browser."><input id="ap-tradesonly" type="checkbox" ${tradesOnly ? 'checked' : ''}><span class="ap-dot"></span>Buys and sells only</label></span></h4>
+                    ${latest ? `<div class="ap-log"><time>${icons.note} ${esc(when(latest.t))}</time> Latest check-in: ${esc(latest.text.replace(/^Checked in\. /, ''))}${latest.n > 1 ? ` <span style="font-size: 0.8rem;">(the same at ${latest.n} check-ins in a row)</span>` : ''}</div>` : ''}
                     ${log.length ? shown.map(e => `<div class="ap-log"><time>${icons[e.type] || ''} ${esc(when(e.t))}</time> ${e.type === 'buy' ? `<strong style="color: var(--text-primary);">Bought ${esc(e.symbol)}</strong> with ${usd0(e.usd)}. ` : e.type === 'sell' ? `<strong style="color: var(--text-primary);">Sold ${esc(e.symbol)}</strong>${typeof e.pct === 'number' ? ` <span style="color: ${tint(e.pct)}; font-weight: 600;">${pc(e.pct)}</span>` : ''}. ` : ''}${esc(e.text)}${e.n > 1 ? ` <span style="font-size: 0.8rem;">(the same at ${e.n} check-ins in a row, since ${esc(when(e.first))})</span>` : ''}${fold(e.type + e.t + e.symbol, e.type === 'sell' ? 'Why, and the details' : 'The plan for it', e.detail)}</div>`).join('') : `<div>${tradesOnly && all.length ? 'No buys or sells yet.' : 'Nothing yet. Its buys, sells and check-ins will be listed here.'}</div>`}
                     ${log.length > shown.length ? `<a href="#" data-ap="more" style="display: inline-block; margin-top: 8px;">Show all ${log.length}</a>` : ''}</div>
             </div>`;
@@ -419,7 +422,7 @@
         readDraft();
         if (!draft || !data) return;
         const on = data.settings.enabled, ready = on && data.settings.screeners.length > 0, state = savedState(), set = (id, fn) => { const el = byId(id); if (el) fn(el); };
-        set('ap-run', el => { el.disabled = !!working || !ready || state.text === 'Saving…'; el.title = !on ? 'Switch the autopilot on first' : !ready ? 'Tick at least one screener first' : 'Runs one check-in now instead of waiting for the next one'; if (el.classList) el.classList.toggle('primary', ready); });
+        set('ap-run', el => { el.disabled = !!working || !ready || state.text === 'Saving…'; el.title = !on ? 'Switch the autopilot on first' : !ready ? 'Tick at least one screener first' : 'Runs one check-in now instead of waiting for the next one. If the budget is still being built up, pressing this releases the next part of it early'; if (el.classList) el.classList.toggle('primary', ready); });
         set('ap-saved', el => { el.textContent = state.text; if (el.classList) el.classList.toggle('bad', state.bad); });
         set('ap-status', el => { el.textContent = statusText(); if (el.classList) el.classList.toggle('on', on); });
         set('ap-switch-text', el => { el.textContent = draft.enabled ? 'On' : 'Off'; });
@@ -562,7 +565,10 @@
                 const r = await api('run');
                 take(r);
                 const s = r.summary || {};
-                notice = { text: s.conflict ? 'The portfolio was being changed at the same time, so nothing was traded. Try again.' : `Checked in: ${s.bought || 0} bought, ${s.sold || 0} sold. Details are listed below.` };
+                // when nothing was traded, say why here: the note with the reason may be hidden by "Buys and sells only"
+                notice = { text: s.conflict ? 'The portfolio was being changed at the same time, so nothing was traded. Try again.'
+                    : !(s.bought || s.sold) && s.why ? `Checked in: nothing bought or sold. ${s.why}`
+                    : `Checked in: ${s.bought || 0} bought, ${s.sold || 0} sold. Details are listed below.` };
                 if (window.practicePortfolio && window.practicePortfolio.reload) window.practicePortfolio.reload();
             });
         }
