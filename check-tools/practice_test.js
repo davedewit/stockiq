@@ -40,7 +40,7 @@ async function fakeFetch(url, opts = {}) {
 const ctx = { window: {}, document, localStorage: { getItem: k => k === 'userId' ? 'tester@example.com' : null }, fetch: fakeFetch, console, setTimeout, clearTimeout, confirm: () => true, alert: m => { ctx.lastAlert = m; }, Date, Math, JSON, Promise, parseFloat, isNaN, encodeURIComponent, Object, String, Set };
 ctx.window = ctx; vm.createContext(ctx); vm.runInContext(src, ctx);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const click = (action, attrs = {}) => handlers.click.forEach(f => f({ target: { closest: sel => sel === '[data-pp]' ? { getAttribute: k => k === 'data-pp' ? action : attrs[k], tagName: 'BUTTON' } : null }, preventDefault() {} }));
+const click = (action, attrs = {}) => handlers.click.forEach(f => f({ target: { closest: sel => sel === '[data-pp]' ? { getAttribute: k => k === 'data-pp' ? action : attrs[k], tagName: 'BUTTON', style: {} } : null }, preventDefault() {} }));
 const text = () => container.innerHTML.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/\s+/g, ' ');
 const bad = () => (container.innerHTML.match(/undefined|NaN|\[object|Infinity/g) || []);
 const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250); if (!/Working…/.test(container.innerHTML) && !/Loading…/.test(container.innerHTML)) return; } };
@@ -60,6 +60,18 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
   check('page shows cash and no broken values', /Practice cash left \$95,200\.00/.test(text()) && !bad().length, bad());
   console.log('   summary: ' + (text().match(/Account value.*?bought on the same days/) || [''])[0]);
   console.log('   rows: ' + (text().match(/Holding Bought.*?(?=Fake money)/) || [''])[0].slice(0, 900));
+  // company-name lookup, as on the home page
+  const type = async (v) => { document.getElementById('pp-symbol').value = v; handlers.input.forEach(f => f({ target: document.getElementById('pp-symbol') })); };
+  const sug = document.getElementById('pp-suggest');
+  await type('apple'); await sleep(600); const checking = /Checking exchanges/.test(sug.innerHTML); for (let i = 0; i < 80 && /Checking/.test(sug.innerHTML); i++) await sleep(250);
+  check('lookup: typing a company name lists codes', checking && sug.style.display === 'block' && /data-symbol="AAPL"/.test(sug.innerHTML) && /US Market/.test(sug.innerHTML) && document.getElementById('pp-clear').style.display === 'block', sug.innerHTML.slice(0, 300));
+  click('pick', { 'data-symbol': 'AAPL' }); for (let i = 0; i < 80 && !/Apple/.test(document.getElementById('pp-notice').textContent || ''); i++) await sleep(250);
+  check('lookup: picking shows the company and price', document.getElementById('pp-symbol').value === 'AAPL' && sug.style.display === 'none' && /^AAPL: Apple Inc\., latest price \$\d/.test(document.getElementById('pp-notice').textContent), document.getElementById('pp-notice').textContent);
+  await type('qzqzqzq'); await sleep(600); for (let i = 0; i < 80 && /Checking/.test(sug.innerHTML); i++) await sleep(250);
+  check('lookup: no match says so', /No matches found/.test(sug.innerHTML), sug.innerHTML);
+  await type('BHP.AX'); await sleep(700); check('lookup: a full code needs no lookup', sug.style.display === 'none');
+  click('clear'); check('lookup: clear button empties the box', document.getElementById('pp-symbol').value === '');
+  check('reset is a visible button', /<button data-pp="reset"[^>]*>Reset fake money to \$100,000\.00<\/button>/.test(container.innerHTML) && /<button data-pp="refresh"/.test(container.innerHTML));
   // Top 10 popup button
   const btn = { disabled: false, textContent: '＋ Practice buy' }; await ctx.window.practiceBuyFromTop10(btn, 'IMX10603-USD', 'IMX-USD');
   check('Top 10 button adds a coin under its familiar name', /Added \$1,000\.00/.test(btn.textContent) && /IMX-USD/.test(text()) && JSON.parse(store['tester@example.com'].data).holdings.slice(-1)[0].symbol === 'IMX10603-USD', btn.textContent + ' ' + (ctx.lastAlert || ''));

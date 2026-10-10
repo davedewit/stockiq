@@ -287,7 +287,11 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   Report History: type a stock code or name, pick an amount of practice US dollars (default $1,000,
   from a $100,000 start) and "Practice buy"; each buy becomes a line that is then monitored: price
   then and now, value, change, and what an S&P 500 fund (SPY) did since the same day. "Sell" closes
-  the line at the latest price; "Start again" resets. The Top 10 Performance popup has a
+  the line at the latest price; the "Reset fake money to $100,000" button clears everything. The
+  search box works like the home page's (same `stockiq-validate-symbol` lookup, "Checking
+  exchanges...", "No matches found"); picking a suggestion shows the company name and latest price
+  before anything is bought. When the script changes, raise `practice-portfolio.js?v=N` in
+  `dashboard.html`: the script is cached for a day. The Top 10 Performance popup has a
   "＋ Practice buy" button on every counted line (uses the report's price-source ticker, so a coin
   with a numbered ticker is bought correctly).
   - Code: `website/practice-portfolio.js` (sums and page; loaded by `dashboard.html`, container
