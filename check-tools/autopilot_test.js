@@ -90,6 +90,19 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     w.form({ ...st.settings, enabled: true, screeners: [] }); w.handlers.change.forEach(f => f({ type: 'change', target: { id: 'ap-enabled', getAttribute: () => null } })); await sleep(30);
     check('switched on with nothing ticked: it stays on, waits, and says what to do', st.settings.enabled === true && st.settings.screeners.length === 0 && /On, but no screener is chosen yet/.test(w.text()) && /Autopilot switched on\. Tick at least one screener below for it to start\./.test(w.text()) && /id="ap-run"[^>]*disabled title="Tick at least one screener first"/.test(w.container.innerHTML), w.text().slice(0, 260));
   }
+  // quick trading options
+  { const OPT3 = { ...OPTIONS, everyHours: [0.5, 1, 3, 6, 12, 24], holdDays: [0.5 / 24, 1 / 24, 3 / 24, 6 / 24, 0.5, 1, 2, 5, 10, 20, 60] };
+    const st = { settings: { ...settings, screeners: ['7-1'], everyHours: 0.5, maxHoldDays: 1 / 24 }, state: {}, log: [], practiceCash: 100000 };
+    const w = page(b => { if (b.action === 'save') st.settings = b.settings; return { status: 200, body: { success: true, allowed: true, options: OPT3, ...st } }; }); await sleep(30);
+    const html = w.container.innerHTML;
+    check('check-ins from every 30 minutes and holdings from 30 minutes are offered in plain words', ['>every 30 minutes<', '>every hour<', '>every 3 hours<', '>twice a day<', '>once a day<', '>30 minutes<', '>1 hour<', '>3 hours<', '>12 hours<', '>1 day<', '>2 days<', '>60 days<'].every(x => html.includes(x)), html.slice(html.indexOf('ap-every'), html.indexOf('ap-every') + 300));
+    check('the saved quick choices are the ones selected', /<option value="0\.5" selected>every 30 minutes</.test(html) && /<option value="0\.041666666666666664" selected>1 hour</.test(html), (html.match(/<option value="[^"]*" selected>[^<]*</g) || []));
+    check('it explains the holding time and is honest about quick trading', /The longest it keeps a holding: after that it sells, whatever the price/.test(w.text()) && /Quick settings suit coins/.test(w.text()) && /No trading costs are taken off/.test(w.text()));
+    w.form({ ...st.settings, everyHours: 1, maxHoldDays: 3 / 24 }); await w.ctx.practiceAutopilot.flush(); await sleep(30);
+    check('fractions of a day are saved exactly, not cut to whole numbers', st.settings.everyHours === 1 && st.settings.maxHoldDays === 0.125, st.settings);
+    const slow = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPT3, ...st, settings: { ...settings, screeners: ['3-100'] } } })); await sleep(30);
+    check('with slow settings the note about quick trading is not shown', /The longest it keeps a holding/.test(slow.text()) && !/Quick settings suit coins/.test(slow.text()));
+  }
   check('no broken values', !/undefined|NaN|\[object/.test(p.container.innerHTML), (p.container.innerHTML.match(/.{30}(undefined|NaN|\[object).{30}/) || [])[0]);
   console.log(ok ? 'ALL PASS' : 'SOME FAILED');
 })();

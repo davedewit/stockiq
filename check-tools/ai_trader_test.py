@@ -212,11 +212,29 @@ check('a burst of saves leaves one line in the activity list, with the final val
 s, b = call(action='get', userId=U); check('every setting is remembered', b['settings'] == dict(base, enabled=True, budgetUsd=20500.0, screeners=['3-8', '7-1'], maxHoldDays=5), b['settings'])
 s, b = call(action='save', userId=U, settings=dict(b['settings'], screeners=[])); check('unticking everything is remembered too', b['settings']['screeners'] == [] and b['settings']['enabled'] is True)
 
+# --- quick trading: check-ins every 30 minutes or hour, holdings kept for as little as 30 minutes
+s, b = call(action='get', userId=U)
+check('quick options are offered', b['options']['everyHours'] == [0.5, 1, 3, 6, 12, 24] and b['options']['holdDays'][:3] == [0.5 / 24, 1 / 24, 3 / 24] and b['options']['holdDays'][-1] == 60 and 20 in b['options']['holdDays'])
+check('settings keep a half-hour check-in and a one-hour hold exactly', m.clean_settings({'everyHours': 0.5, 'maxHoldDays': 1 / 24}, U)['everyHours'] == 0.5 and m.clean_settings(json.loads(json.dumps({'maxHoldDays': 1 / 24})), U)['maxHoldDays'] == 1 / 24
+      and m.clean_settings({'everyHours': 2, 'maxHoldDays': 7}, U)['everyHours'] == 24 and m.clean_settings({'everyHours': 'x', 'maxHoldDays': None}, U)['maxHoldDays'] == 20)
+check('time in plain words', [m.span_text(d) for d in (0.5 / 24, 1 / 24, 3 / 24, 1, 5, 20)] == ['30 minutes', '1 hour', '3 hours', '1 day', '5 days', '20 days'] and [m.every_text(h) for h in (0.5, 1, 3, 24)] == ['every 30 minutes', 'every hour', 'every 3 hours', 'every 24 hours'])
+D.t.clear(); PRICES.clear(); SNAP['7-1'] = rows('crypto', '7-1'); MODEL['answer'] = None; q0 = dt.datetime(2026, 10, 17, 10, 40, 6)       # a Saturday: coins only
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=5, budgetUsd=4000.0, periodDays=1, everyHours=0.5, maxHoldDays=1 / 24, screeners=['7-1']); rec['state']['startedAt'] = m.iso(q0); m.save_item(U, rec)
+s, rec = run(q0); first = [h['symbol'] for h in portfolio()['holdings']]
+check('half-hourly: due again at the next slot, not before', m.due_markets(rec, q0 + dt.timedelta(minutes=10)) == [] and m.due_markets(rec, dt.datetime(2026, 10, 17, 11, 10, 2)) == ['crypto'] and m.next_check(rec, q0)['at'] == '2026-10-17T11:10:00Z', m.next_check(rec, q0))
+s, rec = run(dt.datetime(2026, 10, 17, 11, 10, 2)); check('30 minutes on, a one-hour holding is kept', s['sold'] == 0 and all(x in [h['symbol'] for h in portfolio()['holdings']] for x in first))
+s, rec = run(dt.datetime(2026, 10, 17, 11, 40, 3)); texts = [e['text'] for e in rec['log'] if e['type'] == 'sell']
+check('at the hour (even three seconds early) it is sold, and says so in hours', s['sold'] == len(first) and all('Held 1 hour, the longest this autopilot keeps a holding' in x for x in texts) and rec['history'][0]['days'] == 0.042 and rec['history'][0]['exit'] == 'time', (s, texts[:1], rec['history'][:1]))
+now3 = dt.datetime(2026, 10, 17, 11, 40, 3); again = lambda at: {c['symbol'] for c in m.shortlist(portfolio(), rec['settings'], SNAP, at)}
+check('it waits two holding times (2 hours), not two days, before buying the same coin again', not (set(first) & again(now3 + dt.timedelta(hours=1))) and set(first) <= again(now3 + dt.timedelta(hours=2, minutes=1)), sorted(again(now3 + dt.timedelta(hours=2, minutes=1)))[:5])
+rec['settings'].update(maxHoldDays=20); check('with a long holding time the wait is still two days', not (set(first) & {c['symbol'] for c in m.shortlist(portfolio(), rec['settings'], SNAP, now3 + dt.timedelta(hours=30))}))
+s, b = call(action='save', userId=U, settings=dict(rec['settings'], everyHours=0.5, budgetUsd=5000.0)); check('the activity line says the pace in words', b['log'][-1]['text'].endswith('checking every 30 minutes.'), b['log'][-1])
+
 # --- what the panel is told: when it will next check in, and what it holds
 D.t.clear(); rec = m.load_item(U); rec['settings'].update(enabled=True, screeners=['3-100']); sat = dt.datetime(2026, 10, 17, 10, 25)
 check('next check-in: a US list on a Saturday waits for Monday\'s session', m.next_check(rec, sat) == {'at': '2026-10-19T14:40:00Z', 'markets': ['US']}, m.next_check(rec, sat))
-rec['settings']['screeners'] = ['3-100', '4-200']; check('with an Australian list too, Sydney opens first', m.next_check(rec, sat) == {'at': '2026-10-19T00:40:00Z', 'markets': ['Australian']}, m.next_check(rec, sat))
-rec['settings']['screeners'] = ['7-1']; check('coins: the next hourly slot', m.next_check(rec, sat) == {'at': '2026-10-17T10:40:00Z', 'markets': ['coin']} and m.next_check(rec, sat.replace(minute=45))['at'] == '2026-10-17T11:40:00Z')
+rec['settings']['screeners'] = ['3-100', '4-200']; check('with an Australian list too, Sydney opens first', m.next_check(rec, sat) == {'at': '2026-10-19T00:10:00Z', 'markets': ['Australian']}, m.next_check(rec, sat))
+rec['settings']['screeners'] = ['7-1']; check('coins: the next half-hourly slot', m.next_check(rec, sat) == {'at': '2026-10-17T10:40:00Z', 'markets': ['coin']} and m.next_check(rec, sat.replace(minute=45))['at'] == '2026-10-17T11:10:00Z')
 rec['state']['lastRunBy'] = {'crypto': m.iso(sat)}; rec['settings']['everyHours'] = 6; check('after a check-in it waits the chosen gap', m.next_check(rec, sat)['at'] == '2026-10-17T16:40:00Z', m.next_check(rec, sat))
 rec['settings']['enabled'] = False; check('off: no next check-in', m.next_check(rec, sat) is None)
 D.t.clear(); PRICES.clear(); SNAP['3-100'] = rows(); MODEL['answer'] = None; rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, screeners=['3-100']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec); run(t0)

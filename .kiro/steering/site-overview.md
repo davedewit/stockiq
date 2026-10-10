@@ -324,7 +324,8 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
 - **AI autopilot** for the practice portfolio (added 10 Oct 2026, the owner's idea; **fake money only,
   owner's account only for now**). Under the practice portfolio on the dashboard: switch it on, set a
   risk level (slider 1–5, Cautious to Adventurous), a budget and the number of days to spread it over,
-  how often it checks in (every 3 / 6 / 12 / 24 hours), the longest it keeps a holding, and which
+  how often it checks in (every 30 minutes, 1, 3, 6, 12 or 24 hours), the longest it keeps a holding
+  (30 minutes to 60 days: after that it sells whatever the price), and which
   screeners it buys from: **all 15** since the 10 Oct upgrade (the eight US lists, ASX 50/100/200/300,
   FTSE 100, Nikkei 225, crypto), shown in groups by market. Add a screener by adding a line to
   `SCREENERS` in the Lambda (name, coordinator option and subOption, kind, market, group). "Check in now" runs one
@@ -342,8 +343,22 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
     naming the figures; (6) record the buys at the live price. **The code enforces every limit**: the
     model can only pick from the shortlist; if it fails, the top of the shortlist is used and the
     log says "chosen by rank". It never touches a holding the user bought. At most 3 buys a check-in.
-  - **When it runs:** EventBridge rule `stockiq-ai-trader-schedule` (`cron(40 * * * ? *)`, hourly)
-    runs every user who is switched on and due. **Each screener belongs to a market** and a scheduled
+  - **When it runs:** EventBridge rule `stockiq-ai-trader-schedule` (`cron(10,40 * * * ? *)`, every
+    30 minutes since the quick-trading options of 10 Oct; `SLOT_MINUTES` in the Lambda must match)
+    runs every user who is switched on and due. A check-in up to 5 minutes early still counts
+    (`GRACE`), for the gap between check-ins and for the holding time alike.
+  - **Quick trading** (owner's idea, 10 Oct: "fun to watch it trade by the hour"): `EVERY_HOURS`
+    (0.5 … 24) and `HOLD_HOURS` (0.5 … 1440; settings store days, so 1 hour is 0.041666…, sent back
+    exactly by the panel, which reads both fields with `parseFloat`). After selling, it waits two
+    days or twice the holding time, whichever is shorter, before buying the same thing again. Stored
+    screener results are reused for 20 minutes. It suits coins (they trade all the time and the
+    crypto ranking moves); share rankings barely change within a day. The panel says so, and says
+    that no trading costs are taken off. Side effect worth having: short holds fill the record of
+    closed trades in days, not months, so the learning has something to work with.
+    **Cost:** a crypto check-in is a full crypto screener run (about 540 worker calls) unless a
+    stored copy under 20 minutes old exists, so one user on 30-minute check-ins adds about 780,000
+    Lambda calls a month on top of the crypto history job's 780,000: past the free million, at
+    $0.20 per extra million, plus one small AI-model call per check-in (well under a dollar a month). **Each screener belongs to a market** and a scheduled
     check-in only buys from, and sells holdings of, the markets that are open (`MARKET_HOURS`, UTC,
     Mon–Fri, chosen to sit inside the real hours in summer and winter time: US 14:35–19:55,
     Australia 00:05–04:55, Japan 00:05–05:55, UK 08:05–15:25; coins always). Each market keeps its own
@@ -402,8 +417,8 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   - Code: `website/practice-autopilot.js` (controls only), Lambda in `lambda-sync/stockiq-ai-trader/`.
     The AI key is the same `OPENAI_API_KEY` as the AI chat, copied to this Lambda's environment.
   - Tests: `python3 check-tools/ai_trader_test.py lambda-sync/stockiq-ai-trader/lambda_function.py`
-    (77 checks, stand-in database, screeners and model) and
-    `node check-tools/autopilot_test.js <practice-autopilot.js>` (29 checks, the controls).
+    (86 checks, stand-in database, screeners and model) and
+    `node check-tools/autopilot_test.js <practice-autopilot.js>` (34 checks, the controls).
   - Honest framing, keep it: the backtests (sections 7b and 11) found no reliable edge in the
     screener scores, so this is an experiment to watch, and the panel says so. Its own results will
     be the forward test. Turn everything off: disable the EventBridge rule.
@@ -976,6 +991,7 @@ copy and adapt the stand-in answers for another panel.
     the index added. **Fake-money test** of the Dow 30 and S&P 100 screeners run (section 11).
   - **Practice portfolio** added to the dashboard (section 8), with a new table and Lambda.
   - **AI autopilot upgraded** (section 8): all 15 screeners with per-market hours and currencies,
+    quick trading (check-ins from every 30 minutes, holds from 30 minutes),
     stored screener results, and a record of its own closed trades that it learns from (scorecard,
     resting a lagging screener, AI-written notes fed back into its choices). Dollars-or-quantity
     fields on the practice buy row. Two sessions built an autopilot at the same moment on 10 Oct;
