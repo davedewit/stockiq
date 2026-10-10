@@ -3,11 +3,12 @@ const vm = require('vm'), fs = require('fs'); const src = fs.readFileSync(proces
 let ok = true; const check = (n, c, x) => { ok = ok && !!c; console.log((c ? 'PASS ' : 'FAIL ') + n + (c ? '' : '  ' + JSON.stringify(x))); };
 const OPTIONS = { screeners: { '3-8': { name: 'Dow 30', kind: 'stock' }, '3-100': { name: 'S&P 100', kind: 'stock' }, '7-1': { name: 'Crypto (top coins)', kind: 'crypto' } }, everyHours: [3, 6, 12, 24], holdDays: [2, 5, 10, 20, 60],
   risk: { 1: { name: 'Cautious', positions: 12, top: 5, stop: -5, take: 8, crypto: 0 }, 3: { name: 'Balanced', positions: 8, top: 10, stop: -10, take: 18, crypto: 0.25 }, 5: { name: 'Adventurous', positions: 4, top: 20, stop: -20, take: 45, crypto: 1 } } };
+const kept = { userId: 'tester@x.com' };          // the stand-in for the browser's own storage: it survives a "refresh" (a new page())
 function page(server) {
   const els = {}, handlers = {}, calls = []; const container = { innerHTML: '' }; let boxes = [];
   const document = { readyState: 'complete', getElementById: id => id === 'practice-autopilot' ? container : (els[id] || null), addEventListener: (t, f) => { (handlers[t] = handlers[t] || []).push(f); }, querySelectorAll: () => boxes };
   const fetchFake = async (url, opts) => { const b = JSON.parse(opts.body); calls.push(b); const r = server(b); return { ok: r.status === 200, status: r.status, json: async () => r.body }; };
-  const ctx = { document, localStorage: { getItem: () => 'tester@x.com' }, fetch: fetchFake, console, setTimeout, clearTimeout, confirm: (m) => { ctx.asked = m; return ctx.answer !== false; }, Date, JSON, Math, Object, String, Array, parseInt, parseFloat, isNaN, Promise };
+  const ctx = { document, localStorage: { getItem: k => (k in kept ? kept[k] : null), setItem: (k, v) => { kept[k] = String(v); } }, fetch: fetchFake, console, setTimeout, clearTimeout, confirm: (m) => { ctx.asked = m; return ctx.answer !== false; }, Date, JSON, Math, Object, String, Array, parseInt, parseFloat, isNaN, Promise };
   ctx.window = ctx; ctx.practicePortfolio = { reloaded: 0, reload() { this.reloaded++; }, plans: null, extra: null, setPlans(list, extra) { this.plans = list; this.extra = extra; } };
   vm.createContext(ctx); vm.runInContext(src, ctx);
   const form = (d) => { Object.assign(els, { 'ap-enabled': { checked: d.enabled }, 'ap-risk': { value: String(d.risk) }, 'ap-budget': { value: String(d.budgetUsd) }, 'ap-period': { value: String(d.periodDays) }, 'ap-every': { value: String(d.everyHours) }, 'ap-hold': { value: String(d.maxHoldDays) }, 'ap-risk-text': { textContent: '' } }); boxes = Object.keys(OPTIONS.screeners).map(k => ({ checked: d.screeners.includes(k), getAttribute: () => k })); };
@@ -192,9 +193,16 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     check('its running trial can be stopped from the page', sent.some(b => b.action === 'tune' && b.op === 'stop') && !/Trying now/.test(w.text()) && /Trial stopped\. The rule stays as it was\./.test(w.text()));
     w.form({ ...st.settings }); w.handlers.click.forEach(f => f({ target: { closest: sel => sel === '[data-ap]' ? { getAttribute: k => k === 'data-ap' ? 'restore' : 'take', tagName: 'A' } : null }, preventDefault() {} })); await sleep(60);
     check('a rule it changed can be put back from the page', sent.some(b => b.action === 'tune' && b.op === 'restore' && b.param === 'take') && !/Changed by itself/.test(w.text()) && /sells at -10% or \+18%/.test(w.text()));
-    check('the activity list shows everything to start with', /Checked in\. No change\./.test(w.text()) && /Show buys and sells only/.test(w.text()));
-    w.form({ ...st.settings }); w.handlers.click.forEach(f => f({ target: { closest: sel => sel === '[data-ap]' ? { getAttribute: () => 'filter', tagName: 'A' } : null }, preventDefault() {} })); await sleep(30);
-    check('and can be cut down to buys and sells', !/Checked in\. No change\./.test(w.text()) && /Bought AMT/.test(w.text()) && /Show everything/.test(w.text()));
+    check('the activity list shows everything to start with, with a switch for "buys and sells only"', /Checked in\. No change\./.test(w.text()) && /<label class="ap-mini"[^>]*><input id="ap-tradesonly" type="checkbox" ><span class="ap-dot"><\/span>Buys and sells only<\/label>/.test(w.container.innerHTML) && !/data-ap="filter"/.test(w.container.innerHTML));
+    const savesBefore = sent.filter(b => b.action === 'save').length;
+    w.form({ ...st.settings }); w.handlers.change.forEach(f => f({ type: 'change', target: { id: 'ap-tradesonly', checked: true, getAttribute: () => null } })); await sleep(300);
+    check('switching it on cuts the list down to buys and sells', !/Checked in\. No change\./.test(w.text()) && /Bought AMT/.test(w.text()) && /<input id="ap-tradesonly" type="checkbox" checked>/.test(w.container.innerHTML));
+    check('it is a way of looking at the list, not a setting: nothing is sent to be saved', sent.filter(b => b.action === 'save').length === savesBefore && kept.stockiqAutopilotTradesOnly === '1', [sent.filter(b => b.action === 'save').length, savesBefore, kept]);
+    const again = page(b => ({ status: 200, body: { success: true, allowed: true, options: OPTQ, ...st } })); await sleep(30);
+    check('after a refresh the switch is still on and the list still shows buys and sells only', /<input id="ap-tradesonly" type="checkbox" checked>/.test(again.container.innerHTML) && !/Checked in\. No change\./.test(again.text()) && /Bought AMT/.test(again.text()));
+    again.form({ ...st.settings }); again.handlers.change.forEach(f => f({ type: 'change', target: { id: 'ap-tradesonly', checked: false, getAttribute: () => null } })); await sleep(30);
+    const third = page(b => ({ status: 200, body: { success: true, allowed: true, options: OPTQ, ...st } })); await sleep(30);
+    check('switched off again, that is remembered too', kept.stockiqAutopilotTradesOnly === '0' && /Checked in\. No change\./.test(third.text()) && /<input id="ap-tradesonly" type="checkbox" >/.test(third.container.innerHTML));
     check('no broken values among the controls', !/undefined|NaN|\[object|Infinity/.test(w.container.innerHTML), (w.container.innerHTML.match(/.{40}(undefined|NaN|\[object|Infinity).{40}/) || [])[0]);
   }
   // your own loss limit and gain mark

@@ -6,7 +6,8 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
    steps: type (types in the buy row), sale (the autopilot sells in the background, then the page refreshes itself),
           trial (a trial of its own rules starts), off (the autopilot is switched off), open (unfolds the details),
           preset (presses the "Quick coin trading" set-up), sellall (presses "Sell everything it holds" and says yes),
-          limits (types your own loss limit), split (prints the line that says whose result is whose)
+          limits (types your own loss limit), split (prints the line that says whose result is whose),
+          listswitch (switches the list to "buys and sells only" and reloads the page to see that it is remembered)
 Open the page with headless Chrome: --dump-dom for the printed results, --screenshot for the look (site-overview.md, section 12)."""
 import json, sys
 pp, ap, out, theme, steps = sys.argv[1:6]
@@ -88,6 +89,12 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
     if (step === 'limits') { const a = q('#ap-stop'); out('your own limits: fields empty, greyed hints "' + a.placeholder + '" and "' + q('#ap-take').placeholder + '"'); a.focus(); a.value = '6'; a.dispatchEvent(new Event('input', { bubbles: true })); await wait(200);
       out('  typed 6 as the loss limit: risk text now "' + q('#ap-risk-text').textContent.slice(0, 120) + '" | focus kept=' + (document.activeElement === a)); await wait(1500); out('  saved: stopPct=' + auto.settings.stopPct + ' takePct=' + auto.settings.takePct + ' | saved line "' + q('#ap-saved').textContent + '"'); }
     if (step === 'split') out('whose result is whose: ' + (Array.from(document.querySelectorAll('#practice-portfolio div')).map(x => x.textContent.replace(/\\s+/g, ' ').trim()).find(t => t.startsWith('Of the ')) || '(no line)'));
+    if (step === 'listswitch') {
+      const rows = () => Array.from(document.querySelectorAll('#practice-autopilot .ap-log')).length, box = () => q('#ap-tradesonly');
+      if (!sessionStorage.getItem('reloaded')) { localStorage.removeItem('stockiqAutopilotTradesOnly'); out('list switch: on=' + box().checked + ', lines listed=' + rows()); box().click(); await wait(300);
+        out('  switched on: on=' + box().checked + ', lines listed=' + rows() + ', saves sent=' + calls.filter(c => c.includes('save')).length); sessionStorage.setItem('reloaded', document.getElementById('out').textContent); location.reload(); return; }
+      document.getElementById('out').textContent = sessionStorage.getItem('reloaded') + document.getElementById('out').textContent; sessionStorage.removeItem('reloaded');
+      out('  after a real page refresh: on=' + box().checked + ', lines listed=' + rows() + ', at y=' + Math.round(box().getBoundingClientRect().top + window.scrollY)); localStorage.removeItem('stockiqAutopilotTradesOnly'); }
     if (step === 'off') { q('#ap-enabled').click(); await wait(700); out('switched the autopilot off: ' + cellText('WEMIX')); }
     if (step === 'open') { document.querySelectorAll('#practice-autopilot details').forEach(d => { d.open = true; }); const s = q('#pp-sold'); if (s) s.open = true; out('unfolded the details'); }
   }
