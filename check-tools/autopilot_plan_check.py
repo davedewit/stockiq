@@ -19,7 +19,7 @@ class DB:
     def Table(s, n): return s.t.setdefault(n, T())
 cases = []
 for b, p, e, h, r, coins in itertools.product((10000, 2500, 77777), (1, 10, 30), m.EVERY_HOURS, (0.5, 1, 3, 6, 24, 48, 480), (1, 2, 3, 4, 5), (False, True)):
-    R = m.RISK[r]; cases.append(dict(budgetUsd=b, periodDays=p, everyHours=e, maxHoldDays=h / 24, risk=r, positions=R['positions'], coins=coins, limit=b * R['crypto'] if coins else b))
+    R = m.RISK[r]; cases.append(dict(budgetUsd=b, periodDays=p, everyHours=e, maxHoldDays=h / 24, risk=r, positions=R['positions'], coins=coins, limit=b))      # only coins ticked: the whole budget may go into coins (coin_share)
 t0 = dt.datetime(2026, 1, 5)
 def checkins(c): return math.ceil(c['periodDays'] * 24 / c['everyHours']) + m.RISK[c['risk']]['positions'] + 2
 def light(c):
@@ -31,7 +31,7 @@ def light(c):
         now = t0 + dt.timedelta(hours=n * c['everyHours'])
         for h, price, reason in m.review_sells(p, settings, {}, {'X': {'price': 10.0}, 'X-USD': {'price': 10.0}}, now, {}, None, {}): p['holdings'].remove(h)
         room, invested = m.allowance(p, settings, state, now)
-        crypto_room = c['budgetUsd'] * R['crypto'] - sum(h['costUsd'] for h in p['holdings'] if h['symbol'].endswith('-USD'))
+        crypto_room = c['budgetUsd'] * (1.0 if c['coins'] else R['crypto']) - sum(h['costUsd'] for h in p['holdings'] if h['symbol'].endswith('-USD'))
         for i in range(min(m.MAX_BUYS_PER_CHECK, int((room + 0.01 * R['positions']) // size))):
             amount = min(size, p['cash'], room)
             if c['coins']: amount = min(amount, crypto_room)

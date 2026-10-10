@@ -64,11 +64,24 @@
         #practice-autopilot .ap-fresh { float: right; font-size: 0.8rem; font-weight: normal; color: var(--text-secondary); }
         #practice-autopilot .ap-fresh a { margin-left: 8px; }
         #practice-autopilot a { color: #3b82f6; }
+        #practice-autopilot .ap-presets { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; font-size: 0.85rem; color: var(--text-secondary); }
+        #practice-autopilot .ap-preset { padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 16px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; font-size: 0.85rem; }
+        #practice-autopilot .ap-preset:hover { border-color: #3b82f6; }
+        #practice-autopilot .ap-may { display: block; padding: 6px 0; cursor: pointer; }
+        #practice-autopilot .ap-may input { margin-right: 8px; }
+        #practice-autopilot .ap-may small { display: block; margin-left: 24px; color: var(--text-secondary); font-size: 0.8rem; }
         @media (max-width: 640px) { #practice-autopilot .ap-group { grid-template-columns: 1fr; } #practice-autopilot .ap-group-name { padding-top: 0; } #practice-autopilot .ap-chip { white-space: normal; } #practice-autopilot .ap-input { white-space: normal; } }
     `;
 
     let data = null, draft = null, working = '', notice = null, showAll = false;
     let saveTimer = null, saving = false, saveError = null, savedOnce = false, breakdownOpen = false;
+    let tradesOnly = false;                                         // the activity list: everything, or only buys and sells
+    // Quick set-ups: one press fills in the fields (never the budget or the on/off switch); anything can be changed afterwards
+    const PRESETS = [
+        { key: 'coins', name: '⚡ Quick coin trading', title: 'Coins only, checked every 30 minutes, each kept at most 6 hours, the whole budget in use within a day', set: { risk: 4, periodDays: 1, everyHours: 0.5, maxHoldDays: 0.25, screeners: ['7-1'] } },
+        { key: 'shares', name: '🏛 Steady shares', title: 'S&P 100 shares, checked once a day, each kept at most 20 days, the budget built up over 10 days', set: { risk: 3, periodDays: 10, everyHours: 24, maxHoldDays: 20, screeners: ['3-100'] } },
+        { key: 'mix', name: '🔀 Shares and coins', title: 'S&P 100 shares and coins, checked every 6 hours, each kept at most 5 days, the budget built up over 5 days', set: { risk: 3, periodDays: 5, everyHours: 6, maxHoldDays: 5, screeners: ['3-100', '7-1'] } }
+    ];
     let loadedAt = null, refreshing = false, openDetails = {};       // openDetails: which "Details" are unfolded, kept across redraws
     const REFRESH_MS = 60000;
     const userId = () => { const u = localStorage.getItem('userId'); return u && u !== 'anonymous' ? u : null; };
@@ -113,7 +126,7 @@
         const r = levelRules(level);
         if (!r) return '';
         return `${r.name}: spreads the budget over up to ${r.positions} holdings, looks at the top ${r.top} of each screener, sells a holding at ${r.stop}% or +${r.take}%`
-            + (r.crypto > 0 ? `, up to ${Math.round(r.crypto * 100)}% of the budget in coins.` : ', no coins.');
+            + (r.crypto >= 1 ? ', coins up to the whole budget.' : r.crypto > 0 ? `, up to ${Math.round(r.crypto * 100)}% of the budget in coins (the whole budget if only coin screeners are ticked).` : ', coins only if nothing but coin screeners is ticked.');
     }
     // How much of the budget is in use, check-in by check-in, when every check-in finds enough to buy and nothing is sold
     // early. The same sums as the stockiq-ai-trader Lambda: allowance() (the budget is released in equal steps over the
@@ -144,20 +157,22 @@
         const r = data.options.risk[String(d.risk)];
         if (!r || !(d.budgetUsd > 0) || !(d.periodDays > 0) || !(d.everyHours > 0) || !(d.maxHoldDays > 0)) return '';
         const cash = data.practiceCash || 100000, size = d.budgetUsd / r.positions, start = `It checks in ${everyText(d.everyHours)}.`;
-        const coinsOnly = d.screeners.length > 0 && d.screeners.every(k => (data.options.screeners[k] || {}).kind === 'crypto');
-        const limit = coinsOnly ? d.budgetUsd * r.crypto : d.budgetUsd, up = buildUp(d, r, limit);
-        if (!up.count) return start + (coinsOnly && !(r.crypto > 0)
-            ? ` Only coin screeners are ticked and the ${r.name} level buys no coins, so it will buy nothing. Tick a share screener, or move the level up.`
-            : ` The ${r.name} level spreads the budget over ${r.positions} holdings, which makes each about ${usd0(size)}: under the $25 smallest buy, so it will buy nothing. Raise the budget.`);
+        const up = buildUp(d, r, d.budgetUsd);            // with only coin screeners ticked the whole budget may go into coins (coin_share in the Lambda)
+        if (!up.count) return start + ` The ${r.name} level spreads the budget over ${r.positions} holdings, which makes each about ${usd0(size)}: under the $25 smallest buy, so it will buy nothing. Raise the budget.`;
         const quickest = Math.min.apply(null, data.options.everyHours), oftener = d.everyHours > quickest && d.maxHoldDays * 24 > quickest + 1e-9;   // would checking in more often let it hold more?
-        const many = up.count === 1 ? '1 holding' : `${up.count} holdings`, whole = up.peak >= d.budgetUsd - 0.01, byCoins = !whole && up.peak >= limit - 0.01;
+        const many = up.count === 1 ? '1 holding' : `${up.count} holdings`, whole = up.peak >= d.budgetUsd - 0.01;
         const steps = up.hours <= 0 ? ', bought at the first check-in.'
             : `: ${up.first} at the first check-in` + (up.count - up.first === 1 ? ' and one more' : `, then more as the budget is released, all ${up.count}`) + ` after about ${holdText(up.hours / 24)}.`;
-        return `${start} Up to ${many} of about ${usd0(size)} each${whole || byCoins ? '' : ' at a time'}${steps}`
+        return `${start} Up to ${many} of about ${usd0(size)} each${whole ? '' : ' at a time'}${steps}`
             + (whole ? ` Then the whole ${usd0(d.budgetUsd)} is in use.`
-                : byCoins ? ` That is ${usd0(up.peak)} of the ${usd0(d.budgetUsd)}: only coin screeners are ticked, and the ${r.name} level puts at most ${Math.round(r.crypto * 100)}% of the budget in coins. Tick a share screener as well, or move the level up, for it to use more.`
                 : ` That is ${usd0(up.peak)} of the ${usd0(d.budgetUsd)}: it buys at most 3 at a check-in and sells each holding after ${holdText(d.maxHoldDays)}. Keep holdings longer${oftener ? ', or check in more often,' : ''} for it to use more.`)
+            + (mixed(d) && r.crypto < 1 ? ` Of that, at most ${Math.round(r.crypto * 100)}% (${usd0(d.budgetUsd * r.crypto)}) goes into coins at this level.` : '')
             + (d.budgetUsd > cash ? ` The practice portfolio starts with ${usd0(cash)}, so it can never invest more than the cash that is left.` : '');
+    }
+    // shares and coins both ticked? Then the level's coin share applies
+    function mixed(d) {
+        const kinds = d.screeners.map(k => (data.options.screeners[k] || {}).kind);
+        return kinds.includes('crypto') && kinds.some(k => k !== 'crypto');
     }
     function paceText(d) {
         const r = levelRules(d.risk);
@@ -231,12 +246,12 @@
         const trial = t.trial, group = t.group || 10;
         const side = (n, avg) => `${n} finished${n ? ' (average ' + pc(avg) + ')' : ''}`;
         const now = trial
-            ? `<div style="margin-top: 6px;"><strong style="color: var(--text-primary);">Trying now</strong> (since ${esc(day(trial.since))}): ${esc(trial.text)}. Why: ${esc(trial.why)}. ${esc(trial.how)} So far: with the change ${side(trial.with, trial.avgWith)}, without it ${side(trial.without, trial.avgWithout)}. It decides after ${group} each way and keeps the change only if that group did clearly better.</div>`
+            ? `<div style="margin-top: 6px;"><strong style="color: var(--text-primary);">Trying now</strong> (since ${esc(day(trial.since))}): ${esc(trial.text)}. Why: ${esc(trial.why)}. ${esc(trial.how)} So far: with the change ${side(trial.with, trial.avgWith)}, without it ${side(trial.without, trial.avgWithout)}. It decides after ${group} each way and keeps the change only if that group did clearly better. <a href="#" data-ap="stoptrial">Stop this trial</a></div>`
             : `<div style="margin-top: 6px;">${t.nextReviewIn === 0 ? 'It reviews its rules at the next sale.' : `Next review of its rules after ${t.nextReviewIn} more finished trade${t.nextReviewIn === 1 ? '' : 's'}`}${t.nextReviewIn === 0 ? '' : ` (it reviews them every ${t.batch}).`} If the record suggests a change worth trying, it tries it beside the current rule over the same days.</div>`;
         const verdicts = { kept: 'kept', dropped: 'not kept', stopped: 'stopped' };
         const past = (t.past || []).slice().reverse();
         return `<div class="ap-section"><h4>Improving its own rules</h4>
-            <div>Its rules now (${esc(r.name)} level): ${esc(ruleWords(r))}.${changed.length ? ` Changed by itself after a trial: ${esc(changed.map(k => names[k] + ' (the level starts at ' + r.changed[k] + ')').join(', '))}.` : ''}</div>
+            <div>Its rules now (${esc(r.name)} level): ${esc(ruleWords(r))}.${changed.length ? ` Changed by itself after a trial: ${changed.map(k => esc(names[k] + ' (the level starts at ' + r.changed[k] + ')') + ` <a href="#" data-ap="restore" data-param="${esc(k)}">put it back</a>`).join(', ')}.` : ''}</div>
             ${now}
             ${data.aiSellPausedUntil ? `<div style="margin-top: 6px;">The AI model's early sells are paused until ${esc(day(data.aiSellPausedUntil))}: the holdings it had sold early went on rising afterwards. The fixed selling rules still apply.</div>` : ''}
             ${past.length ? fold('past-trials', `Earlier trials (${past.length})`, past.map(p => `${day(p.since)} to ${day(p.ended)}: ${p.text}: ${verdicts[p.verdict] || p.verdict}. ${p.result ? p.result.charAt(0).toUpperCase() + p.result.slice(1) + '.' : ''}`)) : ''}
@@ -256,8 +271,10 @@
         const d = draft, o = data.options, on = data.settings.enabled, ready = on && data.settings.screeners.length > 0, state = savedState();
         const select = (id, list, value, label) => `<select id="${id}">${list.map(v => `<option value="${v}" ${v === value ? 'selected' : ''}>${label(v)}</option>`).join('')}</select>`;
         const icons = { buy: '🟢', sell: '🔴', note: 'ℹ️' };
-        const log = (data.log || []).slice().reverse();
+        const all = (data.log || []).slice().reverse(), log = tradesOnly ? all.filter(e => e.type !== 'note') : all;
         const shown = showAll ? log : log.slice(0, 8);
+        const holds = (data.plans || []).length;
+        const mayRow = (id, key, title, text) => `<label class="ap-may"><input id="${id}" type="checkbox" ${d[key] !== false ? 'checked' : ''}> <strong>${title}</strong><small>${text}</small></label>`;
         const levels = Object.keys(o.risk).sort();
         const chosen = d.screeners.length;
         el.innerHTML = `
@@ -268,6 +285,8 @@
                 </div>
                 <p class="ap-intro">An AI model makes practice buys and sells for you from the latest results of the screeners you choose, inside the limits you set here. It uses the practice portfolio above. Nothing here is advice, and past screener results have not shown a reliable edge.</p>
                 <div id="ap-status" class="ap-status ${on ? 'on' : ''}">${esc(statusText())}</div>
+
+                <div class="ap-presets"><span>Quick set-ups:</span>${PRESETS.filter(p => p.set.screeners.every(k => o.screeners[k])).map(p => `<button type="button" class="ap-preset" data-ap-preset="${p.key}" title="${esc(p.title)}">${p.name}</button>`).join('')}<span>They fill in the fields below (not the budget or the on/off switch); change anything afterwards.</span></div>
 
                 <div class="ap-card">
                     <span class="ap-label">Risk level</span>
@@ -293,27 +312,38 @@
                     <div class="ap-help">Each share market is only traded while it is open; coins at any time. Bigger lists take a little longer to check.</div>
                 </div>
 
+                <div class="ap-card">
+                    <span class="ap-label">What it may do by itself</span>
+                    ${mayRow('ap-aisell', 'aiSell', 'Sell early on the AI model\'s review', 'At every check-in the AI model looks at each holding with the latest screener figures and recent headlines, and may sell it before the fixed rules would. Off: only the fixed rules sell.')}
+                    ${mayRow('ap-tune', 'selfTune', 'Try changes to its own rules', 'Every 20 finished trades it may try one change to a selling or buying rule beside the current one, and keeps it only if it did clearly better. Off: its rules stay exactly as they are.')}
+                    ${mayRow('ap-mail', 'emails', 'Email me its reviews', 'An email to your account address each time it reviews its rules, starts a trial or finishes one.')}
+                </div>
+
                 <div class="ap-actions">
                     <button id="ap-run" data-ap="run" class="ap-btn ${ready ? 'primary' : ''}" ${working || !ready || state.text === 'Saving…' ? 'disabled' : ''} title="${!on ? 'Switch the autopilot on first' : !ready ? 'Tick at least one screener first' : 'Runs one check-in now instead of waiting for the next one'}">${working === 'run' ? 'Checking in… this can take up to a minute' : 'Check in now'}</button>
+                    <button id="ap-sellall" data-ap="sellall" class="ap-btn" ${working || !holds ? 'disabled' : ''} title="${holds ? 'Sells every holding the autopilot bought, now, at the latest prices. Holdings you bought yourself are not touched' : 'It holds nothing right now'}">${working === 'sellall' ? 'Selling…' : 'Sell everything it holds' + (holds ? ' (' + holds + ')' : '')}</button>
                     <span id="ap-saved" class="ap-saved ${state.bad ? 'bad' : ''}">${esc(state.text)}</span>
                 </div>
                 <div id="ap-notice" class="${notice ? 'ap-note ' + (notice.bad ? 'bad' : 'good') : ''}" role="status">${notice ? esc(notice.text) : ''}</div>
 
                 ${recordHtml()}
                 ${tuneHtml()}
-                <div class="ap-section"><h4>What it has done <span class="ap-fresh"><span id="ap-fresh">${loadedAt ? 'Up to date at ' + esc(clock(loadedAt)) + '. Refreshes by itself every minute.' : ''}</span><a href="#" data-ap="refresh">↻ Refresh now</a></span></h4>
-                    ${log.length ? shown.map(e => `<div class="ap-log"><time>${icons[e.type] || ''} ${esc(when(e.t))}</time> ${e.type === 'buy' ? `<strong style="color: var(--text-primary);">Bought ${esc(e.symbol)}</strong> with ${usd0(e.usd)}. ` : e.type === 'sell' ? `<strong style="color: var(--text-primary);">Sold ${esc(e.symbol)}</strong>${typeof e.pct === 'number' ? ` <span style="color: ${tint(e.pct)}; font-weight: 600;">${pc(e.pct)}</span>` : ''}. ` : ''}${esc(e.text)}${e.n > 1 ? ` <span style="font-size: 0.8rem;">(the same at ${e.n} check-ins in a row, since ${esc(when(e.first))})</span>` : ''}${fold(e.type + e.t + e.symbol, e.type === 'sell' ? 'Why, and the details' : 'The plan for it', e.detail)}</div>`).join('') : '<div>Nothing yet. Its buys, sells and check-ins will be listed here.</div>'}
+                <div class="ap-section"><h4>What it has done <span class="ap-fresh"><span id="ap-fresh">${loadedAt ? 'Up to date at ' + esc(clock(loadedAt)) + '. Refreshes by itself every minute.' : ''}</span><a href="#" data-ap="refresh">↻ Refresh now</a><a href="#" data-ap="filter">${tradesOnly ? 'Show everything' : 'Show buys and sells only'}</a></span></h4>
+                    ${log.length ? shown.map(e => `<div class="ap-log"><time>${icons[e.type] || ''} ${esc(when(e.t))}</time> ${e.type === 'buy' ? `<strong style="color: var(--text-primary);">Bought ${esc(e.symbol)}</strong> with ${usd0(e.usd)}. ` : e.type === 'sell' ? `<strong style="color: var(--text-primary);">Sold ${esc(e.symbol)}</strong>${typeof e.pct === 'number' ? ` <span style="color: ${tint(e.pct)}; font-weight: 600;">${pc(e.pct)}</span>` : ''}. ` : ''}${esc(e.text)}${e.n > 1 ? ` <span style="font-size: 0.8rem;">(the same at ${e.n} check-ins in a row, since ${esc(when(e.first))})</span>` : ''}${fold(e.type + e.t + e.symbol, e.type === 'sell' ? 'Why, and the details' : 'The plan for it', e.detail)}</div>`).join('') : `<div>${tradesOnly && all.length ? 'No buys or sells yet.' : 'Nothing yet. Its buys, sells and check-ins will be listed here.'}</div>`}
                     ${log.length > shown.length ? `<a href="#" data-ap="more" style="display: inline-block; margin-top: 8px;">Show all ${log.length}</a>` : ''}</div>
             </div>`;
     }
 
+    // one of the "what it may do by itself" switches: what is ticked on screen, or what is saved if it is not on screen
+    function may(id, key) { const el = byId(id); return el && typeof el.checked === 'boolean' ? !!el.checked : (data.settings[key] !== false); }
     function readDraft() {
         if (!byId('ap-risk')) return;
         draft = {
             enabled: !!byId('ap-enabled').checked, risk: parseInt(byId('ap-risk').value, 10) || 3,
             budgetUsd: parseFloat(byId('ap-budget').value) || 0, periodDays: parseInt(byId('ap-period').value, 10) || 1,
             everyHours: parseFloat(byId('ap-every').value), maxHoldDays: parseFloat(byId('ap-hold').value),
-            screeners: Array.from(document.querySelectorAll('[data-ap-screener]')).filter(c => c.checked).map(c => c.getAttribute('data-ap-screener')).sort()
+            screeners: Array.from(document.querySelectorAll('[data-ap-screener]')).filter(c => c.checked).map(c => c.getAttribute('data-ap-screener')).sort(),
+            aiSell: may('ap-aisell', 'aiSell'), selfTune: may('ap-tune', 'selfTune'), emails: may('ap-mail', 'emails')
         };
     }
     // Bring the button, the "saved" line and the explanatory lines up to date without redrawing (typing keeps its place)
@@ -411,12 +441,38 @@
     document.addEventListener('click', (e) => {
         const level = e.target.closest && e.target.closest('[data-ap-level]');
         if (level && data && byId('ap-risk')) { byId('ap-risk').value = level.getAttribute('data-ap-level'); saveError = null; queueSave(150); return; }
+        const preset = e.target.closest && e.target.closest('[data-ap-preset]');
+        if (preset && data && byId('ap-risk')) {
+            const p = PRESETS.find(x => x.key === preset.getAttribute('data-ap-preset'));
+            if (!p) return;
+            byId('ap-risk').value = String(p.set.risk); byId('ap-period').value = String(p.set.periodDays); byId('ap-every').value = String(p.set.everyHours);
+            const hold = byId('ap-hold'), want = (data.options.holdDays || []).find(v => Math.abs(v - p.set.maxHoldDays) < 1e-6);
+            if (hold && want !== undefined) hold.value = String(want);
+            Array.from(document.querySelectorAll('[data-ap-screener]')).forEach(c => { c.checked = p.set.screeners.includes(c.getAttribute('data-ap-screener')); });
+            saveError = null; notice = { text: `"${p.name.replace(/^\S+\s/, '')}" filled in: ${p.title.charAt(0).toLowerCase() + p.title.slice(1)}. Change anything you like; it is saved as you go.` };
+            queueSave(150); return;
+        }
         const t = e.target.closest && e.target.closest('[data-ap]');
         if (!t || !data) return;
         if (t.tagName === 'A') e.preventDefault();
         const action = t.getAttribute('data-ap');
         if (action === 'more') { readDraft(); showAll = true; render(); }
         else if (action === 'refresh') refresh(true);
+        else if (action === 'filter') { readDraft(); tradesOnly = !tradesOnly; showAll = false; render(); }
+        else if (action === 'sellall') {
+            const n = (data.plans || []).length;
+            if (!n || !confirm(`Sell the ${n} holding${n === 1 ? '' : 's'} the autopilot bought, now, at the latest prices?\n\nHoldings you bought yourself are not touched. If the autopilot stays switched on it will buy again at its next check-in.`)) return;
+            act('sellall', async () => {
+                const r = await api('sellall');
+                take(r);
+                const s = r.summary || {};
+                notice = { text: `Sold ${s.sold || 0} holding${s.sold === 1 ? '' : 's'}.` + (s.skipped && s.skipped.length ? ` No price right now for ${s.skipped.join(', ')}: still held.` : '') + (data.settings.enabled ? ' The autopilot is still on and will buy again at its next check-in.' : '') };
+                if (window.practicePortfolio && window.practicePortfolio.reload) window.practicePortfolio.reload();
+            });
+        }
+        else if (action === 'restore' || action === 'stoptrial') {
+            act('tune', async () => { take(await api('tune', action === 'restore' ? { op: 'restore', param: t.getAttribute('data-param') } : { op: 'stop' })); notice = { text: action === 'restore' ? 'Put back to the level\'s own rule.' : 'Trial stopped. The rule stays as it was.' }; });
+        }
         else if (action === 'run') {
             act('run', async () => {
                 const r = await api('run');

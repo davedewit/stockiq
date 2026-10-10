@@ -4,7 +4,8 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
 
    python3 check-tools/dashboard_page.py <practice-portfolio.js> <practice-autopilot.js> <out.html> <light|dark> "<steps>"
    steps: type (types in the buy row), sale (the autopilot sells in the background, then the page refreshes itself),
-          trial (a trial of its own rules starts), off (the autopilot is switched off), open (unfolds the details)
+          trial (a trial of its own rules starts), off (the autopilot is switched off), open (unfolds the details),
+          preset (presses the "Quick coin trading" set-up), sellall (presses "Sell everything it holds" and says yes)
 Open the page with headless Chrome: --dump-dom for the printed results, --screenshot for the look (site-overview.md, section 12)."""
 import json, sys
 pp, ap, out, theme, steps = sys.argv[1:6]
@@ -22,7 +23,7 @@ let portfolio = { v: 1, startingCash: 100000, cash: 15899.07, createdAt: iso(-4)
   { id: 'a1', symbol: 'WEMIX-USD', label: 'WEMIX-USD', name: 'WEMIX USD', currency: 'USD', qty: 1250 / 0.1868991, buyPrice: 0.1868991, buyFx: 1, costUsd: 1250, boughtAt: iso(-2.9), spyAtBuy: 700, note: 'AI: rank 1, RSI 14, down 3.8%% in 7 days on 1.0x volume', by: 'ai', screener: '7-1' }] };
 let version = 3;
 const OPTIONS = %s;
-let auto = { settings: { enabled: true, risk: 3, budgetUsd: 10000, periodDays: 10, everyHours: 0.5, maxHoldDays: 0.25, screeners: ['7-1'] }, state: { lastRun: iso(-0.1) }, minSample: 8, practiceCash: 100000, lessons: null, resting: {}, recent: [],
+let auto = { settings: { enabled: true, risk: 3, budgetUsd: 10000, periodDays: 10, everyHours: 0.5, maxHoldDays: 0.25, screeners: ['7-1'], aiSell: true, selfTune: true, emails: true }, coinShare: 1, state: { lastRun: iso(-0.1) }, minSample: 8, practiceCash: 100000, lessons: null, resting: {}, recent: [],
   scorecard: { n: 0, groups: {} }, rules: { name: 'Balanced', stop: -10, take: 18, trail: 0.5, top: 10, max_rsi: 76, arm: 9, changed: {} },
   tune: { trial: null, past: [], nextReviewIn: 20, batch: 20, group: 10, finished: 0 }, month: { last30: { n: 0, up: 0, usd: 0, pct: 0 }, before30: { n: 0, up: 0, usd: 0, pct: 0 } },
   nextCheck: { at: iso(0.4), markets: ['coin'] }, holding: { count: 1, investedUsd: 1250 },
@@ -38,6 +39,10 @@ window.fetch = async (url, opts) => {
   if (b.action === 'get' && !('settings' in b) && u.includes('5c7pt7q')) return json({ success: true, portfolio, version });
   if (b.action === 'save' && b.portfolio) { portfolio = b.portfolio; version++; return json({ success: true, version }); }
   if (b.action === 'save' && b.settings) { auto.settings = b.settings; auto.plans.forEach(p => { p.auto = b.settings.enabled; }); }
+  if (b.action === 'sellall') { const n = auto.plans.length; portfolio.holdings.filter(h => h.by === 'ai').forEach(h => { portfolio.closed.push(Object.assign({}, h, { sellPrice: PRICES[h.symbol], sellFx: 1, proceedsUsd: h.qty * PRICES[h.symbol], soldAt: iso(0), spyAtSell: 700 })); portfolio.cash += h.qty * PRICES[h.symbol]; });
+    portfolio.holdings = portfolio.holdings.filter(h => h.by !== 'ai'); version++; auto.plans = []; auto.holding = { count: 0, investedUsd: 0 };
+    auto.log.push({ t: iso(0), type: 'sell', symbol: 'WEMIX-USD', usd: 1301.5, kind: 'hand', pct: 4.12, text: 'Sold because you pressed "Sell everything it holds". Put in $1,250.00, got back $1,301.50.' });
+    return json(Object.assign({ success: true, allowed: true, options: OPTIONS, summary: { sold: n, skipped: [] } }, auto)); }
   return json(Object.assign({ success: true, allowed: true, options: OPTIONS }, auto));
 };
 </script>
@@ -74,6 +79,11 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
       await window.practiceAutopilot.refresh(false); await wait(500);
       out('a trial started: ' + Array.from(document.querySelectorAll('#practice-autopilot .ap-section')).find(x => x.textContent.includes('Improving its own rules')).textContent.replace(/\\s+/g, ' ').trim().slice(0, 900));
     }
+    if (step === 'preset') { q('[data-ap-preset="coins"]').click(); await wait(900);
+      out('pressed "Quick coin trading": level=' + q('#ap-risk').value + ' days=' + q('#ap-period').value + ' checks=' + q('#ap-every').selectedOptions[0].textContent + ' keeps=' + q('#ap-hold').selectedOptions[0].textContent + ' ticked=' + Array.from(document.querySelectorAll('[data-ap-screener]')).filter(c => c.checked).map(c => c.getAttribute('data-ap-screener')).join(',') + ' | saved: ' + JSON.stringify(auto.settings));
+      out('  it says: ' + q('#ap-plan').textContent + ' || notice: ' + q('#ap-notice').textContent); }
+    if (step === 'sellall') { window.confirm = (m) => { out('asked: ' + m.split(String.fromCharCode(10)).filter(Boolean).join(' / ')); return true; }; const b = q('#ap-sellall'); out('button: "' + b.textContent + '" disabled=' + b.disabled); b.click(); await wait(1200);
+      out('  after: notice="' + q('#ap-notice').textContent + '" | button "' + q('#ap-sellall').textContent + '" disabled=' + q('#ap-sellall').disabled + ' | WEMIX still held in the table: ' + (cellText('WEMIX') !== '(no row)' && !!Array.from(document.querySelectorAll('#practice-portfolio button[data-pp="sell"]')).find(x => x.closest('tr').textContent.includes('WEMIX'))) + ' | calls: ' + calls.slice(-3).join(', ')); }
     if (step === 'off') { q('#ap-enabled').click(); await wait(700); out('switched the autopilot off: ' + cellText('WEMIX')); }
     if (step === 'open') { document.querySelectorAll('#practice-autopilot details').forEach(d => { d.open = true; }); const s = q('#pp-sold'); if (s) s.open = true; out('unfolded the details'); }
   }
