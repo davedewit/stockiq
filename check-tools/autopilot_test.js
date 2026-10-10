@@ -112,7 +112,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     w.form({ ...st.settings, screeners: ['3-100'], everyHours: 24, maxHoldDays: 2 }); fire('change', 'ap-hold');
     check('a 2-day holding time with daily check-ins: 6 of the 8 at most, and it says why', /Up to 6 holdings of about \$1,250 each at a time: .* That is \$7,500 of the \$10,000: it buys at most 3 at a check-in and sells each holding after 2 days\./.test(said()), said());
     w.form({ ...st.settings, screeners: ['7-1'], everyHours: 0.5, maxHoldDays: 0.5 / 24, risk: 5, periodDays: 1 }); fire('change', 'ap-hold');
-    check('very short holdings: it says how little of the budget is ever in use', /It checks in every 30 minutes\. Up to 3 holdings of about \$2,500 each at a time: .* That is \$7,500 of the \$10,000: it buys at most 3 at a check-in and sells each holding after 30 minutes\. Keep holdings longer for it to use more\. \|/.test(said()), said());
+    check('very short holdings: it says how little of the budget is ever in use', /It checks in every 30 minutes\. Up to 3 holdings of about \$2,500 each at a time: .* That is \$7,500 of the \$10,000: it buys at most 3 at a check-in and sells each holding after 30 minutes\. Keep holdings longer for it to use more\. A coin is only bought once it has been near the top at two check-ins running[^|]*\|/.test(said()), said());
     w.form({ ...st.settings, screeners: ['7-1'], risk: 1 }); fire('input', 'ap-risk');
     check('only coins at the Cautious level: coins are bought (ticking only coins asks for coins)', /Up to \d+ holdings of about \$833 each/.test(said()) && !/buy nothing/.test(said()) && !/goes into coins at this level/.test(said()), said());
     w.form({ ...st.settings, screeners: ['3-100', '7-1'], risk: 1, everyHours: 24, maxHoldDays: 20 }); fire('change', 'ap-screener');
@@ -249,6 +249,20 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const old = page(b => ({ status: 200, body: { success: true, allowed: true, options: OPTP, ...st, settings: { ...st.settings, periodDays: 1, everyHours: 0.5, maxHoldDays: 0.25, auto: [] } } })); await sleep(30);
     check('settings chosen by hand before this existed are shown as set by you, with the way back', (old.container.innerHTML.match(/class="ap-auto own">set by you</g) || []).length === 3 && /<input id="ap-period"[^>]*placeholder="10" value="1">/.test(old.container.innerHTML) && /<option value="0\.5" selected>every 30 minutes<\/option>/.test(old.container.innerHTML) && /data-ap="autopace"/.test(old.container.innerHTML));
     check('no broken values around the pace', !/undefined|NaN|\[object|Infinity/.test(html()) && !/undefined|NaN|\[object|Infinity/.test(old.container.innerHTML));
+  }
+  // waiting for a coin to stay near the top; results after a typical trading cost; the record by time on the shortlist
+  { const G2 = (label, n, avg) => ({ label, n, avg, vs: null, beat: 0, judged: 0, up: avg > 0 ? n : 0 });
+    const st = { settings: { ...settings, enabled: true, screeners: ['7-1'], everyHours: 0.5, maxHoldDays: 0.25 }, state: {}, log: [], minSample: 8, practiceCash: 100000, costEachWay: 0.1, plans: [],
+      month: { last30: { n: 2, up: 1, usd: 30, pct: 0.3, afterCosts: 23.97 }, before30: { n: 0, up: 0, usd: 0, pct: 0, afterCosts: 0 } },
+      scorecard: { ...G2('all', 9, 1.2), groups: { stay: [G2('new to the shortlist', 3, -1.0), G2('there 2 to 4 check-ins', 4, 2.0), G2('there 5 check-ins or more', 2, 3.0)] } } };
+    const OPTC = { ...OPTIONS, everyHours: [0.5, 1, 3, 6, 12, 24], holdDays: [0.5 / 24, 1 / 24, 0.25, 1, 5, 20, 60] };
+    const w = page(b => ({ status: 200, body: { success: true, allowed: true, options: OPTC, ...st } })); await sleep(30);
+    check('with coins and quick check-ins it says a coin is bought only once it has stayed near the top', /A coin is only bought once it has been near the top at two check-ins running \(coin rankings change fast and many drop out again within the hour\), so coin buying starts one check-in later than this\./.test(w.text()));
+    check('the last 30 days are also given after a typical trading cost', /Last 30 days: \+\$30\.00 from 2 finished trades \(1 up\), which is \+0\.30% of the \$10,000 budget\. No trading costs are taken from the fake money: with a typical 0\.1% on each buy and each sell that would be \+\$23\.97 \./.test(w.text()), w.text().slice(w.text().indexOf('Last 30 days'), w.text().indexOf('Last 30 days') + 260));
+    check('the breakdown shows how buys did by how long they had stayed near the top', /By how long it had stayed near the top when bought new to the shortlist 3 -1\.0% 0 of 3 – there 2 to 4 check-ins 4 \+2\.0% 4 of 4 – there 5 check-ins or more 2 \+3\.0% 2 of 2 –/.test(w.text()), w.text().slice(w.text().indexOf('By how long'), w.text().indexOf('By how long') + 220));
+    const slow = page(b => ({ status: 200, body: { success: true, allowed: true, options: OPTC, ...st, settings: { ...st.settings, everyHours: 24 } } })); await sleep(30);
+    const shares = page(b => ({ status: 200, body: { success: true, allowed: true, options: OPTC, ...st, settings: { ...st.settings, screeners: ['3-100'] } } })); await sleep(30);
+    check('not when it checks in once a day, and not for shares', !/A coin is only bought once/.test(slow.text()) && !/A coin is only bought once/.test(shares.text()));
   }
   // your own loss limit and gain mark
   { const st = { settings: { ...settings, screeners: ['3-100'], aiSell: true, selfTune: true, emails: true, stopPct: null, takePct: null }, state: {}, log: [], practiceCash: 100000, realizedUsd: 7.91,
