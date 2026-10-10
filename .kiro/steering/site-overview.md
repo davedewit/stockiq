@@ -343,6 +343,9 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
     naming the figures; (6) record the buys at the live price. **The code enforces every limit**: the
     model can only pick from the shortlist; if it fails, the top of the shortlist is used and the
     log says "chosen by rank". It never touches a holding the user bought. At most 3 buys a check-in.
+    Buys are in whole cents, so the last holding of a budget takes exactly what is left (Bold at
+    $10,000: five of $1,666.67 and one of $1,666.65). Until 10 Oct a cent of rounding stopped that
+    last buy for good and the log called 5 of 6 "fully invested".
   - **When it runs:** EventBridge rule `stockiq-ai-trader-schedule` (`cron(10,40 * * * ? *)`, every
     30 minutes since the quick-trading options of 10 Oct; `SLOT_MINUTES` in the Lambda must match)
     runs every user who is switched on and due. A check-in up to 5 minutes early still counts
@@ -405,8 +408,20 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
     "Not saved: <reason>". **No screener is ticked for a new user** (`DEFAULTS` in the Lambda), and it
     can be switched on with none: it then waits and says so. "Check in now" is greyed out, with the
     reason, while it is off or nothing is ticked. The status box says what it holds, when it last
-    checked in and when it will next (`nextCheck` and `holding` from the Lambda's `public()`); a line
-    under the budget says what the numbers mean. The Lambda keeps one "Autopilot on: …" line in the
+    checked in and when it will next (`nextCheck` and `holding` from the Lambda's `public()`).
+    **Two lines under the fields describe what the chosen settings will do, and every part of them
+    follows what is selected** (`planText`, `paceText`; the owner noticed on 10 Oct that they only
+    followed the slider): how often it checks in, how many holdings of what size it builds up to and
+    after how long, the holding time and the level's loss and gain marks. They also say what a
+    reader would not guess: with only coin screeners ticked, the level's coin share is the limit
+    (Balanced: 25%, so $2,500 of $10,000 in two coins; Cautious and Careful buy no coins at all);
+    a holding time so short that it sells as fast as it can buy never uses the whole budget (3 buys
+    a check-in); a holding time shorter than the gap between check-ins means the sale really happens
+    at the next check-in; a budget too small for the level buys nothing ($25 smallest buy). The sums
+    are `buildUp()` in the script, **a copy of the Lambda's rules** (`allowance`, the time rule in
+    `review_sells`, 3 buys a check-in, the coin share, $25): change one, change the other, and run
+    `check-tools/autopilot_plan_check.py`, which replays the Lambda for 3,780 combinations of
+    settings and compares. The Lambda keeps one "Autopilot on: …" line in the
     activity list for a burst of saved changes. While someone is typing, the panel is updated in
     place (`syncDraft`), not redrawn, so the cursor stays put. Styles are in one
     `<style id="ap-style">` block the script adds; raise `practice-autopilot.js?v=N` in
@@ -417,8 +432,10 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   - Code: `website/practice-autopilot.js` (controls only), Lambda in `lambda-sync/stockiq-ai-trader/`.
     The AI key is the same `OPENAI_API_KEY` as the AI chat, copied to this Lambda's environment.
   - Tests: `python3 check-tools/ai_trader_test.py lambda-sync/stockiq-ai-trader/lambda_function.py`
-    (86 checks, stand-in database, screeners and model) and
-    `node check-tools/autopilot_test.js <practice-autopilot.js>` (34 checks, the controls).
+    (88 checks, stand-in database, screeners and model),
+    `node check-tools/autopilot_test.js <practice-autopilot.js>` (44 checks, the controls) and
+    `python3 check-tools/autopilot_plan_check.py <lambda_function.py> <practice-autopilot.js> 150`
+    (the panel's description against the Lambda's own rules; it is how the rounding fault was found).
   - Honest framing, keep it: the backtests (sections 7b and 11) found no reliable edge in the
     screener scores, so this is an experiment to watch, and the panel says so. Its own results will
     be the forward test. Turn everything off: disable the EventBridge rule.
@@ -997,6 +1014,11 @@ copy and adapt the stand-in answers for another panel.
     fields on the practice buy row. Two sessions built an autopilot at the same moment on 10 Oct;
     the deploy script's fingerprint check caught it and the second build was dropped. **Run one
     session on the site at a time.**
+  - **Autopilot description follows every setting** (section 8, "How the panel behaves"): the two
+    lines under the fields are built from the check-in, holding time, level, budget and ticked
+    screeners. Checking them against the Lambda found a rounding fault (the last holding of an
+    uneven budget was never bought); fixed in `stockiq-ai-trader`. Rollback zip:
+    `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_desc_20261010.zip`.
   - **AI autopilot** for the practice portfolio (section 8): new Lambda, table and hourly schedule.
   - **Deploy permission:** from the afternoon of 10 Oct the session's safety check refused production
     deploys and refused to let Claude change its own settings. The owner added the allow rule

@@ -69,3 +69,17 @@ model: budget pacing, risk filters, the coin share, every sell rule, a clash wit
 data, when it is due. The second drives the controls with a stand-in API (the file's real address is
 never called, because the test replaces `fetch`).
 
+## autopilot_plan_check.py (with autopilot_plan_check.js)
+
+Does the autopilot panel describe what the autopilot function really does? The panel works out, for
+the chosen settings, how many holdings it builds up to, how much of the budget that is and after how
+long. This replays the Lambda's own rules for 3,780 combinations of settings and compares; with a
+number at the end it also runs that many as whole check-ins. Nothing real is touched.
+
+```bash
+python3 check-tools/autopilot_plan_check.py lambda-sync/stockiq-ai-trader/lambda_function.py ../website/practice-autopilot.js 150
+```
+
+Run it after changing the budget, selling or buying rules in the Lambda, or `buildUp()` in the panel
+script. On 10 Oct 2026 it found that a cent of rounding stopped the Lambda buying its last holding.
+

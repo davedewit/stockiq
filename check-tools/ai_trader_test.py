@@ -76,6 +76,13 @@ check('never more than 3 buys in one check-in', s['bought'] == 3 and len(p['hold
 s, rec = run(t0 + dt.timedelta(days=6)); s2, rec = run(t0 + dt.timedelta(days=7)); p = portfolio()
 check('stops at the budget: 8 holdings, $8,000', len(p['holdings']) == 8 and p['cash'] == 92000 and s2['bought'] == 0 and 'fully invested' in rec['log'][-1]['text'], (len(p['holdings']), p['cash'], rec['log'][-1]['text']))
 
+# --- cents: a budget that does not divide evenly (Bold, 6 holdings of $1,666.67) is still used in full, never a cent over
+D.t.clear()
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=4, budgetUsd=10000.0, periodDays=1, everyHours=24, maxHoldDays=20, screeners=['3-100']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+s, rec = run(t0); s2, rec = run(t0 + dt.timedelta(days=1)); p = portfolio(); spent = round(sum(h['costUsd'] for h in p['holdings']), 2)
+check('the last holding is not lost to a cent of rounding: 6 of 6, exactly $10,000', s['bought'] == 3 and s2['bought'] == 3 and len(p['holdings']) == 6 and spent == 10000.0 and p['cash'] == 90000.0 and p['holdings'][-1]['costUsd'] == 1666.65, (s['bought'], s2['bought'], spent, [h['costUsd'] for h in p['holdings']]))
+s3, rec = run(t0 + dt.timedelta(days=2)); check('and then it says the budget is fully invested', s3['bought'] == 0 and 'fully invested in 6 holdings' in rec['log'][-1]['text'], rec['log'][-1]['text'])
+
 # --- risk filters
 view = lambda risk, scr=('3-100',): [c['symbol'] for c in m.shortlist(m.new_portfolio(t0), dict(m.DEFAULTS, risk=risk, screeners=list(scr)), SNAP, t0)]
 check('Cautious: top 5 only, and nothing that has run 20%+ in a month', view(1) == ['S00', 'S01', 'S02', 'S03', 'S04'], view(1))
