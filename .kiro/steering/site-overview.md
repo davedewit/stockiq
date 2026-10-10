@@ -283,6 +283,28 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
 - `index.html`: market overview widgets, guides, "How StockIQ Works", **Pricing section**
   (`#pricing`, three plans in USD), email signup ("Get Screener Highlights by Email", details in
   `stockiq.md`), comparison table.
+- **Practice portfolio** (dashboard, added 10 Oct 2026; the owner's "fake money" idea). A section above
+  Report History: type a stock code or name, pick an amount of practice US dollars (default $1,000,
+  from a $100,000 start) and "Practice buy"; each buy becomes a line that is then monitored: price
+  then and now, value, change, and what an S&P 500 fund (SPY) did since the same day. "Sell" closes
+  the line at the latest price; "Start again" resets. The Top 10 Performance popup has a
+  "＋ Practice buy" button on every counted line (uses the report's price-source ticker, so a coin
+  with a numbered ticker is bought correctly).
+  - Code: `website/practice-portfolio.js` (sums and page; loaded by `dashboard.html`, container
+    `#practice-portfolio`). Storage: Lambda `stockiq-paper-portfolio` (public Function URL, written
+    into the JS) and DynamoDB table `stockiq-paper-portfolios` (key `userId`, pay per request). The
+    browser does the sums and sends the whole portfolio; the Lambda checks shape and size and uses a
+    `version` number so two tabs cannot overwrite each other. As everywhere on this site, the
+    `userId` is whatever the browser sends.
+  - Prices: `stockiq-price-proxy`; names: `stockiq-validate-symbol`. Other currencies are converted
+    to US dollars with Yahoo's `XXXUSD=X` rates (London prices are pence, divided by 100), so a
+    holding's change includes the currency move. A holding with no price is shown at cost.
+  - Wording: "practice", "fake money, no real trades"; nothing suggests what to buy. Keep it so.
+  - Test without logging in: `node check-tools/practice_test.js <path to practice-portfolio.js with the
+    __PRACTICE_API_URL__ placeholder>` (real prices, in-memory storage). **Do not run it against the
+    deployed file**: that one holds the real address and would write to the live table.
+  - Not built: a buy button on the generated stock pages or on the single-stock report (enter the
+    code on the dashboard instead); partial sells; dividends; a history chart of the account value.
 - Stock pages load `sidebar.js`, `stock-prices.js` (live ticker), `ai-chat.js`, `auth.js`, `theme.js`.
 - AI chat button: bottom-right on every page; on the home page it moves left of the news panel
   only from 1401px wide (the panel is hidden below that).
@@ -839,6 +861,7 @@ quirk, not a layout bug. The home page shows its right-hand news panel only from
     permitted to run production deploys (Lambda, S3); read-only AWS calls and git pushes were fine.
   - **Dashboard Top 10 Performance rebuilt** (section 8b): faults above fixed, over-time table against
     the index added. **Fake-money test** of the Dow 30 and S&P 100 screeners run (section 11).
+  - **Practice portfolio** added to the dashboard (section 8), with a new table and Lambda.
   - **Deploy permission:** from the afternoon of 10 Oct the session's safety check refused production
     deploys and refused to let Claude change its own settings. The owner added the allow rule
     `Bash(bash /Users/dave/VSCODE/stockiq/check-tools/pending-*/deploy.sh)` himself; with it, a deploy

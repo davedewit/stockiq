@@ -98,6 +98,7 @@ New screeners: use `5-<subOption>`.
 | `stockiq-csv-export-proxy` | CSV export of analysis history |
 | `stockiq-auto-delete-scheduler` | Schedules S3 data deletion |
 | `stockiq-auto-delete-cleanup` | Cleans up S3 user data |
+| `stockiq-paper-portfolio` | Stores each user's practice portfolio (fake money) for the dashboard: actions `get`, `save` (with `expectedVersion`), `reset`. Table `stockiq-paper-portfolios`. Python 3.12, role `acp-lambda-role`, CORS set on the Function URL (POST only). Created 10 Oct 2026. See `site-overview.md` section 8 |
 
 ### Other
 | Function | Purpose |
@@ -276,6 +277,7 @@ aws logs tail /aws/lambda/stockiq-my-function --since 5m --profile default --reg
 | `stockiq-usage-tracker` | varies | usage-counter, daily-usage-tracker |
 | `stockiq-dashboard-analysis-history` | userId + analysisId | dashboard, option-1 |
 | `stockiq-email-subscribers` | email | email-capture |
+| `stockiq-paper-portfolios` | userId (one item per user: `data` JSON, `version`) | paper-portfolio |
 | `stockiq-ai-chat-limits` | userId (TTL 2h) | ai-chat |
 | `stockiq-ai-chat-stats` | userId+date (TTL 90d) | ai-chat, ai-chat-reporter |
 

@@ -46,3 +46,12 @@ python3 backtest.py sp100 2026-10-12  # the fair forward test: only prices after
 
 `frozen_lists.txt` holds the lists as they were on 10 Oct 2026; keep it, or the forward test loses
 its meaning. `data/` is a local cache and is not in git.
+
+## practice_test.js
+
+Tests the dashboard's practice portfolio (`website/practice-portfolio.js`) in a stand-in page with real
+prices and an in-memory copy of the storage function: buys by code and by name, currencies, the Top 10
+button, selling, a change from another window, reset. Give it a copy of the script that still has the
+`__PRACTICE_API_URL__` placeholder (put it back with a text replace first). Never point it at the
+deployed file: that holds the real address and would write to the live table.
+

@@ -118,6 +118,7 @@ aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R --paths "/*" 
 - `stockiq-usage-tracker` — Usage tracking
 - `stockiq-user-tracking` — User activity (key: `user_date`, format: `email#date` or `email#registration`)
 - `stockiq-coinspot-prediction-status` — crypto top-10 history (how long each coin has been in the top 10); `stockiq-coinspot-predictions` — permanent log of top-10 entries for measuring the track record. Both written only by the orchestrator's scheduled run (`site-overview.md` 8b)
+- `stockiq-paper-portfolios` — practice portfolio (fake money) per user, dashboard (`site-overview.md` section 8)
 - `stockiq-ai-chat-limits` — AI chat rate limiting (TTL 2h)
 - `stockiq-ai-chat-stats` — AI chat usage tracking (TTL 90 days)
 
