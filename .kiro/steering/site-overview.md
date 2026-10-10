@@ -380,11 +380,23 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
     users is the owner's decision** and touches the same legal question as the signals: an AI choosing
     stocks, even with fake money, reads as picks. Each user's check-in also runs the screeners again
     (not shared between users) and makes one AI call, so cache the screener results per hour first.
+  - **How the panel behaves** (redesigned 10 Oct after the owner reported "the buttons are not working":
+    they worked, but nothing showed it). The On/Off switch saves straight away. Every other change
+    waits for the save button, which is grey "Saved" until something changes and then blue "Save
+    changes" with a note beside it. "Check in now" is greyed out while it is off or while changes are
+    unsaved, and its tooltip says why. The status box says what it holds, when it last checked in and
+    when it will next (`nextCheck` and `holding` from the Lambda's `public()`); a line under the
+    budget says what the numbers mean ("Up to 8 holdings of about $1,250 each …"). Results of an
+    action appear in a green or red box. Styles are in one `<style id="ap-style">` block the script
+    adds; raise `practice-autopilot.js?v=N` in `dashboard.html` when it changes.
+  - **To see the panel without logging in:** build a test page around the script with a stand-in
+    server and open it in headless Chrome (method: section 12, "Check a logged-in panel in a real
+    browser"). This is how the redesign was clicked through and screenshotted.
   - Code: `website/practice-autopilot.js` (controls only), Lambda in `lambda-sync/stockiq-ai-trader/`.
     The AI key is the same `OPENAI_API_KEY` as the AI chat, copied to this Lambda's environment.
   - Tests: `python3 check-tools/ai_trader_test.py lambda-sync/stockiq-ai-trader/lambda_function.py`
-    (65 checks, stand-in database, screeners and model) and
-    `node check-tools/autopilot_test.js <practice-autopilot.js>` (14 checks, the controls).
+    (71 checks, stand-in database, screeners and model) and
+    `node check-tools/autopilot_test.js <practice-autopilot.js>` (21 checks, the controls).
   - Honest framing, keep it: the backtests (sections 7b and 11) found no reliable edge in the
     screener scores, so this is an experiment to watch, and the panel says so. Its own results will
     be the forward test. Turn everything off: disable the EventBridge rule.
@@ -878,6 +890,14 @@ then run `update_stock_analysis.py` (it sets index/noindex and the snapshots).
 Run one at a time with a time limit; a tall capture can be sliced with `sips -c H W --cropOffset Y 1`.
 Narrow window sizes look cut off in headless mode even for unchanged pages; that's a headless
 quirk, not a layout bug. The home page shows its right-hand news panel only from 1401px wide.
+
+**Check a logged-in panel in a real browser** (the dashboard cannot be opened without a login, but
+a panel script can be run on its own): `python3 check-tools/panel_page.py <script.js> <out.html>
+<light|dark> "<steps>"` writes a page holding the real script, the site's stylesheet and a stand-in
+server, then performs the steps (clicks, typing) and prints what happened into the page. Open it with
+headless Chrome using `--dump-dom` for the printed results and `--screenshot` for the look (a local
+file with no site scripts does not hang). Nothing live is called. Written for the autopilot panel;
+copy and adapt the stand-in answers for another panel.
 
 **Run every analysis button end to end:** section 8b, last part.
 
