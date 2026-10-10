@@ -416,6 +416,18 @@ crypto orchestrator or any worker.
 - Stock pattern: `N. SYMBOL <up to 40 chars> <currency>PRICE`, symbols 1–10 characters with an
   optional `.XX` or `-X` suffix, currencies `$ £ € ¥`. Add `₹` / `₩` for India / Korea.
 - A company name between symbol and price must stay short (Nikkei names are cut to 22 chars).
+- Rebuilt 10 Oct 2026: one parser (`parseScreenerTop10`) and one calculation
+  (`screenerTop10Performance`) feed both the row badge and the popup. Before that the two had
+  separate copies: the popup failed on every UK report, the badge never appeared for Nikkei, a
+  symbol with no price still counted in the average, stocks under $1 showed false moves, every
+  currency was shown as "$", and old crypto reports priced the wrong coin.
+- The popup also shows "Top 10 and the index over the same time": the top-10 average 1 day, 1 week,
+  2 and 3 weeks after the report and now, beside the index the list comes from (`TOP10_BENCHMARKS`
+  keyed on the report's name; Bitcoin for crypto; add a line there for a new screener). The price
+  source keeps about a month of daily closes, so index figures start from the close on the report
+  day (approximate) and appear only after the next trading day.
+- Test it without logging in: `check-tools/tracker_run.js` runs the page's real tracker code on a
+  saved report text with live prices (`NAME='<report name>' DASH=<dashboard.html> node tracker_run.js <label> <report.json> <ISO time>`).
 
 ### Crypto
 
@@ -632,24 +644,6 @@ Needs the owner's decision or more work (nothing here is fixed):
   after entering the top 10 with the average coin over the same days. Leftovers that can be
   deleted when the owner agrees: Lambda `stockiq-coinspot-predictions-updater` (no longer
   triggered) and the old-format rows in both crypto tables.
-- **Dashboard "Top 10 Performance" (🎯): fix built and tested, NOT deployed** (same reason as the
-  crypto one: the session could not deploy). Package: `stockiq/check-tools/pending-top10-tracker/`,
-  the owner runs `bash deploy.sh`; afterwards verify, update this item and delete the folder.
-  Faults found 10 Oct by running the real code on all 15 screener reports (`check-tools/tracker_run.js`):
-  the popup failed on every UK report ("Cannot read properties of undefined"); the row badge never
-  appeared for Nikkei reports (it had an older copy of the parser); a symbol with no price still
-  counted in the average's divisor; stocks under $1 showed false moves (report prints $0.06, price is
-  0.056); every currency was shown as "$"; crypto reports saved before 10 Oct priced the wrong coin
-  (WLFI "-100%"). The fix uses one parser and one calculation for badge and popup.
-  **Added to the same package (10 Oct, later):** a table in the popup, "Top 10 and the index over the
-  same time": the top-10 average 1 day, 1 week, 2 weeks and 3 weeks after the report and now, beside
-  the index the list comes from (`TOP10_BENCHMARKS`: ^DJI, ^NDX, ^OEX, ^GSPC, ^SP1000, ^SP1500, ^RUI,
-  ^RUT, ^AFLI / ^ATOI / ^AXJO / ^AXKO, ^FTSE, ^N225, Bitcoin for crypto). Checked against an
-  independent calculation on two past Dow reports. Limits: the price source keeps about a month of
-  daily closes, so index figures start from the close on the report day (approximate) and appear
-  only after the next trading day; reports are auto-deleted after 30 / 90 days.
-  Owner's wish (10 Oct): no hand-offs. The session still cannot deploy or change its own
-  permissions; the owner has to add a Bash allow rule himself for that to change.
 - **UK FTSE screener shows prices one trading day old.** Yahoo's latest daily close is empty for
   London stocks (seen 10 Oct: Friday's bar `null`), and the `stockiq-europe-4-1` workers fall back
   to the day before (IMB.L 2,614 in the report, 2,662 actual). The report also prints pence with a
@@ -843,5 +837,12 @@ quirk, not a layout bug. The home page shows its right-hand news panel only from
     removed, results slider reworded, dashboard tracker uses the right ticker, permanent entry log
     added. Deployed by the owner with a packaged script, because the Claude Code session was not
     permitted to run production deploys (Lambda, S3); read-only AWS calls and git pushes were fine.
+  - **Dashboard Top 10 Performance rebuilt** (section 8b): faults above fixed, over-time table against
+    the index added. **Fake-money test** of the Dow 30 and S&P 100 screeners run (section 11).
+  - **Deploy permission:** from the afternoon of 10 Oct the session's safety check refused production
+    deploys and refused to let Claude change its own settings. The owner added the allow rule
+    `Bash(bash /Users/dave/VSCODE/stockiq/check-tools/pending-*/deploy.sh)` himself; with it, a deploy
+    packaged as `check-tools/pending-<name>/deploy.sh` runs without a hand-off. Keep packaging deploys
+    that way (live-code check, rollback copy, `DRY_RUN=true`), run the dry run, then run it.
   - Docs consolidated: section 8b added, section 11 reduced to open items, `CLAUDE.md` (added
     9 Oct) loads these steering files into Claude Code sessions.
