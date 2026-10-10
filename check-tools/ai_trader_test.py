@@ -62,7 +62,7 @@ check('someone not on the list is refused', call(action='get', userId='stranger@
 check('not on the list cannot switch it on', m.clean_settings({'enabled': True}, 'stranger@y.com')['enabled'] is False)
 s, b = call(action='get', userId=U); check('defaults', b['allowed'] and b['settings'] == dict(m.DEFAULTS) and '3-100' in b['options']['screeners'], b)
 s, b = call(action='save', userId=U, settings={'enabled': True, 'risk': 9, 'budgetUsd': 'lots', 'periodDays': 0.2, 'everyHours': 7, 'maxHoldDays': 5, 'screeners': ['3-100', 'nope'], 'x': 1})
-check('settings are cleaned', b['settings'] == {'enabled': True, 'risk': 5, 'budgetUsd': 10000.0, 'periodDays': 1, 'everyHours': 24, 'maxHoldDays': 5, 'screeners': ['3-100'], 'aiSell': True, 'selfTune': True, 'emails': True, 'stopPct': None, 'takePct': None, 'auto': []} and b['state'].get('startedAt') and b['log'][-1]['text'].startswith('Autopilot on'), b['settings'])
+check('settings are cleaned', b['settings'] == {'enabled': True, 'risk': 5, 'budgetUsd': 10000.0, 'periodDays': 1, 'everyHours': 24, 'maxHoldDays': 5, 'screeners': ['3-100'], 'aiSell': True, 'selfTune': True, 'emails': True, 'stopPct': None, 'takePct': None, 'auto': [], 'trailMode': 'gains'} and b['state'].get('startedAt') and b['log'][-1]['text'].startswith('Autopilot on'), b['settings'])
 check('run before switching on is refused', call(action='run', userId='dave@x.com')[0] == 400)
 check('garbage requests', m.lambda_handler({'requestContext': {}, 'body': 'x'}, None)['statusCode'] == 400 and call(action='zzz', userId=U)[0] == 400 and call(action='get')[0] == 400)
 
@@ -185,7 +185,7 @@ check('the stored copy is small enough for the table', len(D.Table(m.SETTINGS_TA
 D.t.clear(); PRICES.clear(); SNAP['3-100'] = rows(); MODEL['answer'] = None; MODEL['prompts'].clear()
 rec = m.load_item(U); rec['settings'].update(enabled=True, risk=5, budgetUsd=4000.0, periodDays=1, everyHours=24, maxHoldDays=5, screeners=['3-100']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
 s, rec = run(t0); s, rec = run(t0 + dt.timedelta(days=1)); ids = {h['symbol']: h['id'] for h in portfolio()['holdings']}
-check('remembers what each buy was based on', len(rec['state']['open']) == 4 and rec['state']['open'][ids['S00']] == {'symbol': 'S00', 'label': 'S00', 'screener': '3-100', 'risk': 5, 'chosen': 'rules', 'rank': 1, 'score': 4.0, 'rsi': 50.0, 'd7': 3.0, 'd30': 5.0, 'volume': 1.2, 't': m.iso(t0), 'hold': 5.0, 'peak': 0.0, 'low': 0.0, 'stay': 1, 'path': [[24.0, 0.0]], 'stop': {'arm': 11.2, 'floor': None, 'move': None, 'room': None}}, rec['state']['open'].get(ids['S00']))
+check('remembers what each buy was based on', len(rec['state']['open']) == 4 and rec['state']['open'][ids['S00']] == {'symbol': 'S00', 'label': 'S00', 'screener': '3-100', 'risk': 5, 'chosen': 'rules', 'rank': 1, 'score': 4.0, 'rsi': 50.0, 'd7': 3.0, 'd30': 5.0, 'volume': 1.2, 't': m.iso(t0), 'hold': 5.0, 'peak': 0.0, 'low': 0.0, 'stay': 1, 'path': [[24.0, 0.0]], 'stop': {'arm': 11.2, 'floor': None, 'move': None, 'room': None, 'mode': 'gains'}}, rec['state']['open'].get(ids['S00']))
 PRICES.update(S00=79.0, S01=150.0)
 s, rec = run(t0 + dt.timedelta(days=2)); hist = {x['symbol']: x for x in rec['history']}
 check('sold holdings go into the history with their result', s['sold'] == 2 and set(hist) == {'S00', 'S01'} and hist['S00']['pct'] == -21.0 and hist['S00']['exit'] == 'stop' and hist['S00']['market'] == 0.0 and hist['S00']['vs'] == -21.0 and hist['S00']['days'] == 2.0
@@ -443,7 +443,7 @@ check('a wild coin gets a wider stop than a calm one (up 6.15%: sold at about +3
 check('weaker figures pull the stop closer; stronger ones give it room', near(m.follow_stop(B3, bought, row(score=2.0), 6.15, 6.3, quick, 0.02)['floor'], 4.56) and near(m.follow_stop(B3, bought, row(), 6.15, 6.3, quick, 0.02)['floor'], 3.42))
 check('a share checked once a day is judged against a whole day of its movement', near(m.follow_stop(B3, None, None, 8.0, 1.9, daily, 3)['floor'], 3.25) and m.follow_stop(B3, None, None, 2.0, 1.9, daily, 3)['floor'] is None)
 check('it always keeps at least a fifth of the best gain', near(m.follow_stop(B3, None, None, 5.0, 3.2, dict(quick, everyHours=24), 0.02)['floor'], 1.0))
-check('with no daily prices for a holding the simpler rule by holding time is used', m.follow_stop(B3, None, None, 4.0, None, quick, 0.02) == {'arm': 1.0, 'floor': m.gain_floor(B3, 0.25, 4.0), 'move': None, 'room': None, 'why': []})
+check('with no daily prices for a holding the simpler rule by holding time is used', m.follow_stop(B3, None, None, 4.0, None, quick, 0.02) == {'arm': 1.0, 'floor': m.gain_floor(B3, 0.25, 4.0), 'move': None, 'room': None, 'why': [], 'mode': 'gains'})
 D.t.clear(); PRICES.clear(); NEWS.clear(); STRONG.clear(); ATR.clear(); MODEL['answer'] = None; MODEL['prompts'].clear(); SNAP['7-1'] = rows('crypto', '7-1')
 rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=0.25, screeners=['7-1']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
 s, rec = run(t0); a, b, c = portfolio()['holdings'][:3]; half = dt.timedelta(minutes=30); ATR.update({a['symbol']: 6.3, b['symbol']: 6.3, c['symbol']: 6.3})
@@ -509,6 +509,28 @@ r1 = {'settings': dict(m.DEFAULTS, screeners=['7-1']), 'state': {}, 'log': [], '
 r2 = {'settings': dict(m.DEFAULTS, screeners=['7-1']), 'state': {}, 'log': [], 'history': [coin(2.0, -3.0)] * 8}
 check('a coin screener is rested on its own results, not on how the share market did', 'Resting the Crypto (top coins) screener for 14 days: its last 8 trades averaged -2.0%.' in m.review_resting(r1, t0 + dt.timedelta(hours=2))[0]['text'] and m.review_resting(r2, t0 + dt.timedelta(hours=2)) == [], (r1['state'], r2['state']))
 m.STAY_CHECKS = 1; PRICES.clear(); MODEL['prompts'].clear(); SNAP['7-1'] = rows('crypto', '7-1'); SNAP['3-100'] = rows(); D.t.clear()
+
+# --- the kind of following stop is the user's choice: protect a gain (as before), a full trailing stop loss, or none
+B3 = m.RISK[3]; quick = dict(m.DEFAULTS, risk=3, everyHours=1, maxHoldDays=1); mode = lambda k: dict(quick, trailMode=k)
+check('the choice is one of three, and "protects a gain" unless chosen otherwise', [m.clean_settings({'trailMode': k}, U)['trailMode'] for k in ('gains', 'full', 'off', 'sideways', None)] == ['gains', 'full', 'off', 'gains', 'gains'])
+g, f, o = (m.follow_stop(B3, None, None, 0.5, 6.3, mode(k), 0.1) for k in ('gains', 'full', 'off'))
+check('before a holding has risen: "protects a gain" sets no stop, the full trailing stop already sits under the price, "off" sets none', g['floor'] is None and near(f['floor'], 0.5 - 2.5 * f['move']) and f['floor'] < 0 and near(f['move'], 1.29) and o == {'arm': None, 'floor': None, 'move': None, 'room': None, 'why': [], 'mode': 'off'}, (g, f, o))
+check('once it has risen beyond its wobble both kinds give the same stop, with part of the gain always kept', near(m.follow_stop(B3, None, None, 6.0, 6.3, mode('gains'), 0.1)['floor'], m.follow_stop(B3, None, None, 6.0, 6.3, mode('full'), 0.1)['floor']) and m.follow_stop(B3, None, None, 6.0, 6.3, mode('full'), 0.1)['floor'] > 0)
+check('a holding that only fell: the full stop starts from the buying price', near(m.follow_stop(B3, None, None, -1.0, 6.3, mode('full'), 0.1)['floor'], -2.5 * 1.286))
+def held(kind):
+    D.t.clear(); PRICES.clear(); ATR.clear(); MODEL['answer'] = None
+    rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=1, maxHoldDays=1, screeners=['7-1'], trailMode=kind); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+    s, rec = run(t0); a = portfolio()['holdings'][0]; ATR[a['symbol']] = 6.3; PRICES[a['symbol']] = a['buyPrice'] * 0.96
+    s, rec = run(t0 + dt.timedelta(hours=1)); return a, s, rec
+a, s, rec = held('gains'); check('down 4% an hour after buying, "protects a gain": kept (the loss limit is -10%)', a['id'] in [h['id'] for h in portfolio()['holdings']] and s['sold'] == 0)
+a, s, rec = held('full'); sale = [e for e in rec['log'] if e['type'] == 'sell'][-1]
+check('the same with the full trailing stop: cut early, and it says so', a['id'] not in [h['id'] for h in portfolio()['holdings']] and sale['kind'] == 'cut' and 'Its trailing stop was hit: -4.0% since it was bought (its best was +0.0%; the stop trailed 3 of its typical moves of about 1.3% below that)' in sale['text'] and any('a trailing stop follows it from the moment it was bought' in d for d in sale['detail']), sale)
+check('such a sale is its own kind in the record', rec['history'][-1]['exit'] == 'cut' and m.scorecard(rec['history'])['groups']['exit'][0]['label'] == 'sold by its trailing stop before it had risen')
+a, s, rec = held('off'); PRICES[a['symbol']] = a['buyPrice'] * 1.08; s, rec = run(t0 + dt.timedelta(hours=2)); PRICES[a['symbol']] = a['buyPrice'] * 1.01; s, rec = run(t0 + dt.timedelta(hours=3))
+code_, body = call(action='get', userId=U); plan = [pl for pl in body['plans'] if pl['id'] == a['id']]
+check('with it switched off nothing follows the price: up 8% then back to +1% is kept, and the dashboard is told there is no stop', len(plan) == 1 and plan[0]['arm'] is None and plan[0]['floor'] is None and plan[0]['mode'] == 'off' and body['rules']['trailMode'] == 'off' and s['sold'] == 0, plan)
+check('a buy says which kind applies to it', any('no stop follows it (switched off)' in d for e in rec['log'] if e['type'] == 'buy' for d in e.get('detail', [])))
+PRICES.clear(); ATR.clear(); D.t.clear()
 
 # --- improving its own rules: what the record suggests, a trial beside the current rule, keep or drop, an email each time
 TR = lambda pct, peak=None, low=None, rank=2, rsi=50, exit='time', **k: dict(risk=3, pct=pct, peak=pct if peak is None else peak, low=min(pct, 0) if low is None else low, rank=rank, rsi=rsi, exit=exit, screener='3-100', label='X', **k)
