@@ -4,6 +4,12 @@ Scripts used for the full end-to-end check in October 2026. They run the real si
 real analysis Lambdas without a browser. Nothing here is part of the daily pipeline or the deploy.
 How and when to use them: `.kiro/steering/site-overview.md` section 8b ("How to test every button").
 
+**Working on the dashboard's practice portfolio or its AI autopilot?** The tools are further down
+(`practice_test.js`, `ai_trader_test.py`, `autopilot_test.js`, `autopilot_plan_check.py`,
+`dashboard_page.py`) and the whole routine, from staging a change to verifying it live, is in
+`site-overview.md` section 8c ("How to work on it"). A change being built lives in a
+`pending-<name>/` folder here until it is deployed, then the folder is removed.
+
 Run them from this folder. They write `*.json` result files here, which git ignores.
 
 | Script | What it does | Example |
@@ -30,6 +36,11 @@ refresh; they are one-off scripts and need reading before re-use.
 
 After changing a list, put the same list in both `website/analysis-functions.js` and the coordinator
 Lambda, and update the count on the button in `website/analysis.html`.
+
+## backtest/
+
+Two-year replay of the S&P 500 screener with the unchanged live worker code (10 Oct 2026). It has its own
+`README.md`; the results and what they mean are in `site-overview.md` section 7b.
 
 ## paper-test/
 
@@ -64,10 +75,19 @@ python3 check-tools/ai_trader_test.py lambda-sync/stockiq-ai-trader/lambda_funct
 node check-tools/autopilot_test.js ../website/practice-autopilot.js                      # the dashboard controls
 ```
 
-The first runs the Lambda's code with stand-ins for the database, the screeners, prices and the AI
-model: budget pacing, risk filters, the coin share, every sell rule, a clash with the user, missing
-data, when it is due. The second drives the controls with a stand-in API (the file's real address is
-never called, because the test replaces `fetch`).
+The first (164 checks) runs the Lambda's code with stand-ins for the database, the screeners, prices,
+the AI model, headlines and email: budget pacing, risk filters, the coin share, every sell rule, the
+AI model's hold-or-sell review, headlines, the record and what it learns from it, trials of its own
+rules, the owner's own limits and switches, "sell everything", a clash with the user, missing data,
+when it is due. The second (84 checks) drives the controls with a stand-in API (the file's real
+address is never called, because the test replaces `fetch`) and a stand-in for the browser's storage.
+Add a check for whatever you change; when wording changes, the checks that quote it must change too.
+
+## panel_page.py
+
+The older browser test page for the autopilot panel alone (stand-in server, steps such as
+`btn,tick-on,run,budget,level,slide,quick,refresh,desc`). `dashboard_page.py` below loads both
+sections together and is the one to use for new work.
 
 ## dashboard_page.py
 
