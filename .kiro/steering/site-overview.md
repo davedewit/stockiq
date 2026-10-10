@@ -435,6 +435,18 @@ Flagged for the owner (not changed):
     Probe Yahoo slowly or through `stockiq-price-proxy`: this machine gets HTTP 429 after a few hundred calls.
   - Dashboard tracker: the company-name gap allowed before the price was widened (30 to 40 characters) and Nikkei
     names are cut to 22 characters; a long name ("Nomura Research Institute") was dropping that stock.
+  - **Last free use of the day was being eaten (fixed 10 Oct 2026).** `runAnalysis` checks access and counts
+    the use at the top, for every option. 14 handlers then called `authManager.checkStockAnalysisAccess()` a
+    second time (crypto, single coin, S&P 500/400+600/100/1500, Russell 1000/2000, ASX 50/100/200/300, Nikkei,
+    csi300). With the use already counted, that second check saw zero left and redirected: an anonymous visitor
+    running single-coin analysis went to signup.html with their one free use spent, and a signed-in trial user
+    on their last analysis of the day went to the upgrade page. The second checks were removed. **Never check
+    access again after the use has been counted.** Verified by running the real `auth.js` +
+    `analysis-functions.js` in Node with a simulated usage tracker: users with 1 use left get their result,
+    users with 0 left are still redirected before anything runs.
+  - If the daily run reports a large "No price data" count, this machine has been rate-limited by Yahoo
+    (it happened on 10 Oct after a few hundred manual probes). The script keeps yesterday's snapshot and does
+    not de-index anything; re-run `python3 update_stock_analysis.py` later, then `./deploy-to-s3.sh`.
   **Still open:**
   - **ASX "24h change" is 0 for every stock once the ASX has closed.** Yahoo returns the final session bar
     plus a second bar with the same close, and the ASX workers compute change from the last two closes. This
