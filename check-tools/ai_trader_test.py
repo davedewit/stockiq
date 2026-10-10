@@ -56,7 +56,7 @@ check('someone not on the list is refused', call(action='get', userId='stranger@
 check('not on the list cannot switch it on', m.clean_settings({'enabled': True}, 'stranger@y.com')['enabled'] is False)
 s, b = call(action='get', userId=U); check('defaults', b['allowed'] and b['settings'] == dict(m.DEFAULTS) and '3-100' in b['options']['screeners'], b)
 s, b = call(action='save', userId=U, settings={'enabled': True, 'risk': 9, 'budgetUsd': 'lots', 'periodDays': 0.2, 'everyHours': 7, 'maxHoldDays': 5, 'screeners': ['3-100', 'nope'], 'x': 1})
-check('settings are cleaned', b['settings'] == {'enabled': True, 'risk': 5, 'budgetUsd': 10000.0, 'periodDays': 1, 'everyHours': 24, 'maxHoldDays': 5, 'screeners': ['3-100'], 'aiSell': True, 'selfTune': True, 'emails': True} and b['state'].get('startedAt') and b['log'][-1]['text'].startswith('Autopilot on'), b['settings'])
+check('settings are cleaned', b['settings'] == {'enabled': True, 'risk': 5, 'budgetUsd': 10000.0, 'periodDays': 1, 'everyHours': 24, 'maxHoldDays': 5, 'screeners': ['3-100'], 'aiSell': True, 'selfTune': True, 'emails': True, 'stopPct': None, 'takePct': None} and b['state'].get('startedAt') and b['log'][-1]['text'].startswith('Autopilot on'), b['settings'])
 check('run before switching on is refused', call(action='run', userId='dave@x.com')[0] == 400)
 check('garbage requests', m.lambda_handler({'requestContext': {}, 'body': 'x'}, None)['statusCode'] == 400 and call(action='zzz', userId=U)[0] == 400 and call(action='get')[0] == 400)
 
@@ -356,6 +356,26 @@ check('and a trial already running is ended, unchanged', 'its trials were switch
 D.t.clear(); MAILS.clear(); rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, emails=False, screeners=['3-100']); rec['state'].update(startedAt=m.iso(t0), closedCount=20); rec['history'] = [dict(risk=3, pct=1.0, rank=2, rsi=50, exit='time', sold=m.iso(t0), label='X', screener='3-100'), dict(risk=3, pct=-1.0, rank=2, rsi=50, exit='time', sold=m.iso(t0), label='X', screener='3-100')] * 10; m.save_item(U, rec)
 s, rec = run(t0); check('with its emails switched off a review is still done and listed, but no email is sent', MAILS == [] and any('Reviewed its own rules after 20 finished trades' in e['text'] for e in rec['log']), [e['text'][:60] for e in rec['log']])
 PRICES.clear(); NEWS.clear(); MODEL['answer'] = None; SNAP['3-100'] = rows(); D.t.clear()
+
+# --- your own loss limit and gain mark; what its finished trades have made in all
+own = lambda **k: {f: m.clean_settings(dict(k), U)[f] for f in ('stopPct', 'takePct')}
+check('your own limits are optional sizes in percent, kept inside the same bounds as its own', own() == {'stopPct': None, 'takePct': None} and own(stopPct=-6, takePct='10') == {'stopPct': 6.0, 'takePct': 10.0} and own(stopPct=100, takePct=1) == {'stopPct': 30.0, 'takePct': 2.0} and own(stopPct='', takePct=0) == {'stopPct': None, 'takePct': None} and own(stopPct=0.2) == {'stopPct': 1.5, 'takePct': None})
+yours = dict(m.DEFAULTS, risk=3, stopPct=6.0, takePct=10.0)
+check('they come before the level and before its own changes', m.rules_for(yours, {'tune': {'values': {'3': {'stop': -4.0, 'take': 25.0, 'top': 5}}}}) == dict(m.RISK[3], stop=-6.0, take=10.0, top=5) and m.set_by_user(yours) == {'stop', 'take'} and m.set_by_user(dict(m.DEFAULTS)) == set())
+D.t.clear(); PRICES.clear(); NEWS.clear(); MODEL['answer'] = None; SNAP['3-100'] = rows()
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=20, screeners=['3-100'], stopPct=6.0, takePct=10.0); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+s, rec = run(t0); a, b, c = portfolio()['holdings'][:3]; PRICES[a['symbol']] = a['buyPrice'] * 0.93; PRICES[b['symbol']] = b['buyPrice'] * 1.11
+s, rec = run(t0 + dt.timedelta(days=1)); texts = [e['text'] for e in rec['log'] if e['type'] == 'sell']
+check('it sells at your limits, not the level\'s', s['sold'] == 2 and any('past the -6% limit' in t for t in texts) and any('reached the +10% mark' in t for t in texts), texts)
+check('what its finished trades have made in all is kept, apart from the sold list', rec['state']['realizedUsd'] == round(sum(t['usd'] for t in rec['history']), 2) == 40.0 and m.public(rec, t0)['realizedUsd'] == 40.0, (rec['state'].get('realizedUsd'), [t['usd'] for t in rec['history']]))
+pub = m.public(rec, t0, U)
+check('the dashboard is told which rules are yours and what an empty field would fall back to', pub['rules']['yours'] == ['stop', 'take'] and pub['rules']['stop'] == -6.0 and pub['rules']['take'] == 10.0 and pub['rules']['level'] == {'stop': -10, 'take': 18} and pub['rules']['changed'] == {} and all(pl['stop'] == -6.0 and pl['take'] == 10.0 for pl in pub['plans']), pub['rules'])
+fixed = {'settings': dict(m.DEFAULTS, risk=3, takePct=10.0), 'state': {'closedCount': 20}, 'log': [], 'history': [dict(risk=3, pct=1.0, peak=9.0, low=0.0, rank=2, rsi=50, exit='time', sold=m.iso(t0), label='X', screener='3-100')] * 10 + [dict(risk=3, pct=-2.0, peak=0.5, low=-2.0, rank=2, rsi=50, exit='time', sold=m.iso(t0), label='X', screener='3-100')] * 10}
+notes = m.review_tuning(fixed, t0); trial = fixed['state']['tune']['trial']
+check('its trials leave a rule you set alone', trial is None or trial['param'] != 'take', (trial, notes))
+taken = {'settings': dict(m.DEFAULTS, risk=3, takePct=10.0), 'state': {'tune': {'values': {}, 'past': [], 'mark': 0, 'trial': {'id': 1, 'risk': 3, 'param': 'take', 'old': 18, 'new': 9.0, 'since': m.iso(t0)}}}, 'log': [], 'history': []}
+check('and a trial of a rule you then set yourself is ended', 'you set that rule yourself' in m.review_tuning(taken, t0)[0]['text'] and taken['state']['tune']['trial'] is None)
+PRICES.clear(); SNAP['3-100'] = rows(); D.t.clear()
 
 # --- improving its own rules: what the record suggests, a trial beside the current rule, keep or drop, an email each time
 TR = lambda pct, peak=None, low=None, rank=2, rsi=50, exit='time', **k: dict(risk=3, pct=pct, peak=pct if peak is None else peak, low=min(pct, 0) if low is None else low, rank=rank, rsi=rsi, exit=exit, screener='3-100', label='X', **k)
