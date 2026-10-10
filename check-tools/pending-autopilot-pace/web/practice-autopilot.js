@@ -77,6 +77,8 @@
         #practice-autopilot .ap-own { display: flex; gap: 8px 18px; flex-wrap: wrap; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-color); font-size: 0.85rem; color: var(--text-secondary); }
         #practice-autopilot .ap-own strong { color: var(--text-primary); }
         #practice-autopilot .ap-own input { width: 70px; padding: 6px 8px; margin: 0 4px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 16px; }
+        #practice-autopilot .ap-auto { font-size: 0.75rem; font-weight: normal; color: #22c55e; margin-left: 6px; }
+        #practice-autopilot .ap-auto.own { color: var(--text-secondary); }
         #practice-autopilot .ap-may { display: block; padding: 6px 0; cursor: pointer; }
         #practice-autopilot .ap-may input { margin-right: 8px; }
         #practice-autopilot .ap-may small { display: block; margin-left: 24px; color: var(--text-secondary); font-size: 0.8rem; }
@@ -146,11 +148,21 @@
         if (!r) return r;
         return Object.assign({}, r, d.stopPct > 0 ? { stop: -d.stopPct } : {}, d.takePct > 0 ? { take: d.takePct } : {});
     }
+    // The pace a level sets when the three pace fields are left to it ("Automatic"): days to build up, hours between check-ins,
+    // days a holding is kept. PACE in the stockiq-ai-trader Lambda, sent as options.pace.
+    function paceOf(level) { return (data.options.pace || {})[String(level)] || null; }
+    const PACE_FIELDS = ['periodDays', 'everyHours', 'maxHoldDays'];
+    const isAuto = (d, key) => Array.isArray(d.auto) && d.auto.includes(key);
+    function paceWords(level) {
+        const p = paceOf(level);
+        return p ? ` Left to the level, it builds the budget up over ${p.periodDays} day${p.periodDays === 1 ? '' : 's'}, checks in ${everyText(p.everyHours)} and keeps a holding at most ${holdText(p.maxHoldDays)}.` : '';
+    }
     function riskText(level) {
         const r = levelRules(level);
         if (!r) return '';
         return `${r.name}: spreads the budget over up to ${r.positions} holdings, looks at the top ${r.top} of each screener, sells a holding at ${r.stop}% or +${r.take}%`
-            + (r.crypto >= 1 ? ', coins up to the whole budget.' : r.crypto > 0 ? `, up to ${Math.round(r.crypto * 100)}% of the budget in coins (the whole budget if only coin screeners are ticked).` : ', coins only if nothing but coin screeners is ticked.');
+            + (r.crypto >= 1 ? ', coins up to the whole budget.' : r.crypto > 0 ? `, up to ${Math.round(r.crypto * 100)}% of the budget in coins (the whole budget if only coin screeners are ticked).` : ', coins only if nothing but coin screeners is ticked.')
+            + paceWords(level);
     }
     // How much of the budget is in use, check-in by check-in, when every check-in finds enough to buy and nothing is sold
     // early. The same sums as the stockiq-ai-trader Lambda: allowance() (the budget is released in equal steps over the
@@ -296,7 +308,9 @@
         if (breakdown && typeof breakdown.open === 'boolean') breakdownOpen = breakdown.open;
         if (document.querySelectorAll) Array.from(document.querySelectorAll('[data-ap-fold]')).forEach(x => { if (typeof x.open === 'boolean') openDetails[x.getAttribute('data-ap-fold')] = x.open; });
         const d = draft, o = data.options, on = data.settings.enabled, ready = on && data.settings.screeners.length > 0, state = savedState();
-        const select = (id, list, value, label) => `<select id="${id}">${list.map(v => `<option value="${v}" ${v === value ? 'selected' : ''}>${label(v)}</option>`).join('')}</select>`;
+        const lvl = paceOf(d.risk);                        // what the level would set; null if the function does not send it
+        const select = (id, key, list, value, label) => `<select id="${id}">${lvl ? `<option value="auto" ${isAuto(d, key) ? 'selected' : ''}>Automatic: ${label(lvl[key])}</option>` : ''}${list.map(v => `<option value="${v}" ${!isAuto(d, key) && v === value ? 'selected' : ''}>${label(v)}</option>`).join('')}</select>`;
+        const tag = (key) => lvl ? `<span id="ap-tag-${key}" class="ap-auto ${isAuto(d, key) ? '' : 'own'}">${isAuto(d, key) ? 'automatic' : 'set by you'}</span>` : '';
         const icons = { buy: '🟢', sell: '🔴', note: 'ℹ️' };
         const all = (data.log || []).slice().reverse(), log = tradesOnly ? all.filter(e => e.type !== 'note') : all;
         const shown = showAll ? log : log.slice(0, 8);
@@ -330,10 +344,11 @@
                 <div class="ap-card">
                     <div class="ap-fields">
                         <div><label class="ap-label" for="ap-budget">Budget for the AI</label><div class="ap-input">$ <input id="ap-budget" type="number" min="100" step="500" value="${d.budgetUsd}"></div></div>
-                        <div><label class="ap-label" for="ap-period">Build up to it over</label><div class="ap-input"><input id="ap-period" type="number" min="1" max="90" step="1" value="${d.periodDays}"> days</div></div>
-                        <div><label class="ap-label" for="ap-every">Checks in</label><div class="ap-input">${select('ap-every', o.everyHours, d.everyHours, everyText)}</div></div>
-                        <div><label class="ap-label" for="ap-hold">Keeps a holding at most</label><div class="ap-input">${select('ap-hold', o.holdDays, d.maxHoldDays, holdText)}</div></div>
+                        <div><label class="ap-label" for="ap-period">Build up to it over${tag('periodDays')}</label><div class="ap-input"><input id="ap-period" type="number" min="1" max="90" step="1" ${lvl ? `placeholder="${lvl.periodDays}"` : ''} value="${isAuto(d, 'periodDays') ? '' : d.periodDays}"> days</div></div>
+                        <div><label class="ap-label" for="ap-every">Checks in${tag('everyHours')}</label><div class="ap-input">${select('ap-every', 'everyHours', o.everyHours, d.everyHours, everyText)}</div></div>
+                        <div><label class="ap-label" for="ap-hold">Keeps a holding at most${tag('maxHoldDays')}</label><div class="ap-input">${select('ap-hold', 'maxHoldDays', o.holdDays, d.maxHoldDays, holdText)}</div></div>
                     </div>
+                    ${lvl ? `<div class="ap-help">The last three follow the risk level while they are left on automatic (an empty box, or "Automatic" in a menu): move the slider and they move with it. Set one yourself and it stays where you put it.${(d.auto || []).length < 3 ? ' <a href="#" data-ap="autopace">Let the risk level set all three</a>' : ''}</div>` : ''}
                     <div id="ap-plan" class="ap-help">${esc(planText(d))}</div>
                     <div id="ap-pace" class="ap-help">${esc(paceText(d))}</div>
                 </div>
@@ -372,14 +387,22 @@
     function ownLimit(id, key) { const el = byId(id); if (!el || typeof el.value !== 'string') return data.settings[key] || null; const n = Math.abs(parseFloat(el.value)); return n > 0 ? n : null; }
     function readDraft() {
         if (!byId('ap-risk')) return;
+        const risk = parseInt(byId('ap-risk').value, 10) || 3, level = paceOf(risk), left = [];
+        // a pace field left empty or on "Automatic" takes the level's own value, and is listed as left to the level
+        const pace = (id, key, parse, fallback) => {
+            const raw = String(byId(id).value);
+            if (level && (raw === '' || raw === 'auto')) { left.push(key); return level[key]; }
+            const n = parse(raw); return isFinite(n) ? n : fallback;
+        };
         draft = {
-            enabled: !!byId('ap-enabled').checked, risk: parseInt(byId('ap-risk').value, 10) || 3,
-            budgetUsd: parseFloat(byId('ap-budget').value) || 0, periodDays: parseInt(byId('ap-period').value, 10) || 1,
-            everyHours: parseFloat(byId('ap-every').value), maxHoldDays: parseFloat(byId('ap-hold').value),
+            enabled: !!byId('ap-enabled').checked, risk,
+            budgetUsd: parseFloat(byId('ap-budget').value) || 0, periodDays: pace('ap-period', 'periodDays', v => parseInt(v, 10), 1) || 1,
+            everyHours: pace('ap-every', 'everyHours', parseFloat, NaN), maxHoldDays: pace('ap-hold', 'maxHoldDays', parseFloat, NaN),
             screeners: Array.from(document.querySelectorAll('[data-ap-screener]')).filter(c => c.checked).map(c => c.getAttribute('data-ap-screener')).sort(),
             aiSell: may('ap-aisell', 'aiSell'), selfTune: may('ap-tune', 'selfTune'), emails: may('ap-mail', 'emails'),
             stopPct: ownLimit('ap-stop', 'stopPct'), takePct: ownLimit('ap-take', 'takePct')
         };
+        if ('auto' in data.settings) draft.auto = PACE_FIELDS.filter(k => left.includes(k));
     }
     // Bring the button, the "saved" line and the explanatory lines up to date without redrawing (typing keeps its place)
     function syncDraft() {
@@ -391,6 +414,12 @@
         set('ap-status', el => { el.textContent = statusText(); if (el.classList) el.classList.toggle('on', on); });
         set('ap-switch-text', el => { el.textContent = draft.enabled ? 'On' : 'Off'; });
         set('ap-risk-text', el => { el.textContent = riskText(draft.risk); });
+        const lvl = paceOf(draft.risk);
+        if (lvl) {
+            set('ap-period', el => { el.placeholder = String(lvl.periodDays); });
+            [['ap-every', 'everyHours', everyText], ['ap-hold', 'maxHoldDays', holdText]].forEach(([id, key, label]) => set(id, el => { const first = el.options && el.options[0]; if (first && first.value === 'auto') first.textContent = 'Automatic: ' + label(lvl[key]); }));
+            PACE_FIELDS.forEach(key => set('ap-tag-' + key, el => { el.textContent = isAuto(draft, key) ? 'automatic' : 'set by you'; if (el.classList) el.classList.toggle('own', !isAuto(draft, key)); }));
+        }
         set('ap-stop', el => { el.placeholder = hint(draft.risk, 'stop'); });
         set('ap-take', el => { el.placeholder = hint(draft.risk, 'take'); });
         set('ap-plan', el => { el.textContent = planText(draft); });
@@ -497,6 +526,12 @@
         const action = t.getAttribute('data-ap');
         if (action === 'more') { readDraft(); showAll = true; render(); }
         else if (action === 'refresh') refresh(true);
+        else if (action === 'autopace') {                   // hand all three pace settings back to the risk level
+            if (byId('ap-period')) byId('ap-period').value = '';
+            ['ap-every', 'ap-hold'].forEach(id => { if (byId(id)) byId(id).value = 'auto'; });
+            saveError = null; notice = { text: 'The risk level now sets how fast it builds up, how often it checks in and how long it keeps a holding.' };
+            queueSave(150);
+        }
         else if (action === 'sellall') {
             const n = (data.plans || []).length;
             if (!n || !confirm(`Sell the ${n} holding${n === 1 ? '' : 's'} the autopilot bought, now, at the latest prices?\n\nHoldings you bought yourself are not touched. If the autopilot stays switched on it will buy again at its next check-in.`)) return;

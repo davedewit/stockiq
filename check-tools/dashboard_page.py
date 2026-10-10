@@ -8,6 +8,7 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
           preset (presses the "Quick coin trading" set-up), sellall (presses "Sell everything it holds" and says yes),
           limits (types your own loss limit), split (prints the line that says whose result is whose),
           cards (prints the summary cards and every account value shown since the page opened: there should be one),
+          pace (hands the three pace settings to the risk level, moves the slider, sets one by hand, moves it again),
           listswitch (switches the list to "buys and sells only" and reloads the page to see that it is remembered)
 Open the page with headless Chrome: --dump-dom for the printed results, --screenshot for the look (site-overview.md, section 12)."""
 import json, sys
@@ -28,7 +29,7 @@ let portfolio = { v: 1, startingCash: 100000, cash: 15899.07, createdAt: iso(-4)
   { id: 'a1', symbol: 'WEMIX-USD', label: 'WEMIX-USD', name: 'WEMIX USD', currency: 'USD', qty: 1250 / 0.1868991, buyPrice: 0.1868991, buyFx: 1, costUsd: 1250, boughtAt: iso(-2.9), spyAtBuy: 700, note: 'AI: rank 1, RSI 14, down 3.8%% in 7 days on 1.0x volume', by: 'ai', screener: '7-1' }] };
 let version = 3;
 const OPTIONS = %s;
-let auto = { settings: { enabled: true, risk: 3, budgetUsd: 10000, periodDays: 10, everyHours: 0.5, maxHoldDays: 0.25, screeners: ['7-1'], aiSell: true, selfTune: true, emails: true }, coinShare: 1, state: { lastRun: iso(-0.1) }, minSample: 8, practiceCash: 100000, lessons: null, resting: {}, recent: [],
+let auto = { settings: { enabled: true, risk: 3, budgetUsd: 10000, periodDays: 10, everyHours: 0.5, maxHoldDays: 0.25, screeners: ['7-1'], aiSell: true, selfTune: true, emails: true, stopPct: null, takePct: null, auto: [] }, coinShare: 1, state: { lastRun: iso(-0.1) }, minSample: 8, practiceCash: 100000, lessons: null, resting: {}, recent: [],
   scorecard: { n: 0, groups: {} }, rules: { name: 'Balanced', stop: -10, take: 18, trail: 0.5, top: 10, max_rsi: 76, arm: 9, changed: {}, yours: [], level: { stop: -10, take: 18 } }, realizedUsd: 7.91,
   tune: { trial: null, past: [], nextReviewIn: 20, batch: 20, group: 10, finished: 0 }, month: { last30: { n: 0, up: 0, usd: 0, pct: 0 }, before30: { n: 0, up: 0, usd: 0, pct: 0 } },
   nextCheck: { at: iso(0.4), markets: ['coin'] }, holding: { count: 1, investedUsd: 1250 },
@@ -99,6 +100,15 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
       document.getElementById('out').textContent = sessionStorage.getItem('reloaded') + document.getElementById('out').textContent; sessionStorage.removeItem('reloaded');
       out('  after a real page refresh: on=' + box().checked + ', lines listed=' + rows() + ', at y=' + Math.round(box().getBoundingClientRect().top + window.scrollY)); localStorage.removeItem('stockiqAutopilotTradesOnly'); }
     if (step === 'cards') { out('account values shown since the page opened: ' + JSON.stringify(SEEN)); Array.from(document.querySelectorAll('#practice-portfolio > div:first-child > div')).forEach(c => out('  card: ' + c.textContent.replace(/\\s+/g, ' ').trim())); }
+    if (step === 'pace') {
+      const show = (what) => out(what + ': build-up "' + q('#ap-period').value + '" (greyed ' + q('#ap-period').placeholder + '), checks in "' + q('#ap-every').selectedOptions[0].textContent + '", keeps "' + q('#ap-hold').selectedOptions[0].textContent + '" | tags ' + Array.from(document.querySelectorAll('#practice-autopilot .ap-auto')).map(x => x.textContent).join(', ') + ' | saved ' + JSON.stringify([auto.settings.risk, auto.settings.periodDays, auto.settings.everyHours, auto.settings.maxHoldDays, auto.settings.auto]));
+      show('pace, as saved before (set by hand)');
+      q('[data-ap="autopace"]').click(); await wait(900); show('pressed "Let the risk level set all three"');
+      const r = q('#ap-risk'); r.value = '5'; r.dispatchEvent(new Event('input', { bubbles: true })); await wait(200); show('moved the slider to Adventurous (before it is saved)'); out('  it says: ' + q('#ap-plan').textContent.slice(0, 140));
+      await wait(1400); show('  a moment later');
+      const h = q('#ap-hold'); h.value = String(0.25); h.dispatchEvent(new Event('change', { bubbles: true })); await wait(900); show('chose 6 hours for the holding time myself');
+      const r2 = q('#ap-risk'); r2.value = '1'; r2.dispatchEvent(new Event('input', { bubbles: true })); r2.dispatchEvent(new Event('change', { bubbles: true })); await wait(1500); show('moved the slider to Cautious');   // the panel was redrawn: take the slider afresh
+      out('  it says: ' + q('#ap-pace').textContent.slice(0, 110)); }
     if (step === 'off') { q('#ap-enabled').click(); await wait(700); out('switched the autopilot off: ' + cellText('WEMIX')); }
     if (step === 'open') { document.querySelectorAll('#practice-autopilot details').forEach(d => { d.open = true; }); const s = q('#pp-sold'); if (s) s.open = true; out('unfolded the details'); }
   }
@@ -107,6 +117,7 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
 })().catch(e => out('ERROR ' + e.message));
 </script></body></html>''' % (theme, json.dumps({'screeners': {'3-100': {'name': 'S&P 100', 'kind': 'stock', 'group': 'US shares'}, '4-200': {'name': 'ASX 200', 'kind': 'stock', 'group': 'Australian shares'}, '7-1': {'name': 'Crypto (top coins)', 'kind': 'crypto', 'group': 'Coins'}},
     'everyHours': [0.5, 1, 3, 6, 12, 24], 'holdDays': [h / 24 for h in (0.5, 1, 3, 6, 12, 24, 48, 120, 240, 480, 1440)],
+    'pace': {'1': dict(periodDays=10, everyHours=24, maxHoldDays=20), '2': dict(periodDays=7, everyHours=12, maxHoldDays=10), '3': dict(periodDays=5, everyHours=6, maxHoldDays=5), '4': dict(periodDays=2, everyHours=3, maxHoldDays=2), '5': dict(periodDays=1, everyHours=1, maxHoldDays=1)},
     'risk': {str(k): dict(name=n, positions=p, top=t, stop=s, take=g, crypto=c, trail=0.5, max_rsi=r) for k, (n, p, t, s, g, c, r) in {1: ('Cautious', 12, 5, -5, 8, 0, 68), 2: ('Careful', 10, 8, -7, 12, 0, 72), 3: ('Balanced', 8, 10, -10, 18, 0.25, 76), 4: ('Bold', 6, 15, -14, 28, 0.5, 82), 5: ('Adventurous', 4, 20, -20, 45, 1, 101)}.items()}}),
     open(pp).read().replace('</script>', '<\\/script>'), open(ap).read().replace('</script>', '<\\/script>'), json.dumps([x for x in steps.split(',') if x]))
 open(out, 'w').write(page)
