@@ -10,14 +10,24 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
           cards (prints the summary cards and every account value shown since the page opened: there should be one),
           pace (hands the three pace settings to the risk level, moves the slider, sets one by hand, moves it again),
           trailstop (chooses the full trailing stop loss in "Your own limits"),
+          tabs (needs the dashboard file as a sixth argument: presses each dashboard tab and the autopilot's two parts),
           listswitch (switches the list to "buys and sells only" and reloads the page to see that it is remembered)
 Open the page with headless Chrome: --dump-dom for the printed results, --screenshot for the look (site-overview.md, section 12)."""
 import json, sys
 pp, ap, out, theme, steps = sys.argv[1:6]
+# An optional sixth argument, the path of dashboard.html: its real tab bar, tab styles and tab script are put into the
+# test page (between the DASH_TABS_* markers), so the tabs are tested as they are on the site. Step: tabs.
+BAR = STYLE = SCRIPT = ''
+if len(sys.argv) > 6:
+    dash = open(sys.argv[6]).read()
+    cut = lambda a, b: dash[dash.index(a) + len(a):dash.index(b)]
+    BAR = cut('DASH_TABS_BAR_START', '<!-- DASH_TABS_BAR_END -->').split('-->', 1)[1]
+    SCRIPT = cut('<!-- DASH_TABS_SCRIPT_START -->', '<!-- DASH_TABS_SCRIPT_END -->')
+    STYLE = '<style>' + dash[dash.index("        /* The dashboard's own tabs"):dash.index('        .button-container {')] + '</style>'
 page = '''<!doctype html><html data-theme="%s"><head><meta charset="utf-8"><title>running</title>
 <link rel="stylesheet" href="https://stockiq.tech/styles.css">
 <style>body{padding:20px;background:var(--bg-primary);margin:0} .history-section{background:var(--card-bg);border:1px solid var(--border-color);border-radius:8px;padding:20px;margin-bottom:20px} #out{font:12px monospace;white-space:pre-wrap;color:var(--text-primary)}</style></head><body>
-<div class="history-section"><h2 style="color:var(--text-primary);margin-top:0">Practice portfolio</h2><div id="practice-portfolio"></div><div id="practice-autopilot"></div></div><pre id="out"></pre>
+TABS_GO_HERE<pre id="out"></pre>
 <script>
 localStorage.setItem('userId', 'owner@example.com');
 // every account value the page shows, in order: a figure that flashes up before the prices are in would be listed here
@@ -112,6 +122,13 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
       out('  it says: ' + q('#ap-pace').textContent.slice(0, 110)); }
     if (step === 'trailstop') { const t = q('#ap-trail'); out('trailing stop: "' + t.selectedOptions[0].textContent + '" | ' + q('#ap-trail-text').textContent.slice(0, 90)); t.value = 'full'; t.dispatchEvent(new Event('change', { bubbles: true })); await wait(900);
       out('  chose the full trailing stop loss: saved trailMode=' + auto.settings.trailMode + ' | "' + q('#ap-trail').selectedOptions[0].textContent + '" | ' + q('#ap-trail-text').textContent.slice(0, 110)); out('  it says: ' + q('#ap-pace').textContent.slice(60, 260)); }
+    if (step === 'tabs') {
+      const seen = () => Array.from(document.querySelectorAll('[data-dash-panel]')).filter(p => !p.hidden).map(p => p.getAttribute('data-dash-panel')).join(',') + ' | tabs offered: ' + Array.from(document.querySelectorAll('[data-dash-tab]')).filter(b => !b.hidden).map(b => b.textContent.trim() + (b.classList.contains('active') ? '*' : '')).join(' / ') + ' | address ' + (location.hash || '(none)');
+      out('tabs at the start: showing ' + seen());
+      for (const name of ['practice', 'autopilot', 'reports', 'autopilot']) { q('[data-dash-tab="' + name + '"]').click(); await wait(150); out('  pressed ' + name + ': showing ' + seen() + ' | remembered ' + localStorage.getItem('stockiqDashboardTab')); }
+      out('  autopilot parts: ' + ['activity', 'settings'].map(n => n + (q('#ap-pane-' + n).style.display === 'none' ? ' hidden' : ' shown')).join(', ')); q('[data-ap-part="settings"]').click(); await wait(100);
+      out('  pressed Settings inside the autopilot: ' + ['activity', 'settings'].map(n => n + (q('#ap-pane-' + n).style.display === 'none' ? ' hidden' : ' shown')).join(', ') + ' | page height now ' + document.documentElement.scrollHeight + 'px'); q('[data-ap-part="activity"]').click(); await wait(100);
+      out('  back on Activity: page height ' + document.documentElement.scrollHeight + 'px'); localStorage.removeItem('stockiqDashboardTab'); localStorage.removeItem('stockiqAutopilotPart'); }
     if (step === 'off') { q('#ap-enabled').click(); await wait(700); out('switched the autopilot off: ' + cellText('WEMIX')); }
     if (step === 'open') { document.querySelectorAll('#practice-autopilot details').forEach(d => { d.open = true; }); const s = q('#pp-sold'); if (s) s.open = true; out('unfolded the details'); }
   }
@@ -123,4 +140,8 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
     'pace': {'1': dict(periodDays=10, everyHours=24, maxHoldDays=20), '2': dict(periodDays=7, everyHours=12, maxHoldDays=10), '3': dict(periodDays=5, everyHours=6, maxHoldDays=5), '4': dict(periodDays=2, everyHours=3, maxHoldDays=2), '5': dict(periodDays=1, everyHours=1, maxHoldDays=1)},
     'risk': {str(k): dict(name=n, positions=p, top=t, stop=s, take=g, crypto=c, trail=0.5, max_rsi=r) for k, (n, p, t, s, g, c, r) in {1: ('Cautious', 12, 5, -5, 8, 0, 68), 2: ('Careful', 10, 8, -7, 12, 0, 72), 3: ('Balanced', 8, 10, -10, 18, 0.25, 76), 4: ('Bold', 6, 15, -14, 28, 0.5, 82), 5: ('Adventurous', 4, 20, -20, 45, 1, 101)}.items()}}),
     open(pp).read().replace('</script>', '<\\/script>'), open(ap).read().replace('</script>', '<\\/script>'), json.dumps([x for x in steps.split(',') if x]))
-open(out, 'w').write(page)
+one_section = '<div class="history-section"><h2 style="color:var(--text-primary);margin-top:0">Practice portfolio</h2><div id="practice-portfolio"></div><div id="practice-autopilot"></div></div>'
+tabbed = (STYLE + BAR + '<div data-dash-panel="reports"><div class="history-section"><h2 style="color:var(--text-primary);margin-top:0">Report History</h2><p style="color:var(--text-secondary)">(the reports would be here)</p></div></div>'
+          + '<div data-dash-panel="practice" hidden><div class="history-section"><h2 style="color:var(--text-primary);margin-top:0">Practice Portfolio</h2><div id="practice-portfolio"></div></div></div>'
+          + '<div data-dash-panel="autopilot" hidden><div class="history-section"><div id="practice-autopilot"></div></div></div>' + SCRIPT)
+open(out, 'w').write(page.replace('TABS_GO_HERE', tabbed if BAR else one_section))

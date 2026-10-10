@@ -299,6 +299,26 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     check('once a trade is the newest thing, that line is gone', !/Latest check-in:/.test(w.text()) && /Bought SOL-USD/.test(w.text()));
     kept.stockiqAutopilotTradesOnly = '0';
   }
+  // the panel is in two parts, Activity and Settings, so that neither is a long scroll
+  { delete kept.stockiqAutopilotPart;
+    const off = { settings: { ...settings, enabled: false, screeners: [] }, state: {}, log: [], practiceCash: 100000 };
+    const on = { settings: { ...settings, enabled: true, screeners: ['7-1'] }, state: {}, log: [{ t: '2026-10-10T15:33:45Z', type: 'buy', symbol: 'SOL-USD', usd: 6250, text: 'rank 2' }], practiceCash: 100000 };
+    const a = page(b => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, ...off } })); await sleep(30);
+    const pane = (w, n) => (w.container.innerHTML.match(new RegExp('<div id="ap-pane-' + n + '" class="ap-pane" style="([^"]*)"')) || [])[1];
+    check('not switched on yet: it opens on Settings', pane(a, 'settings') === '' && pane(a, 'activity') === 'display: none;' && /id="ap-view-settings" class="ap-view now"/.test(a.container.innerHTML), [pane(a, 'activity'), pane(a, 'settings')]);
+    const b = page(x => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, ...on } })); await sleep(30);
+    check('switched on with a screener: it opens on Activity', pane(b, 'activity') === '' && pane(b, 'settings') === 'display: none;' && /id="ap-view-activity" class="ap-view now"/.test(b.container.innerHTML));
+    const h = b.container.innerHTML, at = (t) => h.indexOf(t);
+    check('the switch, the status and the buttons sit above both parts; each part holds its own things', at('id="ap-status"') < at('id="ap-run"') && at('id="ap-run"') < at('class="ap-views"') && at('class="ap-views"') < at('id="ap-pane-activity"') && at('id="ap-pane-activity"') < at('How it is doing') && at('What it has done') < at('id="ap-pane-settings"') && at('id="ap-pane-settings"') < at('Quick set-ups:') && at('Quick set-ups:') < at('What it may do by itself'), [at('id="ap-run"'), at('class="ap-views"'), at('id="ap-pane-activity"'), at('id="ap-pane-settings"')]);
+    Object.assign(b.els, { 'ap-pane-activity': { style: { display: '' } }, 'ap-pane-settings': { style: { display: 'none' } }, 'ap-view-activity': { classList: { on: {}, toggle(c, v) { this.on[c] = v; } } }, 'ap-view-settings': { classList: { on: {}, toggle(c, v) { this.on[c] = v; } } } });
+    b.handlers.click.forEach(f => f({ target: { closest: sel => sel === '[data-ap-part]' ? { getAttribute: () => 'settings' } : null }, preventDefault() {} }));
+    check('pressing Settings shows it and hides Activity, without asking the server again', b.els['ap-pane-settings'].style.display === '' && b.els['ap-pane-activity'].style.display === 'none' && b.els['ap-view-settings'].classList.on.now === true && b.els['ap-view-activity'].classList.on.now === false && b.calls.length === 1, [b.els['ap-pane-settings'].style.display, b.calls.length]);
+    const c = page(x => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, ...on } })); await sleep(30);
+    check('the part last looked at is remembered after a refresh', kept.stockiqAutopilotPart === 'settings' && pane(c, 'settings') === '' && pane(c, 'activity') === 'display: none;');
+    b.form(on.settings); await b.ctx.practiceAutopilot.flush(); await sleep(30);
+    check('settings are still read and saved while Activity is the part on show (both are always in the page)', /id="ap-risk"/.test(c.container.innerHTML) && /id="ap-budget"/.test(c.container.innerHTML));
+    delete kept.stockiqAutopilotPart;
+  }
   // your own loss limit and gain mark
   { const st = { settings: { ...settings, screeners: ['3-100'], aiSell: true, selfTune: true, emails: true, stopPct: null, takePct: null }, state: {}, log: [], practiceCash: 100000, realizedUsd: 7.91,
       rules: { name: 'Balanced', stop: -10, take: 18, trail: 0.5, top: 10, max_rsi: 76, arm: 9, changed: {}, yours: [], level: { stop: -10, take: 18 } }, plans: [], tune: { past: [], trial: null, nextReviewIn: 20, batch: 20, group: 10 } };
