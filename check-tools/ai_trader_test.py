@@ -19,6 +19,8 @@ spec = importlib.util.spec_from_file_location('tr', sys.argv[1]); m = importlib.
 # These tests set the pace (build-up days, check-in gap, holding time) by hand, as a user who has chosen his own values.
 # A new user leaves all three to the risk level; that is tested on its own further down, with the real defaults (REAL).
 REAL = dict(m.DEFAULTS, auto=list(m.DEFAULTS['auto'])); m.DEFAULTS.update(periodDays=10, everyHours=24, maxHoldDays=20, auto=[])
+# Likewise these tests buy a coin the first time it is on the shortlist; the wait for a coin to stay there is tested on its own (STAY).
+STAY = m.STAY_CHECKS; m.STAY_CHECKS = 1
 D = DB(); m._db = D
 U = 'tester@x.com'
 ok = True
@@ -183,7 +185,7 @@ check('the stored copy is small enough for the table', len(D.Table(m.SETTINGS_TA
 D.t.clear(); PRICES.clear(); SNAP['3-100'] = rows(); MODEL['answer'] = None; MODEL['prompts'].clear()
 rec = m.load_item(U); rec['settings'].update(enabled=True, risk=5, budgetUsd=4000.0, periodDays=1, everyHours=24, maxHoldDays=5, screeners=['3-100']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
 s, rec = run(t0); s, rec = run(t0 + dt.timedelta(days=1)); ids = {h['symbol']: h['id'] for h in portfolio()['holdings']}
-check('remembers what each buy was based on', len(rec['state']['open']) == 4 and rec['state']['open'][ids['S00']] == {'symbol': 'S00', 'label': 'S00', 'screener': '3-100', 'risk': 5, 'chosen': 'rules', 'rank': 1, 'score': 4.0, 'rsi': 50.0, 'd7': 3.0, 'd30': 5.0, 'volume': 1.2, 't': m.iso(t0), 'hold': 5.0, 'peak': 0.0, 'low': 0.0, 'path': [[24.0, 0.0]], 'stop': {'arm': 11.2, 'floor': None, 'move': None, 'room': None}}, rec['state']['open'].get(ids['S00']))
+check('remembers what each buy was based on', len(rec['state']['open']) == 4 and rec['state']['open'][ids['S00']] == {'symbol': 'S00', 'label': 'S00', 'screener': '3-100', 'risk': 5, 'chosen': 'rules', 'rank': 1, 'score': 4.0, 'rsi': 50.0, 'd7': 3.0, 'd30': 5.0, 'volume': 1.2, 't': m.iso(t0), 'hold': 5.0, 'peak': 0.0, 'low': 0.0, 'stay': 1, 'path': [[24.0, 0.0]], 'stop': {'arm': 11.2, 'floor': None, 'move': None, 'room': None}}, rec['state']['open'].get(ids['S00']))
 PRICES.update(S00=79.0, S01=150.0)
 s, rec = run(t0 + dt.timedelta(days=2)); hist = {x['symbol']: x for x in rec['history']}
 check('sold holdings go into the history with their result', s['sold'] == 2 and set(hist) == {'S00', 'S01'} and hist['S00']['pct'] == -21.0 and hist['S00']['exit'] == 'stop' and hist['S00']['market'] == 0.0 and hist['S00']['vs'] == -21.0 and hist['S00']['days'] == 2.0
@@ -477,6 +479,37 @@ r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); m.date
 check('so the schedule still checks in for it and sells it when its time is up', r['ran'] and r['ran'][0]['sold'] == 1 and coin['id'] not in [h['id'] for h in portfolio()['holdings']] and 'the longest this autopilot keeps a holding' in [e for e in rec['log'] if e['type'] == 'sell'][-1]['text'] and m.its_markets(rec) == {'jp'}, (r, [e['text'][:80] for e in rec['log'][-2:]]))
 PRICES.clear(); SNAP['7-1'] = rows('crypto', '7-1'); D.t.clear()
 
+# --- a coin is bought only once it has stayed near the top; results after a typical trading cost; coins rested on their own results
+m.STAY_CHECKS = STAY                                                                                       # the real wait for this part
+C = lambda sym: {'symbol': sym, 'kind': 'crypto'}; st = {}; half = dt.timedelta(minutes=30)
+check('how long a candidate has stayed on the shortlist is counted check-in by check-in', m.note_stays(st, [C('A'), C('B')], t0, 0.5) == {'A': 1, 'B': 1} and m.note_stays(st, [C('A'), C('B'), C('N')], t0 + half, 0.5) == {'A': 2, 'B': 2, 'N': 1} and m.note_stays(st, [C('A'), C('N')], t0 + 2 * half, 0.5) == {'A': 3, 'N': 2} and m.note_stays(st, [C('A'), C('B')], t0 + 3 * half, 0.5) == {'A': 4, 'B': 1}, st)
+check('a second look a few minutes later does not count as another check-in; a long gap starts the count again', m.note_stays(st, [C('A')], t0 + 3 * half + dt.timedelta(minutes=5), 0.5) == {'A': 4} and m.note_stays(st, [C('A')], t0 + 4 * half, 0.5) == {'A': 5} and m.note_stays(st, [C('A')], t0 + 4 * half + dt.timedelta(hours=3), 0.5) == {'A': 1}, st)
+D.t.clear(); PRICES.clear(); ATR.clear(); MODEL['answer'] = None; MODEL['prompts'].clear(); SNAP['7-1'] = rows('crypto', '7-1'); SNAP['3-100'] = rows()
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=0.5, maxHoldDays=1, screeners=['7-1']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+s, rec = run(t0)
+check('checking in every 30 minutes: at the first check-in every coin is new to it, so it waits and says why', s['bought'] == 0 and portfolio() is None and rec['log'][-1]['key'] == 'stay' and 'Waiting to see which coins stay near the top: the 10 on its shortlist are new to it. It buys a coin once it has been there at 2 check-ins running' in rec['log'][-1]['text'] and len(buy_prompts()) == 0, rec['log'][-1])
+SNAP['7-1'] = [r for r in rows('crypto', '7-1') if r['symbol'] != 'C00-USD'] + [dict(rows('crypto', '7-1')[0], symbol='NEW-USD', label='NEW-USD', score=9.0)]
+SNAP['7-1'] = sorted(SNAP['7-1'], key=lambda r: -r['score']); [r.update(rank=i + 1) for i, r in enumerate(SNAP['7-1'])]
+s, rec = run(t0 + half); bought = [h['symbol'] for h in portfolio()['holdings']]; ask = buy_prompts()[-1]['user']
+check('at the next check-in it buys from those that stayed, and passes over a newcomer even at rank 1', s['bought'] == 1 and bought == ['C01-USD'] and 'NEW-USD' not in ask and 'C01-USD | Crypto (top coins) rank 2 |' in ask and '| on the shortlist at 2 check-ins running' in ask and rec['state']['open'][portfolio()['holdings'][0]['id']]['stay'] == 2, (bought, ask[-400:]))
+D.t.clear(); MODEL['prompts'].clear(); SNAP['7-1'] = rows('crypto', '7-1')
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=20, screeners=['3-100', '7-1']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+s, rec = run(t0); kinds = {h['symbol'].endswith('-USD') for h in portfolio()['holdings']}
+check('checking in once a day there is no wait (a day is too long to wait), and shares are never held back', s['bought'] == 3 and '| new to the shortlist' in buy_prompts()[-1]['user'], (s, kinds))
+rec = m.load_item(U); rec['settings'].update(everyHours=0.5, screeners=['3-100']); m.save_item(U, rec)
+D.t.clear(); rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=0.5, maxHoldDays=20, screeners=['3-100']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+s, rec = run(t0); check('a share screener checked every 30 minutes buys at once', s['bought'] == 1 and not portfolio()['holdings'][0]['symbol'].endswith('-USD'), s)
+H = lambda stay, pct: dict(risk=3, pct=pct, stay=stay, rank=2, rsi=50, exit='time', screener='7-1', label='X', sold=m.iso(t0), usd=pct * 10, cost=1000.0)
+card = m.scorecard([H(1, -1.0)] * 3 + [H(3, 2.0)] * 4 + [H(8, 3.0)] * 2 + [dict(H(None, 0.0))])
+check('the record shows how buys did by how long they had stayed near the top', [(g['label'], g['n'], g['avg']) for g in card['groups']['stay']] == [('new to the shortlist', 3, -1.0), ('there 2 to 4 check-ins', 4, 2.0), ('there 5 check-ins or more', 2, 3.0), ('not recorded', 1, 0.0)], card['groups']['stay'])
+mf = m.month_figures([dict(usd=50.0, cost=1000.0, sold=m.iso(t0 - dt.timedelta(days=1))), dict(usd=-20.0, cost=2000.0, sold=m.iso(t0 - dt.timedelta(days=2)))], 10000.0, t0)['last30']
+check('results after a typical trading cost of 0.1% on each buy and each sell: $30.00 becomes $23.97', mf['usd'] == 30.0 and mf['afterCosts'] == 23.97 and m.public({'settings': dict(m.DEFAULTS), 'state': {}, 'log': [], 'history': []}, t0)['costEachWay'] == 0.1, mf)
+coin = lambda pct, vs: dict(risk=3, pct=pct, vs=vs, screener='7-1', label='X', sold=m.iso(t0 + dt.timedelta(hours=1)), exit='time')
+r1 = {'settings': dict(m.DEFAULTS, screeners=['7-1']), 'state': {}, 'log': [], 'history': [coin(-2.0, 3.0)] * 8}
+r2 = {'settings': dict(m.DEFAULTS, screeners=['7-1']), 'state': {}, 'log': [], 'history': [coin(2.0, -3.0)] * 8}
+check('a coin screener is rested on its own results, not on how the share market did', 'Resting the Crypto (top coins) screener for 14 days: its last 8 trades averaged -2.0%.' in m.review_resting(r1, t0 + dt.timedelta(hours=2))[0]['text'] and m.review_resting(r2, t0 + dt.timedelta(hours=2)) == [], (r1['state'], r2['state']))
+m.STAY_CHECKS = 1; PRICES.clear(); MODEL['prompts'].clear(); SNAP['7-1'] = rows('crypto', '7-1'); SNAP['3-100'] = rows(); D.t.clear()
+
 # --- improving its own rules: what the record suggests, a trial beside the current rule, keep or drop, an email each time
 TR = lambda pct, peak=None, low=None, rank=2, rsi=50, exit='time', **k: dict(risk=3, pct=pct, peak=pct if peak is None else peak, low=min(pct, 0) if low is None else low, rank=rank, rsi=rsi, exit=exit, screener='3-100', label='X', **k)
 base_rules = m.rules_for({'risk': 3})
@@ -535,7 +568,7 @@ f_in = m.remember_buy(st, {'id': 'h1', 'boughtAt': m.iso(t0)}, {'symbol': 'A', '
 f_out = m.remember_buy(st, {'id': 'h2', 'boughtAt': m.iso(t0)}, {'symbol': 'B', 'label': 'B', 'screener': '3-100', 'rank': 13, 'score': 3.0, 'rsi': 50, 'd7': 1, 'd30': 1, 'volume': 1}, dict(m.DEFAULTS, risk=3), 'rules')
 check('and the extra buys are the group that is compared with the usual ones', f_in['v'] == 'old' and f_out['v'] == 'new' and f_out['x'] == 7, (f_in, f_out))
 month = m.month_figures([{'usd': 100.0, 'sold': m.iso(t0 - dt.timedelta(days=3))}, {'usd': -40.0, 'sold': m.iso(t0 - dt.timedelta(days=10))}, {'usd': 25.0, 'sold': m.iso(t0 - dt.timedelta(days=45))}, {'sold': m.iso(t0)}], 10000.0, t0)
-check('the last 30 days and the 30 before, in dollars and as a share of the budget', month == {'last30': {'n': 2, 'up': 1, 'usd': 60.0, 'pct': 0.6}, 'before30': {'n': 1, 'up': 1, 'usd': 25.0, 'pct': 0.25}}, month)
+check('the last 30 days and the 30 before, in dollars and as a share of the budget', month == {'last30': {'n': 2, 'up': 1, 'usd': 60.0, 'pct': 0.6, 'afterCosts': 59.94}, 'before30': {'n': 1, 'up': 1, 'usd': 25.0, 'pct': 0.25, 'afterCosts': 24.98}}, month)
 PRICES.clear(); SNAP['3-100'] = rows(); SNAP['7-1'] = rows('crypto', '7-1'); D.t.clear()
 
 # scheduled event end to end (with the stand-ins patched in)
