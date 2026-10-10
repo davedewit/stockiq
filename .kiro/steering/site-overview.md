@@ -307,8 +307,9 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   - Test without logging in: `node check-tools/practice_test.js <path to practice-portfolio.js with the
     __PRACTICE_API_URL__ placeholder>` (real prices, in-memory storage). **Do not run it against the
     deployed file**: that one holds the real address and would write to the live table.
-  - Not built: a buy button on the generated stock pages or on the single-stock report (enter the
-    code on the dashboard instead); partial sells; dividends; a history chart of the account value.
+  - **Dashboard only (owner's decision, 10 Oct 2026):** buying, selling and viewing progress all stay
+    on the dashboard. Do not add buy buttons to the generated stock pages or the single-stock report.
+  - Not built: partial sells; dividends; a history chart of the account value.
 - Stock pages load `sidebar.js`, `stock-prices.js` (live ticker), `ai-chat.js`, `auth.js`, `theme.js`.
 - AI chat button: bottom-right on every page; on the home page it moves left of the news panel
   only from 1401px wide (the panel is hidden below that).
