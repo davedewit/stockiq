@@ -787,7 +787,14 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
 Yahoo Finance RSS by symbol for shares (a share's company name comes from its quote).
 `pick_headlines` keeps at most three, under 72 hours old, that **name the holding** (its code or
 the first real word of its name) and drops price, forecast and converter pages (`NEWS_JUNK`; the
-first real headline to reach the model, at 15:10 UTC on 10 Oct, was a "price forecast" page). Kept two hours
+first real headline to reach the model, at 15:10 UTC on 10 Oct, was a "price forecast" page).
+**A coin's headline must be about the coin.** A coin's ticker is often also a company or a word:
+on 10 Oct the model was shown share news about ERG S.p.A. (an Italian energy company, "ERG
+(BIT:ERG) Stock Could Be Trading At A Premium…") as headlines for the Ergo coin. For a coin a
+headline now counts only if it names the coin by its own name ("Ergo"; taken from its quote, also
+for candidates), or by its ticker beside a crypto word (`COIN_WORDS`), or the ticker has five
+letters or more; and never if it reads like share news (`SHARE_NEWS`: an exchange code in
+brackets, "stock", "shares", "dividend", "earnings"). Share headlines are not touched by this. Kept two hours
 (`state.news`, `state.seen`). Headlines are untrusted text: both prompts say so, and the model's
 answer can only pick from a list or say hold / sell. Small coins usually have none; then it is the
 figures alone. Only the deployed function fetches (`AWS_LAMBDA_FUNCTION_NAME`); a test run never
@@ -916,7 +923,7 @@ that it at least does not fool itself.
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 224 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 228 checks
    node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 117 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 64 checks
@@ -1381,6 +1388,8 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     packaged as `check-tools/pending-<name>/deploy.sh` runs without a hand-off. Keep packaging deploys
     that way (live-code check, rollback copy, `DRY_RUN=true`), run the dry run, then run it.
   - Autopilot activity list: "Buys and sells only" became a switch remembered in the browser.
+  - **Headlines for a coin must be about the coin** (section 8c): share news about a company with the
+    same letters as a coin's ticker had reached the model. Rollback zip: `…_before_autopilot_news_…`.
   - **Dashboard tidied into tabs** (sections 8 and 8c): Reports, Practice portfolio and AI autopilot
     each have a tab; the autopilot panel is split into Activity and Settings with its switch and
     buttons kept at the top. Website files only.
