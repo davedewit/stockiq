@@ -11,7 +11,7 @@ html = '''<!DOCTYPE html><html data-theme="%s"><head><meta charset="UTF-8"><meta
 <script>
 localStorage.setItem('userId', 'dave@dewit.com.au');
 const OPTIONS = %s;
-let stored = { settings: { enabled: false, risk: 3, budgetUsd: 10000, periodDays: 10, everyHours: 24, maxHoldDays: 20, screeners: ['3-100'] }, state: {}, log: [], scorecard: { n: 0, groups: {} }, lessons: null, resting: {}, recent: [], minSample: 8 };
+let stored = { settings: { enabled: false, risk: 3, budgetUsd: 10000, periodDays: 10, everyHours: 24, maxHoldDays: 20, screeners: [] }, state: {}, log: [], scorecard: { n: 0, groups: {} }, lessons: null, resting: {}, recent: [], minSample: 8 };
 const calls = [];
 window.fetch = async (url, opts) => {
   const b = JSON.parse(opts.body); calls.push(b.action);
@@ -35,12 +35,12 @@ const state = () => 'status="' + (q('#ap-status') ? q('#ap-status').textContent.
   const steps = %s;
   for (const step of steps) {
     if (step === 'tick-on') { q('#ap-enabled').click(); await wait(500); out('ticked Switched on: ' + state()); }
-    if (step === 'save') { q('[data-ap="save"]').click(); await wait(600); out('clicked Save: ' + state()); }
     if (step === 'run') { const b = q('[data-ap="run"]'); out('Check in now disabled? ' + b.disabled); b.click(); await wait(700); out('clicked Check in now: ' + state()); }
-    if (step === 'btn') { const sv = q('[data-ap="save"]'), rn = q('[data-ap="run"]'); out('buttons: save="' + sv.textContent + '" disabled=' + sv.disabled + ' | run disabled=' + rn.disabled + ' title="' + rn.title + '" | switch text=' + q('#ap-switch-text').textContent + ' | dirty="' + q('#ap-dirty').textContent + '"'); }
-    if (step === 'budget') { const b = q('#ap-budget'); b.focus(); b.value = '20000'; b.dispatchEvent(new Event('input', { bubbles: true })); await wait(300); out('typed budget 20000: focus kept=' + (document.activeElement === b) + ' plan="' + q('#ap-plan').textContent.slice(0, 60) + '"'); }
+    if (step === 'btn') { const rn = q('[data-ap="run"]'); out('state: saved line="' + q('#ap-saved').textContent + '" | run disabled=' + rn.disabled + ' title="' + rn.title + '" | switch text=' + q('#ap-switch-text').textContent + ' | save button present=' + !!q('[data-ap="save"]')); }
+    if (step === 'refresh') { await wait(1300); await window.practiceAutopilot.reload(); await wait(400); out('after a refresh: ticked=' + JSON.stringify(Array.from(document.querySelectorAll('[data-ap-screener]')).filter(c => c.checked).map(c => c.getAttribute('data-ap-screener'))) + ' budget=' + q('#ap-budget').value + ' risk=' + q('#ap-risk').value + ' on=' + q('#ap-enabled').checked + ' ' + state()); }
+    if (step === 'budget') { const b = q('#ap-budget'); b.focus(); b.value = '20000'; b.dispatchEvent(new Event('input', { bubbles: true })); await wait(300); out('typed budget 20000: focus kept=' + (document.activeElement === b) + ' saved line="' + q('#ap-saved').textContent + '"'); await wait(1300); out('  1.3s later: focus still kept=' + (document.activeElement === b) + ' saved line="' + q('#ap-saved').textContent + '" ' + state()); }
     if (step === 'level') { q('[data-ap-level="1"]').click(); await wait(300); out('clicked the word Cautious: slider=' + q('#ap-risk').value + ' text="' + q('#ap-risk-text').textContent.slice(0, 40) + '"'); }
-    if (step === 'tick-asx') { q('[data-ap-screener="4-200"]').click(); await wait(500); out('ticked ASX 200: ' + state() + ' saveButtonBlue=' + q('[data-ap="save"]').classList.contains('primary')); }
+    if (step === 'tick-asx') { q('[data-ap-screener="4-200"]').click(); await wait(500); out('ticked ASX 200: saved line="' + q('#ap-saved').textContent + '" ' + state()); }
     if (step === 'slide') { const r = q('#ap-risk'); r.value = '5'; r.dispatchEvent(new Event('input', { bubbles: true })); r.dispatchEvent(new Event('change', { bubbles: true })); await wait(500); out('moved risk to 5: text="' + q('#ap-risk-text').textContent.slice(0, 60) + '" ' + state()); }
   }
   document.title = 'done';

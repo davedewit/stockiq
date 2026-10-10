@@ -200,6 +200,18 @@ text = m.memory_text(m.scorecard(rec['history']), rec['state']['lessons'])
 check('the record and notes are put in front of the model when it chooses', 'All 14 closed trades' in text and '- S&P 100: 14 trades' in text and 'Note from the last review: Trades bought with RSI under 45' in text and 'own record so far' in m.build_prompt(rec['settings'], SNAP['3-100'][:3], '', 1, text)['user'] and 'own record' not in m.build_prompt(rec['settings'], SNAP['3-100'][:3], '', 1)['user'])
 m.save_item(U, rec); s, b = call(action='get', userId=U)
 check('the dashboard gets the scorecard, notes and resting list, not the bulk', b['scorecard']['n'] == 14 and b['lessons']['items'] and isinstance(b['resting'], dict) and len(b['recent']) == 10 and 'history' not in b and 'open' not in b['state'] and b['minSample'] == 8, list(b))
+# --- nothing is chosen for the user, and each change can be saved on its own
+D.t.clear(); s, b = call(action='get', userId=U)
+check('a new user has no screener ticked', b['settings']['screeners'] == [] and b['settings']['enabled'] is False)
+base = dict(b['settings'])
+s, b = call(action='save', userId=U, settings=dict(base, enabled=True)); check('it can be switched on before a screener is chosen, and just waits', s == 200 and b['settings']['enabled'] is True and b['settings']['screeners'] == [] and b['nextCheck'] is None and m.due_markets(m.load_item(U), t0) == [])
+check('check in now with no screener says what is missing', call(action='run', userId=U) == (400, {'error': 'Choose at least one screener for it to buy from first'}))
+for budget in (2000, 20000, 20500): s, b = call(action='save', userId=U, settings=dict(base, enabled=True, budgetUsd=budget))
+s, b = call(action='save', userId=U, settings=dict(base, enabled=True, budgetUsd=20500, screeners=['3-8', '7-1'])); s, b = call(action='save', userId=U, settings=dict(base, enabled=True, budgetUsd=20500, screeners=['3-8', '7-1'], maxHoldDays=5))
+check('a burst of saves leaves one line in the activity list, with the final values', [e['text'] for e in b['log']] == ['Autopilot on: Balanced level, $20,500 over 10 days, checking every 24 hours.'], [e['text'] for e in b['log']])
+s, b = call(action='get', userId=U); check('every setting is remembered', b['settings'] == dict(base, enabled=True, budgetUsd=20500.0, screeners=['3-8', '7-1'], maxHoldDays=5), b['settings'])
+s, b = call(action='save', userId=U, settings=dict(b['settings'], screeners=[])); check('unticking everything is remembered too', b['settings']['screeners'] == [] and b['settings']['enabled'] is True)
+
 # --- what the panel is told: when it will next check in, and what it holds
 D.t.clear(); rec = m.load_item(U); rec['settings'].update(enabled=True, screeners=['3-100']); sat = dt.datetime(2026, 10, 17, 10, 25)
 check('next check-in: a US list on a Saturday waits for Monday\'s session', m.next_check(rec, sat) == {'at': '2026-10-19T14:40:00Z', 'markets': ['US']}, m.next_check(rec, sat))

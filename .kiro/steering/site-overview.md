@@ -381,22 +381,27 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
     stocks, even with fake money, reads as picks. Each user's check-in also runs the screeners again
     (not shared between users) and makes one AI call, so cache the screener results per hour first.
   - **How the panel behaves** (redesigned 10 Oct after the owner reported "the buttons are not working":
-    they worked, but nothing showed it). The On/Off switch saves straight away. Every other change
-    waits for the save button, which is grey "Saved" until something changes and then blue "Save
-    changes" with a note beside it. "Check in now" is greyed out while it is off or while changes are
-    unsaved, and its tooltip says why. The status box says what it holds, when it last checked in and
-    when it will next (`nextCheck` and `holding` from the Lambda's `public()`); a line under the
-    budget says what the numbers mean ("Up to 8 holdings of about $1,250 each …"). Results of an
-    action appear in a green or red box. Styles are in one `<style id="ap-style">` block the script
-    adds; raise `practice-autopilot.js?v=N` in `dashboard.html` when it changes.
+    they worked, but nothing showed it; then made to save by itself after he found his ticks gone on
+    refresh). **Every change saves automatically**: the On/Off switch at once, ticks and menus after
+    0.15 s, typing and the slider after a 0.9 s pause, and anything still waiting when the page is
+    left. There is no save button; a line beside "Check in now" says "Saving…", "✓ Saved." or
+    "Not saved: <reason>". **No screener is ticked for a new user** (`DEFAULTS` in the Lambda), and it
+    can be switched on with none: it then waits and says so. "Check in now" is greyed out, with the
+    reason, while it is off or nothing is ticked. The status box says what it holds, when it last
+    checked in and when it will next (`nextCheck` and `holding` from the Lambda's `public()`); a line
+    under the budget says what the numbers mean. The Lambda keeps one "Autopilot on: …" line in the
+    activity list for a burst of saved changes. While someone is typing, the panel is updated in
+    place (`syncDraft`), not redrawn, so the cursor stays put. Styles are in one
+    `<style id="ap-style">` block the script adds; raise `practice-autopilot.js?v=N` in
+    `dashboard.html` when it changes.
   - **To see the panel without logging in:** build a test page around the script with a stand-in
     server and open it in headless Chrome (method: section 12, "Check a logged-in panel in a real
     browser"). This is how the redesign was clicked through and screenshotted.
   - Code: `website/practice-autopilot.js` (controls only), Lambda in `lambda-sync/stockiq-ai-trader/`.
     The AI key is the same `OPENAI_API_KEY` as the AI chat, copied to this Lambda's environment.
   - Tests: `python3 check-tools/ai_trader_test.py lambda-sync/stockiq-ai-trader/lambda_function.py`
-    (71 checks, stand-in database, screeners and model) and
-    `node check-tools/autopilot_test.js <practice-autopilot.js>` (21 checks, the controls).
+    (77 checks, stand-in database, screeners and model) and
+    `node check-tools/autopilot_test.js <practice-autopilot.js>` (29 checks, the controls).
   - Honest framing, keep it: the backtests (sections 7b and 11) found no reliable edge in the
     screener scores, so this is an experiment to watch, and the panel says so. Its own results will
     be the forward test. Turn everything off: disable the EventBridge rule.
