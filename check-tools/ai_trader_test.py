@@ -532,6 +532,27 @@ check('with it switched off nothing follows the price: up 8% then back to +1% is
 check('a buy says which kind applies to it', any('no stop follows it (switched off)' in d for e in rec['log'] if e['type'] == 'buy' for d in e.get('detail', [])))
 PRICES.clear(); ATR.clear(); D.t.clear()
 
+# --- "Check in now" is a request to act: it releases the next part of the budget early, and says why if nothing can be done
+D.t.clear(); PRICES.clear(); ATR.clear(); MODEL['answer'] = None; SNAP['3-100'] = rows(n=30, **{f'S{i:02d}': {'signal': 'BUY', 'rsi': 50, 'd30': 5.0} for i in range(30)})
+m.fetch_snapshot, m.fetch_quote, m.ask_model = snapshot, quote, model; m.get_snapshot = lambda key, now=None: snapshot(key)
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=4, everyHours=24, maxHoldDays=20, screeners=['3-100']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+s, rec = run(t0); n0 = len(portfolio()['holdings'])
+s, rec = run(t0 + dt.timedelta(hours=1)); check('a scheduled check-in an hour later keeps to the pace: nothing more', s['bought'] == 0 and rec['log'][-1]['key'] == 'pace' and s['why'].startswith('Nothing to spend yet') and len(portfolio()['holdings']) == n0 == 2, (n0, s.get('why')))
+rec = m.load_item(U); s = m.run_user(U, rec, t0 + dt.timedelta(hours=2), snapshot=snapshot, quote=quote, model=model, manual=True, mail=lambda a, b: None, headlines=lambda h, n: []); m.save_item(U, rec)
+check('"Check in now" at the same point releases the next part of the budget and buys', s['bought'] == 2 and len(portfolio()['holdings']) == 4 and rec['state']['ahead'] == 1 and any('You pressed "Check in now", so the next part of the budget was released ahead of its time.' == e['text'] for e in rec['log']), (s['bought'], rec['state'].get('ahead')))
+s, rec = run(t0 + dt.timedelta(hours=3)); check('the schedule then carries on from there, not faster', s['bought'] == 0 and 'the next $1,000 in about' in rec['log'][-1]['text'], rec['log'][-1]['text'])
+for i in range(4):
+    rec = m.load_item(U); s = m.run_user(U, rec, t0 + dt.timedelta(hours=4 + i), snapshot=snapshot, quote=quote, model=model, manual=True, mail=lambda a, b: None, headlines=lambda h, n: []); m.save_item(U, rec)
+check('pressing it again and again stops at the budget: 8 holdings, $8,000, and then it says the budget is fully invested', len(portfolio()['holdings']) == 8 and abs(sum(h['costUsd'] for h in portfolio()['holdings']) - 8000) < 0.01 and s['bought'] == 0 and 'fully invested in 8 holdings' in s['why'], (len(portfolio()['holdings']), s.get('why')))
+code_, b = call(action='save', userId=U, settings=dict(m.load_item(U)['settings'], budgetUsd=9000.0))
+check('changing the budget starts the build-up afresh', m.load_item(U)['state']['ahead'] == 0)
+class Soon(dt.datetime):
+    @classmethod
+    def utcnow(cls): return t0 + dt.timedelta(days=3)
+real_datetime = m.datetime; m.datetime = Soon; code_, b = call(action='run', userId=U); m.datetime = real_datetime
+check('the page that pressed the button is told why when nothing was done', code_ == 200 and 'why' in b['summary'] and (b['summary']['bought'] > 0 or b['summary']['why']), b.get('summary'))
+PRICES.clear(); SNAP['3-100'] = rows(); D.t.clear()
+
 # --- improving its own rules: what the record suggests, a trial beside the current rule, keep or drop, an email each time
 TR = lambda pct, peak=None, low=None, rank=2, rsi=50, exit='time', **k: dict(risk=3, pct=pct, peak=pct if peak is None else peak, low=min(pct, 0) if low is None else low, rank=rank, rsi=rsi, exit=exit, screener='3-100', label='X', **k)
 base_rules = m.rules_for({'risk': 3})
