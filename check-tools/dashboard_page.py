@@ -5,7 +5,8 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
    python3 check-tools/dashboard_page.py <practice-portfolio.js> <practice-autopilot.js> <out.html> <light|dark> "<steps>"
    steps: type (types in the buy row), sale (the autopilot sells in the background, then the page refreshes itself),
           trial (a trial of its own rules starts), off (the autopilot is switched off), open (unfolds the details),
-          preset (presses the "Quick coin trading" set-up), sellall (presses "Sell everything it holds" and says yes)
+          preset (presses the "Quick coin trading" set-up), sellall (presses "Sell everything it holds" and says yes),
+          limits (types your own loss limit), split (prints the line that says whose result is whose)
 Open the page with headless Chrome: --dump-dom for the printed results, --screenshot for the look (site-overview.md, section 12)."""
 import json, sys
 pp, ap, out, theme, steps = sys.argv[1:6]
@@ -24,7 +25,7 @@ let portfolio = { v: 1, startingCash: 100000, cash: 15899.07, createdAt: iso(-4)
 let version = 3;
 const OPTIONS = %s;
 let auto = { settings: { enabled: true, risk: 3, budgetUsd: 10000, periodDays: 10, everyHours: 0.5, maxHoldDays: 0.25, screeners: ['7-1'], aiSell: true, selfTune: true, emails: true }, coinShare: 1, state: { lastRun: iso(-0.1) }, minSample: 8, practiceCash: 100000, lessons: null, resting: {}, recent: [],
-  scorecard: { n: 0, groups: {} }, rules: { name: 'Balanced', stop: -10, take: 18, trail: 0.5, top: 10, max_rsi: 76, arm: 9, changed: {} },
+  scorecard: { n: 0, groups: {} }, rules: { name: 'Balanced', stop: -10, take: 18, trail: 0.5, top: 10, max_rsi: 76, arm: 9, changed: {}, yours: [], level: { stop: -10, take: 18 } }, realizedUsd: 7.91,
   tune: { trial: null, past: [], nextReviewIn: 20, batch: 20, group: 10, finished: 0 }, month: { last30: { n: 0, up: 0, usd: 0, pct: 0 }, before30: { n: 0, up: 0, usd: 0, pct: 0 } },
   nextCheck: { at: iso(0.4), markets: ['coin'] }, holding: { count: 1, investedUsd: 1250 },
   plans: [{ id: 'a1', label: 'WEMIX-USD', boughtAt: iso(-2.9), sellBy: iso(3.1), auto: true, stop: -10, take: 18, arm: 9, trail: 0.5 }],
@@ -84,6 +85,9 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
       out('  it says: ' + q('#ap-plan').textContent + ' || notice: ' + q('#ap-notice').textContent); }
     if (step === 'sellall') { window.confirm = (m) => { out('asked: ' + m.split(String.fromCharCode(10)).filter(Boolean).join(' / ')); return true; }; const b = q('#ap-sellall'); out('button: "' + b.textContent + '" disabled=' + b.disabled); b.click(); await wait(1200);
       out('  after: notice="' + q('#ap-notice').textContent + '" | button "' + q('#ap-sellall').textContent + '" disabled=' + q('#ap-sellall').disabled + ' | WEMIX still held in the table: ' + (cellText('WEMIX') !== '(no row)' && !!Array.from(document.querySelectorAll('#practice-portfolio button[data-pp="sell"]')).find(x => x.closest('tr').textContent.includes('WEMIX'))) + ' | calls: ' + calls.slice(-3).join(', ')); }
+    if (step === 'limits') { const a = q('#ap-stop'); out('your own limits: fields empty, greyed hints "' + a.placeholder + '" and "' + q('#ap-take').placeholder + '"'); a.focus(); a.value = '6'; a.dispatchEvent(new Event('input', { bubbles: true })); await wait(200);
+      out('  typed 6 as the loss limit: risk text now "' + q('#ap-risk-text').textContent.slice(0, 120) + '" | focus kept=' + (document.activeElement === a)); await wait(1500); out('  saved: stopPct=' + auto.settings.stopPct + ' takePct=' + auto.settings.takePct + ' | saved line "' + q('#ap-saved').textContent + '"'); }
+    if (step === 'split') out('whose result is whose: ' + (Array.from(document.querySelectorAll('#practice-portfolio div')).map(x => x.textContent.replace(/\\s+/g, ' ').trim()).find(t => t.startsWith('Of the ')) || '(no line)'));
     if (step === 'off') { q('#ap-enabled').click(); await wait(700); out('switched the autopilot off: ' + cellText('WEMIX')); }
     if (step === 'open') { document.querySelectorAll('#practice-autopilot details').forEach(d => { d.open = true; }); const s = q('#pp-sold'); if (s) s.open = true; out('unfolded the details'); }
   }

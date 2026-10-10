@@ -67,6 +67,9 @@
         #practice-autopilot .ap-presets { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; font-size: 0.85rem; color: var(--text-secondary); }
         #practice-autopilot .ap-preset { padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 16px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; font-size: 0.85rem; }
         #practice-autopilot .ap-preset:hover { border-color: #3b82f6; }
+        #practice-autopilot .ap-own { display: flex; gap: 8px 18px; flex-wrap: wrap; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-color); font-size: 0.85rem; color: var(--text-secondary); }
+        #practice-autopilot .ap-own strong { color: var(--text-primary); }
+        #practice-autopilot .ap-own input { width: 70px; padding: 6px 8px; margin: 0 4px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 16px; }
         #practice-autopilot .ap-may { display: block; padding: 6px 0; cursor: pointer; }
         #practice-autopilot .ap-may input { margin-right: 8px; }
         #practice-autopilot .ap-may small { display: block; margin-left: 24px; color: var(--text-secondary); font-size: 0.8rem; }
@@ -117,10 +120,19 @@
     }
 
     // ---------------------------------------------------------------- wording, from the numbers the Lambda sends
-    // A level's rules. For the level in use these are the rules in force, which the autopilot may have changed itself.
-    function levelRules(level) {
+    // A level's rules without the user's own limits: the level's own, with what the autopilot has changed itself for the level in use
+    function autoRules(level) {
         const r = data.options.risk[String(level)];
-        return r && data.rules && String(data.settings.risk) === String(level) ? Object.assign({}, r, { stop: data.rules.stop, take: data.rules.take, top: data.rules.top, trail: data.rules.trail }) : r;
+        if (!r || !data.rules || String(data.settings.risk) !== String(level)) return r;
+        return Object.assign({}, r, { top: data.rules.top, trail: data.rules.trail }, data.rules.level || { stop: data.rules.stop, take: data.rules.take });
+    }
+    // what an empty "your own limit" field falls back to, shown in grey inside it
+    function hint(level, key) { const r = autoRules(level), n = r ? Math.abs(r[key]) : NaN; return isFinite(n) ? String(n) : ''; }
+    // ... and with the user's own loss limit and gain mark, as they stand on screen: these come before everything else
+    function levelRules(level) {
+        const r = autoRules(level), d = draft || data.settings;
+        if (!r) return r;
+        return Object.assign({}, r, d.stopPct > 0 ? { stop: -d.stopPct } : {}, d.takePct > 0 ? { take: d.takePct } : {});
     }
     function riskText(level) {
         const r = levelRules(level);
@@ -251,7 +263,7 @@
         const verdicts = { kept: 'kept', dropped: 'not kept', stopped: 'stopped' };
         const past = (t.past || []).slice().reverse();
         return `<div class="ap-section"><h4>Improving its own rules</h4>
-            <div>Its rules now (${esc(r.name)} level): ${esc(ruleWords(r))}.${changed.length ? ` Changed by itself after a trial: ${changed.map(k => esc(names[k] + ' (the level starts at ' + r.changed[k] + ')') + ` <a href="#" data-ap="restore" data-param="${esc(k)}">put it back</a>`).join(', ')}.` : ''}</div>
+            <div>Its rules now (${esc(r.name)} level): ${esc(ruleWords(r))}.${(r.yours || []).length ? ` Set by you: ${esc(r.yours.map(k => names[k]).join(' and '))}; its trials leave ${r.yours.length === 1 ? 'that' : 'those'} alone.` : ''}${changed.length ? ` Changed by itself after a trial: ${changed.map(k => esc(names[k] + ' (the level starts at ' + r.changed[k] + ')') + ` <a href="#" data-ap="restore" data-param="${esc(k)}">put it back</a>`).join(', ')}.` : ''}</div>
             ${now}
             ${data.aiSellPausedUntil ? `<div style="margin-top: 6px;">The AI model's early sells are paused until ${esc(day(data.aiSellPausedUntil))}: the holdings it had sold early went on rising afterwards. The fixed selling rules still apply.</div>` : ''}
             ${past.length ? fold('past-trials', `Earlier trials (${past.length})`, past.map(p => `${day(p.since)} to ${day(p.ended)}: ${p.text}: ${verdicts[p.verdict] || p.verdict}. ${p.result ? p.result.charAt(0).toUpperCase() + p.result.slice(1) + '.' : ''}`)) : ''}
@@ -293,6 +305,11 @@
                     <input id="ap-risk" class="ap-risk" type="range" min="1" max="${levels.length || 5}" step="1" value="${d.risk}" aria-label="Risk level">
                     <div class="ap-levels">${levels.map(n => `<span data-ap-level="${n}" class="${String(d.risk) === n ? 'now' : ''}">${esc(o.risk[n].name)}</span>`).join('')}</div>
                     <div id="ap-risk-text" class="ap-help">${esc(riskText(d.risk))}</div>
+                    <div class="ap-own"><strong>Your own limits</strong>
+                        <label>Sell at a loss of <input id="ap-stop" type="number" min="1.5" max="30" step="0.5" inputmode="decimal" placeholder="${hint(d.risk, 'stop')}" value="${d.stopPct || ''}" aria-label="Your own loss limit in percent">%</label>
+                        <label>Sell at a gain of <input id="ap-take" type="number" min="2" max="80" step="0.5" inputmode="decimal" placeholder="${hint(d.risk, 'take')}" value="${d.takePct || ''}" aria-label="Your own gain mark in percent">%</label>
+                        <span>Optional. Leave a field empty to use the level's (shown in grey). What you set here, its own trials leave alone.</span>
+                    </div>
                 </div>
 
                 <div class="ap-card">
@@ -336,6 +353,8 @@
 
     // one of the "what it may do by itself" switches: what is ticked on screen, or what is saved if it is not on screen
     function may(id, key) { const el = byId(id); return el && typeof el.checked === 'boolean' ? !!el.checked : (data.settings[key] !== false); }
+    // the user's own loss limit or gain mark: the number typed, or null when the field is empty (the level's then applies)
+    function ownLimit(id, key) { const el = byId(id); if (!el || typeof el.value !== 'string') return data.settings[key] || null; const n = Math.abs(parseFloat(el.value)); return n > 0 ? n : null; }
     function readDraft() {
         if (!byId('ap-risk')) return;
         draft = {
@@ -343,7 +362,8 @@
             budgetUsd: parseFloat(byId('ap-budget').value) || 0, periodDays: parseInt(byId('ap-period').value, 10) || 1,
             everyHours: parseFloat(byId('ap-every').value), maxHoldDays: parseFloat(byId('ap-hold').value),
             screeners: Array.from(document.querySelectorAll('[data-ap-screener]')).filter(c => c.checked).map(c => c.getAttribute('data-ap-screener')).sort(),
-            aiSell: may('ap-aisell', 'aiSell'), selfTune: may('ap-tune', 'selfTune'), emails: may('ap-mail', 'emails')
+            aiSell: may('ap-aisell', 'aiSell'), selfTune: may('ap-tune', 'selfTune'), emails: may('ap-mail', 'emails'),
+            stopPct: ownLimit('ap-stop', 'stopPct'), takePct: ownLimit('ap-take', 'takePct')
         };
     }
     // Bring the button, the "saved" line and the explanatory lines up to date without redrawing (typing keeps its place)
@@ -356,6 +376,8 @@
         set('ap-status', el => { el.textContent = statusText(); if (el.classList) el.classList.toggle('on', on); });
         set('ap-switch-text', el => { el.textContent = draft.enabled ? 'On' : 'Off'; });
         set('ap-risk-text', el => { el.textContent = riskText(draft.risk); });
+        set('ap-stop', el => { el.placeholder = hint(draft.risk, 'stop'); });
+        set('ap-take', el => { el.placeholder = hint(draft.risk, 'take'); });
         set('ap-plan', el => { el.textContent = planText(draft); });
         set('ap-pace', el => { el.textContent = paceText(draft); });
         set('ap-chosen', el => { el.textContent = draft.screeners.length + ' chosen'; });
@@ -366,11 +388,13 @@
         if (!(d.budgetUsd >= 100)) throw new Error('the budget must be at least $100.');
         if (d.budgetUsd > cash * 10) throw new Error(`the budget cannot be more than ${usd0(cash * 10)}.`);
         if (!(d.periodDays >= 1 && d.periodDays <= 90)) throw new Error('spread the buying over 1 to 90 days.');
+        if (d.stopPct !== null && d.stopPct !== undefined && !(d.stopPct >= 1.5 && d.stopPct <= 30)) throw new Error('your own loss limit must be between 1.5% and 30% (or empty).');
+        if (d.takePct !== null && d.takePct !== undefined && !(d.takePct >= 2 && d.takePct <= 80)) throw new Error('your own gain mark must be between 2% and 80% (or empty).');
     }
     // Is the user in the middle of typing or dragging in the panel? Then the panel is updated in place, not redrawn.
     function editing() {
         const el = document.activeElement;
-        return !!el && typeof el.id === 'string' && ['ap-budget', 'ap-period', 'ap-risk'].includes(el.id);
+        return !!el && typeof el.id === 'string' && ['ap-budget', 'ap-period', 'ap-risk', 'ap-stop', 'ap-take'].includes(el.id);
     }
     function queueSave(delay) {
         if (saveTimer) clearTimeout(saveTimer);
@@ -403,7 +427,7 @@
     }
     function take(result) { data = result; draft = JSON.parse(JSON.stringify(result.settings)); accepted = null; loadedAt = new Date(); sharePlans(); }
     // practice-portfolio.js marks the autopilot's holdings with when and at what they will be sold
-    function sharePlans() { if (data && data.allowed && window.practicePortfolio && window.practicePortfolio.setPlans) window.practicePortfolio.setPlans(data.plans || []); }
+    function sharePlans() { if (data && data.allowed && window.practicePortfolio && window.practicePortfolio.setPlans) window.practicePortfolio.setPlans(data.plans || [], { realizedUsd: data.realizedUsd }); }
     // What changes when the autopilot acts: its activity list and what it holds
     const stamp = (r) => JSON.stringify([r.log && r.log.length, r.log && r.log.slice(-1), r.plans, r.state, r.tune, r.scorecard && r.scorecard.n]);
     // Ask again without disturbing anything: not while a change is being typed, saved or run

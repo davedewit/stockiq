@@ -8,7 +8,7 @@ function page(server) {
   const document = { readyState: 'complete', getElementById: id => id === 'practice-autopilot' ? container : (els[id] || null), addEventListener: (t, f) => { (handlers[t] = handlers[t] || []).push(f); }, querySelectorAll: () => boxes };
   const fetchFake = async (url, opts) => { const b = JSON.parse(opts.body); calls.push(b); const r = server(b); return { ok: r.status === 200, status: r.status, json: async () => r.body }; };
   const ctx = { document, localStorage: { getItem: () => 'tester@x.com' }, fetch: fetchFake, console, setTimeout, clearTimeout, confirm: (m) => { ctx.asked = m; return ctx.answer !== false; }, Date, JSON, Math, Object, String, Array, parseInt, parseFloat, isNaN, Promise };
-  ctx.window = ctx; ctx.practicePortfolio = { reloaded: 0, reload() { this.reloaded++; }, plans: null, setPlans(list) { this.plans = list; } };
+  ctx.window = ctx; ctx.practicePortfolio = { reloaded: 0, reload() { this.reloaded++; }, plans: null, extra: null, setPlans(list, extra) { this.plans = list; this.extra = extra; } };
   vm.createContext(ctx); vm.runInContext(src, ctx);
   const form = (d) => { Object.assign(els, { 'ap-enabled': { checked: d.enabled }, 'ap-risk': { value: String(d.risk) }, 'ap-budget': { value: String(d.budgetUsd) }, 'ap-period': { value: String(d.periodDays) }, 'ap-every': { value: String(d.everyHours) }, 'ap-hold': { value: String(d.maxHoldDays) }, 'ap-risk-text': { textContent: '' } }); boxes = Object.keys(OPTIONS.screeners).map(k => ({ checked: d.screeners.includes(k), getAttribute: () => k })); };
   const click = a => handlers.click.forEach(f => f({ target: { closest: s => s === '[data-ap]' ? { getAttribute: () => a, tagName: 'BUTTON' } : null }, preventDefault() {} }));
@@ -31,7 +31,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   check('says plainly what it is', /fake money/.test(p.text()) && /Nothing here is advice/.test(p.text()));
   p.form({ ...settings, enabled: true, risk: 5, budgetUsd: 5000, periodDays: 5, everyHours: 12, maxHoldDays: 10, screeners: ['3-8', '7-1'] }); await p.ctx.practiceAutopilot.flush(); await sleep(30);
   const sent = p.calls.find(c => c.action === 'save');
-  check('saves exactly what was set', JSON.stringify(sent.settings) === JSON.stringify({ enabled: true, risk: 5, budgetUsd: 5000, periodDays: 5, everyHours: 12, maxHoldDays: 10, screeners: ['3-8', '7-1'], aiSell: true, selfTune: true, emails: true }) && /Autopilot switched on/.test(p.text()) && /On\. First check-in at the next hourly check\./.test(p.text()) && /Adventurous/.test(p.text()) && !/data-ap="run"[^>]*disabled/.test(p.container.innerHTML), sent);
+  check('saves exactly what was set', JSON.stringify(sent.settings) === JSON.stringify({ enabled: true, risk: 5, budgetUsd: 5000, periodDays: 5, everyHours: 12, maxHoldDays: 10, screeners: ['3-8', '7-1'], aiSell: true, selfTune: true, emails: true, stopPct: null, takePct: null }) && /Autopilot switched on/.test(p.text()) && /On\. First check-in at the next hourly check\./.test(p.text()) && /Adventurous/.test(p.text()) && !/data-ap="run"[^>]*disabled/.test(p.container.innerHTML), sent);
   { const keep = stored.settings; p.form({ ...stored.settings, screeners: [] }); await p.ctx.practiceAutopilot.flush(); await sleep(30); check('no screener ticked is saved as it is, and it says what is missing', stored.settings.screeners.length === 0 && /On, but no screener is chosen yet\. Tick at least one below/.test(p.text()) && /Tick at least one screener for it to start/.test(p.text()) && /id="ap-run"[^>]*disabled/.test(p.container.innerHTML), p.text().slice(0, 300)); p.form(keep); await p.ctx.practiceAutopilot.flush(); await sleep(30); }
   p.form(stored.settings); p.click('run'); await sleep(30);
   check('check in now: shows what happened and refreshes the portfolio', /Checked in: 1 bought, 1 sold/.test(p.text()) && /Bought COP with \$1,250\. Rank 1 with &lt;b&gt;RSI 66&lt;\/b&gt;/.test(p.text()) && /Sold AMT \. Up \+18\.2%/.test(p.text()) && p.ctx.practicePortfolio.reloaded === 1 && /Last check-in/.test(p.text()) && !/<b>RSI/.test(p.container.innerHTML), p.text().slice(-500));
@@ -196,6 +196,29 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     w.form({ ...st.settings }); w.handlers.click.forEach(f => f({ target: { closest: sel => sel === '[data-ap]' ? { getAttribute: () => 'filter', tagName: 'A' } : null }, preventDefault() {} })); await sleep(30);
     check('and can be cut down to buys and sells', !/Checked in\. No change\./.test(w.text()) && /Bought AMT/.test(w.text()) && /Show everything/.test(w.text()));
     check('no broken values among the controls', !/undefined|NaN|\[object|Infinity/.test(w.container.innerHTML), (w.container.innerHTML.match(/.{40}(undefined|NaN|\[object|Infinity).{40}/) || [])[0]);
+  }
+  // your own loss limit and gain mark
+  { const st = { settings: { ...settings, screeners: ['3-100'], aiSell: true, selfTune: true, emails: true, stopPct: null, takePct: null }, state: {}, log: [], practiceCash: 100000, realizedUsd: 7.91,
+      rules: { name: 'Balanced', stop: -10, take: 18, trail: 0.5, top: 10, max_rsi: 76, arm: 9, changed: {}, yours: [], level: { stop: -10, take: 18 } }, plans: [], tune: { past: [], trial: null, nextReviewIn: 20, batch: 20, group: 10 } };
+    let saves = 0;
+    const w = page(b => { if (b.action === 'save') { saves++; st.settings = b.settings; const mine = [b.settings.stopPct ? 'stop' : null, b.settings.takePct ? 'take' : null].filter(Boolean); st.rules = { ...st.rules, stop: b.settings.stopPct ? -b.settings.stopPct : -10, take: b.settings.takePct || 18, arm: (b.settings.takePct || 18) / 2, yours: mine }; }
+      return { status: 200, body: { success: true, allowed: true, options: OPTIONS, ...st } }; }); await sleep(30);
+    check('two optional fields for your own loss limit and gain mark, empty to start, the level\'s shown in grey', /<input id="ap-stop" type="number" min="1\.5" max="30" step="0\.5" inputmode="decimal" placeholder="10" value=""/.test(w.container.innerHTML) && /<input id="ap-take" type="number" min="2" max="80" step="0\.5" inputmode="decimal" placeholder="18" value=""/.test(w.container.innerHTML) && /Your own limits Sell at a loss of % Sell at a gain of % Optional\. Leave a field empty to use the level's \(shown in grey\)\. What you set here, its own trials leave alone\./.test(w.text()), w.text().slice(w.text().indexOf('Your own limits'), w.text().indexOf('Your own limits') + 200));
+    check('the practice portfolio is told what its finished trades have made', w.ctx.practicePortfolio.extra && w.ctx.practicePortfolio.extra.realizedUsd === 7.91);
+    const stub = () => ({ disabled: false, textContent: '', title: '', placeholder: '', classList: { on: {}, toggle(c, v) { this.on[c] = v; } } });
+    Object.assign(w.els, { 'ap-run': stub(), 'ap-saved': stub(), 'ap-plan': stub(), 'ap-pace': stub(), 'ap-chosen': stub(), 'ap-status': stub(), 'ap-switch-text': stub() });
+    w.form({ ...st.settings }); Object.assign(w.els, { 'ap-stop': { value: '6', placeholder: '' }, 'ap-take': { value: '', placeholder: '' } });
+    w.handlers.input.forEach(f => f({ type: 'input', target: { id: 'ap-stop', getAttribute: () => null } }));
+    check('typing your own loss limit: the descriptions follow at once', /sells a holding at -6% or \+18%/.test(w.els['ap-risk-text'].textContent) && /and sooner at -6% or \+18%/.test(w.els['ap-pace'].textContent) && saves === 0, [w.els['ap-risk-text'].textContent, w.els['ap-pace'].textContent.slice(0, 120)]);
+    await sleep(1100);
+    check('and it is saved by itself, as a size in percent', saves === 1 && st.settings.stopPct === 6 && st.settings.takePct === null && /value="6"/.test(w.container.innerHTML) && /Set by you: loss limit; its trials leave that alone\./.test(w.text()), [saves, st.settings.stopPct, w.text().slice(w.text().indexOf('Its rules now'), w.text().indexOf('Its rules now') + 260)]);
+    Object.assign(w.els, { 'ap-run': stub(), 'ap-saved': stub(), 'ap-plan': stub(), 'ap-pace': stub(), 'ap-chosen': stub(), 'ap-status': stub(), 'ap-switch-text': stub() });
+    w.form({ ...st.settings }); Object.assign(w.els, { 'ap-stop': { value: '6', placeholder: '' }, 'ap-take': { value: '500', placeholder: '' } }); await w.ctx.practiceAutopilot.flush(); await sleep(30);
+    check('a gain mark that makes no sense is not saved, and it says why', saves === 1 && w.els['ap-saved'].textContent === 'Not saved: your own gain mark must be between 2% and 80% (or empty).', w.els['ap-saved'].textContent);
+    w.form({ ...st.settings }); Object.assign(w.els, { 'ap-stop': { value: '', placeholder: '' }, 'ap-take': { value: '12.5', placeholder: '' } }); await w.ctx.practiceAutopilot.flush(); await sleep(30);
+    check('emptying a field goes back to the level\'s', saves === 2 && st.settings.stopPct === null && st.settings.takePct === 12.5 && /sells a holding at -10% or \+12\.5%/.test(w.text()) && /Set by you: gain mark; its trials leave that alone\./.test(w.text()), st.settings);
+    delete w.els['ap-stop']; delete w.els['ap-take'];
+    check('no broken values around the limits', !/undefined|NaN|\[object|Infinity/.test(w.container.innerHTML));
   }
   check('no broken values', !/undefined|NaN|\[object/.test(p.container.innerHTML), (p.container.innerHTML.match(/.{30}(undefined|NaN|\[object).{30}/) || [])[0]);
   console.log(ok ? 'ALL PASS' : 'SOME FAILED');

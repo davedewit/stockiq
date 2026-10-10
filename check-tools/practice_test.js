@@ -130,6 +130,17 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
     check('with the autopilot off: it says the holding now stays', /🤖 Bought by the autopilot, which is switched off: it stays until you sell it or switch the autopilot back on\./.test(text()));
     check('the plan line itself', pure.planLine({ by: 'me' }, null) === 'Bought by you: it stays until you sell it.' && pure.planLine({ by: 'ai' }, undefined) === '🤖 Bought by the autopilot.');
   }
+  // whose result is whose: the owner's real figures of 10 Oct 2026 (his own Bitcoin up $201.85, an autopilot sale +$7.91, an autopilot holding up $17.08)
+  { const st = { startingCash: 100000, cash: 15906.98, closed: [{ id: 'c1', by: 'ai', costUsd: 1250, proceedsUsd: 1257.91 }], holdings: [
+      { id: 'm1', symbol: 'BTC-USD', currency: 'USD', qty: 1, buyPrice: 82750.93, costUsd: 82750.93 }, { id: 'm2', symbol: 'BTC-USD', currency: 'USD', qty: 100 / 82734.62, buyPrice: 82734.62, costUsd: 100 },
+      { id: 'a1', symbol: 'CFX-USD', currency: 'USD', qty: 1250 / 0.1, buyPrice: 0.1, costUsd: 1250, by: 'ai' }] };
+    const q = { 'BTC-USD': { price: 82952.52 }, 'CFX-USD': { price: 0.1013664 } }; const sp = pure.splitGain(st, q, 7.91), near = (a, b) => Math.abs(a - b) < 0.02;
+    check('the total since the start is split into your own buys and the autopilot\'s', near(sp.total, 226.84) && near(sp.yours, 201.85) && near(sp.autoSold, 7.91) && near(sp.autoOpen, 17.08) && near(sp.auto, 24.99) && near(sp.yours + sp.auto, sp.total) && sp.any === true, sp);
+    st.closed = []; const cleared = pure.splitGain(st, q, 7.91); check('clearing the sold list does not move the autopilot\'s sales into your own result', near(cleared.autoSold, 7.91) && near(cleared.yours, 201.85) && cleared.any === true, cleared);
+    const none = pure.splitGain({ startingCash: 100000, cash: 99900, closed: [], holdings: [st.holdings[1]] }, q, 0); check('with nothing of the autopilot\'s there is nothing to split', none.any === false && near(none.yours, none.total), none); }
+  { const d = JSON.parse(store['tester@example.com'].data), mine = d.holdings.find(h => h.by === 'ai');
+    ctx.window.practicePortfolio.setPlans([{ id: mine.id, auto: true, sellBy: '2026-10-10T16:42:41Z', stop: -10, take: 18, arm: 9 }], { realizedUsd: 7.91 });
+    check('the page says which part of the result is yours and which the autopilot\'s', /Of the [+-]?\$[\d,.]+ since the start: your own buys [+-]?\$[\d,.]+ ?; the autopilot [+-]?\$[\d,.]+ \( ?\+\$7\.91 on what it has sold, [+-]?\$[\d,.]+ on what it still holds\)\. A holding that is not sold yet counts at its latest price\./.test(text()), (text().match(/Of the [^.]*\.[^.]*\.[^.]*\./) || [text().slice(0, 300)])[0]); }
   check('no S&P columns or verdicts in the tables; one comparison figure in the summary', !/S&P 500 since|S&P 500 same time|ahead of what|did better than the S&P/.test(text()) && /For comparison/.test(text()) && /the same money in an S&P 500 index fund instead/.test(text()), text().slice(0, 300));
   // another window changed it
   store['tester@example.com'].version += 1; await buy('KO', 100); check('change from another window is caught, not overwritten', /changed in another window/i.test(text()), (text().match(/This portfolio[^.]*\./) || [''])[0]);

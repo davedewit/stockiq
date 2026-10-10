@@ -120,6 +120,18 @@
         };
     }
 
+    // Whose result is whose: the account's change since the start, split into the user's own buys and the autopilot's.
+    // autoRealized: what the autopilot's finished trades have made in all (from practice-autopilot.js; it survives the
+    // sold list being cleared). Without it, the autopilot's lines still in the sold list are added up instead.
+    function splitGain(state, quotes, autoRealized) {
+        const total = summarize(state, quotes).gainUsd;
+        let autoOpen = 0, held = 0, listed = 0, sold = 0;
+        state.holdings.forEach(h => { if (h.by === 'ai') { held++; autoOpen += valueOf(h, quotes).gainUsd; } });
+        state.closed.forEach(h => { if (h.by === 'ai') { sold++; listed += h.proceedsUsd - h.costUsd; } });
+        const autoSold = typeof autoRealized === 'number' && isFinite(autoRealized) ? autoRealized : listed;
+        return { total, autoSold, autoOpen, auto: autoSold + autoOpen, yours: total - autoSold - autoOpen, any: held > 0 || sold > 0 || Math.abs(autoSold) > 0.004 };
+    }
+
     // ---------------------------------------------------------------- formatting
     // rounded first, so a value a hair under zero shows as 0.00, not -0.00
     function usd(n) { n = Math.round(n * 100) / 100 || 0; return (n < 0 ? '-' : '') + '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
@@ -146,7 +158,7 @@
             + ' The AI model also reviews it at every check-in and may sell it earlier.';
     }
 
-    const pure = { newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, planLine, usd, pct, money, esc, STARTING_CASH, DEFAULT_AMOUNT };
+    const pure = { newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine, usd, pct, money, esc, STARTING_CASH, DEFAULT_AMOUNT };
     if (typeof module !== 'undefined' && module.exports) module.exports = pure;
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
@@ -232,12 +244,12 @@
         if (ids.includes(active)) { const el = document.getElementById(active); if (el && el.focus) el.focus(); }
     }
     // From practice-autopilot.js: for each holding the autopilot bought, when and at what it will sell it
-    let plans = {};
-    function setPlans(list) {
-        const next = {};
+    let plans = {}, autoRealized = null;
+    function setPlans(list, extra) {
+        const next = {}, made = extra && typeof extra.realizedUsd === 'number' ? extra.realizedUsd : null;
         (list || []).forEach(p => { next[p.id] = p; });
-        if (JSON.stringify(next) === JSON.stringify(plans)) return;
-        plans = next;
+        if (JSON.stringify(next) === JSON.stringify(plans) && made === autoRealized) return;
+        plans = next; autoRealized = made;
         if (loaded && state && !working) redraw();
     }
     // Change a copy, save it, and only then show it: what is on screen is always what is stored
@@ -317,6 +329,9 @@
         }).join('');
         const sold = soldSummary(state);
         const soldLine = sold.count ? `${sold.count} sold: put in ${usd(sold.cost)}, got back ${usd(sold.proceeds)}, <span style="color: ${colour(sold.gainUsd)}; font-weight: 600;">${pct(sold.gainPct)} (${usd(sold.gainUsd)})</span>.` : '';
+        // one total mixes the user's own buys with the autopilot's: say which part is whose
+        const split = splitGain(state, quotes, autoRealized), signed = (n) => `<span style="color: ${colour(n)}; font-weight: 600;">${Math.round(n * 100) / 100 >= 0 ? '+' : ''}${usd(n)}</span>`;
+        const splitLine = split.any ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin: -6px 0 14px;">Of the ${signed(split.total)} since the start: your own buys ${signed(split.yours)}; the autopilot ${signed(split.auto)} (${signed(split.autoSold)} on what it has sold, ${signed(split.autoOpen)} on what it still holds). A holding that is not sold yet counts at its latest price.</div>` : '';
         const th = (t, align) => `<th style="padding: 6px; text-align: ${align || 'right'}; font-weight: 600; white-space: nowrap;">${t}</th>`;
         el.innerHTML = `
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
@@ -325,6 +340,7 @@
                 ${card('In holdings', usd(s.holdingsValue), s.openGainPct === null ? 'nothing held yet' : `<span style="color: ${colour(s.openGainPct)}; font-weight: 600;">${pct(s.openGainPct)}</span> on ${usd(s.cost)} put in`)}
                 ${card('For comparison', s.marketPct === null ? '–' : `<span style="color: ${colour(s.marketPct)};">${pct(s.marketPct)}</span>`, 'the same money in an S&amp;P 500 index fund instead')}
             </div>
+            ${splitLine}
             <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 6px;">
                 <div style="position: relative; flex: 2; min-width: 200px;">
                     <input id="pp-symbol" type="text" autocomplete="off" placeholder="Search for tickers or companies" aria-label="Stock code or company name" style="width: 100%; box-sizing: border-box; padding: 10px 32px 10px 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 16px;">
