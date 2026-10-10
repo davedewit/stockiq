@@ -7,6 +7,7 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
           trial (a trial of its own rules starts), off (the autopilot is switched off), open (unfolds the details),
           preset (presses the "Quick coin trading" set-up), sellall (presses "Sell everything it holds" and says yes),
           limits (types your own loss limit), split (prints the line that says whose result is whose),
+          cards (prints the summary cards and every account value shown since the page opened: there should be one),
           listswitch (switches the list to "buys and sells only" and reloads the page to see that it is remembered)
 Open the page with headless Chrome: --dump-dom for the printed results, --screenshot for the look (site-overview.md, section 12)."""
 import json, sys
@@ -17,6 +18,8 @@ page = '''<!doctype html><html data-theme="%s"><head><meta charset="utf-8"><titl
 <div class="history-section"><h2 style="color:var(--text-primary);margin-top:0">Practice portfolio</h2><div id="practice-portfolio"></div><div id="practice-autopilot"></div></div><pre id="out"></pre>
 <script>
 localStorage.setItem('userId', 'owner@example.com');
+// every account value the page shows, in order: a figure that flashes up before the prices are in would be listed here
+window.SEEN = []; new MutationObserver(() => { const m = document.getElementById('practice-portfolio').textContent.match(/Account value\\s*(\\$[\\d,.]+)/); if (m && SEEN[SEEN.length - 1] !== m[1]) SEEN.push(m[1]); }).observe(document.getElementById('practice-portfolio'), { childList: true, subtree: true });
 const iso = (h) => new Date(Date.now() + h * 3600000).toISOString().slice(0, 19) + 'Z';
 const PRICES = { 'BTC-USD': 83500, 'WEMIX-USD': 0.1946, 'SPY': 700 };
 let portfolio = { v: 1, startingCash: 100000, cash: 15899.07, createdAt: iso(-4), closed: [], holdings: [
@@ -29,7 +32,7 @@ let auto = { settings: { enabled: true, risk: 3, budgetUsd: 10000, periodDays: 1
   scorecard: { n: 0, groups: {} }, rules: { name: 'Balanced', stop: -10, take: 18, trail: 0.5, top: 10, max_rsi: 76, arm: 9, changed: {}, yours: [], level: { stop: -10, take: 18 } }, realizedUsd: 7.91,
   tune: { trial: null, past: [], nextReviewIn: 20, batch: 20, group: 10, finished: 0 }, month: { last30: { n: 0, up: 0, usd: 0, pct: 0 }, before30: { n: 0, up: 0, usd: 0, pct: 0 } },
   nextCheck: { at: iso(0.4), markets: ['coin'] }, holding: { count: 1, investedUsd: 1250 },
-  plans: [{ id: 'a1', label: 'WEMIX-USD', boughtAt: iso(-2.9), sellBy: iso(3.1), auto: true, stop: -10, take: 18, arm: 9, trail: 0.5 }],
+  plans: [{ id: 'a1', label: 'WEMIX-USD', boughtAt: iso(-2.9), sellBy: iso(3.1), auto: true, stop: -10, take: 18, arm: 1, trail: 0.5, peak: 6.2, floor: 3.5, view: { t: iso(-0.1), sell: false, text: 'Up 4%% and still climbing', larger: true } }],
   log: [{ t: iso(-2.9), type: 'buy', symbol: 'WEMIX-USD', usd: 1250, text: 'rank 1, RSI 14, down 3.8%% in 7 days on 1.0x volume (Crypto (top coins) rank 1, score +4.0; chosen by the AI model)', detail: ['The plan for it: sell 6 hours after buying at the latest; sooner at -10%% or +18%%; once it has been up 9%%, sell if it gives back 50%% of its best gain; sell if its screener signal turns negative or it slips far down the ranking.'] },
         { t: iso(-0.1), first: iso(-2.4), n: 5, key: 'pace', type: 'note', symbol: '', usd: 0, text: 'Checked in. Nothing to spend yet: $1,250 of the $10,000 budget is invested. The rest is released in steps over the 10 days set under "Build up to it over"; the next $1,250 in about 21 hours.' }] };
 const calls = [];
@@ -95,6 +98,7 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
         out('  switched on: on=' + box().checked + ', lines listed=' + rows() + ', saves sent=' + calls.filter(c => c.includes('save')).length); sessionStorage.setItem('reloaded', document.getElementById('out').textContent); location.reload(); return; }
       document.getElementById('out').textContent = sessionStorage.getItem('reloaded') + document.getElementById('out').textContent; sessionStorage.removeItem('reloaded');
       out('  after a real page refresh: on=' + box().checked + ', lines listed=' + rows() + ', at y=' + Math.round(box().getBoundingClientRect().top + window.scrollY)); localStorage.removeItem('stockiqAutopilotTradesOnly'); }
+    if (step === 'cards') { out('account values shown since the page opened: ' + JSON.stringify(SEEN)); Array.from(document.querySelectorAll('#practice-portfolio > div:first-child > div')).forEach(c => out('  card: ' + c.textContent.replace(/\\s+/g, ' ').trim())); }
     if (step === 'off') { q('#ap-enabled').click(); await wait(700); out('switched the autopilot off: ' + cellText('WEMIX')); }
     if (step === 'open') { document.querySelectorAll('#practice-autopilot details').forEach(d => { d.open = true; }); const s = q('#pp-sold'); if (s) s.open = true; out('unfolded the details'); }
   }

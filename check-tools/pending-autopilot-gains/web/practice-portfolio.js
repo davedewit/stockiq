@@ -116,7 +116,9 @@
             gainUsd: accountValue - state.startingCash, gainPct: (accountValue / state.startingCash - 1) * 100,
             openGainUsd: holdingsValue - cost, openGainPct: cost > 0 ? (holdingsValue / cost - 1) * 100 : null,
             // the same dollars put into the S&P 500 fund on the same days
-            marketPct: marketCost > 0 ? (marketValue / marketCost - 1) * 100 : null
+            marketPct: marketCost > 0 ? (marketValue / marketCost - 1) * 100 : null,
+            // the fund's price is exactly what it was at every buy: the US stock market has not traded since (a weekend, a holiday)
+            marketFlat: marketCost > 0 && state.holdings.every(h => !(h.spyAtBuy > 0) || Math.abs(spy / h.spyAtBuy - 1) < 1e-9)
         };
     }
 
@@ -154,7 +156,8 @@
         if (!plan) return '🤖 Bought by the autopilot.';
         if (!plan.auto) return '🤖 Bought by the autopilot, which is switched off: it stays until you sell it or switch the autopilot back on.';
         return `🤖 Autopilot: it sells this by itself, at the check-in around ${when(plan.sellBy)} at the latest, sooner at ${plan.stop}% or +${plan.take}%`
-            + `, or to keep part of a gain once it has been up ${plan.arm}%.` + (plan.trial ? ' Part of a trial of one of its own rules.' : '')
+            + `, or to keep part of a gain once it has been up ${plan.arm}%.` + (typeof plan.floor === 'number' ? ` It has been up enough: it is sold if it slips back to ${plan.floor >= 0 ? '+' : ''}${plan.floor}%.` : '')
+            + (plan.trial ? ' Part of a trial of one of its own rules.' : '')
             + ' The AI model also reviews it at every check-in and may sell it earlier.';
     }
 
@@ -225,13 +228,18 @@
 
     async function load() {
         if (!userId()) { loaded = true; render(); return; }
+        if (!loaded) render();                             // "Loading…" until the portfolio and its prices are in
         try {
             const r = await api('get');
             state = r.portfolio || newState(new Date().toISOString());
             version = r.version || 0; loadError = null;
         } catch (e) { loadError = e.message; }
+        // Nothing is shown before the latest prices are in: holdings valued at what was paid looked, for a moment, like a
+        // different account value. If the prices are slow, it is shown after 4 seconds anyway and again when they arrive.
+        const prices = state ? refreshQuotes() : Promise.resolve();
+        await Promise.race([prices, new Promise(done => setTimeout(done, 4000))]);
         loaded = true; redraw();
-        if (state) { await refreshQuotes(); redraw(); }
+        await prices; redraw();
     }
     // Redraw without losing what is being typed in the buy row (the autopilot can change the portfolio in the background)
     function redraw() {
@@ -335,10 +343,10 @@
         const th = (t, align) => `<th style="padding: 6px; text-align: ${align || 'right'}; font-weight: 600; white-space: nowrap;">${t}</th>`;
         el.innerHTML = `
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
-                ${card('Account value', usd(s.accountValue), `<span style="color: ${colour(s.gainUsd)}; font-weight: 600;">${pct(s.gainPct)} (${usd(s.gainUsd)})</span> since the start`)}
+                ${card('Account value', usd(s.accountValue), `<span style="color: ${colour(s.gainUsd)}; font-weight: 600;">${pct(s.gainPct)} (${usd(s.gainUsd)})</span> since the start${state.holdings.length || state.closed.length || Math.abs(s.gainUsd) > 0.004 ? `<br>${usd(s.gainUsd - s.openGainUsd)} from what has been sold, ${usd(s.openGainUsd)} on what is still held (at the latest prices)` : ''}`)}
                 ${card('Practice cash left', usd(s.cash), 'of ' + usd(state.startingCash))}
                 ${card('In holdings', usd(s.holdingsValue), s.openGainPct === null ? 'nothing held yet' : `<span style="color: ${colour(s.openGainPct)}; font-weight: 600;">${pct(s.openGainPct)}</span> on ${usd(s.cost)} put in`)}
-                ${card('For comparison', s.marketPct === null ? '–' : `<span style="color: ${colour(s.marketPct)};">${pct(s.marketPct)}</span>`, 'the same money in an S&amp;P 500 index fund instead')}
+                ${card('For comparison', s.marketPct === null ? '–' : s.marketFlat ? 'no change yet' : `<span style="color: ${colour(s.marketPct)};">${pct(s.marketPct)}</span>`, s.marketFlat ? 'the same money in an S&amp;P 500 index fund instead: the US stock market has not traded since you bought (it is closed at weekends), so there is nothing to compare yet' : 'the same money in an S&amp;P 500 index fund instead')}
             </div>
             ${splitLine}
             <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 6px;">
