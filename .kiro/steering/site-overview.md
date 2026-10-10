@@ -568,6 +568,26 @@ Needs the owner's decision or more work (nothing here is fixed):
 - **Screener quality** (section 8b): no real fundamentals in the workers; ASX 24-hour change is 0
   after the ASX close; a few valid symbols return nothing (WBD, PSKY); Russell 1000/2000 lists
   not refreshed; ASX 300 is approximate. All but the lists need worker redeploys.
+- **Crypto top-10 history is broken (found 10 Oct 2026). The fix is built, tested locally and
+  approved by the owner, but NOT deployed:** the Claude Code session was not permitted to run a
+  production deploy. It is packaged in `stockiq/check-tools/pending-crypto-history/`; the owner runs
+  `bash deploy.sh` there (`DRY_RUN=true bash deploy.sh` previews; it checks the live code first and
+  keeps rollback zips). After it has run: verify a live crypto report, update section 8b "Crypto",
+  `lambda-reference.md` and this item, and delete the pending folder. It also adds a permanent log
+  of every top-10 entry (`stockiq-coinspot-predictions`, rows with `log_version` 2) so the
+  ranking's track record can be measured after a few weeks. EventBridge rule `stockiq-coinspot-predictions-schedule`
+  (every 15 min) runs `stockiq-coinspot-predictions-updater`, an old copy of the orchestrator that
+  still uses the workers' batch mode, i.e. the old built-in coin list with wrong-coin prices (and
+  the worker 26 address typo). It writes "first flagged" rows to `stockiq-coinspot-prediction-status`
+  for its own top 10, which is not the top 10 users see: on 10 Oct, 8 of the 10 coins in a real
+  report had no history ("RECENT … UNKNOWN NEW HIGH RISK") and the other two matched by chance.
+  The "consistency" stars include a number derived from the letters of the coin's symbol, and the
+  report prints "LOW / MEDIUM / HIGH RISK" labels. `crypto-filter-buttons.js` (the "Entry Timing"
+  slider on crypto results) rebuilds the report with raw BUY/SELL codes and "GOOD ENTRY" wording.
+  The dashboard 🎯 tracker looks up `SYMBOL-USD`, which is the wrong coin for the ~125 coins that
+  need a numbered ticker. Planned fix: the schedule calls the orchestrator itself (one coin list,
+  one ranking; user runs only read), rows hold the start of the coin's current run in the top 10,
+  no risk labels or stars, report carries the tickers for the tracker, schedule every 30 minutes.
 - **Page score vs app score.** Same model, different inputs (checked on AAPL, 71 vs 47): the page
   uses the previous close and Yahoo fundamentals, the app uses the live price and Finnhub. A
   price 0.1% under the 20-day average swung the trend factor by 18 points; Finnhub had no revenue
