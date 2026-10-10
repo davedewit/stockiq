@@ -291,7 +291,9 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   other is worked out from the latest price once the code is known (`fillOther`, `priceFor`); a buy
   by quantity buys exactly that many. "Sell" closes
   the line at the latest price; the "Reset fake money to $100,000" button clears everything. Under the
-  holdings a line says how many are ahead of the S&P 500 since they were bought. The "Sold" list
+  holdings a line says how many are ahead of the S&P 500 since they were bought; a holding is only
+  counted once it or the market has moved 0.05% (`versusMarket`), so a buy made a moment ago is not
+  called "0 of 1 ahead", and ties are reported as "about level". The "Sold" list
   ends with a summary (put in, got back, result, how many did better than the S&P 500 over the same
   days), a "Clear sold list" button and an × on each line; clearing only tidies the list, because
   what a sale brought in is already in the practice cash (added 10 Oct 2026, script `?v=3`). The
