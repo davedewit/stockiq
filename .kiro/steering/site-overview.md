@@ -400,6 +400,41 @@ Flagged for the owner (not changed):
     warns).
   - Deleted the two orphan pages (`market-data-sidebar.html`, `market-data-widget.html`) from the repo and S3.
   - `lambda-url-mapping.json` regenerated (982 functions, 967 with URLs).
+  **Third pass, 10 Oct 2026 (lists rebuilt from current index members; crypto list replaced):**
+  - **Stock lists refreshed from current constituents**, each symbol checked against the price source (through
+    `stockiq-price-proxy`) before being included. Sources: S&P 100 / 500 / 400 / 600, FTSE 100 and Nikkei 225 from
+    Wikipedia's constituent tables; Dow 30 and NASDAQ-100 from slickcharts.com; ASX 200 from Wikipedia, ASX 50 from
+    Wikipedia, ASX 100 = the 100 largest of the ASX 200 by market cap, ASX 300 = ASX 200 plus the still-live
+    members of the old ASX 300 list (no current ASX 300 source was found, so it is an approximation).
+    Sizes now: Dow 30, S&P 100 101, NASDAQ 100 101, S&P 500 502, S&P 400+600 995,
+    S&P 1500 1497, ASX 50 49, ASX 100 99, ASX 200 195, ASX 300 294, FTSE 100 100,
+    Nikkei 225 225. All of these returned data for every listed stock when re-run (ASX 300: all but one).
+    **Russell 1000 and 2000 were not refreshed**: no complete free source (iShares holdings files return a web
+    page to scripts, Wikipedia has no list), so they keep the cleaned lists (877 and 1,829).
+    Do not use asx50list.com / asx100list.com / asx200list.com / asx300list.com: they are years out of date.
+    Yahoo symbol format: US share classes use a dash (`BRK-B`), FTSE gets `.L` (`BT.A` becomes `BT-A.L`), ASX `.AX`,
+    Tokyo `.T`. The Nikkei company-name table in `analysis-functions.js` was extended for the new members.
+  - **Batching sizes itself to the list** (page code and coordinator): each worker gets 10 stocks, or a few more
+    only when the list is longer than workers x 10 (`ceil(list / workers)`); workers with nothing to do are not
+    called. No worker Lambdas were created, deleted or redeployed. Idle worker functions cost nothing.
+  - **Crypto: new coin list and a different way of calling the workers.** The crypto workers' batch mode ignores
+    the coins it is sent and uses a list built into the worker code, so the list could not be changed from the
+    orchestrator. The orchestrator now holds the list itself (`COINS`, 540 entries of `(symbol shown, Yahoo
+    ticker)`) and calls the workers' **single-coin mode** once per coin, 60 at a time, round-robin over the 54
+    worker functions, retrying a failed call on the next worker. The list is the top coins by market cap from
+    CoinGecko (10 Oct 2026) excluding stablecoins and wrapped/staked tokens, each accepted only if Yahoo's price
+    for the ticker was within 0.8x-1.25x of CoinGecko's with at least 60 days of history. 125 coins need Yahoo's
+    numbered ticker (SUI is `SUI20947-USD`, ARB is `ARB11841-USD`); the plain symbol is a different coin.
+    `CRYPTO_TICKER_MAP` in `analysis-functions.js` holds the same mapping for single-coin analysis: keep the two
+    in step. Result: 539 of 540 coins with data (was 355 usable of 529). `MISMATCHED_SYMBOLS` was removed.
+    The orchestrator's memory was raised from 512 MB to 2,048 MB (540 small calls are CPU-bound; a run dropped
+    from 45 s to 15 s at about the same cost). Worker 26's address in the orchestrator had a typo (`yfo55...`
+    for `yfo27...`) and had always returned 403; fixed.
+    To rebuild the list: CoinGecko `/coins/markets` by market cap, drop stablecoins/wrapped tokens, check
+    `SYMBOL-USD` on Yahoo, and if the price does not match use Yahoo's search API to find the numbered ticker.
+    Probe Yahoo slowly or through `stockiq-price-proxy`: this machine gets HTTP 429 after a few hundred calls.
+  - Dashboard tracker: the company-name gap allowed before the price was widened (30 to 40 characters) and Nikkei
+    names are cut to 22 characters; a long name ("Nomura Research Institute") was dropping that stock.
   **Still open:**
   - **ASX "24h change" is 0 for every stock once the ASX has closed.** Yahoo returns the final session bar
     plus a second bar with the same close, and the ASX workers compute change from the last two closes. This

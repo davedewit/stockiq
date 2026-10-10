@@ -38,7 +38,7 @@
 | `stockiq-option-3-1-us-screener` | US stock screener coordinator (Option 3) |
 | `stockiq-option-3-dynamic-coordinator` | Dynamic screener coordinator |
 | `stockiq-option-3-1-sp100` | S&P 100 screener |
-| `stockiq-option-7-1-orchestrator` | Crypto screener (Option 7) |
+| `stockiq-option-7-1-orchestrator` | Crypto screener (Option 7). Holds the coin list (`COINS`) and calls the 54 `stockiq-option-7-1-worker-N` functions in single-coin mode, one call per coin. 2,048 MB. Handler `orchestrator.lambda_handler`; the zip must contain `orchestrator.py`, `orchestrator_simple.py`, `prediction_memory.py` |
 | `stockiq-screener-coordinator` | Main screener coordinator |
 | `stockiq-chart-generator` | Chart generation |
 | `stockiq-validate-symbol` | Validates stock symbols across exchanges |
