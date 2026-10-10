@@ -1,7 +1,8 @@
 # Lambda Reference
 
 ## Overview
-- ~50 named functions + ~630 parallel screener worker functions (total ~680)
+- 982 functions (967 with Function URLs): ~50 named functions, ~650 stock screener workers, 54 crypto workers, plus old/unused ones
+- **Lambda code is not in git.** `lambda-sync/` is a gitignored mirror that keeps one copy per worker group. Before changing a Lambda, download the live code, diff it with the mirror, and keep the old zip in `~/VSCODE/backup/`
 - All use **Function URLs** (no API Gateway) called directly from frontend JS
 - All in `us-east-1`, IAM role: `arn:aws:iam::114366766218:role/acp-lambda-role`
 - Runtime: Python 3.x, `$LATEST` version (no aliases)
@@ -44,24 +45,32 @@
 | `stockiq-validate-symbol` | Validates stock symbols across exchanges |
 | `StockIQ-StockUpdater` | Stock data updater |
 
-### Screener Workers (~651 functions)
-Parallel workers called by `stockiq-screener-coordinator`. Each worker receives a `stock_batch`
-of 10 symbols and returns scored results. All run in parallel, coordinator aggregates.
+### Screener Workers (~650 functions)
+Parallel workers called from the browser (`analysis-functions.js`) for on-page runs and by
+`stockiq-screener-coordinator` for background runs. Each receives a `stock_batch` (10 symbols, a few
+more if the list is long) and returns ~47 data fields per stock: no report text. Facts that matter
+(full detail in `site-overview.md` section 8b):
+- Codes returned: `STRONG_BUY, BUY, MODERATE_BUY, HOLD, MODERATE_SELL, SELL, STRONG_SELL`. Never shown raw.
+- **No real fundamentals**: P/E, beta, dividend, size and sector are hard-coded guesses/defaults.
+- **Never send an empty batch**: some groups fall back to a built-in list and return unrelated stocks.
+- ASX workers report a 24-hour change of 0 once the ASX has closed (open issue).
 
 | Group | Functions | Screener | Stocks |
 |---|---|---|---|
-| `stockiq-asia-5-1-worker-1..5` | 5 | ASX 50 | 50 |
-| `stockiq-asia-5-2-worker-1..10` | 10 | ASX 100 | 100 |
-| `stockiq-asia-5-3-worker-1..20` | 20 | ASX 200 | 196 |
-| `stockiq-asia-5-4-worker-1..30` | 30 | ASX 300 | 231 |
-| `stockiq-asia-5-5-worker-1..21` | 21 | **Japan Nikkei 225** | 210 |
-| `europe-4-1-worker-1..10` | 10 | UK FTSE 100 | 100 |
-| Various `stockiq-option-3-*` | ~560 | US screeners (S&P, Russell, NASDAQ, Dow) | varies |
+| `stockiq-asia-5-1-worker-1..5` | 5 | ASX 50 | 49 |
+| `stockiq-asia-5-2-worker-1..10` | 10 | ASX 100 | 99 |
+| `stockiq-asia-5-3-worker-1..20` | 20 | ASX 200 | 195 |
+| `stockiq-asia-5-4-worker-1..30` | 30 | ASX 300 | 294 |
+| `stockiq-asia-5-5-worker-1..21` | 21 | **Japan Nikkei 225** | 225 |
+| `stockiq-europe-4-1-worker-1..10` | 10 | UK FTSE 100 | 100 |
+| `stockiq-option-3-1-worker` (10), `3-2` (100), `3-4` (150), `3-5` (100), `3-6` (200), `3-7` (10), `3-8` (3) | ~570 | S&P 100, S&P 400+600, S&P 1500, Russell 1000 (its first 50 also serve S&P 500), Russell 2000, NASDAQ 100, Dow 30 | see `site-overview.md` 8b |
+| `stockiq-option-7-1-worker-1..54` | 54 | Crypto. Batch mode **ignores the coins it is sent**; the orchestrator calls single-coin mode (`{"single_coin": "<Yahoo ticker>"}`) once per coin | 540 coins |
+| `stockiq-option-7-2-worker-1` | 1 | Single-coin analysis from the page | – |
 
 **Coordinator key format:** `{option}-{subOption}` e.g. `4-200` (ASX 200), `5-nikkei225` (Japan), `5-ftse100` (UK).
 New screeners: use `5-<subOption>`.
 
-**Worker code source for new non-US screeners:** copy from `stockiq-asia-5-5-worker-1` (Nikkei; see `add-new-screener.md`) — it handles
+**Worker code source for new non-US screeners:** copy from the Nikkei worker in the mirror (`lambda-sync/stockiq-asia-5-5-worker-*`; see `add-new-screener.md`) — it handles
 `.T`, `.AX`, `.L` suffixes correctly via Yahoo Finance. US workers use a different base.
 
 ### Auth & Users

@@ -94,7 +94,7 @@ else:
 **Step 4:** Create crypto HTML pages in `/website/crypto/` (same template as stock pages).
 
 ### When to Implement
-- Only once the indexed stock pages (962 large caps since Sep 2026) are getting search traffic
+- Only once the indexed stock pages (about 957 large caps, Oct 2026) are getting search traffic
   (check Search Console), and traffic reaches 100+ visitors/month
 - New crypto pages should follow the same rule as stocks: real data on the page, and noindex
   unless there is enough substance

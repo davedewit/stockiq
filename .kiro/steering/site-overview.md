@@ -1,7 +1,8 @@
 # StockIQ Site Overview (read this first)
 
 How stockiq.tech works end to end, what is generated vs hand-edited, the current SEO setup,
-known pitfalls, and open ideas. Last full review: 25 Sep 2026.
+known pitfalls, and open ideas. Last full review: 10 Oct 2026 (section 8b holds what the
+9–10 Oct end-to-end test of every screener, signal and crypto path established).
 
 Detailed references: `stockiq.md` (AWS resources, Cognito, Lambdas, AI chat),
 `script-reference.md` (every script), `add-new-stocks.md`, `stock-matching-system.md`,
@@ -23,7 +24,7 @@ Detailed references: `stockiq.md` (AWS resources, Cognito, Lambdas, AI chat),
 ```
 Browser ──> CloudFront (EHXV50CPHY07R, www→apex redirect function)
               └─> S3 bucket stockiq-final-websitebucket-vqekic7enf9h (static files)
-Browser ──> ~680 Lambda function URLs directly (no API Gateway)
+Browser ──> Lambda function URLs directly (no API Gateway; 982 functions, 967 with URLs, ~650 are screener workers)
               ├─ analysis-functions.js: single-stock report, signals, screener workers, charts
               ├─ index/dashboard/sidebar: market data, gainers/losers/trending, email capture
               └─ auth.js: usage/trial trackers
@@ -41,7 +42,7 @@ Lambdas ──> Yahoo Finance + Finnhub (data), OpenAI gpt-4o-mini (AI chat), Dy
 | Folder | GitHub repo | Notes |
 |---|---|---|
 | `/Users/dave/VSCODE/website/` | `davedewit/stockiq-website` | What is served. `stocks/` and `.last_*` markers are gitignored, so stock pages exist only locally and on S3 |
-| `/Users/dave/VSCODE/stockiq/` | `davedewit/stockiq` | Scripts, Kiro steering. `lambda-sync/`, `.analysis_cache/`, `*.json` are gitignored |
+| `/Users/dave/VSCODE/stockiq/` | `davedewit/stockiq` | Scripts, Kiro steering, `check-tools/` (end-to-end test scripts, section 8b). `lambda-sync/`, `.analysis_cache/`, `*.json` are gitignored |
 | `~/VSCODE/backup/` | – | Daily backups made by every deploy: `website_backup_<UTC time>` and `stockiq_backup_<UTC time>`, 30-day retention. **This is the backup**, including `stocks/`, which GitHub does not have |
 
 **Restoring:** folder names use UTC (`website_backup_20260925_034730` = 13:47 AEST on 25 Sep).
@@ -82,7 +83,7 @@ launchd `com.stockiq.reminder` fires every 10 min → `~/stockiq-daily.sh` runs 
 Order inside `deploy-to-s3.sh`:
 1. `update_news.py`: Yahoo/Google RSS → OpenAI summaries → news.html + news.js (2-hour cooldown)
 2. `update_stock_news.py`: per-stock news into stock pages + news.html/news.js (23-hour cooldown per stock)
-3. `update_stock_analysis.py`: data snapshots on all 3,467 stocks, sets index/noindex on large caps (≥$10B), writes `indexable_stocks.txt`. ~20 min, no API cost. 404s for delisted stocks are normal/cached. **Was missing from deploy until Oct 2026 — caused stock data to go stale.**
+3. `update_stock_analysis.py` (**daily run only**: it sits inside the `UPDATE_STOCK_NEWS=true` block, so a plain `./deploy-to-s3.sh` prints "Skipping stock data snapshots"): data snapshots on all 3,467 stocks, sets index/noindex on large caps (≥$10B), writes `indexable_stocks.txt`. ~20 min, no API cost. 404s for delisted stocks are normal/cached. When Yahoo has no price for a stock it keeps yesterday's snapshot and does not de-index it.
 4. Backups (website + stockiq; prod_scripts every 23h)
 5. `people_also_watch_stocks.py --missing`
 6. `update_sitemap.py`: **rebuilds** stock URLs from `indexable_stocks.txt` (not all HTML files), updates lastmod on site pages. Refuses if list < 200 entries.
@@ -90,7 +91,7 @@ Order inside `deploy-to-s3.sh`:
 8. S3 upload:
    - `stocks/`: `aws s3 sync --delete` (size + mtime), 24h cache
    - `js/`: sync --delete, 24h cache
-   - root `*.html` (1h cache), `*.css` (24h), root `*.js` (24h; news.js 1h): uploaded when local size ≠ S3 size
+   - root `*.html` (1h cache), `*.css` (24h), root `*.js` (24h; news.js 1h): uploaded when the local MD5 differs from the S3 ETag
    - images (7d), and `stocks.txt robots.txt sitemap.xml`
 9. CloudFront invalidation `/*` (waits for completion), `notify_search_engines.py` (IndexNow; "202" means accepted)
 10. `sync-all-lambdas.sh` (hourly cooldown)
@@ -99,6 +100,7 @@ Order inside `deploy-to-s3.sh`:
 
 Preview without uploading or pushing: `cd stockiq && DRY_RUN=true ./deploy-to-s3.sh`.
 It still runs the local steps (backups, sitemap, news trim), then prints `(dryrun)` lines.
+The script lost this mode once (section 9): check `grep -c DRY_RUN deploy-to-s3.sh` is above 0 first.
 
 ## 5b. GitHub: how and when changes get pushed
 
@@ -180,15 +182,16 @@ git pull --rebase && git push
 - Cloud sessions cannot see `stocks/` or run the pipeline. Stock page changes must be made in
   `generate-stock-pages.py` or a section script, then run locally.
 
-## 6. SEO setup (as of 25 Sep 2026)
+## 6. SEO setup (set up 25 Sep 2026; numbers as of 10 Oct 2026)
 
 - **Indexed stock pages:** market cap ≥ **$10B USD** and fresh price data → `index, follow` + data
-  snapshot. That was 962 pages (664 US; the rest TO, L, T, HK, AX, PA, DE, NS).
-  All others (2,505, including 164 delisted/renamed symbols with no data) → `noindex, follow`,
+  snapshot. That was 962 pages on 25 Sep and **957 on 10 Oct 2026** (about two thirds US; the
+  rest TO, L, T, HK, AX, PA, DE, NS). The number moves a little as market caps cross $10B.
+  All others (2,510, including delisted/renamed symbols with no data) → `noindex, follow`,
   with an empty snapshot section. The threshold is `INDEX_MIN_MARKET_CAP_USD` in
   `update_stock_analysis.py`. The owner chose to keep $10B for now; review after 6–8 weeks of
   Search Console data ($2B ≈ 2,000 pages; "any stock with data" ≈ 3,300).
-- **Sitemap:** 979 URLs (962 stocks + 17 site pages incl. about.html). news.html is excluded.
+- **Sitemap:** 974 URLs on 10 Oct 2026 (957 stocks + 17 site pages incl. about.html). news.html is excluded.
   `update_sitemap.py` refuses to touch stock URLs if the indexable list has < 200 entries.
 - **news.html:** `noindex, follow`, newest 240 stock + 60 general articles, summaries cut to
   2 sentences (~0.4 MB, was 5.2 MB with 3,578 articles). Separate limits matter: stock news
@@ -205,7 +208,9 @@ git pull --rebase && git push
 
 ### Anonymous usage limits and bot protection
 
-- Anonymous visitors get **1 analysis per day**. The page (`auth.js` → `checkStockAnalysisAccess`)
+- Anonymous visitors get **1 analysis per day**; trial users 5 per day for 3 days. The use is
+  checked and counted once, at the top of `runAnalysis`; never re-check after counting (section 8b).
+- For anonymous visitors the page (`auth.js` → `checkStockAnalysisAccess`)
   asks Lambda `stockiq-daily-usage-tracker-anonymous` for usage and redirects to signup when
   usage ≥ 1. The limit is enforced **in the page**; the analysis Lambdas themselves are open URLs.
 - 26 Sep 2026: a scraper ran ~145 analyses from ~130 different IPs (Alibaba Cloud 47.82.x,
@@ -229,28 +234,222 @@ git pull --rebase && git push
 
 - `stockiq/stock_metrics.py` is an **exact copy** of the Lambda's scoring functions. If the
   Lambda's scoring changes, copy the functions again or the pages will disagree with the app.
+  (Breakdown label text was aligned on 9 Oct 2026; pages strip the trailing parenthesis anyway.)
 - Stock pages use Yahoo fundamentals (converted to Finnhub units: %, D/E ratio) because the
-  Finnhub free key is shared with the live Lambda. Scores can differ slightly from the app.
-- Public pages use **neutral wording** ("Positive signals", "Mixed") plus "not financial
-  advice". No BUY/SELL labels on public pages. The model calls its 1-year change "YTD"; pages
-  relabel it.
-- `about.html` documents both systems. Keep it in sync if scoring changes.
+  Finnhub free key is shared with the live Lambda. **Page and app scores can differ a lot**, not
+  slightly: the page uses the previous close, the app the live price, and several factors are
+  cliffs (AAPL showed 71 on the page and 47 in the app a day later; breakdown in section 11).
+- **The screeners are price, momentum and volume only.** Their "financial", "sentiment" and "risk"
+  factors do not use real company data, and the 12 weights total 102% in the code (section 8b).
+- **Neutral wording everywhere**, public pages and the paid product: "Strongly positive …
+  Strongly negative signals" plus "not financial advice". No BUY/SELL labels, targets or stop
+  losses are shown anywhere (section 8b). The model calls its 1-year change "YTD"; pages relabel it.
+- `about.html` documents both systems, including the 102% and the price-and-volume-only note.
+  Keep it in sync if scoring changes.
 
 ## 8. Front end
 
 - `analysis.html`: options 1–7 (stock/ETF report, signals, US/EU/Asia/other screeners, crypto).
-  Logic in `analysis-functions.js` (310 KB) + `js/analysis-core.js`.
-- `dashboard.html`: report history, favourites, plans/upgrade (Stripe), manage subscription.
-- `index.html`: market overview widgets, guides, "How StockIQ Works", email capture, comparison.
+  Logic in `analysis-functions.js` (~350 KB, holds the stock lists and all formatters) +
+  `js/analysis-core.js`. How the screeners, signals and crypto work: section 8b.
+- `dashboard.html`: report history, favourites, plans/upgrade (Stripe), manage subscription,
+  "Run in Background" (through `stockiq-screener-coordinator`), 🎯 performance tracker.
+- `index.html`: market overview widgets, guides, "How StockIQ Works", **Pricing section**
+  (`#pricing`, three plans in USD), email signup ("Get Screener Highlights by Email", details in
+  `stockiq.md`), comparison table.
 - Stock pages load `sidebar.js`, `stock-prices.js` (live ticker), `ai-chat.js`, `auth.js`, `theme.js`.
+- AI chat button: bottom-right on every page; on the home page it moves left of the news panel
+  only from 1401px wide (the panel is hidden below that).
+- Every public page footer carries a "General information only, not financial advice …" line.
 - Theme: light/dark by time of day unless the user overrides (`localStorage.theme`).
 - Live prices on stock pages (main ticker + "People also watch" cards) come from
-  `stock-prices.js` → Lambda price proxy, refreshed every 5 s. Pages opened from local files
+  `stock-prices.js` → a price Lambda, refreshed every 5 s. Pages opened from local files
   show `--` (the proxy only answers the live site), which is expected.
-- Utility pages with no footer, not in the sitemap: `clear-cache.html`,
-  `market-data-sidebar.html`, `market-data-widget.html`.
+- Utility page with no footer, not in the sitemap: `clear-cache.html`. (`market-data-sidebar.html`
+  and `market-data-widget.html` called a Lambda that no longer exists and were deleted 10 Oct 2026.)
 - Lambda function URLs are hard-coded in the JS/HTML. `stockiq/lambda-url-mapping.json` maps
-  each URL to its function name (regenerate with `generate-lambda-url-mappings.sh`).
+  each URL to its function name. Regenerate it with `bash generate-lambda-url-mappings.sh`
+  (it rewrites the file in place over a few minutes; don't read it meanwhile).
+
+## 8b. Screeners, signals and crypto: how they work now (verified end to end 9–10 Oct 2026)
+
+Everything in this section was checked by running every analysis button with real data
+(method at the end). Read it before touching `analysis-functions.js`, the coordinator, the
+crypto orchestrator or any worker.
+
+### Two code paths, one set of lists
+
+- **On-page run:** `runAnalysis(option, subOption, event)` in `analysis-functions.js` calls the
+  worker Lambdas straight from the browser and formats the text itself.
+- **"Run in Background" (dashboard):** `stockiq-screener-coordinator` calls the same workers
+  server-side, formats the report and CSV, and saves them to the user's history.
+- The stock lists therefore live in **two places that must stay identical**: the `*Universe`
+  arrays in `analysis-functions.js` and `STOCK_UNIVERSES` in the coordinator. Exception: on the
+  page path Russell 1000/2000 send only `worker_id`, so those workers use lists built into
+  their own code; the coordinator sends its own lists for them.
+- Wording is applied only in those two places (plus the report Lambda and the crypto
+  orchestrator). **Workers return data only, so a wording or list change never needs a worker
+  redeploy.**
+
+| Screener | Page call | Coordinator key | Worker group (count) | List size | Source of the list |
+|---|---|---|---|---|---|
+| Dow 30 | `3, '8'` | `3-8` | `stockiq-option-3-8-worker-N` (3) | 30 | slickcharts.com |
+| S&P 100 | `3, '100'` | `3-100` | `stockiq-option-3-1-worker-N` (10) | 101 | Wikipedia |
+| NASDAQ 100 | `3, '7'` | `3-7` | `stockiq-option-3-7-worker-N` (10) | 101 | slickcharts.com |
+| S&P 500 | `3, '3'` | `3-3` | first 50 of `stockiq-option-3-5-worker-N` | 502 | Wikipedia |
+| S&P 400+600 | `3, '2'` | `3-2` | `stockiq-option-3-2-worker-N` (100) | 995 | Wikipedia (400 + 600) |
+| S&P 1500 | `3, '4'` | `3-4` | `stockiq-option-3-4-worker-N` (150) | 1,497 | Wikipedia (500 + 400 + 600) |
+| Russell 1000 | `3, '5'` | `3-5` | `stockiq-option-3-5-worker-N` (100) | 877 | old list, dead tickers removed |
+| Russell 2000 | `3, '6'` | `3-6` | `stockiq-option-3-6-worker-N` (200) | 1,829 | old list, dead tickers removed |
+| ASX 50 / 100 / 200 / 300 | `5, '50'` … `'300'` | `4-50` … `4-300` | `stockiq-asia-5-1` … `5-4-worker-N` (5 / 10 / 20 / 30) | 49 / 99 / 195 / 294 | Wikipedia ASX 50 and ASX 200; 100 = largest 100 of the 200; 300 = the 200 plus live members of the old list |
+| UK FTSE 100 | `4, 'ftse100'` | `5-ftse100` | `stockiq-europe-4-1-worker-N` (10) | 100 | Wikipedia |
+| Japan Nikkei 225 | `5, 'nikkei225'` | `5-nikkei225` | `stockiq-asia-5-5-worker-N` (21) | 225 | Wikipedia |
+| Crypto universe | `7, 'coinspot'` | `7-1` | orchestrator + 54 `stockiq-option-7-1-worker-N` | 540 coins | CoinGecko top by market cap, price-checked |
+| Single coin | `72, 'single'` | – | `stockiq-option-7-2-worker-1` | – | – |
+
+- The option numbers are inconsistent for historical reasons (ASX is page option 5 but
+  coordinator `4-…`; FTSE the reverse). New screeners: use `5` + the same subOption everywhere.
+- Russell 1000/2000 were **not** refreshed: no complete free source a script can read (iShares
+  holdings URLs return a web page, Wikipedia has no list). ASX 300 is an approximation.
+- Do not use asx50list.com / asx100list.com / asx200list.com / asx300list.com: years out of date.
+- Yahoo symbol format: US share classes use a dash (`BRK-B`, not `BRK.B`); FTSE adds `.L`
+  (`BT.A` → `BT-A.L`); ASX `.AX`; Tokyo `.T`. A symbol Yahoo does not know is silently dropped.
+- Every symbol in a list was checked against the price source before being included. To check a
+  symbol, call `stockiq-price-proxy` (`?symbol=X`; it answers 500 for an unknown symbol).
+  **Do not probe Yahoo in bulk from this machine**: after a few hundred calls it returns HTTP 429,
+  and the daily run's snapshot step then gets no prices (section 9).
+- Button labels in `analysis.html`, the `universeSize` constants in the formatters and the
+  coordinator's `universe_sizes` all carry the real list sizes. Update all three with a list.
+- `NIKKEI_COMPANY_NAMES` in `analysis-functions.js` supplies names for the Nikkei output.
+
+### Batching
+
+- Each worker gets 10 stocks, or a few more only when a list is longer than workers × 10:
+  `perWorker = max(10, ceil(list / workers))`. Workers accept more than 10.
+- **Never send a worker an empty batch.** Some groups (the S&P 500 / Russell 1000 workers) fall
+  back to their built-in list and return unrelated stocks. Both paths skip empty batches.
+- No worker Lambda needs creating or deleting when a list changes; idle functions cost nothing.
+- The coordinator de-duplicates results by symbol.
+
+### What the screener workers really do
+
+- They return ~47 data fields per stock and no report text. Codes: `STRONG_BUY`, `BUY`,
+  `MODERATE_BUY`, `HOLD`, `MODERATE_SELL`, `SELL`, `STRONG_SELL` (underscores). Field names that
+  matter for CSV: `change_24h`, `distance_from_52w_low`, `52w_high`, `52w_low`.
+- **They do not fetch fundamentals.** `get_fundamentals()` returns hard-coded guesses for ~50
+  large US stocks and defaults for everything else (P/E 25, beta 1.0, dividend 0, size "Mid",
+  sector "OTHER"). "Earnings risk" is the calendar month (Jan/Apr/Jul/Oct = HIGH), "sentiment" is
+  the day's price move. The "Financial health" factor therefore adds the same +0.12 to nearly
+  every stock: **the screeners are price, momentum and volume only.** `about.html` says so, and
+  the CSV no longer exports P/E, market cap, beta, dividend, sector or earnings risk.
+- The 12 weights really total 102% in the code (0.18+0.08+0.06+0.20+0.20+0.10+0.06+0.05+0.03+
+  0.03+0.02+0.01). The About and FAQ pages say so. Changing it would change every score.
+- **ASX quirk (open):** once the ASX has closed, Yahoo returns the last session bar twice, so the
+  ASX workers compute a 24-hour change of 0 for every stock (also flattening their sentiment
+  factor and `Momentum_Signal`). Not checked during ASX hours. Fix belongs in the 65 ASX workers.
+- A worker returns nothing for a few valid symbols even when asked directly (WBD, PSKY). Open.
+- Real fundamentals, or the ASX fix, mean redeploying worker groups (~630 functions in total).
+
+### Output wording: describe, don't advise
+
+- Codes are used for logic but **never shown**. Everything printed goes through a label function:
+  `signalLabel()` / `horizonLabel()` in `analysis-functions.js`, `signal_label()` /
+  `horizon_label()` in the coordinator and crypto orchestrator, `signal_label()` in the report
+  Lambda. Labels: Strongly positive, Positive, Slightly positive, Mixed, Slightly negative,
+  Negative, Strongly negative. Both code styles are accepted (stock: underscores; crypto: spaces,
+  plus `CONSIDER` and `AVOID`). An unknown code shows as **"Unrated"**: if that ever appears, a
+  worker has a new code that must be added to all the label maps.
+- Stop loss / take profit are shown as "Lower / Upper reference level"; buy limit / buy stop as
+  "Pullback / Breakout level"; profit probability as "Model probability estimate"; strategy as
+  "Horizon". Lists are headed "TOP N BY SCORE".
+- The single-stock report (`stockiq-option-1-1-custom-analysis`) no longer prints BUY/SELL,
+  "Buy immediately", position size, urgency or action steps; it prints a signal summary, "what
+  the model sees", reference levels and a disclaimer. Scoring is unchanged.
+- The dashboard performance popup reports the price change since the report (it used to say
+  "The AI predicted upward movement" whenever the price was up).
+- Any new formatter must follow this: no "buy", "sell", "target", "stop loss", "take profit",
+  "position size", "recommendation", "picks" or "opportunities" in output.
+- Not changed: the workers still return raw codes and a few descriptive breakdown strings
+  ("RSI Buy Zone"); three Lambdas with old wording are not called by the site
+  (`stockiq-option-3-1-us-screener`, `stockiq-option-3-1-sp100`,
+  `stockiq-option-3-dynamic-coordinator`). Reports already saved in users' history keep the old
+  wording until the 30/90-day auto-delete removes them.
+
+### CSV exports
+
+- Stock CSV columns (page `generateExcelExport` and coordinator): `Signal`, `Lower_Level`,
+  `Upper_Level`, `Model_Probability_%`, `Horizon`, `Horizon_Days`, the change columns,
+  indicators, `Distance_52W_High_%`, `Distance_From_Low_%`, `52W_High`, `52W_Low`,
+  `Market_Regime`, `SPY_20d_Change_%`, `Score_Breakdown`. Several of these were always 0 before
+  Oct 2026 because the code read field names the workers do not return.
+
+### Dashboard performance tracker (🎯 button)
+
+- `trackScreenerPerformance` in `dashboard.html` parses the saved report text: the symbol and
+  price at the start of each numbered line. Do not change that part of a line.
+- Stock pattern: `N. SYMBOL <up to 40 chars> <currency>PRICE`, symbols 1–10 characters with an
+  optional `.XX` or `-X` suffix, currencies `$ £ € ¥`. Add `₹` / `₩` for India / Korea.
+- A company name between symbol and price must stay short (Nikkei names are cut to 22 chars).
+
+### Crypto
+
+- **The 54 crypto workers ignore the coin list they are sent in batch mode** and use a list
+  built into their code. So `stockiq-option-7-1-orchestrator` holds the list itself (`COINS`:
+  540 pairs of `(symbol shown, Yahoo ticker without -USD)`) and calls each worker's
+  **single-coin mode** (`{"single_coin": "<ticker>"}`) once per coin, 60 at a time, round-robin
+  over the 54 worker URLs, retrying a failed call on the next worker. ~15 s for 540 coins with
+  2,048 MB (it was 45 s at 512 MB).
+- The list is the top coins by market cap (CoinGecko, 10 Oct 2026) without stablecoins and
+  wrapped/staked tokens. A coin is only included if Yahoo's price for its ticker was within
+  0.8×–1.25× of CoinGecko's and it had 60+ days of history. **Many coins share a symbol on
+  Yahoo**: 125 need Yahoo's numbered ticker (SUI is `SUI20947-USD`, ARB is `ARB11841-USD`);
+  the plain symbol is a different coin. Before this, the top-ranked coin was often a wrong match
+  (CORE priced as cVault.finance at $5,698) and 27% of coins had no data.
+- `CRYPTO_TICKER_MAP` in `analysis-functions.js` holds the same symbol → ticker mapping for
+  single-coin analysis. **Keep it in step with `COINS`.** `mismatchedCoinSymbols` in
+  `formatSingleCoinResult` warns on symbols still known to be the wrong coin.
+- To rebuild the list: CoinGecko `/coins/markets` by market cap; drop stablecoins and wrapped
+  tokens; check `SYMBOL-USD` on Yahoo; if the price does not match, use Yahoo's search API
+  (`query2.finance.yahoo.com/v1/finance/search?q=<coin name>`) to find the numbered ticker and
+  check its price. Go slowly (429s).
+- The orchestrator zip must contain `orchestrator.py`, `orchestrator_simple.py`,
+  `prediction_memory.py`. Handler `orchestrator.lambda_handler`.
+- The page shows the orchestrator's `report` text directly (`type: 'coinspot_comprehensive'`);
+  internal names still say "coinspot" although the list is no longer CoinSpot's.
+
+### Access checks and usage counting
+
+- `runAnalysis` checks access (`checkDailyUsageLimit` → `authManager.checkStockAnalysisAccess`)
+  and counts the use **once, at the top, for every option**. Anonymous: 1 per day. Trial: 5 per
+  day for 3 days. Paid plans pass the check.
+- **Never check access again after the use has been counted.** 14 handlers used to (crypto,
+  single coin, six US screeners, ASX, Nikkei): the second check saw zero left, so an anonymous
+  visitor's single-coin run went to signup.html and a trial user's last analysis of the day went
+  to the upgrade page, both with the use spent and no result. Removed 10 Oct 2026.
+
+### How to test every button end to end (no browser needed)
+
+The scripts are in `stockiq/check-tools/` (see its `README.md` for one-line examples):
+`page_run.js` (step 1), `anon_run.js` and `trial_run.js` (step 2), `run_all.py` and `analyse.py`
+(step 3). `check-tools/lists/` holds the one-off scripts that rebuilt the index and crypto lists.
+The method:
+1. **Page path:** load `analysis-functions.js` in a Node `vm` context with a stub `document` /
+   `window`, real `fetch`, and `displayResults`, `displayError`, `saveAnalysisToHistory`
+   overridden to capture the result. Block fetches to usage / trial / dashboard Lambdas (answer
+   them with a fake OK) so nothing is written. Call `runAnalysis(option, subOption, event)` per
+   button and check: no error, every worker call 200, result count ≈ list size, no raw codes,
+   no "Unrated", no `undefined` / `NaN`, and the tracker regex finds 10 symbols.
+2. **Access rules:** also load `auth.js` (expose `authManager` on the global object) and
+   simulate the usage tracker in the fake fetch; record every write to `location.href` with a
+   stack trace. Test 1 use left (must get a result) and 0 left (must redirect before running).
+3. **Coordinator path:** import the coordinator in Python, patch `urllib.request.urlopen` to
+   intercept the dashboard save URL, call `lambda_handler` for each key. Needs
+   `AWS_DEFAULT_REGION=us-east-1` for the `worker_id` screeners (`3-4`, `3-5`, `3-6`).
+4. **Report Lambda and formatters:** run old and new code on identical cached inputs and diff:
+   scores and numbers must not change when only wording changes.
+5. Read a few outputs. Tests that only count lines miss wrong content.
+Not testable this way: anything behind a real login (payments, dashboard screens, real trial
+accounts). Say so when reporting.
 
 ## 9. Pitfalls learned the hard way
 
@@ -292,8 +491,9 @@ git pull --rebase && git push
   was pushed to GitHub. Restored from commit 2485162 plus the `$PYTHON` variable. **Before trusting
   `DRY_RUN=true`, check the script still supports it:** `grep -c DRY_RUN deploy-to-s3.sh` must be > 0,
   and the output must contain `(dryrun)` lines and no `upload:` lines. That commit touched 24 scripts
-  (`git diff --stat 2485162 7e14c8f`); `check_news_sync.py`, `update_sitemap.py` and
-  `generate_sitemap.py` were also changed and have not been re-audited against their Sep 25 versions.
+  (`git diff --stat 2485162 7e14c8f`). All were compared with their Sep 25 versions on 9 Oct: the
+  rest only had path changes, except `check_news_sync.py` (window logic lost; restored) and
+  `update_sitemap.py` / `generate_sitemap.py` (rewritten in Oct on purpose; verified working).
 - **News script wiped news on the current template (fixed 9 Oct 2026):** `update_stock_news.py`
   (`update_stock_page`) removed the page's NEWS section and then looked for a "features grid" to insert
   before. That grid only exists in the pre-Sep 25 template, so on current pages a new article **deleted the
@@ -304,198 +504,113 @@ git pull --rebase && git push
   "History" heading is now only written when there is an older article under it (448 pages had an empty one;
   cleaned up). **Any script that writes into stock pages must anchor on the section markers, never on other
   template HTML.**
-- `check_news_sync.py` had its news-window logic removed by the same Oct 2 commit; restored from 2485162.
-- **`update_stock_analysis.py` was missing from deploy-to-s3.sh** (Oct 2026). Stock data was stale from Sep 24. It's now in the pipeline. If stock pages ever show old dates again, check it's still in deploy-to-s3.sh.
+- If stock pages show old data dates, check `update_stock_analysis.py` is still in `deploy-to-s3.sh`
+  (it went missing once) and look for a large "No price data" count in `~/stockiq-daily.log`.
+- **Yahoo rate-limits this machine** (HTTP 429) after a few hundred chart requests. On 10 Oct 2026
+  manual symbol checks caused the daily run's snapshot step to get no prices for 2,041 stocks. It
+  kept yesterday's snapshots and de-indexed nothing; a re-run an hour later was clean.
+- **Lambda code is not in git** (`lambda-sync/` is a gitignored mirror). The only history of a
+  Lambda is whatever zip you keep before changing it.
+- A worker address in the crypto orchestrator had a one-character typo for months and returned
+  403; its coins were silently missing. Failed worker calls are easy to miss: count results.
 - A stray `test-news-layout.html` was publicly live on S3 (deleted 25 Sep 2026). Check S3 for files with no local
   copy occasionally (`aws s3api list-objects-v2 --delimiter /`).
 
 ## 10. Working rules for AI assistants
 
-- The owner works in **Kiro** and hadn't touched the site for months before Sep 2026. Explain
-  in plain terms what a script does and what will change, and confirm facts against the code
-  and live site rather than assuming.
-
-- Ask the owner before any S3 upload or GitHub push. Show the `DRY_RUN=true` output as the
-  approval list. Remember the daily job deploys anything changed in `website/` automatically.
-- No extra backups are needed before changes: the daily deploy backups in `~/VSCODE/backup/`
-  (30 days, both folders incl. `stocks/`) plus GitHub are enough. The owner does not want
-  additional backup copies made.
-- Change generators and templates, not generated pages (section 4).
-- **Wording that lowers legal risk (owner's instruction, 9 Oct 2026; StockIQ holds no financial services
-  licence):** describe, don't advise. On pages, in emails and in the AI chat: no "you should buy/sell", no
-  "picks", "winning stocks", "recommendations", price targets or predictions presented as StockIQ's view; say
-  "scores", "signals", "screener rankings", "what the data shows". The AI chat prompt (`stockiq-ai-chat`) must
-  keep its rule never to give buy/sell/hold calls, price targets or picks. Keep the footer disclaimer and the
-  no-licence statement (terms.html, about.html). Educational text about how technical analysis works is fine.
-- Verify claims against code or data before putting them on public pages (accuracy, user
-  counts and testimonials were removed in Sep 2026 for being unsupported).
+- The owner (Dave) built this with AI help, works in **Kiro**, and is not going to read code.
+  Explain in plain terms what will change and what you found. Lead with the result.
+- **Verify, don't assume, and don't trust these docs blindly.** On 9 Oct 2026 the docs said
+  `DRY_RUN=true` worked; the script had lost it and a "dry run" deployed for real. Before relying
+  on a script feature or a claim here, check the code. When something is fixed, say how it was
+  checked; when something could not be tested (logged-in screens, a real phone), say that too.
+- **Test with real data, end to end.** Spot checks missed real bugs repeatedly on 9–10 Oct
+  (missing label codes, stocks never sent to a worker, a column that was always 0, a worker
+  address with a typo). When asked to "check", run the whole thing (section 8b) and read the
+  output. List every code, field or symbol a component can produce before mapping it.
+- **Before editing a Lambda:** download the live code and diff it with `lambda-sync/` (they must
+  match). Lambda code is not in git, so keep the previous zip in `~/VSCODE/backup/` with a clear
+  name as the rollback. After deploying, smoke-test the live function. If the daily run's Lambda
+  sync is about to run, deploy straight after editing `lambda-sync/` so it does not overwrite you.
+- **The daily deploy starts at 11:00** (Mon–Sat) and publishes and commits whatever is in
+  `website/`. Near that time, stage edits in a scratch folder and copy them in only when
+  verified. If the job's own files (news.html, news.js, sitemap.xml) are dirty, commit only your
+  files by name, never `git add -A`.
+- Ask the owner before an S3 upload or GitHub push and show the `DRY_RUN=true` list. (On 9–10
+  Oct the owner approved deploys as each fix was ready; a few hand-edited files can go up with
+  `aws s3 cp` plus a CloudFront invalidation of just those paths, which avoids a full pipeline run.)
+- No extra backups before changes: the daily backups in `~/VSCODE/backup/` (30 days, both
+  folders incl. `stocks/`) plus GitHub are enough. The one exception is the Lambda rollback zip.
+- Change generators and templates, not generated pages (section 4). Any script that writes into
+  stock pages must anchor on the section markers, never on other template HTML.
+- **Describe, don't advise** (owner's instruction; StockIQ holds no financial services licence).
+  On pages, in emails, in product output and in the AI chat: no "you should buy/sell", "picks",
+  "winning stocks", "recommendations", price targets or predictions presented as StockIQ's view.
+  Say "scores", "signals", "screener rankings", "what the data shows". The AI chat prompt
+  (`stockiq-ai-chat`) must keep its rule never to give buy/sell/hold calls, price targets or
+  picks. Keep the footer disclaimer and the no-licence statement (terms.html, about.html).
+  Educational text about how technical analysis works is fine. Details: section 8b.
+- Verify claims against code or data before putting them on public pages. Don't promise what
+  doesn't exist (the giveaway and "daily picks at 6 AM" were removed for that reason).
+- Commit with a message that says what changed and why. The "Auto-update" commits bundle
+  everything; one of them hid a revert of 24 scripts (section 9).
+- Don't hit Yahoo in bulk from this machine (section 8b). Use `stockiq-price-proxy` or go slowly.
 
 ## 11. Open items and optimisation ideas
 
-Flagged for the owner (not changed):
-- **Advice-style wording in the paid product's output: done 9 Oct 2026.** The product now describes, it does
-  not advise. Internal codes (`STRONG BUY` ... `STRONG SELL`, `CONSIDER`, `AVOID`) are still produced by the
-  Lambdas and used for logic, but are only ever shown through a label function:
-  `signalLabel()` / `horizonLabel()` in `analysis-functions.js`, `signal_label()` / `horizon_label()` in the
-  coordinator and crypto orchestrator, `signal_label()` in the report Lambda. Labels: Strongly positive, Positive,
-  Slightly positive, Mixed, Slightly negative, Negative, Strongly negative. **Codes in use:** stock workers return
-  `STRONG_BUY, BUY, MODERATE_BUY, HOLD, MODERATE_SELL, SELL, STRONG_SELL` (underscores); crypto workers return
-  `STRONG BUY, BUY, CONSIDER, HOLD, AVOID, SELL, STRONG SELL` (spaces). The label functions accept both forms.
-  An unknown code shows as "Unrated", so if "Unrated" ever appears in a report, a worker has a new code that
-  needs adding to all three label maps. Stop loss / take profit are shown as
-  "Lower / Upper reference level"; buy limit / buy stop as "Pullback / Breakout level"; "Profit probability" as
-  "Model probability estimate"; strategy as "Horizon". CSV headers changed to match (`Signal`, `Lower_Level`,
-  `Upper_Level`, `Model_Probability_%`, `Horizon`, `Horizon_Days`). Scoring and numbers were not changed
-  (old vs new compared on identical data for the report, all 8 page formatters and a Dow 30 background run).
-  - Changed: `stockiq-option-1-1-custom-analysis` (report; also fixes the company name, which was cut at the
-    first comma because stocks.txt was split with `split(',')`), `stockiq-screener-coordinator` (background runs),
-    `stockiq-option-7-1-orchestrator` (crypto), `analysis-functions.js`, the dashboard performance popup
-    (it used to say "The AI predicted upward movement" whenever the price was up), and the FAQ.
-  - Previous Lambda code (not in git): `~/VSCODE/backup/*_before_neutral_wording_20261009.zip` (3 files).
-  - **Keep it this way:** any new formatter must print `signalLabel(x.recommendation)`, never the raw code, and
-    must not print "buy", "sell", "stop loss", "take profit", "target", "position size" or "recommendation".
-    The dashboard tracker parses only the symbol and price at the start of numbered lines; don't change those.
-  - **The ~630 screener workers were NOT changed and do not need to be.** They return data only (47 fields per
-    stock, no report text); all wording is applied afterwards in two places: `analysis-functions.js` (on-page runs)
-    and `stockiq-screener-coordinator` (background runs). A wording change never requires redeploying workers.
-  - Not changed: the workers still return the raw codes and a few descriptive breakdown
-    strings ("RSI Buy Zone"); three Lambdas with old wording are not called by the site
-    (`stockiq-option-3-1-us-screener`, `stockiq-option-3-1-sp100`, `stockiq-option-3-dynamic-coordinator`).
-- **Full end-to-end check of every analysis button (9 Oct 2026).** All 21 distinct buttons on analysis.html were
-  run with real data through the real page code (in Node, with history/usage writes blocked) and all 15
-  screeners through the coordinator (saves intercepted). Result: everything runs; all 709 worker calls
-  succeeded; output is well-formed. Fixed during the check:
-  - `MODERATE_BUY` / `MODERATE_SELL` were missing from the label maps (a third of screener results).
-  - `BRK.B` / `BF.B` never returned data: Yahoo needs `BRK-B` / `BF-B`. Fixed in the page lists and the coordinator.
-  - S&P 500 (503 symbols, 50 workers) and NASDAQ 100 (101, 10 workers): the symbols past workers x 10 were never
-    sent. The last worker now takes the remainder (workers accept more than 10), in both page code and coordinator.
-  - S&P 1500 coordinator list has 19 duplicate symbols: results are now de-duplicated by symbol.
-  - Dashboard performance tracker dropped single-letter tickers (W, S, F, T ...) and dash tickers: regex widened.
-  - Crypto report legend said "GOOD ENTRY / OK ENTRY / RISKY ENTRY"; now describes when a coin was flagged.
-  **Second pass, same day (owner asked to fix everything possible):**
-  - **Dead tickers removed.** 630 list entries that returned HTTP 404 from Yahoo twice were removed from the
-    `*Universe` arrays in `analysis-functions.js` and from `STOCK_UNIVERSES` in the coordinator, and duplicates
-    dropped. The two places now hold the same lists. Real sizes: Dow 30, S&P 100 99, NASDAQ 100 101, S&P 500 495,
-    S&P 400+600 830, S&P 1500 1,307, Russell 1000 877, Russell 2000 1,829, ASX 50 47, ASX 100 84, ASX 200 168,
-    ASX 300 219, FTSE 100 76, Nikkei 200. Button labels, report headers and the coordinator's `universe_sizes`
-    use these numbers. **This only removed dead symbols; it did not add current index members**, so the lists
-    are honest but not complete (FTSE "100" has 76). Refreshing them from current constituents is still open.
-    Russell 1000/2000 on the page path use lists built into the workers (the page sends only `worker_id`).
-  - **Never send a worker an empty batch.** The S&P 500 workers fall back to their own built-in list and return
-    unrelated stocks. The page code now skips empty batches (the coordinator already did).
-  - **CSV columns that were never real:** `Distance_From_Low_%`, `52W_High`, `52W_Low` (and `24h_Change_%` on
-    the page) read field names the workers do not return; fixed (workers use `distance_from_52w_low`,
-    `52w_high`, `52w_low`, `change_24h`). `PE_Ratio`, `Market_Cap`, `Beta`, `Dividend_Yield_%`, `Sector` and
-    `Earnings_Risk` were removed from the stock CSV because **the screener workers do not fetch fundamentals**:
-    `get_fundamentals()` returns hard-coded guesses for ~50 large stocks and defaults for the rest (P/E 25, beta
-    1.0, dividend 0, size "Mid"), "earnings risk" is just the calendar month, and "sentiment" is the day's price
-    move. The "Financial health" factor therefore adds the same +0.12 to nearly every stock. about.html now
-    says the screeners use price and volume only. Real fundamentals would mean changing ~630 workers.
-  - **Crypto screener.** The orchestrator now leaves out coins with no price and the 32 symbols in
-    `MISMATCHED_SYMBOLS` (priced as a different coin on Yahoo: CORE, TON, ARB, MNT, GFI ...), and reports how
-    many were left out (355 of 529 kept). The same list is in `formatSingleCoinResult` as a warning. To rebuild
-    the list: fetch CoinGecko `/coins/markets` (top ~6,000), take the best-ranked coin per symbol, and flag any
-    coin whose screener price is outside 0.75x-1.33x of it. 35 coins could not be checked (not in the top 6,000).
-    The crypto *workers* are unchanged, so single-coin analysis still prices a mismatched symbol wrongly (it now
-    warns).
-  - Deleted the two orphan pages (`market-data-sidebar.html`, `market-data-widget.html`) from the repo and S3.
-  - `lambda-url-mapping.json` regenerated (982 functions, 967 with URLs).
-  **Third pass, 10 Oct 2026 (lists rebuilt from current index members; crypto list replaced):**
-  - **Stock lists refreshed from current constituents**, each symbol checked against the price source (through
-    `stockiq-price-proxy`) before being included. Sources: S&P 100 / 500 / 400 / 600, FTSE 100 and Nikkei 225 from
-    Wikipedia's constituent tables; Dow 30 and NASDAQ-100 from slickcharts.com; ASX 200 from Wikipedia, ASX 50 from
-    Wikipedia, ASX 100 = the 100 largest of the ASX 200 by market cap, ASX 300 = ASX 200 plus the still-live
-    members of the old ASX 300 list (no current ASX 300 source was found, so it is an approximation).
-    Sizes now: Dow 30, S&P 100 101, NASDAQ 100 101, S&P 500 502, S&P 400+600 995,
-    S&P 1500 1497, ASX 50 49, ASX 100 99, ASX 200 195, ASX 300 294, FTSE 100 100,
-    Nikkei 225 225. All of these returned data for every listed stock when re-run (ASX 300: all but one).
-    **Russell 1000 and 2000 were not refreshed**: no complete free source (iShares holdings files return a web
-    page to scripts, Wikipedia has no list), so they keep the cleaned lists (877 and 1,829).
-    Do not use asx50list.com / asx100list.com / asx200list.com / asx300list.com: they are years out of date.
-    Yahoo symbol format: US share classes use a dash (`BRK-B`), FTSE gets `.L` (`BT.A` becomes `BT-A.L`), ASX `.AX`,
-    Tokyo `.T`. The Nikkei company-name table in `analysis-functions.js` was extended for the new members.
-  - **Batching sizes itself to the list** (page code and coordinator): each worker gets 10 stocks, or a few more
-    only when the list is longer than workers x 10 (`ceil(list / workers)`); workers with nothing to do are not
-    called. No worker Lambdas were created, deleted or redeployed. Idle worker functions cost nothing.
-  - **Crypto: new coin list and a different way of calling the workers.** The crypto workers' batch mode ignores
-    the coins it is sent and uses a list built into the worker code, so the list could not be changed from the
-    orchestrator. The orchestrator now holds the list itself (`COINS`, 540 entries of `(symbol shown, Yahoo
-    ticker)`) and calls the workers' **single-coin mode** once per coin, 60 at a time, round-robin over the 54
-    worker functions, retrying a failed call on the next worker. The list is the top coins by market cap from
-    CoinGecko (10 Oct 2026) excluding stablecoins and wrapped/staked tokens, each accepted only if Yahoo's price
-    for the ticker was within 0.8x-1.25x of CoinGecko's with at least 60 days of history. 125 coins need Yahoo's
-    numbered ticker (SUI is `SUI20947-USD`, ARB is `ARB11841-USD`); the plain symbol is a different coin.
-    `CRYPTO_TICKER_MAP` in `analysis-functions.js` holds the same mapping for single-coin analysis: keep the two
-    in step. Result: 539 of 540 coins with data (was 355 usable of 529). `MISMATCHED_SYMBOLS` was removed.
-    The orchestrator's memory was raised from 512 MB to 2,048 MB (540 small calls are CPU-bound; a run dropped
-    from 45 s to 15 s at about the same cost). Worker 26's address in the orchestrator had a typo (`yfo55...`
-    for `yfo27...`) and had always returned 403; fixed.
-    To rebuild the list: CoinGecko `/coins/markets` by market cap, drop stablecoins/wrapped tokens, check
-    `SYMBOL-USD` on Yahoo, and if the price does not match use Yahoo's search API to find the numbered ticker.
-    Probe Yahoo slowly or through `stockiq-price-proxy`: this machine gets HTTP 429 after a few hundred calls.
-  - Dashboard tracker: the company-name gap allowed before the price was widened (30 to 40 characters) and Nikkei
-    names are cut to 22 characters; a long name ("Nomura Research Institute") was dropping that stock.
-  - **Last free use of the day was being eaten (fixed 10 Oct 2026).** `runAnalysis` checks access and counts
-    the use at the top, for every option. 14 handlers then called `authManager.checkStockAnalysisAccess()` a
-    second time (crypto, single coin, S&P 500/400+600/100/1500, Russell 1000/2000, ASX 50/100/200/300, Nikkei,
-    csi300). With the use already counted, that second check saw zero left and redirected: an anonymous visitor
-    running single-coin analysis went to signup.html with their one free use spent, and a signed-in trial user
-    on their last analysis of the day went to the upgrade page. The second checks were removed. **Never check
-    access again after the use has been counted.** Verified by running the real `auth.js` +
-    `analysis-functions.js` in Node with a simulated usage tracker: users with 1 use left get their result,
-    users with 0 left are still redirected before anything runs.
-  - If the daily run reports a large "No price data" count, this machine has been rate-limited by Yahoo
-    (it happened on 10 Oct after a few hundred manual probes). The script keeps yesterday's snapshot and does
-    not de-index anything; re-run `python3 update_stock_analysis.py` later, then `./deploy-to-s3.sh`.
-  **Still open:**
-  - **ASX "24h change" is 0 for every stock once the ASX has closed.** Yahoo returns the final session bar
-    plus a second bar with the same close, and the ASX workers compute change from the last two closes. This
-    zeroes the day change, the "sentiment" factor and `Momentum_Signal` for ASX screeners. Not checked during
-    ASX trading hours. Fix is in the ASX workers (`stockiq-asia-5-1..5-4`, 65 Lambdas).
-  - A worker returns nothing for a few valid symbols even when asked directly (WBD, PSKY): not investigated.
-  - `uniqueSymbolsCount` constants in `saveAnalysisToHistory` (`analysis-functions.js`) still use the old sizes.
-  - Reports already saved in users' history keep the old BUY/SELL wording; they expire under the 30/90-day
-    auto-delete, so they were left alone.
-  **How to repeat the check:** the harnesses are not in the repo; the method is (1) load `analysis-functions.js`
-  in a Node `vm` with stub DOM, real `fetch`, and `displayResults` / `saveAnalysisToHistory` overridden, then call
-  `runAnalysis(option, subOption, event)` per button; (2) import the coordinator locally, patch `urlopen` to
-  intercept the dashboard save URL, call `lambda_handler` per key (needs `AWS_DEFAULT_REGION=us-east-1`).
-- **Why the page score and the app score differ (AAPL 71 vs 47, checked 9 Oct 2026).** Same model, different
-  inputs: (1) the page uses the previous close, the app uses the live price, and the trend factor is a cliff:
-  0.1% below the 20-day average turned "Strong Uptrend +12" into "Below 20-day MA -6" (18 points); (2) the page
-  had "Near 52-week high -5", the app did not after the drop (+5); (3) the app (Finnhub) had no revenue growth
-  for AAPL while the page (Yahoo) had "+8"; (4) during market hours the app compares part-day volume with a
-  full-day average and scores "Low Volume -3". 71 - 18 + 5 - 8 - 3 = 47. Not fixed (these are scoring changes):
-  the part-day volume penalty is an artefact worth removing, and a fallback to Yahoo for missing Finnhub
-  fundamentals would make the two agree more often. If either is changed, change `stock_metrics.py` too.
-- Legal (owner's facts, 9 Oct 2026): the business is "StockIQ", online-only with no physical address, and
-  holds **no financial services licence**. Billing is in **USD** (confirmed on the three live Stripe prices:
-  $4.99 / $14.99 / $49.99 per month). The terms, About page, pricing section and FAQ now say all of this.
-  Not legally reviewed: whether issuing BUY/SELL/HOLD signals without a licence is acceptable under Australian
-  law is a question for a lawyer, not something the wording settles.
-- Screener weights really do total 102% in the worker code (0.18+0.08+0.06+0.20+0.20+0.10+0.06+0.05+0.03+
-  0.03+0.02+0.01). The About and FAQ pages now say so. Changing the code would change every screener score.
-- Dashboard plan cards list features that are not verified to differ by plan ("Advanced screening & alerts",
-  "Portfolio tracking", "White-label options", "Dedicated support"), while the FAQ says all plans get the same
-  features. Old accounts also carry legacy limits (Starter 50/day, Pro 200/day); new purchases get 15/50/unlimited.
-- Home page comparison table still benchmarks against Bloomberg ($24,000/yr) and Morningstar.
-- Analysis page: 12 "Coming Soon" screener buttons; Nikkei 225 is labelled 210 stocks (the real count covered).
+Needs the owner's decision or more work (nothing here is fixed):
+- **Legal.** The business is "StockIQ", online-only, no physical address, **no financial services
+  licence**; billing is in USD ($4.99 / $14.99 / $49.99 per month, confirmed on the live Stripe
+  prices). The terms, About page, pricing section and FAQ say all of this, and the product
+  wording was neutralised (section 8b). Whether issuing automated signals to paying users
+  without a licence is acceptable under Australian law is a question for a lawyer; the owner
+  knows and has not had it reviewed. The owner trades as an individual (no company structure).
+- **Screener quality** (section 8b): no real fundamentals in the workers; ASX 24-hour change is 0
+  after the ASX close; a few valid symbols return nothing (WBD, PSKY); Russell 1000/2000 lists
+  not refreshed; ASX 300 is approximate. All but the lists need worker redeploys.
+- **Page score vs app score.** Same model, different inputs (checked on AAPL, 71 vs 47): the page
+  uses the previous close and Yahoo fundamentals, the app uses the live price and Finnhub. A
+  price 0.1% under the 20-day average swung the trend factor by 18 points; Finnhub had no revenue
+  growth (−8); and during market hours the app compares part-day volume with a full-day average
+  ("Low Volume −3"). Worth fixing: the part-day volume penalty, and a Yahoo fallback when Finnhub
+  lacks a figure. Both are scoring changes: change `stock_metrics.py` too.
+- **Dashboard plan cards** list features that are not verified to differ by plan ("Advanced
+  screening & alerts", "Portfolio tracking", "White-label options", "Dedicated support"), while
+  the FAQ says all plans get the same features. Old accounts carry legacy limits (a cancelled
+  Starter at 50/day, the owner's Pro at 200/day); new purchases get 15 / 50 / unlimited. One
+  `@dewit.com.au` test account has a limit of 20, which is why a "19/20 today" badge can appear.
+- **Usage badge** (`#trial-status-display`, created in `auth.js`, fixed top-right) overlaps the
+  index cards under the nav. Bottom-left is taken by the anonymous "Start 3-Day Free Trial"
+  sticky button, so it needs a placement decision.
+- **Mobile:** the owner reports the page zooms when tapping the AI chat input. The input is
+  already 16px; cause not found. Need the phone model and browser to chase it. One candidate is
+  the fixed 500px window height when the keyboard opens.
+- **AI chat rate limit** is keyed on a browser-generated anonymous ID, so clearing site data
+  resets it; the Lambda also looks up paid status from the `userId` the browser sends.
+- **Email signup:** the endpoint is public (a bot could flood signups and notification emails),
+  the Lambda has no CloudWatch log group, and nothing is sent to subscribers yet.
+- Home page: the comparison table still benchmarks against Bloomberg ($24,000/yr) and
+  Morningstar. `analysis.html` shows 12 "Coming Soon" screener buttons.
 - Guides are ~800 words of definitions with no worked examples.
-- Usage badge (`#trial-status-display`, created in `auth.js`, fixed top-right) overlaps the index cards under
-  the nav. Bottom-left is taken by the anonymous "Start 3-Day Free Trial" sticky button, so it needs a proper
-  placement decision, not a quick move.
-- Mobile: owner reports the page zooms when tapping the AI chat input (input is already 16px; cause not found).
-- News `data-timestamp` values on stock pages get bumped past the article date
-  (e.g. 0006.HK showed 16 Sep for a 10 Sep article). This inflates sitemap lastmod; the cause
-  is not found yet (look in `update_stock_news.py`).
+- `uniqueSymbolsCount` constants in `saveAnalysisToHistory` (`analysis-functions.js`) still use
+  the old list sizes (bookkeeping only).
+- News `data-timestamp` values on stock pages get bumped past the article date (e.g. 0006.HK
+  showed 16 Sep for a 10 Sep article). This inflates sitemap lastmod; cause not found (look in
+  `update_stock_news.py`). Also seen 10 Oct: a page with one article sometimes ends with one
+  article after a new one arrives (the old one is not carried into History); counts never drop.
+- `website/stocks-backup-before-restore/` (118 MB, created 9 Oct, gitignored, not uploaded) can
+  be deleted. Three rollback zips `~/VSCODE/backup/*_before_neutral_wording_20261009.zip` hold the
+  pre-rewording code of the report Lambda, the coordinator and the crypto orchestrator.
 
 Ideas:
-- Review Search Console 6–8 weeks after 25 Sep 2026: impressions and clicks on the 962 indexed
-  pages; consider the $2B threshold if they perform.
+- Review Search Console around 6 Nov 2026 (six weeks after 25 Sep): impressions and clicks on
+  the ~957 indexed pages; consider the $2B threshold if they perform.
 - Backlinks remain the biggest lever (see `backlinks-progress.md`).
 - Link to indexed stock pages from index.html, the guides and analysis results (internal links).
-- news.html `<title>` still says "Free Stock Analysis Guide & Investment Blog". Rename it to match its content.
-- "People also watch" Fix 1 and Fix 2 in `future-work.md`.
+- Home page market widgets are filled in by JavaScript; crawlers see "Loading...".
+- news.html `<title>` still says "Free Stock Analysis Guide & Investment Blog". Rename it.
+- "People also watch" Fix 1 in `future-work.md`. India (BSE Sensex) is the next screener
+  (`add-new-screener.md`). Price alerts are not built (`roadmap-to-9.md`).
 - `fix_amazonq_chat.sh` is obsolete (Amazon Q is not used).
 - `update_news.py` `MAX_BLOG_ARTICLES` stays commented out on purpose. Trimming is done by
   `finalize_news_html.py` with separate stock/general limits.
@@ -506,10 +621,35 @@ Ideas:
 cd /Users/dave/VSCODE/stockiq
 python3 check_news_sync.py                                   # news sync + coverage
 python3 update_stock_analysis.py AAPL 7203.T --dry-run       # snapshot logic without writing
-DRY_RUN=true ./deploy-to-s3.sh                               # what would upload / push
-grep -l 'content="index, follow"' ../website/stocks/*.html | wc -l   # indexed stock pages
-curl -s https://stockiq.tech/sitemap.xml | grep -c '<ns0:url>'      # live sitemap size
+grep -c DRY_RUN deploy-to-s3.sh                              # must be > 0 before trusting a dry run
+DRY_RUN=true ./deploy-to-s3.sh                               # prints (dryrun) lines; no "upload:" without it
+curl -s https://stockiq.tech/sitemap.xml | grep -c '<loc>\|:loc>'   # live sitemap size (~975)
 ```
+
+**Before every deploy** (after any regeneration these catch a broken template):
+```bash
+grep -l 'content="index, follow"' ../website/stocks/*.html | wc -l   # ~950-960, never 3,467
+wc -l indexable_stocks.txt                                           # same number, never ~0
+grep -l 'ANALYSIS_SECTION_START' ../website/stocks/*.html | wc -l    # 3,467
+grep -l 'Read full article' ../website/stocks/*.html | wc -l         # ~3,150; should not fall
+```
+
+**After the daily run** (`~/stockiq-daily.log`, cleared each run):
+```bash
+grep -a -E "Pages written|Indexable|No price data|Sync complete|pushed|could not|failed|All done" ~/stockiq-daily.log
+```
+A large "No price data" number means Yahoo rate-limited this machine: nothing is de-indexed
+(yesterday's snapshot is kept); re-run `python3 update_stock_analysis.py` later, then
+`./deploy-to-s3.sh`.
+
+**Upload a few hand-edited files without a full deploy:**
+```bash
+cd /Users/dave/VSCODE/website
+aws s3 cp faq.html s3://stockiq-final-websitebucket-vqekic7enf9h/faq.html \
+  --cache-control "public, max-age=3600" --content-type "text/html; charset=utf-8" --profile default --region us-east-1
+aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R --paths "/faq.html" --profile default --region us-east-1
+```
+(`*.js`: `--cache-control "public, max-age=86400"`, no content-type.)
 
 **Test a template change safely** (before running `generate-stock-pages.py` for real):
 ```bash
@@ -517,16 +657,19 @@ T=$(mktemp -d); cp -R ../website/stocks $T/stocks; cp -R $T/stocks $T/orig
 sed "s#/Users/dave/VSCODE/website/stocks\"#$T/stocks\"#" generate-stock-pages.py > $T/gen.py
 python3 $T/gen.py && diff -r $T/orig $T/stocks | head -100    # check only intended lines change
 ```
-Also check that every page's NEWS and RELATED sections are byte-identical before and after.
+Also check that every page's NEWS and RELATED sections are byte-identical before and after,
+then run `update_stock_analysis.py` (it sets index/noindex and the snapshots).
 
-**Screenshot a page** (headless Chrome): copy the page next to `styles.css` etc., or use the
-live URL:
+**Screenshot a page** (headless Chrome; use the live URL, local files hang):
 ```bash
-"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --window-size=1300,2200 \
-  --screenshot=/tmp/page.png https://stockiq.tech/stocks/AAPL.html
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars \
+  --window-size=1300,2200 --virtual-time-budget=8000 --screenshot=/tmp/page.png https://stockiq.tech/stocks/AAPL.html
 ```
+Run one at a time with a time limit; a tall capture can be sliced with `sips -c H W --cropOffset Y 1`.
 Narrow window sizes look cut off in headless mode even for unchanged pages; that's a headless
-quirk, not a layout bug.
+quirk, not a layout bug. The home page shows its right-hand news panel only from 1401px wide.
+
+**Run every analysis button end to end:** section 8b, last part.
 
 ## 13. Change log
 
@@ -559,14 +702,33 @@ quirk, not a layout bug.
   - **Japan Nikkei 225 screener** built end-to-end (21 workers, 210 stocks, full dashboard integration).
   - Added `add-new-screener.md` steering doc. Trimmed roadmap, backlinks, script-reference docs.
 
-- **9 Oct 2026** (Claude Code session, recovery + site text):
-  - Found and fixed the Oct 2 revert of `generate-stock-pages.py` and `deploy-to-s3.sh` (section 9). All
-    3,467 pages regenerated with the correct template; 956 indexable, rest noindex; deployed.
-  - Site text: removed unsupported accuracy claims, "real-time"/"zero delay", conflicting counts; added a
-    "general information only, not financial advice" footer line to public pages; FAQ and terms plan names
-    and limits now match the payment Lambda (Starter 15/day, Pro 50/day, Elite unlimited).
-  - Home page email signup reworded (no giveaway, no 6 AM promise); `stockiq-email-capture` now emails
-    `noreply@stockiq.tech` on each signup. Details: `stockiq.md` "Email Signup List".
-  - `.gitignore` in both repos restored (`.last_*`, `.analysis_cache/`, `__pycache__/`,
-    `stocks-backup-before-restore/`).
-  - `add-new-screener.md` completed against the Japan code (India next).
+- **9–10 Oct 2026** (Claude Code session: recovery, full end-to-end check, lists and crypto rebuilt):
+  - **Recovery.** The Oct 2 "Auto-update" commit had silently reverted `generate-stock-pages.py`,
+    `deploy-to-s3.sh` and `check_news_sync.py` to pre-Sep 25 versions; a regeneration on Oct 9 then
+    made all 3,467 pages indexable with no snapshot. Scripts restored from 2485162, pages
+    regenerated, 957 indexable. `.gitignore` in both repos restored.
+  - **News script:** `update_stock_news.py` was deleting the news section on current-template
+    pages; fixed (anchors on markers). 448 empty "History" headings removed.
+  - **Site text:** unsupported accuracy claims, "real-time" / "zero delay", conflicting counts and
+    the giveaway removed; footer disclaimer on public pages; plan names and limits match the
+    payment Lambda; pricing section added to the home page; signup Terms link fixed; terms and
+    About state USD billing, online-only, no licence.
+  - **Email signup:** reworded; `stockiq-email-capture` emails `noreply@stockiq.tech` per signup.
+  - **Describe, don't advise:** AI chat prompt and suggested questions, the single-stock report,
+    all screener / signal / crypto formatters, the coordinator, CSV headers, the dashboard popup
+    and the FAQ no longer use BUY/SELL, targets, stop loss, picks or recommendations.
+  - **Full end-to-end test of all 21 analysis buttons** through the page code and of all 15
+    screeners through the coordinator. Fixed: missing `MODERATE_*` labels, `BRK.B` format, stocks
+    never sent to a worker, duplicate rows, empty-batch fallback, CSV columns that were always 0,
+    fake-fundamentals columns removed, tracker regex (single-letter tickers, long names), crypto
+    legend, AI chat button position, a typo in crypto worker 26's address.
+  - **Lists rebuilt** from current index members (all but Russell 1000/2000), every symbol
+    verified; batching sizes itself to the list; labels and headers show real sizes.
+  - **Crypto rebuilt:** new 540-coin list verified against CoinGecko, driven from the
+    orchestrator through the workers' single-coin mode; orchestrator memory 512 → 2,048 MB.
+  - **Access bug:** 14 handlers re-checked access after counting the use, eating the last free
+    use of the day (anonymous single coin; trial users on 13 screeners). Removed.
+  - Orphan pages `market-data-sidebar.html` / `market-data-widget.html` deleted;
+    `lambda-url-mapping.json` regenerated (982 functions, 967 with URLs).
+  - Docs consolidated: section 8b added, section 11 reduced to open items, `CLAUDE.md` (added
+    9 Oct) loads these steering files into Claude Code sessions.

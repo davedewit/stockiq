@@ -43,6 +43,7 @@ Decide:
 - **Stock list** — get the official index constituents. Verify they work on Yahoo Finance with the
   correct suffix (`.T`=Tokyo, `.BO`=Bombay/BSE, `.NS`=NSE India, `.KS`=Korea, `.HK`=Hong Kong).
 - **Worker count** — ceil(stocks / 10). E.g. 30 BSE Sensex stocks = 3 workers, 50 = 5 workers.
+  (If a list later grows past workers × 10, the batching gives each worker a few more; no new workers needed.)
 - **Worker naming** — follow the pattern: `stockiq-asia-5-5-worker-N` was Nikkei.
   Next Asia group would be `stockiq-asia-5-6-worker-N`.
 
@@ -58,9 +59,13 @@ for s in symbols:
 ```
 If they return "NOT FOUND" don't proceed — the workers will get no data.
 
-Also check the final list has the expected count and **no duplicates** (Nikkei: 210 unique, all
-verified; the index nominally has 225 but only 210 were valid Yahoo symbols — report the real count
-to the owner, who asked about this):
+Yahoo blocks this machine (HTTP 429) after a few hundred calls, and a blocked call looks the same as
+a dead symbol. For a long list, check through the price-proxy Lambda instead (URL in
+`site-overview.md` section 8b; HTTP 500 means unknown symbol).
+
+Also check the final list has the expected count and **no duplicates**. Take the members from a
+current source (Wikipedia's index page worked for the Oct 2026 rebuild; the Nikkei list went from an
+old 210 to the full 225) and report the real count to the owner:
 ```python
 print(len(stocks), len(set(stocks)))   # both must match
 ```
@@ -282,7 +287,8 @@ Place the check **before** the generic ones in that function (Japan sits above `
 ### 6e. trackScreenerPerformance() regex — currency symbol (🎯 button)
 Two regexes (~line 3612) use the currency class `[$£€¥]`. **`₹` is not in it**, so India's 🎯 button
 finds no symbols. Add `₹` to both: `[$£€¥₹]`. (Same for any new currency, e.g. `₩` for Korea.)
-The `.{0,30}?` that bridges the company name is already there (Japan fix) — keep it.
+The `.{0,40}?` that bridges the company name is already there — keep it, and keep names short in the
+output line (the Nikkei formatter cuts them to 22 characters). Symbols may be 1–10 characters.
 
 ### 6d. processAnalysisGroup() — for "Run in Background"
 ```javascript
@@ -335,24 +341,28 @@ aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R \
 
 ## Existing Screeners Reference
 
-| Screener | Option | subOption | Workers | Stocks | Symbol suffix |
+| Screener | Option | subOption | Workers | Stocks in list (Oct 2026) | Symbol suffix |
 |---|---|---|---|---|---|
-| S&P 100 | 3 | 100 | 10 | 100 | (none) |
-| S&P 500 | 3 | 3 | 50 | 500 | (none) |
-| S&P 1500 | 3 | 4 | 150 | 1500 | (none) |
-| Russell 1000 | 3 | 5 | 100 | 1000 | (none) |
-| Russell 2000 | 3 | 6 | 200 | 2000 | (none) |
-| NASDAQ 100 | 3 | 7 | 10 | 100 | (none) |
+| S&P 100 | 3 | 100 | 10 | 101 | (none; share classes use a dash, `BRK-B`) |
+| S&P 500 | 3 | 3 | 50 | 502 | (none) |
+| S&P 400+600 | 3 | 2 | 100 | 995 | (none) |
+| S&P 1500 | 3 | 4 | 150 | 1,497 | (none) |
+| Russell 1000 | 3 | 5 | 100 | 877 (not refreshed) | (none) |
+| Russell 2000 | 3 | 6 | 200 | 1,829 (not refreshed) | (none) |
+| NASDAQ 100 | 3 | 7 | 10 | 101 | (none) |
 | Dow Jones 30 | 3 | 8 | 3 | 30 | (none) |
-| ASX 50 | 5 (coordinator `4-50`) | 50 | 5 | 50 | `.AX` |
-| ASX 100 | 5 (coordinator `4-100`) | 100 | 10 | 100 | `.AX` |
-| ASX 200 | 5 (coordinator `4-200`) | 200 | 20 | 196 | `.AX` |
-| ASX 300 | 5 (coordinator `4-300`) | 300 | 30 | 231 | `.AX` |
-| UK FTSE 100 | 4 (coordinator `5-ftse100`) | ftse100 | 10 | 100 | `.L` |
-| **Japan Nikkei 225** | **5** | **nikkei225** | **21** | **210** | **`.T`** |
+| ASX 50 | 5 (coordinator `4-50`) | 50 | 5 | 49 | `.AX` |
+| ASX 100 | 5 (coordinator `4-100`) | 100 | 10 | 99 | `.AX` |
+| ASX 200 | 5 (coordinator `4-200`) | 200 | 20 | 195 | `.AX` |
+| ASX 300 | 5 (coordinator `4-300`) | 300 | 30 | 294 (approximate) | `.AX` |
+| UK FTSE 100 | 4 (coordinator `5-ftse100`) | ftse100 | 10 | 100 | `.L` (`BT.A` → `BT-A.L`) |
+| **Japan Nikkei 225** | **5** | **nikkei225** | **21** | **225** | **`.T`** |
 | India BSE Sensex | 5 | sensex | 3 (30 stocks) | 30 | `.BO` or `.NS` (test both on Yahoo) |
 | South Korea KOSPI | 5 | kospi | TBD | TBD | `.KS` |
-| Crypto | 7 | 1 | 1 (orchestrator) | 548 | `-USD` |
+| Crypto | 7 | coinspot (coordinator `7-1`) | orchestrator + 54 workers in single-coin mode | 540 coins | `-USD`, sometimes a numbered ticker |
+
+Where each list came from, how batching works, what the workers return and how to test a screener
+end to end: `site-overview.md` section 8b.
 
 ---
 
@@ -376,7 +386,7 @@ aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R \
 |---|---|---|
 | Workers return 403 | Missing `lambda:InvokeFunctionUrl` permission | Run `aws lambda add-permission` for each worker (Step 2d) |
 | "Unknown screener" 400 from coordinator | Key not in WORKER_URLS | Add to coordinator and redeploy |
-| No symbols in performance tracker | Company name between symbol and price breaks regex | The regex in `trackScreenerPerformance` uses `.{0,30}?` to bridge company names — keep formatter consistent |
+| No symbols in performance tracker | Company name between symbol and price breaks regex | The regex in `trackScreenerPerformance` uses `.{0,40}?` to bridge company names — keep formatter consistent |
 | `Identifier 'name' has already been declared` | `const name` declared twice in same forEach | Declare it once at top of forEach, don't repeat |
 | Run in Background opens browser tab instead of running server-side | `processAnalysisGroup` redirecting instead of calling coordinator | Wire it to coordinator like other screeners |
 | analysis-functions.js not updating on live site | Deploy script didn't upload root JS files | Upload manually: `aws s3 cp analysis-functions.js s3://...` |

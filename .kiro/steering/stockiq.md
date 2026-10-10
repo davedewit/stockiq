@@ -22,10 +22,11 @@ Detailed docs live in separate files — check these first:
 - **`backlinks-progress.md`** — Backlink strategy and progress
 - **`future-work.md`** — People Also Watch fixes, crypto news integration
 - **`add-new-screener.md`** — Full step-by-step for adding a regional screener (India/Korea next); read before starting one
+- **`site-overview.md` section 8b** — how the screeners, trading signals and crypto really work (lists, batching, what workers return, output wording, access checks, how to test every button)
 
 ## Key Files
 - **`/Users/dave/VSCODE/website/stocks.txt`** — Source of truth (3,467 stocks: SYMBOL, Company Name, Sector)
-- **`/Users/dave/VSCODE/website/stocks/*.html`** — Generated stock pages (3,467 files; ~962 large caps indexed, rest noindex)
+- **`/Users/dave/VSCODE/website/stocks/*.html`** — Generated stock pages (3,467 files; ~957 large caps indexed, rest noindex)
 - **`/Users/dave/VSCODE/website/news.html`** — Recent news (newest 240 stock + 60 general articles, noindex; trimmed by finalize_news_html.py)
 - **`/Users/dave/VSCODE/stockiq/indexable_stocks.txt`** — Stock pages that are indexed and in the sitemap (written daily by update_stock_analysis.py)
 - **`/Users/dave/VSCODE/website/news.js`** — Sidebar (100-item pool, displays 5)
@@ -135,7 +136,7 @@ aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R --paths "/*" 
 - `stockiq-auto-delete-scheduler`, `stockiq-auto-delete-cleanup` — S3 data cleanup
 - `stockiq-ai-chat` — GPT-4o-mini chat (128MB, 30s timeout, 300 max tokens)
 - `stockiq-ai-chat-reporter` — Daily usage email at 5pm UTC
-- ~1000 total; `-worker-` functions are parallel processing duplicates
+- 982 functions in total (967 with URLs); `-worker-` functions are parallel workers. See `lambda-reference.md`
 
 ### IAM
 - **Lambda Role:** `arn:aws:iam::114366766218:role/acp-lambda-role`

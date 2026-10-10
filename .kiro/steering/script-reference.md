@@ -42,7 +42,7 @@ For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-s
 | Issue | Fix |
 |---|---|
 | News not updating | Check 2h/23h cooldowns; verify `OPENAI_API_KEY` is set |
-| Stock page news gaps | Normal — script only picks up articles that clearly match the stock from last 2 days |
+| Stock page news gaps | Normal — script only picks up articles that clearly match the stock from the last 4 days |
 | Stock data showing old date | `update_stock_analysis.py` not running — check it's in deploy-to-s3.sh (was missing until Oct 2026) |
 | Stock pages not regenerating | Run `generate-stock-pages.py`; check stocks.txt CSV format |
 | NUMERIC_COMPANY_NAMES out of sync | Run `fetch_stock_data.py` |
@@ -55,7 +55,7 @@ For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-s
 | news.html has fewer articles than expected | Restored from backup needed — check `~/VSCODE/backup/website_backup_<latest>/news.html`, copy back, then run `python3 sync_news_to_stock_pages.py` |
 
 - Sitemap URL: `https://stockiq.tech/sitemap.xml`
-- Should show ~970 URLs (953 large-cap stock pages + 17 site pages)
+- Should show ~975 URLs (about 957 large-cap stock pages + 17 site pages; it moves by a few each day)
 - If it shows 3,485 URLs the sitemap bloated again — check `generate_sitemap.py` wasn't run, then run `python3 update_sitemap.py` and resubmit
 - Resubmit: Search Console → Sitemaps → three dots → Resubmit
 - Delete the broken `sitemap.xmp` entry if it still appears
