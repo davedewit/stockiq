@@ -462,6 +462,21 @@ PRICES[a['symbol']] = a['buyPrice'] * 1.03; s, rec = run(t0 + 3 * half)
 check('and the strong one is sold too once it slips past its own, wider stop', a['id'] not in [h['id'] for h in portfolio()['holdings']] and 'Was up +6.0% at its best and has slipped back to +3.0%' in [e for e in rec['log'] if e['type'] == 'sell'][-1]['text'])
 PRICES.clear(); ATR.clear(); MODEL['answer'] = None; MODEL['prompts'].clear(); SNAP['7-1'] = rows('crypto', '7-1'); D.t.clear()
 
+# --- a holding whose screener has since been un-ticked is still looked after (it was once left unattended)
+D.t.clear(); PRICES.clear(); MODEL['answer'] = None; SNAP['7-1'] = rows('crypto', '7-1'); sat = dt.datetime(2026, 10, 10, 15, 40, 4)      # a Saturday: only coins trade
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=1, maxHoldDays=0.25, screeners=['7-1']); rec['state']['startedAt'] = m.iso(sat); m.save_item(U, rec)
+s, rec = run(sat); coin = portfolio()['holdings'][0]
+rec = m.load_item(U); rec['settings']['screeners'] = ['5-nikkei225']; m.save_item(U, rec); rec = m.load_item(U)
+check('the coin market still counts as its own while it holds a coin, though only a share screener is ticked', m.its_markets(rec) == {'jp', 'crypto'} and m.due_markets(rec, sat + dt.timedelta(hours=1)) == ['crypto'] and m.next_check(rec, sat + dt.timedelta(minutes=5))['markets'] == ['coin'], (m.its_markets(rec), m.due_markets(rec, sat + dt.timedelta(hours=1))))
+m.fetch_snapshot, m.fetch_quote, m.ask_model = snapshot, quote, model
+class Later(dt.datetime):
+    @classmethod
+    def utcnow(cls): return sat + dt.timedelta(hours=7)
+real_datetime = m.datetime; m.datetime = Later
+r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); m.datetime = real_datetime; rec = m.load_item(U)
+check('so the schedule still checks in for it and sells it when its time is up', r['ran'] and r['ran'][0]['sold'] == 1 and coin['id'] not in [h['id'] for h in portfolio()['holdings']] and 'the longest this autopilot keeps a holding' in [e for e in rec['log'] if e['type'] == 'sell'][-1]['text'] and m.its_markets(rec) == {'jp'}, (r, [e['text'][:80] for e in rec['log'][-2:]]))
+PRICES.clear(); SNAP['7-1'] = rows('crypto', '7-1'); D.t.clear()
+
 # --- improving its own rules: what the record suggests, a trial beside the current rule, keep or drop, an email each time
 TR = lambda pct, peak=None, low=None, rank=2, rsi=50, exit='time', **k: dict(risk=3, pct=pct, peak=pct if peak is None else peak, low=min(pct, 0) if low is None else low, rank=rank, rsi=rsi, exit=exit, screener='3-100', label='X', **k)
 base_rules = m.rules_for({'risk': 3})
