@@ -16,6 +16,9 @@ class DB:
     def Table(s, n): return s.t.setdefault(n, T())
 os.environ['AI_TRADER_USERS'] = 'dave@x.com, tester@x.com'
 spec = importlib.util.spec_from_file_location('tr', sys.argv[1]); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+# These tests set the pace (build-up days, check-in gap, holding time) by hand, as a user who has chosen his own values.
+# A new user leaves all three to the risk level; that is tested on its own further down, with the real defaults (REAL).
+REAL = dict(m.DEFAULTS, auto=list(m.DEFAULTS['auto'])); m.DEFAULTS.update(periodDays=10, everyHours=24, maxHoldDays=20, auto=[])
 D = DB(); m._db = D
 U = 'tester@x.com'
 ok = True
@@ -56,7 +59,7 @@ check('someone not on the list is refused', call(action='get', userId='stranger@
 check('not on the list cannot switch it on', m.clean_settings({'enabled': True}, 'stranger@y.com')['enabled'] is False)
 s, b = call(action='get', userId=U); check('defaults', b['allowed'] and b['settings'] == dict(m.DEFAULTS) and '3-100' in b['options']['screeners'], b)
 s, b = call(action='save', userId=U, settings={'enabled': True, 'risk': 9, 'budgetUsd': 'lots', 'periodDays': 0.2, 'everyHours': 7, 'maxHoldDays': 5, 'screeners': ['3-100', 'nope'], 'x': 1})
-check('settings are cleaned', b['settings'] == {'enabled': True, 'risk': 5, 'budgetUsd': 10000.0, 'periodDays': 1, 'everyHours': 24, 'maxHoldDays': 5, 'screeners': ['3-100'], 'aiSell': True, 'selfTune': True, 'emails': True, 'stopPct': None, 'takePct': None} and b['state'].get('startedAt') and b['log'][-1]['text'].startswith('Autopilot on'), b['settings'])
+check('settings are cleaned', b['settings'] == {'enabled': True, 'risk': 5, 'budgetUsd': 10000.0, 'periodDays': 1, 'everyHours': 24, 'maxHoldDays': 5, 'screeners': ['3-100'], 'aiSell': True, 'selfTune': True, 'emails': True, 'stopPct': None, 'takePct': None, 'auto': []} and b['state'].get('startedAt') and b['log'][-1]['text'].startswith('Autopilot on'), b['settings'])
 check('run before switching on is refused', call(action='run', userId='dave@x.com')[0] == 400)
 check('garbage requests', m.lambda_handler({'requestContext': {}, 'body': 'x'}, None)['statusCode'] == 400 and call(action='zzz', userId=U)[0] == 400 and call(action='get')[0] == 400)
 
@@ -407,6 +410,20 @@ D.t.clear(); PRICES.clear(); STRONG.clear()
 rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=0.5, maxHoldDays=20, screeners=['7-1']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
 s, rec = run(t0); s, rec = run(t0 + half); check('with no gain at stake the usual model does the review', STRONG == [] and rec['state']['strong']['n'] == 0, (len(STRONG), rec['state'].get('strong')))
 PRICES.clear(); MODEL['answer'] = None; MODEL['prompts'].clear(); SNAP['7-1'] = rows('crypto', '7-1'); D.t.clear()
+
+# --- the pace follows the risk level unless the user sets it himself
+tested = dict(m.DEFAULTS); m.DEFAULTS.clear(); m.DEFAULTS.update(REAL)                                    # the real defaults for this part
+pace = lambda **k: {f: m.clean_settings(dict(k), U)[f] for f in ('periodDays', 'everyHours', 'maxHoldDays', 'auto')}
+check('a new user leaves the pace to the level: Balanced builds up over 5 days, checks in every 6 hours, keeps a holding 5 days', pace() == {'periodDays': 5, 'everyHours': 6, 'maxHoldDays': 5, 'auto': ['periodDays', 'everyHours', 'maxHoldDays']} and m.clean_settings({}, U) == dict(REAL), pace())
+check('moving the level moves all three', pace(risk=1, auto=['periodDays', 'everyHours', 'maxHoldDays']) == {'periodDays': 10, 'everyHours': 24, 'maxHoldDays': 20, 'auto': ['periodDays', 'everyHours', 'maxHoldDays']} and [pace(risk=r, auto=list(m.PACE_FIELDS))['everyHours'] for r in (1, 2, 3, 4, 5)] == [24, 12, 6, 3, 1] and [pace(risk=r, auto=list(m.PACE_FIELDS))['maxHoldDays'] for r in (1, 2, 3, 4, 5)] == [20, 10, 5, 2, 1] and [pace(risk=r, auto=list(m.PACE_FIELDS))['periodDays'] for r in (1, 2, 3, 4, 5)] == [10, 7, 5, 2, 1])
+check('what the user sets himself stays put when the level moves; the rest still follows', pace(risk=5, periodDays=3, everyHours=0.5, maxHoldDays=0.25, auto=['maxHoldDays']) == {'periodDays': 3, 'everyHours': 0.5, 'maxHoldDays': 1, 'auto': ['maxHoldDays']} and pace(risk=5, periodDays=3, everyHours=0.5, maxHoldDays=0.25, auto=[]) == {'periodDays': 3, 'everyHours': 0.5, 'maxHoldDays': 0.25, 'auto': []})
+check('settings saved before this existed keep what was chosen by hand', pace(risk=3, periodDays=1, everyHours=0.5, maxHoldDays=0.25) == {'periodDays': 1, 'everyHours': 0.5, 'maxHoldDays': 0.25, 'auto': []} and pace(risk=3, periodDays=1, everyHours=0.5, maxHoldDays=0.25, auto='everything') == {'periodDays': 1, 'everyHours': 0.5, 'maxHoldDays': 0.25, 'auto': []} and pace(risk=3, auto=['periodDays', 'budgetUsd', 7])['auto'] == ['periodDays'])
+check('every level\'s pace is one the dashboard offers', all(v['everyHours'] in m.EVERY_HOURS and any(abs(v['maxHoldDays'] - d) < 1e-9 for d in m.HOLD_DAYS) and 1 <= v['periodDays'] <= 90 for v in m.PACE.values()))
+D.t.clear(); code_, b = call(action='get', userId=U)
+check('the dashboard is sent each level\'s pace and which settings are left to it', b['options']['pace']['4'] == {'periodDays': 2, 'everyHours': 3, 'maxHoldDays': 2} and b['settings']['auto'] == ['periodDays', 'everyHours', 'maxHoldDays'] and b['settings']['maxHoldDays'] == 5)
+code_, b = call(action='save', userId=U, settings=dict(b['settings'], enabled=True, risk=5, screeners=['7-1']))
+check('switching on at Adventurous with the pace left to the level: a day to build up, hourly check-ins, a day at most', (b['settings']['periodDays'], b['settings']['everyHours'], b['settings']['maxHoldDays']) == (1, 1, 1) and 'Autopilot on: Adventurous level, $10,000 over 1 days, checking every hour.' in b['log'][-1]['text'], b['log'][-1]['text'])
+m.DEFAULTS.clear(); m.DEFAULTS.update(tested); D.t.clear()
 
 # --- improving its own rules: what the record suggests, a trial beside the current rule, keep or drop, an email each time
 TR = lambda pct, peak=None, low=None, rank=2, rsi=50, exit='time', **k: dict(risk=3, pct=pct, peak=pct if peak is None else peak, low=min(pct, 0) if low is None else low, rank=rank, rsi=rsi, exit=exit, screener='3-100', label='X', **k)
