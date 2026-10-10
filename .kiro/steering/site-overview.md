@@ -247,6 +247,32 @@ git pull --rebase && git push
 - `about.html` documents both systems, including the 102% and the price-and-volume-only note.
   Keep it in sync if scoring changes.
 
+## 7b. Does the screener score predict anything? (backtest, 10 Oct 2026)
+
+The owner asked for a way to see whether the analysis "works in his favour" using fake money. First
+answer: a replay of the S&P 500 screener over two years (10 Oct 2024 – 9 Oct 2026, 501 trading days,
+502 stocks), using the unchanged live worker code on the prices it would have had each day. The
+replay reproduced that morning's live scores exactly (502 of 502). Tools and full output:
+`stockiq/check-tools/backtest/`.
+
+- **$100,000 following the top 10, bought at the next morning's open:** changed weekly $150,177
+  with no costs, $141,786 at 0.03% per trade, $123,969 at 0.1%; changed daily $159,601 / $128,312 /
+  $77,086 (almost the whole account is replaced every day, so costs decide it); changed monthly
+  $132,153. Index fund (SPY) $134,752; an equal amount in every stock $129,823.
+- **Against luck:** 6% (daily) and 11% (weekly) of 300 random 10-stock portfolios did better than the
+  top 10 before costs; monthly, 43% did. The top 10's lead over the average stock is +0.07% a day,
+  +0.12% a week, +1.05% a month, none of it statistically clear (t 1.2, 0.5, 0.4).
+- **The score does not sort good from bad.** The bottom 10 also beat the average stock, and held for
+  a month did best of all ($193,505). By label, "Strongly negative" stocks rose most over the next
+  week (+0.62%), "Strongly positive" +0.32%, "Mixed" +0.29%: the labels carried no information in
+  this period.
+- **Conclusion:** a small, unproven edge at a day to a week before costs, nothing at a month, and
+  no support for the signal labels or the "model probability" figure. Limits: today's index members
+  used throughout, no dividends, one rising market.
+- Not done yet: the same test for the other screeners and crypto, a test of each of the 12 factors
+  separately (to find which ones help and re-weight the score), and the live daily paper portfolio.
+  Do not publish any of this as a promise; if shown to users it is past performance with the limits.
+
 ## 8. Front end
 
 - `analysis.html`: options 1–7 (stock/ETF report, signals, US/EU/Asia/other screeners, crypto).
@@ -622,7 +648,8 @@ Needs the owner's decision or more work (nothing here is fixed):
   to the day before (IMB.L 2,614 in the report, 2,662 actual). The report also prints pence with a
   £ sign ("£2614.00" is 2,614p). Needs the 10 workers redeployed (use `meta.regularMarketPrice`).
 - **Owner's idea, 10 Oct 2026: test the analysis with fake money** (a practice account, or an
-  automatic one that trades the screeners' results). Recommended shape, not built: (1) a backtest
+  automatic one that trades the screeners' results). Step 1 is done for the S&P 500 (section 7b).
+  Recommended shape: (1) a backtest
   first: the screeners use only price and volume, so the worker scoring can be replayed over past
   daily prices to see what holding each day's top 10 would have done against the index; (2) then a
   daily scheduled run of each screener that logs the top 10 permanently (as crypto now does) and

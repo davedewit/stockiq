@@ -1,0 +1,50 @@
+Period replayed: 2024-10-10 to 2026-10-09 (501 trading days), 502 stocks
+Stocks sharing the 10th-place score on a typical day: median 3
+
+1. AVERAGE PRICE CHANGE AFTER A STOCK IS RANKED (all days, percent)
+group                               next day    1 week   1 month
+Top 10 by score                        +0.13     +0.38     +2.20
+Top 50 by score                        +0.10     +0.34     +1.80
+Bottom 50 by score                     +0.08     +0.28     +1.11
+Bottom 10 by score                     +0.10     +0.34     +1.59
+All ~500 stocks (average stock)        +0.06     +0.26     +1.15
+S&P 500 index fund (SPY)               +0.07     +0.32     +1.31
+
+2. TOP 10 MINUS THE AVERAGE STOCK (is the gap real or luck?)
+   next day : average gap +0.07%  | top 10 ahead on 53% of days | t-statistic +1.16 over 500 separate periods (beyond about ±2 is unlikely to be luck)
+   1 week   : average gap +0.12%  | top 10 ahead on 52% of days | t-statistic +0.51 over 100 separate periods (beyond about ±2 is unlikely to be luck)
+   1 month  : average gap +1.05%  | top 10 ahead on 55% of days | t-statistic +0.38 over 23 separate periods (beyond about ±2 is unlikely to be luck)
+
+3. BY THE LABEL SHOWN TO USERS (average change over the next week, percent)
+   Strongly positive  +0.32%   ( 20765 stock-days, 8% of all)
+   Positive           +0.22%   ( 53977 stock-days, 22% of all)
+   Slightly positive  +0.21%   ( 71573 stock-days, 29% of all)
+   Mixed              +0.29%   ( 74219 stock-days, 30% of all)
+   Slightly negative  +0.33%   (  3291 stock-days, 1% of all)
+   Negative           +0.26%   ( 16585 stock-days, 7% of all)
+   Strongly negative  +0.62%   (  7213 stock-days, 3% of all)
+
+4. FAKE MONEY: $100,000 following the top 10 (prices at the close, no dividends)
+   over 2.0 years                         no trading costs    0.1% cost per trade
+   new top 10 every day             $     176,499       $      85,094      (500 changes)
+   new top 10 every week            $     142,517       $     117,433      (100 changes)
+   new top 10 every month           $     135,756       $     129,933      (23 changes)
+   index fund (SPY), buy and hold   $     135,138
+   equal amount in every stock      $     130,371
+
+5. SAME TEST, HALF BY HALF (a real effect should show in both)
+   first half   2024-10-10 to 2025-10-09: top 10 minus average stock over the next week +0.19%
+   second half  2025-10-10 to 2026-10-09: top 10 minus average stock over the next week +0.04%
+FAKE MONEY, $100,000, buying at the NEXT MORNING'S OPEN (what a person could really do)
+                                        no costs   0.03%/trade   0.1%/trade
+   top 10, changed every day        $    159,601 $    128,312 $     77,086 
+   top 10, changed every week       $    150,177 $    141,786 $    123,969 
+   top 10, changed every month      $    132,153 $    130,427 $    126,484 
+   BOTTOM 10, changed every day     $    153,013 $    126,133 $     80,341 
+   BOTTOM 10, changed every week    $    129,741 $    122,911 $    108,329 
+   BOTTOM 10, changed every month   $    193,505 $    191,001 $    185,279 
+   index fund (SPY), buy and hold   $    134,752
+   equal amount in every stock      $    129,823
+   10 RANDOM stocks changed every day   : typical $128,118, range of the middle 90% $99,482 to $161,687; 6% of 300 random portfolios beat the screener's $159,601
+   10 RANDOM stocks changed every week  : typical $126,660, range of the middle 90% $97,531 to $159,113; 11% of 300 random portfolios beat the screener's $150,177
+   10 RANDOM stocks changed every month : typical $128,463, range of the middle 90% $102,940 to $167,263; 43% of 300 random portfolios beat the screener's $132,153
