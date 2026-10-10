@@ -46,8 +46,9 @@ def portfolio(): it = D.Table(m.PORTFOLIO_TABLE).rows.get(U); return json.loads(
 def run(now, **settings):
     rec = m.load_item(U)
     if settings: rec['settings'].update(settings)
-    s = m.run_user(U, rec, now, snapshot=snapshot, quote=quote, model=model, mail=lambda subject, lines: MAILS.append((subject, lines))); m.save_item(U, rec); return s, rec
-MAILS = []
+    s = m.run_user(U, rec, now, snapshot=snapshot, quote=quote, model=model, mail=lambda subject, lines: MAILS.append((subject, lines)), headlines=lambda h, now: NEWS.get(h['symbol'], [])); m.save_item(U, rec); return s, rec
+MAILS = []; NEWS = {}
+buy_prompts = lambda: [p for p in MODEL['prompts'] if 'Pick exactly' in p['user']]
 t0 = dt.datetime(2026, 10, 12, 15, 0, 0)          # a Monday, US market open
 
 # --- access and settings
@@ -279,10 +280,43 @@ check('and the rules in force, the month so far and the review countdown', b['ru
 D.t.clear(); PRICES.clear(); SNAP['7-1'] = rows('crypto', '7-1'); MODEL['prompts'].clear()
 rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=10000.0, periodDays=1, everyHours=0.5, maxHoldDays=20, screeners=['7-1']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
 for i in range(60): s, rec = run(t0 + dt.timedelta(minutes=30 * i))
-coins = [h for h in portfolio()['holdings'] if h.get('by') == 'ai']; asked = len(MODEL['prompts']); last = rec['log'][-1]
+coins = [h for h in portfolio()['holdings'] if h.get('by') == 'ai']; asked = len(buy_prompts()); last = rec['log'][-1]
 check('only coins at Balanced: stops at a quarter of the budget and says why', len(coins) == 2 and sum(h['costUsd'] for h in coins) == 2500 and last['key'] == 'coins' and '$2,500 is in coins, and the Balanced level puts at most 25% of the budget ($2,500) in coins. Tick a share screener as well, or move the level up' in last['text'], last)
 check('the same uneventful check-in is counted, not listed again', last.get('n', 1) > 10 and last['first'] < last['t'] and len([e for e in rec['log'] if e.get('key') == 'coins']) == 1, (last.get('n'), len(rec['log'])))
-s, rec = run(t0 + dt.timedelta(hours=31)); check('with the coin share used up the AI model is not asked again', len(MODEL['prompts']) == asked, (asked, len(MODEL['prompts'])))
+s, rec = run(t0 + dt.timedelta(hours=31)); check('with the coin share used up the AI model is not asked to pick again', len(buy_prompts()) == asked, (asked, len(buy_prompts())))
+
+# --- hold or sell: the AI model reviews each holding the rules are keeping, with the screener's figures now and recent headlines
+feed = lambda items: ('<rss><channel>' + ''.join(f"<item><title>{t}</title><pubDate>{(t0 - dt.timedelta(hours=h)).strftime('%a, %d %b %Y %H:%M:%S GMT')}</pubDate></item>" for t, h in items) + '</channel></rss>').encode()
+heads = m.pick_headlines(feed([('Solana and Ethereum lead outflows', 1), ('WEMIX delisted from three exchanges after hack', 5), ('Convert 1 WEMIX (WEMIX) to USD - Bybit', 2), ('WEMIX price prediction 2030', 3), ('Old WEMIX story', 90), ('Wemix Foundation names new chief', 30), ('WEMIX delisted from three exchanges after hack', 6)]), 'WEMIX-USD', 'WEMIX', t0)
+check('headlines: only recent ones that name the holding, newest first, no price pages or repeats', heads == [{'title': 'WEMIX delisted from three exchanges after hack', 'hours': 5.0}, {'title': 'Wemix Foundation names new chief', 'hours': 30.0}], heads)
+check('a share is matched by its code or its company name', [n['title'] for n in m.pick_headlines(feed([('Apple supplier warns on demand', 2), ('Solana addresses surge', 3), ('Why AAPL slid today', 4), ('Pineapple prices rise', 1)]), 'AAPL', 'Apple Inc.', t0)] == ['Apple supplier warns on demand', 'Why AAPL slid today'])
+check('a test run never fetches real headlines', m.fetch_news({'symbol': 'AAPL', 'label': 'AAPL', 'name': 'Apple Inc.'}, t0) == [])
+D.t.clear(); PRICES.clear(); NEWS.clear(); MODEL['answer'] = None; MODEL['prompts'].clear(); SNAP['3-100'] = rows()
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=20, screeners=['3-100']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+s, rec = run(t0); p = portfolio(); a, b, c = p['holdings'][:3]
+NEWS[a['symbol']] = [{'title': f"{a['label']} cuts its forecast after a recall", 'hours': 4.0}]
+SNAP['3-100'] = [dict(r, rank=40, score=1.5, signal='HOLD', rsi=38, d1=-4.0) if r['symbol'] == a['symbol'] else r for r in rows()]
+PRICES[a['symbol']] = a['buyPrice'] * 0.97
+MODEL['answer'] = {'decisions': [{'symbol': a['label'], 'action': 'sell', 'reason': 'Rank fell from 1 to 40, score +1.5, and a recall headline'}, {'symbol': b['label'], 'action': 'hold', 'reason': 'Rank and score steady'}, {'symbol': 'ZZZZ', 'action': 'sell', 'reason': 'not held'}, {'symbol': c['label'], 'action': 'dump', 'reason': 'x'}], 'picks': []}
+before = len(MODEL['prompts']); s, rec = run(t0 + dt.timedelta(days=1)); held = [h['id'] for h in portfolio()['holdings']]; ask = MODEL['prompts'][before]; sale = [e for e in rec['log'] if e['type'] == 'sell'][-1]
+check('the review is given each holding: bought on what, the figures now, how it has moved, the rules, the headlines', f"{a['label']} | bought 1 day ago at rank" in ask['user'] and 'now rank 40, score +1.5, signal mixed, RSI 38, 1 day -4.0%' in ask['user'] and 'since buying -3.0% (best +0.0%, worst -3.0%)' in ask['user'] and 'the rules sell it at -10% or +18%, or in 19 days at the latest' in ask['user'] and f"headlines: (4 hours old) {a['label']} cuts its forecast after a recall" in ask['user'] and 'headlines: none found' in ask['user'] and 'untrusted text' in ask['system'] and 'fake' in ask['system'], ask['user'][:700])
+check('it sells the one the AI model gave a reason for, and says so', a['id'] not in held and sale['kind'] == 'ai' and sale['symbol'] == a['label'] and "The AI model's review found a reason to sell before the rules would: Rank fell from 1 to 40, score +1.5, and a recall headline (-3.0% since it was bought)" in sale['text'], sale)
+check('the sale lists the headlines it was shown', any(d.startswith('Headlines it was shown: "') and 'cuts its forecast after a recall" (4 hours old)' in d for d in sale['detail']), sale['detail'])
+check('a holding it chose to keep stays, with its latest review noted; a symbol it does not hold and an unknown answer are ignored', b['id'] in held and c['id'] in held and rec['state']['open'][b['id']]['view'] == {'t': m.iso(t0 + dt.timedelta(days=1)), 'sell': False, 'text': 'Rank and score steady'} and 'view' not in rec['state']['open'][c['id']] and s['sold'] == 1, rec['state']['open'].get(b['id']))
+check('the finished trade is recorded as sold early by the AI model', rec['history'][-1]['exit'] == 'ai' and m.scorecard(rec['history'])['groups']['exit'][0]['label'] == "sold early by the AI model's review" and rec['state']['watch'][-1]['id'] == a['id'], rec['history'][-1])
+s2, body = call(action='get', userId=U)
+check('the dashboard gets the latest review of each holding', [pl['view']['text'] for pl in body['plans'] if pl['id'] == b['id']] == ['Rank and score steady'] and body['aiSellPausedUntil'] is None)
+MODEL['answer'] = None; s, rec = run(t0 + dt.timedelta(days=2)); check('no answer from the AI model: nothing is sold on its account', s['sold'] == 0)
+MODEL['answer'] = {'decisions': [{'symbol': b['label'], 'action': 'hold', 'reason': 'keep it for ever'}]}; PRICES[b['symbol']] = b['buyPrice'] * 0.85
+s, rec = run(t0 + dt.timedelta(days=3)); check('it cannot keep a holding past a rule: the loss limit still sells', b['id'] not in [h['id'] for h in portfolio()['holdings']] and [e for e in rec['log'] if e['type'] == 'sell'][-1]['kind'] == 'stop')
+early = lambda after: dict(risk=3, pct=-1.0, exit='ai', after=after, sold=m.iso(t0), screener='3-100', label='X', rank=2, rsi=50)
+rec = m.load_item(U); rec['history'] = [early(2.0)] * 8; notes = m.review_ai_sells(rec, t0 + dt.timedelta(days=4))
+check('if what it sold early went on rising, its early sells are paused', rec['state']['aiSell']['rest'] == m.iso(t0 + dt.timedelta(days=18)) and "Pausing the AI model's early sells for 14 days: the last 8 holdings it sold early went on to +2.0% on average afterwards" in notes[0]['text'], notes)
+m.save_item(U, rec); MODEL['answer'] = {'decisions': [{'symbol': c['label'], 'action': 'sell', 'reason': 'x'}]}; before = len(MODEL['prompts']); s, rec = run(t0 + dt.timedelta(days=5))
+check('while paused the review is not asked and nothing is sold early', s['sold'] == 0 and not any('Holdings:' in p['user'] for p in MODEL['prompts'][before:]) and m.public(rec, t0)['aiSellPausedUntil'] == m.iso(t0 + dt.timedelta(days=18)), s)
+notes = m.review_ai_sells(rec, t0 + dt.timedelta(days=19)); check('after the pause it may sell early again, judged on new sales only', 'rest' not in rec['state']['aiSell'] and 'may sell early again' in notes[0]['text'] and m.review_ai_sells(rec, t0 + dt.timedelta(days=20)) == [])
+rec2 = {'settings': dict(m.DEFAULTS), 'state': {}, 'log': [], 'history': [early(-2.0)] * 8}; check('if what it sold early went on falling, it carries on', m.review_ai_sells(rec2, t0) == [] and 'rest' not in rec2['state']['aiSell'])
+PRICES.clear(); NEWS.clear(); MODEL['answer'] = None; SNAP['3-100'] = rows(); D.t.clear()
 
 # --- improving its own rules: what the record suggests, a trial beside the current rule, keep or drop, an email each time
 TR = lambda pct, peak=None, low=None, rank=2, rsi=50, exit='time', **k: dict(risk=3, pct=pct, peak=pct if peak is None else peak, low=min(pct, 0) if low is None else low, rank=rank, rsi=rsi, exit=exit, screener='3-100', label='X', **k)

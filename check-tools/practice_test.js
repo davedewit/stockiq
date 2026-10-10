@@ -123,7 +123,7 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
     await ctx.window.practicePortfolio.reload(); await sleep(50); await waitIdle(); const hid = d.holdings[0].id;
     check('a holding is marked as bought by you or by the autopilot', /🤖 Bought by the autopilot\./.test(text()) && /Bought by you: it stays until you sell it\./.test(text()), text().slice(0, 500));
     ctx.window.practicePortfolio.setPlans([{ id: hid, auto: true, sellBy: '2026-10-10T16:42:41Z', stop: -10, take: 18, arm: 9 }]);
-    check('with the autopilot on: when and at what it will be sold', /🤖 Autopilot: it sells this by itself, at the check-in around [^.]*\d\d:\d\d[^.]* at the latest, sooner at -10% or \+18%, or to keep part of a gain once it has been up 9%\./.test(text()), (text().match(/🤖 Autopilot:[^.]*\.[^.]*\./) || [''])[0]);
+    check('with the autopilot on: when and at what it will be sold', /🤖 Autopilot: it sells this by itself, at the check-in around [^.]*\d\d:\d\d[^.]* at the latest, sooner at -10% or \+18%, or to keep part of a gain once it has been up 9%\. The AI model also reviews it at every check-in and may sell it earlier\./.test(text()), (text().match(/🤖 Autopilot:[^.]*\.[^.]*\./) || [''])[0]);
     ctx.window.practicePortfolio.setPlans([{ id: hid, auto: true, sellBy: '2026-10-10T16:42:41Z', stop: -10, take: 9, arm: 4.5, trial: true }]);
     check('a holding in a trial of its rules says so', /sooner at -10% or \+9%, or to keep part of a gain once it has been up 4\.5%\. Part of a trial of one of its own rules\./.test(text()));
     ctx.window.practicePortfolio.setPlans([{ id: hid, auto: false, sellBy: '2026-10-10T16:42:41Z', stop: -10, take: 18, arm: 9 }]);
