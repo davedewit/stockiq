@@ -541,8 +541,12 @@ code before relying on a detail (section 10).
 ### What the owner sees on the dashboard, top to bottom
 
 **Practice portfolio** (above Report History, container `#practice-portfolio`):
-- Four cards: Account value (change since the start), Practice cash left, In holdings, and "For
-  comparison" (the same money in an S&P 500 index fund instead).
+- Four cards: Account value (the cash plus every holding at its latest price; under it the change
+  since the start, split into what has been sold and what is still held), Practice cash left, In
+  holdings, and "For comparison" (the same money in an S&P 500 index fund instead; it says "no change
+  yet" while the US stock market has not traded since the buys, e.g. a weekend: `marketFlat`).
+  **Nothing is shown until the latest prices are in** (4 seconds at most): before 10 Oct the page
+  first showed holdings at what was paid, which the owner took for a second, "correct" account value.
 - One line, **whose result is whose**: "Of the +$226.84 since the start: your own buys +$201.85;
   the autopilot +$24.99 (+$7.91 on what it has sold, +$17.08 on what it still holds)". Shown once
   the autopilot has bought anything. A holding not sold yet counts at its latest price.
@@ -578,8 +582,8 @@ code before relying on a detail (section 10).
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=9` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=11`) | Controls and reports only; decisions are made by the Lambda |
+| Portfolio section | `website/practice-portfolio.js` (`?v=10` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=12`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | Two containers (about line 1250) and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
@@ -587,7 +591,7 @@ code before relying on a detail (section 10).
 | Screener data | `stockiq-screener-coordinator` | Called with no `userId`, so nothing is saved to anyone's history |
 | Prices | `stockiq-price-proxy` | Also exchange rates (`AUDUSD=X`, `USDJPY=X`) and the S&P 500 fund (`SPY`) |
 | Headlines | Google News RSS (coins), Yahoo Finance RSS (shares) | Fetched by the Lambda; the AI model has no internet |
-| AI model | OpenAI `gpt-4o-mini`, JSON replies | Three uses: choose buys, review holdings, write notes |
+| AI model | OpenAI `gpt-4o-mini`, JSON replies; `gpt-4o` for the holdings review when a gain is at stake | Three uses: choose buys, review holdings, write notes. `aws lambda invoke … --payload '{"model_test": true}'` asks each one question and says which answered |
 | Email | SES, from `autopilot@stockiq.tech` to the account's own address | The role has SES access; the owner's address is a verified identity (SES is still in sandbox) |
 
 The Function URLs are written into the two scripts. As everywhere on this site the `userId` is
@@ -659,16 +663,30 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
    copy under 20 minutes old is stored as `_snapshot#<key>`, so **the data is fresh at every
    check-in**), the latest price of each of its holdings, and exchange rates.
 3. **Fixed selling rules** (`review_sells`), first that applies: at the loss limit; at the gain
-   mark; **keeping part of a gain** (once it has been up half the gain mark, sold when it has given
-   back half of its best gain: `TRAIL_ARM`, `trail`); held the longest allowed time; the screener
+   mark; **keeping part of a gain** (see below: `gain_arm`, `gain_floor`); held the longest
+   allowed time; the screener
    signal turned negative or its score fell below zero; **slipped down the ranking** (below 5 times
    the level's ranking limit with under half the score it was bought on: `FADE`). A check-in up to
    5 minutes early still counts for the time limit (`GRACE`). Each holding's best and worst change,
-   as seen at check-ins, is kept (`peak`, `low`).
+   as seen at check-ins, is kept (`peak`, `low`), and its path (`path`: hours held and change at
+   each of the last 16 check-ins).
+   **Keeping part of a gain** (reworked 10 Oct after the owner asked whether it "wouldn't sell at
+   +17%"): the gain mark is where it always sells, but waiting for +18% on a 6-hour holding hands
+   back most quick rises. So (a) the rise from which a gain is protected follows the holding time
+   (`gain_arm`: half the gain mark for 20 days or more, less for shorter, never under 1%; Balanced:
+   9% at 20 days, 4.5% at 5, 2% at 1 day, 1% at 6 hours), and (b) once it has been up that much it
+   is sold when it slips back to `gain_floor`: a small gain may give back the level's share (half),
+   a gain near the mark only half that share (up 4%: sold at about +2.2%; up 17%: at about +12.5%,
+   not +8.5%). The panel has the same sum (`gainArm`); the cases are checked in both test files.
 4. **The AI model's review** (`ai_review`, if `aiSell` is on and not paused): for each holding the
    rules are keeping it is given what it was bought on, the screener's figures now, how it has
-   moved, when the rules will sell it, and up to three recent headlines that name it. It answers
-   hold or sell with a reason. **It can only sell earlier than the rules, never keep past one.**
+   moved, **its path since buying**, what is protected, when the rules will sell it, and up to three
+   recent headlines that name it. It is asked whether a rise is still building or has stalled or
+   turned, weighed against the time left, and answers hold or sell with a reason. **A larger model
+   (`STRONG_MODEL`, gpt-4o) does this review when a gain is at stake** (some holding is up enough
+   for its gain to be protected), at most 8 times a day per user (`STRONG_PER_DAY`, `state.strong`;
+   about 0.3 US cents a call, so under $1 a month; the owner's limit). Otherwise gpt-4o-mini. If the
+   larger model cannot be reached the usual one answers. **It can only sell earlier than the rules, never keep past one.**
    A "keep" is stored with the holding (`view`) and shown on the panel.
 5. The sales are made; each gets a log entry with its story (`sale_detail`).
 6. What may be spent (`allowance`): the budget released in equal steps per check-in over
@@ -694,7 +712,8 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
 `fetch_news` (holdings) and `candidate_news` (the shortlist): Google News RSS search for coins,
 Yahoo Finance RSS by symbol for shares (a share's company name comes from its quote).
 `pick_headlines` keeps at most three, under 72 hours old, that **name the holding** (its code or
-the first real word of its name) and drops price and converter pages. Kept two hours
+the first real word of its name) and drops price, forecast and converter pages (`NEWS_JUNK`; the
+first real headline to reach the model, at 15:10 UTC on 10 Oct, was a "price forecast" page). Kept two hours
 (`state.news`, `state.seen`). Headlines are untrusted text: both prompts say so, and the model's
 answer can only pick from a list or say hold / sell. Small coins usually have none; then it is the
 figures alone. Only the deployed function fetches (`AWS_LAMBDA_FUNCTION_NAME`); a test run never
@@ -756,7 +775,7 @@ that it at least does not fool itself.
   minSample, practiceCash, rules` (in force, with `yours`, `level`, `changed`, `arm`), `tune`
   (`trial` with its figures, `past`, `nextReviewIn`, `batch`, `group`), `aiSellPausedUntil`,
   `coinShare, realizedUsd, month` (`last30`, `before30`), `now, nextCheck, holding, plans` (per
-  holding: `sellBy, stop, take, arm, trail, peak, trial, view, auto`) and `options` (screeners,
+  holding: `sellBy, stop, take, arm, floor, trail, peak, trial, view, auto`) and `options` (screeners,
   check-in and holding-time choices, the level table). **The panel is drawn from these; change the
   two together.**
 - Other actions: `sellall` (`sell_everything`: only the autopilot's holdings, recorded as sold by
@@ -812,16 +831,16 @@ that it at least does not fool itself.
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 164 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 84 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 176 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 88 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
-     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 59 checks
+     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 63 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
    ```
    **Never run `practice_test.js` on the real `practice-portfolio.js`**: it holds the live storage
    address and would write to the live table (it happened once). Add checks for what you change.
 4. **See it in a browser** without a login: `dashboard_page.py` (both sections, stand-in server,
-   steps such as `type,sale,trial,preset,sellall,limits,split,listswitch,open`) with headless
+   steps such as `type,sale,trial,preset,sellall,limits,split,cards,listswitch,open`) with headless
    Chrome; `--dump-dom` for what it printed, `--screenshot` for the look (section 12).
 5. **Try the staged function on a copy of the real record**: read the owner's item from both tables
    (read-only), load it into stand-in storage under another name, run `run_user` / `public` with
@@ -858,8 +877,10 @@ zone; SES and the news feeds are only used when running as the Lambda, so tests 
   holdings kept at most 6 hours, crypto screener only, all three switches on, no limits of his own.
 - One finished trade: WEMIX, +0.6% (+$7.91), sold when its score fell below zero (rank 1 → 149).
   It holds one coin (CFX). His own buys in the practice portfolio are two Bitcoin lines.
-- Not yet seen for real: a sale made by the AI model's review, a headline reaching the model in
-  production, a review of its own rules (the first comes after 20 finished trades), a trial, the
+- Seen for real since: a headline reaching the model (15:10 UTC), clean scheduled check-ins on each
+  new version, both AI models answering the test question.
+- Not yet seen for real: a sale made by the AI model's review, a sale by the reworked gain
+  protection, a review of its own rules (the first comes after 20 finished trades), a trial, the
   emails that go with them (a set-up email was sent; arrival not confirmed), and the logged-in
   dashboard itself (all checks used a stand-in server). **Worth checking first in a new session:**
   the function's log and the owner's record for errors and for the first of each of these.
@@ -1259,6 +1280,12 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     packaged as `check-tools/pending-<name>/deploy.sh` runs without a hand-off. Keep packaging deploys
     that way (live-code check, rollback copy, `DRY_RUN=true`), run the dry run, then run it.
   - Autopilot activity list: "Buys and sells only" became a switch remembered in the browser.
+  - **Gain protection reworked; clearer account figures** (section 8c): a gain is protected from a
+    rise that follows the holding time, and a big gain gives back less; the AI review sees each
+    holding's path and a larger model is used, capped, when a gain is at stake; the practice
+    portfolio no longer flashes a figure before prices arrive, says what is from sales and what is
+    on holdings still held, and says when the stock market has been closed. Rollback zip:
+    `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_gains_20261010.zip`.
   - Docs consolidated: section 8b added, section 11 reduced to open items, `CLAUDE.md` (added
     9 Oct) loads these steering files into Claude Code sessions. On the evening of 10 Oct the
     practice portfolio and autopilot notes, which had grown in layers through the day, were rewritten
