@@ -46,7 +46,8 @@ def portfolio(): it = D.Table(m.PORTFOLIO_TABLE).rows.get(U); return json.loads(
 def run(now, **settings):
     rec = m.load_item(U)
     if settings: rec['settings'].update(settings)
-    s = m.run_user(U, rec, now, snapshot=snapshot, quote=quote, model=model); m.save_item(U, rec); return s, rec
+    s = m.run_user(U, rec, now, snapshot=snapshot, quote=quote, model=model, mail=lambda subject, lines: MAILS.append((subject, lines))); m.save_item(U, rec); return s, rec
+MAILS = []
 t0 = dt.datetime(2026, 10, 12, 15, 0, 0)          # a Monday, US market open
 
 # --- access and settings
@@ -67,7 +68,7 @@ check('day 1: buys 2 x $1,000 (a quarter of the budget)', s['bought'] == 2 and l
 check('the AI model chose, and an unlisted symbol was ignored', s['decidedBy'] == 'ai' and [h['symbol'] for h in p['holdings']] == ['S03', 'S01'] and p['holdings'][0]['note'] == 'AI: Rank 4 with RSI 53 and steady volume' and len(p['holdings'][1]['note']) <= 200, [h['symbol'] for h in p['holdings']])
 check('the prompt carries the data and the limits', 'Pick exactly 2' in MODEL['prompts'][-1]['user'] and 'S00 | S&P 100 rank 1 | score +4.0' in MODEL['prompts'][-1]['user'] and 'fake' in MODEL['prompts'][-1]['system'])
 check('holding fields match what the dashboard expects', set(p['holdings'][0]) == {'id', 'symbol', 'label', 'name', 'currency', 'qty', 'buyPrice', 'buyFx', 'costUsd', 'boughtAt', 'spyAtBuy', 'note', 'by', 'screener'} and abs(p['holdings'][0]['qty'] - 1000 / 103) < 1e-9 and p['holdings'][0]['spyAtBuy'] == 700)
-s, rec = run(t0 + dt.timedelta(hours=1)); check('an hour later: nothing more yet', s['bought'] == 0 and 'spread over 4 days' in rec['log'][-1]['text'], rec['log'][-1])
+s, rec = run(t0 + dt.timedelta(hours=1)); check('an hour later: nothing more yet', s['bought'] == 0 and 'released in steps over the 4 days set under "Build up to it over"; the next $1,000 in about 23 hours.' in rec['log'][-1]['text'], rec['log'][-1])
 MODEL['answer'] = None
 s, rec = run(t0 + dt.timedelta(days=1)); p = portfolio()
 check('day 2: 2 more, chosen by score because the model gave nothing', s['bought'] == 2 and s['decidedBy'] == 'rules' and [h['symbol'] for h in p['holdings']][2:] == ['S00', 'S02'] and 'chosen by rank' in rec['log'][-1]['text'], [h['symbol'] for h in p['holdings']])
@@ -172,7 +173,7 @@ check('the stored copy is small enough for the table', len(D.Table(m.SETTINGS_TA
 D.t.clear(); PRICES.clear(); SNAP['3-100'] = rows(); MODEL['answer'] = None; MODEL['prompts'].clear()
 rec = m.load_item(U); rec['settings'].update(enabled=True, risk=5, budgetUsd=4000.0, periodDays=1, everyHours=24, maxHoldDays=5, screeners=['3-100']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
 s, rec = run(t0); s, rec = run(t0 + dt.timedelta(days=1)); ids = {h['symbol']: h['id'] for h in portfolio()['holdings']}
-check('remembers what each buy was based on', len(rec['state']['open']) == 4 and rec['state']['open'][ids['S00']] == {'symbol': 'S00', 'label': 'S00', 'screener': '3-100', 'risk': 5, 'chosen': 'rules', 'rank': 1, 'score': 4.0, 'rsi': 50.0, 'd7': 3.0, 'd30': 5.0, 'volume': 1.2, 't': m.iso(t0)}, rec['state']['open'].get(ids['S00']))
+check('remembers what each buy was based on', len(rec['state']['open']) == 4 and rec['state']['open'][ids['S00']] == {'symbol': 'S00', 'label': 'S00', 'screener': '3-100', 'risk': 5, 'chosen': 'rules', 'rank': 1, 'score': 4.0, 'rsi': 50.0, 'd7': 3.0, 'd30': 5.0, 'volume': 1.2, 't': m.iso(t0), 'hold': 5.0, 'peak': 0.0, 'low': 0.0}, rec['state']['open'].get(ids['S00']))
 PRICES.update(S00=79.0, S01=150.0)
 s, rec = run(t0 + dt.timedelta(days=2)); hist = {x['symbol']: x for x in rec['history']}
 check('sold holdings go into the history with their result', s['sold'] == 2 and set(hist) == {'S00', 'S01'} and hist['S00']['pct'] == -21.0 and hist['S00']['exit'] == 'stop' and hist['S00']['market'] == 0.0 and hist['S00']['vs'] == -21.0 and hist['S00']['days'] == 2.0
@@ -249,6 +250,100 @@ s, b = call(action='get', userId=U); check('the panel is told what the autopilot
 D.t.clear(); PRICES.clear(); rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, screeners=['3-100']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
 D.Table(m.PORTFOLIO_TABLE).fail_next = True; s, rec = run(t0)
 check('a clash with the user: the unsaved buys are not remembered', s.get('conflict') and not rec['state'].get('open'), rec['state'].get('open'))
+
+# --- selling: keeping part of a gain, slipping down the ranking, and the story of a sale
+D.t.clear(); PRICES.clear(); MODEL['answer'] = None; SNAP['3-100'] = rows()
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=20, screeners=['3-100']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+s, rec = run(t0); p = portfolio(); first = p['holdings'][0]; sym = first['symbol']; base = first['buyPrice']
+check('a buy says what the plan for it is', any('sell 20 days after buying at the latest; sooner at -10% or +18%; once it has been up 9%, sell if it gives back 50% of its best gain' in d for e in rec['log'] if e['type'] == 'buy' for d in e.get('detail', [])), [e.get('detail') for e in rec['log'] if e['type'] == 'buy'][:1])
+PRICES[sym] = base * 1.12; s, rec = run(t0 + dt.timedelta(days=1))
+check('up 12% (under the +18% mark): kept, and its best so far is remembered', sym in [h['symbol'] for h in portfolio()['holdings']] and rec['state']['open'][first['id']]['peak'] == 12.0, rec['state']['open'].get(first['id']))
+PRICES[sym] = base * 1.05; s, rec = run(t0 + dt.timedelta(days=2)); sale = [e for e in rec['log'] if e['type'] == 'sell'][-1]
+check('slipped back to +5% from a best of +12%: sold to keep part of the gain', sym not in [h['symbol'] for h in portfolio()['holdings']] and sale['kind'] == 'trail' and 'Was up +12.0% at its best and has slipped back to +5.0%: sold to keep part of the gain' in sale['text'] and sale['pct'] == 5.0, sale)
+check('the sale carries its story: what it was bought on, how long, best and worst, the rules, the market', len(sale['detail']) >= 5 and sale['detail'][0].startswith('Bought at rank ') and 'Held 2 days. It was set to keep a holding at most 20 days.' in sale['detail'] and '+12.0% at its best' in ' '.join(sale['detail']) and 'sell at -10% or +18%' in ' '.join(sale['detail']) and 'An S&P 500 fund over the same time: +0.0%.' in sale['detail'], sale['detail'])
+done = rec['history'][-1]
+check('the finished trade keeps the dollars, the best and worst, and how it was sold', done['exit'] == 'trail' and done['usd'] == 50.0 and done['cost'] == 1000.0 and done['peak'] == 12.0 and done['low'] == 0.0 and done['id'] == first['id'] and rec['state']['closedCount'] == 1 and m.scorecard(rec['history'])['groups']['exit'][0]['label'] == 'sold to keep part of a gain', done)
+check('its price is looked at again later', rec['state']['watch'][-1]['symbol'] == sym and rec['state']['watch'][-1]['due'] == m.iso(t0 + dt.timedelta(days=2) + dt.timedelta(days=5)), rec['state'].get('watch'))
+PRICES[sym] = base * 1.05 * 1.10; s, rec = run(t0 + dt.timedelta(days=7, hours=1))
+check('later: what it did after it was sold is added to the record', rec['history'][0].get('after') == 10.0 and not rec['state']['watch'], (rec['history'][0], rec['state'].get('watch')))
+other = portfolio()['holdings'][0]; far = [dict(r, rank=r['rank'] + 60, score=1.0) if r['symbol'] == other['symbol'] else r for r in rows()]
+info = {}; sells = m.review_sells(portfolio(), rec['settings'], {'3-100': far}, {other['symbol']: {'price': other['buyPrice']}}, t0 + dt.timedelta(days=8), opened=rec['state']['open'], info=info)
+check('far down the ranking with under half its score: sold', len(sells) == 1 and info[other['id']]['kind'] == 'fade' and 'Slipped to rank' in sells[0][2] and 'less than half the score it was bought on' in sells[0][2], sells and sells[0][2])
+near = [dict(r, rank=r['rank'] + 60) if r['symbol'] == other['symbol'] else r for r in rows()]
+check('far down the ranking but the score has held: kept', m.review_sells(portfolio(), rec['settings'], {'3-100': near}, {other['symbol']: {'price': other['buyPrice']}}, t0 + dt.timedelta(days=8), opened=rec['state']['open']) == [])
+s, b = call(action='get', userId=U); plan = b['plans'][0]
+check('the dashboard gets a plan for each holding: sell-by time and marks', len(b['plans']) == len([h for h in portfolio()['holdings'] if h.get('by') == 'ai']) and plan['auto'] is True and plan['stop'] == -10 and plan['take'] == 18 and plan['arm'] == 9 and m.parse_time(plan['sellBy']) - m.parse_time(plan['boughtAt']) == dt.timedelta(days=20), plan)
+check('and the rules in force, the month so far and the review countdown', b['rules']['stop'] == -10 and b['rules']['changed'] == {} and b['month']['last30']['n'] >= 0 and b['tune']['trial'] is None and b['tune']['nextReviewIn'] == 19 and b['now'], (b['rules'], b['tune']))
+
+# --- the activity list: the same uneventful check-in is counted, not repeated; reasons name the right setting
+D.t.clear(); PRICES.clear(); SNAP['7-1'] = rows('crypto', '7-1'); MODEL['prompts'].clear()
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=10000.0, periodDays=1, everyHours=0.5, maxHoldDays=20, screeners=['7-1']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+for i in range(60): s, rec = run(t0 + dt.timedelta(minutes=30 * i))
+coins = [h for h in portfolio()['holdings'] if h.get('by') == 'ai']; asked = len(MODEL['prompts']); last = rec['log'][-1]
+check('only coins at Balanced: stops at a quarter of the budget and says why', len(coins) == 2 and sum(h['costUsd'] for h in coins) == 2500 and last['key'] == 'coins' and '$2,500 is in coins, and the Balanced level puts at most 25% of the budget ($2,500) in coins. Tick a share screener as well, or move the level up' in last['text'], last)
+check('the same uneventful check-in is counted, not listed again', last.get('n', 1) > 10 and last['first'] < last['t'] and len([e for e in rec['log'] if e.get('key') == 'coins']) == 1, (last.get('n'), len(rec['log'])))
+s, rec = run(t0 + dt.timedelta(hours=31)); check('with the coin share used up the AI model is not asked again', len(MODEL['prompts']) == asked, (asked, len(MODEL['prompts'])))
+
+# --- improving its own rules: what the record suggests, a trial beside the current rule, keep or drop, an email each time
+TR = lambda pct, peak=None, low=None, rank=2, rsi=50, exit='time', **k: dict(risk=3, pct=pct, peak=pct if peak is None else peak, low=min(pct, 0) if low is None else low, rank=rank, rsi=rsi, exit=exit, screener='3-100', label='X', **k)
+base_rules = m.rules_for({'risk': 3})
+check('too few trades: nothing is suggested', m.propose([TR(1.0)] * 19, base_rules) == [])
+ideas = m.propose([TR(1.0, peak=10.0)] * 12 + [TR(-2.0, peak=0.5)] * 12, base_rules)
+check('holdings that were well up and ended low: a nearer gain mark is suggested, with the reason', ideas and ideas[0]['param'] == 'take' and ideas[0]['new'] == 9.0 and ideas[0]['old'] == 18 and ideas[0]['gain'] == 4.0 and '12 of the last 24 finished trades were up 9% or more at some point while held, and ended at +1.0% on average' in ideas[0]['why'], ideas[:1])
+ideas = m.propose([TR(-9.0, low=-9.5)] * 10 + [TR(2.0)] * 14, base_rules)
+check('holdings that were well down and stayed down: a nearer loss limit', ideas and ideas[0]['param'] == 'stop' and ideas[0]['new'] == -5.0 and 'were down 5% or more' in ideas[0]['why'], ideas[:1])
+ideas = m.propose([TR(18.5, exit='take', after=6.0)] * 6 + [TR(0.0)] * 18, base_rules)
+check('sold at the gain mark and then went on rising: a further gain mark', [i for i in ideas if i['param'] == 'take' and i['new'] == 27.0 and 'went on to +6.0% on average afterwards' in i['why']], ideas)
+ideas = m.propose([TR(3.0, rank=2)] * 12 + [TR(-1.0, rank=8)] * 12, base_rules)
+check('buys near the top did better: buy nearer the top', ideas and ideas[0]['param'] == 'top' and ideas[0]['new'] == 5 and 'buys ranked 1 to 5 averaged +3.0% over 12 trades; those ranked lower -1.0% over 12' in ideas[0]['why'], ideas[:1])
+ideas = m.propose([TR(2.0, rsi=50)] * 12 + [TR(-1.0, rsi=72)] * 12, base_rules)
+check('calmer buys did better: a lower RSI limit', [i for i in ideas if i['param'] == 'max_rsi' and i['new'] == 68], ideas)
+check('an even record: nothing is suggested', m.propose([TR(1.0), TR(-1.0)] * 12, base_rules) == [])
+check('a change that was dropped lately is not tried again straight away', m.propose([TR(1.0, peak=10.0)] * 12 + [TR(-2.0, peak=0.5)] * 12, base_rules, [{'param': 'take', 'direction': 'down', 'verdict': 'dropped'}]) == [] or m.propose([TR(1.0, peak=10.0)] * 12 + [TR(-2.0, peak=0.5)] * 12, base_rules, [{'param': 'take', 'direction': 'down', 'verdict': 'dropped'}])[0]['param'] != 'take')
+check('its own changes stay inside fixed bounds', m.rules_for({'risk': 3}, {'tune': {'values': {'3': {'stop': -99, 'take': 500, 'top': 1, 'trail': 0.01, 'positions': 1, 'crypto': 1}}}}) == dict(m.RISK[3], stop=-30.0, take=80.0, top=3, trail=0.2))
+check('a test run never sends a real email', m.send_mail('nobody@example.com', 'x', ['y']) is False)
+
+D.t.clear(); PRICES.clear(); MAILS.clear(); SNAP['3-100'] = rows(n=200)
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=1, screeners=['3-100']); rec['state'].update(startedAt=m.iso(t0), closedCount=20)
+rec['history'] = [dict(TR(1.0, peak=10.0), sold=m.iso(t0), usd=10.0, cost=1000.0)] * 10 + [dict(TR(-2.0, peak=0.5), sold=m.iso(t0), usd=-20.0, cost=1000.0)] * 10
+notes = m.review_tuning(rec, t0, lambda subject, lines: MAILS.append((subject, lines))); trial = rec['state']['tune']['trial']
+check('after 20 finished trades it starts a trial of the most promising change', trial and trial['param'] == 'take' and trial['new'] == 9.0 and trial['old'] == 18 and trial['id'] == 1 and rec['state']['tune']['mark'] == 20 and 'started a trial: sell at +9% instead of the current "sell at +18%"' in notes[0]['text'] and 'Every second buy follows the changed rule' in notes[0]['text'], (trial, notes))
+check('and emails what it is trying, why, and the record', len(MAILS) == 1 and 'trying a change to one of its rules' in MAILS[0][0] and any('What it is trying: sell at +9% instead of the current "sell at +18%" (Balanced level).' == l for l in MAILS[0][1]) and any(l.startswith('Why: 10 of the last 20 finished trades were up 9% or more') for l in MAILS[0][1]) and any('Last 30 days: 20 finished trades, 10 of them up, $-100.00 in all, which is -1.25% of the $8,000 budget.' == l for l in MAILS[0][1]) and any('fake-money experiment' in l for l in MAILS[0][1]) and not any('@' in l for l in MAILS[0][1]), MAILS[0])
+check('the rule in force is unchanged while it is only on trial', m.rules_for(rec['settings'], rec['state'])['take'] == 18)
+m.save_item(U, rec); s, rec = run(t0); p = portfolio(); tags = [rec['state']['open'][h['id']].get('v') for h in p['holdings']]
+check('every second buy follows the changed rule', tags == ['new', 'old', 'new'] and all(rec['state']['open'][h['id']]['x'] == 1 for h in p['holdings']), tags)
+for h in p['holdings']: PRICES[h['symbol']] = h['buyPrice'] * 1.10
+s, rec = run(t0 + dt.timedelta(hours=2)); sold_now = [e for e in rec['log'] if e['type'] == 'sell']
+check('at +10% the trial buys are sold (their mark is +9%) and the other is kept (its mark is +18%)', len(sold_now) == 2 and all('reached the +9% mark' in e['text'] for e in sold_now) and len([h for h in portfolio()['holdings'] if h['id'] == p['holdings'][1]['id']]) == 1 and all('This buy was part of a trial of a changed rule.' in ' '.join(e['detail']) for e in sold_now), [e['text'] for e in sold_now])
+s, b = call(action='get', userId=U)
+check('the dashboard shows the trial and how the two groups are doing', b['tune']['trial']['text'] == 'sell at +9% instead of "sell at +18%"' and b['tune']['trial']['with'] == 2 and b['tune']['trial']['without'] == 0 and b['tune']['trial']['avgWith'] == 10.0 and b['tune']['nextReviewIn'] is None and [pl['take'] for pl in b['plans'] if pl['id'] == p['holdings'][1]['id']] == [18], b['tune'])
+def finish(rec, with_pcts, without_pcts):
+    rec['history'] += [dict(TR(x), x=1, v='new', sold=m.iso(t0)) for x in with_pcts] + [dict(TR(x), x=1, v='old', sold=m.iso(t0)) for x in without_pcts]
+import copy as _c
+good = _c.deepcopy(rec); good['history'] = [t for t in good['history'] if not t.get('x')]; finish(good, [3.0, 4.0, 3.5, 2.5, 3.0, 4.0, 3.5, 2.5, 3.0, 3.0], [0.5, -0.5, 0.0, 1.0, 0.0, -1.0, 0.5, 0.0, 0.5, -0.5]); MAILS.clear()
+notes = m.review_tuning(good, t0 + dt.timedelta(days=9), lambda subject, lines: MAILS.append((subject, lines)))
+check('clearly better with the change: it is kept, and the email says so with the numbers', good['state']['tune']['trial'] is None and m.rules_for(good['settings'], good['state'])['take'] == 9.0 and good['state']['tune']['past'][-1]['verdict'] == 'kept' and 'The change is kept: 10 trades with the change averaged +3.20%, 10 without it +0.05% (difference +3.15' in notes[0]['text'] and 'change kept' in MAILS[0][0] and any(l.startswith('Sells at -10% or +9%') for l in MAILS[0][1]), (notes, MAILS[:1]))
+check('the dashboard marks the rule as changed by itself', m.public(good, t0)['rules']['changed'] == {'take': 18} and m.public(good, t0)['tune']['past'][-1]['text'] == 'sell at +9% instead of "sell at +18%"')
+flat = _c.deepcopy(rec); flat['history'] = [t for t in flat['history'] if not t.get('x')]; finish(flat, [3.0, -4.0, 3.5, -2.5, 3.0, -4.0, 3.5, -2.5, 1.0, 0.0], [0.5, -0.5, 0.0, 1.0, 0.0, -1.0, 0.5, 0.0, 0.5, -0.5]); MAILS.clear()
+notes = m.review_tuning(flat, t0 + dt.timedelta(days=9), lambda subject, lines: MAILS.append((subject, lines)))
+check('no clear difference: the rule stays as it was', flat['state']['tune']['trial'] is None and m.rules_for(flat['settings'], flat['state'])['take'] == 18 and flat['state']['tune']['past'][-1]['verdict'] == 'dropped' and 'The rule stays as it was' in notes[0]['text'] and 'no clear improvement' in notes[0]['text'] and 'rule left as it was' in MAILS[0][0], notes)
+few = _c.deepcopy(rec); few['history'] = [t for t in few['history'] if not t.get('x')]; finish(few, [3.0] * 5, [0.0] * 5)
+check('before both groups are full it waits', m.review_tuning(few, t0 + dt.timedelta(days=9)) == [] and few['state']['tune']['trial'] is not None)
+check('a trial that cannot fill its groups ends after 30 days, unchanged', 'too few trades had finished' in m.review_tuning(few, t0 + dt.timedelta(days=31))[0]['text'] and few['state']['tune']['trial'] is None and m.rules_for(few['settings'], few['state'])['take'] == 18)
+moved = _c.deepcopy(rec); moved['settings']['risk'] = 4
+check('changing the risk level ends the trial', 'The trial was stopped' in m.review_tuning(moved, t0 + dt.timedelta(days=1))[0]['text'] and moved['state']['tune']['trial'] is None)
+quiet = m.load_item('tester@x.com'); quiet['settings'].update(risk=3); quiet['state'] = {'closedCount': 20}; quiet['history'] = [dict(TR(1.0), sold=m.iso(t0)), dict(TR(-1.0), sold=m.iso(t0))] * 10; MAILS.clear()
+notes = m.review_tuning(quiet, t0, lambda subject, lines: MAILS.append((subject, lines)))
+check('a review that finds nothing says so, and emails that too', 'nothing in the record suggests a change worth trying' in notes[0]['text'] and quiet['state']['tune']['trial'] is None and 'no change' in MAILS[0][0] and m.review_tuning(quiet, t0) == [])
+wide = {'id': 7, 'risk': 3, 'param': 'top', 'old': 10, 'new': 15}; st = {'tune': {'trial': wide}}
+picks = [c['rank'] for c in m.shortlist(m.new_portfolio(t0), dict(m.DEFAULTS, risk=3, screeners=['3-100']), {'3-100': rows(n=30, **{f'S{i:02d}': {'signal': 'BUY', 'rsi': 50, 'd30': 5.0} for i in range(30)})}, t0, None, wide)]
+check('a wider buying rule on trial: it buys from the wider range', max(picks) == 15, picks)
+f_in = m.remember_buy(st, {'id': 'h1', 'boughtAt': m.iso(t0)}, {'symbol': 'A', 'label': 'A', 'screener': '3-100', 'rank': 4, 'score': 3.0, 'rsi': 50, 'd7': 1, 'd30': 1, 'volume': 1}, dict(m.DEFAULTS, risk=3), 'rules')
+f_out = m.remember_buy(st, {'id': 'h2', 'boughtAt': m.iso(t0)}, {'symbol': 'B', 'label': 'B', 'screener': '3-100', 'rank': 13, 'score': 3.0, 'rsi': 50, 'd7': 1, 'd30': 1, 'volume': 1}, dict(m.DEFAULTS, risk=3), 'rules')
+check('and the extra buys are the group that is compared with the usual ones', f_in['v'] == 'old' and f_out['v'] == 'new' and f_out['x'] == 7, (f_in, f_out))
+month = m.month_figures([{'usd': 100.0, 'sold': m.iso(t0 - dt.timedelta(days=3))}, {'usd': -40.0, 'sold': m.iso(t0 - dt.timedelta(days=10))}, {'usd': 25.0, 'sold': m.iso(t0 - dt.timedelta(days=45))}, {'sold': m.iso(t0)}], 10000.0, t0)
+check('the last 30 days and the 30 before, in dollars and as a share of the budget', month == {'last30': {'n': 2, 'up': 1, 'usd': 60.0, 'pct': 0.6}, 'before30': {'n': 1, 'up': 1, 'usd': 25.0, 'pct': 0.25}}, month)
+PRICES.clear(); SNAP['3-100'] = rows(); SNAP['7-1'] = rows('crypto', '7-1'); D.t.clear()
 
 # scheduled event end to end (with the stand-ins patched in)
 m.fetch_snapshot, m.fetch_quote, m.ask_model = snapshot, quote, model
