@@ -22,7 +22,7 @@ async function fakeFetch(url, opts = {}) {
 }
 let popup = '';
 const mk = () => ({ style: {}, set innerHTML(v) { popup = v; }, get innerHTML() { return popup; }, appendChild() {}, remove() {}, onclick: null });
-const item = { analysisId: 'a1', timestamp: when };
+const item = { analysisId: 'a1', timestamp: when, companyName: process.env.NAME || '' };   // NAME picks the index, e.g. NAME='Dow Jones 30 Blue Chip Screener'
 const ctx = { console: { log() {}, error() {}, warn() {} }, fetch: fakeFetch, document: { createElement: mk, body: mk() }, localStorage: { getItem: () => 'tester' }, analysisHistory: [item], displayHistory() {}, Date, Math, JSON, parseFloat, Promise, setTimeout, isFinite, Number, String, Object, encodeURIComponent };
 vm.createContext(ctx); vm.runInContext(code, ctx);
 (async () => {
@@ -34,5 +34,6 @@ vm.createContext(ctx); vm.runInContext(code, ctx);
   console.log(`\n=== ${label}: popup average ${head[0]} | gainers ${head[1]} losers ${head[2]} | "${head[3]}" | on-load badge ${typeof onLoad === 'number' ? onLoad.toFixed(2) + '%' : onLoad}`);
   if (!head.length) console.log('   POPUP: ' + text.slice(0, 200));
   console.log('   lookups: ' + priceCalls.map(p => `${p.sym}${p.ok ? '' : '(NO DATA ' + p.status + ')'}`).join(' ') + ' | currencies: ' + [...new Set(priceCalls.map(p => p.ccy))].join(','));
+  const cmp = text.match(/Top 10 and the index over the same time\|(.*?)\|(The index comparison|Index figures)/); if (cmp) console.log('   comparison: ' + cmp[1].replace(/\|/g, '  '));
   rows.forEach(r => console.log('   ' + r)); const nodata = (text.match(/\|[^|]*: (No data|Price does not match the report|No price in the report)[^|]*/g) || []); if (nodata.length) console.log('   ' + nodata.join(' '));
 })();

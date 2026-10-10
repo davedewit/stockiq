@@ -641,8 +641,15 @@ Needs the owner's decision or more work (nothing here is fixed):
   counted in the average's divisor; stocks under $1 showed false moves (report prints $0.06, price is
   0.056); every currency was shown as "$"; crypto reports saved before 10 Oct priced the wrong coin
   (WLFI "-100%"). The fix uses one parser and one calculation for badge and popup.
-  **Still missing by design:** it only compares "price at the report" with "now": no index to compare
-  with, no fixed periods (1 day / 1 week / 1 month), and the report is auto-deleted after 30 / 90 days.
+  **Added to the same package (10 Oct, later):** a table in the popup, "Top 10 and the index over the
+  same time": the top-10 average 1 day, 1 week, 2 weeks and 3 weeks after the report and now, beside
+  the index the list comes from (`TOP10_BENCHMARKS`: ^DJI, ^NDX, ^OEX, ^GSPC, ^SP1000, ^SP1500, ^RUI,
+  ^RUT, ^AFLI / ^ATOI / ^AXJO / ^AXKO, ^FTSE, ^N225, Bitcoin for crypto). Checked against an
+  independent calculation on two past Dow reports. Limits: the price source keeps about a month of
+  daily closes, so index figures start from the close on the report day (approximate) and appear
+  only after the next trading day; reports are auto-deleted after 30 / 90 days.
+  Owner's wish (10 Oct): no hand-offs. The session still cannot deploy or change its own
+  permissions; the owner has to add a Bash allow rule himself for that to change.
 - **UK FTSE screener shows prices one trading day old.** Yahoo's latest daily close is empty for
   London stocks (seen 10 Oct: Friday's bar `null`), and the `stockiq-europe-4-1` workers fall back
   to the day before (IMB.L 2,614 in the report, 2,662 actual). The report also prints pence with a

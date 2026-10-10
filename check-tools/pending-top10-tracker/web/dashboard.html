@@ -3517,8 +3517,33 @@ ${analysis.report}
             return new Date(t).getTime() / 1000;
         }
 
+        // The index each screener's list is drawn from, for "how did the market do over the same period".
+        const TOP10_BENCHMARKS = [
+            [/Dow Jones/i, '^DJI', 'Dow Jones Industrial Average'], [/NASDAQ 100/i, '^NDX', 'NASDAQ 100 index'],
+            [/S&P 400/i, '^SP1000', 'S&P 1000 index (400 + 600)'], [/1500/, '^SP1500', 'S&P 1500 index'],
+            [/S&P 500/i, '^GSPC', 'S&P 500 index'], [/S&P 100/i, '^OEX', 'S&P 100 index'],
+            [/Russell 1000/i, '^RUI', 'Russell 1000 index'], [/Russell 2000/i, '^RUT', 'Russell 2000 index'],
+            [/ASX 300/i, '^AXKO', 'S&P/ASX 300 index'], [/ASX 200/i, '^AXJO', 'S&P/ASX 200 index'],
+            [/ASX 100/i, '^ATOI', 'S&P/ASX 100 index'], [/ASX 50/i, '^AFLI', 'S&P/ASX 50 index'],
+            [/FTSE 100/i, '^FTSE', 'FTSE 100 index'], [/Nikkei/i, '^N225', 'Nikkei 225 index'],
+            [/Crypto|CoinSpot/i, 'BTC-USD', 'Bitcoin']
+        ];
+        function top10Benchmark(companyName) {
+            const hit = TOP10_BENCHMARKS.find(b => b[0].test(String(companyName || '')));
+            return hit ? { symbol: hit[1], label: hit[2] } : null;
+        }
+        // Trading days after the report at which the top 10 is compared (the price source keeps about a month of daily closes)
+        const TOP10_PERIODS = [[1, '1 day later'], [5, '1 week later'], [10, '2 weeks later'], [15, '3 weeks later']];
+        // The daily bar the report falls in: the last one that had started by the time of the report
+        function top10BarAtReport(timestamps, reportSecs) {
+            let idx = null;
+            for (let i = 0; i < timestamps.length; i++) { if (timestamps[i] <= reportSecs) idx = i; }
+            return idx;
+        }
+
         // Fetches the report and the latest prices. Every symbol is either counted (ok) or listed with the reason it is not.
-        async function screenerTop10Performance(analysisId, timestamp) {
+        // With a benchmark ({symbol, label}) it also fetches that index for the popup's comparison.
+        async function screenerTop10Performance(analysisId, timestamp, benchmark = null) {
             const userId = localStorage.getItem('userId') || 'anonymous';
             const response = await fetch(TOP10_DASHBOARD_API + '?v=' + Date.now(), {
                 method: 'POST',
@@ -3564,14 +3589,51 @@ ${analysis.report}
                 const ratio = currentPrice / reportPrice;
                 if ((!isCrypto || !row.tickerRecorded) && (ratio > 5 || ratio < 0.2)) return { ...row, ok: false, reason: 'Price does not match the report' };
 
+                // Change from the report price to the close N trading days later, where the price history reaches
+                const barAtReport = top10BarAtReport(timestamps, reportSecs);
+                const after = {};
+                TOP10_PERIODS.forEach(([n]) => {
+                    const close = barAtReport === null ? null : closes[barAtReport + n];
+                    after[n] = close > 0 ? (close - reportPrice) / reportPrice * 100 : null;
+                });
+
                 return { ...row, ok: true, currency: chart.meta.currency || '', isCrypto, reportPrice, currentPrice,
-                         percentChange: (currentPrice - reportPrice) / reportPrice * 100, bars };
+                         percentChange: (currentPrice - reportPrice) / reportPrice * 100, bars, after };
             }));
 
             const counted = evaluated.filter(r => r.ok);
             const avgChange = counted.length ? counted.reduce((sum, r) => sum + r.percentChange, 0) / counted.length : null;
+
+            // The index over the same period. Only daily closes are available, so the starting level is the close of
+            // the day of the report; it is shown once a later trading day exists (before that it would read 0%).
+            let index = null;
+            if (benchmark) {
+                try {
+                    const res = await fetch(TOP10_PRICE_API + encodeURIComponent(benchmark.symbol));
+                    const chart = (await res.json())?.chart?.result?.[0];
+                    const timestamps = chart?.timestamp || [];
+                    const closes = chart?.indicators?.quote?.[0]?.close || [];
+                    const current = chart?.meta?.regularMarketPrice;
+                    const bar = top10BarAtReport(timestamps, reportSecs);
+                    const start = bar === null ? null : closes[bar];
+                    if (start > 0 && current > 0 && bar < timestamps.length - 1) {
+                        const after = {};
+                        TOP10_PERIODS.forEach(([n]) => { after[n] = closes[bar + n] > 0 ? (closes[bar + n] - start) / start * 100 : null; });
+                        index = { label: benchmark.label, change: (current - start) / start * 100, after };
+                    } else {
+                        index = { label: benchmark.label, change: null, after: {} };
+                    }
+                } catch (e) {}
+            }
+            // A period is shown when at least 8 in 10 of the counted entries have a close for it
+            const periods = TOP10_PERIODS.map(([n, label]) => {
+                const values = counted.map(r => r.after[n]).filter(v => v !== null);
+                const enough = values.length > 0 && values.length >= Math.ceil(counted.length * 0.8);
+                return { label, top10: enough ? values.reduce((a, b) => a + b, 0) / values.length : null, index: index ? (index.after[n] ?? null) : null };
+            }).filter(p => p.top10 !== null);
+
             return {
-                isCrypto, tickersRecorded, reportSecs, rows: evaluated, counted: counted.length, avgChange,
+                isCrypto, tickersRecorded, reportSecs, rows: evaluated, counted: counted.length, avgChange, index, periods,
                 // reports print two decimals, so a move under 0.05% is rounding, not a gain or a loss
                 gainers: counted.filter(r => r.percentChange >= 0.05).length,
                 losers: counted.filter(r => r.percentChange <= -0.05).length
@@ -3608,7 +3670,8 @@ ${analysis.report}
             modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 
             try {
-                const perf = await screenerTop10Performance(analysisId, timestamp);
+                const reportItem = analysisHistory.find(a => a.analysisId === analysisId);
+                const perf = await screenerTop10Performance(analysisId, timestamp, top10Benchmark(reportItem && reportItem.companyName));
                 if (perf.avgChange === null) throw new Error('No price data for the symbols in this report');
 
                 const timeDiff = Date.now() - perf.reportSecs * 1000;
@@ -3647,7 +3710,16 @@ ${analysis.report}
                 saveScreenerAvgChange(analysisId, perf.avgChange);
                 displayHistory();
 
-                content.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h2 style="color: var(--text-primary); margin: 0;">📊 Top 10 Performance</h2><button onclick="this.closest('div[style*=fixed]').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-primary);">×</button></div><div style="background: var(--bg-secondary); border-radius: 8px; padding: 20px; margin-bottom: 20px;"><div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px;"><div style="text-align: center;"><div style="color: var(--text-secondary); font-size: 0.85rem;">Average Change</div><div style="font-size: 1.5rem; font-weight: bold; color: ${perf.avgChange >= 0 ? '#22c55e' : '#ef4444'};">${perf.avgChange >= 0 ? '+' : ''}${perf.avgChange.toFixed(2)}%</div></div><div style="text-align: center;"><div style="color: var(--text-secondary); font-size: 0.85rem;">Gainers</div><div style="font-size: 1.5rem; font-weight: bold; color: #22c55e;">${perf.gainers}</div></div><div style="text-align: center;"><div style="color: var(--text-secondary); font-size: 0.85rem;">Losers</div><div style="font-size: 1.5rem; font-weight: bold; color: #ef4444;">${perf.losers}</div></div></div><div style="color: var(--text-secondary); font-size: 0.85rem; text-align: center;">${timeAgoText} since screener${perf.counted < perf.rows.length ? ' · ' + perf.counted + ' of ' + perf.rows.length + ' counted' : ''}</div></div><div style="background: var(--bg-secondary); border-radius: 8px; overflow: hidden;">${stocksHtml}</div><div style="color: var(--text-secondary); font-size: 0.75rem; text-align: center; margin-top: 12px;">Price change of each top-10 entry since the report. General information only, not financial advice.</div>`;
+                // Over time, and against the index the list comes from
+                const pct = (v) => (v === null || v === undefined) ? '–' : `<span style="color: ${v >= 0 ? '#22c55e' : '#ef4444'}; font-weight: 600;">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</span>`;
+                let compareHtml = '';
+                if (perf.index) {
+                    const cols = perf.periods.map(p => ({ label: p.label, top10: p.top10, index: p.index })).concat([{ label: 'Now', top10: perf.avgChange, index: perf.index.change }]);
+                    const cell = 'padding: 6px 8px; text-align: right; white-space: nowrap;';
+                    compareHtml = `<div style="background: var(--bg-secondary); border-radius: 8px; padding: 15px 20px; margin-bottom: 20px; overflow-x: auto;"><div style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Top 10 and the index over the same time</div><table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; color: var(--text-secondary);"><tr><td></td>${cols.map(c => `<td style="${cell}">${c.label}</td>`).join('')}</tr><tr><td style="padding: 6px 0; color: var(--text-primary);">Top 10 average</td>${cols.map(c => `<td style="${cell}">${pct(c.top10)}</td>`).join('')}</tr><tr><td style="padding: 6px 0; color: var(--text-primary);">${perf.index.label}</td>${cols.map(c => `<td style="${cell}">${pct(c.index)}</td>`).join('')}</tr></table><div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 8px;">${perf.index.change === null ? 'The index comparison appears after the next trading day. ' : ''}Index figures start from the daily close on the day of the report, so they are approximate. One top 10 can be ahead of or behind its index by chance; a single report is not a track record.</div></div>`;
+                }
+
+                content.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h2 style="color: var(--text-primary); margin: 0;">📊 Top 10 Performance</h2><button onclick="this.closest('div[style*=fixed]').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-primary);">×</button></div><div style="background: var(--bg-secondary); border-radius: 8px; padding: 20px; margin-bottom: 20px;"><div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px;"><div style="text-align: center;"><div style="color: var(--text-secondary); font-size: 0.85rem;">Average Change</div><div style="font-size: 1.5rem; font-weight: bold; color: ${perf.avgChange >= 0 ? '#22c55e' : '#ef4444'};">${perf.avgChange >= 0 ? '+' : ''}${perf.avgChange.toFixed(2)}%</div></div><div style="text-align: center;"><div style="color: var(--text-secondary); font-size: 0.85rem;">Gainers</div><div style="font-size: 1.5rem; font-weight: bold; color: #22c55e;">${perf.gainers}</div></div><div style="text-align: center;"><div style="color: var(--text-secondary); font-size: 0.85rem;">Losers</div><div style="font-size: 1.5rem; font-weight: bold; color: #ef4444;">${perf.losers}</div></div></div><div style="color: var(--text-secondary); font-size: 0.85rem; text-align: center;">${timeAgoText} since screener${perf.counted < perf.rows.length ? ' · ' + perf.counted + ' of ' + perf.rows.length + ' counted' : ''}</div></div>${compareHtml}<div style="background: var(--bg-secondary); border-radius: 8px; overflow: hidden;">${stocksHtml}</div><div style="color: var(--text-secondary); font-size: 0.75rem; text-align: center; margin-top: 12px;">Price change of each top-10 entry since the report. General information only, not financial advice.</div>`;
             } catch (error) {
                 console.error('Screener performance error:', error);
                 content.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h2 style="color: var(--text-primary); margin: 0;">📊 Performance Tracking</h2><button onclick="this.closest('div[style*=fixed]').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-primary);">×</button></div><div style="text-align: center; padding: 40px; color: var(--text-secondary);"><div style="font-size: 3rem; margin-bottom: 10px;">⚠️</div><div>Unable to fetch screener data</div><div style="font-size: 0.85rem; margin-top: 10px; color: #ef4444;">${error.message}</div></div>`;
