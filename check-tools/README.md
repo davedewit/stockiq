@@ -12,6 +12,7 @@ Run them from this folder. They write `*.json` result files here, which git igno
 | `anon_run.js` | Same page code plus `auth.js`, as an anonymous visitor with a simulated usage tracker. Logs every redirect with the line that caused it. | `node anon_run.js 72 single` (1 use left: must show a result), `USED=1 node anon_run.js 72 single` (none left: must redirect before running) |
 | `trial_run.js` | As above for a signed-in trial user (5 a day). | `TRIAL=1 node trial_run.js 3 8`, `TRIAL=1 USED=5 node trial_run.js 3 8` |
 | `run_all.py` | Runs the background coordinator (`lambda-sync/stockiq-screener-coordinator`) locally for every screener key, or the keys given. The dashboard save is intercepted, so nothing is stored. | `AWS_DEFAULT_REGION=us-east-1 python3 run_all.py 3-8 4-50` |
+| `tracker_run.js` | Runs the dashboard's real "Top 10 Performance" code (row badge and 🎯 popup) on a saved report with live prices; nothing is saved. Takes a label, a `page_*.json` from `page_run.js` (or a saved orchestrator response) and the report time. `DASH=<path>` tests another copy of `dashboard.html`. A report made while its market is closed must show 0.00%. | `node tracker_run.js FTSE page_4-ftse100.json 2026-10-10T03:58:00+00:00` |
 | `analyse.py` | Reads the `res_*.json` files from `run_all.py` and reports coverage per screener (`-v` lists missing symbols). | `python3 analyse.py -v` |
 
 Button codes (option, subOption) are in the screener table in section 8b. Refresh `lambda-sync/`

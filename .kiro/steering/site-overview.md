@@ -606,6 +606,28 @@ Needs the owner's decision or more work (nothing here is fixed):
   after entering the top 10 with the average coin over the same days. Leftovers that can be
   deleted when the owner agrees: Lambda `stockiq-coinspot-predictions-updater` (no longer
   triggered) and the old-format rows in both crypto tables.
+- **Dashboard "Top 10 Performance" (🎯): fix built and tested, NOT deployed** (same reason as the
+  crypto one: the session could not deploy). Package: `stockiq/check-tools/pending-top10-tracker/`,
+  the owner runs `bash deploy.sh`; afterwards verify, update this item and delete the folder.
+  Faults found 10 Oct by running the real code on all 15 screener reports (`check-tools/tracker_run.js`):
+  the popup failed on every UK report ("Cannot read properties of undefined"); the row badge never
+  appeared for Nikkei reports (it had an older copy of the parser); a symbol with no price still
+  counted in the average's divisor; stocks under $1 showed false moves (report prints $0.06, price is
+  0.056); every currency was shown as "$"; crypto reports saved before 10 Oct priced the wrong coin
+  (WLFI "-100%"). The fix uses one parser and one calculation for badge and popup.
+  **Still missing by design:** it only compares "price at the report" with "now": no index to compare
+  with, no fixed periods (1 day / 1 week / 1 month), and the report is auto-deleted after 30 / 90 days.
+- **UK FTSE screener shows prices one trading day old.** Yahoo's latest daily close is empty for
+  London stocks (seen 10 Oct: Friday's bar `null`), and the `stockiq-europe-4-1` workers fall back
+  to the day before (IMB.L 2,614 in the report, 2,662 actual). The report also prints pence with a
+  £ sign ("£2614.00" is 2,614p). Needs the 10 workers redeployed (use `meta.regularMarketPrice`).
+- **Owner's idea, 10 Oct 2026: test the analysis with fake money** (a practice account, or an
+  automatic one that trades the screeners' results). Recommended shape, not built: (1) a backtest
+  first: the screeners use only price and volume, so the worker scoring can be replayed over past
+  daily prices to see what holding each day's top 10 would have done against the index; (2) then a
+  daily scheduled run of each screener that logs the top 10 permanently (as crypto now does) and
+  keeps a paper portfolio per screener; (3) no manual buy/sell screen until there is evidence the
+  ranking is worth following. Any published result must be stated as past performance.
 - **Page score vs app score.** Same model, different inputs (checked on AAPL, 71 vs 47): the page
   uses the previous close and Yahoo fundamentals, the app uses the live price and Finnhub. A
   price 0.1% under the 20-day average swung the trend factor by 18 points; Finnhub had no revenue
