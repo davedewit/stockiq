@@ -17,6 +17,13 @@ let ok = true; const check = (name, cond, extra) => { ok = ok && !!cond; console
   try { pure.applyBuy(st, { symbol: 'AAPL', price: 0, fx: 1, amountUsd: 10, now: '2026-10-10T00:00:00Z' }); err = ''; } catch (e) { err = e.message; } check('no price, no buy', /No price/.test(err), err);
   const proceeds = pure.applySell(st, h.id, { price: 2795.1, fx: 0.013233, spy: 794.14, now: '2026-10-11T00:00:00Z' });
   check('sell returns the money', Math.abs(proceeds - 1050) < 0.01 && Math.abs(st.cash - 100050) < 0.01 && st.holdings.length === 0 && st.closed.length === 1, { proceeds, cash: st.cash });
+  { const s2 = pure.newState('2026-10-10T00:00:00Z');
+    const a1 = pure.applyBuy(s2, { symbol: 'AAA', price: 10, fx: 1, spy: 100, amountUsd: 1000, now: '2026-10-10T00:00:00Z' }), b1 = pure.applyBuy(s2, { symbol: 'BBB', price: 10, fx: 1, spy: 100, amountUsd: 1000, now: '2026-10-10T00:00:00Z' });
+    const live = pure.summarize(s2, { AAA: { price: 11 }, BBB: { price: 10.1 }, SPY: { price: 102 } }); check('ahead-of-market count on open holdings', live.compared === 2 && live.ahead === 1, live);
+    pure.applySell(s2, a1.id, { price: 11, fx: 1, spy: 102, now: '2026-10-12T00:00:00Z' }); pure.applySell(s2, b1.id, { price: 10.1, fx: 1, spy: 102, now: '2026-10-12T00:00:00Z' });
+    const ss = pure.soldSummary(s2); check('sold summary adds up', ss.count === 2 && ss.cost === 2000 && Math.abs(ss.proceeds - 2110) < 0.01 && Math.abs(ss.gainPct - 5.5) < 0.01 && ss.compared === 2 && ss.ahead === 1, ss);
+    const cashBefore = s2.cash; check('clearing one sold line', pure.applyClearSold(s2, a1.id) === 1 && s2.closed.length === 1 && s2.closed[0].symbol === 'BBB' && s2.cash === cashBefore);
+    check('clearing the whole sold list', pure.applyClearSold(s2, null) === 1 && s2.closed.length === 0 && s2.cash === cashBefore && pure.soldSummary(s2).gainPct === null && pure.applyClearSold(s2, null) === 0); }
   check('formatting', pure.usd(-1234.5) === '-$1,234.50' && pure.money(2662, 'GBp') === '2662.00p' && pure.money(60.94, 'AUD') === 'A$60.940' && pure.esc('<b>"x"') === '&lt;b&gt;&quot;x&quot;');
 }
 // --- the page
@@ -78,6 +85,17 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
   // sell
   const id = JSON.parse(store['tester@example.com'].data).holdings[0].id; click('sell', { 'data-id': id }); await sleep(50); await waitIdle();
   const after = JSON.parse(store['tester@example.com'].data); check('sell closes the line and returns cash', after.holdings.length === 5 && after.closed.length === 1 && /Sold AAPL for \$/.test(text()) && /Sold \(1\)/.test(text()), text().slice(0, 300));
+  // sold list: summary, remove one line, clear all. None of it may change the money
+  const id2 = after.holdings[0].id; click('sell', { 'data-id': id2 }); await sleep(50); await waitIdle();
+  const two = JSON.parse(store['tester@example.com'].data);
+  check('sold list has a summary and a clear button', two.closed.length === 2 && /2 sold: put in \$[\d,.]+, got back \$/.test(text()) && /did better than the S&P 500 over the same days/.test(text()) && /<button data-pp="clearsold"/.test(container.innerHTML), (text().match(/\d sold:[^.]*\.[^.]*\./) || [''])[0]);
+  click('unsold', { 'data-id': two.closed[0].id }); await sleep(50); await waitIdle();
+  const one = JSON.parse(store['tester@example.com'].data);
+  check('removing one sold line leaves the money alone', one.closed.length === 1 && one.closed[0].id === two.closed[1].id && one.cash === two.cash && one.holdings.length === two.holdings.length && /removed from the sold list/.test(text()), { n: one.closed.length, cash: [two.cash, one.cash] });
+  click('clearsold'); await sleep(50); await waitIdle();
+  const none = JSON.parse(store['tester@example.com'].data);
+  check('clear sold list empties it and leaves the money alone', none.closed.length === 0 && none.cash === two.cash && none.holdings.length === two.holdings.length && /Sold list cleared/.test(text()) && !/Sold \(/.test(text()) && !/data-pp="clearsold"/.test(container.innerHTML), { n: none.closed.length, cash: [two.cash, none.cash] });
+  check('open holdings show how many are ahead of the market', /\d of \d holdings? (is|are) ahead of the S&P 500 since/.test(text()), (text().match(/\d of \d holding[^.]*\./) || [''])[0]);
   // another window changed it
   store['tester@example.com'].version += 1; await buy('KO', 100); check('change from another window is caught, not overwritten', /changed in another window/i.test(text()), (text().match(/This portfolio[^.]*\./) || [''])[0]);
   await buy('KO', 100); check('and works after the reload', /Practice buy recorded: \$100\.00 of KO/.test(text()));

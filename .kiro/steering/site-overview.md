@@ -287,7 +287,11 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   Report History: type a stock code or name, pick an amount of practice US dollars (default $1,000,
   from a $100,000 start) and "Practice buy"; each buy becomes a line that is then monitored: price
   then and now, value, change, and what an S&P 500 fund (SPY) did since the same day. "Sell" closes
-  the line at the latest price; the "Reset fake money to $100,000" button clears everything. The
+  the line at the latest price; the "Reset fake money to $100,000" button clears everything. Under the
+  holdings a line says how many are ahead of the S&P 500 since they were bought. The "Sold" list
+  ends with a summary (put in, got back, result, how many did better than the S&P 500 over the same
+  days), a "Clear sold list" button and an × on each line; clearing only tidies the list, because
+  what a sale brought in is already in the practice cash (added 10 Oct 2026, script `?v=3`). The
   search box works like the home page's (same `stockiq-validate-symbol` lookup, "Checking
   exchanges...", "No matches found"); picking a suggestion shows the company name and latest price
   before anything is bought. When the script changes, raise `practice-portfolio.js?v=N` in
@@ -309,7 +313,9 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
     deployed file**: that one holds the real address and would write to the live table.
   - **Dashboard only (owner's decision, 10 Oct 2026):** buying, selling and viewing progress all stay
     on the dashboard. Do not add buy buttons to the generated stock pages or the single-stock report.
-  - Not built: partial sells; dividends; a history chart of the account value.
+  - Not built (ideas offered to the owner, 10 Oct): a chart of the account value over time; the score
+    or report a buy came from recorded automatically and compared later; selling part of a holding;
+    sorting the table; dividends.
 - Stock pages load `sidebar.js`, `stock-prices.js` (live ticker), `ai-chat.js`, `auth.js`, `theme.js`.
 - AI chat button: bottom-right on every page; on the home page it moves left of the news panel
   only from 1401px wide (the panel is hidden below that).
