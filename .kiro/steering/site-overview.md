@@ -580,7 +580,7 @@ now" / "Sell everything it holds" sit at the top; below them the panel is in **t
 and Settings**, so neither is a long scroll (it opens on Settings until it is switched on with a
 screener, then on Activity; the part last looked at is remembered, `stockiqAutopilotPart`). Both
 parts are always in the page and one is hidden, so settings are read and saved whichever is on
-show. Settings holds the first six items below, Activity the last three:
+show. Settings holds the first five items below, Activity the last three:
 - **Quick set-ups**: "Quick coin trading", "Steady shares", "Shares and coins".
 - **Risk level** slider (Cautious … Adventurous) with a sentence of what the level means, and
   **Your own limits**: two optional fields, "Sell at a loss of __ %" and "Sell at a gain of __ %",
