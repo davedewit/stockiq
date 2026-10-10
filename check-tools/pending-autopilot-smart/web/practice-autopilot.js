@@ -63,6 +63,7 @@
         #practice-autopilot .ap-log ul, #practice-autopilot .ap-section ul { margin: 4px 0 0 18px; padding: 0; }
         #practice-autopilot .ap-fresh { float: right; font-size: 0.8rem; font-weight: normal; color: var(--text-secondary); }
         #practice-autopilot .ap-fresh a { margin-left: 8px; }
+        #practice-autopilot a { color: #3b82f6; }
         @media (max-width: 640px) { #practice-autopilot .ap-group { grid-template-columns: 1fr; } #practice-autopilot .ap-group-name { padding-top: 0; } #practice-autopilot .ap-chip { white-space: normal; } #practice-autopilot .ap-input { white-space: normal; } }
     `;
 

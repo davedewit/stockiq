@@ -731,6 +731,10 @@ def month_figures(history, budget, now):
     return {'last30': span(now - timedelta(days=30), now), 'before30': span(now - timedelta(days=60), now - timedelta(days=30))}
 
 
+def signed_usd(amount):
+    return f"{'-' if amount < 0 else '+'}${abs(amount):,.2f}"
+
+
 def rule_text(param, value):
     if param == 'stop':
         return f"sell at {value:g}%"
@@ -891,11 +895,11 @@ def review_lines(record, now):
     month, rules = month_figures(history, settings['budgetUsd'], now), rules_for(settings, state)
     recent = month['last30']
     lines = ['', 'THE RECORD SO FAR (fake money)']
-    lines.append(f"Last 30 days: {recent['n']} finished trades, {recent['up']} of them up, ${recent['usd']:+,.2f} in all"
+    lines.append(f"Last 30 days: {recent['n']} finished trades, {recent['up']} of them up, {signed_usd(recent['usd'])} in all"
                  + (f", which is {recent['pct']:+.2f}% of the ${settings['budgetUsd']:,.0f} budget." if recent['pct'] is not None else '.'))
     if month['before30']['n']:
         earlier = month['before30']
-        lines.append(f"The 30 days before: {earlier['n']} finished trades, ${earlier['usd']:+,.2f}" + (f" ({earlier['pct']:+.2f}% of the budget)." if earlier['pct'] is not None else '.'))
+        lines.append(f"The 30 days before: {earlier['n']} finished trades, {signed_usd(earlier['usd'])}" + (f" ({earlier['pct']:+.2f}% of the budget)." if earlier['pct'] is not None else '.'))
     lines += memory_text(scorecard(history), None).split('\n') if history else []
     notes = (state.get('lessons') or {}).get('items') or []
     if notes:
@@ -952,8 +956,6 @@ def sale_detail(h, facts, at_sale, settings, spy, now):
         lines.append(f"Its rules for this holding: sell at {at_sale['stop']:g}% or +{at_sale['take']:g}%; once up {at_sale['take'] * TRAIL_ARM:g}%, sell if it gives back "
                      f"{at_sale['trail'] * 100:.0f}% of its best gain; sell if the screener signal turns negative or it slips far down the ranking."
                      + (' This buy was part of a trial of a changed rule.' if facts and facts.get('v') == 'new' else ''))
-    if h.get('spyAtBuy') and spy:
-        lines.append(f"An S&P 500 fund over the same time: {(spy / h['spyAtBuy'] - 1) * 100:+.1f}%.")
     return [line[:320] for line in lines][:6]
 
 
