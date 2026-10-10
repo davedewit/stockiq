@@ -316,6 +316,48 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   - Not built (ideas offered to the owner, 10 Oct): a chart of the account value over time; the score
     or report a buy came from recorded automatically and compared later; selling part of a holding;
     sorting the table; dividends.
+- **AI autopilot** for the practice portfolio (added 10 Oct 2026, the owner's idea; **fake money only,
+  owner's account only for now**). Under the practice portfolio on the dashboard: switch it on, set a
+  risk level (slider 1–5, Cautious to Adventurous), a budget and the number of days to spread it over,
+  how often it checks in (every 3 / 6 / 12 / 24 hours), the longest it keeps a holding, and which
+  screeners it buys from (Dow 30, S&P 100, NASDAQ 100, S&P 500, crypto). "Check in now" runs one
+  check-in on demand (10-minute gap). "What it has done" lists every buy, sell and skipped check-in
+  with the reason. Its holdings carry a 🤖 in the portfolio table and can be sold by hand.
+  - **How a check-in works** (Lambda `stockiq-ai-trader`): (1) fetch the chosen screeners' latest
+    results from `stockiq-screener-coordinator` (called with no `userId`, so nothing is saved to
+    anyone's history); (2) sell its own holdings by fixed rules: down past the level's limit, up to
+    the level's mark, held the longest allowed time, or the screener signal turned negative; (3) work
+    out what may be spent: the budget is released in equal steps over the chosen days, money from
+    sales is re-used, never more than the budget invested, never more than the practice cash;
+    (4) shortlist the top of each screener, filtered by the risk level (`RISK` table in the code: how
+    many holdings, how far down the ranking, RSI and 30-day-move limits, share allowed in coins);
+    (5) send the shortlist to the AI model (gpt-4o-mini, JSON reply) to choose and give a reason
+    naming the figures; (6) record the buys at the live price. **The code enforces every limit**: the
+    model can only pick from the shortlist; if it fails, the top of the shortlist is used and the
+    log says "chosen by rank". It never touches a holding the user bought. At most 3 buys a check-in.
+  - **When it runs:** EventBridge rule `stockiq-ai-trader-schedule` (`cron(40 * * * ? *)`, hourly)
+    runs every user who is switched on and due. Users with a stock screener selected are only run
+    Mon–Fri 14:35–19:55 UTC (inside US market hours all year); coin-only users at any time.
+  - **Storage:** table `stockiq-ai-trader` (key `userId`: settings, state, last 60 log entries). Buys
+    and sells are written into `stockiq-paper-portfolios` with the same version check the dashboard
+    uses; holdings it bought carry `by: 'ai'` and `screener`. If the user changes the portfolio at
+    the same moment, nothing is traded and it tries again at the next check-in.
+  - **Who may use it:** env `AI_TRADER_USERS` on the Lambda (the owner's email and the deploy test
+    user; `*` would open it to everyone). The controls are hidden for anyone else. **Opening it to
+    users is the owner's decision** and touches the same legal question as the signals: an AI choosing
+    stocks, even with fake money, reads as picks. Each user's check-in also runs the screeners again
+    (not shared between users) and makes one AI call, so cache the screener results per hour first.
+  - Code: `website/practice-autopilot.js` (controls only), Lambda in `lambda-sync/stockiq-ai-trader/`.
+    The AI key is the same `OPENAI_API_KEY` as the AI chat, copied to this Lambda's environment.
+  - Tests: `python3 check-tools/ai_trader_test.py lambda-sync/stockiq-ai-trader/lambda_function.py`
+    (34 checks, stand-in database, screeners and model) and
+    `node check-tools/autopilot_test.js <practice-autopilot.js>` (the controls).
+  - Honest framing, keep it: the backtests (sections 7b and 11) found no reliable edge in the
+    screener scores, so this is an experiment to watch, and the panel says so. Its own results will
+    be the forward test. Turn everything off: disable the EventBridge rule.
+  - Ideas not built: results of the AI's holdings shown separately from manual ones; a daily summary
+    email; ASX / FTSE / Nikkei screeners (need currency handling in the trader); letting the model
+    also decide sells; per-user cost limits before opening it up.
 - Stock pages load `sidebar.js`, `stock-prices.js` (live ticker), `ai-chat.js`, `auth.js`, `theme.js`.
 - AI chat button: bottom-right on every page; on the home page it moves left of the news panel
   only from 1401px wide (the panel is hidden below that).
@@ -873,6 +915,7 @@ quirk, not a layout bug. The home page shows its right-hand news panel only from
   - **Dashboard Top 10 Performance rebuilt** (section 8b): faults above fixed, over-time table against
     the index added. **Fake-money test** of the Dow 30 and S&P 100 screeners run (section 11).
   - **Practice portfolio** added to the dashboard (section 8), with a new table and Lambda.
+  - **AI autopilot** for the practice portfolio (section 8): new Lambda, table and hourly schedule.
   - **Deploy permission:** from the afternoon of 10 Oct the session's safety check refused production
     deploys and refused to let Claude change its own settings. The owner added the allow rule
     `Bash(bash /Users/dave/VSCODE/stockiq/check-tools/pending-*/deploy.sh)` himself; with it, a deploy

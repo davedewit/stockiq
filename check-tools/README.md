@@ -55,3 +55,17 @@ button, selling, a change from another window, reset. Give it a copy of the scri
 `__PRACTICE_API_URL__` placeholder (put it back with a text replace first). Never point it at the
 deployed file: that holds the real address and would write to the live table.
 
+## ai_trader_test.py and autopilot_test.js
+
+Tests of the practice portfolio's AI autopilot. Neither touches anything real.
+
+```bash
+python3 check-tools/ai_trader_test.py lambda-sync/stockiq-ai-trader/lambda_function.py   # the trading rules
+node check-tools/autopilot_test.js ../website/practice-autopilot.js                      # the dashboard controls
+```
+
+The first runs the Lambda's code with stand-ins for the database, the screeners, prices and the AI
+model: budget pacing, risk filters, the coin share, every sell rule, a clash with the user, missing
+data, when it is due. The second drives the controls with a stand-in API (the file's real address is
+never called, because the test replaces `fetch`).
+

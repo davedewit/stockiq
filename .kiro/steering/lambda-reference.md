@@ -98,6 +98,7 @@ New screeners: use `5-<subOption>`.
 | `stockiq-csv-export-proxy` | CSV export of analysis history |
 | `stockiq-auto-delete-scheduler` | Schedules S3 data deletion |
 | `stockiq-auto-delete-cleanup` | Cleans up S3 user data |
+| `stockiq-ai-trader` | AI autopilot for the practice portfolio (fake money). Hourly from EventBridge rule `stockiq-ai-trader-schedule`, or `run` through its Function URL; actions `get`, `save`, `run`. Reads screener results from the coordinator, asks gpt-4o-mini to choose from a shortlist, writes practice buys/sells into `stockiq-paper-portfolios`. Table `stockiq-ai-trader`. Env `OPENAI_API_KEY`, `AI_TRADER_USERS` (allow-list). Python 3.12, 300 s, 256 MB. Created 10 Oct 2026. See `site-overview.md` section 8 |
 | `stockiq-paper-portfolio` | Stores each user's practice portfolio (fake money) for the dashboard: actions `get`, `save` (with `expectedVersion`), `reset`. Table `stockiq-paper-portfolios`. Python 3.12, role `acp-lambda-role`, CORS set on the Function URL (POST only). Created 10 Oct 2026. See `site-overview.md` section 8 |
 
 ### Other
@@ -277,7 +278,8 @@ aws logs tail /aws/lambda/stockiq-my-function --since 5m --profile default --reg
 | `stockiq-usage-tracker` | varies | usage-counter, daily-usage-tracker |
 | `stockiq-dashboard-analysis-history` | userId + analysisId | dashboard, option-1 |
 | `stockiq-email-subscribers` | email | email-capture |
-| `stockiq-paper-portfolios` | userId (one item per user: `data` JSON, `version`) | paper-portfolio |
+| `stockiq-paper-portfolios` | userId (one item per user: `data` JSON, `version`) | paper-portfolio, ai-trader |
+| `stockiq-ai-trader` | userId (autopilot settings, state, log; `enabled` flag) | ai-trader |
 | `stockiq-ai-chat-limits` | userId (TTL 2h) | ai-chat |
 | `stockiq-ai-chat-stats` | userId+date (TTL 90d) | ai-chat, ai-chat-reporter |
 
