@@ -647,14 +647,28 @@ Needs the owner's decision or more work (nothing here is fixed):
   London stocks (seen 10 Oct: Friday's bar `null`), and the `stockiq-europe-4-1` workers fall back
   to the day before (IMB.L 2,614 in the report, 2,662 actual). The report also prints pence with a
   £ sign ("£2614.00" is 2,614p). Needs the 10 workers redeployed (use `meta.regularMarketPrice`).
-- **Owner's idea, 10 Oct 2026: test the analysis with fake money** (a practice account, or an
-  automatic one that trades the screeners' results). Step 1 is done for the S&P 500 (section 7b).
-  Recommended shape: (1) a backtest
-  first: the screeners use only price and volume, so the worker scoring can be replayed over past
-  daily prices to see what holding each day's top 10 would have done against the index; (2) then a
-  daily scheduled run of each screener that logs the top 10 permanently (as crypto now does) and
-  keeps a paper portfolio per screener; (3) no manual buy/sell screen until there is evidence the
-  ranking is worth following. Any published result must be stated as past performance.
+- **Fake-money test of the screeners (owner's idea, 10 Oct 2026; first results in).** Tool:
+  `stockiq/check-tools/paper-test/` (`python3 fetch.py && python3 backtest.py dow30|sp100 [start date]`).
+  It replays the worker's own scoring code over daily prices (the screeners use nothing else), takes
+  each day's top 10 and compares what they did next with the whole list and with SPY; it also runs
+  a $10,000 paper account re-invested in the top 10 weekly. The replay's top 10 for 9 Oct matched
+  the live Dow 30 and S&P 100 reports exactly. Results, 3 Jan 2023 – 9 Oct 2026 (946 trading days):
+  - **Dow 30: no edge.** Top 10 +16.8% a year, whole list +18.4%, bottom 10 +19.3%, SPY +21.0%.
+    No reliable difference at 1 day, 1 week, 1 month or 3 months. With 0.1% cost per trade: +10.3%.
+  - **S&P 100: ahead, but not reliably.** Top 10 +43% a year (no costs; +31% with 0.1% costs)
+    against +25% for the whole list; bottom 10 +16%. The gap is inside the margin of error at 1 week
+    and longer, most of it came in 2026, and it disappears (+0.02% a week) when seven chip / AI
+    stocks are left out (SNDK, MU, AMD, ANET, NVDA, PLTR, DELL). The score is a momentum score, and
+    momentum paid in those names in this period. The list is today's membership, which flatters it.
+  - The top 10 changes a lot: the account trades 57–84 times its own value a year.
+  - **Do not publish these numbers as a track record.** The fair test is forward: the lists were
+    frozen on 10 Oct 2026 (`frozen_lists.txt`); re-run with a start date of 2026-10-12 or later
+    (suggested: early Dec 2026 and early Jan 2027). No scheduled job is needed for this, because the
+    replay gives exactly what a daily automatic paper-trader would have recorded.
+  - Not covered: the larger US lists (one price download per stock; Yahoo blocks this machine after
+    a few hundred), ASX / FTSE / Nikkei (different worker code; same method would work), crypto
+    (the entry log in section 8b does this job from 10 Oct). A manual buy/sell practice screen on
+    the site was considered and not built: it would test the user's choices, not the screeners.
 - **Page score vs app score.** Same model, different inputs (checked on AAPL, 71 vs 47): the page
   uses the previous close and Yahoo fundamentals, the app uses the live price and Finnhub. A
   price 0.1% under the 20-day average swung the trend factor by 18 points; Finnhub had no revenue

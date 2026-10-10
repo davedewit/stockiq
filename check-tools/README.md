@@ -30,3 +30,19 @@ refresh; they are one-off scripts and need reading before re-use.
 
 After changing a list, put the same list in both `website/analysis-functions.js` and the coordinator
 Lambda, and update the count on the button in `website/analysis.html`.
+
+## paper-test/
+
+Fake-money test of the Dow 30 and S&P 100 screeners: replays the screener worker's own scoring over
+daily prices and reports how each day's top 10 went on to do against the whole list and the S&P 500,
+plus a $10,000 paper account re-invested weekly. Results and caveats: `site-overview.md` section 11.
+
+```bash
+cd check-tools/paper-test
+python3 fetch.py                      # 106 price downloads, about 2 minutes; run it once per session at most
+python3 backtest.py sp100             # from Jan 2023
+python3 backtest.py sp100 2026-10-12  # the fair forward test: only prices after the lists were frozen
+```
+
+`frozen_lists.txt` holds the lists as they were on 10 Oct 2026; keep it, or the forward test loses
+its meaning. `data/` is a local cache and is not in git.
