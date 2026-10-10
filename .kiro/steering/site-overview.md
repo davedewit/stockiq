@@ -396,6 +396,23 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
     in the model's prompt at each decision. **These inform the choice among the shortlist only: every
     limit is still enforced by code, and nothing adapts on fewer than 8 trades** (`MIN_SAMPLE`).
     Honest limit: with a handful of trades the record is mostly chance, and the panel says so.
+  - **Hold or sell, reviewed by the AI model at every check-in** (added 10 Oct 2026; the owner's point
+    that the fresh screener data and news could decide "if it holds or sells"). After the fixed rules
+    have run, `ai_review` gives the model each holding they are keeping: what it was bought on, the
+    screener's figures now (rank, score, signal, RSI, 1-day and 7-day change), how it has moved, when
+    the rules will sell it, and up to three recent headlines that name it. **The model has no
+    internet: the function fetches the headlines** (`fetch_news`: Google News RSS for coins, Yahoo
+    Finance RSS for shares; `pick_headlines` keeps only those under 72 hours old that name the
+    holding and drops price pages; kept two hours in `state.news`). The model answers hold or sell
+    with a reason. **It can only sell earlier than the rules, never keep a holding past one**, and
+    only the autopilot's own holdings. Such a sale is exit kind `ai` ("sold early by the AI model's
+    review") and its details list the headlines it was shown; a "keep" is stored with the holding
+    (`view`) and shown under "Holding now". Its own check (`review_ai_sells`): when the last 8 to 12
+    holdings it sold early went on to rise 0.5% or more on average afterwards (`after`), its early
+    sells are paused for 14 days. Headlines are untrusted text: the prompt says so, and the model's
+    answer can do nothing but hold or sell a fake-money holding. One more small AI call per check-in
+    while something is held (cents a month). Only the deployed function fetches headlines; a test
+    run never calls out. Small coins mostly have no real headlines, so for them it is the figures.
   - **Improving its own rules, in bounded trials** (added 10 Oct 2026 after the owner asked for it to
     "continually improve itself" and email him what it found). What it may change is fixed in
     `TUNABLE`: the loss limit, the gain mark, the share of a gain it gives back, how far down a
@@ -467,8 +484,8 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   - Code: `website/practice-autopilot.js` (controls only), Lambda in `lambda-sync/stockiq-ai-trader/`.
     The AI key is the same `OPENAI_API_KEY` as the AI chat, copied to this Lambda's environment.
   - Tests: `python3 check-tools/ai_trader_test.py lambda-sync/stockiq-ai-trader/lambda_function.py`
-    (128 checks, stand-in database, screeners, model and mailer),
-    `node check-tools/autopilot_test.js <practice-autopilot.js>` (59 checks, the controls),
+    (143 checks, stand-in database, screeners, model, headlines and mailer),
+    `node check-tools/autopilot_test.js <practice-autopilot.js>` (62 checks, the controls),
     `node check-tools/practice_test.js <placeholder copy>` (55 checks, the portfolio section) and
     `python3 check-tools/autopilot_plan_check.py <lambda_function.py> <practice-autopilot.js> 150`
     (the panel's description against the Lambda's own rules; it is how the rounding fault was found).
@@ -493,8 +510,8 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   - Ideas not built: a chart of its results over time; a weekly summary email even when there is no
     review; a coin yardstick (Bitcoin) in place of the S&P 500 fund for coin trades, which is also what
     "resting" a screener is judged against; letting the trials cover the user's own settings (holding
-    time, how often it checks in); letting the model also decide sells; per-user cost limits before
-    opening it up.
+    time, how often it checks in); headlines for the candidates when buying, not only for holdings;
+    per-user cost limits before opening it up.
 - Stock pages load `sidebar.js`, `stock-prices.js` (live ticker), `ai-chat.js`, `auth.js`, `theme.js`.
 - AI chat button: bottom-right on every page; on the home page it moves left of the news panel
   only from 1401px wide (the panel is hidden below that).
@@ -1073,6 +1090,9 @@ in one command, the check finds its own text and stops.
     fields on the practice buy row. Two sessions built an autopilot at the same moment on 10 Oct;
     the deploy script's fingerprint check caught it and the second build was dropped. **Run one
     session on the site at a time.**
+  - **The AI model reviews each holding at every check-in** (section 8): fresh screener figures and
+    real headlines fetched by the function; it may sell earlier than the rules, and its early sells are
+    paused if they prove too early. Rollback zip: `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_review_20261010.zip`.
   - **Autopilot made clearer and able to review itself** (section 8): whose holding is whose and when
     the autopilot will sell; S&P columns removed from the practice portfolio; details under each buy
     and sale; the panel refreshes itself; two more selling rules; bounded trials of its own rules with
