@@ -75,7 +75,7 @@ python3 check-tools/ai_trader_test.py lambda-sync/stockiq-ai-trader/lambda_funct
 node check-tools/autopilot_test.js ../website/practice-autopilot.js                      # the dashboard controls
 ```
 
-The first (183 checks) runs the Lambda's code with stand-ins for the database, the screeners, prices,
+The first (198 checks) runs the Lambda's code with stand-ins for the database, the screeners, prices,
 the AI model, headlines and email: budget pacing, risk filters, the coin share, every sell rule, the
 AI model's hold-or-sell review, headlines, the record and what it learns from it, trials of its own
 rules, the owner's own limits and switches, "sell everything", a clash with the user, missing data,

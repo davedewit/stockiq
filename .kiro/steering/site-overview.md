@@ -586,7 +586,7 @@ code before relying on a detail (section 10).
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=10` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=13`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=14`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | Two containers (about line 1250) and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
@@ -679,19 +679,36 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
    5 minutes early still counts for the time limit (`GRACE`). Each holding's best and worst change,
    as seen at check-ins, is kept (`peak`, `low`), and its path (`path`: hours held and change at
    each of the last 16 check-ins).
-   **Keeping part of a gain** (reworked 10 Oct after the owner asked whether it "wouldn't sell at
-   +17%"): the gain mark is where it always sells, but waiting for +18% on a 6-hour holding hands
-   back most quick rises. So (a) the rise from which a gain is protected follows the holding time
-   (`gain_arm`: half the gain mark for 20 days or more, less for shorter, never under 1%; Balanced:
-   9% at 20 days, 4.5% at 5, 2% at 1 day, 1% at 6 hours), and (b) once it has been up that much it
-   is sold when it slips back to `gain_floor`: a small gain may give back the level's share (half),
-   a gain near the mark only half that share (up 4%: sold at about +2.2%; up 17%: at about +12.5%,
-   not +8.5%). The panel has the same sum (`gainArm`); the cases are checked in both test files.
+   **Keeping part of a gain: the stop that follows a rising holding** (`follow_stop`; reworked twice
+   on 10 Oct). The gain mark is where it always sells, but waiting for +18% on a 6-hour holding
+   hands back most quick rises, and the owner then rejected fixed distances as "a dumb static
+   rule". So the stop is set from **that holding's own movement and its figures now**:
+   - `daily_range`: how much it normally moves in a day, the average of its last 14 days' high-to-low
+     range, from the daily prices `fetch_quote` already receives (CFX about 6.3%, Bitcoin 2.4%, a
+     large share about 1.9%). `typical_move` scales that to the gap between check-ins by the square
+     root of time (CFX: about 0.9% in 30 minutes).
+   - Protection starts once it has risen 1.5 typical moves (`STOP_ARM`): beyond its normal wobble.
+   - From then on it may slip a number of typical moves from its best before it is sold
+     (`stop_room`): 2.5 as a rule (`STOP_ROOM`, scaled by the level's `trail`, which its own trials
+     may change); +0.5 while its screener score and rank are as strong as when it was bought;
+     −0.75 when they have weakened (score under 70% of then, or rank far lower); −0.5 when RSI is 80
+     or more; −0.5 in the last quarter of its holding time; −1 when the AI review answered
+     "tighten". Never under 1 or over 3.5, and it is always sold while a fifth of the best gain is
+     left (`STOP_KEEP`). Example: CFX up 6.15% at its best with strong figures is sold if it slips to
+     about +3.4%; with weakened figures at about +4.6%; a calm coin at about +5.3%.
+   - The reasons are kept and shown under the sale ("The stop that followed it: …") and the stop as
+     last worked out is stored with the holding (`state.open[id].stop`) for the dashboard.
+   - Without daily prices for a holding the simpler rule by holding time still applies (`gain_arm`,
+     `gain_floor`: protection from half the gain mark at 20 days down to 1% at 6 hours; a small gain
+     may give back half, one near the mark a quarter). The tuner's hindsight estimate for `trail`
+     still uses that simpler rule.
 4. **The AI model's review** (`ai_review`, if `aiSell` is on and not paused): for each holding the
    rules are keeping it is given what it was bought on, the screener's figures now, how it has
    moved, **its path since buying**, what is protected, when the rules will sell it, and up to three
    recent headlines that name it. It is asked whether a rise is still building or has stalled or
-   turned, weighed against the time left, and answers hold or sell with a reason. **A larger model
+   turned, weighed against the time left, and told how much the holding normally moves between
+   check-ins (so a dip smaller than that is not taken for a turn). It answers **hold, tighten or
+   sell** with a reason; "tighten" keeps the holding with a closer stop (`tight`). **A larger model
    (`STRONG_MODEL`, gpt-4o) does this review when a gain is at stake** (some holding is up enough
    for its gain to be protected), at most 8 times a day per user (`STRONG_PER_DAY`, `state.strong`;
    about 0.3 US cents a call, so under $1 a month; the owner's limit). Otherwise gpt-4o-mini. If the
@@ -784,7 +801,7 @@ that it at least does not fool itself.
   minSample, practiceCash, rules` (in force, with `yours`, `level`, `changed`, `arm`), `tune`
   (`trial` with its figures, `past`, `nextReviewIn`, `batch`, `group`), `aiSellPausedUntil`,
   `coinShare, realizedUsd, month` (`last30`, `before30`), `now, nextCheck, holding, plans` (per
-  holding: `sellBy, stop, take, arm, floor, trail, peak, trial, view, auto`) and `options` (screeners,
+  holding: `sellBy, stop, take, arm, floor, move, room, tight, trail, peak, trial, view, auto`) and `options` (screeners,
   check-in and holding-time choices, the level table). **The panel is drawn from these; change the
   two together.**
 - Other actions: `sellall` (`sell_everything`: only the autopilot's holdings, recorded as sold by
@@ -843,7 +860,7 @@ that it at least does not fool itself.
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 183 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 198 checks
    node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 97 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 63 checks
@@ -896,8 +913,8 @@ zone; SES and the news feeds are only used when running as the Lambda, so tests 
   It holds one coin (CFX). His own buys in the practice portfolio are two Bitcoin lines.
 - Seen for real since: a headline reaching the model (15:10 UTC), clean scheduled check-ins on each
   new version, both AI models answering the test question.
-- Not yet seen for real: a sale made by the AI model's review, a sale by the reworked gain
-  protection, a review of its own rules (the first comes after 20 finished trades), a trial, the
+- Not yet seen for real: a sale made by the AI model's review, a sale by the stop that follows a
+  rising holding, a "tighten" answer, a review of its own rules (the first comes after 20 finished trades), a trial, the
   emails that go with them (a set-up email was sent; arrival not confirmed), and the logged-in
   dashboard itself (all checks used a stand-in server). **Worth checking first in a new session:**
   the function's log and the owner's record for errors and for the first of each of these.
@@ -1297,6 +1314,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     packaged as `check-tools/pending-<name>/deploy.sh` runs without a hand-off. Keep packaging deploys
     that way (live-code check, rollback copy, `DRY_RUN=true`), run the dry run, then run it.
   - Autopilot activity list: "Buys and sells only" became a switch remembered in the browser.
+  - **The stop that follows a rising holding is set from the holding's own movement** (section 8c):
+    its daily range scaled to the check-in gap, with room that widens or tightens with its screener
+    figures, the time left and the AI review's new "tighten" answer. Rollback zip:
+    `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_stop_20261010.zip`.
   - **The pace follows the risk level** (section 8c): the three pace settings can be left to the
     level ("automatic") or set by hand. Rollback zip:
     `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_pace_20261010.zip`.
