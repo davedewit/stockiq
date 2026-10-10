@@ -210,15 +210,12 @@
         const kinds = d.screeners.map(k => (data.options.screeners[k] || {}).kind);
         return kinds.includes('crypto') && kinds.some(k => k !== 'crypto');
     }
-    // The rise from which part of a gain is protected: half the gain mark for a holding kept 20 days or more, less for a
-    // shorter holding time, never under 1%. The same sum as gain_arm() in the stockiq-ai-trader Lambda: keep them alike.
-    function gainArm(r, d) { return Math.round(Math.max(1, r.take * 0.5 * Math.sqrt(Math.min(1, Math.max(0, d.maxHoldDays) / 20))) * 10) / 10; }
     function paceText(d) {
         const r = levelRules(d.risk);
         if (!r || !(d.maxHoldDays > 0) || !(d.everyHours > 0)) return '';
         const late = d.maxHoldDays * 24 < d.everyHours - 1e-9, quick = d.everyHours < 3 || d.maxHoldDays < 1;
         const shares = d.screeners.some(k => (data.options.screeners[k] || {}).kind !== 'crypto');
-        return `It sells a holding once it has had it for ${holdText(d.maxHoldDays)}, whatever the price, and sooner at ${r.stop}% or +${r.take}%, to keep part of a gain once it has been up ${gainArm(r, d)}% (it is then sold if it slips back, giving back less of a big gain than of a small one), or when its screener signal turns negative or it slips far down the ranking. The money is then free for the next buy. At every check-in the AI model also reviews each holding against the latest screener figures and recent headlines, and may sell it earlier than these rules.`
+        return `It sells a holding once it has had it for ${holdText(d.maxHoldDays)}, whatever the price, and sooner at ${r.stop}% or +${r.take}%, when a stop that follows a rising holding is hit (it starts once the holding has risen beyond its own normal wobble and is set from how much that holding normally moves: wider for a jumpy coin, closer when its screener figures weaken or time is short), or when its screener signal turns negative or it slips far down the ranking. The money is then free for the next buy. At every check-in the AI model also reviews each holding against the latest screener figures and recent headlines, and may sell it earlier than these rules.`
             + (late ? ` It only checks in ${everyText(d.everyHours)}, though, so in practice a holding is sold at the next check-in, about ${holdText(d.everyHours / 24)} after it was bought. Check in more often for it to be sold on time.` : '')
             + (quick && shares ? ' Shares are only traded while their market is open and their rankings change little within a day, so quick settings mostly make a difference for coins.' : '')
             + (quick ? ' No trading costs are taken off here: real trading this often would lose part of every trade to fees.' : '');
@@ -252,7 +249,7 @@
     function recordHtml() {
         const c = data.scorecard, need = data.minSample || 8, plans = data.plans || [], on = data.settings.enabled;
         const held = plans.length
-            ? `<div>Holding now: ${plans.map(p => `<strong style="color: var(--text-primary);">${esc(p.label)}</strong> (bought ${esc(when(p.boughtAt))}; ${on ? `it sells it at the check-in around ${esc(when(p.sellBy))} at the latest, sooner at ${p.stop}% or +${p.take}%` : 'the autopilot is off, so it stays until you sell it'}${on && typeof p.floor === 'number' ? `; it has been up ${pc(p.peak)} at its best and is sold if it slips back to ${pc(p.floor)}` : ''}${on && p.view ? `; the AI model's latest review, ${esc(when(p.view.t))}${p.view.larger ? ', by the larger model' : ''}: ${p.view.sell ? 'sell' : 'keep'} (${esc(p.view.text)})` : ''})`).join('; ')}.</div>`
+            ? `<div>Holding now: ${plans.map(p => `<strong style="color: var(--text-primary);">${esc(p.label)}</strong> (bought ${esc(when(p.boughtAt))}; ${on ? `it sells it at the check-in around ${esc(when(p.sellBy))} at the latest, sooner at ${p.stop}% or +${p.take}%` : 'the autopilot is off, so it stays until you sell it'}${on && typeof p.floor === 'number' ? `; it has been up ${pc(p.peak)} at its best and is sold if it slips back to ${pc(p.floor)}` : on && typeof p.arm === 'number' ? `; a stop follows it once it has been up ${p.arm}%` : ''}${on && typeof p.move === 'number' ? ` (it normally moves about ${p.move.toFixed(1)}% between check-ins and may slip ${p.room} such moves from its best${p.tight ? '; the AI review asked for a tighter stop' : ''})` : ''}${on && p.view ? `; the AI model's latest review, ${esc(when(p.view.t))}${p.view.larger ? ', by the larger model' : ''}: ${p.view.sell ? 'sell' : p.view.tighten ? 'keep, with a tighter stop' : 'keep'} (${esc(p.view.text)})` : ''})`).join('; ')}.</div>`
             : `<div>Holding nothing right now.</div>`;
         const m = data.month && data.month.last30, before = data.month && data.month.before30;
         const month = m && m.n ? `<div style="margin-top: 4px;">Last 30 days: <span style="color: ${tint(m.usd)}; font-weight: 600;">${usd2(m.usd)}</span> from ${m.n} finished trade${m.n === 1 ? '' : 's'} (${m.up} up)${m.pct !== null ? `, which is <span style="color: ${tint(m.pct)}; font-weight: 600;">${(m.pct >= 0 ? '+' : '') + m.pct.toFixed(2)}%</span> of the ${usd0(data.settings.budgetUsd)} budget` : ''}.${before && before.n ? ` The 30 days before: ${usd2(before.usd)} from ${before.n}${before.pct !== null ? ' (' + (before.pct >= 0 ? '+' : '') + before.pct.toFixed(2) + '%)' : ''}.` : ''}</div>` : '';
@@ -275,7 +272,7 @@
 
     // ---------------------------------------------------------------- "Improving its own rules": what it has changed, is trying, has tried
     function ruleWords(r) {
-        return `sells at ${r.stop}% or +${r.take}%; once a holding has been up ${r.arm}%, sells if it slips back far enough to keep part of that gain (a small gain may give back ${Math.round(r.trail * 100)}%, a big one less); buys from the top ${r.top} of a ranking` + (r.max_rsi >= 100 ? '' : ` with RSI under ${r.max_rsi}`);
+        return `sells at ${r.stop}% or +${r.take}%; a stop follows a rising holding, set from how much that holding normally moves and from its screener figures now; buys from the top ${r.top} of a ranking` + (r.max_rsi >= 100 ? '' : ` with RSI under ${r.max_rsi}`);
     }
     function tuneHtml() {
         const t = data.tune, r = data.rules;
@@ -361,7 +358,7 @@
 
                 <div class="ap-card">
                     <span class="ap-label">What it may do by itself</span>
-                    ${mayRow('ap-aisell', 'aiSell', 'Sell early on the AI model\'s review', 'At every check-in the AI model looks at each holding with the latest screener figures and recent headlines, and may sell it before the fixed rules would: for instance when a rise has stalled or turned. A larger model is asked when a gain is at stake (a few times a day at most). Off: only the fixed rules sell.')}
+                    ${mayRow('ap-aisell', 'aiSell', 'Sell early on the AI model\'s review', 'At every check-in the AI model looks at each holding with the latest screener figures and recent headlines, and may sell it before the fixed rules would, or keep it with a tighter stop: for instance when a rise has stalled or turned. A larger model is asked when a gain is at stake (a few times a day at most). Off: only the fixed rules sell.')}
                     ${mayRow('ap-tune', 'selfTune', 'Try changes to its own rules', 'Every 20 finished trades it may try one change to a selling or buying rule beside the current one, and keeps it only if it did clearly better. Off: its rules stay exactly as they are.')}
                     ${mayRow('ap-mail', 'emails', 'Email me its reviews', 'An email to your account address each time it reviews its rules, starts a trial or finishes one.')}
                 </div>
