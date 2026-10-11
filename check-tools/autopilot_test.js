@@ -29,7 +29,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   };
   p = page(server); await sleep(30);
   check('shows the controls, off by default', /AI autopilot/.test(p.text()) && /Balanced: spreads the budget over up to 8 holdings, looks at the top 10 of each screener, sells a holding at -10% or \+18%, up to 25% of the budget in coins \(the whole budget if only coin screeners are ticked\)\./.test(p.text()) && /Off\. Nothing is bought or sold automatically/.test(p.text()) && /<option value="24" selected>once a day/.test(p.container.innerHTML) && /data-ap="run"[^>]*disabled/.test(p.container.innerHTML), p.text().slice(0, 400));
-  check('says plainly what it is', /fake money/.test(p.text()) && /Nothing here is advice/.test(p.text()));
+  check('says plainly what it is, and that it is in beta', /fake money/.test(p.text()) && /Nothing here is advice/.test(p.text()) && /AI autopilot Beta fake money, an experiment to watch/.test(p.text()) && /It is in beta: new, and still being tested and changed\./.test(p.text()) && /class="ap-beta"/.test(p.container.innerHTML));
   p.form({ ...settings, enabled: true, risk: 5, budgetUsd: 5000, periodDays: 5, everyHours: 12, maxHoldDays: 10, screeners: ['3-8', '7-1'] }); await p.ctx.practiceAutopilot.flush(); await sleep(30);
   const sent = p.calls.find(c => c.action === 'save');
   check('saves exactly what was set', JSON.stringify(sent.settings) === JSON.stringify({ enabled: true, risk: 5, budgetUsd: 5000, periodDays: 5, everyHours: 12, maxHoldDays: 10, screeners: ['3-8', '7-1'], aiSell: true, selfTune: true, emails: true, stopPct: null, takePct: null }) && /Autopilot switched on/.test(p.text()) && /On\. First check-in at the next hourly check\./.test(p.text()) && /Adventurous/.test(p.text()) && !/data-ap="run"[^>]*disabled/.test(p.container.innerHTML), sent);
@@ -389,9 +389,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     check('no broken values in the new parts', !/undefined|NaN|\[object|Infinity/.test(w.container.innerHTML));
     { const tab = { textContent: '🤖 AI autopilot', title: '' }; w.ctx.document.querySelector = (sel) => sel === '[data-dash-tab="autopilot"]' ? tab : null;
       await w.ctx.practiceAutopilot.refresh(true); await sleep(30);
-      check('while something needs you, the dashboard\'s AI autopilot tab carries a mark', tab.textContent === '🤖 AI autopilot ⚠' && /One thing needs you/.test(tab.title), tab);
+      check('while something needs you, the dashboard\'s AI autopilot tab carries a mark', tab.textContent === '🤖 AI autopilot (Beta) ⚠' && /One thing needs you/.test(tab.title), tab);
       st.needs = []; await w.ctx.practiceAutopilot.refresh(true); await sleep(30);
-      check('and loses it when nothing does', tab.textContent === '🤖 AI autopilot' && tab.title === '', tab); }
+      check('and loses it when nothing does', tab.textContent === '🤖 AI autopilot (Beta)' && tab.title === '', tab); }
     const off = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, ...st, settings: { ...st.settings, enabled: false }, nextCheck: null, coming: [], mail: null, needs: [{ kind: 'off', text: 'It is switched off and still holds 1 holding: it stays until you sell it or switch it back on.' }] } })); await sleep(30);
     check('switched off: no countdown and no list, and what needs you is said', !/⏱/.test(off.text()) && !/What happens next/.test(off.text()) && /⚠ Needs you It is switched off and still holds 1 holding/.test(off.text()));
     const old = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, settings: { ...settings, enabled: true }, state: {}, practiceCash: 100000, log: [], nextCheck: { at: '2026-10-11T04:40:00Z', markets: ['coin'] } } })); await sleep(30);
@@ -509,10 +509,10 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   // an account that is not on a paid plan: shown what the autopilot is and where the plans are, nothing more
   { const w = page(() => ({ status: 200, body: { success: true, allowed: false, locked: 'plan', upgrade: 'dashboard.html#upgrade' } })); await sleep(30);
     const t = w.text(), h = w.container.innerHTML;
-    check('without a paid plan the panel says what the autopilot is, that it is part of the paid plans, and that buying by hand stays free', /AI autopilot fake money · part of the paid plans/.test(t) && /It is included in every paid plan \(Starter, Pro and Elite\)\. This account is not on a paid plan at the moment, so the autopilot is not available to it\. Buying and selling by hand with the fake money stays free: that is the Practice portfolio tab\./.test(t) && /No real trade is ever placed and nothing here is advice/.test(t), t.slice(0, 500));
+    check('without a paid plan the panel says what the autopilot is, that it is part of the paid plans, and that buying by hand stays free', /AI autopilot Beta fake money · part of the paid plans/.test(t) && /It is in beta: new, and still being tested and changed\./.test(t) && /It is included in every paid plan \(Starter, Pro and Elite\)\. This account is not on a paid plan at the moment, so the autopilot is not available to it\. Buying and selling by hand with the fake money stays free: that is the Practice portfolio tab\./.test(t) && /No real trade is ever placed and nothing here is advice/.test(t), t.slice(0, 500));
     check('one button leads to the plans, and there is nothing to switch on or run', /<a id="ap-upgrade" class="ap-btn primary" href="#upgrade"[^>]*>See the plans<\/a>/.test(h) && !/id="ap-enabled"|data-ap="run"|id="ap-budget"/.test(h) && !/undefined|NaN|\[object/.test(h));
     const tab = { textContent: '🤖 AI autopilot', title: '' }; w.ctx.document.querySelector = (sel) => sel === '[data-dash-tab="autopilot"]' ? tab : null; w.ctx.practiceAutopilot.reload(); await sleep(30);
-    check('the dashboard tab for it carries a lock', tab.textContent === '🤖 AI autopilot 🔒' && tab.title === 'Part of the paid plans', tab);
+    check('the dashboard tab for it carries a lock', tab.textContent === '🤖 AI autopilot (Beta) 🔒' && tab.title === 'Part of the paid plans', tab);
     const u = page(() => ({ status: 200, body: { success: true, allowed: false, locked: 'unknown' } })); await sleep(30);
     check('if the plan could not be checked it says so and offers nothing to buy', /Your plan could not be checked just now\. Refresh the page in a moment\./.test(u.text()) && !/See the plans/.test(u.text()));
     const none = page(() => ({ status: 200, body: { success: true, allowed: false } })); await sleep(30);

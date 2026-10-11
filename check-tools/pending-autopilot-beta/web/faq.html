@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - Stock Analysis Questions Answered | StockIQ</title>
+    <meta name="description" content="Get answers to common questions about AI stock analysis, trading signals, technical indicators, and investment research. Learn how StockIQ's platform works.">
+
+    <link rel="canonical" href="https://stockiq.tech/faq.html">
+    <link rel="icon" type="image/png" sizes="32x32" href="stockiq-logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="stockiq-logo.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    
+    <!-- Schema.org FAQ markup -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "How accurate are AI-powered stock analysis tools?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "StockIQ combines multiple data sources, including market data, technical indicators, and sentiment analysis, to produce its scores and signals. They are automated model outputs and general information, not personal financial advice, and past results do not guarantee future performance."
+                }
+            },
+            {
+                "@type": "Question", 
+                "name": "What makes StockIQ different from other stock screeners?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "StockIQ uses 600+ parallel AWS Lambda workers to analyze 2000+ stocks simultaneously, combining Yahoo Finance and Finnhub data sources for comprehensive reports per stock."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I cancel my subscription anytime?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, you can cancel your subscription at any time with no penalties. You'll continue to have full access until the end of your current billing month."
+                }
+            }
+        ]
+    }
+    </script>
+    
+    <style>
+        html, body { background: #0f0f0f !important; transition: none !important; }
+        [data-theme="light"] html, [data-theme="light"] body { background: #ffffff !important; }
+    </style>
+    <script>
+        const savedTheme = localStorage.getItem('theme');
+        const manualOverride = localStorage.getItem('manualOverride');
+        const hour = new Date().getHours();
+        const autoTheme = (hour >= 18 || hour < 6) ? 'dark' : 'light';
+        const theme = (manualOverride === 'true' && savedTheme) ? savedTheme : autoTheme;
+        document.documentElement.setAttribute('data-theme', theme);
+    </script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="theme.js"></script>
+    
+    <style>
+        .top-nav { top: 0 !important; }
+        body { padding-top: 64px !important; }
+        .mobile-menu { top: 64px !important; height: calc(100vh - 64px) !important; }
+        #trial-status-display { top: 60px !important; }
+        
+        .faq-container {
+            max-width: 800px;
+            margin: 80px auto;
+            padding: 40px 30px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .faq-item {
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .faq-question {
+            background: var(--bg-secondary);
+            padding: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-question:hover {
+            background: var(--hover-bg);
+        }
+        
+        .faq-answer {
+            padding: 20px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            display: none;
+            line-height: 1.6;
+        }
+        
+        .faq-answer.active {
+            display: block;
+        }
+        
+        .faq-toggle {
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+        
+        .faq-toggle.rotated {
+            transform: rotate(180deg);
+        }
+        
+        @media (max-width: 768px) {
+            .faq-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="index.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit;">
+                    <img src="stockiq-logo.png" alt="StockIQ" class="brand-logo" style="width: 24px; height: 24px;">
+                    <span class="brand-text">StockIQ</span>
+                </a>
+            </div>
+            
+            <div class="desktop-nav">
+                <a href="index.html" class="nav-item home-link" style="text-decoration: none !important; color: inherit; display: flex; align-items: center;">
+                    Home
+                </a>
+                <div class="nav-item dropdown" onclick="showDropdown('analysis-dropdown', event)">
+                    Analysis <span class="dropdown-arrow">▼</span>
+                    <div class="dropdown-menu" id="analysis-dropdown">
+                        <a href="analysis.html?option=1">Stock & ETF Analysis</a>
+                        <a href="analysis.html?option=2">Trading Signals</a>
+                    </div>
+                </div>
+                <div class="nav-item dropdown" onclick="showDropdown('screeners-dropdown', event)">
+                    Screeners <span class="dropdown-arrow">▼</span>
+                    <div class="dropdown-menu" id="screeners-dropdown">
+                        <a href="analysis.html?option=3">🇺🇸 US Markets</a>
+                        <a href="analysis.html?option=4">🇪🇺 Europe Markets</a>
+                        <a href="analysis.html?option=5">🌏 Asia Markets</a>
+                        <a href="analysis.html?option=6">🌏 Other Markets</a>
+                    </div>
+                </div>
+                <div class="nav-item dropdown" onclick="showDropdown('crypto-dropdown', event)">
+                    Crypto <span class="dropdown-arrow">▼</span>
+                    <div class="dropdown-menu" id="crypto-dropdown">
+                        <a href="analysis.html?option=7">Crypto Universe Screener</a>
+                    </div>
+                </div>
+                <div class="nav-item dropdown" onclick="showDropdown('account-dropdown', event)" style="margin-left: auto;">
+                    Account <span class="dropdown-arrow">▼</span>
+                    <div class="dropdown-menu" id="account-dropdown">
+                        <a href="signup.html">Register</a>
+                        <a href="login.html">Login</a>
+                    </div>
+                </div>
+                <button class="notification-bell" id="notification-bell" onclick="goToNotifications()" title="Notifications" aria-label="View notifications" style="display: none; position: relative; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-primary); margin-right: 10px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span class="notification-badge" id="notification-badge" style="position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; font-weight: bold; display: none; align-items: center; justify-content: center;"></span>
+                </button>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Click: Toggle theme | Double-click: Reset to auto" aria-label="Toggle dark mode">
+                    <span class="theme-icon" aria-hidden="true">🌙</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="faq-container">
+        <h1 style="text-align: center; color: var(--text-primary); margin-bottom: 40px;">Frequently Asked Questions</h1>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                How accurate are AI-powered stock analysis tools?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                StockIQ combines market data, technical indicators, sentiment analysis, and fundamental metrics to produce its scores and signals. They are automated model outputs and general information, not personal financial advice, and past results do not guarantee future performance.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                What makes StockIQ different from other stock screeners?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                StockIQ uses 600+ parallel AWS Lambda workers to analyze 2000+ stocks simultaneously, combining Yahoo Finance and Finnhub data sources for comprehensive reports per stock. While traditional screeners show basic metrics, we provide institutional-grade analysis with AI-generated signals quickly.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                How do I analyze stocks with technical indicators?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                Our platform automatically calculates 15+ technical indicators including RSI, MACD, Bollinger Bands, and moving averages. Each stock analysis includes momentum signals, support/resistance levels, and automatically calculated reference levels with confidence ratings. No manual calculation required.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                What are trading signals and how reliable are they?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                Trading signals are automated positive, negative or mixed signals based on technical analysis, market sentiment, and price patterns. Each signal comes with a confidence level (HIGH/MEDIUM/LOW) and automatically calculated reference levels. They are general information, not instructions to trade.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                Can I analyze ASX (Australian) stocks?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                Yes! StockIQ supports comprehensive analysis of ASX stocks including ASX 20, 50, 100, 200, and 300 indices. Our ASX screener provides the same detailed analysis as US stocks, including technical indicators, reference levels, and risk assessments.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                How often is the stock data updated?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                Prices and market data come from third-party providers (Yahoo Finance and Finnhub) and are refreshed regularly during market hours. Data may be delayed or contain errors, so always check important figures with your broker or the exchange.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                What is the difference between fundamental and technical analysis?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                Fundamental analysis examines company financials (revenue, earnings, debt) to determine intrinsic value, while technical analysis studies price charts and patterns to predict future movements. StockIQ combines both approaches for comprehensive stock evaluation.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                How do I interpret RSI and MACD indicators?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                RSI (Relative Strength Index) measures momentum: above 70 suggests overbought conditions, below 30 indicates oversold. MACD shows trend changes when the signal line crosses above/below the MACD line. Our platform provides plain-English interpretations of all indicators.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                Is cryptocurrency analysis available?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                Yes! Our crypto screener analyzes 548+ cryptocurrencies with technical indicators, model scores, and calculated reference levels. We provide BTC, ETH, and altcoin analysis with the same depth as stock analysis, including support/resistance levels and momentum signals.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                How does StockIQ compare to enterprise platforms?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+Enterprise platforms ($10,000-$25,000/year) are designed for institutional traders and require extensive training. StockIQ (starting at $4.99/month) provides institutional-grade analysis with 600+ parallel AWS Lambda workers, but with an intuitive interface built for individual investors. We focus on the essential analytical tools everyone needs, without the complexity or enterprise pricing of institutional platforms.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                What's the difference between StockIQ and premium subscription services?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                Many premium services ($200-$500/year) use delayed data or provide limited analysis depth. StockIQ offers market data with parallel processing of 2000+ stocks simultaneously. Our transparent weighted scoring system (12 factors including momentum, RSI, MACD, volume) provides complete visibility into how stocks are rated, while many services use opaque methodologies. We deliver deeper technical analysis with full transparency.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                What makes StockIQ's scoring methodology better?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                Unlike black-box algorithms used by expensive platforms, StockIQ provides complete transparency. Our weighted scoring uses: Short Momentum (18%), RSI (20%), MACD (20%), Volume (10%), Medium Momentum (8%), Long Momentum (6%), Financial Health (6%), Bollinger Bands (5%), Sentiment (3%), Market Conditions (3%), Risk (2%), and MA Trend (1%). These are the multipliers the model applies; together they total 102%, so read them as relative weights rather than shares of 100%. You see exactly why each stock scores the way it does - no hidden formulas or proprietary secrets.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                How does StockIQ pricing compare to other services?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+StockIQ bridges the gap between free basic screeners and expensive enterprise platforms. While enterprise solutions cost $10,000-$25,000/year and premium services range from $200-$500/year, StockIQ starts at just $4.99/month with full institutional-grade features. You get professional analysis tools, market data, and transparent methodology at accessible pricing for everyone.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                What are StockIQ's pricing plans and subscription options?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                StockIQ offers flexible monthly subscriptions with different usage tiers: Starter ($4.99/month, 15 analyses per day), Pro ($14.99/month, 50 analyses per day), and Elite ($49.99/month, unlimited analyses), with prices in US dollars. All plans provide complete institutional-grade reports with market data, technical indicators, and AI-generated signals - no features are restricted by plan level.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                What are the practice portfolio and the AI autopilot (Beta), and which plans include them?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                The practice portfolio is on your dashboard and is free for every account: you start with $100,000 of fake money, buy and sell any stock, ETF or coin by hand, and see how each holding has done since you bought it. The AI autopilot is in beta (new, and still being tested and changed) and is included in every paid plan (Starter, Pro and Elite). It runs a practice portfolio for you: at times you choose it makes practice buys and sells from the latest results of the screeners you tick, inside a budget and limits you set, and it shows what it did, why, and what it will do next. It keeps a record of its own results and tries changes to its own rules. Both use fake money only: no real trade is ever placed, past screener results have not shown a reliable edge, and nothing they show is financial advice.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                Can I cancel my subscription anytime? What happens to my access?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                Yes, you can cancel your subscription at any time with no penalties or fees. When you cancel, you'll continue to have full access to all StockIQ features until the end of your current billing month. Your subscription will simply not renew for the following month, giving you complete flexibility and peace of mind.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                Do all plans get the same analysis quality?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                Yes! Every StockIQ plan - from Free Trial to Elite - receives the exact same institutional-grade reports with full technical indicators, AI-generated signals, and market data. The only difference is the number of analyses per day. We don't restrict features or analysis depth based on your plan - everyone gets professional-quality insights.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                Is there a free trial available?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                Yes! New users get 15 free analyses (3-day trial) with full access to all StockIQ features including complete reports, screeners, and AI-powered trading signals. No credit card required to start your trial - experience institutional-grade analysis risk-free.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                Why should I choose StockIQ over free stock screeners?
+                <span class="faq-toggle">▼</span>
+            </div>
+            <div class="faq-answer">
+                Free screeners (Yahoo Finance, Google Finance, Robinhood) show basic metrics but lack depth. StockIQ provides comprehensive reports with AI-generated signals, transparent weighted scoring across 12 factors, multi-timeframe momentum analysis (5d to 1yr), and parallel processing of 2000+ stocks. It's the difference between seeing a stock's price and understanding why it's moving and where it's headed.
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 StockIQ - Professional Investment Research Platform</p>
+        <p style="font-size:0.8rem;opacity:0.8;max-width:800px;margin:8px auto 0;line-height:1.5;">General information only, not financial advice. Scores and signals are automated model outputs that do not take your personal circumstances into account, and past performance does not indicate future results. Market data comes from third parties (Yahoo Finance, Finnhub) and may be delayed or inaccurate.</p>
+        <p>Powered by AI • Market Data • Comprehensive Analysis</p>
+        <p>
+            <a href="terms.html" style="color: #007bff; text-decoration: none;">Terms of Service</a> • 
+            <a href="privacy-policy.html" style="color: #007bff; text-decoration: none;">Privacy Policy</a> • 
+            <a href="refunds.html" style="color: #007bff; text-decoration: none;">Refund Policy</a> • 
+            <a href="support.html" style="color: #007bff; text-decoration: none;">Support</a> • 
+            <a href="contact.html" style="color: #007bff; text-decoration: none;">Contact</a> • 
+            <a href="data-deletion.html" style="color: #007bff; text-decoration: none;">Data Deletion</a> • 
+            <a href="news.html" style="color: #007bff; text-decoration: none;">Blog</a> • 
+            <a href="faq.html" style="color: #007bff; text-decoration: none;">FAQ</a>
+        </p>
+        <p style="margin-top: 15px;">
+            <a href="https://instagram.com/stockiq.tech" target="_blank" style="color: #E4405F; text-decoration: none; font-size: 24px;" title="Follow us on Instagram">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+            </a>
+        </p>
+    </footer>
+
+    <script>
+        let activeDropdown = null;
+
+        function showDropdown(dropdownId, event) {
+            if (event && event.target.closest('.home-link')) {
+                return;
+            }
+            if (activeDropdown && activeDropdown !== dropdownId) {
+                document.getElementById(activeDropdown).classList.remove('show');
+            }
+            const dropdown = document.getElementById(dropdownId);
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+                activeDropdown = dropdown.classList.contains('show') ? dropdownId : null;
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.dropdown')) {
+                if (activeDropdown) {
+                    const dropdown = document.getElementById(activeDropdown);
+                    if (dropdown) {
+                        dropdown.classList.remove('show');
+                    }
+                    activeDropdown = null;
+                }
+            }
+        });
+
+        const userId = localStorage.getItem('userId');
+        if (userId && userId !== 'anonymous') {
+            const bell = document.getElementById('notification-bell');
+            if (bell) bell.style.display = 'block';
+            
+            const accountDropdown = document.getElementById('account-dropdown');
+            if (accountDropdown) {
+                accountDropdown.innerHTML = `
+                    <a href="dashboard.html">Dashboard</a>
+                    <a href="#" onclick="event.preventDefault(); localStorage.clear(); window.location.href='index.html';">Logout</a>
+                `;
+            }
+        }
+
+        function goToNotifications() {
+            window.location.href = 'dashboard.html';
+        }
+
+        function toggleFAQ(element) {
+            const answer = element.nextElementSibling;
+            const toggle = element.querySelector('.faq-toggle');
+            
+            answer.classList.toggle('active');
+            toggle.classList.toggle('rotated');
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            localStorage.setItem('manualOverride', 'true');
+            const icon = document.querySelector('.theme-icon');
+            if (icon) {
+                icon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            }
+        }
+    </script>
+</body>
+</html>
