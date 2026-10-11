@@ -15,6 +15,7 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
           progress (prints the table of progress per batch of 20 finished trades),
           breakdown (fills the record with the owner's four trades of 11 Oct and opens the breakdown table),
           locked (shows the autopilot tab as an account without a paid plan sees it),
+          mobile (how it sits at the window's width: what sticks out past the screen, what scrolls sideways; use mobile_frame.py for a phone's width),
           budget (types a budget larger than the practice money and presses the link that puts it right),
           next (prints the countdown, "Needs you", the "What happens next" list and the email line, and sends a test email),
           listswitch (switches the list to "buys and sells only" and reloads the page to see that it is remembered)
@@ -196,12 +197,31 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
       out('  the button: "' + q('#ap-upgrade').textContent + '" -> ' + q('#ap-upgrade').getAttribute('href') + ' | switch or run button on the page: ' + !!(q('#ap-enabled') || q('#ap-run')));
       q('#practice-autopilot').scrollIntoView({ block: 'start' });
     }
+    if (step.indexOf('mobile') === 0) {
+      // How it sits at this window's width (run the page inside a 390px frame for a phone: mobile_frame.py). Lists what sticks
+      // out past the edge of the screen, and what has to be scrolled sideways inside its own box. "mobile:practice",
+      // "mobile:activity" or "mobile:settings" leaves that view on show for a screenshot.
+      const look = (name) => { const W = window.innerWidth, bad = [], inner = [];
+        document.querySelectorAll('.dash-tabs, .dash-tabs *, #practice-portfolio *, #practice-autopilot *').forEach(x => {
+          if (!x.offsetParent && x.tagName !== 'BODY') return; const r = x.getBoundingClientRect(); if (!r.width) return;
+          const o = getComputedStyle(x).overflowX; const tag = (x.id ? '#' + x.id : x.className && typeof x.className === 'string' ? '.' + x.className.split(' ')[0] : x.tagName.toLowerCase());
+          if ((o === 'auto' || o === 'scroll') && x.scrollWidth > x.clientWidth + 1) inner.push(tag + ' (' + x.scrollWidth + 'px of content in ' + x.clientWidth + 'px)');
+          if (r.right > W + 1 || r.left < -1) { let p = x.parentElement, held = false; while (p && p !== document.body) { const po = getComputedStyle(p).overflowX; if (po === 'auto' || po === 'scroll' || po === 'hidden') { held = true; break; } p = p.parentElement; } if (!held) bad.push(tag + ' to ' + Math.round(r.right) + 'px'); } });
+        out('mobile ' + name + ': screen ' + W + 'px, page ' + document.documentElement.scrollWidth + 'px wide | sticking out past the screen: ' + ([...new Set(bad)].slice(0, 10).join(', ') || 'nothing') + ' | scrolls sideways inside its own box: ' + ([...new Set(inner)].slice(0, 8).join(', ') || 'nothing')); };
+      const want = step.split(':')[1] || 'all';
+      window.dashboardTabs.show('practice'); await wait(300); if (want === 'all' || want === 'practice') look('practice portfolio');
+      if (want !== 'practice') { window.dashboardTabs.show('autopilot'); await wait(300); q('[data-ap-part="activity"]').click(); await wait(200); document.querySelectorAll('#practice-autopilot details').forEach(d => { d.open = true; }); await wait(200);
+        if (want === 'all' || want === 'activity') look('autopilot, Activity');
+        if (want !== 'activity') { q('[data-ap-part="settings"]').click(); await wait(300); look('autopilot, Settings'); } }
+      window.scrollTo(0, 0);
+    }
     if (step === 'off') { q('#ap-enabled').click(); await wait(700); out('switched the autopilot off: ' + cellText('WEMIX')); }
     if (step === 'open') { document.querySelectorAll('#practice-autopilot details').forEach(d => { d.open = true; }); const s = q('#pp-sold'); if (s) s.open = true; out('unfolded the details'); }
   }
   out('broken values on the page: ' + ((q('#practice-portfolio').innerHTML + q('#practice-autopilot').innerHTML).match(/undefined|NaN|\\[object|Infinity/g) || []).length);
+  if (window.parent !== window) window.parent.postMessage({ out: document.getElementById('out').textContent, height: document.documentElement.scrollHeight }, '*');   // inside a phone-width frame (mobile_frame.py)
   document.title = 'done';
-})().catch(e => out('ERROR ' + e.message));
+})().catch(e => { out('ERROR ' + e.message); if (window.parent !== window) window.parent.postMessage({ out: document.getElementById('out').textContent, height: 2000 }, '*'); });
 </script></body></html>''' % (theme, json.dumps({'screeners': {'3-100': {'name': 'S&P 100', 'kind': 'stock', 'group': 'US shares'}, '4-200': {'name': 'ASX 200', 'kind': 'stock', 'group': 'Australian shares'}, '7-1': {'name': 'Crypto (top coins)', 'kind': 'crypto', 'group': 'Coins'}}, 'groups': ['US shares', 'Australian shares', 'Coins'],
     'everyHours': [0.5, 1, 3, 6, 12, 24], 'holdDays': [h / 24 for h in (0.5, 1, 3, 6, 12, 24, 48, 120, 240, 480, 1440)],
     'pace': {'1': dict(periodDays=10, everyHours=24, maxHoldDays=20), '2': dict(periodDays=7, everyHours=12, maxHoldDays=10), '3': dict(periodDays=5, everyHours=6, maxHoldDays=5), '4': dict(periodDays=2, everyHours=3, maxHoldDays=2), '5': dict(periodDays=1, everyHours=1, maxHoldDays=1)},
