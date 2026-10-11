@@ -22,17 +22,10 @@ HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
 US_PRICES = os.path.join(ROOT, 'check-tools', 'paper-test', 'data', 'prices.json')
 SAMPLE = os.path.join(HERE, 'data', 'sample.json')
 EVERY = 5                                   # every fifth trading day
-SAMPLES = {
-    'asx': 'BHP.AX CBA.AX CSL.AX NAB.AX WBC.AX ANZ.AX WES.AX MQG.AX WOW.AX TLS.AX RIO.AX FMG.AX'.split(),
-    'london': 'IMB.L AZN.L HSBA.L SHEL.L ULVR.L BP.L GSK.L RIO.L LLOY.L BARC.L VOD.L BT-A.L'.split(),
-    'tokyo': '7203.T 6758.T 9984.T 8306.T 6861.T 9432.T 7974.T 6501.T 8035.T 4063.T 6098.T 9983.T'.split(),
-    'nasdaq': 'CRWD ZS DDOG MSTR TEAM LULU MELI PDD ASML ARM CSX KHC'.split(),
-}
-GROUPS = ['stockiq-option-3-1-worker', 'stockiq-option-3-2-worker', 'stockiq-option-3-4-worker', 'stockiq-option-3-5-worker', 'stockiq-option-3-6-worker',
-          'stockiq-option-3-7-worker', 'stockiq-option-3-8-worker', 'stockiq-asia-5-1-worker', 'stockiq-asia-5-2-worker', 'stockiq-asia-5-3-worker',
-          'stockiq-asia-5-4-worker', 'stockiq-asia-5-5-worker', 'stockiq-europe-4-1-worker']
-SEES = {'stockiq-asia-5-1-worker': ['asx'], 'stockiq-asia-5-2-worker': ['asx'], 'stockiq-asia-5-3-worker': ['asx'], 'stockiq-asia-5-4-worker': ['asx'],
-        'stockiq-asia-5-5-worker': ['tokyo'], 'stockiq-europe-4-1-worker': ['london']}          # every other group: US shares
+sys.path.insert(0, HERE); import groups as G                # the one list of worker groups and markets (workers/groups.py)
+SAMPLES = {m: v['sample'] for m, v in G.MARKETS.items()}
+GROUPS = list(G.GROUPS)
+SEES = {g: [v[2]] for g, v in G.GROUPS.items()}
 CODES = ['STRONG_SELL', 'SELL', 'MODERATE_SELL', 'HOLD', 'MODERATE_BUY', 'BUY', 'STRONG_BUY']
 
 def fetch():
@@ -175,7 +168,7 @@ def main():
     feed = Feed(charts); real_open = urllib.request.urlopen; urllib.request.urlopen = feed
     try:
         new = load('new_worker', new_path); new_rsi = new.calculate_rsi
-        us = sorted(s for s in json.load(open(US_PRICES)) if s != 'SPY') + [s for s in SAMPLES['nasdaq'] if s in sample]
+        us = sorted(s for s in json.load(open(US_PRICES)) if s != 'SPY') + [s for s in SAMPLES['us'] if s in sample]
         spy = charts['SPY']['timestamp']
         us_days = [t for t in spy if day(t) >= '2022-10-17'][::EVERY]
         seen_analysis = {}
@@ -212,7 +205,7 @@ def main():
         # ---- the faults the new file fixes, each shown on a real answer ----
         print('== the faults')
         base = load('old_base', copies[next(h for h, v in copies.items() if 'stockiq-asia-5-1-worker' in v[1])][0]) if any('stockiq-asia-5-1-worker' in v[1] for v in copies.values()) else None
-        for market in ('asx', 'tokyo', 'london'):
+        for market in [m for m in SAMPLES if m != 'us']:
             symbols = [s for s in SAMPLES[market] if s in sample]
             if not symbols or not base: continue
             end = max(sample[s]['timestamp'][-1] for s in symbols); feed.at(end, symbols)
@@ -220,7 +213,7 @@ def main():
             a = run(base, symbols, 10); feed.cache = {}; b = run(new, symbols, 10)
             print(f"   {market.capitalize()}, the answer as Yahoo sent it on {day(end)}: last session sent twice for {len(twice)} of {len(symbols)}; 24-hour change of exactly 0: live copy {sum(1 for s in a if a[s]['change_24h'] == 0)}, new file {sum(1 for s in b if b[s]['change_24h'] == 0)}; "
                   f"currency the new file reports: {sorted({b[s]['currency'] for s in b})}")
-        london = [s for s in SAMPLES['london'] if s in sample]
+        london = [s for s in SAMPLES.get('london', []) if s in sample]
         if london and base:
             end = max(sample[s]['timestamp'][-1] for s in london); feed.at(end, london)
             truth = {s: sample[s]['indicators']['quote'][0]['close'][-1] for s in london}; before = {s: sample[s]['indicators']['quote'][0]['close'][-2] for s in london}
@@ -241,7 +234,7 @@ def main():
             r1 = new.handle_batch_processing({'worker_id': 1, 'batch_size': 10}, Ctx('stockiq-option-3-5-worker-1'))
             r88 = new.handle_batch_processing({'worker_id': 88}, Ctx('stockiq-option-3-5-worker-88')); r89 = new.handle_batch_processing({'worker_id': 89}, Ctx('stockiq-option-3-5-worker-89'))
             r2000 = new.handle_batch_processing({'worker_id': 183}, Ctx('stockiq-option-3-6-worker-183'))
-            none = [new.handle_batch_processing({'worker_id': 1}, Ctx(g + '-1'))['stocks_processed'] for g in GROUPS if g not in ('stockiq-option-3-5-worker', 'stockiq-option-3-6-worker')]
+            none = [new.handle_batch_processing({'worker_id': 1}, Ctx(g + '-1'))['stocks_processed'] for g in GROUPS if g not in G.NUMBER_ONLY]
             empty = new.handle_batch_processing({'worker_id': 1, 'stock_batch': []}, Ctx('stockiq-option-3-5-worker-1'))
             feed.calls.clear(); ten = new.handle_batch_processing({'worker_id': 1, 'stock_batch': us[:10]}, Ctx('stockiq-option-3-1-worker-1')); spy_calls = feed.calls['SPY']
             http = json.loads(new.lambda_handler({'body': json.dumps({'stock_batch': us[:3], 'worker_id': 7})}, Ctx('stockiq-option-3-8-worker-1'))['body'])

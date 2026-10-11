@@ -13,7 +13,7 @@ STOCK_UNIVERSES in lambda-sync/stockiq-screener-coordinator.
 import sys, os, ast, zipfile, hashlib, base64
 HERE = os.path.dirname(os.path.abspath(__file__))
 FILES = ['stock_worker.py', 'lambda_function.py', 'advanced_lambda.py', 'lists.txt']
-GROUPS = {'stockiq-option-3-5-worker': '3-5', 'stockiq-option-3-6-worker': '3-6'}      # the groups called with a worker number only
+sys.path.insert(0, HERE); from groups import NUMBER_ONLY as GROUPS      # the groups called with a worker number only
 COORDINATOR = os.path.join(os.path.dirname(HERE), 'lambda-sync', 'stockiq-screener-coordinator', 'lambda_function.py')
 
 def coordinator_lists():

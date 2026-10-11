@@ -15,10 +15,8 @@ A new share-screener group: add its name to NAMES here. See site-overview.md sec
 import sys, re, json, glob, os, collections, subprocess
 import boto3
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-NAMES = {'stockiq-option-3-1-worker': 'S&P 100', 'stockiq-option-3-2-worker': 'S&P 400+600', 'stockiq-option-3-4-worker': 'S&P 1500', 'stockiq-option-3-5-worker': 'Russell 1000 (its first 50: S&P 500)',
-         'stockiq-option-3-6-worker': 'Russell 2000', 'stockiq-option-3-7-worker': 'NASDAQ 100', 'stockiq-option-3-8-worker': 'Dow 30', 'stockiq-asia-5-1-worker': 'ASX 50', 'stockiq-asia-5-2-worker': 'ASX 100',
-         'stockiq-asia-5-3-worker': 'ASX 200', 'stockiq-asia-5-4-worker': 'ASX 300', 'stockiq-asia-5-5-worker': 'Nikkei 225', 'stockiq-europe-4-1-worker': 'FTSE 100', 'stockiq-option-7-1-worker': 'Crypto (540 coins)',
-         'stockiq-option-7-2-worker': 'Single coin'}
+sys.path.insert(0, os.path.join(ROOT, 'workers')); import groups as G        # the share-screener groups: workers/groups.py
+NAMES = dict({g: v[0] for g, v in G.GROUPS.items()}, **{'stockiq-option-7-1-worker': 'Crypto (540 coins)', 'stockiq-option-7-2-worker': 'Single coin'})
 lam = boto3.Session(profile_name='default', region_name='us-east-1').client('lambda')
 fns = [f for page in lam.get_paginator('list_functions').paginate() for f in page['Functions']]
 groups = collections.defaultdict(list)
