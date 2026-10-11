@@ -1,13 +1,16 @@
 """Who runs what: every screener worker group on AWS, how many functions it has, whether they all run one version of their
 code, which groups run the same code as another, and which the site calls at all. Read-only.
 
-   python3 check-tools/workers.py            # the table
-   python3 check-tools/workers.py --diff     # also: how each group's code (the copy in lambda-sync/) differs from the S&P 100 worker's
+   python3 check-tools/workers.py                  # the table, from the fingerprint AWS shows for each package
+   python3 check-tools/workers.py --contents [DIR] # the honest count: downloads every package and compares the files inside it
+   python3 check-tools/workers.py --diff           # how each group's code (the copy in lambda-sync/) differs from the S&P 100 worker's
 
-Why it exists: on 11 Oct 2026 the owner asked whether the screeners "all share the same function". They do not, quite:
-928 worker functions in 18 groups, most groups on one version, the two Russell groups with a different file in every function
-(each carries its own list of stocks), and small differences between markets that nobody had chosen (two ways of working
-out RSI). See site-overview.md section 8b, "The worker groups".
+Why it exists: on 11 Oct 2026 the owner asked whether the screeners "all share the same function". They did not, quite:
+928 worker functions in 18 groups, the share screeners on seven copies of one program that had drifted apart. The table's
+"100 DIFFERENT" for the Russell groups was misleading: a package's fingerprint changes with the dates inside the zip, and
+those were one program zipped 300 times (--contents shows it). Since that day every share-screener worker runs the one
+package built from workers/ in git (workers/build.py), so the 13 share groups show "one" and the same code as each other.
+A new share-screener group: add its name to NAMES here. See site-overview.md section 8b, "The worker groups".
 """
 import sys, re, json, glob, os, collections, subprocess
 import boto3

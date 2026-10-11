@@ -1,0 +1,61 @@
+Dow 30 and S&P 100 fake-money tests, run again on 11 Oct 2026 with the one worker file (workers/stock_worker.py): python3 backtest.py dow30 | sp100
+
+===== dow30 =====
+  scored 0/946 days (0s)
+  scored 100/946 days (0s)
+  scored 200/946 days (1s)
+  scored 300/946 days (1s)
+  scored 400/946 days (2s)
+  scored 500/946 days (2s)
+  scored 600/946 days (3s)
+  scored 700/946 days (3s)
+  scored 800/946 days (3s)
+  scored 900/946 days (4s)
+
+===== DOW30: 30 stocks, 946 trading days tested, 2023-01-03 to 2026-10-09 =====
+stocks scored per day: min 30, max 30
+1 day     later: top 10 +0.07% | whole list +0.07% | bottom 10 +0.09% | SPY +0.08% || top 10 minus list +0.00% (margin of error ±0.03): no reliable difference
+1 week    later: top 10 +0.33% | whole list +0.34% | bottom 10 +0.42% | SPY +0.39% || top 10 minus list -0.02% (margin of error ±0.16): no reliable difference
+1 month   later: top 10 +1.49% | whole list +1.35% | bottom 10 +1.40% | SPY +1.51% || top 10 minus list +0.14% (margin of error ±0.60): no reliable difference
+3 months  later: top 10 +5.12% | whole list +4.35% | bottom 10 +4.02% | SPY +4.65% || top 10 minus list +0.77% (margin of error ±1.88): no reliable difference
+
+Paper portfolio, $10,000 at 2023-01-03, re-balanced weekly (ending 2026-10-09):
+  Screener top 10, no costs              $   15,413    +12.2% a year   worst fall -17%   traded 51x the account per year
+  Screener top 10, 0.1% cost per trade   $   12,717     +6.6% a year   worst fall -18%   traded 51x the account per year
+  Whole list, equal amounts              $   18,879    +18.4% a year   worst fall -16%   traded 2x the account per year
+  Screener bottom 10                     $   22,925    +24.7% a year   worst fall -17%   traded 52x the account per year
+  S&P 500 fund (SPY), buy and hold       $   20,445    +21.0% a year   worst fall -19%
+  by calendar year (top 10 / whole list / SPY): 2023: +23% / +22% / +25%  2024: +14% / +22% / +24%  2025: +1% / +17% / +17%  2026: +9% / +9% / +14%
+signal codes over the whole period: {'HOLD': 8509, 'BUY': 6619, 'MODERATE_BUY': 6216, 'SELL': 3081, 'STRONG_BUY': 2146, 'STRONG_SELL': 1240, 'MODERATE_SELL': 569}
+top 10 at the last close (2026-10-09): CSCO +3.1, AXP +2.7, HD +2.7, AMGN +2.4, TRV +2.4, AMZN +2.4, HON +2.4, UNH +2.1, KO +2.1, MSFT +1.8
+No trading costs unless stated; prices are daily closes without dividends; past results only.
+
+===== sp100 =====
+  scored 0/946 days (0s)
+  scored 100/946 days (1s)
+  scored 200/946 days (3s)
+  scored 300/946 days (4s)
+  scored 400/946 days (6s)
+  scored 500/946 days (7s)
+  scored 600/946 days (9s)
+  scored 700/946 days (10s)
+  scored 800/946 days (11s)
+  scored 900/946 days (13s)
+
+===== SP100: 101 stocks, 946 trading days tested, 2023-01-03 to 2026-10-09 =====
+stocks scored per day: min 99, max 101
+1 day     later: top 10 +0.18% | whole list +0.09% | bottom 10 +0.08% | SPY +0.08% || top 10 minus list +0.09% (margin of error ±0.06): top 10 ahead
+1 week    later: top 10 +0.68% | whole list +0.46% | bottom 10 +0.33% | SPY +0.39% || top 10 minus list +0.22% (margin of error ±0.30): no reliable difference
+1 month   later: top 10 +2.80% | whole list +1.82% | bottom 10 +1.40% | SPY +1.51% || top 10 minus list +0.98% (margin of error ±1.23): no reliable difference
+3 months  later: top 10 +8.61% | whole list +5.86% | bottom 10 +4.76% | SPY +4.65% || top 10 minus list +2.76% (margin of error ±4.48): no reliable difference
+
+Paper portfolio, $10,000 at 2023-01-03, re-balanced weekly (ending 2026-10-09):
+  Screener top 10, no costs              $   35,784    +40.4% a year   worst fall -25%   traded 81x the account per year
+  Screener top 10, 0.1% cost per trade   $   26,399    +29.5% a year   worst fall -26%   traded 81x the account per year
+  Whole list, equal amounts              $   23,258    +25.2% a year   worst fall -17%   traded 2x the account per year
+  Screener bottom 10                     $   16,993    +15.2% a year   worst fall -16%   traded 75x the account per year
+  S&P 500 fund (SPY), buy and hold       $   20,445    +21.0% a year   worst fall -19%
+  by calendar year (top 10 / whole list / SPY): 2023: +43% / +27% / +25%  2024: +34% / +23% / +24%  2025: +22% / +26% / +17%  2026: +54% / +18% / +14%
+signal codes over the whole period: {'HOLD': 27839, 'BUY': 22024, 'MODERATE_BUY': 20020, 'SELL': 10251, 'STRONG_BUY': 8463, 'STRONG_SELL': 4098, 'MODERATE_SELL': 1914}
+top 10 at the last close (2026-10-09): COP +3.4, AMT +3.3, PANW +3.3, CSCO +3.1, FDX +3.0, PM +3.0, AXP +2.7, CVS +2.7, HD +2.7, NEE +2.7
+No trading costs unless stated; prices are daily closes without dividends; past results only.
