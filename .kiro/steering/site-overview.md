@@ -1,12 +1,12 @@
 # StockIQ Site Overview (read this first)
 
 How stockiq.tech works end to end, what is generated vs hand-edited, the current SEO setup,
-known pitfalls, and open ideas. Last full review: 10 Oct 2026 (section 8b holds what the
-9–10 Oct end-to-end test of every screener, signal and crypto path established; **section 8c is
-the dashboard's practice portfolio and AI autopilot, and the routine for working on them**, checked
-name by name and number by number against the code and AWS on 11 Oct 2026; **to resume that work,
-read section 8c from "Start here when resuming"**; section 7b holds the backtests and the factor
-study of the screener score).
+known pitfalls, and open ideas. **Last full sweep: 11 Oct 2026, evening** (every part of section 8c
+rewritten or checked against the deployed code; the other steering files, the README files and the AI chat's
+own guide brought into line). Section 8b holds what the 9–10 Oct end-to-end test of every screener, signal
+and crypto path established; section 7b the backtests and the factor study of the screener score; **section 8c
+is the dashboard (practice portfolio, AI autopilot, notification bell): to resume that work, read it from
+"Start here when resuming"**.
 
 Detailed references: `stockiq.md` (AWS resources, Cognito, Lambdas, AI chat),
 `script-reference.md` (every script), `add-new-stocks.md`, `stock-matching-system.md`,
@@ -345,7 +345,10 @@ and full output: `check-tools/paper-test/factor_study.py`, `results-factors-2026
   rules. `practice-portfolio.js`, `practice-autopilot.js`, Lambdas `stockiq-paper-portfolio` and
   `stockiq-ai-trader`. **Everything about them, and how to work on them, is in section 8c.**
 - Stock pages load `sidebar.js`, `stock-prices.js` (live ticker), `ai-chat.js`, `auth.js`, `theme.js`.
-- AI chat button: bottom-right on every page; on the home page it moves left of the news panel
+- **Notification bell** (🔔 in the header of 18 hand-edited pages and of the stock pages): one list, drawn by
+  `autopilot-bell.js` for every page, of the reports and the AI autopilot's buys and sells (section 8c, "The notification
+  bell").
+- AI chat button: bottom-right on the pages that load `ai-chat.js` (the home page, blog, the dashboard and the stock pages); on the home page it moves left of the news panel
   only from 1401px wide (the panel is hidden below that).
 - Every public page footer carries a "General information only, not financial advice …" line.
 - Theme: light/dark by time of day unless the user overrides (`localStorage.theme`).
@@ -588,11 +591,9 @@ accounts). Say so when reporting.
 Built 10 Oct 2026 from the owner's idea of "fake money" to see whether the analysis works in his
 favour, then extended the same day into an autopilot that trades it. **Everything here is fake
 money: no real trade is ever placed, and nothing here may ever be connected to real money.** This
-section is written from the code as deployed on 11 Oct 2026 (04:00 UTC). Every code name, constant,
-setting and AWS figure in it was checked against the function, the two scripts and AWS at 02:30 UTC
-that day, and each later change was added as it went live. **A new session starts at "Start here
-when resuming" near the end of this section.**
-Verify against the code before relying on a detail (section 10).
+section is written from the code as deployed on the evening of 11 Oct 2026, and was swept in full then: the
+function, the scripts and AWS were compared with it. **A new session starts at "Start here when resuming" near the
+end of this section.** Verify against the code before relying on a detail (section 10).
 
 ### What the owner sees on the dashboard
 
@@ -600,9 +601,7 @@ The dashboard was one long page until the owner asked for it to be tidied (10 Oc
 **three tabs** under the heading: 📈 Reports, 💵 Practice portfolio, 🤖 AI autopilot. One panel is
 shown at a time; the choice is remembered in the browser (`localStorage` key
 `stockiqDashboardTab`) and kept in the address (`dashboard.html#practice`, `#autopilot`), so a
-refresh or a link lands on the same tab; any other address (`#upgrade`) opens Reports. The AI
-autopilot tab only appears once its panel has content (it is empty for users the autopilot is not
-open to). The markup is `data-dash-tab` buttons and `data-dash-panel` blocks, with a small inline
+refresh or a link lands on the same tab; any other address (`#upgrade`) opens Reports. Every signed-in account has all three tabs; without a paid plan the AI autopilot tab shows what it is and a button to the plans (its tab carries a 🔒). The markup is `data-dash-tab` buttons and `data-dash-panel` blocks, with a small inline
 script between the `DASH_TABS_SCRIPT_START/END` comments in `dashboard.html`
 (`window.dashboardTabs.show(name)` switches from code). Report code keeps working while its panel
 is hidden. **Keep the Reports panel first in the page**: one report routine finds "Recent Reports"
@@ -615,116 +614,18 @@ with `document.querySelector('h3')`.
   yet" while the US stock market has not traded since the buys, e.g. a weekend: `marketFlat`).
   **Nothing is shown until the latest prices are in** (4 seconds at most): before 10 Oct the page
   first showed holdings at what was paid, which the owner took for a second, "correct" account value.
-- One line, **whose result is whose**, in words: "the account is down $58.48 since the start. Your
-  own buys are up $144.12; the autopilot is down $202.60 (down $202.60 on what it has sold, level
-  on what it still holds)". Shown once the autopilot has bought anything. **Results are said as
-  "up", "down" or "level" (`moved`), never as bare signed figures**: on 11 Oct the owner could not
-  make sense of "Of the -$58.48 since the start: your own buys +$144.12; the autopilot -$202.60".
-  The Account value card follows the same rule ("Down $58.48 (0.06%) since the start. Sold
-  holdings: down $58.48. Still held: level at the latest prices.").
-- **A result is an arrow and an amount** (11 Oct, later the same day; the owner: "have an arrow going up or down instead of
-  saying down or up, obviously red for down green for up… look like a professional stock portfolio"): `▲ $801.50 (0.80%)` in
-  green, `▼ $58.48 (0.06%)` in red, `– $0.00` in grey (`movedHtml`, `pctHtml` in `practice-portfolio.js`; `deltaHtml` in
-  `practice-autopilot.js`). The words stay as each arrow's `aria-label` for screen readers, and `moved()` still gives the
-  words for the AI chat's summary. **Never a bare signed figure without an arrow** (the earlier confusion over "-$58.48").
-  The cards have small capital labels and a green or red top edge on Account value; "Whose result is whose" is one framed
-  row (Your own buys ▲ … · 🤖 AI autopilot ▲ … sold ▲ … · still held – …); table headings are small capitals; rows
-  highlight under the pointer; figures use tabular numerals.
-- **The bell** (the notification bell in the header of every page that has one: 18 hand-edited pages and the stock pages).
-  Reworked the same day after the owner asked that it show a red number and work "across other pages like index.html
-  wherever the bell sits", with "whatever is newest at the top".
-  - **One list, drawn in one place** (third and final form, 11 Oct). The bell's list is headed "🔔 Notifications" and holds
-    the reports and the autopilot's buys and sells **together, newest first**, each line saying which it is ("📊 Report ·
-    time" / "🤖 AI autopilot (Beta) · name · time"); it ends with "View Dashboard". A trade line reads "Sold at a profit:
-    CFX-USD ▲ $12.79 (1.0%)" / "Sold at a loss: … ▼ …" / "Bought: … $1,250". Only real buys and sells, never check-in notes.
-    **Why one list:** the first form put the trades as a group above or below the page's own report list, whichever had
-    the newest item. With the owner's real data a report was newer than the last trade, so the trades sat under seven
-    reports in a 400px list, out of sight: "i don't see any of the AI analysis when i hit the bell". He also called the
-    arrangement "a shit setup… would have been nice to have it all setup in one way not multiple ways": each page drew its
-    own report list in its own code (dashboard, home page, analysis page). Now `autopilot-bell.js` draws the whole list
-    (`html`, `reportRow`, `tradeRow`) and **a page's own drawing of its list gives way to it** (`place` empties the
-    page's `#notification-dropdown` and puts `#bell-list` in; when the page redraws its own, the one list is drawn
-    again). The page still opens, places and closes the list, and still supplies the reports (`analysisHistory`) and
-    what a click does (`viewAnalysisFromNotification`, `rerunFromNotification`); if the script fails, the page's own
-    list simply stays.
-  - **Unread and the red number, as for reports:** trades made since the bell was last opened are counted in the bell's red
-    number together with unseen reports ("seen", key `stockiqBellBell_<address>`); opening the bell clears the number but
-    the lines stay marked unread (blue dot, bold, a green, red or blue edge; the heading says "3 unread: 1 report, 2
-    autopilot buys and sells") until one is clicked ("read", key `stockiqBellRead_<address>`). Both marks start with the
-    first list a browser gets: what is there then is not news. A report is unread by the pages' own key (`unreadReports_`).
-  - **A click** on a trade goes to the AI autopilot tab's list "What it has done" (on another page: `/dashboard.html#autopilot`);
-    on a report it does what the page does with it (`report`), or goes to the dashboard.
-  - **How it is built:** one script, `website/autopilot-bell.js` (`window.autopilotBell`: `set, trades, reports, unseen, unread,
-    markSeen, markRead, html, place, open, report, badge, load, onTop`). It does not depend on how a page draws its bell: it listens
-    for a click on `#notification-bell` / `#mobile-notification-bell` and draws the one list in `#notification-dropdown` if the
-    page opened one (dashboard, home page, analysis page; on pages whose bell just goes to the dashboard only the red number
-    shows), watches that list and draws it again when the page redraws its own, and watches the two badge elements to add
-    its count to whatever number the page's own code sets. **Who fetches it** (signed-in visitors only): each of the 17
-    hand-edited pages with a bell, by one line after its `theme.js` tag between the comments `AUTOPILOT_BELL_START/END`;
-    `dashboard.html` by the same line near its other scripts; and `theme.js`, which is what covers the generated stock
-    pages. **The address is relative and has no version number**: `autopilot-bell.js?h=<the hour>` (`Math.floor(Date.now()/36e5)`), a new
-    address every hour, so **a change to the script needs no edit to any page**; CloudFront ignores the query string, so
-    it is still one cached file there. (It had a `?v=` in three places, raised by hand in 20 files for each change.)
-  - **It takes over from older copies of itself (version 4, 11 Oct).** After the fixes above the owner saw no trades in the
-    bell on any page, the dashboard included. Cause, found by playing it back: his browser still held an old `theme.js`
-    (kept for a day under the old rule), which asks for the *first* version of this script out of the browser's own store.
-    That old copy ran before the current one arrived over the network, and the current one then stood down
-    (`if (window.autopilotBell) return`). The old copy puts the trades under the reports, out of sight. Now the script
-    **always takes over** (`VERSION`, the guard only stops the same or a newer version), and leaves an older copy with
-    nothing to draw: it empties that copy's store of trades (`stockiqAutopilotTrades_…`, at the start and whenever it
-    reappears), uses other names for its own (`stockiqBellTrades_`, `stockiqBellBell_` for "seen", `stockiqBellRead_`,
-    and `data-bell` on the red number; the old marks are taken over once), marks its question to the function `list: 2`
-    (**the function answers the bell only then**: an older copy is told nothing), carries on its list the signature a
-    version-3 copy expects (`olderSig`, attribute `data-sig`; its own is `data-mine`) so that copy leaves the list alone,
-    and stops redrawing if something undoes the list more than 12 times in two seconds (`state()` says so).
-    **If this script is changed in a way an older copy on the same page could fight with, raise `VERSION` and think about
-    what the older copy will still do**; `OLD_THEME` / `OLD_BELL` of `live_bell_check.js` play the old copies back.
-  - **The address of the script must be relative (the fault behind "something is overriding your changes", 11 Oct).**
-    Through five rounds the owner saw no trades in the bell while every test on stockiq.tech showed them. The script was
-    asked for at `/autopilot-bell.js`: found when the site is at the top of its address, **nowhere when it is served from a
-    folder** (a local preview of `~/VSCODE/website`, for one). There the script never loaded, every page showed its own
-    list of reports, and the script's own report never arrived. It fits his whole account: the dashboard worked at first
-    (its script tag was relative) and stopped when it was given the same absolute address as the other pages. Now every
-    address is relative: the pages ask for `autopilot-bell.js?h=…` beside themselves, `theme.js` beside itself
-    (`document.currentScript.src`), and the script takes its links and its look at `theme.js` from where it was loaded
-    (`SITE`). **Never write "/file" for one of the site's own files in a script or a loader line.** How he views the site
-    was not confirmed; the fix holds either way. To reproduce: `cd ~/VSCODE && python3 -m http.server 8765 --bind
-    127.0.0.1`, then `BASE_URL=http://127.0.0.1:8765/website/ REAL_USER=… PASS_GET=1 node check-tools/live_bell_check.js
-    dashboard.html index.html` (stop the server afterwards).
-  - **Still in the script, temporary:** it reports what it finds in a browser (`tell`, on "page loaded" and "bell opened")
-    to the function's action `belllog`, which prints `bell report: {...}` to its log for the site's own accounts only
-    (`aws logs tail /aws/lambda/stockiq-ai-trader --since 30m | grep "bell report"`): version, `servedFrom`, whether an
-    older copy was on the page, what the open list holds, `draws`, `gaveUp`, `fault`, which `theme.js` the browser keeps
-    (an old one is replaced, `lookAtTheme`). **Remove `tell`, `lookAtTheme` and `belllog` once the owner confirms the bell.**
-    Also since version 6: a stored list of unread reports that is not a list no longer stops the drawing.
-  - **Where the list comes from:** on the dashboard the panel hands over its own (`practiceAutopilot.bellFeed` →
-    `autopilotBell.set`); on every other page the script asks the function's **read-only action `bell`** (`bell_trades`:
-    the last 12 buys and sells with `t, type, symbol, name, usd, gain, pct`; an account without the autopilot gets an empty
-    list; it is not a visit and writes nothing) at most every two minutes (30 for an account without it), and keeps the
-    answer in the browser (`stockiqBellTrades_<address>`) so that every page and tab shows the same.
-  - A sale's dollars are the entry's `gain` (stored since 11 Oct) or are read from an older entry's words ("Put in $X, got
-    back $Y": `gainOf` on the panel, the same in `bell_trades`). Entries from before that deploy have no name.
-  - **Limits:** a notice on the site, not an email or a phone notification; `theme.js` is cached for a day without a version,
-    so a browser that already had it shows the bell's new part on other pages within a day or after a refresh; nothing is
-    shown to a visitor who is not signed in.
-  - **Tests:** `node check-tools/autopilot_bell_test.js ../website/autopilot-bell.js` (22 checks) and, in a real browser,
-    `python3 check-tools/bell_page.py ../website/autopilot-bell.js /tmp/bell.html light trade` (or `report`): a stand-in page
-    with a bell drawn as the dashboard draws it; it prints the red number, the order of the list, what happens when the
-    page redraws it and on a click. **On the live pages:** `node check-tools/live_bell_check.js index.html analysis.html
-    stocks/AAPL.html` opens them in headless Chrome as a signed-in visitor (a made-up address; every call the page makes
-    to the site's functions is answered locally, so nothing is written) and reports whether the script loaded, the red
-    number and the bell's list after a click; `NO_THEME=1` withholds `theme.js` to prove a page fetches the script itself.
-    **With the real account:** `REAL_USER=<address> SHOT=/tmp/bell.png node check-tools/live_bell_check.js index.html
-    analysis.html` opens the pages as that account and lets its two read-only questions through (the report list and the
-    bell's), so the list is the real one, and saves a picture; `LOCAL_BELL=<file>` gives the page a staged copy of the
-    script, **to try a change on the live pages before deploying it**. This is what found the fault: two earlier checks
-    with a made-up account and no reports had passed while the owner saw nothing. Seen on 11 Oct on the home and analysis
-    pages with the owner's seven reports and ten trades: one list, newest first. **The dashboard can be opened the same way**
-    (it only needs the address in the browser's store; add `PASS_GET=1` so that the autopilot's and the portfolio's own
-    opening questions go through). **`OLD_THEME=<file> OLD_BELL=<file>` play back old copies** of `theme.js` and of the
-    bell's script (from git) as a browser's own store would, the current script arriving 0.4 s later: this is what
-    reproduced "no trades anywhere", and after the fix all nine cases (old copies of versions 1, 2, 3 on the dashboard,
-    home and analysis pages) show the one list with the trades. Not checked: a phone.
+- **A result is an arrow and an amount**, as a broker's screen shows it: `▲ $801.50 (0.80%)` in green, `▼ $58.48 (0.06%)`
+  in red, `– $0.00` in grey (`movedHtml`, `pctHtml` in `practice-portfolio.js`; `deltaHtml` in `practice-autopilot.js`).
+  The words stay as each arrow's `aria-label` for screen readers, and `moved()` gives the words ("down $58.48") for the
+  AI chat's summary. History: the owner could not make sense of bare signed figures ("Of the -$58.48 since the start: your
+  own buys +$144.12…"), so they became words, and then at his request arrows ("look like a professional stock
+  portfolio"). **Never a bare signed figure without an arrow.**
+- One framed row, **whose result is whose**: "Your own buys ▲ $793.59 · 🤖 AI autopilot ▲ $7.91 sold ▲ $7.91 · still held
+  – $0.00" (`splitGain`; shown once the autopilot has bought anything; the two add up to the account's change).
+- The cards have small capital labels and a green or red top edge on Account value; table headings are small capitals,
+  rows highlight under the pointer, figures use tabular numerals.
+- The notification bell in the page header lists the autopilot's buys and sells with the reports: its own part below,
+  "The notification bell".
 - The buy row: search box (code or company name, same lookup as the home page), "Enter $" **or**
   "or quantity" (the other is worked out from the latest price), an optional note, "Practice buy".
 - The holdings table: Holding, Bought (date and time), Price then, Price now, Value, Change, Sell.
@@ -779,6 +680,65 @@ show. Settings holds the first five items below, Activity the last five:
 - **What it has done**: every buy, sell and check-in note, newest first; "Why, and the details" /
   "The plan for it" folded under each trade; "Refresh now"; a switch "Buys and sells only".
 
+### The notification bell (one list, on every page)
+
+Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story of the rounds is in section 9.
+
+- **What it shows.** The 🔔 in the page header opens one list headed "🔔 Notifications": the account's reports and the AI
+  autopilot's buys and sells **together, newest first**, each line saying which it is ("📊 Report · time" / "🤖 AI
+  autopilot (Beta) · name · time"); it ends with "View Dashboard". A trade reads "Sold at a profit: CFX-USD ▲ $12.79
+  (1.0%)", "Sold at a loss: … ▼ …" or "Bought: … $1,250". Only real buys and sells, never check-in notes.
+- **Unread and the red number.** Trades made since the bell was last opened are counted in the red number together with
+  unseen reports; opening the bell clears the number, but a line stays marked unread (blue dot, bold, a coloured edge;
+  the heading says "3 unread: 1 report, 2 autopilot buys and sells") until one is clicked. The first list a browser gets
+  is not news. A click on a trade opens the autopilot tab's list "What it has done"; on a report it does what the page
+  does with a report (`viewAnalysisFromNotification`), or goes to the dashboard.
+- **Where.** Pages that open a list on the bell (dashboard, home page, analysis page, stock pages, login on a phone) show
+  the one list. On the pages whose bell only goes to the dashboard (About, FAQ, the guides, legal pages) the red number
+  shows and the click goes to the dashboard as before. Nothing is shown to a visitor who is not signed in.
+- **One script draws it for every page: `website/autopilot-bell.js`** (`window.autopilotBell`: `version, set, trades,
+  reports, unseen, unread, markSeen, markRead, html, place, open, report, badge, load, onTop, state`). Each page used to
+  draw its own report list in its own code; the owner called that "a shit setup… would have been nice to have it all setup
+  in one way". The script does not depend on how a page draws its bell: it listens for a click on `#notification-bell` /
+  `#mobile-notification-bell`; if the page opened `#notification-dropdown` it empties it and puts the one list in
+  (`#bell-list`, built by `html`, `reportRow`, `tradeRow`); it watches that list and draws it again when the page redraws
+  its own; and it watches the two badge elements to add its count to whatever number the page sets. The page still
+  opens, places and closes the list, and supplies the reports (`analysisHistory`) and what a click or "run again" does.
+  If the script fails, the page's own list simply stays.
+- **How it is loaded.** Signed-in visitors only. Each of the 17 hand-edited pages with a bell has one line after its
+  `theme.js` tag, between the comments `AUTOPILOT_BELL_START/END`; `dashboard.html` has the same line near its other
+  scripts; and `theme.js` asks for it too, which is what covers the generated stock pages. **The address is relative and
+  has no version number**: `autopilot-bell.js?h=<the hour>` beside the page (`theme.js`: beside itself). **Never
+  "/autopilot-bell.js"**: that exists only when the site is at the top of its address (section 9). Because the address
+  changes every hour and browsers keep a script five minutes, **a change to the script needs no edit to any page**.
+  Inside the script `SITE` is where it was loaded from; its links are built from that.
+- **Where the trades come from.** On the dashboard the panel hands over its own list (`practiceAutopilot.bellFeed` →
+  `autopilotBell.set`). On every other page the script asks the function's **read-only action `bell`** (`bell_trades`:
+  the last 12 buys and sells with `t, type, symbol, name, usd, gain, pct`; it is not a visit and writes nothing; an
+  account without the autopilot gets an empty list) at most every two minutes (30 for an account without it) and keeps
+  the answer in the browser (`stockiqBellTrades_<address>`) so that every page and tab shows the same. A sale's dollars
+  are the entry's `gain` (stored since 11 Oct) or are read from an older entry's words ("Put in $X, got back $Y");
+  entries from before that have no name.
+- **In the browser's store:** `stockiqBellTrades_`, `stockiqBellBell_` ("seen": clears the red number), `stockiqBellRead_`
+  ("read": clears the unread marks); the reports' own keys `unreadReports_` and `seenReports_` belong to the pages.
+- **It takes over from an older copy of itself** (`VERSION`, 8 at the sweep): a browser can run an older copy for a while
+  after a change, and an older copy that ran first once shut the current one out. The current one always takes over,
+  empties the store of the copies before version 4 (`stockiqAutopilotTrades_…`), marks its question to the function
+  `list: 2` (**the function answers `bell` only then**), carries on its list the signature a version-3 copy expects
+  (`olderSig`) so that copy leaves the list alone, and stops redrawing if something undoes the list more than 12 times in
+  two seconds (`state()` says so, with any `fault` met while drawing). This part can be thinned out once no browser can
+  still hold a copy from 11 Oct 2026 (a week is ample): keep the "newer version wins" guard.
+- **Tests.** `node check-tools/autopilot_bell_test.js ../website/autopilot-bell.js` (22 checks); a stand-in page in a real
+  browser: `python3 check-tools/bell_page.py ../website/autopilot-bell.js /tmp/bell.html light trade` (or `report`); and
+  **the live pages as a real account**: `REAL_USER=<address> PASS_GET=1 SHOT=/tmp/bell.png node
+  check-tools/live_bell_check.js dashboard.html index.html analysis.html` opens them in headless Chrome as that account,
+  lets only its read-only questions through (everything else the page asks is answered locally, so nothing is written),
+  and prints what the bell holds. Its other switches reproduce what a particular browser sees: `BASE_URL=` (the local copy
+  served from a folder, as a local preview does), `OLD_THEME=` / `OLD_BELL=` (old copies played back), `NO_THEME=1`,
+  `LOCAL_BELL=` (a staged copy tried on the live pages before deploying). Details in `check-tools/README.md`.
+- **Limits:** a notice on the site, not an email or a phone notification. The 14 pages whose bell goes to the dashboard
+  have no list of their own. Not checked on a phone.
+
 ### Files and services
 
 | Thing | Where | Notes |
@@ -788,7 +748,7 @@ show. Settings holds the first five items below, Activity the last five:
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
-| Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`, `bell` (read-only, for the notification bell). Env `AI_TRADER_USERS` (accounts that may use it without a paid plan; everyone on a paid plan may use it; `*` would make it free for all) and `OPENAI_API_KEY` (never print it) |
+| Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`, `bell` (read-only, for the notification bell; `belllog` is answered and ignored, a leftover). Env `AI_TRADER_USERS` (accounts that may use it without a paid plan; everyone on a paid plan may use it; `*` would make it free for all) and `OPENAI_API_KEY` (never print it) |
 | Schedule | EventBridge `stockiq-ai-trader-schedule`, `cron(10,40 * * * ? *)` | Every 30 minutes; `SLOT_MINUTES` in the Lambda must match. **Disable this rule to stop everything** |
 | Screener data | `stockiq-screener-coordinator` | Called with no `userId`, so nothing is saved to anyone's history |
 | Prices | `stockiq-price-proxy` | Also exchange rates (`AUDUSD=X`, `USDJPY=X`) and the S&P 500 fund (`SPY`) |
@@ -796,8 +756,8 @@ show. Settings holds the first five items below, Activity the last five:
 | AI model | OpenAI `gpt-4o-mini`, JSON replies; `gpt-4o` for the holdings review when a gain is at stake | Three uses: choose buys, review holdings, write notes. `aws lambda invoke … --payload '{"model_test": true}'` asks each one question and says which answered |
 | Email | SES, from `autopilot@stockiq.tech` to the account's own address | The role has SES access; the owner's address is a verified identity (SES is still in sandbox) |
 
-The Function URLs are written into the two scripts. As everywhere on this site the `userId` is
-whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_USERS`.
+The Function URLs are written into the scripts. As everywhere on this site the `userId` is whatever the browser
+sends. The autopilot acts for accounts on a paid plan and for the accounts listed in `AI_TRADER_USERS` (`allowed`).
 
 ### The practice portfolio in detail
 
@@ -1040,6 +1000,10 @@ calls out.
 
 ### Learning from its own results
 
+**Since 11 Oct 2026 these reviews run once, on every account's finished trades together** (next part, "Learning is shared
+by every account"); an account's own check-in no longer runs them. What each review does is described here and is the
+same code; read "its record" below as the shared record, or the shared record at the account's risk level.
+
 - **The record.** Each finished trade goes into `history` (last 300): what it was bought on (rank,
   score, RSI, 7- and 30-day change, volume, who chose), result in percent and dollars, the S&P 500
   fund over the same time (`market`, `vs`), how long it was held, how it was sold (`exit`: `stop`,
@@ -1212,8 +1176,7 @@ own results" (those routines are the same; they now run once, on everyone's trad
   accounts, 0 notes": the owner's four trades are in the shared record and the queue is empty again.
   **Not yet seen for real:** a shared note reaching an activity list (the first comes with the first review, at 20
   finished trades at a level, or the first notes at 5 more trades), and the bell on the logged-in pages.
-- Not changed: the AI chat's `DASHBOARD_GUIDE` does not mention the bell or shared learning yet (the chat is told about
-  shared learning through the page's summary line).
+- The AI chat knows: its `DASHBOARD_GUIDE` says that learning is shared, and the page's summary gives it the numbers.
 - Rollback zip: `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_central_20261011.zip`. The older function ignores
   `_brain` and `_pool#` items, as it does the stored screener results.
 
@@ -1240,15 +1203,17 @@ there. Setting things up for the user by chat was judged too much for now and is
 - **The risk-level numbers in `DASHBOARD_GUIDE` are a copy of `RISK` in `stockiq-ai-trader`**
   (holdings, loss limit, gain mark per level): `check-tools/ai_chat_test.py` compares them. They
   were added after the model told a test question that Cautious means "fewer" holdings.
-- Test: `python3 check-tools/ai_chat_test.py lambda-sync/stockiq-ai-chat/lambda_function.py` (13
-  checks; stand-ins for the database and the AI model). Tried live with real questions on 11 Oct:
+- Test: `python3 check-tools/ai_chat_test.py lambda-sync/stockiq-ai-chat/lambda_function.py` (16
+  checks; stand-ins for the database and the AI model). The guide was brought up to date in the evening sweep of 11 Oct
+  (results as arrows, the bell's one list, a release of the budget listed at its check-in, learning shared by every
+  account). Tried live with real questions on 11 Oct:
   it answered from the figures, pointed to the right controls, and declined "which settings will
   make the most money" and "should I switch to Cautious". It is still a small model: read a few
   answers after any change to the guide.
 - When a dashboard feature changes, **update `DASHBOARD_GUIDE` and the two `summary()` functions**,
   or the chat will describe the old dashboard.
 - Cost: about 1,600 tokens a dashboard question instead of 650 elsewhere, roughly $0.0003 each.
-- Rollback zips: `~/VSCODE/backup/stockiq-ai-chat_before_dashboard_20261011.zip`, `…_wording_…`, `…_levels_…`.
+- Rollback zips: `~/VSCODE/backup/stockiq-ai-chat_before_dashboard_20261011.zip`, `…_wording_…`, `…_levels_…`, `…_before_sweep_…`.
 
 ### What the Lambda keeps per user, and what it sends the page
 
@@ -1271,6 +1236,13 @@ there. Setting things up for the user by chat was judged too much for now and is
 - Other actions: `mailtest` (one test email to the account's own address, at most every 10 minutes), `sellall` (`sell_everything`: only the autopilot's holdings, recorded as sold by
   the owner; holdings of a closed market are kept; its `summary` has `sold`, `skipped`, `closed`) and `tune` (`tune_by_hand`: `op: 'restore', param` puts one rule back to the level's;
   `op: 'stop'` ends the running trial; `op: 'stoporder'` / `'restoreorder'` stop the trial of the buying order or put a kept order back; nothing else can be touched).
+
+- **Added with the shared learning and the bell (11 Oct, evening):** a finished trade in `history` carries `p` once it has
+  been sent to the shared record (1 sent, 2 sent with what it did afterwards); `state.brainSeen` is the number of the last
+  shared note the account has had; what `adopt` takes over sits in `state.tune`, `state.order`, `state.rest`,
+  `state.restSince` and `state.lessons` as before, but is now a copy of the shared record's. A buy or sell entry in `log`
+  carries `name`, and a sell its `gain` in dollars. `public()` adds `central` (`trades, accounts, level, on, canChange`)
+  and `progress.shared`. Action `bell` answers the notification bell (read-only).
 
 ### What happens next, and what needs the owner (added 11 Oct 2026)
 
@@ -1427,6 +1399,8 @@ narrow screen (nothing changes at desktop width):
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 71 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
+   node autopilot_bell_test.js pending-<name>/web/autopilot-bell.js | grep -v '^PASS'                 # 22 checks (the notification bell)
+   python3 ai_chat_test.py pending-<name>/chat/lambda_function.py | grep -v '^PASS'                 # 16 checks (the AI chat's function)
    ```
    `ai_trader_test.py` sets the pace by hand at its top (it patches `DEFAULTS`), as a user who chose
    his own values; the real defaults, where the level sets the pace, are tested in their own part.
@@ -1479,145 +1453,116 @@ apostrophe must allow for it; a test of an action that depends on the day (tradi
 must set the function's clock (`m.datetime = at(when)` in `ai_trader_test.py`), or it passes on
 weekdays and fails at the weekend.
 
-### Start here when resuming (state at 06:20 UTC on 11 Oct 2026, the end of a two-day session)
+### Start here when resuming (state at 11:30 UTC on 11 Oct 2026, after the full sweep that ended a three-day session)
 
 **What is live, and how to confirm nothing has moved since:**
-- Lambda `stockiq-ai-trader`: `CodeSha256` `Gy2rNaAXaIYsQIoSxw9U5OjBOHy2ei6PHr0tAcOZOTU=` (with the temporary `belllog`), equal to
-  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,856 lines; shared learning deployed 07:42 UTC on 11 Oct, the release wording 08:45, the bell's action 09:01, the bell answering only its current script 10:42).
-- Website: `practice-autopilot.js?v=37` (sha256 starts `57956b67cf2b`), `practice-portfolio.js?v=17`
-  (`f7ddb505486a`), `autopilot-bell.js` (version 7, `1a2d14f5ff58`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`9aa006cdf26a`), and the loader line in 17 other pages, `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
-- Lambda `stockiq-ai-chat`: `CodeSha256` `LFyuyhd1ivEYAXqSqVkEk+Deq2H+rG9IhzSYdpho+w8=`, equal to `lambda-sync/stockiq-ai-chat/lambda_function.py`. Live files were compared byte for byte.
-- Both repos clean and pushed; **no `check-tools/pending-*` folder is left** (every package was
-  deployed and removed). Tests on the live files: 379 function, 196 panel, 71 portfolio, 22 bell, 13 chat, the
-  panel-versus-function comparison clean (3,780 budget combinations, 2,915 spreads over markets).
-- Rollback copies of the function, one per deploy, in `~/VSCODE/backup/`:
-  `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order: 10 Oct `v2, fast, panel,
-  autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
-  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell, takeover, report`.
-- First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and
-  the function's log (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors
-  ("check-in failed", "not worked out", "not sent") and for the firsts listed below.
+- Lambda `stockiq-ai-trader`: `CodeSha256` `e6X8RM+wrRVbZAheFQfUr5uaKU1hUSGfjBHk1Q/W7xI=`, equal to
+  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,860 lines).
+- Lambda `stockiq-ai-chat`: `CodeSha256` `8QzCNJ8LqitMH5nYVJ1OsylJmek8GSLTWOuIKerjcPo=`, equal to
+  `lambda-sync/stockiq-ai-chat/lambda_function.py` (350 lines).
+- Website (sha256 starts): `practice-autopilot.js?v=37` (`57956b67cf2b`), `practice-portfolio.js?v=17` (`f7ddb505486a`),
+  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`9aa006cdf26a`),
+  `ai-chat.js?v=2` (`87eaadf52197`); 17 more pages carry the bell's loader line; `index.html` and `faq.html` the plan wording.
+  Live files were compared byte for byte at each deploy.
+- `deploy-to-s3.sh` carries the rules for how long a browser may keep a copy (section 5, step 8); the first daily run with
+  it is Monday 12 Oct: look at its log once (section 12, "After the daily run").
+- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 379 function, 196
+  panel, 71 portfolio, 22 bell, 16 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
+  spreads over markets).
+- Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
+  10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
+  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell,
+  takeover, report`, then `stockiq-ai-trader_before_sweep_20261011.zip`; `stockiq-ai-chat_before_{dashboard, wording,
+  levels, sweep}_20261011.zip`.
+- First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and the function's log
+  (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors ("check-in failed", "shared learning failed",
+  "not worked out", "not sent") and for the firsts listed below.
 
-**The owner's autopilot when the session ended** (he changes settings often: read the record):
-Adventurous, budget $99,941 (set by the function from his $200,000; that is all his practice
-money: $87,442 cash and $12,500 invested), built up over 1 day (by hand), hourly check-ins and
-one-day holds (left to the level), trailing stop "protects a gain", all three switches on,
-screeners S&P 500, Russell 1000, Russell 2000, NASDAQ 100, Dow 30, ASX 200 and crypto, shares of
-the budget all automatic: US shares 2 holdings, Australian shares 1, coins 1 (about $24,985 each).
-It holds one Nikkei share (4307.T, $12,500, bought on a Saturday at Friday's close before the
-trading-hours rule; its screener is no longer ticked; it is sold when Tokyo opens, Monday 00:05
-UTC, its day being long up).
+**The owner's autopilot at the sweep** (he changes settings often: read the record, do not trust this):
+Adventurous; budget $99,941 (all his practice money); built up over 1 day (by hand); checks in every hour (left to the
+level); keeps a holding at most 2 days (by hand); trailing stop "protects a gain"; all three switches on. Screeners
+ticked: S&P 500, Russell 1000, Russell 2000, NASDAQ 100, Dow 30, ASX 200, FTSE 100, Nikkei 225 and crypto, **with the
+share of the budget set by hand to 0% for US, Australian, UK and Japanese shares: everything goes to coins.** It holds
+WAL-USD and MANTA-USD ($24,985 each, bought 11 Oct) and one Nikkei share (4307.T, $12,500, bought on a Saturday before
+the trading-hours rule; it is sold when Tokyo opens, Monday 00:05 UTC). Practice cash $37,471.
 
-**Its record: four finished trades, two up, -$202.60 (-$232.40 after typical costs).** WEMIX +0.6%
-(+$7.91; score fell below zero). CFX +1.0% (+$12.79; first sale by the following stop; it rose a
-further 7.95% afterwards). ERG -2.8% (-$173.03; first sale by the AI review, rank 2 → 25). CKB
--0.8% (-$50.27; had been up 2.5%, the stop was passed between two check-ins after the owner
-shortened the check-in gap, which also shortens the stop's distances). Far too few to judge.
+**Its record: four finished trades, two up, -$202.60.** WEMIX +0.6% (+$7.91; score fell below zero). CFX +1.0% (+$12.79;
+first sale by the following stop; it rose a further 7.95% afterwards). ERG -2.8% (-$173.03; first sale by the AI review).
+CKB -0.8% (-$50.27; the stop was passed between two check-ins). All four were bought at the Balanced level, so the
+shared record holds 4 trades from 1 account at that level. Far too few to judge anything.
 
-**Seen for real:** clean scheduled check-ins on every version; headlines reaching the model; both AI
-models answering the test question; sales by the following stop and by the AI review; the
-look-back; "Check in now" releasing the next step early; a test email accepted by the mail service
-(03:00 UTC 11 Oct); the budget being put right on opening the page (03:59 UTC).
-**Not yet seen for real:** a "tighten" answer; the larger model in a review; a coin held back until
-it has stayed; a buy spread over several markets (share markets were shut all weekend); "Check in
-now" pressed with a market closed; the share split by 52-week low filling; **the trial of which
-share to buy starting at Monday's first share buy** (`state.order` was still absent at hand-over);
-**the first progress report (at 20 finished trades), any trial, and their emails**; whether the test email reached the
-owner's inbox; and the logged-in dashboard itself (every check used a stand-in server).
+**Seen for real:** clean scheduled check-ins on every version; headlines reaching the model; both AI models answering
+the test question; sales by the following stop and by the AI review; the look-back; "Check in now" releasing the next
+step early; a test email accepted by the mail service; the budget being put right on opening the page; the shared
+record taking in the four trades (09:10 UTC, 11 Oct) and its trial of the buying order starting; the bell's one list on
+the live dashboard, home, analysis and a stock page, opened as the owner's account in a test browser, **and the owner's
+own confirmation that the bell works ("ah all good now")**; the AI chat answering dashboard questions from its new guide.
+**Not yet seen for real:** a "tighten" answer; the larger model in a review; a coin held back until it has stayed; a buy
+spread over several markets; "Check in now" with a market closed; the first notes (at 5 finished trades in the shared
+record: one more), a shared note reaching an activity list and its email; the first progress report and review of its
+rules (at 20 finished trades at one level); any trial of a rule; a share bought under the buying-order trial; whether
+the test email reached the owner's inbox; the dashboard on a real phone.
 
-**Limits to remember:** a stop only acts at a check-in (CFX and CKB were both sold below where
-their stop stood); the trading hours know no public holidays; a market's share is a number of whole
-holdings; the practice portfolio takes no trading costs off (the panel shows an after-costs figure).
+**Not known:** how the owner looks at the site (stockiq.tech, or a local preview from Kiro). He was asked and did not say;
+the bell worked for him only once its addresses were relative, which points to something other than the live domain.
+Ask early next time a change "does not show" (section 9).
 
-**What the owner is after, in his words:** "trying to optimise this to always be active ever
-changing and improving", a goal of "close to 70% profit 30% loss", "seamless and straightforward so
-a dummy could figure it all out and not input things that they shouldn't", and "something on the
-site to tell me whats going on". Hold these against section 7b: the share of winning trades comes
-from the selling rule and is not profit; the screener's own factors showed no reliable link with
-what shares did next. Say so plainly each time results come up, and keep judging by dollars and
-the average per trade.
+**Limits to remember:** a stop only acts at a check-in (CFX and CKB were both sold below where their stop stood); the
+trading hours know no public holidays; a market's share is a number of whole holdings; the practice portfolio takes no
+trading costs off (the panel shows an after-costs figure); with one account the shared learning is that account.
+
+**What the owner is after, in his words:** "trying to optimise this to always be active ever changing and improving", a
+goal of "close to 70% profit 30% loss", "seamless and straightforward so a dummy could figure it all out", "something on
+the site to tell me whats going on", "a smart AI that is learning in a central location for all users", "look like a
+professional stock portfolio", and things "setup in one way not multiple ways". Hold the goal against section 7b: the
+share of winning trades comes from the selling rule and is not profit; the screener's own factors showed no reliable
+link with what shares did next. Say so plainly each time results come up, and judge by dollars and the average per trade.
 
 **Open, in the order I would take them:**
-1. Monday: check what happened when Tokyo, Sydney and New York opened (4307.T sold; first buys
-   spread over US shares, Australian shares and coins; the "What happens next" list and the split
-   line reading right against what really happened).
-2. The first progress report at 20 finished trades: read the note, the email and the table.
-3. The trial of which share to buy (built and live at the end of the session): watch it start,
-   check the two kinds of buy in the activity list and the two sides' figures on the panel, and
-   read its verdict when 10 have finished each way. Next ideas of the same kind, to be tried the
-   same way and never adopted from hindsight: longer holding times for shares (the study: one-day
-   holds lost to costs, 20-day holds did not), and the same question for coins once the entry log
-   of section 8b has enough rows.
-4. The screener scoring itself (section 7b): not touched. Changing it is the owner's decision and
-   a redeploy of worker groups; the study does not support a re-weighting yet. The same study for
-   the larger US lists, ASX / FTSE / Nikkei and coins needs prices that are not on this machine
-   (download slowly, section 8b).
-5. Smaller: a leftover holding of an odd size (after a budget change) can leave less than one
-   holding's room, which is then never used; the dashboard's S&P comparison card; a summary email.
+1. Monday 12 Oct: the first daily deploy with the new copy-keeping rules (its log); what happened when Tokyo, Sydney and
+   New York opened (4307.T sold; his shares for share markets are 0%, so no share buys are expected unless he changes
+   that); "What happens next" reading right against what really happened.
+2. The first shared notes (5 trades) and the first progress report (20 at one level): read the note, the email, the table.
+3. The trial of which share to buy: it cannot move while every share market's share is 0%. If he asks why nothing is
+   being tried, that is why.
+4. Thin out the bell script's dealings with older copies after a week (see "The notification bell").
+5. Next ideas of the same kind as the buying-order trial, each to be tried and never adopted from hindsight: longer
+   holding times for shares, the automatic pace of each level, the stop's distances, the wait for a coin to stay; and,
+   once the shared record holds thousands of trades, a small fitted model scoring a candidate (no new AWS service needed).
+6. The screener scoring itself (section 7b): untouched; changing it is the owner's decision and a redeploy of worker groups.
+7. Smaller: a leftover holding of an odd size can leave less than one holding's room, never used; a summary email; the
+   deploy test account has an empty, switched-off autopilot record (harmless; made by a deploy check).
 
-- **Other accounts (checked 11 Oct 2026, the owner asked whether inactive accounts run check-ins).**
-  The autopilot is off for everyone by default and hidden from everyone not on the allow-list
-  (`AI_TRADER_USERS`: two named accounts, the owner's and the deploy test user; not `*`). Of 24
-  registered accounts, one has an autopilot record and it is the owner's. The schedule only looks at
-  rows of table `stockiq-ai-trader` that are switched on and allowed, so an account that never
-  switched it on costs nothing and does nothing; for an account not on the list the dashboard's one
-  call is answered "not allowed" and no record is made. The practice portfolio (buying by hand with
-  fake money) is shown to every logged-in user and stores a row only once they buy.
-- **Safeguards for every account** (built 11 Oct at the owner's word: "do it for all accounts
-  anyway. make it pause if it hasn't been logged in for 2 weeks"):
-  1. **Paused after two weeks without a visit.** Every call from the dashboard is a visit
-     (`seen_now`: `state.visit`, written at most every `SEEN_EVERY_HOURS` 6; not `state.seen`, which
-     is the headline cache). The scheduled run asks `pause_if_away` of every account that is on:
-     more than `IDLE_DAYS` (14) since the last visit and it is switched off (so the schedule passes
-     it by at no cost), `state.pausedAt` is set, a line goes into the activity list and one email
-     is sent. **It switches back on by itself the next time the dashboard is opened** ("Welcome
-     back…"). What it holds is not sold and not watched while paused. A record from before this
-     existed gets its two weeks from the first scheduled run. "What happens next" shows when it
-     would pause (`pause`).
-  2. **Check-ins side by side.** The schedule runs up to `RUN_TOGETHER` (4) accounts at once and
-     starts no check-in with less than `RUN_RESERVE_SECONDS` (100) of the run's time left; such an
-     account is still due and is run at the next slot (`waiting` in the log line).
-  3. **A daily limit on AI calls per account:** `AI_CALLS_PER_DAY` (120; `state.ai`). Past it the
-     model is treated as not answering: buys go by rank, only the fixed rules sell, one line a day
-     says so. Screener results were already shared between accounts for 20 minutes.
-- **Open to every account on a paid plan since 11 Oct 2026** (the owner: "you can open it for all
-  accounts, the only thing is users can only use it if they pay, users who signed up and don't pay
-  can only do the manual stuff… if they try to run it, it should direct them to make payment").
-  - **Who may use it** is decided in the function: `allowed(user)` = `listed(user)` (env
-    `AI_TRADER_USERS`, now meaning "may use it without paying": the owner's account and the deploy
-    test user) **or** `plan_of(user) == 'paid'`. `plan_of` reads table `stockiq-user-tracking`,
-    item `<email>#registration` (the record the payment function writes and the AI chat reads):
-    paid = `subscriptionStatus` `active`, or `cancelled` with `expiryDate` not yet past; anything
-    else, a free trial included, is `free`; a read that fails is `unknown`. Cached 60 seconds.
-    On 11 Oct: 66 registered accounts, 1 paid (the owner's).
-  - **Without a paid plan:** `get` answers `{allowed: false, locked: 'plan', upgrade}` and no
-    record is made; every other action is refused with HTTP 402 and the same pointer. The panel
-    then shows `lockedHtml`: what the autopilot is, that it is in every paid plan, that buying by
-    hand stays free, and a "See the plans" button (`#upgrade`, the plan cards under the tabs); its
-    dashboard tab carries a 🔒. A 402 during use (the plan ended while the page was open) switches
-    the panel to that view and sends the browser to `#upgrade`. `locked: 'unknown'`: "could not
-    be checked, refresh in a moment" (HTTP 503 for actions); nobody is paused on an unknown.
-  - **A plan that ends:** the scheduled run pauses the autopilot (`pause_for_plan`: off,
-    `state.pausedAt`, `pausedWhy: 'plan'`, a line and one email) and it switches back on by itself
-    when the account is on a paid plan again and its dashboard is opened (`seen_now`).
-  - **The practice portfolio by hand is free for every logged-in account**, as before.
-  - **What the site says** (hand-edited pages, same deploy): home page pricing (`index.html`
-    `#pricing`: the intro, a line on each plan card, the footnote), the dashboard's three plan
-    cards, and a new FAQ entry ("What are the practice portfolio and the AI autopilot, and which
-    plans include them?"). Wording rule: "practice", "fake money", "no real trade is placed", "not
-    financial advice", "past screener results have not shown a reliable edge"; never "picks".
-  - **Still to weigh, and the owner knows:** an AI choosing what to buy for paying users, even with
-    fake money, sits on the same unreviewed legal question as the signals (section 11). And, as
-    everywhere on this site, the `userId` is whatever the browser sends: someone who knows a paying
-    user's email could open that user's autopilot (fake money only).
-  - **"4 side by side" is not a limit on users** (the owner asked): the schedule works through
-    every account that is due, four at a time. One 300-second run handles a few dozen check-ins;
-    past that, accounts roll to the next slot (`waiting`). If paying users ever number in the
-    hundreds, give each account its own invocation.
-- Cost: a crypto check-in is a full crypto screener run (about 540 worker calls) unless a copy
-  under 20 minutes old exists, so one user on 30-minute check-ins adds about 780,000 Lambda calls
-  a month, plus up to two small AI calls per check-in and at most 8 larger ones a day: a few
-  dollars a month in all at the very most.
+**Who can use it, and what guards every account:**
+- **The practice portfolio by hand is free for every signed-in account.** The AI autopilot (Beta) is for accounts on a paid
+  plan, or listed in env `AI_TRADER_USERS` (the owner's account and the deploy test account; "may use it without
+  paying"). Decided in the function: `allowed(user)` = `listed(user)` or `plan_of(user) == 'paid'`; `plan_of` reads table
+  `stockiq-user-tracking`, item `<email>#registration`: paid = `subscriptionStatus` `active`, or `cancelled` with
+  `expiryDate` not yet past; a free trial is `free`; a read that fails is `unknown` (cached 60 seconds). On 11 Oct: 66
+  registered accounts, 1 paid (the owner's); one autopilot record besides his (the deploy test account's, off).
+- **Without a paid plan:** `get` answers `{allowed: false, locked: 'plan', upgrade}` and no record is made; every other
+  action is refused with HTTP 402 and the same pointer; the panel shows `lockedHtml` (what it is, that it is in every paid
+  plan, that buying by hand stays free, "See the plans") and its tab a 🔒. `locked: 'unknown'`: "could not be checked,
+  refresh in a moment" (HTTP 503 for actions); nobody is paused on an unknown.
+- **A plan that ends:** the scheduled run pauses the autopilot (`pause_for_plan`, `pausedWhy: 'plan'`, a line and one
+  email); it switches back on by itself when the account is on a paid plan again and its dashboard is opened.
+- **Paused after two weeks without a visit** (`seen_now` writes `state.visit` at most every 6 hours; `pause_if_away`,
+  `IDLE_DAYS` 14): switched off, a line and one email; back on at the next visit to the dashboard. The bell's question on
+  other pages is not a visit. What it holds is neither sold nor watched while paused.
+- **The schedule** runs every account that is due, up to `RUN_TOGETHER` (4) side by side, and starts no check-in with less
+  than `RUN_RESERVE_SECONDS` (100) left; such an account runs at the next slot. This is not a limit on users. It scans
+  the whole table page by page. If paying users ever number in the hundreds, give each account its own invocation.
+- **A daily limit on AI calls per account:** `AI_CALLS_PER_DAY` (120); past it, buys go by rank and only the fixed rules
+  sell. Screener results are shared between accounts for 20 minutes.
+- **What the site says:** home page pricing (`index.html` `#pricing`), the dashboard's three plan cards and an FAQ entry
+  name the practice portfolio (free) and the AI autopilot (Beta, paid plans). Wording rule: "practice", "fake money", "no
+  real trade is placed", "not financial advice", "past screener results have not shown a reliable edge"; never "picks".
+- **Still to weigh, and the owner knows:** an AI choosing what to buy for paying users, even with fake money, sits on the
+  same unreviewed legal question as the signals (section 11). And the `userId` is whatever the browser sends: someone who
+  knows a paying user's email could open that user's autopilot (fake money only).
+- **Cost:** a crypto check-in is a full crypto screener run (about 540 worker calls) unless a copy under 20 minutes old
+  exists, so one user on 30-minute check-ins adds about 780,000 Lambda calls a month, plus up to two small AI calls per
+  check-in and at most 8 larger ones a day: a few dollars a month at the very most.
 
 ### Ideas offered and not built
 
@@ -1639,26 +1584,35 @@ more finished trades than there are, and would chase noise before then.
 
 ## 9. Pitfalls learned the hard way
 
-- **A fix that is live but not seen (11 Oct 2026).** The owner reported three times that the notification bell still had
-  "the old look" on the home and analysis pages, and asked whether "other config" was taking priority. The site was
-  serving the new files (checked on the plain addresses, `/` included; there is no service worker). What took priority
-  was his browser's own copy: the site let a browser keep a page for an hour and a script for a day, so only the page he
-  had reloaded (the dashboard) was current. Fixed at the source: pages must be asked for again every time, scripts are
-  kept five minutes (section 5, step 8; `check-tools`' one-off deploy relabelled the 36 root pages, scripts and
-  stylesheets already on the site, content untouched). **When someone says a deployed change does not show, check what a
-  normal visit is served (`curl -sI` the plain address for `cache-control` and compare the body), before looking for a
-  fault in the change.** And a check that adds `?something` to the address or uses a fresh browser proves the site, not
-  what a returning visitor sees.
-- **"/file" is nowhere unless the site is at the top of its address (11 Oct 2026).** A loader line and a script asked for
-  `/autopilot-bell.js`. On stockiq.tech that is the file; in a local preview served from a folder it is a 404, the script
-  never runs, and nothing on the page says so. The owner reported "no change" five times and "something is overriding
-  your changes" while every check here (all on stockiq.tech) passed. Use addresses relative to the page or to the script
-  itself, and when a deployed change "does not show", **ask where he is looking at it** before anything else.
-- **An old copy of a script can outrun the new one (11 Oct 2026).** The same episode's last turn: a script fetched by
-  another script (the bell's, fetched by `theme.js`) and guarded with "if I am already here, do nothing" was shut out by
-  its own first version, which an old `theme.js` loaded from the browser's store before the new one arrived. A script
-  that may be loaded twice must let the newer version win, and must work out what the older one will still do on the
-  page (section 8c, the bell, "It takes over").
+- **"It does not show for me" (the notification bell, 11 Oct 2026): six rounds, one cause found late.** The owner asked
+  for the autopilot's trades in the bell on every page. He then reported, round after round, that nothing showed ("no
+  change", "something is overriding your changes"), while every check here passed. What was wrong, in the order found:
+  1. *The trades sat out of sight.* The first forms put them as a group above or below each page's own report list,
+     whichever had the newest item; with a report newer than the last trade they were under seven reports in a 400px
+     list. Checks with a made-up account and no reports had passed. Fixed by one list, newest first.
+  2. *Browsers kept old copies.* The site let a browser keep a page for an hour and a script for a day, so a fix was live
+     and unseen. Fixed at the source (section 5, step 8: pages are asked for again every time, scripts kept five minutes).
+  3. *An old copy outran the new one.* An old `theme.js` in a browser's store asked for the first version of the bell's
+     script, which ran before the current one arrived; the current one then stood down ("if I am already here, do
+     nothing"). Fixed: the newer version always takes over.
+  4. **The one that fits everything he saw: the script was asked for at `/autopilot-bell.js`.** That address exists only
+     when the site is at the top of its address. Served from a folder (a local preview of `~/VSCODE/website`), it is a
+     404, the script never runs, and nothing on the page says so. The dashboard had worked at first because its script
+     tag was relative, and stopped when it was given the same absolute address as the other pages. With relative
+     addresses he confirmed at once that it worked.
+  **Lessons, all learned the expensive way:**
+  - **Ask where he is looking at the site, first** (stockiq.tech, a local preview, a phone, which browser), and reproduce
+    *that*. A check in a clean browser on stockiq.tech proves the site, not what he sees.
+  - **Reproduce with the real account's data** (`live_bell_check.js`, `REAL_USER`, read-only) before saying a thing works;
+    do not say "fixed" on the strength of a made-up account.
+  - **Never address the site's own files as "/file"** in a script or a loader line: relative to the page, or to the
+    script itself (`document.currentScript.src`).
+  - A script that may be loaded twice must let the newer version win, and its author must think through what an older
+    copy still on the page will do.
+  - When a deployed change "does not show": `curl -sI` the plain address (no `?something`) for `cache-control` and compare
+    the body with the local file; that settles in a minute whether the site or the viewer is behind.
+  - Change one thing per round and say what was and was not reproduced. Four deploys chasing guesses cost more than one
+    question would have.
 - **Template drift:** in Sep 2026 the live stock pages had a newer footer than the generator
   template, so running the generator would have reverted all 3,467 footers. Before running
   `generate-stock-pages.py` after template edits, test it on a copy of `stocks/` and diff.
@@ -1771,10 +1725,25 @@ more finished trades than there are, and would chase noise before then.
 - Commit with a message that says what changed and why. The "Auto-update" commits bundle
   everything; one of them hid a revert of 24 scripts (section 9).
 - Don't hit Yahoo in bulk from this machine (section 8b). Use `stockiq-price-proxy` or go slowly.
+- **`analysis.html`, `analysis-functions.js`, `index.html` and `dashboard.html` are very large: never read them whole.**
+  Search for what is needed (the owner's instruction for `analysis.html`), read the few lines around a match, edit by
+  exact replacement and confirm with a diff or a line count that nothing else changed.
+- **When the owner says a change does not show, ask where he is looking at the site and reproduce that** before changing
+  anything; never address the site's own files as "/file" (section 9, the bell).
+- **Both GitHub repositories are public** (checked 11 Oct 2026): nothing private belongs in a commit, in a commit message
+  or in these notes: no keys, no customer addresses, nothing personal. An account is "the owner's account" here, not
+  an address.
 
 ## 11. Open items and optimisation ideas
 
 Needs the owner's decision or more work (nothing here is fixed):
+- **Both GitHub repositories are public** (`davedewit/stockiq` and `davedewit/stockiq-website`; checked without signing
+  in, 11 Oct 2026). Two things follow that only the owner can decide. (1) `stockiq/youtube-channel-plan.md` is a
+  **personal** plan that has nothing to do with the site and can be read by anyone; taking it out of the repo does not
+  take it out of the history, which needs a rewrite or the repo made private. (2) These notes describe how the site is
+  built, including its weak points (the `userId` is whatever the browser sends; the analysis Lambdas are open URLs; the
+  AWS account number and function addresses). Making `stockiq` private would cost nothing the site needs: only the
+  deploy's `git push` uses it. He was told at the end of the session of 11 Oct; nothing was changed.
 - **Practice portfolio and AI autopilot: what is open** is listed in section 8c, "Start here when
   resuming" (Monday's first trades across markets, the first progress report at 20 finished trades,
   a trial of buying shares by distance above the 52-week low if the record supports it, the
@@ -2175,39 +2144,19 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     `…_before_autopilot_release_20261011.zip`. First scheduled run of the shared learning seen in the log at 08:10 UTC
     ("shared learning: 0 new finished trades…", the record `_brain` written); the owner's four trades follow his next
     check-in.
-  - **The bell on every page** (section 8c, "What the owner sees"): the autopilot's buys and sells are in the notification
-    bell wherever a page has one, counted in its red number and marked unread like reports, and the group with the newest
-    item (the trades or the report history) is on top. New `autopilot-bell.js`, fetched through `theme.js`; the function has
-    a read-only `bell` action (`+Z5scAf…`). Rollback zip: `…_before_autopilot_bell_20261011.zip`. Checked with the owner's
-    real account: the action answered his nine buys and sells and wrote nothing.
-  - **The bell did not show on the home and analysis pages for the owner**: his browser still had the day-old `theme.js`
-    from before it fetched the bell's script. The 17 hand-edited pages with a bell now fetch `autopilot-bell.js?v=2`
-    themselves (one line each, between `AUTOPILOT_BELL` comments); a pointer line shows when the trades are below the report
-    history. Website only (20 files). New tool `check-tools/live_bell_check.js`: the live pages in a headless browser as a
-    signed-in visitor, with nothing written.
-  - **The bell's list became one list** (section 8c, "What the owner sees"): that was not the fault either. Opened as the
-    owner's real account, the home page showed the trades under seven reports, out of sight. `autopilot-bell.js?v=3` now
-    draws the whole list for every page: reports and trades together, newest first. Website only (20 files). **Lesson: a
-    check with a made-up account passed twice while the owner saw nothing; reproduce with the real account's data
-    (`REAL_USER`, read-only) before saying a thing works.**
-  - **Browsers no longer keep old copies** (section 5 step 8, section 9): after all that the owner still saw the old bell on
-    two pages, because his browser kept its own copy of a page for an hour and of a script for a day. Root pages must now
-    be asked for again every time and scripts are kept five minutes (`deploy-to-s3.sh`; the 36 files on the site
-    relabelled, content compared byte for byte afterwards); the bell's script is asked for under an address that changes
-    every hour, with no version number to raise. Website and deploy script only.
-  - **And then no trades in the bell on any page**: an old `theme.js` in the owner's browser loaded the first version of the
-    bell's script from the browser's store, and that copy shut the current one out. `autopilot-bell.js` (version 4) now takes
-    over from any older copy and leaves it nothing to draw; the function answers the bell only for the current script
-    (`PoZ2yvK…`). Rollback zip: `…_before_autopilot_takeover_20261011.zip`. Reproduced first, then checked after the deploy,
-    by playing the old copies back to the live dashboard, home and analysis pages as the owner's account (nine cases).
-    **Lesson: when "it works here" and the owner says it does not, the difference is the state of his browser; play that
-    state back instead of testing a clean one again.**
-  - **The fault that fits all of it: the script was asked for at "/autopilot-bell.js"**, which exists only when the site is
-    at the top of its address. Served from a folder (a local preview) it never loaded. Every address is now relative
-    (18 pages, `theme.js`, `autopilot-bell.js` version 7); checked on stockiq.tech and on the local copy served from a
-    folder, as the owner's account: the one list with the trades on the dashboard, home and analysis pages in both. The
-    script still carries a temporary report to the function's log (`belllog`), to be removed once he confirms.
-    **Lesson: ask how he is looking at the site, early. Five rounds went into caches and old copies because every test
-    used stockiq.tech.**
-  - Notes: section 8c ends with "Start here when resuming"; this session was closed there because
-    its context had grown too large. Everything known is in these files.
+  - **The notification bell** (section 8c, "The notification bell"; the story in section 9): the autopilot's buys and sells
+    are in the bell with the reports, as one list, newest first, drawn by one script (`autopilot-bell.js`) for every page
+    that has a bell; unread marks and the red number work as for reports. The function has a read-only action `bell`. It
+    took six rounds: the trades first sat out of sight under the reports, browsers kept old copies, an old copy outran the
+    new one, and finally the cause that fitted everything: the script was asked for at "/autopilot-bell.js", which is
+    nowhere unless the site sits at the top of its address. The owner confirmed it works.
+  - **Browsers no longer keep old copies** (section 5, step 8): root pages are asked for again every time, scripts and
+    stylesheets are kept five minutes (`deploy-to-s3.sh`; the 36 files on the site relabelled, content untouched).
+  - **Full sweep, evening:** the temporary diagnostics taken out of the bell's script and the function; the AI chat's guide
+    to the dashboard brought up to date (arrows, the bell, shared learning) and tried live; section 8c's parts on the
+    bell, "Start here when resuming" and who can use the autopilot rewritten from the deployed state; the other steering
+    files and the two README files corrected; two superseded task plans removed (`.agents/tasks/nikkei225-*.md`);
+    every code name these notes mention checked against the code. Found and passed to the owner: both repositories are
+    public (section 11). Live at the end: `stockiq-ai-trader` `e6X8RM+w…`, `stockiq-ai-chat` `8QzCNJ8L…`,
+    `autopilot-bell.js` version 8, `practice-autopilot.js?v=37`, `practice-portfolio.js?v=17`.
+  - Notes: section 8c ends with "Start here when resuming". Everything known is in these files.

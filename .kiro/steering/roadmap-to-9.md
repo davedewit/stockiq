@@ -7,7 +7,7 @@
 - ✅ 3,467 stock pages with automated daily news + data snapshots
 - ✅ Auth (Cognito + Google/Facebook OAuth), Stripe payments, dashboard
 - ✅ Trial system: 15 analyses over 3 days. Plans: Starter $4.99, Pro $14.99, Elite $49.99
-- ✅ AI Stock Chat (GPT-4o-mini, all pages)
+- ✅ AI Stock Chat (GPT-4o-mini; home page, blog, dashboard and stock pages; on the dashboard it knows the user's own practice portfolio and autopilot)
 - ✅ SEO: ~957 large-cap pages indexed (≥$10B, moves a little each day), WebPage + Corporation schema, GA4
 - ✅ Screeners: US (S&P, Russell, NASDAQ, Dow), ASX 50/100/200/300, UK FTSE 100, Japan Nikkei 225, crypto (540 coins)
 - ✅ Bot/subnet protection on anonymous usage tracker
@@ -15,8 +15,10 @@
   rebuilt from current members; crypto coin list and matching replaced; neutral "describe, don't advise"
   wording across the site, AI chat and all report/CSV output; pricing section and working email signup
   on the home page. Detail: `site-overview.md` sections 8, 8b and 13
-- ✅ Practice portfolio (fake money) and its AI autopilot on the dashboard, with tabs (10–11 Oct 2026).
-  Owner's account only for the autopilot; opening it to users is his decision. Detail: `site-overview.md` section 8c
+- ✅ Practice portfolio (fake money, free for every account) and its AI autopilot (Beta, part of every paid plan) on the
+  dashboard, with tabs; the autopilot learns from every account's finished trades together; the notification bell lists
+  its buys and sells with the reports on every page; the dashboard works on a phone (10–11 Oct 2026).
+  Detail: `site-overview.md` section 8c
 
 ## Open Items (Priority Order)
 

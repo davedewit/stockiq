@@ -1,6 +1,6 @@
 # StockIQ Automation Scripts
 
-Python automation powering [StockIQ.tech](https://stockiq.tech) - a professional AI-driven stock analysis platform with 3,467 stock pages, real-time data, and intelligent news aggregation.
+Python automation powering [StockIQ.tech](https://stockiq.tech) - an AI-assisted stock, ETF and crypto research site with 3,467 stock pages, daily data snapshots, market screeners, a fake-money practice portfolio with an AI autopilot (Beta), and automated news. General information only, not financial advice.
 
 ## 🚀 What This Powers
 
@@ -47,7 +47,7 @@ AWS S3 (static hosting)
     ↓
 CloudFront CDN
     ↓
-~680 Lambda Functions (analysis, screeners, auth)
+~980 Lambda Functions (analysis, screeners, auth; about 650 are screener workers)
     ↓
 DynamoDB + OpenAI API
 ```
@@ -57,16 +57,16 @@ DynamoDB + OpenAI API
 - **Cloud:** AWS (S3, Lambda, CloudFront, Cognito, DynamoDB)
 - **AI:** OpenAI GPT-4o-mini
 - **Data:** Yahoo Finance, Finnhub
-- **Frontend:** Vanilla JS (analysis-functions.js is 310KB)
+- **Frontend:** Vanilla JS (analysis-functions.js is about 350 KB)
 - **Auth:** AWS Cognito + Google/Facebook OAuth
 - **Payment:** Stripe
 
 ## 📖 Documentation
 
 Complete docs in `.kiro/steering/`:
-- `site-overview.md` - Architecture, deploy pipeline, SEO strategy
+- `site-overview.md` - Start here: architecture, deploy pipeline, SEO, the dashboard (practice portfolio, AI autopilot, notification bell), pitfalls, open items
 - `script-reference.md` - Every script documented
-- `lambda-reference.md` - All 680 Lambda functions
+- `lambda-reference.md` - The Lambda functions (984 in all)
 - `add-new-screener.md` - How to add regional screeners
 - `stock-matching-system.md` - News → stock matching logic
 
@@ -79,13 +79,13 @@ Complete docs in `.kiro/steering/`:
 - 23-hour cooldown per stock (prevents duplicate fetches)
 
 ### SEO Strategy
-- **962 large-cap pages** (≥$10B market cap) → "index, follow" with daily snapshots
-- **2,505 small-cap pages** → "noindex, follow" (internal links only)
-- Sitemap: 979 URLs (962 stocks + 17 site pages)
+- **About 957 large-cap pages** (≥$10B market cap; the number moves a little each day) → "index, follow" with daily snapshots
+- **About 2,510 other pages** → "noindex, follow" (internal links only)
+- Sitemap: about 974 URLs (the indexed stock pages + 17 site pages)
 - WebPage schema + GA4 on all pages
 
 ### Daily Pipeline
-Runs Mon-Sat, 11am-3pm via launchd:
+Runs once a day, Mon-Sat, between 11am and 10pm (the machine's clock) via launchd:
 1. Update market news (2h cooldown)
 2. Update stock news (~60-90 stocks/day, 23h cooldown each)
 3. Update analysis snapshots on large caps

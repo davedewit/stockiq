@@ -12,7 +12,7 @@
 ## Rules Reference
 Start with **`site-overview.md`**: how the whole site works, what is generated vs hand-edited,
 **how GitHub pushes work (daily and manual)**, current SEO setup, pitfalls and open ideas
-(reviewed 25 Sep 2026).
+(full sweep 11 Oct 2026).
 
 Detailed docs live in separate files — check these first:
 - **`script-reference.md`** — All Python scripts, what they do, how to run them, workflow
@@ -22,7 +22,7 @@ Detailed docs live in separate files — check these first:
 - **`backlinks-progress.md`** — Backlink strategy and progress
 - **`future-work.md`** — People Also Watch fixes, crypto news integration
 - **`add-new-screener.md`** — Full step-by-step for adding a regional screener (India/Korea next); read before starting one
-- **`site-overview.md` section 8c** — the dashboard's practice portfolio (fake money) and its AI autopilot: what the owner sees, how a check-in works, how it learns, and the routine for changing and deploying them. Read before any dashboard work
+- **`site-overview.md` section 8c** — the dashboard's practice portfolio (fake money), its AI autopilot (Beta) and the notification bell: what the owner sees, how a check-in works, how it learns (one record shared by every account), who can use it, and the routine for changing and deploying them. **A new session starts at its part "Start here when resuming".** Read before any dashboard work
 - **`site-overview.md` section 8b** — how the screeners, trading signals and crypto really work (lists, batching, what workers return, output wording, access checks, how to test every button)
 
 ## Key Files
@@ -227,7 +227,7 @@ aws s3 rm s3://stockiq-option-1-1-custom-analysis/charts/email@example.com/ --re
 
 ## AI Chat System (Updated Oct 9, 2026)
 - **Lambda:** `stockiq-ai-chat` | **Model:** GPT-4o-mini | **Cost:** ~$0.02/month (Oct 2026)
-- **Frontend:** `ai-chat.js` (about 24 KB) on all pages, the dashboard included
+- **Frontend:** `ai-chat.js` (about 24 KB) on the pages that load it: the home page, blog, the dashboard and the stock pages (not the analysis page, the guides or the legal pages)
 - **Features:** 3-message conversation memory, live stock prices, links to stock pages
 - **On the dashboard (11 Oct 2026):** `dashboard.html` loads the chat too; there it is told how the dashboard works (`DASHBOARD_GUIDE`) and what the user's own practice portfolio and AI autopilot show (a summary built by the page, sent as `pageContext.dashboard`). It explains and points to controls; it cannot change settings. Detail and the rules: `site-overview.md` section 8c, "The AI chat on the dashboard"
 - **No advice rule (Oct 9, 2026):** the system prompt tells the model never to give buy/sell/hold calls, price targets, predictions or picks. Asked "should I buy X?" it says it can't make that call, then gives the price, what the score looks at, and links. Suggested questions in `ai-chat.js` are "What does the data say about X?", not "Should I buy X?". Don't loosen this
