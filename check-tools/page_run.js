@@ -24,12 +24,13 @@ const mkEl = id => { const el = { style: {}, innerHTML: '', textContent: '', val
   classList: { add() {}, remove() {}, toggle() {}, contains: () => false }, appendChild() {}, remove() {}, setAttribute() {}, getAttribute: () => null, addEventListener() {}, scrollIntoView() {}, focus() {},
   querySelectorAll: () => [], querySelector: () => null, closest: () => null, insertAdjacentHTML() {} }; return el; };
 const els = {}; const store = {};
-const document = { getElementById: id => els[id] || (els[id] = mkEl(id)), querySelectorAll: () => [], querySelector: () => null, createElement: () => mkEl('new'), addEventListener() {}, body: mkEl('body'), head: mkEl('head'), cookie: '', title: '', readyState: 'complete' };
+const document = { getElementById: id => els[id] || (els[id] = mkEl(id)), querySelectorAll: () => [], querySelector: () => null, createElement: () => Object.assign(mkEl('new'), { download: '' }),      // a link "can download", so the CSV writer returns its text
+   addEventListener() {}, body: mkEl('body'), head: mkEl('head'), cookie: '', title: '', readyState: 'complete' };
 const stubFn = () => new Proxy(function () {}, { get: (t, k) => k === Symbol.toPrimitive ? () => '' : stubFn(), apply: () => stubFn() });
 const out = { result: null, error: null };
 const ctx = { console: { log() {}, warn() {}, error() {}, info() {} }, setTimeout, clearTimeout, setInterval: () => 0, clearInterval() {}, fetch: loggedFetch, document, navigator: { userAgent: 'Mozilla/5.0 Chrome/120', onLine: true },
   localStorage: { getItem: k => store[k] ?? null, setItem(k, v) { store[k] = String(v); }, removeItem(k) { delete store[k]; } }, sessionStorage: { getItem: () => null, setItem() {}, removeItem() {} },
-  location: { href: 'https://stockiq.tech/analysis.html', search: '', pathname: '/analysis.html', hostname: 'stockiq.tech' }, URL, URLSearchParams, Blob: function () {}, alert() {}, gtag() {}, performance, AbortController, TextEncoder, TextDecoder, Intl, crypto: globalThis.crypto, addEventListener() {}, removeEventListener() {}, dispatchEvent() {}, innerWidth: 1300, innerHeight: 900, scrollTo() {}, scrollY: 0, open() {}, matchMedia: () => ({ matches: false, addEventListener() {} }), requestAnimationFrame: f => setTimeout(f, 0), history: { pushState() {}, replaceState() {} }, getComputedStyle: () => ({}) };
+  location: { href: 'https://stockiq.tech/analysis.html', search: '', pathname: '/analysis.html', hostname: 'stockiq.tech' }, URL, URLSearchParams, Blob, alert() {}, gtag() {}, performance, AbortController, TextEncoder, TextDecoder, Intl, crypto: globalThis.crypto, addEventListener() {}, removeEventListener() {}, dispatchEvent() {}, innerWidth: 1300, innerHeight: 900, scrollTo() {}, scrollY: 0, open() {}, matchMedia: () => ({ matches: false, addEventListener() {} }), requestAnimationFrame: f => setTimeout(f, 0), history: { pushState() {}, replaceState() {} }, getComputedStyle: () => ({}) };
 ctx.window = new Proxy(ctx, { get: (t, k) => k in t ? t[k] : undefined, set: (t, k, v) => { t[k] = v; return true; } }); ctx.globalThis = ctx; ctx.self = ctx.window;
 vm.createContext(ctx);
 // FUNCS=<file> runs a staged copy of the page code instead of the one in website/
@@ -46,7 +47,9 @@ const opt = Number(option);
   const flags = [...new Set(plain.match(/\bundefined\b|\bNaN\b|\[object Object\]|Unrated|\b(STRONG_BUY|MODERATE_BUY|MODERATE_SELL|STRONG_SELL|STRONG BUY|STRONG SELL|BUY|SELL|HOLD|AVOID|CONSIDER)\b|Take Profit|Stop Loss|Recommendation(?!s? to buy)|Infinity/g) || [])];
   const summary = { button: `${option}-${subOption}`, secs: +((Date.now() - t0) / 1000).toFixed(1), type: out.result && out.result.type, error: out.error || thrown, chars: text.length, lines: plain.split('\n').length,
     analyzed: (plain.match(/(?:Stocks? Analyzed|Symbols Analyzed|Total coins analyzed|Signals Generated|Screening Universe|Analysis: )[^\n]{0,60}/i) || [''])[0].trim(), trackerSymbols: (trackA.length || trackB.length), flags, lambdas: by, blocked: [...new Set(blocked)] };
-  fs.writeFileSync(`page_${option}-${subOption}.json`, JSON.stringify({ summary, text: plain }));
+  // csv: the screener's CSV as the page would hand it to the visitor (its content, when the result carries one)
+  const csvData = out.result && out.result.csvData; const csv = !csvData ? null : typeof csvData === 'string' ? csvData : (csvData.content || csvData.csv || csvData.data || null);
+  fs.writeFileSync(`page_${option}-${subOption}.json`, JSON.stringify({ summary, text: plain, csv }));
   console.log(JSON.stringify(summary));
   process.exit(0);
 })();
