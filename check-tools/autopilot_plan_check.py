@@ -31,7 +31,7 @@ def light(c):
         now = t0 + dt.timedelta(hours=n * c['everyHours'])
         for h, price, reason in m.review_sells(p, settings, {}, {'X': {'price': 10.0}, 'X-USD': {'price': 10.0}}, now, {}, None, {}): p['holdings'].remove(h)
         room, invested = m.allowance(p, settings, state, now)
-        crypto_room = c['budgetUsd'] * (1.0 if c['coins'] else R['crypto']) - sum(h['costUsd'] for h in p['holdings'] if h['symbol'].endswith('-USD'))
+        crypto_room = c['budgetUsd'] - sum(h['costUsd'] for h in p['holdings'] if h['symbol'].endswith('-USD'))      # one market ticked: it has the whole budget (market_slots)
         for i in range(min(m.MAX_BUYS_PER_CHECK, int((room + 0.01 * R['positions']) // size))):
             amount = min(size, p['cash'], room)
             if c['coins']: amount = min(amount, crypto_room)
@@ -66,6 +66,23 @@ show = lambda c: ({k: c[k] for k in ('budgetUsd', 'periodDays', 'everyHours', 'r
 bad = [(c, a, s) for c, a, s in ((c, a, light(c)) for c, a in zip(cases, ours)) if not same(a, s)]
 print('budget and selling rules replayed for', len(cases), 'combinations of settings | panel differs from the function in:', len(bad))
 for c, a, s in bad[:6]: print('  ', *show(c), '\n     panel', a, '\n     function', s)
+# how the budget is spread over the markets ticked: the panel's marketSlots() against the function's market_slots()
+if hasattr(m, 'market_slots'):
+    one = {g: next(k for k, v in m.SCREENERS.items() if v[5] == g) for g in m.GROUPS}                     # one screener of each market
+    subsets = [[g for i, g in enumerate(m.GROUPS) if bits >> i & 1] for bits in range(1, 2 ** len(m.GROUPS))]
+    def by_hand(groups, positions):
+        yield {}
+        for g in groups:
+            for k in range(0, positions + 1, max(1, positions // 4)): yield {g: round(k / positions * 100, 4)}
+        if len(groups) >= 2:
+            yield {groups[0]: 30.0, groups[-1]: 30.0}; yield {groups[0]: 50.0, groups[1]: 50.0}; yield {groups[0]: 33.3333, groups[-1]: 12.5}; yield {g: round(100 / len(groups), 4) for g in groups}
+    split = [dict(risk=r, screeners=sorted(one[g] for g in groups), shares=sh) for r in m.RISK for groups in subsets for sh in by_hand(groups, m.RISK[r]['positions'])]
+    opts = {'groups': list(m.GROUPS), 'screeners': {k: {'group': v[5]} for k, v in m.SCREENERS.items()}, 'risk': {str(k): {'positions': v['positions'], 'crypto': v['crypto']} for k, v in m.RISK.items()}}
+    with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False) as f: json.dump({'options': opts, 'cases': split}, f)
+    theirs = json.loads(subprocess.run(['node', HERE + 'autopilot_plan_check.js', sys.argv[2], f.name, 'slots'], capture_output=True, text=True, check=True).stdout); os.unlink(f.name)
+    bad = [(c, a, b) for c, a, b in ((c, a, m.market_slots(dict(m.DEFAULTS, **c))) for c, a in zip(split, theirs)) if a != b]
+    print('spread of the budget over the markets ticked, for', len(split), 'combinations of level, markets and shares set by hand | panel differs from the function in:', len(bad))
+    for c, a, b in bad[:6]: print('  ', c, '\n     panel', a, '\n     function', b)
 k = int(sys.argv[3]) if len(sys.argv) > 3 else 0
 if k:
     random.seed(7); pick = random.sample([i for i, c in enumerate(cases) if checkins(c) <= 500], k)

@@ -5,8 +5,8 @@ const OPTIONS = { screeners: { '3-8': { name: 'Dow 30', kind: 'stock' }, '3-100'
   risk: { 1: { name: 'Cautious', positions: 12, top: 5, stop: -5, take: 8, crypto: 0 }, 3: { name: 'Balanced', positions: 8, top: 10, stop: -10, take: 18, crypto: 0.25 }, 5: { name: 'Adventurous', positions: 4, top: 20, stop: -20, take: 45, crypto: 1 } } };
 const kept = { userId: 'tester@x.com' };          // the stand-in for the browser's own storage: it survives a "refresh" (a new page())
 function page(server) {
-  const els = {}, handlers = {}, calls = []; const container = { innerHTML: '' }; let boxes = [];
-  const document = { readyState: 'complete', getElementById: id => id === 'practice-autopilot' ? container : (els[id] || null), addEventListener: (t, f) => { (handlers[t] = handlers[t] || []).push(f); }, querySelectorAll: () => boxes };
+  const els = {}, handlers = {}, calls = [], shares = []; const container = { innerHTML: '' }; let boxes = [];
+  const document = { readyState: 'complete', getElementById: id => id === 'practice-autopilot' ? container : (els[id] || null), addEventListener: (t, f) => { (handlers[t] = handlers[t] || []).push(f); }, querySelectorAll: (sel) => /data-ap-share/.test(String(sel)) ? shares : boxes };
   const fetchFake = async (url, opts) => { const b = JSON.parse(opts.body); calls.push(b); const r = server(b); return { ok: r.status === 200, status: r.status, json: async () => r.body }; };
   const ctx = { document, localStorage: { getItem: k => (k in kept ? kept[k] : null), setItem: (k, v) => { kept[k] = String(v); } }, fetch: fetchFake, console, setTimeout, clearTimeout, confirm: (m) => { ctx.asked = m; return ctx.answer !== false; }, Date, JSON, Math, Object, String, Array, parseInt, parseFloat, isNaN, Promise };
   ctx.window = ctx; ctx.practicePortfolio = { reloaded: 0, reload() { this.reloaded++; }, plans: null, extra: null, setPlans(list, extra) { this.plans = list; this.extra = extra; } };
@@ -14,7 +14,7 @@ function page(server) {
   const form = (d) => { Object.assign(els, { 'ap-enabled': { checked: d.enabled }, 'ap-risk': { value: String(d.risk) }, 'ap-budget': { value: String(d.budgetUsd) }, 'ap-period': { value: String(d.periodDays) }, 'ap-every': { value: String(d.everyHours) }, 'ap-hold': { value: String(d.maxHoldDays) }, 'ap-risk-text': { textContent: '' } }); boxes = Object.keys(OPTIONS.screeners).map(k => ({ checked: d.screeners.includes(k), getAttribute: () => k })); };
   const click = a => handlers.click.forEach(f => f({ target: { closest: s => s === '[data-ap]' ? { getAttribute: () => a, tagName: 'BUTTON' } : null }, preventDefault() {} }));
   const text = () => container.innerHTML.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/\s+/g, ' ');
-  return { container, handlers, calls, form, click, text, ctx, els };
+  return { container, handlers, calls, form, click, text, ctx, els, shares };
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 (async () => {
@@ -415,6 +415,38 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     check('and then the line under the field just says how much there is', /Its budget can be up to \$99,992: \$81,242 of practice cash plus the \$18,750 it has invested\./.test(w.text()) && !/⚠ That is more/.test(w.text()));
     const fresh = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, settings: { ...settings }, state: {}, practiceCash: 100000, log: [], money: { cash: 100000, invested: 0, reach: 100000 } } })); await sleep(30);
     check('with nothing invested yet it names the practice cash', /Its budget can be up to \$100,000: the practice cash you have left\./.test(fresh.text()));
+  }
+  // the budget is spread over the markets ticked: shown per market, automatic unless a share is picked
+  { const OPT = { ...OPTIONS, groups: ['US shares', 'Coins'], screeners: { '3-8': { name: 'Dow 30', kind: 'stock', group: 'US shares' }, '3-100': { name: 'S&P 100', kind: 'stock', group: 'US shares' }, '7-1': { name: 'Crypto (top coins)', kind: 'crypto', group: 'Coins' } } };
+    const st = { settings: { ...settings, enabled: true, risk: 3, budgetUsd: 10000, screeners: ['3-100', '3-8', '7-1'], shares: {} }, state: {}, practiceCash: 100000, log: [], plans: [] };
+    const w = page(b => { if (b.action === 'save') st.settings = b.settings; return { status: 200, body: { success: true, allowed: true, options: OPT, ...st } }; }); await sleep(30);
+    const t = () => w.text(), pick = (list) => { w.shares.length = 0; list.forEach(([g, v]) => w.shares.push({ value: v, getAttribute: () => g })); };
+    check('each ticked market shows its share of the budget, automatic to begin with, in percent, holdings and dollars', /US shares[^·]*Share of the budget Automatic: 75% \(6 holdings, \$7,500\)/.test(t()) && /Coins[^·]*Share of the budget Automatic: 25% \(2 holdings, \$2,500\)/.test(t()) && (w.container.innerHTML.match(/data-ap-share="/g) || []).length === 2 && (t().match(/automatic/g) || []).length >= 2, t().slice(t().indexOf('Screeners it buys from'), t().indexOf('Screeners it buys from') + 400));
+    check('the menu offers every step: a share is a number of whole holdings', /<option value="12\.5" >13% \(1 holding, \$1,250\)<\/option>/.test(w.container.innerHTML) && /<option value="100" >100% \(8 holdings, \$10,000\)<\/option>/.test(w.container.innerHTML) && /<option value="0" >0% \(0 holdings, \$0\)<\/option>/.test(w.container.innerHTML));
+    check('and one line says in words where the budget goes and how automatic works', /How the budget is spread: US shares 6 holdings \(\$7,500, 75%\) · Coins 2 holdings \(\$2,500, 25%\)\. On automatic the budget is spread evenly over the markets ticked \(coins at most 25% at this level\); pick a share yourself to change one\. A market never takes more than its share, whichever opens first\./.test(t()), t().slice(t().indexOf('How the budget is spread'), t().indexOf('How the budget is spread') + 330));
+    pick([['US shares', 'auto'], ['Coins', '50']]); w.form(st.settings); await w.ctx.practiceAutopilot.flush(); await sleep(30);
+    check('picking a share for one market saves it, and the other stays automatic', JSON.stringify(st.settings.shares) === '{"Coins":50}' && /Coins[^·]*Share of the budget Automatic: 25% \(2 holdings, \$2,500\)[^·]*set by you/.test(t()) && /<option value="50" selected>50% \(4 holdings, \$5,000\)<\/option>/.test(w.container.innerHTML) && /US shares[^·]*Automatic: 50% \(4 holdings, \$5,000\)/.test(t()) && /How the budget is spread: US shares 4 holdings \(\$5,000, 50%\) · Coins 4 holdings \(\$5,000, 50%\)\./.test(t()), [JSON.stringify(st.settings.shares), t().slice(t().indexOf('How the budget is spread'), t().indexOf('How the budget is spread') + 120)]);
+    const stub = () => ({ disabled: false, textContent: '', innerHTML: '', title: '', placeholder: '', classList: { on: {}, toggle(c, v) { this.on[c] = v; } } });
+    Object.assign(w.els, { 'ap-saved': stub(), 'ap-split': stub(), 'ap-sharebox-0': stub(), 'ap-sharebox-1': stub() });
+    pick([['US shares', 'auto'], ['Coins', '50']]); w.form({ ...st.settings, budgetUsd: 20000 }); w.ctx.document.activeElement = { id: 'ap-budget' }; w.handlers.input.forEach(f => f({ type: 'input', target: { id: 'ap-budget', getAttribute: () => null } })); await sleep(20);
+    check('while the budget is being typed, the menus and the line follow it without a redraw', /Automatic: 50% \(4 holdings, \$10,000\)/.test(w.els['ap-sharebox-0'].innerHTML) && /<option value="50" selected>50% \(4 holdings, \$10,000\)<\/option>/.test(w.els['ap-sharebox-1'].innerHTML) && /^How the budget is spread: US shares 4 holdings \(\$10,000, 50%\) · Coins 4 holdings \(\$10,000, 50%\)\./.test(w.els['ap-split'].textContent), [w.els['ap-sharebox-0'].innerHTML.slice(0, 200), w.els['ap-split'].textContent.slice(0, 120)]);
+    w.ctx.document.activeElement = null; w.form(st.settings); await w.ctx.practiceAutopilot.flush(); await sleep(30);
+    delete w.els['ap-sharebox-0']; delete w.els['ap-sharebox-1'];
+    const before = w.calls.filter(c => c.action === 'save').length;
+    pick([['US shares', '75'], ['Coins', '50']]); w.form(st.settings); await w.ctx.practiceAutopilot.flush(); await sleep(30);
+    check('shares that add up to more than the budget are not saved, and it says what to do', w.calls.filter(c => c.action === 'save').length === before && w.els['ap-saved'].textContent === 'Not saved: the shares you picked add up to 125% of the budget: together they can be 100% at most. Lower one, or put one back to "Automatic".', w.els['ap-saved'].textContent);
+    delete w.els['ap-saved']; delete w.els['ap-split'];
+    pick([['US shares', '25'], ['Coins', '25']]); w.form(st.settings); await w.ctx.practiceAutopilot.flush(); await sleep(30);
+    check('shares that leave part of the budget out say how much stays in cash', JSON.stringify(st.settings.shares) === '{"US shares":25,"Coins":25}' && /How the budget is spread: US shares 2 holdings \(\$2,500, 25%\) · Coins 2 holdings \(\$2,500, 25%\)\. 4 holdings \(\$5,000\) are not given to any market and stay in cash\./.test(t()), t().slice(t().indexOf('How the budget is spread'), t().indexOf('How the budget is spread') + 200));
+    pick([['US shares', 'auto'], ['Coins', 'auto']]); w.form({ ...st.settings, risk: 1 }); await w.ctx.practiceAutopilot.flush(); await sleep(30);
+    check('back on automatic at Cautious: everything goes to shares, and it says why nothing goes to coins', JSON.stringify(st.settings.shares) === '{}' && /How the budget is spread: US shares 12 holdings \(\$10,000, 100%\)\. Nothing goes to Coins: the Cautious level puts nothing into coins while a share market is ticked too \(pick a share for coins yourself to change that\)\./.test(t()), t().slice(t().indexOf('How the budget is spread'), t().indexOf('How the budget is spread') + 260));
+    pick([['Coins', 'auto']]); w.form({ ...st.settings, risk: 3, screeners: ['7-1'] }); await w.ctx.practiceAutopilot.flush(); await sleep(30);
+    check('one market ticked: all of it goes there', /How the budget is spread: all of it goes to Coins, the one market ticked \(8 holdings of \$1,250\)\./.test(t()) && (w.container.innerHTML.match(/data-ap-share="/g) || []).length === 1);
+    check('the panel works the spread out as the function does (spot check; the full comparison is autopilot_plan_check.py)', JSON.stringify(w.ctx.practiceAutopilot.marketSlots({ risk: 5, screeners: ['3-100', '7-1'], shares: {} })) === '{"US shares":2,"Coins":2}' && JSON.stringify(w.ctx.practiceAutopilot.marketSlots({ risk: 3, screeners: ['3-100', '7-1'], shares: { Coins: 12.5 } })) === '{"US shares":7,"Coins":1}');
+    check('no broken values around the shares', !/undefined|NaN|\[object|Infinity/.test(w.container.innerHTML));
+    const old = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, settings: { ...settings, enabled: true, screeners: ['3-100', '7-1'] }, state: {}, practiceCash: 100000, log: [] } })); await sleep(30);
+    old.form({ ...settings, enabled: true, risk: 4, screeners: ['3-100', '7-1'] }); await old.ctx.practiceAutopilot.flush(); await sleep(30);
+    check('an answer from the older function: no share menus, nothing about shares is sent, and the coin sentence is as before', !/Share of the budget|How the budget is spread/.test(old.text()) && !('shares' in old.calls.filter(c => c.action === 'save')[0].settings) && /goes into coins at this level/.test(old.text()));
   }
   check('no broken values', !/undefined|NaN|\[object/.test(p.container.innerHTML), (p.container.innerHTML.match(/.{30}(undefined|NaN|\[object).{30}/) || [])[0]);
   console.log(ok ? 'ALL PASS' : 'SOME FAILED');

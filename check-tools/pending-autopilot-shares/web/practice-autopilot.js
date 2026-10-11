@@ -87,6 +87,8 @@
         #practice-autopilot .ap-may { display: block; padding: 6px 0; cursor: pointer; }
         #practice-autopilot .ap-may input { margin-right: 8px; }
         #practice-autopilot .ap-may small { display: block; margin-left: 24px; color: var(--text-secondary); font-size: 0.8rem; }
+        #practice-autopilot .ap-share { margin-top: 7px; font-size: 0.82rem; color: var(--text-secondary); display: flex; gap: 6px 8px; flex-wrap: wrap; align-items: center; }
+        #practice-autopilot .ap-share select { padding: 5px 8px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 16px; max-width: 100%; }
         #practice-autopilot .ap-countline { margin-top: 6px; color: var(--text-primary); }
         #practice-autopilot .ap-count { display: inline-block; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; white-space: nowrap; }
         #practice-autopilot .ap-needs { margin-top: 10px; padding: 9px 12px; border-radius: 6px; font-size: 0.85rem; line-height: 1.5; color: var(--text-primary); background: rgba(217, 119, 6, 0.12); border: 1px solid rgba(217, 119, 6, 0.5); }
@@ -232,7 +234,7 @@
         return `${start} Up to ${many} of about ${usd0(size)} each${whole ? '' : ' at a time'}${steps}`
             + (whole ? ` Then the whole ${usd0(d.budgetUsd)} is in use.`
                 : ` That is ${usd0(up.peak)} of the ${usd0(d.budgetUsd)}: it buys at most 3 at a check-in and sells each holding after ${holdText(d.maxHoldDays)}. Keep holdings longer${oftener ? ', or check in more often,' : ''} for it to use more.`)
-            + (mixed(d) && r.crypto < 1 ? ` Of that, at most ${Math.round(r.crypto * 100)}% (${usd0(d.budgetUsd * r.crypto)}) goes into coins at this level.` : '')
+            + (!sharesOn() && mixed(d) && r.crypto < 1 ? ` Of that, at most ${Math.round(r.crypto * 100)}% (${usd0(d.budgetUsd * r.crypto)}) goes into coins at this level.` : '')
             + (d.everyHours <= 3 && d.screeners.some(k => (data.options.screeners[k] || {}).kind === 'crypto') ? ' A coin is only bought once it has been near the top at two check-ins running (coin rankings change fast and many drop out again within the hour), so coin buying starts one check-in later than this.' : '')
 ;
     }
@@ -350,6 +352,65 @@
         const next = !s.enabled ? ' Use the switch at the top right to turn it on.' : !s.screeners.length ? ' Tick at least one screener for it to start.' : '';
         return { text: (savedOnce ? '✓ Saved.' : 'Changes are saved as you make them.') + next, bad: false };
     }
+    // ---------------------------------------------------------------- how the budget is spread over the markets ticked
+    // The same rules as market_split() and market_slots() in the stockiq-ai-trader Lambda: keep the two in step
+    // (autopilot_plan_check.py compares them). A share the user set stands; what is left is spread evenly over the other
+    // ticked markets, coins never above the level's share while a share market is ticked too; then whole holdings.
+    // MARKET_SPLIT_START
+    function marketSplit(d) {
+        const all = data.options.groups || [], r = data.options.risk[String(d.risk)] || {};
+        const groups = all.filter(g => d.screeners.some(k => (data.options.screeners[k] || {}).group === g)), own = {};
+        groups.forEach(g => { const v = (d.shares || {})[g]; if (typeof v === 'number' && isFinite(v)) own[g] = v / 100; });
+        const left = Math.max(0, 1 - Object.keys(own).reduce((a, g) => a + own[g], 0)), auto = groups.filter(g => !(g in own)), out = Object.assign({}, own);
+        let coin = 0;
+        if (auto.includes('Coins') && groups.length > 1) coin = out.Coins = Math.min(r.crypto || 0, left / auto.length);
+        const rest = auto.filter(g => g !== 'Coins' || groups.length === 1);
+        rest.forEach(g => { out[g] = (left - coin) / rest.length; });
+        const split = {}; groups.forEach(g => { split[g] = out[g] || 0; });
+        return split;
+    }
+    function marketSlots(d) {
+        const all = data.options.groups || [], positions = (data.options.risk[String(d.risk)] || {}).positions || 0, split = marketSplit(d);
+        const exact = {}, slots = {}; let sum = 0, used = 0;
+        Object.keys(split).forEach(g => { exact[g] = split[g] * positions; slots[g] = Math.floor(exact[g] + 1e-9); sum += exact[g]; used += slots[g]; });
+        const spare = Math.min(positions, Math.floor(sum + 0.5 + 1e-9)) - used;
+        Object.keys(split).sort((a, b) => (Math.round((exact[b] - slots[b]) * 1e6) - Math.round((exact[a] - slots[a]) * 1e6)) || (all.indexOf(a) - all.indexOf(b)))
+            .slice(0, Math.max(0, spare)).forEach(g => { slots[g]++; });
+        return slots;
+    }
+    // MARKET_SPLIT_END
+    const sharesOn = () => !!(data && data.options && Array.isArray(data.options.groups) && 'shares' in data.settings);
+    const holdingsWord = (n) => n === 1 ? '1 holding' : `${n} holdings`;
+    const stepPct = (k, positions) => Math.round(k / positions * 1e6) / 1e4;                // k holdings as a percent of the budget
+    const stepLabel = (k, positions, size) => `${Math.round(k / positions * 100)}% (${holdingsWord(k)}, ${usd0(k * size)})`;
+    // What a market would get on automatic, the others staying as they are
+    function autoSlots(d, group) { const sh = Object.assign({}, d.shares); delete sh[group]; return marketSlots(Object.assign({}, d, { shares: sh }))[group] || 0; }
+    // One market's line under its screeners: its share of the budget, automatic unless picked from the steps
+    function shareRow(d, group, index) {
+        if (!sharesOn()) return '';
+        const r = data.options.risk[String(d.risk)] || {}, positions = r.positions || 0, size = d.budgetUsd / (positions || 1);
+        const ticked = d.screeners.some(k => (data.options.screeners[k] || {}).group === group);
+        if (!ticked || !positions) return '';
+        const mine = typeof (d.shares || {})[group] === 'number', chosen = mine ? Math.min(positions, Math.max(0, Math.round(d.shares[group] / 100 * positions))) : -1;
+        const steps = []; for (let k = 0; k <= positions; k++) steps.push(`<option value="${stepPct(k, positions)}" ${k === chosen ? 'selected' : ''}>${stepLabel(k, positions, size)}</option>`);
+        return `<div class="ap-share">Share of the budget <select id="ap-share-${index}" data-ap-share="${esc(group)}" aria-label="Share of the budget for ${esc(group)}"><option value="auto" ${mine ? '' : 'selected'}>Automatic: ${stepLabel(autoSlots(d, group), positions, size)}</option>${steps.join('')}</select><span class="ap-auto ${mine ? 'own' : ''}">${mine ? 'set by you' : 'automatic'}</span></div>`;
+    }
+    // In words, under the screeners: where the budget goes, and what is left over or left out
+    function splitText(d) {
+        if (!sharesOn()) return '';
+        const r = data.options.risk[String(d.risk)] || {}, positions = r.positions || 0, size = d.budgetUsd / (positions || 1), slots = marketSlots(d), groups = Object.keys(slots);
+        if (!groups.length || !positions) return '';
+        const mine = (g) => typeof (d.shares || {})[g] === 'number';
+        const used = groups.reduce((a, g) => a + slots[g], 0), spare = positions - used, none = groups.filter(g => !slots[g]);
+        const how = groups.length === 1 && slots[groups[0]] === positions ? `How the budget is spread: all of it goes to ${groups[0]}, the one market ticked (${holdingsWord(positions)} of ${usd0(size)}).`
+            : 'How the budget is spread: ' + groups.filter(g => slots[g]).map(g => `${g} ${holdingsWord(slots[g])} (${usd0(slots[g] * size)}, ${Math.round(slots[g] / positions * 100)}%)`).join(' · ') + '.';
+        const left = none.map(g => ` Nothing goes to ${g}: ` + (mine(g) ? 'you set its share to 0%.' : g === 'Coins' && !(r.crypto > 0) && groups.length > 1 ? `the ${r.name} level puts nothing into coins while a share market is ticked too (pick a share for coins yourself to change that).`
+            : groups.some(mine) ? 'the shares set by hand leave nothing for it.' : `there are more markets ticked than the ${positions} holdings of this level.`)).join('');
+        const idle = spare > 0 && groups.some(mine) ? ` ${holdingsWord(spare)} (${usd0(spare * size)}) ${spare === 1 ? 'is' : 'are'} not given to any market and stay${spare === 1 ? 's' : ''} in cash.` : '';
+        const rule = groups.length > 1 ? ` On automatic the budget is spread evenly over the markets ticked${groups.includes('Coins') && !(r.crypto >= 1) ? ` (coins at most ${Math.round((r.crypto || 0) * 100)}% at this level)` : ''}; pick a share yourself to change one. A market never takes more than its share, whichever opens first.` : '';
+        return how + left + idle + rule;
+    }
+
     function screenerGroups(all) {
         const groups = [];
         Object.keys(all).forEach(k => { const g = all[k].group || 'Screeners'; let row = groups.find(x => x[0] === g); if (!row) groups.push(row = [g, []]); row[1].push(k); });
@@ -494,7 +555,8 @@
 
                 <div class="ap-card">
                     <span class="ap-label">Screeners it buys from <span id="ap-chosen" class="ap-sub">${chosen} chosen</span></span>
-                    ${screenerGroups(o.screeners).map(([group, keys], i) => `<div class="ap-group ${i === 0 ? 'first' : ''}"><div class="ap-group-name">${esc(group)}</div><div class="ap-chips">${keys.map(k => `<label class="ap-chip"><input type="checkbox" data-ap-screener="${esc(k)}" ${d.screeners.includes(k) ? 'checked' : ''}> ${esc(o.screeners[k].name)}${data.resting && data.resting[k] ? ' <small title="Resting after its recent trades lagged the market">(resting until ' + esc(day(data.resting[k])) + ')</small>' : ''}</label>`).join('')}</div></div>`).join('')}
+                    ${screenerGroups(o.screeners).map(([group, keys], i) => `<div class="ap-group ${i === 0 ? 'first' : ''}"><div class="ap-group-name">${esc(group)}</div><div><div class="ap-chips">${keys.map(k => `<label class="ap-chip"><input type="checkbox" data-ap-screener="${esc(k)}" ${d.screeners.includes(k) ? 'checked' : ''}> ${esc(o.screeners[k].name)}${data.resting && data.resting[k] ? ' <small title="Resting after its recent trades lagged the market">(resting until ' + esc(day(data.resting[k])) + ')</small>' : ''}</label>`).join('')}</div><div id="ap-sharebox-${i}">${shareRow(d, group, i)}</div></div></div>`).join('')}
+                    <div id="ap-split" class="ap-help">${esc(splitText(d))}</div>
                     <div class="ap-help">Each share market is only traded while it is open, also when you press "Check in now"; coins at any time. Bigger lists take a little longer to check.</div>
                 </div>
 
@@ -531,6 +593,14 @@
             stopPct: ownLimit('ap-stop', 'stopPct'), takePct: ownLimit('ap-take', 'takePct')
         };
         if ('auto' in data.settings) draft.auto = PACE_FIELDS.filter(k => left.includes(k));
+        if ('shares' in data.settings) {                   // a market's share: what its menu says, or automatic when it has no menu on the page
+            const sh = {}, known = data.options.groups || [];
+            Array.from(document.querySelectorAll('[data-ap-share]')).forEach(el => {
+                const g = el.getAttribute('data-ap-share'), v = typeof el.value === 'string' ? parseFloat(el.value) : NaN;
+                if (known.includes(g) && isFinite(v) && draft.screeners.some(k => (data.options.screeners[k] || {}).group === g)) sh[g] = v;
+            });
+            draft.shares = sh;
+        }
         if ('trailMode' in data.settings) { const pick = byId('ap-trail'); draft.trailMode = pick && TRAILS[pick.value] ? pick.value : trailOf(data.settings); }
     }
     // Bring the button, the "saved" line and the explanatory lines up to date without redrawing (typing keeps its place)
@@ -556,6 +626,9 @@
         set('ap-plan', el => { el.textContent = planText(draft); });
         set('ap-pace', el => { el.textContent = paceText(draft); });
         set('ap-chosen', el => { el.textContent = draft.screeners.length + ' chosen'; });
+        set('ap-split', el => { el.textContent = splitText(draft); });
+        // the share menus show dollars and holdings, which follow the budget and the level: rebuild them in place (none of them has the cursor)
+        if (sharesOn()) screenerGroups(data.options.screeners).forEach(([group], i) => set('ap-sharebox-' + i, el => { el.innerHTML = shareRow(draft, group, i); }));
         if (document.querySelectorAll) Array.from(document.querySelectorAll('[data-ap-level]')).forEach(el => { if (el.classList) el.classList.toggle('now', el.getAttribute('data-ap-level') === String(draft.risk)); });
     }
     function validate(d) {
@@ -565,6 +638,10 @@
         // only when the budget is being changed: other settings must still save while an older, too-large budget is being put right
         if (data.money && d.budgetUsd > data.money.reach && d.budgetUsd !== data.settings.budgetUsd) throw new Error(`the budget can be at most ${usd0(data.money.reach)}: that is all the practice money there is.`);
         if (!(d.periodDays >= 1 && d.periodDays <= 90)) throw new Error('spread the buying over 1 to 90 days.');
+        if (sharesOn() && d.shares) {
+            const total = Object.keys(d.shares).reduce((a, g) => a + d.shares[g], 0);
+            if (total > 100.01) throw new Error(`the shares you picked add up to ${Math.round(total)}% of the budget: together they can be 100% at most. Lower one, or put one back to "Automatic".`);
+        }
         if (d.stopPct !== null && d.stopPct !== undefined && !(d.stopPct >= 1.5 && d.stopPct <= 30)) throw new Error('your own loss limit must be between 1.5% and 30% (or empty).');
         if (d.takePct !== null && d.takePct !== undefined && !(d.takePct >= 2 && d.takePct <= 80)) throw new Error('your own gain mark must be between 2% and 80% (or empty).');
     }
@@ -728,6 +805,6 @@
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') leaving(); });
 
     if (typeof setInterval === 'function') { setInterval(() => refresh(false), REFRESH_MS); setInterval(tick, 1000); }
-    window.practiceAutopilot = { reload: load, flush, refresh, tick, leftText };
+    window.practiceAutopilot = { reload: load, flush, refresh, tick, leftText, marketSlots };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load); else load();
 })();

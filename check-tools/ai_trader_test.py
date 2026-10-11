@@ -812,4 +812,11 @@ for h in list(portfolio()['holdings'])[:2]: PRICES[h['symbol']] = h['buyPrice'] 
 s, rec = run(t0 + dt.timedelta(days=4)); s, rec = run(t0 + dt.timedelta(days=5))
 check('ticking a different market: what it holds from the old ones stays until sold, and only freed money goes to the new one', where().get('Australian shares') == 2 and sum(where().values()) == 8 and sum(h['costUsd'] for h in portfolio()['holdings']) == 8000.0, where())
 PRICES.clear(); MODEL['prompts'].clear()
+
+# --- "Check in now" releases the next holding's worth of the budget, however many small steps that takes
+D.t.clear(); PRICES.clear(); MODEL['answer'] = None; SNAP['7-1'] = rows('crypto', '7-1')
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=5, budgetUsd=4000.0, periodDays=1, everyHours=1, maxHoldDays=20, screeners=['7-1'], shares={}); rec['state']['startedAt'] = m.iso(sun); m.save_item(U, rec)
+m.datetime = at(sun); code_, b = call(action='run', userId=U); first = b['summary']['bought']
+m.datetime = at(sun + dt.timedelta(minutes=15)); code_, b = call(action='run', userId=U); m.datetime = clock
+check('hourly steps of $167 and holdings of $1,000: pressing "Check in now" again still buys the next holding (it used to give up after four steps)', first == 1 and b['summary']['bought'] == 1 and len(portfolio()['holdings']) == 2 and any('released ahead of its time' in e['text'] for e in b['log']), (first, b['summary']))
 print('ALL PASS' if ok else 'SOME FAILED')

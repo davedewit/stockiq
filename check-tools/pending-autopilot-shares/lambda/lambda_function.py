@@ -263,7 +263,7 @@ def clean_settings(raw, user_id):
     out['shares'] = {}
     for group in GROUPS:
         if group in given and given[group] is not None and given[group] != '':
-            out['shares'][group] = round(min(100.0 - total, max(0.0, num(given[group]))), 2)
+            out['shares'][group] = round(min(100.0 - total, max(0.0, num(given[group]))), 4)
             total += out['shares'][group]
     out['auto'] = [f for f in PACE_FIELDS if f in left]
     for field in out['auto']:
@@ -1604,7 +1604,8 @@ def run_user(user_id, record, now, snapshot=None, quote=None, model=None, manual
     if manual and not count and buy_from and portfolio['cash'] >= size and settings['budgetUsd'] - invested >= size - slack:
         # "Check in now" is a request to act: when only the pace of the build-up stands in the way, the next part of the
         # budget is released early (never past the budget or the practice cash)
-        for _ in range(rules['positions']):
+        # (as many steps as it takes for one more holding: with small steps and large holdings that can be several)
+        for _ in range(int(math.ceil(settings['periodDays'] * 24 / settings['everyHours'])) + 1):
             state['ahead'] = int(state.get('ahead') or 0) + 1
             room, invested = allowance(portfolio, settings, state, now)
             count = min(MAX_BUYS_PER_CHECK, int((room + slack) // size))
