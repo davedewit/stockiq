@@ -1822,7 +1822,7 @@ only); (b) an ASX run during ASX hours (the one-bar-a-day rule was only seen aft
 share buys, which now come from rankings made with the one RSI.
 **The small job after it is done too (11 Oct, 13:46 UTC): the report writers and the tracker.** Both screener reports print
 each market's own currency from the workers' `currency` field and whole symbols, and the 🎯 tracker reads them (section 8b,
-"Dashboard performance tracker"). Live: `stockiq-screener-coordinator` `CODESHA`, `analysis-functions.js` (sha256 starts
+"Dashboard performance tracker"). Live: `stockiq-screener-coordinator` `CKR1cZ3wGz/t…`, `analysis-functions.js` (sha256 starts
 `a2fd5ef6c8a2`), `dashboard.html` (`bec16da1ef4c`). Way back: `~/VSCODE/backup/stockiq-screener-coordinator_before_currency_20261011.zip`
 and the two website files from git.
 **The owner approved the one RSI for every screener on 11 Oct 2026** (asked directly: "Yes, keep it"), knowing that about a
@@ -1840,7 +1840,7 @@ left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line ch
 - Lambda `stockiq-ai-chat`: `CodeSha256` `cTz2ks6BStwoDLEIod20m/pzvn59WP2VHo9Hc/RtEV8=`, equal to
   `lambda-sync/stockiq-ai-chat/lambda_function.py` (350 lines).
 - Website (sha256 starts): `practice-autopilot.js?v=38` (`43520270763f`), `practice-portfolio.js?v=18` (`b48ff650293c`),
-  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`79986e57a7ee`),
+  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`bec16da1ef4c`),
   `ai-chat.js?v=2` (`87eaadf52197`); 17 more pages carry the bell's loader line; `index.html` and `faq.html` the plan wording.
   Live files were compared byte for byte at each deploy.
 - `deploy-to-s3.sh` carries the rules for how long a browser may keep a copy (section 5, step 8); the first daily run with
@@ -2622,8 +2622,17 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     nothing to change. `add-new-screener.md` rewritten around the one package, with Germany (DAX 40) as its example.
     **Lessons: a count of zip fingerprints is not a count of programs; and measure a scoring change before describing its
     size** (section 9).
-  - Found on the way and left open (section 11, "Report writers"): pence printed as pounds, and the coordinator's report
-    cutting symbols to five characters.
+  - **The report writers and the tracker (13:46 UTC; section 8b, "Dashboard performance tracker").** Found during the worker
+    job: London prices in pence printed as pounds on the page and as dollars in background reports, and the coordinator
+    cutting every symbol to five characters, so that the 🎯 tracker read 6 of 10 symbols of a background FTSE report and
+    none of a Nikkei one. Now one money rule in the page (`screenerMoney`), the coordinator (`money`) and the single-stock
+    report, from the currency each worker result carries: "503.80p", "A$8.43", "¥5,613.00"; three FTSE shares that are
+    quoted in dollars or euros print as such. The tracker reads a leading sign or a number of pence, with commas, and the
+    older saved forms. Proved before and after the deploy by running the tracker on real FTSE, ASX 200 and Nikkei reports
+    from both paths: 10 of 10 symbols each, 0.00% on closed markets. Rollback zip:
+    `~/VSCODE/backup/stockiq-screener-coordinator_before_currency_20261011.zip`. `tracker_run.js` now reads a `res_*.json`,
+    `run_all.py` takes `COORD=<file>`, `page_run.js` takes `FUNCS=<file>`.
+  - **The owner approved the one RSI for every screener** (asked directly, 11 Oct): it stays.
   - Notes: section 8c ends with "Start here when resuming". Everything known is in these files.
   - **The single-stock report and its chart rebuilt** (section 7, "The single-stock report and its chart"), in the first
     session again, after the owner asked whether the individual analysis could be improved. Prices in the share's own

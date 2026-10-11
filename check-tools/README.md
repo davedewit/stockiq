@@ -31,7 +31,9 @@ there, not here: `build.py` (the package and its fingerprint), `prove.py` (what 
 `deploy.py` (a group at a time, through a `pending-<name>/deploy.sh` here; `--selftest`), `create_group.py` (a new
 screener's workers), `groups.py` (the one table of groups). Here: `workers.py` prints who runs what from AWS (read-only);
 `--contents` downloads every package and compares the files inside, which is the honest count (fingerprints of zips
-differ when only the file dates do). `page_run.js` takes `FUNCS=<file>` to run a staged copy of the page code.
+differ when only the file dates do). `page_run.js` takes `FUNCS=<file>` to run a staged copy of the page code, `run_all.py` takes `COORD=<file>` for a staged
+coordinator, and `tracker_run.js` reads a `res_*.json` from `run_all.py` as well as a `page_*.json` (`DASH=<file>` for a
+staged dashboard): that is how a change to a report line is proved readable by the 🎯 tracker on both paths.
 Detail: `site-overview.md` section 8b, "The worker groups"; a new screener: `add-new-screener.md`.
 
 ## lists/

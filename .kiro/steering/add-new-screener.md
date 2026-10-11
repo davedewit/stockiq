@@ -153,10 +153,9 @@ the live zip in `~/VSCODE/backup/` as the way back. A full copy of every functio
 - the titles table: `'5-dax40': 'Germany DAX 40 Screener'` (search for `'5-nikkei225'` and add a line wherever it has one)
 - `universe_sizes`: `'5-dax40': 40` (the real count; it appears twice)
 
-**Known fault to fix first or at the same time** (`site-overview.md` section 11, "Report writers"): the coordinator's
-report cuts every symbol to five characters and prints "$" for every market, so `SAP.DE` would be printed "SAP.D $…"
-and the 🎯 tracker could not read a background DAX report. Print the whole symbol, and take the sign from each stock's
-`currency` field (the workers send it: `EUR` → `€`).
+The coordinator's report prints the whole symbol and takes each price's sign from the stock's `currency` field through
+`money()` (since 11 Oct 2026; `EUR` → `€` is in its table). Add the new key to `market_currency()`, which is only the
+fallback for a result without the field. Nothing else in the report writer is per market.
 
 Deploy it with a packaged script of its own (stop if the daily deploy is running; check the live `CodeSha256` is the one
 the change was built from; keep the old zip; update; copy into `lambda-sync/`; support `DRY_RUN=true`). The crypto
@@ -179,13 +178,11 @@ Keep the line that skips an empty batch.
 **4b. A names table**, `DAX_COMPANY_NAMES = { 'SAP.DE': 'SAP', 'SIE.DE': 'Siemens', … }`, short names.
 
 **4c. The formatter.** Copy `formatNikkeiResult()` and change: the names table; the `universeSize` constant (the real
-count); the header text; `type: 'option_5dax40_screener'`; the company name "Germany DAX 40 Screener"; and the money
-sign. Each stock now carries `currency` (as Yahoo gives it), so write the sign from it instead of typing `¥`:
-
-```javascript
-const SIGN = { USD: '$', EUR: '€', JPY: '¥', GBP: '£', AUD: 'A$' };          // one small table for the formatter
-const money = (stock, v) => (SIGN[stock.currency] || '') + (v || 0).toFixed(2);
-```
+count); the header text; `type: 'option_5dax40_screener'`; the company name "Germany DAX 40 Screener"; and the fallback
+currency. Prices are written with `screenerMoney(stock, value, 'EUR')` (one rule for every share-screener formatter,
+above `formatOption3Result`): it takes the sign from the `currency` each stock carries, and the third argument is only
+the fallback. Never type a sign into a formatter. If the currency is new, add its sign to `SCREENER_MONEY_SIGNS` there,
+to `MONEY_SIGNS` in the coordinator and to the single-stock report's table (the three must stay alike).
 
 Rules the output must keep (section 8b):
 - every code goes through `signalLabel()` / `horizonLabel()`; never print `STRONG_BUY` and the like, and none of "buy",
@@ -223,8 +220,9 @@ Search for `japan_screener` and `Japan Nikkei`; add the German line beside each:
   `'analysis.html?option=5&subOption=dax40&autorun=true'` (Japan has both names)
 - `processAnalysisGroup()` ("Run in Background"): `} else if (analysisType === 'germany_screener') { endpoint = coordinatorUrl; payload = { option: '5', subOption: 'dax40', userId }; }`
 - `TOP10_BENCHMARKS`: `[/DAX/i, '^GDAXI', 'DAX 40 index'],` (the index the Top 10 popup compares with)
-- **The tracker's money signs.** The two patterns in `parseScreenerTop10` accept `[$£€¥]`. The euro is already there;
-  for India add `₹` and for Korea `₩` to **both**.
+- **The tracker's money signs.** The two patterns in `parseScreenerTop10` accept `$ £ € ¥ ₹ ₩` before the number, or a
+  number followed by `p` (pence). Any other sign must be added to **both** patterns and to the copy in
+  `check-tools/page_run.js`.
 
 The page has inline scripts: after editing, check each `<script>` block still parses (`node --check`), section 8c.
 
@@ -260,10 +258,11 @@ Stage the website files in the pending folder and test the staged copies; nothin
 cd /Users/dave/VSCODE/stockiq/check-tools
 node page_run.js 5 dax40                                   # the page path, with real worker calls
 #   expect: error null, flags [], worker calls 4/4, results = the list's size, trackerSymbols 10
-AWS_DEFAULT_REGION=us-east-1 python3 run_all.py 5-dax40    # the coordinator path, run locally from lambda-sync/; nothing is saved
+AWS_DEFAULT_REGION=us-east-1 python3 run_all.py 5-dax40    # the coordinator path, run locally from lambda-sync/ (COORD=<file>: a staged copy); nothing is saved
 python3 analyse.py -v                                      # per screener: returned / listed, missing symbols, duplicates, zero prices, flags, CSV rows
-node tracker_run.js DAX page_5-dax40.json <the report's ISO time>      # the dashboard's 🎯 tracker on the page's report
-node tracker_run.js DAX res_5-dax40.json <ISO time>                    # and on the coordinator's report
+NAME='Germany DAX 40 Screener' node tracker_run.js DAX page_5-dax40.json <the report's ISO time>   # the dashboard's 🎯 tracker on the page's report
+NAME='Germany DAX 40 Screener' node tracker_run.js DAX res_5-dax40.json <ISO time>                 # and on the coordinator's (DASH=<file>: a staged dashboard.html)
+#   expect: 10 lookups plus the index, and 0.00% when the market is closed (a wrong sign or a misread comma shows as a huge move)
 python3 ../workers/prove.py                                # only if workers/ changed
 python3 workers.py                                         # the new group: "one", same code as the other share groups
 ```
@@ -333,7 +332,7 @@ the package (`site-overview.md` section 8b). A new screener sends its batches li
 | A worker's address answers 403 | The public permission is missing | `create_group.py` adds it; run it again (it passes over what exists) |
 | "Unknown screener" (400) from the coordinator | The key is not in `WORKER_URLS` | Add it and deploy the coordinator |
 | The list comes back short | A symbol Yahoo does not know is dropped without a word | Check every symbol through the price proxy first; `analyse.py -v` lists what is missing |
-| The 🎯 tracker finds no symbols | A long name between symbol and price, a money sign the pattern does not accept, or (background reports) the coordinator cutting the symbol to five characters | Names of 22 characters at most; add the sign to both patterns; fix the coordinator's report line (step 3) |
+| The 🎯 tracker finds no symbols | A long name between symbol and price, or a money sign the pattern does not accept | Names of 22 characters at most; add the sign to both patterns (step 6); test with `tracker_run.js` on a `page_*.json` and a `res_*.json` |
 | "Unrated" in a report | A worker code missing from a label table | Add it to `signalLabel()` and the coordinator's `signal_label()` |
 | `Identifier 'name' has already been declared` | `const name` twice in one `forEach` | Declare it once; `node -c` after every edit |
 | A visitor's last free use gives no result | An access check inside the handler | Never check access again after the top of `runAnalysis` |
