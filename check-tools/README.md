@@ -158,7 +158,10 @@ saves a picture with the bell open; `LOCAL_BELL=<file>` gives the page a staged 
 live pages before it is deployed. The address is never printed. `PASS_GET=1` also lets the dashboard's own opening
 questions through, so `dashboard.html` can be opened as that account. `OLD_THEME=<file> OLD_BELL=<file>` play back old
 copies of `theme.js` and of the bell's script (take them from git: `git -C ../website show <commit>:theme.js`) the way a
-browser's own store would, ahead of the current script: the way to reproduce "it works for you but not in my browser". A page whose bell goes to the dashboard ends
+browser's own store would, ahead of the current script: the way to reproduce "it works for you but not in my browser".
+`BASE_URL=http://127.0.0.1:8765/website/` opens the local copy of the site instead, served from a folder as a local preview
+serves it (`cd ~/VSCODE && python3 -m http.server 8765 --bind 127.0.0.1` first, and stop it afterwards): this is what found
+that the bell's script was asked for at the top of the address and so never loaded anywhere but on stockiq.tech. A page whose bell goes to the dashboard ends
 with "Inspected target navigated": that is the bell working.
 
 ## autopilot_plan_check.py (with autopilot_plan_check.js)
