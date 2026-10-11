@@ -5,7 +5,7 @@ buys and sells, and is the newest group on top of the bell's list? Nothing live 
    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars --window-size=900,900 \\
        --virtual-time-budget=8000 --dump-dom file:///tmp/bell.html        (and --screenshot=... for the look)
 
-`trade`: the last trade is newer than the last report (the trades go on top). `report`: a report is newer (the reports do)."""
+The bell's list is one list, newest first. `trade`: the newest item is a trade. `report`: the newest item is a report."""
 import sys
 src, out, theme, case = open(sys.argv[1]).read(), sys.argv[2], sys.argv[3], sys.argv[4]
 report_time = '2026-10-09T08:00:00Z' if case == 'trade' else '2026-10-11T12:00:00Z'
@@ -40,17 +40,16 @@ updateNotificationBell();
 <script>%s</script>
 <script>
 const out = (t) => { document.getElementById('out').textContent += t + '\\n'; }, wait = (ms) => new Promise(r => setTimeout(r, ms));
-const order = () => Array.from(document.getElementById('notification-dropdown').children).map(c => c.id === 'autopilot-bell-pointer' ? 'POINTER (' + c.textContent.replace(/\\s+/g, ' ').trim() + ')' : c.id === 'autopilot-bell-section' ? 'AUTOPILOT (' + (c.textContent.match(/\\d+ unread/) || [''])[0] + ')' : c.tagName === 'A' ? 'view-all link' : (c.querySelector('h4') ? 'REPORTS heading' : 'report')).join(' > ');
+const order = () => { const one = document.getElementById('bell-list'); return one ? 'ONE LIST: ' + Array.from(one.children).map(c => c.getAttribute('data-kind') ? '[' + c.getAttribute('data-kind') + '] ' + c.textContent.replace(/\\s+/g, ' ').trim().slice(0, 34) : c.tagName === 'A' ? 'link' : 'heading (' + (c.textContent.match(/\\d+ unread[^)]*/) || [''])[0] + ')').join(' > ') : 'the page\\'s own list: ' + document.getElementById('notification-dropdown').children.length + ' parts'; };
 const badge = () => { const b = document.getElementById('notification-badge'); return b.style.display === 'none' ? 'hidden' : b.textContent; };
 (async () => {
   await wait(300); out('case: %s (the newest report is ' + analysisHistory[0].timestamp + ', the newest trade 2026-10-11T10:00:00Z)');
   out('red number after the page loads (1 unseen report + 2 new trades): ' + badge());
   document.getElementById('notification-bell').click(); await wait(100);
   out('bell opened, order of the list: ' + order()); out('red number once the bell has been opened: ' + badge());
-  out('the trades as listed: ' + document.getElementById('autopilot-bell-section').textContent.replace(/\\s+/g, ' ').trim());
   document.getElementById('notification-dropdown').innerHTML = content(); await wait(100); out('after the page redraws its list: ' + order());
   let went = null; window.practiceAutopilot = { bellOpen() { went = 'the autopilot list'; } };
-  document.querySelector('.autopilot-bell-row').click(); await wait(50);
+  document.querySelector('.bell-row[data-kind="trade"]').click(); await wait(50);
   out('a click on a trade: goes to ' + went + ', list closed: ' + !document.getElementById('notification-dropdown') + ', unread now ' + autopilotBell.unread());
   localStorage.setItem('stockiqAutopilotRead_' + U, '2026-10-10T12:00:00Z'); document.getElementById('notification-bell').click(); await wait(100);   // open again, unread, for the picture
   document.title = 'done';
