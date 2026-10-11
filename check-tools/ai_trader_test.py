@@ -823,7 +823,7 @@ check('hourly steps of $167 and holdings of $1,000: pressing "Check in now" agai
 # --- how far above its 52-week low a share was when bought: recorded with the buy, shown to the AI model, and the record is split by it
 D.t.clear(); PRICES.clear(); MODEL['answer'] = None; MODEL['prompts'].clear(); m.datetime = clock
 SNAP['3-100'] = [dict(r, from_low=10.0 + 30 * i) for i, r in enumerate(rows())]; SNAP['7-1'] = rows('crypto', '7-1')
-rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=20, screeners=['3-100', '7-1'], shares={}); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=20, screeners=['3-100', '7-1'], shares={}); rec['state'].update(startedAt=m.iso(t0), order={'mode': 'rank'}); m.save_item(U, rec)      # (the trial of the buying order is tested on its own below)
 MODEL['answer'] = {'picks': [{'symbol': 'S00', 'reason': 'r'}, {'symbol': 'S01', 'reason': 'r'}, {'symbol': 'S02', 'reason': 'r'}]}
 s, rec = run(t0); facts = {v['label']: v for v in rec['state']['open'].values()}; ask = buy_prompts()[-1]['user']
 check('a share\'s distance above its 52-week low is shown to the AI model and remembered with the buy; a coin has none', '| 10% above 52-week low' in ask and 'C00-USD' in ask and 'above 52-week low' not in [l for l in ask.split('\n') if l.startswith('C00-USD')][0] and facts['S00']['above'] == 10.0 and facts['S02']['above'] == 70.0, (facts.get('S00'), ask[-400:]))
@@ -880,4 +880,34 @@ check('a budget saved before the limit existed is put right as soon as the page 
 n_lines = len(b['log']); code_, b = call(action='get', userId=U); check('and only once', len(b['log']) == n_lines)
 rec = m.load_item(U); rec['settings']['budgetUsd'] = 200000.0; m.save_item(U, rec); m.lambda_handler({'source': 'aws.events'}, None); m.datetime = clock
 check('a scheduled check-in never works from a budget larger than the practice money either', m.load_item(U)['settings']['budgetUsd'] == 100000.0 and all(h['costUsd'] <= 25000.01 for h in portfolio()['holdings']), [h['costUsd'] for h in (portfolio() or {}).get('holdings', [])])
+
+# --- its own trial of which share to buy: as ranked, or the one furthest above its 52-week low
+D.t.clear(); PRICES.clear(); MODEL['answer'] = None; MODEL['prompts'].clear(); MAILS.clear(); m.datetime = clock
+SNAP['3-100'] = [dict(r, from_low=10.0 + 7 * ((i * 5) % 11)) for i, r in enumerate(rows())]; SNAP['7-1'] = rows('crypto', '7-1')       # the share furthest above its low is not the top-ranked one
+top12 = SNAP['3-100'][:10]; far = max(top12, key=lambda r: r['from_low'])['symbol']
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=20, screeners=['3-100', '7-1'], shares={}); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+s, rec = run(t0); facts = sorted(rec['state']['open'].values(), key=lambda v: v['label']); shares = [v for v in facts if not v['label'].endswith('-USD')]; buys = {e['symbol']: e['text'] for e in rec['log'] if e['type'] == 'buy'}
+check('the trial starts by itself at the first share buy', rec['state']['order']['mode'] == 'trial' and rec['state']['order']['buys'] == len(shares) == 2, rec['state'].get('order'))
+check('every second share bought is the one furthest above its 52-week low on the shortlist; the other is bought as ranked', sorted(v['o'] for v in shares) == ['low52', 'rank'] and [v['label'] for v in shares if v['o'] == 'low52'] == [far] and [v['chosen'] for v in shares if v['o'] == 'low52'] == ['order'] and [v['label'] for v in shares if v['o'] == 'rank'][0] in ('S00', 'S01'), [(v['label'], v['o'], v.get('above')) for v in shares])
+check('the buy says how it was chosen, and a coin is bought as before', 'Furthest above its 52-week low on the shortlist (' in buys[far] and 'bought as the share furthest above its 52-week low, as part of a trial of that order)' in buys[far] and all('o' not in v for v in facts if v['label'].endswith('-USD')) and any(k.endswith('-USD') for k in buys), buys)
+pub = m.public(m.load_item(U), t0, U)['order']
+check('the dashboard is told about the trial: what, why and how far along', pub['mode'] == 'trial' and pub['with'] == 0 and pub['without'] == 0 and pub['group'] == 10 and 'one figure with a link' in pub['why'], pub)
+def done(o, pcts): return [dict(risk=3, pct=p, usd=p * 10, o=o, t=m.iso(t0 + dt.timedelta(hours=1)), sold=m.iso(t0 + dt.timedelta(days=3)), label='X', screener='3-100', rank=2, rsi=50, exit='time') for p in pcts]
+r1 = m.load_item(U); r1['history'] = done('low52', [3.0, 4.0, 3.5, 2.5, 3.0, 4.0, 3.5, 2.5, 3.0, 3.0]) + done('rank', [0.5, -0.5, 0.0, 1.0, 0.0, -1.0, 0.5, 0.0, 0.5, -0.5]); notes = m.review_order(r1, t0 + dt.timedelta(days=4), lambda a, b: MAILS.append((a, b)))
+check('clearly better that way: the new order is kept, said and emailed with the numbers', r1['state']['order']['mode'] == 'low52' and r1['state']['order']['kept'] is True and 'The new order is kept: from now on every share it buys is the one furthest above its 52-week low on the shortlist. 10 shares bought furthest above their 52-week low averaged +3.20%, 10 bought as ranked +0.05%' in notes[0]['text'] and 'new order kept' in MAILS[0][0], notes)
+picks = m.apply_order(r1['state']['order'], [(SNAP['3-100'][0], 'r'), (SNAP['3-100'][1], 'r'), (SNAP['7-1'][0], 'c')], SNAP['3-100'][:12] + SNAP['7-1'][:3]); tags = [(c['symbol'], c.pop('_order', None)) for c, _ in picks]
+check('once kept, every share is bought that way: the two furthest above their low, never the same one twice, the coin untouched', tags[0][0] == far and tags[1][0] != far and tags[0][1] == tags[1][1] == 'low52' and tags[2] == ('C00-USD', None) and tags[1][0] == sorted(SNAP['3-100'][:12], key=lambda r: -r['from_low'])[1]['symbol'], tags)
+r2 = m.load_item(U); r2['history'] = done('low52', [1.0, -1.0] * 5) + done('rank', [1.2, -1.0] * 5); notes = m.review_order(r2, t0 + dt.timedelta(days=4))
+check('no clear difference: the order stays as it was', r2['state']['order']['mode'] == 'rank' and 'The order stays as it was: shares are bought as their screener ranks them.' in notes[0]['text'] and 'no clear improvement' in notes[0]['text'] and m.apply_order(r2['state']['order'], [(SNAP['3-100'][0], 'r')], SNAP['3-100'][:12])[0][0]['symbol'] == 'S00' and '_order' not in SNAP['3-100'][0])
+r3 = m.load_item(U); r3['history'] = done('low52', [3.0] * 4) + done('rank', [0.0] * 4)
+check('before 10 have finished each way it waits; after 90 days it gives up unchanged', m.review_order(r3, t0 + dt.timedelta(days=30)) == [] and r3['state']['order']['mode'] == 'trial' and 'too few of its share trades had finished' in m.review_order(r3, t0 + dt.timedelta(days=91))[0]['text'] and r3['state']['order']['mode'] == 'rank')
+r4 = m.load_item(U); r4['settings']['selfTune'] = False; m.review_order(r4, t0 + dt.timedelta(days=1))
+check('with its trials switched off the trial ends, and none starts for someone who never had them on', r4['state']['order']['mode'] == 'rank' and m.order_of({}, dict(m.DEFAULTS, selfTune=False), t0) == {'mode': 'rank'})
+code_, b = call(action='tune', userId=U, op='stoporder')
+check('the owner can stop the trial from the dashboard', b['order']['mode'] == 'rank' and b['order']['result'] == 'stopped by you' and any('You stopped its trial of buying shares' in e['text'] for e in b['log']), b.get('order'))
+r1['state']['order']['mode'] = 'low52'; m.save_item(U, r1); code_, b = call(action='tune', userId=U, op='restoreorder')
+check('and put a kept order back', b['order']['mode'] == 'rank' and b['order']['kept'] is False and any('You put the order it buys shares in back' in e['text'] for e in b['log']))
+card = m.scorecard(done('low52', [3.0] * 3) + [dict(t, chosen='order') for t in done('low52', [2.0] * 2)] + done('rank', [1.0] * 2))
+check('the record shows the shares bought that way as their own group', [(g['label'], g['n']) for g in card['groups']['chosen']] == [('chosen by rank', 5), ('bought furthest above its 52-week low', 2)], card['groups']['chosen'])
+PRICES.clear(); SNAP['3-100'] = rows(); MODEL['prompts'].clear()
 print('ALL PASS' if ok else 'SOME FAILED')
