@@ -562,15 +562,11 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
         rules: { name: 'Balanced', stop: -10, take: 9, trail: 0.5, top: 10, max_rsi: 76, arm: 9, changed: { take: 18 }, yours: [] }, order: { mode: 'low52', since: '2026-10-01T00:00:00Z', ended: '2026-10-09T00:00:00Z', result: 'r', kept: true, group: 10, why: 'w', with: 10, without: 10, avgWith: 1, avgWithout: 0 },
         tune: { past: [], nextReviewIn: null, batch: 20, group: 10, trial: { id: 2, param: 'stop', old: -10, new: -5, since: '2026-10-12T10:00:00Z', why: 'w', how: 'h', text: 'sell at -5% instead of "sell at -10%"', with: 3, without: 2, avgWith: 1, avgWithout: 0.5 } } } })); await sleep(30);
       const api = bw.ctx.practiceAutopilot;
-      check('the bell: what is already there the first time is not news', api.unseenTrades() === 0);
-      kept['stockiqAutopilotBell_tester@x.com'] = '2026-10-10T12:00:00Z';
-      const html = api.bellHtml(), plain = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
-      check('the bell counts the buys and sells made since it was last opened, not the check-in notes', api.unseenTrades() === 2 && /2 new · practice trades with fake money/.test(plain), plain.slice(0, 200));
-      check('each one says clearly whether it was a profit or a loss and how much, with the code and the name; a buy says how much was put in',
-        /Sold at a loss: ERG-USD ▼ \$173\.03 \(2\.8%\)/.test(plain) && /Sold at a profit: CFX-USD ▲ \$12\.79 \(1\.0%\) Conflux · /.test(plain) && /Bought: CFX-USD \$1,250 Conflux · /.test(plain)
-        && /aria-label="loss of \$173\.03 \(2\.8%\)"/.test(html) && plain.indexOf('ERG-USD') < plain.indexOf('Sold at a profit') && !/undefined|NaN/.test(html), plain);
+      let fed = null; bw.ctx.autopilotBell = { set(list, allowed) { fed = { list, allowed }; } };
+      check('the panel hands its buys and sells (not the check-in notes) to the bell script, each sale with its result in dollars',
+        api.bellFeed() === true && fed.allowed === true && fed.list.length === 3 && fed.list.map(e => e.type).join() === 'buy,sell,sell' && fed.list[1].gain === 12.79 && fed.list[2].gain === -173.03 && fed.list[0].gain === null
+        && fed.list[1].name === 'Conflux' && fed.list[2].symbol === 'ERG-USD' && !('text' in fed.list[0]), fed);
       check('the result of an older sale is read from its own words when the function did not send it', api.gainOf(log[3]) === -173.03 && api.gainOf(log[1]) === 12.79 && api.gainOf(log[0]) === null);
-      api.bellSeen(); check('opening the bell clears the count', api.unseenTrades() === 0);
       check('the panel says that it learns from every account, with the numbers, and an account that is not the site\'s has no button to undo what is shared',
         /It learns from every account, not only yours\./.test(bw.text()) && /45 finished trades so far from 3 accounts \(20 are at your risk level\)/.test(bw.text()) && /Trying now/.test(bw.text()) && /Changed by itself after a trial: gain mark/.test(bw.text()) && !/data-ap="stoptrial"|data-ap="restore"|data-ap="restoreorder"/.test(bw.container.innerHTML), bw.text().slice(bw.text().indexOf('It learns'), bw.text().indexOf('It learns') + 300));
       const site = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPT, ...st, log, central: { trades: 45, accounts: 3, level: 20, on: true, canChange: true },
