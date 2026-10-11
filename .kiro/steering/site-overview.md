@@ -280,6 +280,41 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   is the forward test.
   Do not publish any of this as a promise; if shown to users it is past performance with the limits.
 
+**Factor by factor (11 Oct 2026).** The owner asked whether the scoring that produces the screeners'
+CSV could be improved to raise the chance of profit, with "70% profit, 30% loss" as the aim. Tool
+and full output: `check-tools/paper-test/factor_study.py`, `results-factors-2026-10-11.txt` (the S&P
+100 worker's own code replayed on saved prices, 101 stocks, 999 trading days, 17 Oct 2022 – 9 Oct
+2026; no downloads; about 100 seconds).
+- **None of the score's own factors had a reliable link with what a stock did next** (day, week or
+  month): RSI, MACD, short / medium / long momentum, Bollinger, sentiment, MA trend all inside the
+  margin of error, several with opposite signs in the two halves of the period. The final score:
+  +0.19 points a week for its top fifth over its bottom fifth (t 1.3). The labels: nothing.
+  Volume, Market and Risk are the same for nearly every stock on a day, so they cannot sort.
+  The "Financial" factor looks clear (t 2.3–2.6) but **is an artefact**: it is the hard-coded guess
+  per company name (section 8b), which happens to favour the companies that rose.
+- **Two raw figures did point the right way in both halves:** how jumpy a stock is (`atr`, t 3.5)
+  and how far it is above its 52-week low (t 2.6). The first is risk, not skill: a score built
+  from the two had a top 10 that moved 2.2 times as far as the list in rising weeks and 1.4 times
+  as far in falling weeks, worst month -32% against -12%, and half its lead went when the seven
+  chip / AI names were left out. **The second kept a modest lead among equally jumpy stocks:**
+  +0.40 points a week, +1.5 a month (t 2.0, same sign in both halves). That is the known momentum
+  effect, flattered here by using today's index members.
+- **A win rate is set by the selling rule, not by skill.** Under the autopilot's own rules 45–51%
+  of trades ended up, for the score's top 10 and for any stock alike. A rule built to "win" (sell
+  at +2%, loss limit -15%) ended up 76% of the time for the top 10 and 74% for any stock at all,
+  and made no more per trade than the rest. **"70% up, 30% down" can be had by anyone and says
+  nothing about profit**; what counts is the average per trade against the average stock, and
+  there the top 10's lead was +0.02 to +0.22 points a trade, never clear (t under 1).
+- **Quick trading in shares loses to costs:** with 0.2% a trade taken off, one-day holds averaged
+  -0.14% a trade and two-day holds -0.02%; 20-day holds +0.86%, most of it the market's own rise.
+- **What was done with it:** nothing in the screeners (re-weighting 650 worker functions to one
+  rising market's winner would be fitting to the past, and it is a product-wide change that is the
+  owner's to decide). The autopilot now records how far above its 52-week low each share was when
+  bought and splits its record by it (section 8c), so its own fake-money trades test the one
+  finding that survived. **If that split shows the same after 8 or more trades a band, the next
+  step is a trial of buying shares in that order**, beside the current order, through its trial
+  mechanism. Not covered: coins (no saved prices; the entry log of section 8b is their test).
+
 ## 8. Front end
 
 - `analysis.html`: options 1–7 (stock/ETF report, signals, US/EU/Asia/other screeners, crypto).
@@ -625,7 +660,7 @@ show. Settings holds the first five items below, Activity the last four:
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=13` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=24`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=25`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
@@ -878,7 +913,7 @@ calls out.
   `take`, `trail`, `cut`, `time`, `signal`, `fade`, `ai`, `hand`), its best and worst while held, and,
   filled in later by `look_back`, **what it did after it was sold** (`after`: the further change
   once the same length of time had passed again).
-- **Scorecard** (`scorecard`): overall and by screener, rank band, RSI band, who chose, and exit.
+- **Scorecard** (`scorecard`): overall and by screener, rank band, RSI band, who chose, exit, how long it had stayed, and, for shares, **how far above its 52-week low it was when bought** (`above` on the remembered buy, from the screener row's `from_low`; added 11 Oct after the factor study of section 7b, as a measurement and not a rule).
   Shown as "How it is doing" and given to the model at each decision (`memory_text`).
 - **Resting a screener** (`review_resting`): when its last 12 trades (at least 8) average 1.5% or
   more behind the S&P 500 fund, it is rested 14 days, then tried again with a clean slate. **A coin
@@ -917,7 +952,10 @@ its own work. Bigger changes come through a session like this one, informed by i
 **And say this plainly whenever results come up:** the backtests (sections 7b and 11) found no
 reliable edge in the screener scores, tuning on a few dozen trades is mostly noise, and a goal
 like "70% a month" is not something this or anything else delivers. The trial design exists so
-that it at least does not fool itself.
+that it at least does not fool itself. The owner's later aim, "70% profit, 30% loss", needs the
+same care: section 7b shows that share of winning trades comes from the selling rule (any stock
+"wins" 74% of the time under a sell-at-+2% rule) and is not profit. Judge it by dollars and by
+the average per trade, which the panel shows, never by the share of trades that ended up.
 
 ### What the Lambda keeps per user, and what it sends the page
 
@@ -1052,8 +1090,8 @@ not sure whether its improvements needed him to "push" them. They do not, and th
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 300 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 154 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 305 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 156 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 66 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
@@ -1620,3 +1658,8 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     name (now `slot_times`): the "what happens next" list silently failed in tests until renamed,
     which is what its `except` and log line are for. Rollback zip:
     `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_shares_20261011.zip`. Live: `practice-autopilot.js?v=24`.
+  - **Factor study of the screener score** (section 7b): none of its own factors reliably sorted
+    stocks; a win rate comes from the selling rule, not from skill; one raw figure (distance above
+    the 52-week low) kept a modest lead. The autopilot now records that figure with each share it
+    buys and splits its record by it: a measurement, not a rule. Rollback zip:
+    `…_before_autopilot_low52_20261011.zip`. Live: `practice-autopilot.js?v=25`.
