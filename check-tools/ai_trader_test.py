@@ -819,4 +819,20 @@ rec = m.load_item(U); rec['settings'].update(enabled=True, risk=5, budgetUsd=400
 m.datetime = at(sun); code_, b = call(action='run', userId=U); first = b['summary']['bought']
 m.datetime = at(sun + dt.timedelta(minutes=15)); code_, b = call(action='run', userId=U); m.datetime = clock
 check('hourly steps of $167 and holdings of $1,000: pressing "Check in now" again still buys the next holding (it used to give up after four steps)', first == 1 and b['summary']['bought'] == 1 and len(portfolio()['holdings']) == 2 and any('released ahead of its time' in e['text'] for e in b['log']), (first, b['summary']))
+
+# --- how far above its 52-week low a share was when bought: recorded with the buy, shown to the AI model, and the record is split by it
+D.t.clear(); PRICES.clear(); MODEL['answer'] = None; MODEL['prompts'].clear(); m.datetime = clock
+SNAP['3-100'] = [dict(r, from_low=10.0 + 30 * i) for i, r in enumerate(rows())]; SNAP['7-1'] = rows('crypto', '7-1')
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=20, screeners=['3-100', '7-1'], shares={}); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+MODEL['answer'] = {'picks': [{'symbol': 'S00', 'reason': 'r'}, {'symbol': 'S01', 'reason': 'r'}, {'symbol': 'S02', 'reason': 'r'}]}
+s, rec = run(t0); facts = {v['label']: v for v in rec['state']['open'].values()}; ask = buy_prompts()[-1]['user']
+check('a share\'s distance above its 52-week low is shown to the AI model and remembered with the buy; a coin has none', '| 10% above 52-week low' in ask and 'C00-USD' in ask and 'above 52-week low' not in [l for l in ask.split('\n') if l.startswith('C00-USD')][0] and facts['S00']['above'] == 10.0 and facts['S02']['above'] == 70.0, (facts.get('S00'), ask[-400:]))
+MODEL['answer'] = None; s, rec = run(t0 + dt.timedelta(days=1)); held = {h['label']: h for h in portfolio()['holdings']}
+check('(a coin bought the next day carries no such figure)', any(k.endswith('-USD') for k in held) and all('above' not in v for v in rec['state']['open'].values() if v['label'].endswith('-USD')))
+for label, mult in (('S00', 0.80), ('S01', 1.30), ('S02', 1.30)): PRICES[held[label]['symbol']] = held[label]['buyPrice'] * mult
+s, rec = run(t0 + dt.timedelta(days=2)); card = m.scorecard(rec['history']); bands = {g['label']: (g['n'], g['avg']) for g in card['groups']['above']}
+check('the record is split by it once such holdings are sold', bands == {'under 20% above its 52-week low': (1, -20.0), '20% to 50% above it': (1, 30.0), 'more than 50% above it': (1, 30.0)} and [t.get('above') for t in rec['history']] == [10.0, 40.0, 70.0], (bands, [(t['label'], t.get('above')) for t in rec['history']]))
+old_trade = dict(rec['history'][0]); old_trade.pop('above'); check('a trade from before this was recorded is left out of that split, and nothing breaks', m.scorecard([old_trade])['groups']['above'] == [] and 'All 1 closed trades' in m.memory_text(m.scorecard([old_trade]), None))
+check('once a band has enough trades the AI model is told how it did', '- more than 50% above it: 8 trades, average +30.0%' in m.memory_text(m.scorecard([dict(rec['history'][2])] * 8), None))
+PRICES.clear(); SNAP['3-100'] = rows(); MODEL['prompts'].clear()
 print('ALL PASS' if ok else 'SOME FAILED')

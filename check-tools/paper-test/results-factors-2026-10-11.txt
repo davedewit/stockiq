@@ -1,0 +1,72 @@
+===== S&P 100 screener, factor by factor: 101 stocks, 999 trading days, 2022-10-17 to 2026-10-09 =====
+stocks scored per day: min 99, max 101; the second half starts 2024-10-11
+
+Each cell: what the stocks a figure LIKED did next, minus what the ones it DISLIKED did, in percentage points;
+t: how clear that is (2 or more is clear, under 2 could be chance); halves: the same thing for the first and the second half of the period.
+A figure is called reliable only if it is clear AND has the same sign in both halves.
+
+A. THE SCREENER'S OWN SCORE AND ITS 12 WEIGHTED FACTORS (liked = above the day's middle value)
+                                   |               next day               |              next week               |              next month              |
+the final score (top 5th - bottom) |  +0.04 (t +1.4; halves +0.04 / +0.05) |  +0.19 (t +1.3; halves +0.16 / +0.23) |  +0.84 (t +1.3; halves +0.33 / +1.38) | no reliable link
+the signal label                   |  -0.01 (t -0.6; halves +0.00 / -0.03) |  +0.06 (t +0.5; halves +0.12 / -0.00) |  +0.47 (t +0.9; halves +0.08 / +0.88) | no reliable link
+RSI factor                         |  +0.01 (t +0.4; halves +0.01 / +0.02) |  -0.06 (t -0.4; halves +0.02 / -0.14) |  -0.34 (t -0.6; halves +0.43 / -1.11) | no reliable link
+MACD factor                        |  +0.00 (t +0.0; halves +0.05 / -0.04) |  +0.08 (t +0.5; halves +0.20 / -0.01) |  +0.20 (t +0.3; halves -0.06 / +0.42) | no reliable link
+Short Momentum factor              |  +0.08 (t +0.9; halves +0.17 / +0.04) |  +0.06 (t +0.1; halves +0.15 / +0.02) |  +0.97 (t +0.6; halves +0.13 / +1.37) | no reliable link
+Medium Momentum factor             |  +0.07 (t +1.0; halves -0.01 / +0.13) |  +0.20 (t +0.6; halves -0.24 / +0.52) |  +1.49 (t +1.1; halves +0.21 / +2.45) | no reliable link
+Long Momentum factor               |  +0.03 (t +0.8; halves -0.01 / +0.08) |  +0.17 (t +0.8; halves -0.03 / +0.36) |  +0.45 (t +0.5; halves -0.38 / +1.31) | no reliable link
+Volume factor                      |         (same for all stocks)        |         (same for all stocks)        |         (same for all stocks)        | no reliable link
+Financial factor                   |  +0.07 (t +2.3; halves +0.10 / +0.04) |  +0.36 (t +2.3; halves +0.53 / +0.18) |  +1.52 (t +2.6; halves +2.39 / +0.61) | pointed the RIGHT way
+Bollinger factor                   |  -0.03 (t -0.7; halves -0.05 / -0.02) |  +0.01 (t +0.0; halves +0.06 / -0.04) |  -0.15 (t -0.2; halves +0.34 / -0.55) | no reliable link
+Sentiment factor                   |  +0.10 (t +0.9; halves +0.15 / +0.07) |  -0.16 (t -0.3; halves +0.12 / -0.27) |  +0.35 (t +0.2; halves -0.24 / +0.59) | no reliable link
+Market factor                      |         (same for all stocks)        |         (same for all stocks)        |         (same for all stocks)        | no reliable link
+Risk factor                        |         (same for all stocks)        |         (same for all stocks)        |         (same for all stocks)        | no reliable link
+MA Trend factor                    |  +0.02 (t +0.6; halves -0.00 / +0.04) |  +0.06 (t +0.4; halves -0.10 / +0.21) |  +0.02 (t +0.0; halves -0.63 / +0.67) | no reliable link
+
+B. THE RAW FIGURES BEHIND THEM (the top fifth of the list minus the bottom fifth; + means higher was better)
+                                   |               next day               |              next week               |              next month              |
+rsi                                |  -0.01 (t -0.2; halves +0.01 / -0.03) |  +0.09 (t +0.4; halves +0.06 / +0.12) |  +0.32 (t +0.4; halves -0.40 / +1.07) | no reliable link
+change_24h                         |  +0.01 (t +0.2; halves +0.01 / +0.01) |  -0.07 (t -0.3; halves -0.01 / -0.13) |  +0.15 (t +0.2; halves -0.04 / +0.34) | no reliable link
+change_5d                          |  -0.03 (t -0.6; halves +0.03 / -0.08) |  -0.03 (t -0.1; halves +0.04 / -0.10) |  +0.24 (t +0.3; halves -0.15 / +0.64) | no reliable link
+change_10d                         |  +0.04 (t +0.8; halves +0.02 / +0.05) |  +0.12 (t +0.6; halves +0.09 / +0.16) |  +0.53 (t +0.6; halves -0.47 / +1.57) | no reliable link
+change_30d                         |  +0.04 (t +0.8; halves -0.01 / +0.08) |  +0.16 (t +0.7; halves -0.07 / +0.38) |  +0.35 (t +0.4; halves -0.81 / +1.55) | no reliable link
+change_90d                         |  +0.05 (t +1.0; halves +0.04 / +0.06) |  +0.18 (t +0.7; halves +0.09 / +0.26) |  +0.91 (t +0.9; halves +0.36 / +1.49) | no reliable link
+change_200d                        |  +0.03 (t +0.6; halves -0.03 / +0.09) |  +0.16 (t +0.6; halves -0.13 / +0.46) |  +0.81 (t +0.8; halves -0.23 / +1.89) | no reliable link
+change_1yr                         |  +0.08 (t +1.5; halves +0.03 / +0.13) |  +0.39 (t +1.4; halves +0.14 / +0.65) |  +1.39 (t +1.2; halves +0.29 / +2.53) | no reliable link
+price_vs_ma20                      |  +0.02 (t +0.4; halves +0.02 / +0.01) |  +0.07 (t +0.3; halves -0.05 / +0.20) |  +0.57 (t +0.7; halves -0.52 / +1.70) | no reliable link
+price_vs_ma50                      |  +0.03 (t +0.7; halves +0.01 / +0.06) |  +0.13 (t +0.6; halves -0.06 / +0.32) |  +0.54 (t +0.6; halves -0.55 / +1.68) | no reliable link
+price_vs_ma200                     |  +0.03 (t +0.6; halves -0.00 / +0.06) |  +0.19 (t +0.7; halves -0.02 / +0.39) |  +0.79 (t +0.8; halves -0.07 / +1.70) | no reliable link
+distance_from_52w_high             |  -0.07 (t -1.5; halves -0.08 / -0.05) |  -0.29 (t -1.3; halves -0.37 / -0.22) |  -1.01 (t -1.1; halves -1.15 / -0.86) | no reliable link
+distance_from_52w_low              |  +0.13 (t +2.4; halves +0.10 / +0.16) |  +0.67 (t +2.6; halves +0.49 / +0.85) |  +2.72 (t +2.6; halves +1.84 / +3.64) | pointed the RIGHT way
+volume_ratio                       |  +0.07 (t +2.5; halves +0.07 / +0.06) |  +0.10 (t +0.9; halves +0.13 / +0.07) |  +0.04 (t +0.1; halves +0.23 / -0.16) | pointed the RIGHT way
+stoch_k                            |  +0.01 (t +0.4; halves +0.03 / +0.00) |  -0.03 (t -0.2; halves -0.01 / -0.04) |  +0.13 (t +0.2; halves -0.49 / +0.78) | no reliable link
+profit_probability                 |  +0.05 (t +1.7; halves +0.06 / +0.04) |  +0.17 (t +1.1; halves +0.21 / +0.13) |  +0.88 (t +1.4; halves +0.46 / +1.32) | no reliable link
+atr_pct                            |  +0.20 (t +3.5; halves +0.15 / +0.25) |  +0.98 (t +3.4; halves +0.72 / +1.25) |  +4.22 (t +3.7; halves +3.33 / +5.15) | pointed the RIGHT way
+
+C. HOW OFTEN A TRADE ENDS UP, AND WHAT IT MAKES (every day's top 10 by score with a positive signal, bought at the next open,
+   0.2% taken off each trade for costs; 'any stock' is the same rule applied to every stock of the list on every day)
+selling rule                                         | top 10: trades |  end up |  average | any stock: end up |  average | top 10 minus any stock
+Cautious: -5% / +8%, 20 days                         |          9,974 |   50.9% |   +0.86% |             50.8% |   +0.66% | +0.19 (t +0.6)
+Balanced: -10% / +18%, 5 days                        |          9,974 |   50.8% |   +0.32% |             51.5% |   +0.21% | +0.11 (t +0.8)
+Bold: -14% / +28%, 2 days                            |          9,974 |   48.6% |   -0.02% |             48.3% |   -0.06% | +0.04 (t +0.7)
+Adventurous: -20% / +45%, 1 day                      |          9,974 |   45.1% |   -0.14% |             44.9% |   -0.15% | +0.02 (t +0.7)
+a rule built to "win" often: -15% / +2%, 20 days     |          9,974 |   76.0% |   +0.71% |             73.5% |   +0.49% | +0.22 (t +0.9)
+the opposite: -2% / +15%, 20 days                    |          9,974 |   33.4% |   +0.57% |             34.7% |   +0.47% | +0.10 (t +0.3)
+
+D. WOULD OTHER WEIGHTS HAVE DONE BETTER? (the fair way: chosen on the first half, judged on the second half only)
+   figures that looked clear in the first half (week ahead, t of 1.5 or more) and the direction that helped: distance_from_52w_low (higher was better), atr_pct (higher was better)
+   the screener's score as it is              top 10 minus the whole list: first half week +0.20 (t +1.1) | first half month +0.47 (t +0.7) | SECOND half week +0.20 (t +0.9) | SECOND half month +1.25 (t +1.3)
+   a score re-built from those figures        top 10 minus the whole list: first half week +0.67 (t +2.0) | first half month +2.92 (t +2.2) | SECOND half week +1.38 (t +2.7) | SECOND half month +6.37 (t +2.9)
+   long-run rise alone (change_200d)          top 10 minus the whole list: first half week +0.23 (t +0.9) | first half month +1.01 (t +1.0) | SECOND half week +0.84 (t +1.9) | SECOND half month +3.70 (t +1.9)
+   a random top 10 (the average of 20 draws)  top 10 minus the whole list: first half week -0.01 | first half month -0.03 | SECOND half week +0.00 | SECOND half month -0.00
+
+Read the SECOND half columns: that is the only part the re-built score was not fitted to.
+
+E. THREE CHECKS ON THE RE-BUILT SCORE BEFORE BELIEVING IT
+   1. all 101 stocks                       top 10 minus the list, a week ahead: first half: +0.67 a week (t +2.0) | second half: +1.38 a week (t +2.7)
+   1. without the seven chip / AI names    top 10 minus the list, a week ahead: first half: +0.33 a week (t +1.3) | second half: +0.65 a week (t +2.0)
+   2. In the 628 weeks the whole list ROSE: its top 10 +3.44%, the list +1.55%. In the 366 weeks the list FELL: its top 10 -1.83%, the list -1.35%.
+      Its top 10 moved 2.2 times as far as the list in rising weeks and 1.4 times as far in falling weeks: above 1 in both means it is partly just more risk.
+      Worst single week: its top 10 -18.5%, the list -11.3%. Worst month: its top 10 -32.0%, the list -11.8%.
+   3. distance_from_52w_low  comparing only stocks that are about equally jumpy (top fifth minus bottom fifth inside each third by how much they move): week +0.40 (t +2.0; halves +0.30 / +0.51) | month +1.51 (t +2.0; halves +1.04 / +2.01)
+   3. change_1yr             comparing only stocks that are about equally jumpy (top fifth minus bottom fifth inside each third by how much they move): week +0.38 (t +1.7; halves +0.14 / +0.62) | month +1.43 (t +1.6; halves +0.41 / +2.49)
+   3. score                  comparing only stocks that are about equally jumpy (top fifth minus bottom fifth inside each third by how much they move): week +0.19 (t +1.4; halves +0.17 / +0.20) | month +0.49 (t +0.9; halves +0.10 / +0.89)

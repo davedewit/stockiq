@@ -448,6 +448,14 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     old.form({ ...settings, enabled: true, risk: 4, screeners: ['3-100', '7-1'] }); await old.ctx.practiceAutopilot.flush(); await sleep(30);
     check('an answer from the older function: no share menus, nothing about shares is sent, and the coin sentence is as before', !/Share of the budget|How the budget is spread/.test(old.text()) && !('shares' in old.calls.filter(c => c.action === 'save')[0].settings) && /goes into coins at this level/.test(old.text()));
   }
+  { const g1 = (label, n, avg) => ({ label, n, avg, vs: null, beat: 0, judged: 0, up: avg > 0 ? n : 0 });
+    const st = { settings: { ...settings, enabled: true }, state: {}, practiceCash: 100000, log: [], plans: [], minSample: 8,
+      scorecard: { n: 9, avg: 1.2, up: 6, vs: null, beat: 0, judged: 0, label: 'all', groups: { screener: [g1('S&P 100', 9, 1.2)], above: [g1('under 20% above its 52-week low', 4, -1.5), g1('more than 50% above it', 5, 3.4)] } } };
+    const w = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, ...st } })); await sleep(30);
+    check('the breakdown splits finished share trades by how far above its 52-week low each was when bought', /By how far above its 52-week low when bought \(shares\) under 20% above its 52-week low 4 -1\.5% 0 of 4 – more than 50% above it 5 \+3\.4% 5 of 5/.test(w.text()), w.text().slice(w.text().indexOf('By how far above'), w.text().indexOf('By how far above') + 200));
+    st.scorecard.groups.above = []; const none = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, ...st } })); await sleep(30);
+    check('and leaves that part out while there is nothing in it', !/By how far above its 52-week low/.test(none.text()));
+  }
   check('no broken values', !/undefined|NaN|\[object/.test(p.container.innerHTML), (p.container.innerHTML.match(/.{30}(undefined|NaN|\[object).{30}/) || [])[0]);
   console.log(ok ? 'ALL PASS' : 'SOME FAILED');
 })();
