@@ -357,7 +357,7 @@
                 <div id="ap-status" class="ap-status ${on ? 'on' : ''}">${esc(statusText())}</div>
 
                 <div class="ap-actions">
-                    <button id="ap-run" data-ap="run" class="ap-btn ${ready ? 'primary' : ''}" ${working || !ready || state.text === 'Saving…' ? 'disabled' : ''} title="${!on ? 'Switch the autopilot on first' : !ready ? 'Tick at least one screener first' : 'Runs one check-in now instead of waiting for the next one. If the budget is still being built up, pressing this releases the next part of it early'}">${working === 'run' ? 'Checking in… this can take up to a minute' : 'Check in now'}</button>
+                    <button id="ap-run" data-ap="run" class="ap-btn ${ready ? 'primary' : ''}" ${working || !ready || state.text === 'Saving…' ? 'disabled' : ''} title="${!on ? 'Switch the autopilot on first' : !ready ? 'Tick at least one screener first' : 'Runs one check-in now instead of waiting for the next one. If the budget is still being built up, pressing this releases the next part of it early. Only markets that are open are traded; coins at any time'}">${working === 'run' ? 'Checking in… this can take up to a minute' : 'Check in now'}</button>
                     <button id="ap-sellall" data-ap="sellall" class="ap-btn" ${working || !holds ? 'disabled' : ''} title="${holds ? 'Sells every holding the autopilot bought, now, at the latest prices. Holdings you bought yourself are not touched' : 'It holds nothing right now'}">${working === 'sellall' ? 'Selling…' : 'Sell everything it holds' + (holds ? ' (' + holds + ')' : '')}</button>
                     <span id="ap-saved" class="ap-saved ${state.bad ? 'bad' : ''}">${esc(state.text)}</span>
                 </div>
@@ -409,7 +409,7 @@
                 <div class="ap-card">
                     <span class="ap-label">Screeners it buys from <span id="ap-chosen" class="ap-sub">${chosen} chosen</span></span>
                     ${screenerGroups(o.screeners).map(([group, keys], i) => `<div class="ap-group ${i === 0 ? 'first' : ''}"><div class="ap-group-name">${esc(group)}</div><div class="ap-chips">${keys.map(k => `<label class="ap-chip"><input type="checkbox" data-ap-screener="${esc(k)}" ${d.screeners.includes(k) ? 'checked' : ''}> ${esc(o.screeners[k].name)}${data.resting && data.resting[k] ? ' <small title="Resting after its recent trades lagged the market">(resting until ' + esc(day(data.resting[k])) + ')</small>' : ''}</label>`).join('')}</div></div>`).join('')}
-                    <div class="ap-help">Each share market is only traded while it is open; coins at any time. Bigger lists take a little longer to check.</div>
+                    <div class="ap-help">Each share market is only traded while it is open, also when you press "Check in now"; coins at any time. Bigger lists take a little longer to check.</div>
                 </div>
 
                 <div class="ap-card">
@@ -451,7 +451,7 @@
         readDraft();
         if (!draft || !data) return;
         const on = data.settings.enabled, ready = on && data.settings.screeners.length > 0, state = savedState(), set = (id, fn) => { const el = byId(id); if (el) fn(el); };
-        set('ap-run', el => { el.disabled = !!working || !ready || state.text === 'Saving…'; el.title = !on ? 'Switch the autopilot on first' : !ready ? 'Tick at least one screener first' : 'Runs one check-in now instead of waiting for the next one. If the budget is still being built up, pressing this releases the next part of it early'; if (el.classList) el.classList.toggle('primary', ready); });
+        set('ap-run', el => { el.disabled = !!working || !ready || state.text === 'Saving…'; el.title = !on ? 'Switch the autopilot on first' : !ready ? 'Tick at least one screener first' : 'Runs one check-in now instead of waiting for the next one. If the budget is still being built up, pressing this releases the next part of it early. Only markets that are open are traded; coins at any time'; if (el.classList) el.classList.toggle('primary', ready); });
         set('ap-saved', el => { el.textContent = state.text; if (el.classList) el.classList.toggle('bad', state.bad); });
         set('ap-status', el => { el.textContent = statusText(); if (el.classList) el.classList.toggle('on', on); });
         set('ap-switch-text', el => { el.textContent = draft.enabled ? 'On' : 'Off'; });
@@ -584,7 +584,7 @@
                 const r = await api('sellall');
                 take(r);
                 const s = r.summary || {};
-                notice = { text: `Sold ${s.sold || 0} holding${s.sold === 1 ? '' : 's'}.` + (s.skipped && s.skipped.length ? ` No price right now for ${s.skipped.join(', ')}: still held.` : '') + (data.settings.enabled ? ' The autopilot is still on and will buy again at its next check-in.' : '') };
+                notice = { text: `Sold ${s.sold || 0} holding${s.sold === 1 ? '' : 's'}.` + (s.skipped && s.skipped.length ? ` No price right now for ${s.skipped.join(', ')}: still held.` : '') + (s.closed && s.closed.length ? ` Still held because its market is closed (a closed market's last price is not one to sell at): ${s.closed.join(', ')}.` : '') + (data.settings.enabled ? ' The autopilot is still on and will buy again at its next check-in.' : '') };
                 if (window.practicePortfolio && window.practicePortfolio.reload) window.practicePortfolio.reload();
             });
         }
