@@ -1,10 +1,6 @@
 #!/bin/bash
-# One-off deploy (built and tested locally on 11 Oct 2026): the AI chat on the dashboard, knowing the dashboard.
-# The chat function (stockiq-ai-chat) is told how the dashboard works when the user is on it, and is given a short summary
-# of what that user's own practice portfolio and autopilot show (built by the page; data, never instructions). The
-# dashboard page now loads the chat, and the two practice scripts provide that summary.
-# Function stockiq-ai-chat; ai-chat.js, practice-autopilot.js, practice-portfolio.js, dashboard.html.
-# What it is and why: .kiro/steering/stockiq.md ("AI Chat System") and site-overview.md section 8c.
+# One-off deploy (11 Oct 2026): the AI chat is told to keep to what the user's dashboard figures say (no added steps,
+# amounts or times) and not to use selling words about the autopilot. Function stockiq-ai-chat only.
 #
 #   Preview (changes nothing):   DRY_RUN=true bash deploy.sh
 #   Deploy:                      bash deploy.sh
@@ -12,7 +8,7 @@
 # Safe to run twice: each step first checks whether it has already been done, and stops if the live
 # code or a website file is not what this was built against.
 #
-# Roll back: the previous Lambda code is saved in ~/VSCODE/backup/stockiq-ai-chat_before_dashboard_20261011.zip
+# Roll back: the previous Lambda code is saved in ~/VSCODE/backup/stockiq-ai-chat_before_wording_20261011.zip
 #   aws lambda update-function-code --function-name stockiq-ai-trader --zip-file fileb://<that zip> --profile default --region us-east-1
 # Website files: git checkout ai-chat.js, practice-autopilot.js, practice-portfolio.js and dashboard.html in ~/VSCODE/website and upload them again.
 # (The older function simply ignores what the newer one added to a user's record.)
@@ -48,7 +44,7 @@ deploy_lambda() {
     local live_sha; live_sha="$("${AWS[@]}" lambda get-function-configuration --function-name "$name" --query CodeSha256 --output text)"
     [ "$live_sha" = "$expected" ] || stop "$name has changed on AWS since this was built (code $live_sha)"
     cmp -s "$work/live/$main" "$MIRROR/$name/$main" || stop "the live $name is not the same as the local mirror"
-    run cp "$work/live.zip" "$BACKUP/${name}_before_dashboard_20261011.zip"
+    run cp "$work/live.zip" "$BACKUP/${name}_before_wording_20261011.zip"
     cp "$new" "$work/live/$main"
     (cd "$work/live" && zip -q -X "$work/new.zip" ./*.py)
     echo "new package: $(unzip -Z1 "$work/new.zip" | tr '\n' ' ')"
@@ -58,29 +54,10 @@ deploy_lambda() {
 }
 
 # 1. The chat function
-deploy_lambda "$TRADER" lambda_function.py "$HERE/lambda/lambda_function.py" "53j2nQ8ZhN4AyKi3AR5QTLC2Fb0ahAOeRxrmY46Zosg="
+deploy_lambda "$TRADER" lambda_function.py "$HERE/lambda/lambda_function.py" "bNjN0ufYGU3FRdiYC+oNHPIEbS7y/t0O4hEiKc0z0Ko="
 if [ "$DRY" != "true" ]; then
     say "the live function answers (an empty message, which it refuses without asking the AI model)"
     curl -s -m 30 -X POST "$TRADER_URL" -H 'Content-Type: application/json' -d '{"message":"","userId":"anon_deploycheck"}'; echo
 fi
-
-# 2. Website files
-say "website files"
-check_web() {   # <file> <sha256 of the version this was built against>
-    local f="$1" expected="$2" have
-    if cmp -s "$WEB/$f" "$HERE/web/$f"; then echo "$f: already copied"; return 0; fi
-    have="$(shasum -a 256 "$WEB/$f" | cut -d' ' -f1)"
-    [ "$have" = "$expected" ] || stop "$WEB/$f has changed since this was built"
-    run cp "$HERE/web/$f" "$WEB/$f"
-}
-check_web ai-chat.js            2de57dc2bf369423a4d73268160e988c28a566d7b35715aa590add79c28642fa
-check_web practice-autopilot.js 7a5f0d40c3f85fe24f9de129019d069a8ae099ec982b682ed5d81fceb1f11b05
-check_web practice-portfolio.js 07f4ef610504fc76296e7b89b157b534b6625d499705c0bf2c6a9424126c673e
-check_web dashboard.html        17b36effb2663fd468977d40e3865771013a25b3a8034beb2e3a9904312d5e8b
-for f in ai-chat.js practice-autopilot.js practice-portfolio.js; do
-    run "${AWS[@]}" s3 cp "$WEB/$f" "s3://$BUCKET/$f" --cache-control "public, max-age=86400"
-done
-run "${AWS[@]}" s3 cp "$WEB/dashboard.html" "s3://$BUCKET/dashboard.html" --cache-control "public, max-age=3600" --content-type "text/html; charset=utf-8"
-run "${AWS[@]}" cloudfront create-invalidation --distribution-id "$DIST" --paths /ai-chat.js /practice-autopilot.js /practice-portfolio.js /dashboard.html --query Invalidation.Status --output text
 
 say "FINISHED$([ "$DRY" = "true" ] && echo ' (dry run, nothing changed)')"
