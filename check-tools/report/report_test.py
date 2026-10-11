@@ -165,6 +165,10 @@ state['figures'] = 'fail'; f = run(new, 'BHP.AX'); state['figures'] = 'ok'
 check('the file cannot be read: still a report, and it says the score is price and volume only', bool(f) and 'were not available for this share' in text(f) and 'from price and volume only' in text(f) and f['pe_ratio'] is None, f and [l for l in text(f).split('\n') if 'available' in l])
 state['keep_file'] = True; new._site_figures.update(figures=None, at=0); state['figure_reads'] = 0; run(new, 'BHP.AX'); run(new, 'IMB.L'); run(new, 'KHC'); state['keep_file'] = False
 check('the file is read once and kept, not once a report', state['figure_reads'] == 1, state['figure_reads'])
+with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+    new._api_cache.clear(); first = new.analyze_stock_comprehensive_enhanced('KHC'); second = new.analyze_stock_comprehensive_enhanced('KHC')
+source = lambda r: [l.strip() for l in text(r).split('\n') if 'Company figures from' in l]
+check('a second report from the same container names the same sources', source(first) == source(second) == ['Company figures from Finnhub and Yahoo Finance (as of 5 Oct 2026)'], (source(first), source(second)))
 for symbol, a, b in rows:
     lines = new.company_figure_lines({k: b.get(k) for k in ('pe_ratio', 'revenue_growth', 'profit_margin', 'debt_to_equity', 'return_on_equity')})
     bad = [l for l in lines if ('❌' in l) and not any(w in ' '.join(b['score_breakdown']) for w in ('High P/E', 'Declining', 'Unprofitable', 'Weak Profit', 'High Debt', 'Elevated Debt', 'Negative ROE', 'Weak ROE'))]

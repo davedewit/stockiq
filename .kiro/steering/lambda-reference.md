@@ -36,7 +36,7 @@
 ### Analysis (analysis.html)
 | Function | Purpose |
 |---|---|
-| `stockiq-option-1-1-custom-analysis` | Single stock report + 0-100 score (Option 1) |
+| `stockiq-option-1-1-custom-analysis` | Single stock report + 0-100 score (Option 1). File `lambda_function2.py`. Rebuilt 11 Oct 2026 (`site-overview.md` section 7, "The single-stock report and its chart"): prices in the share's own currency, one bar a day, Wilder's RSI, a graded trend factor (`trend_points`), company figures from Finnhub and, for what it lacks (everything outside the US), from the private file `s3://stockiq-dynamic-stock-lists/site-data/company_figures.json` that `publish_company_figures.py` publishes daily. Sends its own prices to the chart function. **Holds the Finnhub key in its code, so the code is not in git**; changes are kept as scripts in `check-tools/report/changes-2026-10-11/`. A call with no `userId` is saved to history: test with `userId` and `skipHistorySave: true`. Tests: `check-tools/report/report_test.py` |
 | `stockiq-option-2-trading-signals` | Trading signals (Option 2) |
 | `stockiq-option-2-2-auto-signals` | Auto trading signals |
 | `stockiq-option-3-1-us-screener` | US stock screener coordinator (Option 3) |
@@ -44,7 +44,7 @@
 | `stockiq-option-3-1-sp100` | S&P 100 screener |
 | `stockiq-option-7-1-orchestrator` | Crypto screener (Option 7). Holds the coin list (`COINS`) and calls the 54 `stockiq-option-7-1-worker-N` functions in single-coin mode, one call per coin. 2,048 MB. Also invoked every 30 minutes by EventBridge rule `stockiq-coinspot-predictions-schedule` to record the top 10 (history and entry log, see `site-overview.md` 8b); user calls only read that history. Handler `orchestrator.lambda_handler`; the zip must contain `orchestrator.py`, `orchestrator_simple.py`, `prediction_memory.py` |
 | `stockiq-screener-coordinator` | Main screener coordinator |
-| `stockiq-chart-generator` | Chart generation |
+| `stockiq-chart-generator` | The single-stock report's chart as an SVG (`lambda_function_simple.py`, redrawn 11 Oct 2026): price with 20-, 50- and 200-day averages, support and resistance, volume, RSI. Draws the prices the report sends it (`series`, `currency`, `support`, `resistance`); asked by itself (`{"symbol": "MSFT"}` from `script.js` and `analysis-functions.js`) it fetches its own. Output must stay plain ASCII (the pages use `btoa()`). Tests: `check-tools/report/chart_test.py` |
 | `stockiq-validate-symbol` | Validates stock symbols across exchanges |
 | `StockIQ-StockUpdater` | Stock data updater |
 

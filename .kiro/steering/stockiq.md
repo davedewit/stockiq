@@ -107,7 +107,8 @@ aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R --paths "/*" 
 - `stockiq-final-websitebucket-vqekic7enf9h` — Website hosting
 - `stockiq-dashboard-analysis-history` — User analysis reports/CSV (auto-delete 30/90 days)
 - `stockiq-option-1-1-custom-analysis` — Custom analysis charts (auto-delete 30/90 days)
-- `stockiq-dynamic-stock-lists`, `stockiq-stock-lists`, `stockiq-acp`, `stockiq-prod-1756902871`
+- `stockiq-dynamic-stock-lists` (private) — also holds `site-data/company_figures.json`, the company figures the single-stock report reads for shares outside the US (written daily by `publish_company_figures.py`)
+- `stockiq-stock-lists`, `stockiq-prod-1756902871` (`stockiq-acp` no longer exists, checked 11 Oct 2026)
 
 ### CloudFront
 - **Distribution ID:** `EHXV50CPHY07R`

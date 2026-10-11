@@ -101,7 +101,7 @@ out when the next run is.
 Order inside `deploy-to-s3.sh`:
 1. `update_news.py`: Yahoo/Google RSS → OpenAI summaries → news.html + news.js (2-hour cooldown)
 2. `update_stock_news.py`: per-stock news into stock pages + news.html/news.js (23-hour cooldown per stock)
-3. `update_stock_analysis.py` (**daily run only**: it sits inside the `UPDATE_STOCK_NEWS=true` block, so a plain `./deploy-to-s3.sh` prints "Skipping stock data snapshots"): data snapshots on all 3,467 stocks, sets index/noindex on large caps (≥$10B), writes `indexable_stocks.txt`. ~20 min, no API cost. 404s for delisted stocks are normal/cached. When Yahoo has no price for a stock it keeps yesterday's snapshot and does not de-index it.
+3. `update_stock_analysis.py` (**daily run only**: it sits inside the `UPDATE_STOCK_NEWS=true` block, so a plain `./deploy-to-s3.sh` prints "Skipping stock data snapshots"): data snapshots on all 3,467 stocks, sets index/noindex on large caps (≥$10B), writes `indexable_stocks.txt`. ~20 min, no API cost. 404s for delisted stocks are normal/cached. When Yahoo has no price for a stock it keeps yesterday's snapshot and does not de-index it. Straight after it, in the same block, `publish_company_figures.py` publishes the company figures the single-stock report uses for shares outside the US (section 7, "The single-stock report"); it never stops the deploy.
 4. Backups (website + stockiq; prod_scripts every 23h)
 5. `people_also_watch_stocks.py --missing`
 6. `update_sitemap.py`: **rebuilds** stock URLs from `indexable_stocks.txt` (not all HTML files), updates lastmod on site pages. Refuses if list < 200 entries.
@@ -259,10 +259,14 @@ git pull --rebase && git push
 - `stockiq/stock_metrics.py` is an **exact copy** of the Lambda's scoring functions. If the
   Lambda's scoring changes, copy the functions again or the pages will disagree with the app.
   (Breakdown label text was aligned on 9 Oct 2026; pages strip the trailing parenthesis anyway.)
+  `python3 check-tools/report/patch_metrics.py <the Lambda's file> stock_metrics.py stock_metrics.py` copies the functions
+  across and stops if the two differ afterwards.
 - Stock pages use Yahoo fundamentals (converted to Finnhub units: %, D/E ratio) because the
-  Finnhub free key is shared with the live Lambda. **Page and app scores can differ a lot**, not
-  slightly: the page uses the previous close, the app the live price, and several factors are
-  cliffs (AAPL showed 71 on the page and 47 in the app a day later; breakdown in section 11).
+  Finnhub free key is shared with the live Lambda. **Page and app scores can still differ**: the page uses
+  the previous close and Yahoo's figures, the app the live price and Finnhub's figures first (Yahoo's, from the
+  pages' own cache, only for what Finnhub lacks). The largest cause of big jumps, a trend factor of +12 or -12 on
+  the sign alone, was replaced by a graded one on 11 Oct 2026 (next part); RSI, MACD and the one-year change still
+  score in steps (AAPL once showed 71 on the page and 47 in the app a day later).
 - **The screeners are price, momentum and volume only.** Their "financial", "sentiment" and "risk"
   factors do not use real company data, and the 12 weights total 102% in the code (section 8b).
 - **Every share screener is scored by one file since 11 Oct 2026** (`stockiq/workers/stock_worker.py`, section 8b "The worker
@@ -272,9 +276,90 @@ git pull --rebase && git push
   factors. Crypto is a different program (section 8b "Crypto").
 - **Neutral wording everywhere**, public pages and the paid product: "Strongly positive …
   Strongly negative signals" plus "not financial advice". No BUY/SELL labels, targets or stop
-  losses are shown anywhere (section 8b). The model calls its 1-year change "YTD"; pages relabel it.
+  losses are shown anywhere (section 8b). Until 11 Oct 2026 the model called its 1-year change "YTD"; it now says
+  "over 1 year" (the pages' relabelling of "YTD" is left in and does nothing).
 - `about.html` documents both systems, including the 102% and the price-and-volume-only note.
   Keep it in sync if scoring changes.
+
+### The single-stock report and its chart: how they work now (rebuilt 11 Oct 2026)
+
+The owner asked whether the individual stock analysis could be improved ("it took a long time to create back in the day
+with an older version of AI"). The live report was run for a US share, an Australian one, a UK one and a fund and read
+line by line. What was wrong, and what it does now:
+
+- **Two functions.** `stockiq-option-1-1-custom-analysis` (`lambda_function2.py`, about 2,440 lines) fetches a year of
+  daily prices from Yahoo, company figures, dividends, the VIX and the latest news from the share's own stock page,
+  scores the share and writes the report text. It calls `stockiq-chart-generator` (`lambda_function_simple.py`) for the
+  picture, which comes back inside the report text as a `data:` address. The pages can also ask the chart function for
+  a chart by itself (`script.js`, `analysis-functions.js`: they turn the SVG text into a picture with `btoa()`, so **the
+  chart's text must be plain ASCII**: a pound or yen sign is written as a character code).
+- **Prices in the share's own currency** (`money()`, `currency_note()`; the currency comes with Yahoo's prices). Every
+  share was printed with a dollar sign: BHP.AX "$60.94" (Australian dollars), IMB.L "$2662.00" (2,662 pence). Now
+  "A$60.94", "2,662.00p" with a line "Prices for this share are in pence: 2,662.00p is £26.62", "¥2,910.50", "C$243.83".
+- **One bar a day, and the latest session from the quote** (`bars_from_chart`: the same rules as the screener workers).
+  ASX shares said "+0.00% today" after the close (Yahoo sends the last session twice); a London share whose latest bar
+  arrives empty showed the price of the day before.
+- **One RSI** (Wilder's, as the chart and the screeners use). The text said 47.3 under a chart that said 56: the report
+  used a plain 14-day average, the chart Wilder's smoothing.
+- **A trend factor that grows with the distance** (`trend_points`): up to 6 points for where the price is against its
+  20-day average and up to 6 for where the 20-day average is against the 50-day, each in full at 2% apart
+  (`TREND_FULL_AT`). Names: Strong Uptrend (9 or more), Uptrend (3 or more), Flat Trend, Mixed Trend (two clear halves
+  that point opposite ways: a bounce inside a decline), Downtrend, Strong Downtrend. It was +12 or -12 on the sign
+  alone: BHP.AX, up 45% in a year, read "Strong Downtrend: -12" for being 0.03% under its 20-day average, and a move of
+  a few cents swung a score by 24 points.
+- **One explanation of the score.** Under the breakdown stood a "detailed scoring methodology" that used other points
+  (a one-year gain +7 where the breakdown said +3), did not add up to the score and quoted 40% / 40% / 20% weights that
+  do not exist. It is gone. "How the score is built" now adds the breakdown's own points: "50 + 41 - 28 = 63". The
+  company-figure lines use the score's own thresholds (`company_figure_lines`): a figure could read "Weak" in the
+  breakdown and "Adequate" below it.
+- **Company figures for shares outside the US.** Finnhub (free plan) has them for US shares only, so every Australian,
+  UK, Japanese, Canadian, European and Hong Kong share was scored on price alone while the report listed "fundamental
+  metrics". **Yahoo's own summary cannot be read from AWS or from a script**: it answers "429 Too Many Requests" to
+  anything that is not a browser (tried in the first deploy, taken out again). What works: `update_stock_analysis.py`
+  already keeps Yahoo's figures for every stock on the site in `.analysis_cache/info/`.
+  **`publish_company_figures.py`** puts them, in the score's units, into one private file,
+  `s3://stockiq-dynamic-stock-lists/site-data/company_figures.json` (3,333 stocks, 570 KB; refuses to upload fewer
+  than 1,000; leaves out figures older than 75 days). The daily deploy runs it straight after the snapshot step (it
+  never stops a deploy; a dry run only builds the file). The function reads the file once per warm container and for six
+  hours (`site_company_figures`), fills only the figures Finnhub did not have (`fill_missing_figures`), for shares only
+  (a fund gets none), and the report says "Company figures from Yahoo Finance (as of 5 Oct 2026)" or "from Finnhub and
+  Yahoo Finance (…)". A share that is not on the site, or a file that cannot be read: "Company figures were not
+  available for this share. The score above is therefore built from price and volume only".
+- **Smaller things:** "YTD" is called the one-year change it is; "Breaking news (last 24 hours)" is "Latest news" (the
+  article can be days old); "Oversold (Buy signal)" / "Overbought (Sell signal)" lost their brackets (advice wording
+  that the Oct 9 pass had missed); volume is compared with the 20-day average the score uses (a line labelled "20-day
+  average" printed the year's); while a session is still open its part-day volume is left out of the score
+  (`partial_day`; it read "Low Volume: -3" every morning); "Liquidity Crisis" is "Low Liquidity"; filler lines removed.
+- **The chart** (`draw_chart`) is drawn from the very prices the report scored, sent to it by the report with its
+  support and resistance (`series`, `currency`, `support`, `resistance` in the request), so picture and text cannot
+  differ; asked by itself it fetches its own with the same rules. Averages and RSI start when they have their days (they
+  were padded: flat lines, then a jump); the 200-day average is on it; it has no background of its own and mid-tone
+  lettering, so it sits on a dark page; **lettering grows when the picture is shown small** (a rule inside the SVG:
+  `@media (max-width:480px)`, which a browser applies to the size the picture is shown at); 21 KB (it was 79 KB, and a
+  saved report 115 KB: now about 35 KB).
+- **Scores moved, and the stock pages with them.** On saved prices for 106 US shares the page score moved 6 points on
+  average (27 of them by 10 or more, no lean up or down), mostly from the RSI method. `stock_metrics.py` carries the
+  same functions; the pages follow at the next daily run. **None of this makes the score better at predicting**
+  (section 7b): it makes the report correct and consistent.
+- **The functions' code is still not in git, and the report's cannot be yet: it holds the Finnhub key in the code.**
+  What changed is kept as the scripts that made the change: `check-tools/report/changes-2026-10-11/` (run in order
+  against the copies in the rollback zips they rebuild the live code exactly). Tests:
+  `python3 check-tools/report/report_test.py <the file from ~/VSCODE/backup/stockiq-option-1-1-custom-analysis_before_report_20261011.zip> lambda-sync/stockiq-option-1-1-custom-analysis/lambda_function2.py`
+  (79 checks: the old code and the new on the same saved prices, `--show SYMBOL` prints a whole report) and
+  `python3 check-tools/report/chart_test.py lambda-sync/stockiq-chart-generator/lambda_function_simple.py lambda-sync/stockiq-option-1-1-custom-analysis/lambda_function2.py`
+  (29 checks). A live report without saving anything: POST `{"symbols":["BHP.AX"],"userId":"nobody-deploy-check@example.com","skipHistorySave":true}`
+  to the function's address (with no `userId` it is treated as a background run and **saved**).
+- **Live** (13:29 UTC, 11 Oct 2026): `stockiq-option-1-1-custom-analysis` `cPDWynX/4N+25Ec/+jot60nlhFWq1aeZ8wH/ozEqKps=`,
+  `stockiq-chart-generator` `OIDrZ2W9G3lJ2sKarnoT4c7RvoLh1ApDX43NWjR72z4=`, both equal to their mirrors. Checked with
+  the live report for AAPL, BHP.AX, IMB.L, 7203.T, SHOP.TO and SPY, through the page's own code (`page_run.js 1 custom`),
+  and by looking at the live chart at desktop and phone width on light and dark. **Not checked:** the analysis page
+  itself in a browser, a real phone, the dashboard's "Run in Background" for a single stock.
+  Rollback zips, in order: `~/VSCODE/backup/stockiq-chart-generator_before_report_20261011.zip`,
+  `stockiq-option-1-1-custom-analysis_before_report_…`, `…_before_figures_…`, `…_before_source_…`.
+- **Left as it is:** the first line still says "(REAL-TIME DATA)", as every screener's does (one wording decision for
+  the whole site); MACD still scores +8 or -8 on its sign and RSI in steps at 30 / 40 / 60 / 70; valuation is counted
+  twice for a share with a high P/E and a high price-to-book; the Finnhub call is still made for shares it never has;
+  the report's time is the visitor's only when the page sends its offset.
 
 ## 7b. Does the screener score predict anything? (backtest, 10 Oct 2026)
 
@@ -1697,6 +1782,9 @@ left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line ch
   Live files were compared byte for byte at each deploy.
 - `deploy-to-s3.sh` carries the rules for how long a browser may keep a copy (section 5, step 8); the first daily run with
   it is Monday 12 Oct: look at its log once (section 12, "After the daily run").
+- The single-stock report and its chart (section 7, "The single-stock report"): `stockiq-option-1-1-custom-analysis`
+  `cPDWynX/4N+25Ec/+jot60nlhFWq1aeZ8wH/ozEqKps=`, `stockiq-chart-generator` `OIDrZ2W9G3lJ2sKarnoT4c7RvoLh1ApDX43NWjR72z4=`,
+  both equal to their mirrors; `stock_metrics.py` sha256 starts `5c034782379b`; tests 79 report, 29 chart.
 - Crypto: the 54 `stockiq-option-7-1-worker-N` all `NmXC9dcsA6p5tXJl+u6VZIfdsrvM3ERN/DmMSQ9zalI=`, the orchestrator
   `Tyyx+Pb2l+sy7avfCncwduEtmFtYn6Lws+5g6dj9Kc0=`, both equal to their mirrors (MACD fix of 11 Oct, section 8b).
 - Share-screener workers: all 669 show `CodeSha256` `q9ZX/UvTBcszKxRPR9lvJw9UpyfWrB5sOB3pDWccm6c=` (`workers/live.txt`), built from `workers/` in git.
@@ -2068,12 +2156,15 @@ Needs the owner's decision or more work (nothing here is fixed):
     (the entry log in section 8b does this job from 10 Oct). The practice portfolio and autopilot
     built the same day (section 8c) are the live counterpart: the autopilot's finished trades are a
     forward test of buying from the top of the rankings, with its own record on the dashboard.
-- **Page score vs app score.** Same model, different inputs (checked on AAPL, 71 vs 47): the page
-  uses the previous close and Yahoo fundamentals, the app uses the live price and Finnhub. A
-  price 0.1% under the 20-day average swung the trend factor by 18 points; Finnhub had no revenue
-  growth (−8); and during market hours the app compares part-day volume with a full-day average
-  ("Low Volume −3"). Worth fixing: the part-day volume penalty, and a Yahoo fallback when Finnhub
-  lacks a figure. Both are scoring changes: change `stock_metrics.py` too.
+- **Page score vs app score.** Same model, different inputs (once 71 vs 47 for AAPL): the page uses the previous
+  close and Yahoo's figures, the app the live price and Finnhub's. Three of its causes were dealt with on 11 Oct 2026
+  (section 7, "The single-stock report"): the trend factor is graded, part-day volume is left out, and figures Finnhub
+  lacks come from the pages' own Yahoo cache. What is left: MACD (+8 or -8 on its sign) and RSI still score in steps.
+- **Single-stock report, left open on 11 Oct 2026** (section 7): its code cannot go into git while the Finnhub key is
+  written in it (move the key to the function's settings first; both repositories are public); company figures only for
+  the 3,333 stocks the site's daily job keeps them for, up to a month old; the analysis page in a browser and on a real
+  phone was not looked at; the first run of `publish_company_figures.py` inside the daily deploy is Monday 12 Oct:
+  look for "Company figures" in `~/stockiq-daily.log`.
 - **Dashboard plan cards** (the line "AI autopilot for your practice portfolio (fake money)" added on 11 Oct is real and the same on all three plans) list features that are not verified to differ by plan ("Advanced
   screening & alerts", "Portfolio tracking", "White-label options", "Dedicated support"), while
   the FAQ says all plans get the same features. Old accounts carry legacy limits (a cancelled
@@ -2479,3 +2570,14 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - Found on the way and left open (section 11, "Report writers"): pence printed as pounds, and the coordinator's report
     cutting symbols to five characters.
   - Notes: section 8c ends with "Start here when resuming". Everything known is in these files.
+  - **The single-stock report and its chart rebuilt** (section 7, "The single-stock report and its chart"), in the first
+    session again, after the owner asked whether the individual analysis could be improved. Prices in the share's own
+    currency (every share had a dollar sign, pence included); one bar a day (ASX "+0.00% today") and the latest session
+    from the quote (London a day old); one RSI for text and chart (47 against 56); a trend factor that grows with the
+    distance (0.03% under an average read "Strong Downtrend: -12"); one explanation of the score that adds up; company
+    figures for shares outside the US from the pages' own cache, published by the new `publish_company_figures.py`
+    (Yahoo's summary cannot be read from AWS: tried, refused, taken out); a chart drawn from the report's own prices,
+    with clean lines, the 200-day average, no background and lettering that grows on a phone. Three deploys with dry
+    runs (13:20, 13:27, 13:28 UTC); `stock_metrics.py` follows; tests kept in `check-tools/report/`. **Lesson: read the
+    live output a second time after a deploy: the third deploy fixed a wrong source label that only a repeat report from
+    a warm function showed.**

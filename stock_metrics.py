@@ -118,7 +118,7 @@ def trend_points(current, ma20, ma50):
     middle = 'Mixed Trend' if abs(short) >= 3 and abs(longer) >= 3 and short * longer < 0 else 'Flat Trend'
     name = ('Strong Uptrend' if points >= 9 else 'Uptrend' if points >= 3 else 'Strong Downtrend' if points <= -9
             else 'Downtrend' if points <= -3 else middle)
-    side = lambda gap: f"{abs(gap):.1f}% {'above' if gap >= 0 else 'below'}"
+    side = lambda gap: 'level with' if abs(gap) < 0.05 else f"{abs(gap):.1f}% {'above' if gap > 0 else 'below'}"
     return points, name, f"price {side(price_gap)} its 20-day average; 20-day average {side(average_gap)} the 50-day"
 
 

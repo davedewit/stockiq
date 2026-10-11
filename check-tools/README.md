@@ -211,3 +211,26 @@ python3 check-tools/autopilot_plan_check.py lambda-sync/stockiq-ai-trader/lambda
 Run it after changing the budget, selling or buying rules in the Lambda, or `buildUp()` in the panel
 script. On 10 Oct 2026 it found that a cent of rounding stopped the Lambda buying its last holding.
 
+
+## report/ (the single-stock report and its chart)
+
+Lambdas `stockiq-option-1-1-custom-analysis` and `stockiq-chart-generator` (`site-overview.md` section 7, "The single-stock
+report and its chart"). Nothing live is called: prices come from `workers/data/sample.json`.
+
+```bash
+# the report: the code from before 11 Oct 2026 against the code now, on the same saved prices (79 checks)
+unzip -o -q ~/VSCODE/backup/stockiq-option-1-1-custom-analysis_before_report_20261011.zip -d /tmp/report-before
+python3 check-tools/report/report_test.py /tmp/report-before/lambda_function2.py lambda-sync/stockiq-option-1-1-custom-analysis/lambda_function2.py
+#   add  --show BHP.AX  to print a whole report (BHP.AX CBA.AX IMB.L AZN.L 7203.T CRWD KHC CSX MSTR ASML)
+
+# the chart, by itself and fed by the report (29 checks)
+python3 check-tools/report/chart_test.py lambda-sync/stockiq-chart-generator/lambda_function_simple.py lambda-sync/stockiq-option-1-1-custom-analysis/lambda_function2.py
+
+# after any change to the report's scoring: copy it into the stock pages' copy (stops if the two differ afterwards)
+python3 check-tools/report/patch_metrics.py lambda-sync/stockiq-option-1-1-custom-analysis/lambda_function2.py stock_metrics.py stock_metrics.py
+```
+
+`report/changes-2026-10-11/` holds the scripts that made the change of 11 Oct 2026 (the functions' code is not in git:
+the report's holds a key). To change a function again: copy the mirror's file, change the copy, run the two tests on
+it, and deploy with a packaged `check-tools/pending-<name>/deploy.sh` that rebuilds the change from the live code (the
+last one: `git show 2df59e0:check-tools/pending-figures/deploy.sh`).
