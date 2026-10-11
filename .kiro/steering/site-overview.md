@@ -466,8 +466,8 @@ The owner asked whether the screeners "all share the same function", and for it 
   and S&P 1500 workers run the identical file (993 lines). NASDAQ 100 and Dow 30 share another copy: the same functions
   and the same weights, without the Australian and UK sector lists. The four ASX groups share one file and the Nikkei
   workers have the same code. FTSE differs from those by about 30 lines (UK sectors).
-- **Every Russell 1000 and Russell 2000 worker has its own file** (100 and 200 different ones): the same code with that
-  worker's own list of stocks written into it (the page sends those two screeners only a worker number). FTSE has 9
+- **Every Russell 1000 and Russell 2000 worker has a package of its own** (100 and 200 different fingerprints; see "Found
+  when the work was about to start" below: probably the same code and list in each, zipped separately). FTSE has 9
   different files among its 10 workers; why was not looked at.
 - **Differences between markets that nobody chose:** RSI, which carries 20% of the score, is worked out two ways: Wilder's
   smoothing (the standard) in the ASX and Nikkei workers, a plain 14-day average in the US and FTSE workers; and a
@@ -478,6 +478,24 @@ The owner asked whether the screeners "all share the same function", and for it 
   a few valid symbols return nothing (WBD, PSKY); the weights add up to 102%.
 - **The crypto workers** (54, one version) are a different program; their MACD fault was fixed the same day ("Crypto",
   below). The single-coin worker asks for 60 days and does not have it.
+- **Found when the work was about to start (11 Oct, last hour of the session; not acted on):**
+  - The Russell workers do **not** have their lists written into the code, as these notes said until now. Their code opens
+    a data file in the package (`russell1000_stocks.json` / `russell2000_stocks.json`) and, when the caller sends only a
+    worker number, takes ten stocks from it by that number (`start = (worker_id - 1) * 10`). Apart from that their code
+    differs from the S&P 100 worker only in a few messages and the test at the bottom. **So "100 / 200 different versions"
+    may be nothing but 300 packages zipped one at a time** (a zip's fingerprint changes with its file dates): the first
+    thing to do is download three or four of them and compare the contents (`unzip -Z1`, `cmp` the `.py`, compare the
+    JSON). If the code is the same in all, the Russell groups are already one version in substance. The same check
+    settles the FTSE group's "9 different" and the unused `3-3` group's "8".
+  - Handlers and file names differ by group and must be kept: `stockiq-option-3-1-worker-N` runs
+    `advanced_lambda.lambda_handler` (its file is `advanced_lambda.py`); every other share group runs
+    `lambda_function.lambda_handler`. No share worker uses a layer (the crypto workers use `requests-layer:2`).
+  - The mirror `lambda-sync/` keeps one function per group, so it cannot show differences inside a group; `workers.py`
+    counts fingerprints of packages, not of code. A `--contents` option that downloads and compares would be the honest
+    count; it is not built.
+  - Differences in code between groups that are known: RSI (Wilder's in ASX / Nikkei, a plain average in US / FTSE); the
+    fallback for the distance from the 52-week low (`/ current_price` in US, `/ week52_low` in ASX / Nikkei, the second
+    being right); sector lists (cosmetic: the company figures are made up anyway); the Russell data-file lookup.
 - **The plan to make it one thing (not started; a job for a fresh session, in this order):**
   1. One source file for every share-screener worker, kept **in git** (`stockiq/workers/stock_worker.py`; Lambda code has no
      history today): the ASX / Nikkei version as the base (it handles `.AX`, `.T`, `.L`), with the UK sectors, and the
@@ -1581,6 +1599,22 @@ must set the function's clock (`m.datetime = at(when)` in `ai_trader_test.py`), 
 weekdays and fails at the weekend.
 
 ### Start here when resuming (state at 11:45 UTC on 11 Oct 2026: the full sweep, then the replay, real costs and the bar)
+
+**THE NEXT JOB, agreed with the owner at the very end of the session of 9–11 Oct ("put info in the md on what needs to be
+done and i'll start a new session to get it done"): one code base for the share screeners.** Everything needed is in
+section 8b, "The worker groups: who runs what code": the audit (`python3 check-tools/workers.py`), what was found at the last
+minute (the Russell lists are a data file in the package, so the "300 different versions" may only be 300 separately made
+zips: check that first), the differences that are real (two RSI methods, one 52-week formula), the known faults to fix in
+the one file (ASX 24-hour change of 0 after the close, FTSE prices a day old and pence shown as pounds), and the five-step
+plan (one source file in git, prove on saved prices, deploy group by group with rollback zips, test every button). Work in
+that order; the crypto deploy script of 11 Oct (`git show 146ffed:check-tools/pending-crypto/deploy.sh`) is the pattern
+for updating a whole group. About 720 live functions are involved: dry run, one group first (Dow 30 has 3 workers),
+and check `workers.py` and a live screener run after each group.
+**Other things waiting, in order:** (1) the owner's decision on the two **public** GitHub repositories and his personal
+file in one of them (section 11, first item); (2) Monday 12 Oct: the first daily deploy with the new copy-keeping rules,
+and the first share trades; (3) the autopilot's own trials of a longer holding time and of not selling on the signal, and
+recording company figures with each share bought (below, item 0); (4) deleting the 204 worker functions the site never
+calls, with his agreement; (5) thinning the bell script's handling of older copies after a week.
 
 **What is live, and how to confirm nothing has moved since:**
 - Lambda `stockiq-ai-trader`: `CodeSha256` `k2OocgJogAZjcF8LYC6WOtH0n7I3VaE5nb9EmxWzAnI=`, equal to
