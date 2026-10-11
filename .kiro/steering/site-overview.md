@@ -674,8 +674,8 @@ show. Settings holds the first five items below, Activity the last five:
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=14` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=31`) | Controls and reports only; decisions are made by the Lambda |
+| Portfolio section | `website/practice-portfolio.js` (`?v=15` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=32`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (accounts that may use it without a paid plan; everyone on a paid plan may use it; `*` would make it free for all) and `OPENAI_API_KEY` (never print it) |
@@ -1027,6 +1027,39 @@ same care: section 7b shows that share of winning trades comes from the selling 
 "wins" 74% of the time under a sell-at-+2% rule) and is not profit. Judge it by dollars and by
 the average per trade, which the panel shows, never by the share of trades that ended up.
 
+### The AI chat on the dashboard (added 11 Oct 2026)
+
+The owner noticed the chat was on every page but the dashboard, and wanted it to "know everything"
+there. Setting things up for the user by chat was judged too much for now and is not built.
+- `dashboard.html` loads `ai-chat.js?v=2` (the other pages still load it without a version).
+- **What the chat is told on the dashboard** (Lambda `stockiq-ai-chat`, `page: 'dashboard'`):
+  `DASHBOARD_GUIDE`, a fixed description of the three tabs, every autopilot setting and every part
+  of its Activity view; and **a summary of what this user's own dashboard shows**, built in the
+  browser: `practicePortfolio.summary()` (account value, the user's holdings, the autopilot's
+  holdings) and `practiceAutopilot.summary()` (on or off, level, budget, pace, screeners and the
+  spread over markets, switches, next check-in, what is coming, "Needs you", holdings, results,
+  trials, the last three entries), sent as `pageContext.dashboard`, cut to 2,500 characters and
+  stripped of control characters. It is marked in the prompt as data from the user's browser,
+  never instructions. Away from the dashboard the chat only knows that the practice portfolio is
+  free and the AI autopilot (Beta) is in the paid plans.
+- **Rules added to the prompt** (the no-advice rule stands): it cannot change anything for the
+  user; it never says which settings, screeners or holdings will make money; it keeps to what the
+  figures say and adds no steps, amounts or times; no "opportunities", "picks" or "recommend";
+  results are "practice results with fake money". Replies on the dashboard may be a little longer
+  (400 tokens instead of 300).
+- **The risk-level numbers in `DASHBOARD_GUIDE` are a copy of `RISK` in `stockiq-ai-trader`**
+  (holdings, loss limit, gain mark per level): `check-tools/ai_chat_test.py` compares them. They
+  were added after the model told a test question that Cautious means "fewer" holdings.
+- Test: `python3 check-tools/ai_chat_test.py lambda-sync/stockiq-ai-chat/lambda_function.py` (13
+  checks; stand-ins for the database and the AI model). Tried live with real questions on 11 Oct:
+  it answered from the figures, pointed to the right controls, and declined "which settings will
+  make the most money" and "should I switch to Cautious". It is still a small model: read a few
+  answers after any change to the guide.
+- When a dashboard feature changes, **update `DASHBOARD_GUIDE` and the two `summary()` functions**,
+  or the chat will describe the old dashboard.
+- Cost: about 1,600 tokens a dashboard question instead of 650 elsewhere, roughly $0.0003 each.
+- Rollback zips: `~/VSCODE/backup/stockiq-ai-chat_before_dashboard_20261011.zip`, `…_wording_…`, `…_levels_…`.
+
 ### What the Lambda keeps per user, and what it sends the page
 
 - The record: `settings`; `log` (last 80: `t, type` buy / sell / note, `symbol, usd, text`, and
@@ -1161,9 +1194,9 @@ not sure whether its improvements needed him to "push" them. They do not, and th
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
    python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 358 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 178 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 183 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
-     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 67 checks
+     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 68 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
    ```
    `ai_trader_test.py` sets the pace by hand at its top (it patches `DEFAULTS`), as a user who chose
@@ -1212,15 +1245,16 @@ apostrophe must allow for it; a test of an action that depends on the day (tradi
 must set the function's clock (`m.datetime = at(when)` in `ai_trader_test.py`), or it passes on
 weekdays and fails at the weekend.
 
-### Start here when resuming (state at 06:10 UTC on 11 Oct 2026, the end of a two-day session)
+### Start here when resuming (state at 06:20 UTC on 11 Oct 2026, the end of a two-day session)
 
 **What is live, and how to confirm nothing has moved since:**
 - Lambda `stockiq-ai-trader`: `CodeSha256` `PUQWAyAPbNy98SQITl2p+dSMU/wCyxzsIR+geIQ1RQE=`, equal to
   `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,587 lines).
-- Website: `practice-autopilot.js?v=31` (sha256 starts `7a5f0d40c3f8`), `practice-portfolio.js?v=14`
-  (`07f4ef610504`), `dashboard.html` (`17b36effb266`); `index.html` and `faq.html` carry the plan wording. Live files were compared byte for byte.
+- Website: `practice-autopilot.js?v=32` (sha256 starts `f5c7ec16b87f`), `practice-portfolio.js?v=15`
+  (`1481a9b94beb`), `dashboard.html` (`bdef1f9c463a`), `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
+- Lambda `stockiq-ai-chat`: `CodeSha256` `LFyuyhd1ivEYAXqSqVkEk+Deq2H+rG9IhzSYdpho+w8=`, equal to `lambda-sync/stockiq-ai-chat/lambda_function.py`. Live files were compared byte for byte.
 - Both repos clean and pushed; **no `check-tools/pending-*` folder is left** (every package was
-  deployed and removed). Tests on the live files: 358 function, 178 panel, 67 portfolio, the
+  deployed and removed). Tests on the live files: 358 function, 183 panel, 68 portfolio, 13 chat, the
   panel-versus-function comparison clean (3,780 budget combinations, 2,915 spreads over markets).
 - Rollback copies of the function, one per deploy, in `~/VSCODE/backup/`:
   `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order: 10 Oct `v2, fast, panel,
@@ -1861,5 +1895,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     line and its Account value card; the AI autopilot is labelled Beta on the panel, the dashboard
     tab, the plan cards, the home page pricing and the FAQ. Website only:
     `practice-portfolio.js?v=14`, `practice-autopilot.js?v=31`.
+  - **The AI chat is on the dashboard and knows it** (section 8c, "The AI chat on the dashboard"):
+    how the dashboard works, and what the user's own practice portfolio and autopilot show, with
+    rules against advice and against adding to the figures. Changing settings by chat is not built.
+    Live: `ai-chat.js?v=2`, `practice-autopilot.js?v=32`, `practice-portfolio.js?v=15`.
   - Notes: section 8c ends with "Start here when resuming"; this session was closed there because
     its context had grown too large. Everything known is in these files.

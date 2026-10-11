@@ -227,8 +227,9 @@ aws s3 rm s3://stockiq-option-1-1-custom-analysis/charts/email@example.com/ --re
 
 ## AI Chat System (Updated Oct 9, 2026)
 - **Lambda:** `stockiq-ai-chat` | **Model:** GPT-4o-mini | **Cost:** ~$0.02/month (Oct 2026)
-- **Frontend:** `ai-chat.js` (22.5KB) on all pages
+- **Frontend:** `ai-chat.js` (about 24 KB) on all pages, the dashboard included
 - **Features:** 3-message conversation memory, live stock prices, links to stock pages
+- **On the dashboard (11 Oct 2026):** `dashboard.html` loads the chat too; there it is told how the dashboard works (`DASHBOARD_GUIDE`) and what the user's own practice portfolio and AI autopilot show (a summary built by the page, sent as `pageContext.dashboard`). It explains and points to controls; it cannot change settings. Detail and the rules: `site-overview.md` section 8c, "The AI chat on the dashboard"
 - **No advice rule (Oct 9, 2026):** the system prompt tells the model never to give buy/sell/hold calls, price targets, predictions or picks. Asked "should I buy X?" it says it can't make that call, then gives the price, what the score looks at, and links. Suggested questions in `ai-chat.js` are "What does the data say about X?", not "Should I buy X?". Don't loosen this
 - **Rate limits:** Anonymous: 3 msg/hr | Trial/free: 10 msg/hr | Paid: 50 msg/hr | @dewit.com.au: unlimited
 - **Positioning:** bottom-right, 20px from the edge on every page. Only on pages that have the `#news-panel` sidebar (home page) and only from 1401px wide, it moves to right 370px to clear the panel (`body.has-news-panel`, set in ai-chat.js)

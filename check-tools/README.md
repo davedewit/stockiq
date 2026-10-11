@@ -80,9 +80,19 @@ The first (358 checks) runs the Lambda's code with stand-ins for the database, t
 the AI model, headlines and email: budget pacing, risk filters, the coin share, every sell rule, the
 AI model's hold-or-sell review, headlines, the record and what it learns from it, trials of its own
 rules, the owner's own limits and switches, "sell everything", trading hours (also by hand), a switch
-of screeners while it holds something, the spread of the budget over markets, progress per batch of 20 trades and what it does when a batch is no better, its own trial of which share to buy, the pause after two weeks without a visit, several accounts at once, the daily limit on AI calls, who may use it (paid plans and the listed accounts) and what the others are shown, a budget that always fits the practice money, what happens next and what needs the owner, the email's status, a clash with the user, missing data, when it is due. The second (178 checks) drives the controls with a stand-in API (the file's real
+of screeners while it holds something, the spread of the budget over markets, progress per batch of 20 trades and what it does when a batch is no better, its own trial of which share to buy, the pause after two weeks without a visit, several accounts at once, the daily limit on AI calls, who may use it (paid plans and the listed accounts) and what the others are shown, a budget that always fits the practice money, what happens next and what needs the owner, the email's status, a clash with the user, missing data, when it is due. The second (183 checks) drives the controls with a stand-in API (the file's real
 address is never called, because the test replaces `fetch`) and a stand-in for the browser's storage.
 Add a check for whatever you change; when wording changes, the checks that quote it must change too.
+
+## ai_chat_test.py
+
+The AI chat function's prompt, with stand-ins for the database and the AI model (13 checks): what it is told away from
+the dashboard and on it, that the user's dashboard summary is treated as data and cut to length, that the rule against
+advice stands, and that the risk-level numbers it quotes are the autopilot's own.
+
+```bash
+python3 check-tools/ai_chat_test.py lambda-sync/stockiq-ai-chat/lambda_function.py
+```
 
 ## panel_page.py
 
