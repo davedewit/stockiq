@@ -623,7 +623,7 @@ show. Settings holds the first five items below, Activity the last four:
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=13` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=22`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=23`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
@@ -667,7 +667,7 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
 |---|---|---|
 | `enabled` | on / off (default off) | Only for users in `AI_TRADER_USERS` |
 | `risk` | 1–5 (default 3) | The level: see the table below |
-| `budgetUsd` | 100 … 1,000,000 (default 10,000) | The most it has invested at once |
+| `budgetUsd` | 100 … the practice money there is (default 10,000) | The most it has invested at once. **It cannot be more than the practice cash plus what the autopilot itself has invested** (`money_of`, sent as `money`: `cash, invested, reach`). On 11 Oct the owner typed $200,000 against $100,000 of fake money and nothing objected; it would have bought one $50,000 holding and stalled. Now the panel says under the field how much there is (`budgetHint`), refuses a larger number ("Not saved: the budget can be at most …"), offers "Set it to $…" (`maxbudget`), and the `save` action sets a larger one to that amount and notes it (the backstop for an older cached script). An older, too-large budget does not block other settings from saving |
 | `periodDays` | 1–90 | "Build up to it over": the budget is released in equal steps over this long. **Not the holding time** (the owner mixed them up twice) |
 | `everyHours` | 0.5, 1, 3, 6, 12, 24 | How often it checks in |
 | `maxHoldDays` | 0.5 h … 60 days, stored in days | The longest it keeps a holding |
@@ -1019,8 +1019,8 @@ not sure whether its improvements needed him to "push" them. They do not, and th
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 277 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 136 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 283 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 142 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 66 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
@@ -1570,3 +1570,8 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     "Send me a test email" link. Email set-up checked on AWS and one test accepted. Rollback zip:
     `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_next_20261011.zip`. The dashboard's AI autopilot tab
     carries a ⚠ while something needs the owner. Live: `practice-autopilot.js?v=22`.
+  - **The budget cannot be more than the practice money there is** (section 8c, settings table): said
+    at the field with a one-click fix, refused in plain words, and set right by the function as a
+    backstop. A sale by the following stop that ends below the buying price now says the gain was
+    gone before the stop could act (it had said "sold to keep part of the gain" on a -0.8% sale).
+    Rollback zip: `…_before_autopilot_budget_20261011.zip`. Live: `practice-autopilot.js?v=23`.
