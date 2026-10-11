@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="https://stockiq.tech/privacy-policy.html">
+    <meta name="robots" content="index, follow">    <title>Privacy Policy - StockIQ</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="stockiq-logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="stockiq-logo.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    <style>
+        html, body { background: #0f0f0f !important; transition: none !important; }
+        [data-theme="light"] html, [data-theme="light"] body { background: #ffffff !important; }
+    </style>
+    <script>
+        const savedTheme = localStorage.getItem('theme');
+        const manualOverride = localStorage.getItem('manualOverride');
+        const hour = new Date().getHours();
+        const autoTheme = (hour >= 18 || hour < 6) ? 'dark' : 'light';
+        const theme = (manualOverride === 'true' && savedTheme) ? savedTheme : autoTheme;
+        document.documentElement.setAttribute('data-theme', theme);
+    </script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="theme.js"></script>
+<!-- AUTOPILOT_BELL_START: the AI autopilot's practice buys and sells in the notification bell, for signed-in visitors only --><script>(function(){try{var u=localStorage.getItem('userId');if(u&&u!=='anonymous'&&!window.autopilotBell){var s=document.createElement('script');s.src='autopilot-bell.js?h='+Math.floor(Date.now()/36e5);s.async=true;document.head.appendChild(s);}}catch(e){}})();</script><!-- AUTOPILOT_BELL_END -->
+    <style>
+        .top-nav { top: 0 !important; }
+        body { padding-top: 64px !important; }
+        .mobile-menu { top: 64px !important; height: calc(100vh - 64px) !important; }
+        #trial-status-display { top: 60px !important; }
+        
+        .privacy-container {
+            max-width: 800px;
+            margin: 80px auto;
+            padding: 40px 30px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .privacy-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .privacy-header h1 {
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .privacy-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        .privacy-content {
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .privacy-content h2 {
+            color: var(--text-primary);
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .privacy-content p {
+            margin-bottom: 15px;
+        }
+        
+        .privacy-content ul {
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+        
+        .privacy-content li {
+            margin-bottom: 8px;
+        }
+        
+        .contact-info {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .privacy-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+        }
+    </style>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WVETNMPF8V"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+
+gtag('config', 'G-WVETNMPF8V');
+</script>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="index.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit;">
+                    <img src="stockiq-logo.png" alt="StockIQ" class="brand-logo" style="width: 24px; height: 24px;">
+                    <span class="brand-text">StockIQ</span>
+                </a>
+            </div>
+            
+            <div class="desktop-nav">
+                <a href="index.html" class="nav-item home-link" style="text-decoration: none !important; color: inherit; display: flex; align-items: center;">
+                    Home
+                </a>
+                <div class="nav-item dropdown" onclick="showDropdown('analysis-dropdown', event)">
+                    Analysis <span class="dropdown-arrow">▼</span>
+                    <div class="dropdown-menu" id="analysis-dropdown">
+                        <a href="analysis.html?option=1">Stock & ETF Analysis</a>
+                        <a href="analysis.html?option=2">Trading Signals</a>
+                    </div>
+                </div>
+                <div class="nav-item dropdown" onclick="showDropdown('screeners-dropdown', event)">
+                    Screeners <span class="dropdown-arrow">▼</span>
+                    <div class="dropdown-menu" id="screeners-dropdown">
+                        <a href="analysis.html?option=3">🇺🇸 US Markets</a>
+                        <a href="analysis.html?option=4">🇪🇺 Europe Markets</a>
+                        <a href="analysis.html?option=5">🌏 Asia Markets</a>
+                        <a href="analysis.html?option=6">🌏 Other Markets</a>
+                    </div>
+                </div>
+                <div class="nav-item dropdown" onclick="showDropdown('crypto-dropdown', event)">
+                    Crypto <span class="dropdown-arrow">▼</span>
+                    <div class="dropdown-menu" id="crypto-dropdown">
+                        <a href="analysis.html?option=7">Crypto Universe Screener</a>
+                    </div>
+                </div>
+                <div class="nav-item dropdown" onclick="showDropdown('account-dropdown', event)" style="margin-left: auto;">
+                    Account <span class="dropdown-arrow">▼</span>
+                    <div class="dropdown-menu" id="account-dropdown">
+                        <a href="signup.html">Register</a>
+                        <a href="login.html">Login</a>
+                    </div>
+                </div>
+                <button class="notification-bell" id="notification-bell" onclick="goToNotifications()" title="Notifications" aria-label="View notifications" style="display: none; position: relative; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-primary); margin-right: 10px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span class="notification-badge" id="notification-badge" style="position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; font-weight: bold; display: none; align-items: center; justify-content: center;"></span>
+                </button>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Click: Toggle theme | Double-click: Reset to auto" aria-label="Toggle dark mode">
+                    <span class="theme-icon" aria-hidden="true">🌙</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="privacy-container">
+        <div class="privacy-header">
+            <h1>Privacy Policy</h1>
+            <p>Last updated: December 2024</p>
+        </div>
+
+        <div class="privacy-content">
+            <h2>1. Information We Collect</h2>
+            <p>When you use StockIQ, we may collect:</p>
+            <ul>
+                <li>Account information (name, email) when you register</li>
+                <li>Usage data (stock searches, analysis requests)</li>
+                <li>Technical data (IP address, browser type, device information)</li>
+                <li>Social media profile information if you sign in with Facebook or Google</li>
+            </ul>
+
+            <h2>2. How We Use Your Information</h2>
+            <p>We use your information to:</p>
+            <ul>
+                <li>Provide stock analysis and market research services</li>
+                <li>Maintain and improve our platform</li>
+                <li>Send service-related communications</li>
+                <li>Ensure platform security and prevent fraud</li>
+            </ul>
+
+            <h2>3. Information Sharing</h2>
+            <p>We do not sell, trade, or rent your personal information to third parties. We may share information only:</p>
+            <ul>
+                <li>With your explicit consent</li>
+                <li>To comply with legal obligations</li>
+                <li>To protect our rights and safety</li>
+            </ul>
+
+            <h2>4. Data Security</h2>
+            <p>We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.</p>
+
+            <h2>5. Third-Party Services</h2>
+            <p>Our platform integrates with:</p>
+            <ul>
+                <li>Facebook Login (subject to Facebook's Privacy Policy)</li>
+                <li>Google Sign-In (subject to Google's Privacy Policy)</li>
+
+                <li>Financial data providers for market information</li>
+            </ul>
+
+            <h2>6. Data Retention</h2>
+            <p>We retain your information for as long as your account is active or as needed to provide services. You may request account deletion at any time.</p>
+
+            <h2>7. Your Rights</h2>
+            <p>You have the right to:</p>
+            <ul>
+                <li>Access your personal information</li>
+                <li>Correct inaccurate data</li>
+                <li>Request deletion of your data</li>
+                <li>Withdraw consent for data processing</li>
+            </ul>
+
+            <h2>8. Cookies and Tracking</h2>
+            <p>We use cookies and similar technologies to enhance your experience, analyze usage, and provide personalized content.</p>
+
+            <h2>9. Children's Privacy</h2>
+            <p>Our service is not intended for users under 18 years of age. We do not knowingly collect personal information from children.</p>
+
+            <h2>10. Changes to This Policy</h2>
+            <p>We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page.</p>
+
+            <div class="contact-info">
+                <h2>Contact Us</h2>
+                <p>If you have any questions about this Privacy Policy, please contact us:</p>
+                <p><strong>Email:</strong> privacy@stockiq.tech</p>
+                <p><strong>Website:</strong> https://stockiq.tech</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 StockIQ - Professional Investment Research Platform</p>
+        <p>Powered by AI • Market Data • Comprehensive Analysis</p>
+        <p>
+            <a href="terms.html" style="color: #007bff; text-decoration: none;">Terms of Service</a> • 
+            <a href="privacy-policy.html" style="color: #007bff; text-decoration: none;">Privacy Policy</a> • 
+            <a href="refunds.html" style="color: #007bff; text-decoration: none;">Refund Policy</a> • 
+            <a href="support.html" style="color: #007bff; text-decoration: none;">Support</a> • 
+            <a href="contact.html" style="color: #007bff; text-decoration: none;">Contact</a> • 
+            <a href="data-deletion.html" style="color: #007bff; text-decoration: none;">Data Deletion</a> • 
+            <a href="news.html" style="color: #007bff; text-decoration: none;">Blog</a> • 
+            <a href="about.html" style="color: #007bff; text-decoration: none;">About</a> • <a href="faq.html" style="color: #007bff; text-decoration: none;">FAQ</a>
+        </p>
+        <p style="margin-top: 15px;">
+            <a href="https://instagram.com/stockiq.tech" target="_blank" style="color: #E4405F; text-decoration: none; font-size: 24px;" title="Follow us on Instagram">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+            </a>
+        </p>
+    </footer>
+
+    <script>
+        let activeDropdown = null;
+
+        function showDropdown(dropdownId, event) {
+            if (event && event.target.closest('.home-link')) {
+                return;
+            }
+            if (activeDropdown && activeDropdown !== dropdownId) {
+                document.getElementById(activeDropdown).classList.remove('show');
+            }
+            const dropdown = document.getElementById(dropdownId);
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+                activeDropdown = dropdown.classList.contains('show') ? dropdownId : null;
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.dropdown')) {
+                if (activeDropdown) {
+                    const dropdown = document.getElementById(activeDropdown);
+                    if (dropdown) {
+                        dropdown.classList.remove('show');
+                    }
+                    activeDropdown = null;
+                }
+            }
+        });
+
+        const userId = localStorage.getItem('userId');
+        if (userId && userId !== 'anonymous') {
+            const bell = document.getElementById('notification-bell');
+            if (bell) bell.style.display = 'block';
+            
+            const accountDropdown = document.getElementById('account-dropdown');
+            if (accountDropdown) {
+                accountDropdown.innerHTML = `
+                    <a href="dashboard.html">Dashboard</a>
+                    <a href="#" onclick="event.preventDefault(); localStorage.clear(); window.location.href='index.html';">Logout</a>
+                `;
+            }
+        }
+
+        function goToNotifications() {
+            window.location.href = 'dashboard.html';
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            localStorage.setItem('manualOverride', 'true');
+            const icon = document.querySelector('.theme-icon');
+            if (icon) {
+                icon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            }
+        }
+    </script>
+</body>
+</html>
