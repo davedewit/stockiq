@@ -242,3 +242,15 @@ last one: `git show 2df59e0:check-tools/pending-figures/deploy.sh`).
 `python3 signals/test_signals.py` (42 checks on saved prices; `--show` prints the readings) and `python3 signals/build.py`
 (the package and its fingerprint; `--list` rewrites the scan list from the coordinator's S&P 100). One file runs in both
 functions; `site-overview.md` section 8b, "Trading signals and the presets".
+
+## crypto/batch_test.py (the crypto job: ten coins a call)
+
+The orchestrator from before 11 Oct 2026 (one worker call per coin) against the one now (ten coins a call), on a
+stand-in for the 54 workers; nothing live is called. `coin_template.txt` is one real coin analysis the stand-in copies.
+
+```bash
+unzip -o -q ~/VSCODE/backup/stockiq-option-7-1-orchestrator_before_batch_20261011.zip -d /tmp/orch-before
+unzip -o -q ~/VSCODE/backup/stockiq-option-7-1-worker_before_batch_20261011.zip -d /tmp/worker-before
+python3 check-tools/crypto/batch_test.py /tmp/orch-before/orchestrator.py lambda-sync/stockiq-option-7-1-orchestrator/orchestrator.py \
+  /tmp/worker-before/lambda_function.py lambda-sync/stockiq-option-7-1-worker-*/lambda_function.py check-tools/crypto/coin_template.txt
+```

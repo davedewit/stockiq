@@ -812,10 +812,16 @@ The owner asked for the "junky" items to be looked at: "Choose from presets" and
 
 - **The 54 crypto workers ignore the coin list they are sent in batch mode** and use a list
   built into their code. So `stockiq-option-7-1-orchestrator` holds the list itself (`COINS`:
-  540 pairs of `(symbol shown, Yahoo ticker without -USD)`) and calls each worker's
-  **single-coin mode** (`{"single_coin": "<ticker>"}`) once per coin, 60 at a time, round-robin
-  over the 54 worker URLs, retrying a failed call on the next worker. ~15 s for 540 coins with
-  2,048 MB (it was 45 s at 512 MB).
+  540 pairs of `(symbol shown, Yahoo ticker without -USD)`) and sends it out itself: **ten coins a
+  call** (`{"coin_list": [<tickers>]}`, a mode added to the workers on 11 Oct 2026 that analyses each
+  coin exactly as single-coin mode does and answers `results: [{ticker, coin}]`), 54 batches, one to
+  each worker function, all at once; a batch whose function fails goes to the next one, and any coin
+  that did not come back is asked for once more on other functions. About 10 s for 540 coins with
+  2,048 MB. **From 10 to 11 Oct it called single-coin mode once per coin (540 calls a run): with the
+  top-10 history every 30 minutes that was about 0.8 million calls a month against Lambda's free
+  million.** Now a run is 54 calls (about 80,000 a month for the history). Single-coin mode
+  (`{"single_coin": "<ticker>"}`) is unchanged. Test: `check-tools/crypto/batch_test.py` (the old
+  orchestrator and the new against a stand-in for the workers: same coins, scores, order and report).
 - The list is the top coins by market cap (CoinGecko, 10 Oct 2026) without stablecoins and
   wrapped/staked tokens. A coin is only included if Yahoo's price for its ticker was within
   0.8×–1.25× of CoinGecko's and it had 60+ days of history. **Many coins share a symbol on
@@ -1986,9 +1992,9 @@ writing: done, and shown on the panel.
 - **Still to weigh, and the owner knows:** an AI choosing what to buy for paying users, even with fake money, sits on the
   same unreviewed legal question as the signals (section 11). And the `userId` is whatever the browser sends: someone who
   knows a paying user's email could open that user's autopilot (fake money only).
-- **Cost:** a crypto check-in is a full crypto screener run (about 540 worker calls) unless a copy under 20 minutes old
-  exists, so one user on 30-minute check-ins adds about 780,000 Lambda calls a month, plus up to two small AI calls per
-  check-in and at most 8 larger ones a day: a few dollars a month at the very most.
+- **Cost:** a crypto check-in is a full crypto screener run unless a copy under 20 minutes old exists: 54 worker calls
+  since 11 Oct 2026 (it was 540), so one user on 30-minute check-ins adds about 80,000 Lambda calls a month, plus up to
+  two small AI calls per check-in and at most 8 larger ones a day. What the whole site costs: section 11, "What AWS costs".
 
 ### Ideas offered and not built
 
@@ -2196,6 +2202,22 @@ Needs the owner's decision or more work (nothing here is fixed):
   resuming" (Monday's first trades across markets, the first progress report at 20 finished trades,
   a trial of buying shares by distance above the 52-week low if the record supports it, the
   screener scoring left untouched after the factor study of section 7b).
+- **What AWS costs (measured 11 Oct 2026; the owner wants to stay inside the free allowances).** The bill for 1-11 Oct
+  was **$0.34 in all** (S3 $0.17, DynamoDB $0.12, Lambda $0.00). Lambda's free allowance each month is one million calls
+  and 400,000 GB-seconds. Before this week the account made about 6,000 calls a day; the old crypto updater alone used
+  about 200,000 GB-seconds a month. After the rebuilds: the crypto job's computing time fell by two thirds (about 70,000
+  GB-seconds a month for the crypto workers, the orchestrator, the autopilot and the coordinator together), but its
+  one-call-per-coin design made about 0.8 million calls a month; ten coins a call (section 8b "Crypto") brought that to
+  about 80,000. **What runs by itself:** the crypto top-10 history every 30 minutes (54 calls a run), the autopilot every
+  30 minutes (real work only when an account is due), the daily deploy from the owner's Mac. Raising a function's
+  memory does not raise its cost when the work is processor work (it finishes proportionally sooner): the signals
+  functions went from 128 to 512 and 1024 MB for that reason. Not on the AWS bill: OpenAI (the daily news summaries, the
+  chat, the autopilot's calls: at most about $2 a month for a heavy autopilot user). **To check:** `aws ce
+  get-cost-and-usage --time-period Start=<first of month>,End=<today> --granularity DAILY --metrics UnblendedCost
+  --group-by Type=DIMENSION,Key=SERVICE` (one cent a lookup), and `aws cloudwatch get-metric-statistics --namespace
+  AWS/Lambda --metric-name Invocations --period 86400 --statistics Sum …` for calls a day (free). If the calls ever
+  near a million a month again: the crypto history could run hourly (the schedule, plus the 65- and 100-minute limits in
+  the orchestrator).
 - **Legal.** The business is "StockIQ", online-only, no physical address, **no financial services
   licence**; billing is in USD ($4.99 / $14.99 / $49.99 per month, confirmed on the live Stripe
   prices). The terms, About page, pricing section and FAQ say all of this, and the product
@@ -2699,4 +2721,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     after changing what it does; a function's processor share goes with its memory.**
   - Commit `a0be314` (trading signals) also carries the report-writers session's notes in progress and its removal of
     `check-tools/pending-reports/`: two sessions were committing at the same minute (section 10, "name the paths").
+  - **What it all costs, and the crypto job brought inside the free allowance** (section 11, "What AWS costs"; section 8b
+    "Crypto"): the owner asked whether the week's changes raise the AWS bill. Measured: 34 cents for eleven days, and
+    less computing than before, but the crypto screener's one call per coin was heading for 0.8 million calls a month.
+    The 54 workers now take ten coins a call and the orchestrator sends 54 batches: the same 536 coins and the same
+    top 10 before and after, from a tenth of the calls. Rollback zips: `~/VSCODE/backup/stockiq-option-7-1-worker_before_batch_20261011.zip`
+    (the same to all 54) and `stockiq-option-7-1-orchestrator_before_batch_20261011.zip`.
 
