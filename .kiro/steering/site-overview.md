@@ -675,7 +675,7 @@ show. Settings holds the first five items below, Activity the last five:
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=15` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=33`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=34`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (accounts that may use it without a paid plan; everyone on a paid plan may use it; `*` would make it free for all) and `OPENAI_API_KEY` (never print it) |
@@ -761,6 +761,14 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
     rank, and no buy is larger than its market's room. Holdings from a market that is no longer
     ticked stay until sold and still count against the budget, not against any market.
   - `coin_share(settings)` is now the coin market's holdings over all (it was the level's figure).
+  - **Layout of the card (redone 11 Oct, v34):** the owner "didn't even see the dropdown boxes for
+    a while", and took the absence of a menu under UK and Japan (nothing ticked there) for a fault.
+    Now: one line saying what to do; a coloured bar (`splitBar`, `#ap-splitbar`) with one part per
+    market as wide as its share, and a grey "cash" part when shares set by hand leave some out; each
+    market is a row of three columns (`ap-group shared`): name with its colour dot, the screener
+    chips, and its share in an outlined box of its own on the right (`ap-share`, in the market's
+    colour, `MARKET_COLOURS`); a market with nothing ticked says "No share of the budget: nothing
+    is ticked in this market". Under 980px the share box drops below the chips.
   - The panel shows it: a menu per ticked market, "Automatic: 38% (3 holdings, $18,750)" or one of
     the steps (0 to all holdings, each with its percent and dollars), tagged "automatic" / "set by
     you" (`shareRow`), and a line in words (`splitText`) that also says when a market gets nothing
@@ -1194,7 +1202,7 @@ not sure whether its improvements needed him to "push" them. They do not, and th
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
    python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 358 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 185 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 189 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 68 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
@@ -1255,11 +1263,11 @@ weekdays and fails at the weekend.
 **What is live, and how to confirm nothing has moved since:**
 - Lambda `stockiq-ai-trader`: `CodeSha256` `PUQWAyAPbNy98SQITl2p+dSMU/wCyxzsIR+geIQ1RQE=`, equal to
   `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,587 lines).
-- Website: `practice-autopilot.js?v=33` (sha256 starts `406bf253b54d`), `practice-portfolio.js?v=15`
-  (`1481a9b94beb`), `dashboard.html` (`1e500c0ff449`), `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
+- Website: `practice-autopilot.js?v=34` (sha256 starts `e7690b791753`), `practice-portfolio.js?v=15`
+  (`1481a9b94beb`), `dashboard.html` (`07c2d015f7a7`), `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
 - Lambda `stockiq-ai-chat`: `CodeSha256` `LFyuyhd1ivEYAXqSqVkEk+Deq2H+rG9IhzSYdpho+w8=`, equal to `lambda-sync/stockiq-ai-chat/lambda_function.py`. Live files were compared byte for byte.
 - Both repos clean and pushed; **no `check-tools/pending-*` folder is left** (every package was
-  deployed and removed). Tests on the live files: 358 function, 185 panel, 68 portfolio, 13 chat, the
+  deployed and removed). Tests on the live files: 358 function, 189 panel, 68 portfolio, 13 chat, the
   panel-versus-function comparison clean (3,780 budget combinations, 2,915 spreads over markets).
 - Rollback copies of the function, one per deploy, in `~/VSCODE/backup/`:
   `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order: 10 Oct `v2, fast, panel,
@@ -1906,5 +1914,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     Live: `ai-chat.js?v=2`, `practice-autopilot.js?v=32`, `practice-portfolio.js?v=15`.
   - "What happens then" beside the countdown now opens Activity and goes down to the list (it was a
     bare "#" link that sent the page to the top). Website only, `practice-autopilot.js?v=33`.
+  - The "Screeners it buys from" card laid out afresh: a bar for the split, each market's share in
+    a box of its own (website only, `practice-autopilot.js?v=34`).
   - Notes: section 8c ends with "Start here when resuming"; this session was closed there because
     its context had grown too large. Everything known is in these files.
