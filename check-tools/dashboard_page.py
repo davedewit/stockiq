@@ -11,6 +11,7 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
           pace (hands the three pace settings to the risk level, moves the slider, sets one by hand, moves it again),
           trailstop (chooses the full trailing stop loss in "Your own limits"),
           tabs (needs the dashboard file as a sixth argument: presses each dashboard tab and the autopilot's two parts),
+          budget (types a budget larger than the practice money and presses the link that puts it right),
           next (prints the countdown, "Needs you", the "What happens next" list and the email line, and sends a test email),
           listswitch (switches the list to "buys and sells only" and reloads the page to see that it is remembered)
 Open the page with headless Chrome: --dump-dom for the printed results, --screenshot for the look (site-overview.md, section 12)."""
@@ -44,7 +45,7 @@ const OPTIONS = %s;
 let auto = { settings: { enabled: true, risk: 3, budgetUsd: 10000, periodDays: 10, everyHours: 0.5, maxHoldDays: 0.25, screeners: ['7-1'], aiSell: true, selfTune: true, emails: true, stopPct: null, takePct: null, auto: [], trailMode: 'gains' }, coinShare: 1, state: { lastRun: iso(-0.1) }, minSample: 8, practiceCash: 100000, lessons: null, resting: {}, recent: [],
   scorecard: { n: 0, groups: {} }, rules: { name: 'Balanced', stop: -10, take: 18, trail: 0.5, top: 10, max_rsi: 76, arm: 9, changed: {}, yours: [], level: { stop: -10, take: 18 } }, realizedUsd: 7.91,
   tune: { trial: null, past: [], nextReviewIn: 20, batch: 20, group: 10, finished: 0 }, month: { last30: { n: 0, up: 0, usd: 0, pct: 0 }, before30: { n: 0, up: 0, usd: 0, pct: 0 } },
-  nextCheck: { at: iso(0.4), markets: ['coin'] }, holding: { count: 1, investedUsd: 1250 }, now: iso(0), needs: [], mail: null,
+  nextCheck: { at: iso(0.4), markets: ['coin'] }, holding: { count: 1, investedUsd: 1250 }, now: iso(0), needs: [], mail: null, money: { cash: 6500, invested: 1250, reach: 7750 },
   coming: [{ at: iso(0.4), kind: 'check', text: 'Next check-in (coin market). It looks at the holding it has there (WEMIX-USD) and sells it if it has hit its loss limit, gain mark, stop or time limit, or if the AI review wants it out. It may buy up to 1 holding of about $1,250 from Crypto (top coins), if something on the shortlist passes its filters.' },
             { at: iso(2.1), kind: 'release', text: 'More of the budget is released: $3,750 of the $10,000 may be invested from then ($2,500 until then; $1,250 is invested now). It is spent at check-ins after that, in markets that are open.' },
             { at: iso(3.1), kind: 'sell', text: 'WEMIX-USD is sold at the latest: its 6 hours are up then.' },
@@ -148,6 +149,13 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
       auto.needs = [{ kind: 'missed', at: iso(-1), text: 'A scheduled check-in was due and has not happened. Press "Check in now"; if that works, the schedule itself may be stopped and needs a look.' }];
       await window.practiceAutopilot.refresh(true); await wait(500); out('with something wrong: ' + line('#ap-needs') + ' | its tab reads: ' + line('[data-dash-tab="autopilot"]')); auto.needs = [];
       await window.practiceAutopilot.refresh(true); await wait(500); out('put right again: ' + line('#ap-needs').slice(0, 40) + ' | its tab reads: ' + line('[data-dash-tab="autopilot"]'));
+    }
+    if (step === 'budget') {
+      const line = (sel) => { const x = q(sel); return x ? x.textContent.replace(/\\s+/g, ' ').trim() : '(none)'; };
+      out('under the budget field (budget ' + q('#ap-budget').value + ', field max ' + q('#ap-budget').max + '): ' + line('#ap-budget-hint'));
+      const b = q('#ap-budget'); b.focus(); b.value = '9000'; b.dispatchEvent(new Event('input', { bubbles: true })); await wait(1300);
+      out('typed 9000: ' + line('#ap-saved') + ' | ' + line('#ap-budget-hint')); b.blur();
+      q('[data-ap="maxbudget"]').click(); await wait(900); out('pressed the link: budget field ' + q('#ap-budget').value + ' | ' + line('#ap-notice') + ' | ' + line('#ap-budget-hint') + ' | saved budget ' + auto.settings.budgetUsd);
     }
     if (step === 'off') { q('#ap-enabled').click(); await wait(700); out('switched the autopilot off: ' + cellText('WEMIX')); }
     if (step === 'open') { document.querySelectorAll('#practice-autopilot details').forEach(d => { d.open = true; }); const s = q('#pp-sold'); if (s) s.open = true; out('unfolded the details'); }

@@ -397,6 +397,25 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const old = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, settings: { ...settings, enabled: true }, state: {}, practiceCash: 100000, log: [], nextCheck: { at: '2026-10-11T04:40:00Z', markets: ['coin'] } } })); await sleep(30);
     check('an answer from the older function (none of this in it) shows as before, with just the countdown', !/What happens next|Needs you|Nothing needs you|Send me a test email/.test(old.text()) && /⏱ Next check-in/.test(old.text()) && !/undefined|NaN/.test(old.container.innerHTML));
   }
+  // the budget cannot be more than the practice money there is: said at the field, with the fix one click away
+  { const st = { settings: { ...settings, enabled: true, screeners: ['7-1'], budgetUsd: 200000 }, state: {}, practiceCash: 100000, log: [], plans: [], money: { cash: 81242.11, invested: 18750, reach: 99992 } };
+    const w = page(b => { if (b.action === 'save') { st.settings = b.settings; } return { status: 200, body: { success: true, allowed: true, options: OPTIONS, ...st } }; }); await sleep(30);
+    check('a budget already above the practice money: the field says so, with the most it can be and a link that sets it', /⚠ That is more than the practice money there is\. Its budget can be at most \$99,992 \(\$81,242 of practice cash plus the \$18,750 it has invested\)\. Set it to \$99,992/.test(w.text()) && /max="99992"/.test(w.container.innerHTML), w.text().slice(w.text().indexOf('⚠'), w.text().indexOf('⚠') + 220));
+    const stub = () => ({ disabled: false, textContent: '', innerHTML: '', title: '', placeholder: '', classList: { on: {}, toggle(c, v) { this.on[c] = v; } } });
+    Object.assign(w.els, { 'ap-saved': stub(), 'ap-budget-hint': stub() });
+    w.form({ ...st.settings, budgetUsd: 150000 }); await w.ctx.practiceAutopilot.flush(); await sleep(30);
+    check('typing another budget that is too large is not saved, and it says why in plain words', w.calls.filter(c => c.action === 'save').length === 0 && w.els['ap-saved'].textContent === 'Not saved: the budget can be at most $99,992: that is all the practice money there is.' && /⚠ That is more than the practice money there is/.test(w.els['ap-budget-hint'].innerHTML), [w.els['ap-saved'].textContent, w.els['ap-budget-hint'].innerHTML]);
+    delete w.els['ap-saved']; delete w.els['ap-budget-hint'];
+    w.form({ ...st.settings, risk: 5 }); await w.ctx.practiceAutopilot.flush(); await sleep(30);
+    check('other settings still save while the old, too-large budget is waiting to be put right', w.calls.filter(c => c.action === 'save').length === 1 && w.calls.filter(c => c.action === 'save')[0].settings.risk === 5);
+    w.form(st.settings); w.click('maxbudget'); await sleep(250);
+    const saves = w.calls.filter(c => c.action === 'save');
+    check('"Set it to $99,992" puts the budget to the most there is and saves it', saves.length === 2 && saves[1].settings.budgetUsd === 99992 && /Budget set to \$99,992: all the practice money there is for it\./.test(w.text()), saves.map(x => x.settings.budgetUsd));
+    await w.ctx.practiceAutopilot.refresh(true); await sleep(30);
+    check('and then the line under the field just says how much there is', /Its budget can be up to \$99,992: \$81,242 of practice cash plus the \$18,750 it has invested\./.test(w.text()) && !/⚠ That is more/.test(w.text()));
+    const fresh = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, settings: { ...settings }, state: {}, practiceCash: 100000, log: [], money: { cash: 100000, invested: 0, reach: 100000 } } })); await sleep(30);
+    check('with nothing invested yet it names the practice cash', /Its budget can be up to \$100,000: the practice cash you have left\./.test(fresh.text()));
+  }
   check('no broken values', !/undefined|NaN|\[object/.test(p.container.innerHTML), (p.container.innerHTML.match(/.{30}(undefined|NaN|\[object).{30}/) || [])[0]);
   console.log(ok ? 'ALL PASS' : 'SOME FAILED');
 })();

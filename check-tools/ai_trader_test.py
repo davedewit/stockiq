@@ -412,6 +412,9 @@ PRICES[a['symbol']] = a['buyPrice'] * 1.02; PRICES[b['symbol']] = b['buyPrice'] 
 s, rec = run(t0 + 2 * half); sales = {e['symbol']: e for e in rec['log'] if e['type'] == 'sell'}
 check('slipping back from +4% to +2%: sold to keep the gain, not held to the time limit', sales.get(a['label'], {}).get('kind') == 'trail' and 'Was up +4.0% at its best and has slipped back to +2.0%: sold to keep part of the gain' in sales[a['label']]['text'], sales.get(a['label']))
 check('slipping back from +17% to +12%: sold there, not at half', sales.get(b['label'], {}).get('kind') == 'trail' and 'Was up +17.0% at its best and has slipped back to +12.0%' in sales[b['label']]['text'] and any('Its path since buying, at each check-in: 0.5h +17.0%, 1h +12.0%.' == d for d in sales[b['label']]['detail']), sales.get(b['label']))
+rec = m.load_item(U); rec['state']['open'][c['id']]['peak'] = 4.0; m.save_item(U, rec); PRICES[c['symbol']] = c['buyPrice'] * 0.992
+s, rec = run(t0 + 3 * half); gone = {e['symbol']: e for e in rec['log'] if e['type'] == 'sell'}.get(c['label'], {})
+check('a holding that had been up and is under its buying price by the next check-in: the stop sells it, and does not call that keeping a gain', gone.get('kind') == 'trail' and 'Was up +4.0% at its best and had fallen to -0.8% by this check-in: sold by the stop that followed it. The gain was gone before it could act, because it only sees prices at check-ins' in gone.get('text', '') and 'keep part of the gain' not in gone.get('text', ''), gone)
 check('the plan under a sale names the protection that applied', any('Rising is not a reason to sell it: while it keeps going up it is kept. Once it has been up 1%, a stop starts following it up, and it is sold only if it then falls back too far from its best.' in d for d in sales[a['label']]['detail']), sales[a['label']]['detail'])
 D.t.clear(); PRICES.clear(); STRONG.clear(); MODEL['answer'] = None
 rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=0.5, maxHoldDays=20, screeners=['7-1']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
@@ -758,4 +761,21 @@ rec = m.load_item(U); rec['settings']['emails'] = False
 check('with its emails switched off a failed email is not held against it', m.needs(rec, portfolio(), sun + dt.timedelta(hours=10)) == [])
 check('a stranger cannot have a test email sent', call(action='mailtest', userId='stranger@y.com') == (200, {'success': True, 'allowed': False}))
 m.send_mail = real_send
+
+# --- the budget cannot be more than the practice money there is
+D.t.clear(); PRICES.clear(); SNAP['7-1'] = rows('crypto', '7-1'); m.datetime = at(sun)
+rec = m.load_item(U); base = dict(rec['settings'], enabled=True, risk=3, screeners=['7-1'], budgetUsd=8000.0)
+code_, b = call(action='save', userId=U, settings=base)
+check('the dashboard is told how much practice money there is for the autopilot (a new portfolio: all $100,000)', b['money'] == {'cash': 100000.0, 'invested': 0.0, 'reach': 100000} and b['settings']['budgetUsd'] == 8000.0, b.get('money'))
+code_, b = call(action='save', userId=U, settings=dict(base, budgetUsd=200000.0))
+check('a budget of $200,000 against $100,000 of practice money is set to $100,000, and the activity list says why', b['settings']['budgetUsd'] == 100000.0 and any(e['text'] == 'The budget was set to $100,000: that is all the practice money there is ($100,000 of cash and $0 it has invested).' for e in b['log']) and b['needs'] == [], (b['settings']['budgetUsd'], [e['text'] for e in b['log']][-2:]))
+pf = m.new_portfolio(sun); pf['cash'] = 61000.5; pf['holdings'] = [{'id': 'x1', 'symbol': 'C00-USD', 'label': 'C00-USD', 'currency': 'USD', 'qty': 10.0, 'buyPrice': 100.0, 'buyFx': 1, 'costUsd': 1000.0, 'boughtAt': m.iso(sun), 'by': 'ai', 'screener': '7-1'}, {'id': 'm1', 'symbol': 'AAPL', 'label': 'AAPL', 'currency': 'USD', 'qty': 1.0, 'buyPrice': 38000.0, 'buyFx': 1, 'costUsd': 38000.0, 'boughtAt': m.iso(sun)}]
+D.Table(m.PORTFOLIO_TABLE).rows[U] = {'userId': U, 'data': json.dumps(pf), 'version': 3}
+code_, b = call(action='save', userId=U, settings=dict(base, budgetUsd=90000.0))
+check('what the owner has spent on his own buys is not there for it: the most is the cash plus what it has itself invested', b['money'] == {'cash': 61000.5, 'invested': 1000.0, 'reach': 62000} and b['settings']['budgetUsd'] == 62000.0 and any('The budget was set to $62,000: that is all the practice money there is ($61,000 of cash and $1,000 it has invested).' == e['text'] for e in b['log']), (b.get('money'), b['settings']['budgetUsd']))
+n_notes = len([e for e in b['log'] if 'The budget was set to' in e['text']]); code_, b = call(action='save', userId=U, settings=dict(b['settings'], risk=4))
+check('another setting saved afterwards leaves the budget and adds no second note', b['settings']['budgetUsd'] == 62000.0 and len([e for e in b['log'] if 'The budget was set to' in e['text']]) == n_notes)
+code_, b = call(action='save', userId=U, settings=dict(b['settings'], budgetUsd=62000.0, risk=3)); code_, b = call(action='save', userId=U, settings=dict(b['settings'], budgetUsd=50000.0))
+check('a budget within the practice money is saved as typed', b['settings']['budgetUsd'] == 50000.0)
+m.datetime = clock
 print('ALL PASS' if ok else 'SOME FAILED')
