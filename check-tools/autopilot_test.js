@@ -355,6 +355,43 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     delete w.els['ap-stop']; delete w.els['ap-take'];
     check('no broken values around the limits', !/undefined|NaN|\[object|Infinity/.test(w.container.innerHTML));
   }
+  // what happens next: countdowns, what needs the user, and the email's status
+  { const NOW = '2026-10-11T02:52:00Z';
+    const coming = [{ at: '2026-10-11T04:40:00Z', kind: 'check', text: 'Next check-in (coin market). It looks at the holding it has there (CKB-USD) and sells it if it has hit its loss limit. It may buy up to 1 holding of about $6,250 from Crypto (top coins), if something on the shortlist passes its filters.' },
+                    { at: '2026-10-11T04:46:36Z', kind: 'release', text: 'More of the budget is released: $37,500 of the $50,000 may be invested from then.' },
+                    { at: '2026-10-12T00:10:00Z', kind: 'open', text: 'First check-in after the Australian and Japanese markets open.' },
+                    { at: '2026-10-12T14:40:00Z', kind: 'open', text: 'First check-in after the US market opens.' },
+                    { at: '2026-10-15T16:37:06Z', kind: 'sell', text: 'CKB-USD is sold at the latest: its 5 days are up then.' },
+                    { at: '2026-10-16T00:05:00Z', kind: 'sell', text: '4307.T is sold at the latest.' },
+                    { after: 17, kind: 'review', text: 'It reviews its own rules (3 of the 20 finished trades it waits for are in), may start a trial of one change beside the current rule, and emails you.' },
+                    { after: 1, kind: 'notes', text: 'The AI model writes fresh notes on what the record shows.' }];
+    const st = { settings: { ...settings, enabled: true, screeners: ['3-100', '7-1'], emails: true }, state: { lastRun: '2026-10-10T22:40:04Z' }, practiceCash: 100000, log: [], plans: [], now: NOW,
+      nextCheck: { at: '2026-10-11T04:40:00Z', markets: ['coin'] }, coming, needs: [], mail: null };
+    let sent = 0;
+    const w = page(b => { if (b.action === 'mailtest') { sent++; st.mail = sent === 1 ? { t: '2026-10-11T02:53:00Z', ok: true, subject: 'StockIQ autopilot (fake money): review emails are set up', why: null } : { t: '2026-10-11T03:10:00Z', ok: false, subject: 'x', why: 'MessageRejected' }; return { status: 200, body: { success: true, allowed: true, options: OPTIONS, summary: { sent: sent === 1 }, ...st } }; }
+      return { status: 200, body: { success: true, allowed: true, options: OPTIONS, ...st } }; }); await sleep(30);
+    const t = () => w.text();
+    check('a countdown to the next check-in sits under the status, with the time and a link to what happens then', /⏱ Next check-in in 1 h 48 min \([^)]*\d\d:\d\d[^)]*\)\. What happens then/.test(t()), t().slice(t().indexOf('⏱'), t().indexOf('⏱') + 120));
+    check('with nothing wrong it says nothing needs you, and that reviews happen by themselves', /✓ Nothing needs you right now\. It checks in, reviews its own rules and tries changes to them by itself; nothing has to be approved or pushed\./.test(t()) && !/⚠ Needs you/.test(t()));
+    const next = t().slice(t().indexOf('What happens next'), t().indexOf('How it is doing'));
+    check('"What happens next" lists what is coming, soonest first, each with a countdown and a time', /What happens next a forecast from its settings/.test(next) && next.indexOf('in 1 h 48 min') < next.indexOf('Next check-in (coin market)') && next.indexOf('Next check-in (coin market)') < next.indexOf('in 1 h 55 min') && next.indexOf('More of the budget is released') < next.indexOf('in 21 h 18 min') && next.indexOf('First check-in after the Australian') < next.indexOf('in 1 day 12 h') && /in 1 day 12 h [^.]*\d\d:\d\d[^.]*?First check-in after the US market opens/.test(next), next.slice(0, 700));
+    check('what is further ahead is folded away, not lost', /2 more further ahead/.test(next) && /in 4 days 14 h/.test(next) && /CKB-USD is sold at the latest/.test(next) && /in 4 days 21 h/.test(next), next.slice(600, 1300));
+    check('what goes by the number of trades says how many more, and that nothing has to be pushed', /after 17 more finished trades It reviews its own rules \(3 of the 20 finished trades it waits for are in\)/.test(next) && /after 1 more finished trade The AI model writes fresh notes/.test(next) && /Its reviews and trials happen by themselves at check-ins: you do not have to approve or push anything\./.test(next) && /changes to the program itself are made by a person, never by the autopilot/.test(next), next.slice(-700));
+    check('the countdown is in the page as a time the clock can tick down', (w.container.innerHTML.match(/data-ap-until="2026-10-11T04:40:00Z"/g) || []).length === 2);
+    const left = w.ctx.practiceAutopilot.leftText, from = (s) => new Date(Date.parse(NOW) + s * 1000).toISOString();
+    check('how the time left is worded, from seconds to days', left(from(-5)) === 'any moment now' && /^in (29|30) s$/.test(left(from(30))) && /^in 11 min (0\d|10) s$/.test(left(from(11 * 60 + 10))) && left(from(3630)) === 'in 1 h 01 min' && left(from(7200 - 20)) === 'in 2 h 00 min' && left(from(86400)) === 'in 1 day' && left(from(3 * 86400 + 5 * 3600)) === 'in 3 days 5 h' && left('nonsense') === '', [left(from(-5)), left(from(30)), left(from(670)), left(from(3600)), left(from(86400)), left(from(3 * 86400 + 5 * 3600))]);
+    check('under the email switch: no email yet, and a way to send a test', /Nothing needs doing when one arrives\. No email has been sent yet\. Send me a test email/.test(t()), t().slice(t().indexOf('Email me its reviews'), t().indexOf('Email me its reviews') + 300));
+    w.form(st.settings); w.click('mailtest'); await sleep(40);
+    check('"Send me a test email" asks the function, says it is on its way, and then shows the last email', w.calls.filter(c => c.action === 'mailtest').length === 1 && /A test email is on its way to tester@x\.com\. If it is not in your inbox in a few minutes, look in junk\./.test(t()) && /Last email: "StockIQ autopilot \(fake money\): review emails are set up", [^"]*?\d\d:\d\d[^"]*?, accepted by the mail service for tester@x\.com\. If it is not in your inbox, look in junk\. Send me a test email/.test(t()), t().slice(t().indexOf('Last email'), t().indexOf('Last email') + 260));
+    st.needs = [{ kind: 'mail', at: '2026-10-11T03:10:00Z', text: 'Its last email could not be sent (MessageRejected). What it would have said is under "What it has done".' }];
+    w.form(st.settings); w.click('mailtest'); await sleep(40);
+    check('an email that is refused: the message, the status line and "Needs you" all say so', /The test email could not be sent \(MessageRejected\)\./.test(t()) && /Last email could not be sent \(MessageRejected\)/.test(t()) && /⚠ Needs you Its last email could not be sent \(MessageRejected\)\. What it would have said is under "What it has done"\. \([^)]*\d\d:\d\d[^)]*\)/.test(t()) && !/Nothing needs you/.test(t()), t().slice(t().indexOf('⚠'), t().indexOf('⚠') + 220));
+    check('no broken values in the new parts', !/undefined|NaN|\[object|Infinity/.test(w.container.innerHTML));
+    const off = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, ...st, settings: { ...st.settings, enabled: false }, nextCheck: null, coming: [], mail: null, needs: [{ kind: 'off', text: 'It is switched off and still holds 1 holding: it stays until you sell it or switch it back on.' }] } })); await sleep(30);
+    check('switched off: no countdown and no list, and what needs you is said', !/⏱/.test(off.text()) && !/What happens next/.test(off.text()) && /⚠ Needs you It is switched off and still holds 1 holding/.test(off.text()));
+    const old = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, settings: { ...settings, enabled: true }, state: {}, practiceCash: 100000, log: [], nextCheck: { at: '2026-10-11T04:40:00Z', markets: ['coin'] } } })); await sleep(30);
+    check('an answer from the older function (none of this in it) shows as before, with just the countdown', !/What happens next|Needs you|Nothing needs you|Send me a test email/.test(old.text()) && /⏱ Next check-in/.test(old.text()) && !/undefined|NaN/.test(old.container.innerHTML));
+  }
   check('no broken values', !/undefined|NaN|\[object/.test(p.container.innerHTML), (p.container.innerHTML.match(/.{30}(undefined|NaN|\[object).{30}/) || [])[0]);
   console.log(ok ? 'ALL PASS' : 'SOME FAILED');
 })();

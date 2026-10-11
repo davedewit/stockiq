@@ -11,6 +11,7 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
           pace (hands the three pace settings to the risk level, moves the slider, sets one by hand, moves it again),
           trailstop (chooses the full trailing stop loss in "Your own limits"),
           tabs (needs the dashboard file as a sixth argument: presses each dashboard tab and the autopilot's two parts),
+          next (prints the countdown, "Needs you", the "What happens next" list and the email line, and sends a test email),
           listswitch (switches the list to "buys and sells only" and reloads the page to see that it is remembered)
 Open the page with headless Chrome: --dump-dom for the printed results, --screenshot for the look (site-overview.md, section 12)."""
 import json, sys
@@ -43,7 +44,14 @@ const OPTIONS = %s;
 let auto = { settings: { enabled: true, risk: 3, budgetUsd: 10000, periodDays: 10, everyHours: 0.5, maxHoldDays: 0.25, screeners: ['7-1'], aiSell: true, selfTune: true, emails: true, stopPct: null, takePct: null, auto: [], trailMode: 'gains' }, coinShare: 1, state: { lastRun: iso(-0.1) }, minSample: 8, practiceCash: 100000, lessons: null, resting: {}, recent: [],
   scorecard: { n: 0, groups: {} }, rules: { name: 'Balanced', stop: -10, take: 18, trail: 0.5, top: 10, max_rsi: 76, arm: 9, changed: {}, yours: [], level: { stop: -10, take: 18 } }, realizedUsd: 7.91,
   tune: { trial: null, past: [], nextReviewIn: 20, batch: 20, group: 10, finished: 0 }, month: { last30: { n: 0, up: 0, usd: 0, pct: 0 }, before30: { n: 0, up: 0, usd: 0, pct: 0 } },
-  nextCheck: { at: iso(0.4), markets: ['coin'] }, holding: { count: 1, investedUsd: 1250 },
+  nextCheck: { at: iso(0.4), markets: ['coin'] }, holding: { count: 1, investedUsd: 1250 }, now: iso(0), needs: [], mail: null,
+  coming: [{ at: iso(0.4), kind: 'check', text: 'Next check-in (coin market). It looks at the holding it has there (WEMIX-USD) and sells it if it has hit its loss limit, gain mark, stop or time limit, or if the AI review wants it out. It may buy up to 1 holding of about $1,250 from Crypto (top coins), if something on the shortlist passes its filters.' },
+            { at: iso(2.1), kind: 'release', text: 'More of the budget is released: $3,750 of the $10,000 may be invested from then ($2,500 until then; $1,250 is invested now). It is spent at check-ins after that, in markets that are open.' },
+            { at: iso(3.1), kind: 'sell', text: 'WEMIX-USD is sold at the latest: its 6 hours are up then.' },
+            { at: iso(31), kind: 'open', text: 'First check-in after the US market opens. It can buy from S&P 100 if part of the budget is free then.' },
+            { at: iso(24 * 9), kind: 'rest', text: 'The Dow 30 screener is tried again after its rest.' },
+            { after: 17, kind: 'review', text: 'It reviews its own rules (3 of the 20 finished trades it waits for are in), may start a trial of one change beside the current rule, and emails you.' },
+            { after: 2, kind: 'notes', text: 'The AI model writes fresh notes on what the record shows (under "How it is doing").' }],
   plans: [{ id: 'a1', label: 'WEMIX-USD', boughtAt: iso(-2.9), sellBy: iso(3.1), auto: true, stop: -10, take: 18, arm: 1, trail: 0.5, peak: 6.2, floor: 3.5, view: { t: iso(-0.1), sell: false, text: 'Up 4%% and still climbing', larger: true } }],
   log: [{ t: iso(-2.9), type: 'buy', symbol: 'WEMIX-USD', usd: 1250, text: 'rank 1, RSI 14, down 3.8%% in 7 days on 1.0x volume (Crypto (top coins) rank 1, score +4.0; chosen by the AI model)', detail: ['The plan for it: sell 6 hours after buying at the latest; sooner at -10%% or +18%%; once it has been up 9%%, sell if it gives back 50%% of its best gain; sell if its screener signal turns negative or it slips far down the ranking.'] },
         { t: iso(-0.1), first: iso(-2.4), n: 5, key: 'pace', type: 'note', symbol: '', usd: 0, text: 'Checked in. Nothing to spend yet: $1,250 of the $10,000 budget is invested. The rest is released in steps over the 10 days set under "Build up to it over"; the next $1,250 in about 21 hours.' }] };
@@ -55,6 +63,7 @@ window.fetch = async (url, opts) => {
   const b = JSON.parse(opts.body); calls.push((b.settings ? 'autopilot-' : b.portfolio ? 'portfolio-' : '') + b.action);
   if (b.action === 'get' && !('settings' in b) && u.includes('5c7pt7q')) return json({ success: true, portfolio, version });
   if (b.action === 'save' && b.portfolio) { portfolio = b.portfolio; version++; return json({ success: true, version }); }
+  if (b.action === 'mailtest') { auto.mail = { t: iso(0), ok: true, subject: 'StockIQ autopilot (fake money): review emails are set up', why: null }; return json(Object.assign({ success: true, allowed: true, options: OPTIONS, summary: { sent: true } }, auto)); }
   if (b.action === 'save' && b.settings) { auto.settings = b.settings; auto.plans.forEach(p => { p.auto = b.settings.enabled; }); }
   if (b.action === 'sellall') { const n = auto.plans.length; portfolio.holdings.filter(h => h.by === 'ai').forEach(h => { portfolio.closed.push(Object.assign({}, h, { sellPrice: PRICES[h.symbol], sellFx: 1, proceedsUsd: h.qty * PRICES[h.symbol], soldAt: iso(0), spyAtSell: 700 })); portfolio.cash += h.qty * PRICES[h.symbol]; });
     portfolio.holdings = portfolio.holdings.filter(h => h.by !== 'ai'); version++; auto.plans = []; auto.holding = { count: 0, investedUsd: 0 };
@@ -129,6 +138,16 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
       out('  autopilot parts: ' + ['activity', 'settings'].map(n => n + (q('#ap-pane-' + n).style.display === 'none' ? ' hidden' : ' shown')).join(', ')); q('[data-ap-part="settings"]').click(); await wait(100);
       out('  pressed Settings inside the autopilot: ' + ['activity', 'settings'].map(n => n + (q('#ap-pane-' + n).style.display === 'none' ? ' hidden' : ' shown')).join(', ') + ' | page height now ' + document.documentElement.scrollHeight + 'px'); q('[data-ap-part="activity"]').click(); await wait(100);
       out('  back on Activity: page height ' + document.documentElement.scrollHeight + 'px'); localStorage.removeItem('stockiqDashboardTab'); localStorage.removeItem('stockiqAutopilotPart'); }
+    if (step === 'next') {
+      const line = (sel) => { const x = q(sel); return x ? x.textContent.replace(/\\s+/g, ' ').trim() : '(none)'; };
+      out('countdown under the status: ' + line('#practice-autopilot .ap-countline')); out('needs you: ' + line('#ap-needs'));
+      const sec = Array.from(document.querySelectorAll('#practice-autopilot .ap-section')).find(x => x.textContent.includes('What happens next'));
+      out('what happens next: ' + (sec ? sec.textContent.replace(/\\s+/g, ' ').trim() : '(none)'));
+      const first = q('#practice-autopilot [data-ap-until]'), was = first.textContent; await wait(2300); out('the countdown ticks: "' + was + '" then "' + q('#practice-autopilot [data-ap-until]').textContent + '"');
+      out('email line: ' + line('#ap-mail-state')); q('#practice-autopilot [data-ap="mailtest"]').click(); await wait(700); out('after "Send me a test email": ' + line('#ap-notice') + ' | ' + line('#ap-mail-state'));
+      auto.needs = [{ kind: 'missed', at: iso(-1), text: 'A scheduled check-in was due and has not happened. Press "Check in now"; if that works, the schedule itself may be stopped and needs a look.' }];
+      await window.practiceAutopilot.refresh(true); await wait(500); out('with something wrong: ' + line('#ap-needs')); auto.needs = [];
+    }
     if (step === 'off') { q('#ap-enabled').click(); await wait(700); out('switched the autopilot off: ' + cellText('WEMIX')); }
     if (step === 'open') { document.querySelectorAll('#practice-autopilot details').forEach(d => { d.open = true; }); const s = q('#pp-sold'); if (s) s.open = true; out('unfolded the details'); }
   }

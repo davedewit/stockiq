@@ -87,10 +87,21 @@
         #practice-autopilot .ap-may { display: block; padding: 6px 0; cursor: pointer; }
         #practice-autopilot .ap-may input { margin-right: 8px; }
         #practice-autopilot .ap-may small { display: block; margin-left: 24px; color: var(--text-secondary); font-size: 0.8rem; }
+        #practice-autopilot .ap-countline { margin-top: 6px; color: var(--text-primary); }
+        #practice-autopilot .ap-count { display: inline-block; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+        #practice-autopilot .ap-needs { margin-top: 10px; padding: 9px 12px; border-radius: 6px; font-size: 0.85rem; line-height: 1.5; color: var(--text-primary); background: rgba(217, 119, 6, 0.12); border: 1px solid rgba(217, 119, 6, 0.5); }
+        #practice-autopilot .ap-needs.none { background: none; border: 0; padding: 0; color: var(--text-secondary); }
+        #practice-autopilot .ap-needs ul { margin: 4px 0 0 18px; padding: 0; }
+        #practice-autopilot .ap-next { display: grid; grid-template-columns: minmax(150px, max-content) 1fr; gap: 8px 14px; align-items: start; margin-top: 8px; line-height: 1.45; }
+        #practice-autopilot .ap-next .ap-count { padding: 2px 9px; border-radius: 12px; background: var(--bg-secondary); border: 1px solid var(--border-color); font-size: 0.82rem; text-align: center; }
+        #practice-autopilot .ap-next .ap-count.first { background: rgba(0, 123, 255, 0.14); border-color: #007bff; }
+        #practice-autopilot .ap-next time { color: var(--text-primary); font-weight: 600; margin-right: 6px; white-space: nowrap; }
+        @media (max-width: 640px) { #practice-autopilot .ap-next { grid-template-columns: 1fr; gap: 2px 0; } #practice-autopilot .ap-next .ap-count { justify-self: start; margin-top: 8px; } }
         @media (max-width: 640px) { #practice-autopilot .ap-group { grid-template-columns: 1fr; } #practice-autopilot .ap-group-name { padding-top: 0; } #practice-autopilot .ap-chip { white-space: normal; } #practice-autopilot .ap-input { white-space: normal; } }
     `;
 
     let data = null, draft = null, working = '', notice = null, showAll = false;
+    let skew = 0;                                         // the server's clock minus this computer's, in ms: countdowns use the server's
     let saveTimer = null, saving = false, saveError = null, savedOnce = false, breakdownOpen = false;
     // The activity list: everything, or only buys and sells. A way of looking at the list, not a setting of the autopilot:
     // it is remembered in this browser (localStorage), so a refresh keeps it.
@@ -260,6 +271,61 @@
             : (data.nextCheck === null ? ' No check-in is due in the next ten days.' : '');
         return 'On.' + holding + (last ? ` Last check-in ${when(last)}.` : (next ? '' : ' First check-in at the next hourly check.')) + next;
     }
+    // ---------------------------------------------------------------- what happens next: countdowns, and what needs the user
+    // How long until a time, in words that tick: "in 1 h 48 min", "in 12 min 05 s", "any moment now"
+    function leftText(iso) {
+        const ms = Date.parse(iso) - (Date.now() + skew);
+        if (!isFinite(ms)) return '';
+        if (ms <= 0) return 'any moment now';
+        const sec = Math.floor(ms / 1000);
+        if (sec < 60) return `in ${sec} s`;
+        if (sec < 3600) return `in ${Math.floor(sec / 60)} min ${String(sec % 60).padStart(2, '0')} s`;
+        const min = Math.ceil(sec / 60);
+        if (min < 1440) return `in ${Math.floor(min / 60)} h ${String(min % 60).padStart(2, '0')} min`;
+        const hours = Math.round(min / 60), days = Math.floor(hours / 24);
+        return `in ${days} day${days === 1 ? '' : 's'}${hours % 24 ? ' ' + (hours % 24) + ' h' : ''}`;
+    }
+    const until = (iso, cls) => `<span class="ap-count ${cls || ''}" data-ap-until="${esc(iso)}">${esc(leftText(iso))}</span>`;
+    // Every second: only the countdown texts are touched, nothing is redrawn
+    function tick() {
+        if (!data || !document.querySelectorAll) return;
+        Array.from(document.querySelectorAll('[data-ap-until]')).forEach(x => { const t = leftText(x.getAttribute('data-ap-until')); if (x.textContent !== t) x.textContent = t; });
+    }
+    // Under the status box: the countdown to the next check-in
+    function countLine() {
+        const n = data.settings.enabled && data.nextCheck && data.nextCheck.at;
+        return n ? `<div class="ap-countline">⏱ Next check-in ${until(n)} <span style="color: var(--text-secondary);">(${esc(when(n))}).</span> <a href="#" data-ap-part="activity">What happens then</a></div>` : '';
+    }
+    // What needs the user. Its own reviews and trials do not: they happen by themselves at check-ins
+    function needsHtml() {
+        if (!Array.isArray(data.needs)) return '';
+        if (!data.needs.length) return `<div id="ap-needs" class="ap-needs none">✓ Nothing needs you right now.${data.settings.enabled ? ' It checks in, reviews its own rules and tries changes to them by itself; nothing has to be approved or pushed.' : ''}</div>`;
+        return `<div id="ap-needs" class="ap-needs" role="status"><strong>⚠ Needs you</strong><ul>${data.needs.map(n => `<li>${esc(n.text)}${n.at ? ` <span style="color: var(--text-secondary);">(${esc(when(n.at))})</span>` : ''}</li>`).join('')}</ul></div>`;
+    }
+    // The first thing under Activity: what is coming, soonest first, each with a countdown; then what goes by the number of trades
+    function comingHtml() {
+        const list = data.coming;
+        if (!Array.isArray(list) || !list.length) return '';
+        const timed = list.filter(c => c.at), counted = list.filter(c => !c.at);
+        const row = (c, i) => `${until(c.at, i === 0 ? 'first' : '')}<div><time>${esc(when(c.at))}</time>${esc(c.text)}</div>`;
+        const rest = timed.slice(4);
+        return `<div class="ap-section"><h4>What happens next <span class="ap-sub">a forecast from its settings: the prices and rankings of the moment decide what is really bought or sold</span></h4>
+            <div class="ap-next">${timed.slice(0, 4).map(row).join('')}</div>
+            ${rest.length ? `<details data-ap-fold="coming" ${openDetails.coming ? 'open' : ''}><summary>${rest.length} more further ahead</summary><div class="ap-next">${rest.map(c => row(c, 1)).join('')}</div></details>` : ''}
+            ${counted.length ? `<div class="ap-next" style="margin-top: 12px;">${counted.map(c => `<span class="ap-count">${typeof c.after === 'number' ? (c.after > 0 ? `after ${c.after} more finished trade${c.after === 1 ? '' : 's'}` : 'at the next check-in') : 'not planned'}</span><div>${esc(c.text)}</div>`).join('')}</div>
+            <div style="font-size: 0.8rem; margin-top: 8px;">A finished trade is a holding it bought and has sold. Its reviews and trials happen by themselves at check-ins: you do not have to approve or push anything. It can only adjust its own five trading rules, inside fixed limits; changes to the program itself are made by a person, never by the autopilot.</div>` : ''}
+        </div>`;
+    }
+    // Under "Email me its reviews": what became of the last email, and a way to check that they arrive
+    function mailHtml() {
+        if (!('mail' in data)) return '';
+        const m = data.mail, to = userId() || 'your account address';
+        const last = !m ? 'No email has been sent yet.'
+            : m.ok ? `Last email: "${esc(m.subject)}", ${esc(when(m.t))}, accepted by the mail service for ${esc(to)}. If it is not in your inbox, look in junk.`
+            : `<span style="color: #d97706;">Last email could not be sent (${esc(m.why || 'no reason given')}), ${esc(when(m.t))}.</span>`;
+        return `<div id="ap-mail-state" class="ap-help" style="margin-left: 24px;">${last} <a href="#" data-ap="mailtest">${working === 'mailtest' ? 'Sending…' : 'Send me a test email'}</a></div>`;
+    }
+
     // The line beside the button: whether what is on screen is saved, and what to do next
     function savedState() {
         if (saveError) return { text: 'Not saved: ' + saveError, bad: true };
@@ -354,7 +420,8 @@
                     <label class="ap-switch" title="Switch the autopilot on or off. This is saved straight away."><span id="ap-switch-text">${d.enabled ? 'On' : 'Off'}</span><input id="ap-enabled" type="checkbox" ${d.enabled ? 'checked' : ''} ${working ? 'disabled' : ''}><span class="ap-track"></span></label>
                 </div>
                 <p class="ap-intro">An AI model makes practice buys and sells for you from the latest results of the screeners you choose, inside the limits you set here. It uses the fake money of your <a href="#practice">practice portfolio</a>, where its holdings are listed with your own. Nothing here is advice, and past screener results have not shown a reliable edge.</p>
-                <div id="ap-status" class="ap-status ${on ? 'on' : ''}">${esc(statusText())}</div>
+                <div id="ap-status" class="ap-status ${on ? 'on' : ''}">${esc(statusText())}${countLine()}</div>
+                ${needsHtml()}
 
                 <div class="ap-actions">
                     <button id="ap-run" data-ap="run" class="ap-btn ${ready ? 'primary' : ''}" ${working || !ready || state.text === 'Saving…' ? 'disabled' : ''} title="${!on ? 'Switch the autopilot on first' : !ready ? 'Tick at least one screener first' : 'Runs one check-in now instead of waiting for the next one. If the budget is still being built up, pressing this releases the next part of it early. Only markets that are open are traded; coins at any time'}">${working === 'run' ? 'Checking in… this can take up to a minute' : 'Check in now'}</button>
@@ -369,6 +436,7 @@
                 </div>
 
                 <div id="ap-pane-activity" class="ap-pane" style="${part === 'activity' ? '' : 'display: none;'}">
+                ${comingHtml()}
                 ${recordHtml()}
                 ${tuneHtml()}
                 <div class="ap-section"><h4>What it has done <span class="ap-fresh"><span id="ap-fresh">${loadedAt ? 'Up to date at ' + esc(clock(loadedAt)) + '. Refreshes by itself every minute.' : ''}</span><a href="#" data-ap="refresh">↻ Refresh now</a><label class="ap-mini" title="On: only its buys and sells are listed. Off: its check-ins and notes too. Remembered in this browser."><input id="ap-tradesonly" type="checkbox" ${tradesOnly ? 'checked' : ''}><span class="ap-dot"></span>Buys and sells only</label></span></h4>
@@ -416,7 +484,8 @@
                     <span class="ap-label">What it may do by itself</span>
                     ${mayRow('ap-aisell', 'aiSell', 'Sell early on the AI model\'s review', 'At every check-in the AI model looks at each holding with the latest screener figures and recent headlines, and may sell it before the fixed rules would, or keep it with a tighter stop: for instance when a rise has stalled or turned. A larger model is asked when a gain is at stake (a few times a day at most). Off: only the fixed rules sell.')}
                     ${mayRow('ap-tune', 'selfTune', 'Try changes to its own rules', 'Every 20 finished trades it may try one change to a selling or buying rule beside the current one, and keeps it only if it did clearly better. Off: its rules stay exactly as they are.')}
-                    ${mayRow('ap-mail', 'emails', 'Email me its reviews', 'An email to your account address each time it reviews its rules, starts a trial or finishes one.')}
+                    ${mayRow('ap-mail', 'emails', 'Email me its reviews', 'An email to your account address each time it reviews its rules, starts a trial or finishes one. Nothing needs doing when one arrives.')}
+                    ${mailHtml()}
                 </div>
                 </div>
             </div>`;
@@ -512,11 +581,11 @@
         if (!saveError && isDirty()) { queueSave(300); return; }
         if (editing()) syncDraft(); else render();
     }
-    function take(result) { data = result; draft = JSON.parse(JSON.stringify(result.settings)); accepted = null; loadedAt = new Date(); sharePlans(); }
+    function take(result) { data = result; draft = JSON.parse(JSON.stringify(result.settings)); accepted = null; loadedAt = new Date(); const at = Date.parse(result.now); if (isFinite(at)) skew = at - Date.now(); sharePlans(); }
     // practice-portfolio.js marks the autopilot's holdings with when and at what they will be sold
     function sharePlans() { if (data && data.allowed && window.practicePortfolio && window.practicePortfolio.setPlans) window.practicePortfolio.setPlans(data.plans || [], { realizedUsd: data.realizedUsd }); }
     // What changes when the autopilot acts: its activity list and what it holds
-    const stamp = (r) => JSON.stringify([r.log && r.log.length, r.log && r.log.slice(-1), r.plans, r.state, r.tune, r.scorecard && r.scorecard.n]);
+    const stamp = (r) => JSON.stringify([r.log && r.log.length, r.log && r.log.slice(-1), r.plans, r.state, r.tune, r.scorecard && r.scorecard.n, r.coming, r.needs, r.mail, r.nextCheck]);
     // Ask again without disturbing anything: not while a change is being typed, saved or run
     async function refresh(byHand) {
         if (!data || !data.allowed || refreshing || working || saving || saveTimer || isDirty() || (editing() && !byHand)) return;
@@ -588,6 +657,14 @@
                 if (window.practicePortfolio && window.practicePortfolio.reload) window.practicePortfolio.reload();
             });
         }
+        else if (action === 'mailtest') {
+            act('mailtest', async () => {
+                const r = await api('mailtest');
+                take(r);
+                notice = r.summary && r.summary.sent ? { text: `A test email is on its way to ${userId()}. If it is not in your inbox in a few minutes, look in junk.` }
+                    : { text: `The test email could not be sent${r.mail && r.mail.why ? ' (' + r.mail.why + ')' : ''}.`, bad: true };
+            });
+        }
         else if (action === 'restore' || action === 'stoptrial') {
             act('tune', async () => { take(await api('tune', action === 'restore' ? { op: 'restore', param: t.getAttribute('data-param') } : { op: 'stop' })); notice = { text: action === 'restore' ? 'Put back to the level\'s own rule.' : 'Trial stopped. The rule stays as it was.' }; });
         }
@@ -624,7 +701,7 @@
     if (typeof window !== 'undefined' && window.addEventListener) window.addEventListener('pagehide', leaving);
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') leaving(); });
 
-    if (typeof setInterval === 'function') setInterval(() => refresh(false), REFRESH_MS);
-    window.practiceAutopilot = { reload: load, flush, refresh };
+    if (typeof setInterval === 'function') { setInterval(() => refresh(false), REFRESH_MS); setInterval(tick, 1000); }
+    window.practiceAutopilot = { reload: load, flush, refresh, tick, leftText };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load); else load();
 })();

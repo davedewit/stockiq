@@ -1332,7 +1332,7 @@ def review_lines(record, now):
     if notes:
         lines += ['', 'WHAT THE AI MODEL NOTED FROM THE RECORD'] + ['- ' + n for n in notes]
     lines += ['', f"ITS RULES NOW ({rules['name']} level)",
-              f"Sells a holding if it falls to {rules['stop']:g}% or reaches +{rules['take']:g}%, or when its {span_text(settings['maxHoldDays'])} are up. "
+              f"Sells a holding if it falls to {rules['stop']:g}% or reaches +{rules['take']:g}%, or after {span_text(settings['maxHoldDays'])} at the latest. "
               + {'off': 'No stop follows a holding (switched off).',
                  'full': 'A trailing stop sits under each holding from the moment it is bought and follows it up: it is sold if it falls back too far from its best.'}.get(
                      settings.get('trailMode', 'gains'), 'A holding that keeps rising is kept: once it has risen beyond its own normal wobble a stop follows it up, and it is sold only if it then falls back.')
@@ -1866,7 +1866,7 @@ def coming(record, portfolio, now, plans=()):
     # the latest each holding is kept
     for p in plans:
         if p.get('sellBy'):
-            out.append({'at': p['sellBy'], 'kind': 'sell', 'text': f"{p.get('label')} is sold at the latest: its {span_text(settings['maxHoldDays'])} are up then"
+            out.append({'at': p['sellBy'], 'kind': 'sell', 'text': f"{p.get('label')} is sold at the latest: by then it has been kept {span_text(settings['maxHoldDays'])}, the longest allowed"
                                                                    + (f" (counted to when the {p['market']} market is open)." if p.get('market') and p['market'] != 'coin' else '.')})
     # rests that end
     for key, until in resting.items():
@@ -1916,6 +1916,9 @@ def needs(record, portfolio, now):
     elif portfolio['cash'] < size and settings['budgetUsd'] - invested >= size - 0.01 * RISK[settings['risk']]['positions']:
         out.append({'kind': 'cash', 'text': f"The practice cash (${portfolio['cash']:,.0f}) is less than one holding (${size:,.0f}), so it cannot buy more. "
                                             'Sell one of your own holdings, lower its budget, or reset the fake money.'})
+    elif settings['budgetUsd'] > portfolio['cash'] + invested + 1:
+        out.append({'kind': 'budget', 'text': f"Its budget (${settings['budgetUsd']:,.0f}) is more than the practice money it can reach (${portfolio['cash'] + invested:,.0f}: "
+                                              f"${portfolio['cash']:,.0f} cash and ${invested:,.0f} it has invested), so it will stop short of the budget. Lower the budget if you want its figures to add up."})
     fail = state.get('fail')
     if fail:
         out.append({'kind': 'fail', 'at': fail.get('t'), 'text': f"Its last scheduled check-in stopped on an error ({fail.get('what')}). It tries again at the next one; if this stays, the program needs a look."})
