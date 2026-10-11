@@ -1028,7 +1028,7 @@ the average per trade, which the panel shows, never by the share of trades that 
   (when the budget's build-up began; reset when it is switched on or the budget or build-up
   changes), `lastRun`, `lastRunBy`, `open` (remembered buys), `exits`, `rest`, `restSince`,
   `lessons`, `tune` (`values`, `trial`, `past`, `mark`, `seq`, `reviewed`), `watch`, `news`, `seen`, `stay`,
-  `strong`, `ahead`, `aiSell`, `closedCount`, `realizedUsd`, `progress` (`done`: batches reported, `reports`), `order` (the trial of which share to buy), `mail` (what became of the last email:
+  `strong`, `ahead`, `aiSell`, `closedCount`, `realizedUsd`, `progress` (`done`: batches reported, `reports`), `order` (the trial of which share to buy), `visit`, `pausedAt`, `ai` (today's AI calls), `mail` (what became of the last email:
   `t, ok, subject, why`), `fail` (a scheduled check-in that stopped on an error; cleared by the next
   good one), `savedAt` (when the settings last changed).
 - `public()` (every action returns it): `settings, state, log, scorecard, lessons, resting, recent,
@@ -1154,7 +1154,7 @@ not sure whether its improvements needed him to "push" them. They do not, and th
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 335 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 348 checks
    node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 169 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 66 checks
@@ -1206,20 +1206,20 @@ apostrophe must allow for it; a test of an action that depends on the day (tradi
 must set the function's clock (`m.datetime = at(when)` in `ai_trader_test.py`), or it passes on
 weekdays and fails at the weekend.
 
-### Start here when resuming (state at 04:30 UTC on 11 Oct 2026, the end of a two-day session)
+### Start here when resuming (state at 05:35 UTC on 11 Oct 2026, the end of a two-day session)
 
 **What is live, and how to confirm nothing has moved since:**
-- Lambda `stockiq-ai-trader`: `CodeSha256` `pgElWqPN3JXBw+iOsBhXwtksKgZo2EXY1tEpTpjd/Ew=`, equal to
-  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,445 lines).
+- Lambda `stockiq-ai-trader`: `CodeSha256` `YTXPRUhy3GpE1fLUWpaCqE5tDrBaKHTgqbpHdVtoy6k=`, equal to
+  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,525 lines).
 - Website: `practice-autopilot.js?v=28` (sha256 starts `9b51554782cf`), `practice-portfolio.js?v=13`
   (`ad1c1372002e`), `dashboard.html` (`a1dbcd8b81e8`). Live files were compared byte for byte.
 - Both repos clean and pushed; **no `check-tools/pending-*` folder is left** (every package was
-  deployed and removed). Tests on the live files: 335 function, 169 panel, 66 portfolio, the
+  deployed and removed). Tests on the live files: 348 function, 169 panel, 66 portfolio, the
   panel-versus-function comparison clean (3,780 budget combinations, 2,915 spreads over markets).
 - Rollback copies of the function, one per deploy, in `~/VSCODE/backup/`:
   `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order: 10 Oct `v2, fast, panel,
   autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
-  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order`.
+  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle`.
 - First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and
   the function's log (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors
   ("check-in failed", "not worked out", "not sent") and for the firsts listed below.
@@ -1289,13 +1289,29 @@ the average per trade.
   switched it on costs nothing and does nothing; for an account not on the list the dashboard's one
   call is answered "not allowed" and no record is made. The practice portfolio (buying by hand with
   fake money) is shown to every logged-in user and stores a row only once they buy.
-- **Before it is ever opened to users** (his decision; it also touches the same legal question as
-  the signals: an AI choosing stocks, even with fake money, reads as picks): (1) an account left
-  switched on keeps checking in for ever, so pause it after some weeks without a visit to the
-  dashboard; (2) the schedule runs users one after another inside one 300-second run, which would
-  not finish for many users: run them in parallel or one invocation per user; (3) screener results
-  are already shared between users for 20 minutes, but each check-in makes its own AI calls, so set
-  a limit per user.
+- **Safeguards for every account** (built 11 Oct at the owner's word: "do it for all accounts
+  anyway. make it pause if it hasn't been logged in for 2 weeks"):
+  1. **Paused after two weeks without a visit.** Every call from the dashboard is a visit
+     (`seen_now`: `state.visit`, written at most every `SEEN_EVERY_HOURS` 6; not `state.seen`, which
+     is the headline cache). The scheduled run asks `pause_if_away` of every account that is on:
+     more than `IDLE_DAYS` (14) since the last visit and it is switched off (so the schedule passes
+     it by at no cost), `state.pausedAt` is set, a line goes into the activity list and one email
+     is sent. **It switches back on by itself the next time the dashboard is opened** ("Welcome
+     back…"). What it holds is not sold and not watched while paused. A record from before this
+     existed gets its two weeks from the first scheduled run. "What happens next" shows when it
+     would pause (`pause`).
+  2. **Check-ins side by side.** The schedule runs up to `RUN_TOGETHER` (4) accounts at once and
+     starts no check-in with less than `RUN_RESERVE_SECONDS` (100) of the run's time left; such an
+     account is still due and is run at the next slot (`waiting` in the log line).
+  3. **A daily limit on AI calls per account:** `AI_CALLS_PER_DAY` (120; `state.ai`). Past it the
+     model is treated as not answering: buys go by rank, only the fixed rules sell, one line a day
+     says so. Screener results were already shared between accounts for 20 minutes.
+- **It is still not open to other accounts.** These safeguards make that possible; the switch is
+  the Lambda's `AI_TRADER_USERS` setting (`*` for everyone), and it is the owner's to throw: an AI
+  choosing stocks for users, even with fake money, reads as picks, the same legal question as the
+  signals (section 11). The owner's sentence could be read as asking for it; it was not done on an
+  ambiguous instruction. If he confirms, change the setting (the session's safety check may want a
+  packaged script for that too) and re-check the panel as a second, ordinary account.
 - Cost: a crypto check-in is a full crypto screener run (about 540 worker calls) unless a copy
   under 20 minutes old exists, so one user on 30-minute check-ins adds about 780,000 Lambda calls
   a month, plus up to two small AI calls per check-in and at most 8 larger ones a day: a few
@@ -1796,5 +1812,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     each way; "Improvements so far" line on the panel. Built after the owner pointed out that the
     study had been measured and reported but not acted on. Rollback zip:
     `…_before_autopilot_order_20261011.zip`. Live: `practice-autopilot.js?v=28`.
+  - **Safeguards for every account** (section 8c, "Start here"): paused after two weeks without a
+    visit to the dashboard and back on at the next visit; check-ins of several accounts side by
+    side; a daily limit on AI calls per account. The autopilot itself is still open to the two
+    listed accounts only. Function only. Rollback zip: `…_before_autopilot_idle_20261011.zip`.
   - Notes: section 8c ends with "Start here when resuming"; this session was closed there because
     its context had grown too large. Everything known is in these files.
