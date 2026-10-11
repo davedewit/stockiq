@@ -4,7 +4,7 @@ import boto3
 from botocore.exceptions import ClientError
 class T:
     def __init__(s): s.rows = {}; s.fail_next = False
-    def get_item(s, Key): r = s.rows.get(Key['userId']); return {'Item': copy.deepcopy(r)} if r else {}
+    def get_item(s, Key): r = s.rows.get(Key.get('userId') or Key.get('user_date')); return {'Item': copy.deepcopy(r)} if r else {}      # the plans table is keyed by user_date
     def scan(s, **k): return {'Items': [copy.deepcopy(r) for r in s.rows.values()]}
     def put_item(s, Item, ConditionExpression=None, ExpressionAttributeValues=None):
         cur = s.rows.get(Item['userId'])
@@ -58,7 +58,7 @@ buy_prompts = lambda: [p for p in MODEL['prompts'] if 'Pick exactly' in p['user'
 t0 = dt.datetime(2026, 10, 12, 15, 0, 0)          # a Monday, US market open
 
 # --- access and settings
-check('someone not on the list is refused', call(action='get', userId='stranger@y.com')[1] == {'success': True, 'allowed': False})
+check('someone not on the list and not on a paid plan is refused, and pointed to the plans', call(action='get', userId='stranger@y.com')[1] == {'success': True, 'allowed': False, 'locked': 'plan', 'upgrade': 'dashboard.html#upgrade'})
 check('not on the list cannot switch it on', m.clean_settings({'enabled': True}, 'stranger@y.com')['enabled'] is False)
 s, b = call(action='get', userId=U); check('defaults', b['allowed'] and b['settings'] == dict(m.DEFAULTS) and '3-100' in b['options']['screeners'], b)
 s, b = call(action='save', userId=U, settings={'enabled': True, 'risk': 9, 'budgetUsd': 'lots', 'periodDays': 0.2, 'everyHours': 7, 'maxHoldDays': 5, 'screeners': ['3-100', 'nope'], 'x': 1})
@@ -759,7 +759,7 @@ m.send_mail = refuse; m.datetime = at(sun + dt.timedelta(hours=10)); code_, b = 
 check('an email the mail service refuses is shown as needing the user, with the reason', b['summary'] == {'sent': False} and b['mail']['ok'] is False and b['mail']['why'] == 'MessageRejected' and [n['kind'] for n in b['needs']] == ['mail'] and 'could not be sent (MessageRejected)' in b['needs'][0]['text'], (b.get('mail'), b.get('needs')))
 rec = m.load_item(U); rec['settings']['emails'] = False
 check('with its emails switched off a failed email is not held against it', m.needs(rec, portfolio(), sun + dt.timedelta(hours=10)) == [])
-check('a stranger cannot have a test email sent', call(action='mailtest', userId='stranger@y.com') == (200, {'success': True, 'allowed': False}))
+check('someone without a paid plan cannot have a test email sent', call(action='mailtest', userId='stranger@y.com')[0] == 402)
 m.send_mail = real_send
 
 # --- the budget cannot be more than the practice money there is
@@ -949,4 +949,33 @@ s, rec = run(t0 + dt.timedelta(hours=1)); check('and it is said once a day, not 
 s, rec = run(t0 + dt.timedelta(days=1)); buy = [e for e in rec['log'] if e['type'] == 'buy'][-1]
 check('the next day the count starts again and the AI model chooses', rec['state']['ai']['day'] == m.iso(t0 + dt.timedelta(days=1))[:10] and 1 <= rec['state']['ai']['n'] <= 3 and 'chosen by the AI model' in buy['text'] and buy['symbol'] == 'C03-USD', (buy['text'], rec['state']['ai']))
 m.send_mail = real_send; MODEL['answer'] = None; MODEL['prompts'].clear()
+
+# --- who may use it: accounts on a paid plan (and the listed ones); everyone else is shown what it is and where the plans are
+D.t.clear(); m.PLAN_CACHE.clear(); m.datetime = at(sun); PRICES.clear(); MODEL['answer'] = None; SNAP['7-1'] = rows('crypto', '7-1'); sent = []; real_send = m.send_mail
+m.send_mail = lambda to, subject, lines: (sent.append((to, subject, lines)), True)[1]
+plans = D.Table(m.USERS_TABLE).rows
+def plan(email, **fields): m.PLAN_CACHE.clear(); plans[f'{email}#registration'] = dict({'user_date': f'{email}#registration'}, **fields)
+check('no plan on record is not a paid plan; the listed accounts need none', m.plan_of('nobody@z.com') == 'free' and m.allowed('nobody@z.com') is False and m.allowed(U) is True and m.listed('nobody@z.com') is False)
+plan('pay@z.com', subscriptionStatus='active', planType='starter', expiryDate='2026-11-01'); plan('gone@z.com', subscriptionStatus='cancelled', planType='pro', expiryDate='2026-10-01'); plan('paidup@z.com', subscriptionStatus='cancelled', planType='pro', expiryDate='2026-10-20'); plan('trial@z.com', isTrialActive=True)
+check('paid: an active subscription, or a cancelled one still inside the time paid for; a free trial or an ended plan is not', [m.plan_of(x) for x in ('pay@z.com', 'paidup@z.com', 'gone@z.com', 'trial@z.com')] == ['paid', 'paid', 'free', 'free'])
+code_, b = call(action='get', userId='trial@z.com')
+check('an account without a paid plan is told the autopilot is locked and where the plans are, and no record is made for it', (code_, b) == (200, {'success': True, 'allowed': False, 'locked': 'plan', 'upgrade': 'dashboard.html#upgrade'}) and 'trial@z.com' not in D.Table(m.SETTINGS_TABLE).rows)
+for act in ('save', 'run', 'sellall', 'tune', 'mailtest'):
+    code_, b = call(action=act, userId='trial@z.com', settings=dict(m.DEFAULTS, enabled=True, screeners=['7-1']))
+    if not (code_ == 402 and b['locked'] == 'plan' and 'part of the paid plans' in b['error'] and b['upgrade'] == 'dashboard.html#upgrade'): check(f'trying to {act} without a paid plan is refused and pointed to the plans', False, (code_, b)); break
+else: check('trying to save, run, sell or test without a paid plan is refused and pointed to the plans, and nothing is stored or traded', 'trial@z.com' not in D.Table(m.SETTINGS_TABLE).rows and 'trial@z.com' not in D.Table(m.PORTFOLIO_TABLE).rows and sent == [])
+code_, b = call(action='save', userId='pay@z.com', settings=dict(m.DEFAULTS, enabled=True, risk=3, budgetUsd=8000.0, screeners=['7-1'], auto=[], periodDays=1, everyHours=6, maxHoldDays=5))
+check('an account on a paid plan can switch it on like the owner', code_ == 200 and b['allowed'] is True and b['settings']['enabled'] is True and b['nextCheck'] is not None, (code_, b.get('settings')))
+m.datetime = at(sun + dt.timedelta(minutes=30)); r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body'])
+check('and the schedule checks in for it', len(r['ran']) == 1 and r['ran'][0]['bought'] >= 1 and 'pay@z.com' in D.Table(m.PORTFOLIO_TABLE).rows, r)
+plan('pay@z.com', subscriptionStatus='cancelled', planType='starter', expiryDate='2026-10-10'); m.datetime = at(sun + dt.timedelta(days=1)); r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); rec = json.loads(D.Table(m.SETTINGS_TABLE).rows['pay@z.com']['data'])
+check('when its plan has ended the schedule pauses it instead of checking in, says why, and emails once', r == {'ran': [], 'paused': 1, 'waiting': 0} and D.Table(m.SETTINGS_TABLE).rows['pay@z.com']['enabled'] is False and rec['state']['pausedWhy'] == 'plan' and rec['log'][-1]['text'].startswith('Paused: the AI autopilot is part of the paid plans, and this account is no longer on one') and len(sent) == 1 and 'the paid plan has ended' in sent[0][1], (r, rec['log'][-1]['text'][:90], sent[-1:]))
+code_, b = call(action='get', userId='pay@z.com'); check('its dashboard then shows the locked view', b.get('locked') == 'plan' and b['allowed'] is False)
+plan('pay@z.com', subscriptionStatus='active', planType='pro', expiryDate='2026-12-01'); m.datetime = at(sun + dt.timedelta(days=2)); code_, b = call(action='get', userId='pay@z.com')
+check('and once it is on a paid plan again, opening the dashboard switches the autopilot back on and says so', b['allowed'] is True and b['settings']['enabled'] is True and any(e['text'].startswith('Welcome back: the autopilot is on again. It had been paused since 12 Oct because the paid plan had ended.') for e in b['log']), [e['text'][:110] for e in b['log']][-2:])
+broken = D.Table(m.USERS_TABLE); real_get = broken.get_item; m.PLAN_CACHE.clear()
+def fail(Key): raise RuntimeError('database away')
+broken.get_item = fail; code_, b = call(action='get', userId='pay@z.com'); code2, b2 = call(action='run', userId='pay@z.com'); r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); broken.get_item = real_get; m.PLAN_CACHE.clear()
+check('if the plan cannot be read, nobody is locked out for good or paused: the page says to try again and the schedule leaves the account for its next run', b == {'success': True, 'allowed': False, 'locked': 'unknown'} and code2 == 503 and r['paused'] == 0 and r['waiting'] == 1 and json.loads(D.Table(m.SETTINGS_TABLE).rows['pay@z.com']['data'])['settings']['enabled'] is True, (b, code2, r))
+m.send_mail = real_send; m.datetime = clock; m.PLAN_CACHE.clear()
 print('ALL PASS' if ok else 'SOME FAILED')

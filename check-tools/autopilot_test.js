@@ -506,6 +506,23 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     st.scorecard.groups.rank[0].vs = -2.4; const w2 = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, ...st } })); await sleep(30);
     check('when it differs for any group the column is shown for all', /Ended up Against an index fund/.test(w2.text()) && /rank 1 to 3 2 -1\.1% 0 of 2 -2\.4%/.test(w2.text()) && /<td colspan="5">By screener/.test(w2.container.innerHTML) && !/The comparison with an S&P 500 index fund is left out/.test(w2.text()));
   }
+  // an account that is not on a paid plan: shown what the autopilot is and where the plans are, nothing more
+  { const w = page(() => ({ status: 200, body: { success: true, allowed: false, locked: 'plan', upgrade: 'dashboard.html#upgrade' } })); await sleep(30);
+    const t = w.text(), h = w.container.innerHTML;
+    check('without a paid plan the panel says what the autopilot is, that it is part of the paid plans, and that buying by hand stays free', /AI autopilot fake money · part of the paid plans/.test(t) && /It is included in every paid plan \(Starter, Pro and Elite\)\. This account is not on a paid plan at the moment, so the autopilot is not available to it\. Buying and selling by hand with the fake money stays free: that is the Practice portfolio tab\./.test(t) && /No real trade is ever placed and nothing here is advice/.test(t), t.slice(0, 500));
+    check('one button leads to the plans, and there is nothing to switch on or run', /<a id="ap-upgrade" class="ap-btn primary" href="#upgrade"[^>]*>See the plans<\/a>/.test(h) && !/id="ap-enabled"|data-ap="run"|id="ap-budget"/.test(h) && !/undefined|NaN|\[object/.test(h));
+    const tab = { textContent: '🤖 AI autopilot', title: '' }; w.ctx.document.querySelector = (sel) => sel === '[data-dash-tab="autopilot"]' ? tab : null; w.ctx.practiceAutopilot.reload(); await sleep(30);
+    check('the dashboard tab for it carries a lock', tab.textContent === '🤖 AI autopilot 🔒' && tab.title === 'Part of the paid plans', tab);
+    const u = page(() => ({ status: 200, body: { success: true, allowed: false, locked: 'unknown' } })); await sleep(30);
+    check('if the plan could not be checked it says so and offers nothing to buy', /Your plan could not be checked just now\. Refresh the page in a moment\./.test(u.text()) && !/See the plans/.test(u.text()));
+    const none = page(() => ({ status: 200, body: { success: true, allowed: false } })); await sleep(30);
+    check('an answer from the older function (not allowed, nothing more) still shows nothing', none.container.innerHTML === '');
+    // a plan that ends while the page is open: the next thing tried is refused, the page locks and goes to the plans
+    const st = { settings: { ...settings, enabled: true }, state: {}, practiceCash: 100000, log: [], plans: [] }; let lapsed = false;
+    const live = page(b => lapsed ? { status: 402, body: { error: 'The AI autopilot is part of the paid plans. Choose a plan to use it', locked: 'plan', upgrade: 'dashboard.html#upgrade' } } : { status: 200, body: { success: true, allowed: true, options: OPTIONS, ...st } }); await sleep(30);
+    live.ctx.location = { hash: '' }; lapsed = true; live.form(st.settings); live.click('run'); await sleep(40);
+    check('when the plan has ended, pressing "Check in now" shows the locked view and takes the user to the plans', /part of the paid plans/.test(live.text()) && /See the plans/.test(live.text()) && !/data-ap="run"/.test(live.container.innerHTML) && live.ctx.location.hash === 'upgrade', [live.text().slice(0, 160), live.ctx.location]);
+  }
   check('no broken values', !/undefined|NaN|\[object/.test(p.container.innerHTML), (p.container.innerHTML.match(/.{30}(undefined|NaN|\[object).{30}/) || [])[0]);
   console.log(ok ? 'ALL PASS' : 'SOME FAILED');
 })();

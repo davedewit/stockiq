@@ -14,6 +14,7 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
           shares (ticks three markets, sets a share by hand, tries to give out more than 100%, moves the risk level),
           progress (prints the table of progress per batch of 20 finished trades),
           breakdown (fills the record with the owner's four trades of 11 Oct and opens the breakdown table),
+          locked (shows the autopilot tab as an account without a paid plan sees it),
           budget (types a budget larger than the practice money and presses the link that puts it right),
           next (prints the countdown, "Needs you", the "What happens next" list and the email line, and sends a test email),
           listswitch (switches the list to "buys and sells only" and reloads the page to see that it is remembered)
@@ -69,6 +70,7 @@ window.fetch = async (url, opts) => {
   const b = JSON.parse(opts.body); calls.push((b.settings ? 'autopilot-' : b.portfolio ? 'portfolio-' : '') + b.action);
   if (b.action === 'get' && !('settings' in b) && u.includes('5c7pt7q')) return json({ success: true, portfolio, version });
   if (b.action === 'save' && b.portfolio) { portfolio = b.portfolio; version++; return json({ success: true, version }); }
+  if (window.LOCKED && !u.includes('5c7pt7q')) return b.action === 'get' ? json({ success: true, allowed: false, locked: 'plan', upgrade: 'dashboard.html#upgrade' }) : { ok: false, status: 402, json: async () => ({ error: 'The AI autopilot is part of the paid plans. Choose a plan to use it', locked: 'plan' }) };
   if (b.action === 'mailtest') { auto.mail = { t: iso(0), ok: true, subject: 'StockIQ autopilot (fake money): review emails are set up', why: null }; return json(Object.assign({ success: true, allowed: true, options: OPTIONS, summary: { sent: true } }, auto)); }
   if (b.action === 'save' && b.settings) { auto.settings = b.settings; auto.plans.forEach(p => { p.auto = b.settings.enabled; }); }
   if (b.action === 'sellall') { const n = auto.plans.length; portfolio.holdings.filter(h => h.by === 'ai').forEach(h => { portfolio.closed.push(Object.assign({}, h, { sellPrice: PRICES[h.symbol], sellFx: 1, proceedsUsd: h.qty * PRICES[h.symbol], soldAt: iso(0), spyAtSell: 700 })); portfolio.cash += h.qty * PRICES[h.symbol]; });
@@ -184,6 +186,12 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
       auto.scorecard = { n: 4, avg: -0.5, up: 2, vs: -0.5, beat: 0, judged: 4, label: 'all', groups: { screener: [g('Crypto (top coins)', 4, -0.5, 2, -0.5)], rank: [g('rank 1 to 3', 2, -1.1, 1, -1.1), g('rank 4 to 10', 2, 0.1, 1, 0.1)], rsi: [g('RSI under 45', 1, 0.6, 1, 0.6), g('RSI 45 to 60', 3, -0.8, 1, -0.8)],
         stay: [g('new to the shortlist', 2, -1.8, 0, -1.8), g('not recorded', 2, 0.8, 2, 0.8)], chosen: [g('chosen by the AI model', 4, -0.5, 2, -0.5)], exit: [g('sold to keep part of a gain', 2, 0.1, 1, 0.1), g('sold when the signal turned', 1, 0.6, 1, 0.6), g("sold early by the AI model's review", 1, -2.8, 0, -2.8)] } };
       await window.practiceAutopilot.refresh(true); await wait(500); const d = q('#ap-breakdown'); d.open = true; out('breakdown: ' + d.textContent.replace(/\\s+/g, ' ').trim().slice(0, 400)); d.scrollIntoView({ block: 'start' });
+    }
+    if (step === 'locked') {
+      window.LOCKED = true; await window.practiceAutopilot.reload(); await wait(600); if (window.dashboardTabs) window.dashboardTabs.show('autopilot'); await wait(200);
+      out('without a paid plan: tab "' + (q('[data-dash-tab="autopilot"]') || {}).textContent + '" | ' + q('#practice-autopilot').textContent.replace(/\\s+/g, ' ').trim().slice(0, 520));
+      out('  the button: "' + q('#ap-upgrade').textContent + '" -> ' + q('#ap-upgrade').getAttribute('href') + ' | switch or run button on the page: ' + !!(q('#ap-enabled') || q('#ap-run')));
+      q('#practice-autopilot').scrollIntoView({ block: 'start' });
     }
     if (step === 'off') { q('#ap-enabled').click(); await wait(700); out('switched the autopilot off: ' + cellText('WEMIX')); }
     if (step === 'open') { document.querySelectorAll('#practice-autopilot details').forEach(d => { d.open = true; }); const s = q('#pp-sold'); if (s) s.open = true; out('unfolded the details'); }
