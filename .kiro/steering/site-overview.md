@@ -599,7 +599,9 @@ show. Settings holds the first five items below, Activity the last four:
   the slider; shown as an empty box with the level's value in grey, or "Automatic: …" in a menu) or
   "set by you" (it stays put); a link hands all three back to the level. Then **two lines that
   describe what exactly these settings will do**.
-- Screeners it buys from, grouped by market (all 15).
+- Screeners it buys from, grouped by market (all 15). Under each market with a ticked screener: a
+  menu "Share of the budget" (automatic, or a step picked by hand), and under the card one line in
+  words on how the budget is spread.
 - **What it may do by itself**: three switches (sell early on the AI model's review, try changes
   to its own rules, email me its reviews). Under the email switch: what became of the last email
   ("accepted by the mail service", or "could not be sent" and why) and "Send me a test email".
@@ -623,7 +625,7 @@ show. Settings holds the first five items below, Activity the last four:
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=13` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=23`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=24`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
@@ -675,9 +677,10 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
 | `screeners` | any of the 15 keys (default none) | Coordinator keys: `3-8 3-100 3-7 3-3 3-2 3-4 3-5 3-6 4-50 4-100 4-200 4-300 5-ftse100 5-nikkei225 7-1` |
 | `aiSell`, `selfTune`, `emails` | on unless switched off | "What it may do by itself" |
 | `stopPct`, `takePct` | empty, or 1.5–30 and 2–80 | The owner's own loss limit and gain mark, as sizes in percent |
+| `shares` | `{market: percent}`, only for markets set by hand (default none) | A market's share of the budget. Markets are the groups of `SCREENERS` (`GROUPS`: US shares, Australian shares, UK shares, Japanese shares, Coins). A market left out is automatic. Together at most 100 (`clean_settings` takes the excess off the later ones). See "How the budget is spread" below |
 | `trailMode` | `gains` (default), `full`, `off` | The kind of stop that follows a holding. `gains`: it starts once the holding has risen beyond its normal wobble. `full`: a full trailing stop loss, under the price from the moment of buying, so a faller is cut early (exit kind `cut`). `off`: none |
 
-| Level | Holdings | Buys from the top | RSI under | 30-day move within | Loss limit | Gain mark | Coins, when shares are ticked too |
+| Level | Holdings | Buys from the top | RSI under | 30-day move within | Loss limit | Gain mark | Coins at most, on automatic with a share market ticked too |
 |---|---|---|---|---|---|---|---|
 | 1 Cautious | 12 | 5 | 68 | 20% | −5% | +8% | 0% |
 | 2 Careful | 10 | 8 | 72 | 30% | −7% | +12% | 0% |
@@ -690,8 +693,36 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
   Careful 7 / twice a day / 10; Balanced 5 / every 6 hours / 5; Bold 2 / every 3 hours / 2;
   Adventurous 1 day / every hour / 1 day (build-up / check-in / longest holding). So one slider can
   drive everything, and anything set by hand overrides it. The quick set-ups set these by hand.
-- **With only coin screeners ticked the whole budget may go into coins at any level**
-  (`coin_share`); the last column only applies to a mix. The panel's wording follows (`mixed`).
+- **How the budget is spread over the markets ticked** (11 Oct; the owner asked whether ticking
+  several screeners spreads the money evenly, and proposed a share per market with an override).
+  It did not: only coins had a limit, so whichever share market opened first could take the rest
+  (with US and Australian screeners ticked, Sydney opens 14 hours before New York). Now:
+  - `market_split(settings)`: each ticked market's share as a fraction. A share set by hand
+    (`settings.shares`) stands. What is left is spread **evenly** over the other ticked markets,
+    except that **coins never get more than the level's share** (last column of the table) while a
+    share market is ticked too. One market ticked: all of it, coins included.
+  - `market_slots(settings)`: the split in **whole holdings** of the level (each holding is the
+    budget over the level's number of holdings), fractions to the largest remainders, a tie to the
+    market listed first. Balanced with US, Australian and coin screeners: 3 / 3 / 2 of 8.
+    Adventurous: 2 / 1 / 1 of 4. Several screeners of one market count as that one market.
+  - At a check-in each market's room is its holdings times the holding size, less what it already
+    holds there (`group_room`); a market with no room is not offered, the AI model is told a
+    market's limit, `choose(..., limits)` passes over picks beyond it and fills from the others by
+    rank, and no buy is larger than its market's room. Holdings from a market that is no longer
+    ticked stay until sold and still count against the budget, not against any market.
+  - `coin_share(settings)` is now the coin market's holdings over all (it was the level's figure).
+  - The panel shows it: a menu per ticked market, "Automatic: 38% (3 holdings, $18,750)" or one of
+    the steps (0 to all holdings, each with its percent and dollars), tagged "automatic" / "set by
+    you" (`shareRow`), and a line in words (`splitText`) that also says when a market gets nothing
+    and why, and when shares set by hand leave part of the budget in cash. Shares adding up to more
+    than 100% are not saved ("Not saved: the shares you picked add up to 125%…"). **A share is
+    picked from steps, not typed, so nothing impossible can be entered**; "5% in UK" at Balanced
+    is not possible (one holding is 12.5%): choose a level with more holdings for finer steps.
+  - `marketSplit` / `marketSlots` in `practice-autopilot.js` are **a copy of the Lambda's two
+    functions** (between `MARKET_SPLIT_START/END`): `autopilot_plan_check.py` compares them for
+    2,915 combinations of level, markets and hand-set shares. Change one, change the other.
+  - Within a market the choice among its screeners is as before: by place in each screener's own
+    ranking, then the AI model's pick. There is no per-screener share.
 - The rules in force for a user are `rules_for(settings, state)`: the level, then what the
   autopilot changed itself for that level (`state.tune.values`), then the owner's own limits.
 - A screener belongs to a market and is only traded while that market is open (`MARKET_HOURS`,
@@ -790,6 +821,8 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
    into the steps; reset when the build-up restarts) and notes it. The schedule then carries on
    from there, no faster. Added 10 Oct after the owner pressed the button expecting a buy and got
    none. The answer to `run` also carries `summary.why`, the reason when nothing was traded.
+   It releases as many steps as one more holding takes (with hourly steps and 4 large holdings
+   that is several; until 11 Oct it gave up after as many steps as the level has holdings).
    If the early release buys nothing after all (nothing fit to buy, its market closed), it is taken
    back, so pressing the button again and again cannot use up the build-up. Nor can it overshoot:
    each press releases one more step at most, never past the budget, the practice cash, the
@@ -811,7 +844,7 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
    "chosen by rank". A buy is recorded at the live price, and skipped if that is not within
    0.8–1.25 times the screener's price. `remember_buy` keeps the figures it was bought on.
 9. If nothing was traded, one note says why (`key`): `pace` (waiting for the next step of the
-   budget, with when), `full`, `cash`, `coins` (the coin share is used up), `shut` (by hand: "Nothing
+   budget, with when), `full`, `cash`, `share` (the markets that are open already hold their share of the budget; it was `coins`), `shut` (by hand: "Nothing
    to do: none of its markets is open."), `none`, `nodata`, `same`.
    The same note at the next check-in is counted on that line, not added again (`add_log`).
 10. The portfolio is saved with a version check. If the owner changed it at the same moment,
@@ -902,7 +935,7 @@ that it at least does not fool itself.
   `coinShare, realizedUsd, month` (`last30`, `before30`), `now, nextCheck, holding, plans` (per
   holding: `sellBy` (the end of its holding time, moved on to its market's next opening), `market,
   closed, opens, stop, take, arm, floor, move, room, tight, mode, trail, peak, trial, view, auto`) and `options` (screeners,
-  check-in and holding-time choices, the level table); and `coming`, `needs`, `mail`, `reviewed` (next section). **The panel is drawn from these; change the
+  check-in and holding-time choices, the level table, `groups`); `split` (per ticked market: `group, holdings, pct, usd, own`); `money`; and `coming`, `needs`, `mail`, `reviewed` (next section). **The panel is drawn from these; change the
   two together.**
 - Other actions: `mailtest` (one test email to the account's own address, at most every 10 minutes), `sellall` (`sell_everything`: only the autopilot's holdings, recorded as sold by
   the owner; holdings of a closed market are kept; its `summary` has `sold`, `skipped`, `closed`) and `tune` (`tune_by_hand`: `op: 'restore', param` puts one rule back to the level's;
@@ -966,8 +999,8 @@ not sure whether its improvements needed him to "push" them. They do not, and th
   something is being typed or saved) and reloads the practice portfolio when the autopilot traded.
 - The two description lines (`planText`, `paceText`) are built from what is selected. The sums in
   `buildUp()` are **a copy of the Lambda's rules** (`allowance`, the time rule, 3 buys a check-in,
-  the coin share, the $25 smallest buy): change one, change the other, and run
-  `autopilot_plan_check.py`.
+  the $25 smallest buy), and `marketSplit` / `marketSlots` a copy of how it spreads the budget over
+  markets: change one, change the other, and run `autopilot_plan_check.py` (it checks both).
 - `levelRules` gives the rules to describe: the level's (`options.risk`), what it changed itself
   (`rules.level`), then the owner's own limits as typed. `readDraft` turns an empty build-up box or
   "Automatic" in a menu into the level's own value (`paceOf`) and lists the field in `auto`; while
@@ -1019,8 +1052,8 @@ not sure whether its improvements needed him to "push" them. They do not, and th
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 283 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 142 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 300 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 154 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 66 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
@@ -1035,7 +1068,7 @@ not sure whether its improvements needed him to "push" them. They do not, and th
    into the test page, step `tabs`). After any edit to `dashboard.html` also check that the
    sections still balance and that every inline script parses (`node --check` on each `<script>`
    block): the logged-in page itself cannot be opened from here, it redirects to Sign In.
-   Steps such as `type,sale,trial,preset,sellall,limits,trailstop,split,cards,pace,listswitch,next,open`) with headless
+   Steps such as `type,sale,trial,preset,sellall,limits,trailstop,split,cards,pace,listswitch,next,budget,shares,open`) with headless
    Chrome; `--dump-dom` for what it printed, `--screenshot` for the look (section 12).
 5. **Try the staged function on a copy of the real record**: read the owner's item from both tables
    (read-only), load it into stand-in storage under another name, run `run_user` / `public` with
@@ -1125,7 +1158,11 @@ public holidays for each market. **Separate pots** (offered 11 Oct, when the own
 budget across everything ticked, a few named pots, each with its own budget, screeners and pace
 (say "Coins, quick" and "US shares, steady"), shown and judged separately. It would make a switch
 of screeners a visible choice instead of a side effect, and show which kind of trading earns its
-keep. Not asked for yet; it is a rework of the settings, the allowance and the panel.
+keep. Not asked for yet; it is a rework of the settings, the allowance and the panel. (The share
+of the budget per market, built the same day, covers the "how much goes where" half of this; a
+separate pace and record per market is the half that is not built.) Also not built: letting the
+automatic split follow results (more to the market whose trades have done better); it needs far
+more finished trades than there are, and would chase noise before then.
 
 ## 9. Pitfalls learned the hard way
 
@@ -1575,3 +1612,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     backstop. A sale by the following stop that ends below the buying price now says the gain was
     gone before the stop could act (it had said "sold to keep part of the gain" on a -0.8% sale).
     Rollback zip: `…_before_autopilot_budget_20261011.zip`. Live: `practice-autopilot.js?v=23`.
+  - **The budget is spread over the markets ticked** (section 8c, "How the budget is spread"): a
+    share per market in whole holdings, even on automatic (coins held to the level's share) or
+    picked from a menu under the market; enforced at every buy. Before this the first market to
+    open could take most of the budget. "Check in now" now releases a whole holding's worth of the
+    budget however small the steps. A local name `slots` had hidden the schedule helper of the same
+    name (now `slot_times`): the "what happens next" list silently failed in tests until renamed,
+    which is what its `except` and log line are for. Rollback zip:
+    `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_shares_20261011.zip`. Live: `practice-autopilot.js?v=24`.
