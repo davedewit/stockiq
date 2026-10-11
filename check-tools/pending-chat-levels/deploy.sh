@@ -1,6 +1,7 @@
 #!/bin/bash
-# One-off deploy (11 Oct 2026): the AI chat is told to keep to what the user's dashboard figures say (no added steps,
-# amounts or times) and not to use selling words about the autopilot. Function stockiq-ai-chat only.
+# One-off deploy (11 Oct 2026): the AI chat is given the exact numbers of each risk level (holdings, loss limit, gain mark),
+# after it told a test question that Cautious means "fewer" holdings, and is told a budget release is not a check-in.
+# Function stockiq-ai-chat only.
 #
 #   Preview (changes nothing):   DRY_RUN=true bash deploy.sh
 #   Deploy:                      bash deploy.sh
@@ -8,7 +9,7 @@
 # Safe to run twice: each step first checks whether it has already been done, and stops if the live
 # code or a website file is not what this was built against.
 #
-# Roll back: the previous Lambda code is saved in ~/VSCODE/backup/stockiq-ai-chat_before_wording_20261011.zip
+# Roll back: the previous Lambda code is saved in ~/VSCODE/backup/stockiq-ai-chat_before_levels_20261011.zip
 #   aws lambda update-function-code --function-name stockiq-ai-trader --zip-file fileb://<that zip> --profile default --region us-east-1
 # Website files: git checkout ai-chat.js, practice-autopilot.js, practice-portfolio.js and dashboard.html in ~/VSCODE/website and upload them again.
 # (The older function simply ignores what the newer one added to a user's record.)
@@ -44,7 +45,7 @@ deploy_lambda() {
     local live_sha; live_sha="$("${AWS[@]}" lambda get-function-configuration --function-name "$name" --query CodeSha256 --output text)"
     [ "$live_sha" = "$expected" ] || stop "$name has changed on AWS since this was built (code $live_sha)"
     cmp -s "$work/live/$main" "$MIRROR/$name/$main" || stop "the live $name is not the same as the local mirror"
-    run cp "$work/live.zip" "$BACKUP/${name}_before_wording_20261011.zip"
+    run cp "$work/live.zip" "$BACKUP/${name}_before_levels_20261011.zip"
     cp "$new" "$work/live/$main"
     (cd "$work/live" && zip -q -X "$work/new.zip" ./*.py)
     echo "new package: $(unzip -Z1 "$work/new.zip" | tr '\n' ' ')"
@@ -54,7 +55,7 @@ deploy_lambda() {
 }
 
 # 1. The chat function
-deploy_lambda "$TRADER" lambda_function.py "$HERE/lambda/lambda_function.py" "bNjN0ufYGU3FRdiYC+oNHPIEbS7y/t0O4hEiKc0z0Ko="
+deploy_lambda "$TRADER" lambda_function.py "$HERE/lambda/lambda_function.py" "HMINNy2mXc5Y+fzXk7e6sFZ70wBchuwuTz8ccw354O8="
 if [ "$DRY" != "true" ]; then
     say "the live function answers (an empty message, which it refuses without asking the AI model)"
     curl -s -m 30 -X POST "$TRADER_URL" -H 'Content-Type: application/json' -d '{"message":"","userId":"anon_deploycheck"}'; echo
