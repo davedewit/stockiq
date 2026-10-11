@@ -609,9 +609,13 @@ with `document.querySelector('h3')`.
   yet" while the US stock market has not traded since the buys, e.g. a weekend: `marketFlat`).
   **Nothing is shown until the latest prices are in** (4 seconds at most): before 10 Oct the page
   first showed holdings at what was paid, which the owner took for a second, "correct" account value.
-- One line, **whose result is whose**: "Of the +$226.84 since the start: your own buys +$201.85;
-  the autopilot +$24.99 (+$7.91 on what it has sold, +$17.08 on what it still holds)". Shown once
-  the autopilot has bought anything. A holding not sold yet counts at its latest price.
+- One line, **whose result is whose**, in words: "the account is down $58.48 since the start. Your
+  own buys are up $144.12; the autopilot is down $202.60 (down $202.60 on what it has sold, level
+  on what it still holds)". Shown once the autopilot has bought anything. **Results are said as
+  "up", "down" or "level" (`moved`), never as bare signed figures**: on 11 Oct the owner could not
+  make sense of "Of the -$58.48 since the start: your own buys +$144.12; the autopilot -$202.60".
+  The Account value card follows the same rule ("Down $58.48 (0.06%) since the start. Sold
+  holdings: down $58.48. Still held: level at the latest prices.").
 - The buy row: search box (code or company name, same lookup as the home page), "Enter $" **or**
   "or quantity" (the other is worked out from the latest price), an optional note, "Practice buy".
 - The holdings table: Holding, Bought (date and time), Price then, Price now, Value, Change, Sell.
@@ -622,7 +626,7 @@ with `document.querySelector('h3')`.
 - "Sold (N)" folded list with a summary, "Clear sold list" and an × per line (clearing only tidies
   the list: what a sale brought in is already in the cash). "Refresh prices", "Reset fake money".
 
-**AI autopilot** (its own tab, container `#practice-autopilot`; shown only to allowed users). The
+**AI autopilot (Beta)** (its own tab, container `#practice-autopilot`; every logged-in account sees the tab, accounts without a paid plan see the locked view). **It is labelled Beta wherever it is named to users** (the owner, 11 Oct: "more professional, as in under testing"): the panel heading (`ap-beta` badge), the dashboard tab ("🤖 AI autopilot (Beta)", also set by `markTab`), the plan cards, the home page pricing and the FAQ, each time with "new, and still being tested and changed". Keep the label when adding text about it. The
 on/off switch, the status box (what it holds, last and next check-in, and **a live countdown to the
 next check-in**), a **"Needs you"** line (green "Nothing needs you right now", or an amber box
 listing what only the owner can put right) and the buttons "Check in now" / "Sell everything it
@@ -670,8 +674,8 @@ show. Settings holds the first five items below, Activity the last five:
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=13` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=30`) | Controls and reports only; decisions are made by the Lambda |
+| Portfolio section | `website/practice-portfolio.js` (`?v=14` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=31`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (accounts that may use it without a paid plan; everyone on a paid plan may use it; `*` would make it free for all) and `OPENAI_API_KEY` (never print it) |
@@ -1159,7 +1163,7 @@ not sure whether its improvements needed him to "push" them. They do not, and th
    python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 358 checks
    node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 178 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
-     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 66 checks
+     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 67 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
    ```
    `ai_trader_test.py` sets the pace by hand at its top (it patches `DEFAULTS`), as a user who chose
@@ -1208,15 +1212,15 @@ apostrophe must allow for it; a test of an action that depends on the day (tradi
 must set the function's clock (`m.datetime = at(when)` in `ai_trader_test.py`), or it passes on
 weekdays and fails at the weekend.
 
-### Start here when resuming (state at 05:50 UTC on 11 Oct 2026, the end of a two-day session)
+### Start here when resuming (state at 06:10 UTC on 11 Oct 2026, the end of a two-day session)
 
 **What is live, and how to confirm nothing has moved since:**
 - Lambda `stockiq-ai-trader`: `CodeSha256` `PUQWAyAPbNy98SQITl2p+dSMU/wCyxzsIR+geIQ1RQE=`, equal to
   `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,587 lines).
-- Website: `practice-autopilot.js?v=30` (sha256 starts `bc2c3aac1c2e`), `practice-portfolio.js?v=13`
-  (`ad1c1372002e`), `dashboard.html` (`376d4cd1e101`); `index.html` and `faq.html` carry the plan wording. Live files were compared byte for byte.
+- Website: `practice-autopilot.js?v=31` (sha256 starts `7a5f0d40c3f8`), `practice-portfolio.js?v=14`
+  (`07f4ef610504`), `dashboard.html` (`17b36effb266`); `index.html` and `faq.html` carry the plan wording. Live files were compared byte for byte.
 - Both repos clean and pushed; **no `check-tools/pending-*` folder is left** (every package was
-  deployed and removed). Tests on the live files: 358 function, 178 panel, 66 portfolio, the
+  deployed and removed). Tests on the live files: 358 function, 178 panel, 67 portfolio, the
   panel-versus-function comparison clean (3,780 budget combinations, 2,915 spreads over markets).
 - Rollback copies of the function, one per deploy, in `~/VSCODE/backup/`:
   `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order: 10 Oct `v2, fast, panel,
@@ -1852,5 +1856,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     and are refused and sent there if they try to use it; an ended plan pauses it. Home page
     pricing, dashboard plan cards and a new FAQ entry say what the plans include. Rollback zip:
     `…_before_autopilot_paid_20261011.zip`. Live: `practice-autopilot.js?v=30`.
+  - **Results in words, and the Beta label** (section 8c, "What the owner sees"): the practice
+    portfolio says "up", "down" or "level" instead of signed figures in its "whose result is whose"
+    line and its Account value card; the AI autopilot is labelled Beta on the panel, the dashboard
+    tab, the plan cards, the home page pricing and the FAQ. Website only:
+    `practice-portfolio.js?v=14`, `practice-autopilot.js?v=31`.
   - Notes: section 8c ends with "Start here when resuming"; this session was closed there because
     its context had grown too large. Everything known is in these files.
