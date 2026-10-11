@@ -3,7 +3,7 @@ For each day D the worker is given exactly the prices it would have fetched that
 nothing later) and its score for every stock is recorded. Output: scores.pkl"""
 import importlib.util, io, contextlib, json, os, sys, pickle, time, datetime as dt, multiprocessing as mp, glob
 
-WORKER = glob.glob('/Users/dave/VSCODE/stockiq/lambda-sync/stockiq-option-3-5-worker-*/lambda_function.py')[0]
+WORKER = '/Users/dave/VSCODE/stockiq/workers/stock_worker.py'      # one file for every share screener since 11 Oct 2026 (it was the Russell 1000 workers' copy in lambda-sync/)
 DATA = {}          # symbol -> list of rows (as the worker builds them)
 CAL = []           # trading days (SPY bar timestamps)
 STATE = {}

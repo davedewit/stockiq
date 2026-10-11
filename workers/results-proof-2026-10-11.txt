@@ -1,0 +1,91 @@
+the new file: workers/stock_worker.py 0a2d08c45ce4
+the live copies (/Users/dave/VSCODE/stockiq/lambda-sync): 6 different files for 13 groups
+
+== option-3-1-worker, option-3-2-worker, option-3-4-worker
+   live copy 1b36c3c53646 (lambda-sync/stockiq-option-3-1-worker-2/advanced_lambda.py)
+   functions whose code differs from the new file: analyze_stock_advanced, bars_from_chart (new), calculate_rsi, export_to_csv (only in the live copy), get_sector_info, get_stock_data, handle_batch_processing, own_batch (new)
+   -- on 117 US shares, 200 days (2022-10-17 to 2026-10-06)
+   with this copy's own RSI put into the new file (what else differs):
+   21,870 stock-days; identical in every figure: 21,771 (99.5%)
+   figures that differ, and on how many stock-days: distance_from_52w_low 99
+      e.g. distance_from_52w_low: PLTR 2025-02-18: 83.69 -> 512.99
+   the new file as it is (with the one RSI for every screener):
+   21,870 stock-days; identical in every figure: 127 (0.6%)
+   figures that differ, and on how many stock-days: rsi 21,742, score_breakdown 21,742, total_score 10,846, score 10,846, profit_probability 9,981, timeframe 8,036, hold_days 8,036, recommendation 8,036, confidence 8,025, strategy_type 5,984, take_profit 5,557, stop_loss 5,557, distance_from_52w_low 99
+   score (it runs from about -2 to +3): unchanged on 50% of stock-days; moved by 0.5 or more on 46.5%; average move 0.40, largest 2.6; average direction -0.026
+   signal label: changed on 36.7% of stock-days (-4 step: 4, -3 step: 313, -2 step: 1,114, -1 step: 2,656, +1 step: 3,351, +2 step: 482, +3 step: 116)
+   each day's top 10: 6.5 of 10 the same on average (fewest 1)
+
+== option-3-5-worker
+   live copy fdd2ac2aa694 (lambda-sync/stockiq-option-3-5-worker-33/lambda_function.py)
+   functions whose code differs from the new file: analyze_stock_advanced, bars_from_chart (new), calculate_rsi, export_to_csv (only in the live copy), get_sector_info, get_stock_data, handle_batch_processing, own_batch (new)
+   its scoring code is the same, function for function, as the copy of option-3-1-worker, option-3-2-worker, option-3-4-worker: the figures above apply
+
+== option-3-6-worker
+   live copy fde8402eb725 (lambda-sync/stockiq-option-3-6-worker-10/lambda_function.py)
+   functions whose code differs from the new file: analyze_stock_advanced, bars_from_chart (new), calculate_rsi, export_to_csv (only in the live copy), get_sector_info, get_stock_data, handle_batch_processing, own_batch (new)
+   its scoring code is the same, function for function, as the copy of option-3-1-worker, option-3-2-worker, option-3-4-worker: the figures above apply
+
+== option-3-7-worker, option-3-8-worker
+   live copy 0603f71321f4 (lambda-sync/stockiq-option-3-7-worker-10/lambda_function.py)
+   functions whose code differs from the new file: analyze_stock_advanced, bars_from_chart (new), calculate_rsi, get_fundamentals, get_sector_info, get_stock_data, handle_batch_processing, own_batch (new)
+   -- on 117 US shares, 200 days (2022-10-17 to 2026-10-06)
+   with this copy's own RSI put into the new file (what else differs):
+   21,870 stock-days; identical in every figure: 0 (0.0%)
+   figures that differ, and on how many stock-days: score_breakdown 21,870, market_cap 19,870, sector 11,680, total_score 11,585, score 11,585, profit_probability 11,401, pe_ratio 10,280, dividend_yield 8,180, beta 6,390, timeframe 3,783, hold_days 3,783, recommendation 3,783, strategy_type 2,758, take_profit 2,561, stop_loss 2,561, distance_from_52w_low 99
+      e.g. score_breakdown: AAPL 2022-10-17: ['Neutral Tech Momentum (5d:1.4%, 10d:-0.0%): 0.00', 'Neutral Medium Trend (30d:-8.6%, 90d:-3.8%): 0.00', 'Poor Long Performance (200d:-20.1%, 1yr:-2.8%): -0.12', 'RSI Buy Zone (39.3): +0.40', 'MACD Weak Bullish: 
+      e.g. market_cap: ABBV 2022-10-17: 'Large' -> 'Mid'
+      e.g. sector: ABBV 2022-10-17: 'OTHER' -> 'HEALTHCARE'
+      e.g. total_score: AAPL 2022-10-17: 1.8 -> 1.6
+      e.g. score: AAPL 2022-10-17: 1.8 -> 1.6
+      e.g. profit_probability: AAPL 2022-10-17: 77.6 -> 75.2
+   score (it runs from about -2 to +3): unchanged on 47% of stock-days; moved by 0.5 or more on 11.2%; average move 0.17, largest 0.8; average direction -0.112
+   signal label: changed on 17.3% of stock-days (-3 step: 6, -2 step: 425, -1 step: 2,714, +1 step: 555, +2 step: 80, +3 step: 3)
+   each day's top 10: 8.3 of 10 the same on average (fewest 5)
+   the new file as it is (with the one RSI for every screener):
+   21,870 stock-days; identical in every figure: 0 (0.0%)
+   figures that differ, and on how many stock-days: score_breakdown 21,870, rsi 21,742, market_cap 19,870, total_score 16,576, score 16,576, profit_probability 15,389, sector 11,680, pe_ratio 10,280, timeframe 9,868, hold_days 9,868, recommendation 9,868, dividend_yield 8,180, confidence 8,025, strategy_type 7,428, take_profit 6,897, stop_loss 6,897, beta 6,390, distance_from_52w_low 99
+   score (it runs from about -2 to +3): unchanged on 24% of stock-days; moved by 0.5 or more on 48.3%; average move 0.49, largest 2.7; average direction -0.138
+   signal label: changed on 45.1% of stock-days (-4 step: 18, -3 step: 483, -2 step: 1,463, -1 step: 4,091, +1 step: 3,204, +2 step: 527, +3 step: 82)
+   each day's top 10: 6.0 of 10 the same on average (fewest 0)
+
+== asia-5-1-worker, asia-5-2-worker, asia-5-3-worker, asia-5-4-worker, asia-5-5-worker
+   live copy d3a21a9124fe (lambda-sync/stockiq-asia-5-1-worker-1/lambda_function.py)
+   functions whose code differs from the new file: analyze_stock_advanced, bars_from_chart (new), export_to_csv (only in the live copy), get_sector_info, get_stock_data, handle_batch_processing, own_batch (new)
+   -- on 12 Asx shares, 52 days (2025-10-10 to 2026-10-09)
+   with this copy's own RSI put into the new file (what else differs):
+   624 stock-days; identical in every figure: 612 (98.1%)
+   figures that differ, and on how many stock-days: change_30d 12, change_7d 12, price_vs_ma20 12, change_1yr 12, price_vs_ma200 12, change_10d 12, ytd_change 12, change_200d 12, change_24h 12, score_breakdown 12, price_vs_ma50 12, change_90d 11, change_5d 11, atr 10, volume_ratio 6, momentum_signal 5, total_score 3, profit_probability 3, score 3, support 2, confidence 2, stoch_k 1, resistance 1, 52w_low 1, distance_from_52w_low 1, timeframe 1, strategy_type 1, hold_days 1, recommendation 1
+      e.g. change_30d: BHP.AX 2026-10-09: -7.99 -> -9.45
+      e.g. change_7d: BHP.AX 2026-10-09: 1.13 -> 0.2
+      e.g. price_vs_ma20: BHP.AX 2026-10-09: -0.06 -> -0.03
+      e.g. change_1yr: BHP.AX 2026-10-09: 39.96 -> 42.42
+      e.g. price_vs_ma200: BHP.AX 2026-10-09: 6.67 -> 6.81
+      e.g. change_10d: BHP.AX 2026-10-09: 1.91 -> 0.36
+   score (it runs from about -2 to +3): unchanged on 100% of stock-days; moved by 0.5 or more on 0.0%; average move 0.00, largest 0.3; average direction -0.000
+   signal label: changed on 0.2% of stock-days (-1 step: 1)
+   -- on 12 Tokyo shares, 50 days (2025-10-08 to 2026-10-09)
+   with this copy's own RSI put into the new file (what else differs):
+   600 stock-days; identical in every figure: 600 (100.0%)
+
+== europe-4-1-worker
+   live copy ec2cd960a7e4 (lambda-sync/stockiq-europe-4-1-worker-3/lambda_function.py)
+   functions whose code differs from the new file: analyze_stock_advanced, bars_from_chart (new), calculate_rsi, export_to_csv (only in the live copy), get_sector_info, get_stock_data, handle_batch_processing, own_batch (new)
+   -- on 12 London shares, 52 days (2025-10-09 to 2026-10-09)
+   with this copy's own RSI put into the new file (what else differs):
+   624 stock-days; identical in every figure: 624 (100.0%)
+   the new file as it is (with the one RSI for every screener):
+   624 stock-days; identical in every figure: 1 (0.2%)
+   figures that differ, and on how many stock-days: rsi 623, score_breakdown 623, total_score 299, score 299, profit_probability 272, timeframe 230, hold_days 230, recommendation 230, confidence 226, take_profit 176, stop_loss 176, strategy_type 175
+   score (it runs from about -2 to +3): unchanged on 52% of stock-days; moved by 0.5 or more on 45.0%; average move 0.40, largest 2.0; average direction -0.057
+   signal label: changed on 36.9% of stock-days (-3 step: 4, -2 step: 34, -1 step: 87, +1 step: 90, +2 step: 14, +3 step: 1)
+
+== the faults
+   Asx, the answer as Yahoo sent it on 2026-10-09: last session sent twice for 12 of 12; 24-hour change of exactly 0: live copy 12, new file 0; currency the new file reports: ['AUD']
+   Tokyo, the answer as Yahoo sent it on 2026-10-09: last session sent twice for 0 of 12; 24-hour change of exactly 0: live copy 0, new file 0; currency the new file reports: ['JPY']
+   London, the answer as Yahoo sent it on 2026-10-09: last session sent twice for 0 of 12; 24-hour change of exactly 0: live copy 0, new file 0; currency the new file reports: ['GBp']
+   London with the latest session's figures emptied (as seen on 10 Oct): price is the latest session's in 12 of 12 with the new file, 0 of 12 with the live copy (the rest show the session before)
+   a Russell 1000 worker called with its number only takes its own ten: worker 1 10 (the list's first ten: True), worker 88 7, worker 89 0; Russell 2000 worker 183 9
+   any other group called with a number only processes: [0] stocks; a Russell worker sent an empty batch: 0
+   a batch of ten: 10 analysed, SPY fetched 1 time(s); through the web address: success True, 3 analysed, worker_id 7
+python3 workers/prove.py  173.65s user 1.15s system 99% cpu 2:55.27 total

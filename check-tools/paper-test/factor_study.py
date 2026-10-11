@@ -15,7 +15,7 @@ Limits to state with any result: today's index members for the whole period (fla
 one mostly rising market, 101 large US stocks only (nothing here says anything about coins)."""
 import importlib.util, io, contextlib, json, sys, bisect, datetime, os, statistics, re, glob, random
 HERE = os.path.dirname(os.path.abspath(__file__))
-worker_path = glob.glob('/Users/dave/VSCODE/stockiq/lambda-sync/stockiq-option-3-1-worker-*/advanced_lambda.py')[0]
+worker_path = os.environ.get('WORKER') or '/Users/dave/VSCODE/stockiq/workers/stock_worker.py'      # one file for every share screener since 11 Oct 2026; WORKER=<file> studies another copy
 start_date = sys.argv[1] if len(sys.argv) > 1 else '2022-10-17'
 universe = {l.split(':')[0]: l.split(':')[1].split() for l in open(os.path.join(HERE, 'frozen_lists.txt')) if ':' in l and not l.startswith('#')}['sp100']
 prices = json.load(open(os.path.join(HERE, 'data', 'prices.json')))

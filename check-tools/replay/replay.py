@@ -41,7 +41,7 @@ calendar = [d for d in dates['SPY'] if d >= START]
 
 def build_panel():
     """Every stock's screener figures on every day, from the worker's own code."""
-    worker = load_module('worker', glob.glob(os.path.join(ROOT, 'lambda-sync', 'stockiq-option-3-1-worker-*', 'advanced_lambda.py'))[0])
+    worker = load_module('worker', os.path.join(ROOT, 'workers', 'stock_worker.py'))      # one file for every share screener since 11 Oct 2026
     now = {'d': None}
     def get_stock_data(symbol, period='1y'):
         symbol = symbol.upper()

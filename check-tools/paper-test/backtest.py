@@ -9,8 +9,7 @@ Fair forward test: use a start date on or after the date in frozen_lists.txt."""
 import importlib.util, io, contextlib, json, sys, bisect, datetime, pickle, os, statistics, time
 HERE = os.path.dirname(os.path.abspath(__file__)); MIRROR = '/Users/dave/VSCODE/stockiq/lambda-sync/'
 import glob
-WORKERS = {'dow30': 'stockiq-option-3-8-worker-*/lambda_function.py', 'sp100': 'stockiq-option-3-1-worker-*/advanced_lambda.py'}
-name = sys.argv[1]; worker_path = glob.glob(MIRROR + WORKERS[name])[0]
+name = sys.argv[1]; worker_path = '/Users/dave/VSCODE/stockiq/workers/stock_worker.py'      # one file for every share screener since 11 Oct 2026 (it was a copy per group in lambda-sync/)
 start_date = sys.argv[2] if len(sys.argv) > 2 else '2023-01-01'
 universe = {l.split(':')[0]: l.split(':')[1].split() for l in open(os.path.join(HERE, 'frozen_lists.txt')) if ':' in l and not l.startswith('#')}[name]
 os.chdir(os.path.join(HERE, 'data')); prices = json.load(open('prices.json'))
