@@ -234,7 +234,7 @@ if [ -d "$WEBSITE_DIR/stocks" ]; then
     --content-type "text/html; charset=utf-8"
 fi
 
-# Sync js/ folder - 24 hour cache (exclude testing)
+# Sync js/ folder - five minutes in a browser, a day at CloudFront (exclude testing)
 if [ -d "$WEBSITE_DIR/js" ]; then
   echo "  📜 Syncing js/ folder..."
   retry_aws $AWS s3 sync "$WEBSITE_DIR/js/" s3://$BUCKET/js/ \
@@ -242,7 +242,7 @@ if [ -d "$WEBSITE_DIR/js" ]; then
     --delete \
     --exclude "testing/*" \
     --exclude ".DS_Store" \
-    --cache-control "public, max-age=86400"
+    --cache-control "public, max-age=300, s-maxage=86400"
 fi
 
 # Root files are compared by content: local MD5 vs the S3 ETag from one listing call
@@ -250,6 +250,14 @@ fi
 S3_ETAGS=$(mktemp)
 retry_aws $AWS s3api list-objects-v2 --bucket $BUCKET --delimiter / \
   --query 'Contents[].[Key,ETag]' --output text > "$S3_ETAGS"
+
+# How long a copy may be kept before the site is asked again. A browser always asks for a page (max-age=0) and keeps a script or
+# stylesheet for five minutes; CloudFront keeps them longer (s-maxage) and is emptied by the invalidation at the end of every
+# deploy. Until 11 Oct 2026 browsers kept pages for an hour and scripts for a day, so a change was live on the site and still
+# invisible to anyone who had opened the page before (the owner did not see a fixed notification bell on the home page).
+HTML_CACHE="public, max-age=0, s-maxage=3600, must-revalidate"
+ASSET_CACHE="public, max-age=300, s-maxage=86400"
+NEWS_JS_CACHE="public, max-age=300, s-maxage=3600"
 
 upload_if_changed() {
   local filepath=$1 cache=$2 ctype=$3
@@ -267,28 +275,28 @@ upload_if_changed() {
   fi
 }
 
-# Root HTML files - 1 hour cache
+# Root HTML files - a browser always asks again (HTML_CACHE)
 echo "  📄 Syncing HTML files..."
 for filepath in "$WEBSITE_DIR"/*.html; do
-  upload_if_changed "$filepath" "public, max-age=3600" "text/html; charset=utf-8"
+  upload_if_changed "$filepath" "$HTML_CACHE" "text/html; charset=utf-8"
 done
 
-# Root CSS files - 24 hour cache
+# Root CSS files - five minutes in a browser (ASSET_CACHE)
 echo "  🎨 Syncing CSS files..."
 for filepath in "$WEBSITE_DIR"/*.css; do
-  upload_if_changed "$filepath" "public, max-age=86400" "text/css"
+  upload_if_changed "$filepath" "$ASSET_CACHE" "text/css"
 done
 
-# Root JS files (auth.js, sidebar.js, analysis-functions.js, news.js...) - 24 hour cache
+# Root JS files (auth.js, sidebar.js, analysis-functions.js, news.js...) - five minutes in a browser (ASSET_CACHE)
 echo "  📜 Syncing root JavaScript files..."
 for filepath in "$WEBSITE_DIR"/*.js; do
   case "$(basename "$filepath")" in
     test-*|analysis-functions-*|*copy*|*Copy*|*old*|*Old*|*backup*|*Backup*) continue ;;
   esac
   if [ "$(basename "$filepath")" = "news.js" ]; then
-    upload_if_changed "$filepath" "public, max-age=3600" "application/javascript"   # changes daily
+    upload_if_changed "$filepath" "$NEWS_JS_CACHE" "application/javascript"   # changes daily
   else
-    upload_if_changed "$filepath" "public, max-age=86400" "application/javascript"
+    upload_if_changed "$filepath" "$ASSET_CACHE" "application/javascript"
   fi
 done
 rm -f "$S3_ETAGS"
