@@ -139,7 +139,7 @@ aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R --paths "/*" 
 - `stockiq-auto-delete-scheduler`, `stockiq-auto-delete-cleanup` — S3 data cleanup
 - `stockiq-ai-chat` — GPT-4o-mini chat (128MB, 30s timeout, 300 max tokens)
 - `stockiq-ai-chat-reporter` — Daily usage email at 5pm UTC
-- 982 functions in total (967 with URLs); `-worker-` functions are parallel workers. See `lambda-reference.md`
+- 984 functions in total (969 with URLs); `-worker-` functions are parallel workers. See `lambda-reference.md`
 
 ### IAM
 - **Lambda Role:** `arn:aws:iam::114366766218:role/acp-lambda-role`

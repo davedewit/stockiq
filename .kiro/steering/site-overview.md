@@ -3,7 +3,8 @@
 How stockiq.tech works end to end, what is generated vs hand-edited, the current SEO setup,
 known pitfalls, and open ideas. Last full review: 10 Oct 2026 (section 8b holds what the
 9–10 Oct end-to-end test of every screener, signal and crypto path established; **section 8c is
-the dashboard's practice portfolio and AI autopilot, and the routine for working on them**).
+the dashboard's practice portfolio and AI autopilot, and the routine for working on them**, checked
+name by name and number by number against the code and AWS on 11 Oct 2026).
 
 Detailed references: `stockiq.md` (AWS resources, Cognito, Lambdas, AI chat),
 `script-reference.md` (every script), `add-new-stocks.md`, `stock-matching-system.md`,
@@ -25,7 +26,7 @@ Detailed references: `stockiq.md` (AWS resources, Cognito, Lambdas, AI chat),
 ```
 Browser ──> CloudFront (EHXV50CPHY07R, www→apex redirect function)
               └─> S3 bucket stockiq-final-websitebucket-vqekic7enf9h (static files)
-Browser ──> Lambda function URLs directly (no API Gateway; 982 functions, 967 with URLs, ~650 are screener workers)
+Browser ──> Lambda function URLs directly (no API Gateway; 984 functions, 969 with URLs, ~650 are screener workers)
               ├─ analysis-functions.js: single-stock report, signals, screener workers, charts
               ├─ index/dashboard/sidebar: market data, gainers/losers/trending, email capture
               └─ auth.js: usage/trial trackers
@@ -80,6 +81,9 @@ Stock page order: header, **ANALYSIS snapshot**, "Full report" CTA card, NEWS, R
 launchd `com.stockiq.reminder` fires every 10 min → `~/stockiq-daily.sh` runs once a day
 **Mon–Sat, 11am–10pm** (lock `/tmp/stockiq-deploy-YYYYMMDD.lock`) → `deploy.sh` →
 `deploy-to-s3.sh` with `UPDATE_STOCK_NEWS=true`. Log: `~/stockiq-daily.log` (cleared each run).
+The hours are the **machine's own clock** (`date` in `~/stockiq-daily.sh`). On 11 Oct 2026 this Mac was
+set to UTC+7, not Sydney time, so "11am–10pm" was 04:00–15:00 UTC; check `date` before working
+out when the next run is.
 
 Order inside `deploy-to-s3.sh`:
 1. `update_news.py`: Yahoo/Google RSS → OpenAI summaries → news.html + news.js (2-hour cooldown)
@@ -301,7 +305,7 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
 - Every public page footer carries a "General information only, not financial advice …" line.
 - Theme: light/dark by time of day unless the user overrides (`localStorage.theme`).
 - Live prices on stock pages (main ticker + "People also watch" cards) come from
-  `stock-prices.js` → a price Lambda, refreshed every 5 s. Pages opened from local files
+  `stock-prices.js` → Lambda `stockiq-popular-prices`, refreshed every 5 s. Pages opened from local files
   show `--` (the proxy only answers the live site), which is expected.
 - Utility page with no footer, not in the sitemap: `clear-cache.html`. (`market-data-sidebar.html`
   and `market-data-widget.html` called a Lambda that no longer exists and were deleted 10 Oct 2026.)
@@ -539,8 +543,9 @@ accounts). Say so when reporting.
 Built 10 Oct 2026 from the owner's idea of "fake money" to see whether the analysis works in his
 favour, then extended the same day into an autopilot that trades it. **Everything here is fake
 money: no real trade is ever placed, and nothing here may ever be connected to real money.** This
-section is written from the code as deployed on the evening of 10 Oct 2026. Verify against the
-code before relying on a detail (section 10).
+section is written from the code as deployed on 11 Oct 2026 (02:30 UTC), when every code name,
+constant, setting and AWS figure in it was checked against the function, the two scripts and AWS.
+Verify against the code before relying on a detail (section 10).
 
 ### What the owner sees on the dashboard
 
@@ -570,7 +575,9 @@ with `document.querySelector('h3')`.
   "or quantity" (the other is worked out from the latest price), an optional note, "Practice buy".
 - The holdings table: Holding, Bought (date and time), Price then, Price now, Value, Change, Sell.
   Under each name a line says whose it is: "Bought by you: it stays until you sell it", or for the
-  autopilot's, when it will sell at the latest and at what loss or gain sooner.
+  autopilot's, when it will sell at the latest, at what loss or gain sooner, how the stop that
+  follows it works, and, while its market is closed, that nothing happens to it until the market
+  opens, with the time.
 - "Sold (N)" folded list with a summary, "Clear sold list" and an × per line (clearing only tidies
   the list: what a sale brought in is already in the cash). "Refresh prices", "Reset fake money".
 
@@ -608,8 +615,8 @@ show. Settings holds the first five items below, Activity the last three:
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=11` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=18`) | Controls and reports only; decisions are made by the Lambda |
+| Portfolio section | `website/practice-portfolio.js` (`?v=13` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=20`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
@@ -686,7 +693,17 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
   is checked in both sessions. **The markets of what it still holds count too** (`its_markets`):
   on 10 Oct the owner un-ticked the crypto screener while it held a coin, and because only the
   ticked screeners' markets were looked at, the coin was left unattended (no time limit, no stop)
-  until that was fixed the same afternoon. "Check in now" acts on everything (10-minute gap between presses).
+  until that was fixed the same afternoon.
+- **Trading hours hold by hand too** (11 Oct; the owner: "no point it buying something when the
+  market isn't open… making it unrealistic"). "Check in now" (10-minute gap between presses) and
+  "Sell everything it holds" trade only in markets that are open: a closed market's last price is
+  not one anybody could trade at. A closed market is named in the answer and in the activity list
+  with when it opens (`opens_in`); "Sell everything" keeps the holdings of a closed market and lists
+  them (`summary.closed`). A longest-holding time that ends while the holding's market is closed is
+  acted on at the next opening, and the dashboard is given that time (`when_open`). Before this, a
+  Nikkei share (4307.T) was bought on a Saturday at Friday's closing price.
+  **Limits:** the hours are fixed windows a little inside the real sessions; public holidays and
+  Tokyo's lunch break are not known, so on such a day a share can still be traded at its last price.
 - Add a screener: one line in `SCREENERS` (name, coordinator option and subOption, kind, market,
   group). The panel lists whatever the Lambda sends.
 
@@ -731,6 +748,14 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
      sale is exit kind `cut` ("sold by its trailing stop before it had risen"), so the record shows
      whether it saves more than normal dips cost. `off` sets no following stop. `stop_words` puts
      the chosen kind into the plan of a buy and the story of a sale.
+   - **Wording rule (11 Oct): the point where the stop starts must never read like a selling
+     price.** The first wording ("sooner at -10% or +18%; once it has been up 4.5%, sell if it
+     slips back far enough…") was read by the owner as "it sells at +4.6%, so how would it get to
+     +18%?". Every place now says the same three things in this order: rising is not a reason to
+     sell (while it rises it is kept); once it has been up that much a stop starts following it;
+     it is sold only if it then falls back. Places: the plan under a buy, the story under a sale,
+     `planLine` on the portfolio, "Holding now", and the line under the Trailing stop menu
+     (`TRAILS`). Keep them in step.
    - The reasons are kept and shown under the sale ("The stop that followed it: …") and the stop as
      last worked out is stored with the holding (`state.open[id].stop`) for the dashboard.
    - Without daily prices for a holding the simpler rule by holding time still applies (`gain_arm`,
@@ -758,6 +783,10 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
    into the steps; reset when the build-up restarts) and notes it. The schedule then carries on
    from there, no faster. Added 10 Oct after the owner pressed the button expecting a buy and got
    none. The answer to `run` also carries `summary.why`, the reason when nothing was traded.
+   If the early release buys nothing after all (nothing fit to buy, its market closed), it is taken
+   back, so pressing the button again and again cannot use up the build-up. Nor can it overshoot:
+   each press releases one more step at most, never past the budget, the practice cash, the
+   level's number of holdings or the coin share.
 7. The shortlist (`shortlist`): the top of each chosen screener with a positive score and signal,
    not already held, not sold within two days (or twice the holding time if shorter), inside the
    level's RSI and 30-day-move limits; ordered by place in its own screener.
@@ -775,7 +804,8 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
    "chosen by rank". A buy is recorded at the live price, and skipped if that is not within
    0.8–1.25 times the screener's price. `remember_buy` keeps the figures it was bought on.
 9. If nothing was traded, one note says why (`key`): `pace` (waiting for the next step of the
-   budget, with when), `full`, `cash`, `coins` (the coin share is used up), `shut`, `none`, `nodata`, `same`.
+   budget, with when), `full`, `cash`, `coins` (the coin share is used up), `shut` (by hand: "Nothing
+   to do: none of its markets is open."), `none`, `nodata`, `same`.
    The same note at the next check-in is counted on that line, not added again (`add_log`).
 10. The portfolio is saved with a version check. If the owner changed it at the same moment,
     nothing is traded and it tries again next time.
@@ -861,11 +891,12 @@ that it at least does not fool itself.
   minSample, practiceCash, rules` (in force, with `yours`, `level`, `changed`, `arm`), `tune`
   (`trial` with its figures, `past`, `nextReviewIn`, `batch`, `group`), `aiSellPausedUntil`,
   `coinShare, realizedUsd, month` (`last30`, `before30`), `now, nextCheck, holding, plans` (per
-  holding: `sellBy, stop, take, arm, floor, move, room, tight, mode, trail, peak, trial, view, auto`) and `options` (screeners,
+  holding: `sellBy` (the end of its holding time, moved on to its market's next opening), `market,
+  closed, opens, stop, take, arm, floor, move, room, tight, mode, trail, peak, trial, view, auto`) and `options` (screeners,
   check-in and holding-time choices, the level table). **The panel is drawn from these; change the
   two together.**
 - Other actions: `sellall` (`sell_everything`: only the autopilot's holdings, recorded as sold by
-  the owner) and `tune` (`tune_by_hand`: `op: 'restore', param` puts one rule back to the level's;
+  the owner; holdings of a closed market are kept; its `summary` has `sold`, `skipped`, `closed`) and `tune` (`tune_by_hand`: `op: 'restore', param` puts one rule back to the level's;
   `op: 'stop'` ends the running trial; nothing outside `TUNABLE` can be touched).
 
 ### How the panel script behaves (`practice-autopilot.js`)
@@ -895,6 +926,14 @@ that it at least does not fool itself.
 
 ### Smaller facts worth knowing
 
+- **Changing which screeners are ticked while it holds something** (the owner asked what happens
+  on switching from crypto to the S&P; tested, `ai_trader_test.py` near "switches from coins"):
+  there are no separate jobs per screener. One check-in looks after everything it holds, whatever
+  screener it came from. Holdings from an un-ticked screener keep all their rules (time limit,
+  loss limit, gain mark, the following stop, the AI review; that screener is still read for them)
+  until they are sold; new buys come only from what is ticked, from the part of the budget that is
+  not invested; a market drops out of the check-ins once nothing from it is held. With coin and
+  share screeners both ticked, the level's coin share applies (Balanced: a quarter of the budget).
 - No screener is ticked for a new user, and it can be switched on with none: it then waits and
   says so. "Check in now" is greyed out, with the reason, while it is off or nothing is ticked.
 - The holding time and the check-in gap are stored in days and hours as fractions (1 hour is
@@ -923,10 +962,10 @@ that it at least does not fool itself.
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 228 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 117 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 246 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 121 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
-     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 64 checks
+     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 66 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
    ```
    `ai_trader_test.py` sets the pace by hand at its top (it patches `DEFAULTS`), as a user who chose
@@ -969,28 +1008,44 @@ file once); a stand-in page that does not finish has a syntax error in its own s
 `<script>` block with `node --check`); in a browser step, take an element afresh after the panel
 has redrawn (a kept reference is to the old one and nothing happens); test expectations with dates must allow for the local time
 zone; SES and the news feeds are only used when running as the Lambda, so tests need stand-ins
-(`mail=`, `headlines=`); two sessions building at once collided (the fingerprint check caught it).
+(`mail=`, `headlines=`); two sessions building at once collided (the fingerprint check caught it);
+the panel test's `text()` leaves `&#39;` as it is, so a pattern that quotes a notice with an
+apostrophe must allow for it; a test of an action that depends on the day (trading hours, `sellall`)
+must set the function's clock (`m.datetime = at(when)` in `ai_trader_test.py`), or it passes on
+weekdays and fails at the weekend.
 
-### Where things stood late on 10 Oct 2026 (about 15:45 UTC)
+### Where things stood on 11 Oct 2026 (02:30 UTC)
 
-- The owner was trying settings out all evening, so read his record rather than trust this line.
-  Last seen: Adventurous, $50,000 built up over 1 day (set by hand), check-ins and holding time left
-  to the level (every hour, 1 day), crypto screener ticked, all three switches on.
-- Two finished trades, both up: WEMIX +0.6% (+$7.91; its score fell below zero, rank 1 → 149) and
-  CFX +1.0% (+$12.79; **the first real sale by the stop that follows a rising holding**: it had been
-  up 6.15% and was sold on the way down). It holds one Nikkei share (4307.T), bought with "Check in
-  now" while Japan was closed; the fix above means it is looked after when Japan opens on Monday.
+- The owner tries settings out a lot, so read his record rather than trust this line. Last seen:
+  Balanced, $50,000 built up over 1 day (set by hand), check-ins every 6 hours and holdings kept at
+  most 5 days (both left to the level), trailing stop "protects a gain", all three switches on,
+  screeners ticked: S&P 500, Russell 1000, Russell 2000, NASDAQ 100, Dow 30, ASX 200 and crypto.
+  Because shares are ticked too, coins may take a quarter of the budget ($12,500) at this level.
+- It holds a Nikkei share (4307.T, $12,500, bought on a Saturday at Friday's close, before the
+  trading-hours rule covered "Check in now"; nothing happens to it until Tokyo opens, Monday 00:05
+  UTC) and a coin (CKB, $6,250). The Nikkei screener is no longer ticked; the share is still looked after.
+- **Three finished trades, two up, -$152.33 in all (-0.3% of the budget; -$169.68 after typical costs):**
+  WEMIX +0.6% (+$7.91; its score fell below zero, rank 1 → 149). CFX +1.0% (+$12.79; the first real
+  sale by the stop that follows a rising holding: up 6.15% at its best, sold on the way down). ERG
+  -2.8% (-$173.03; **the first real sale by the AI model's review**, six hours after buying: "Rank
+  dropped from 2 to 25, score down from +5.0 to +2.0").
+- **The look-back has filled in its first case, and it went against the stop:** CFX rose a further
+  7.95% in the time after it was sold. One trade proves nothing; it is exactly what the record and
+  the trials of `trail` exist to weigh once there are 20.
 - **A limit that sale showed:** the stop stood at about +2.3% but the sale came at +1.0%, because the
   price is only seen at check-ins and it fell through between two of them. The autopilot does not
   watch prices in between. Shorter check-in gaps narrow this; nothing removes it.
-- Seen for real: clean scheduled check-ins on every version, a headline reaching the model, both AI
-  models answering the test question, the stop's sale with its explanation.
-- Not yet seen for real: a sale made by the AI model's review, a "tighten" answer, the larger model
-  being used, a coin being held back until it has stayed, a review of its own rules (after 20
-  finished trades), a trial, the emails that go with them (a set-up email was sent; arrival not
-  confirmed), and the logged-in dashboard itself (all checks used a stand-in server). **Worth
-  checking first in a new session:** the function's log and the owner's record for errors and for
-  the first of each of these.
+- Seen for real: clean scheduled check-ins on every version (the function's log for the 12 hours to
+  02:10 UTC on 11 Oct has no error), headlines reaching the model, both AI models answering the test
+  question, the stop's sale with its explanation, a sale by the AI review, the look-back, "Check in
+  now" releasing the next step early (two coins bought), the counter of how long a coin has stayed.
+- Not yet seen for real: a "tighten" answer, the larger model being used in a review (`state.strong`
+  was still 0), a coin being held back until it has stayed (only when it checks in every 3 hours or
+  less), "Check in now" or "Sell everything" pressed while a market is closed, a review of its own
+  rules (after 20 finished trades), a trial, the emails that go with them (a set-up email was sent;
+  arrival not confirmed), and the logged-in dashboard itself (all checks used a stand-in server).
+  **Worth checking first in a new session:** the function's log and the owner's record for errors
+  and for the first of each of these, and what happened to 4307.T when Tokyo opened.
 - It is the owner's account only (`AI_TRADER_USERS`). Opening it to users is his decision and
   touches the same legal question as the signals (an AI choosing stocks, even with fake money,
   reads as picks); each user's check-in also runs screeners and AI calls, so cost limits first.
@@ -1005,7 +1060,13 @@ A chart of the account and of the autopilot's result over time; a weekly summary
 there is no review; a coin yardstick (Bitcoin) for coin trades in the breakdown; watching prices
 between check-ins (a stop can only act at a check-in); trials that cover the owner's settings
 (holding time, how often it checks in); selling part of a holding; sorting the tables; recording
-which report a manual buy came from; dividends; per-user cost limits before opening it up.
+which report a manual buy came from; dividends; per-user cost limits before opening it up;
+public holidays for each market. **Separate pots** (offered 11 Oct, when the owner wondered about
+"a better way to manage it all" after asking what happens on switching screeners): instead of one
+budget across everything ticked, a few named pots, each with its own budget, screeners and pace
+(say "Coins, quick" and "US shares, steady"), shown and judged separately. It would make a switch
+of screeners a visible choice instead of a side effect, and show which kind of trading earns its
+keep. Not asked for yet; it is a rework of the settings, the allowance and the panel.
 
 ## 9. Pitfalls learned the hard way
 
@@ -1276,7 +1337,7 @@ file with no site scripts does not hang). Nothing live is called. Written for th
 copy and adapt the stand-in answers for another panel.
 `python3 check-tools/dashboard_page.py <practice-portfolio.js> <practice-autopilot.js> <out.html> <light|dark> "<steps>"`
 does the same with **both** practice sections together (two holdings bought by hand, one by the
-autopilot; steps `type`, `sale`, `trial`, `off`, `open`, `preset`, `sellall`, `limits`, `split`): use it to see how they work with each other,
+autopilot; steps `type`, `sale`, `trial`, `off`, `open`, `preset`, `sellall`, `limits`, `split` and more, listed in `check-tools/README.md`): use it to see how they work with each other,
 for example that a sale made in the background appears without losing what is being typed.
 A deploy script that checks `pgrep -f deploy-to-s3.sh` must be run as its own command: written and run
 in one command, the check finds its own text and stops.
@@ -1423,3 +1484,23 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     practice portfolio and autopilot notes, which had grown in layers through the day, were rewritten
     from the deployed code as **section 8c**, with the working routine, so a new session can resume
     dashboard work from the notes alone.
+
+- **11 Oct 2026** (same Claude Code session, continued):
+  - **The plan for a holding in words nobody can misread** (section 8c, "Wording rule"): the owner
+    read "once it has been up 4.5%, sell if it slips back…" as a selling price. Buy plans, sale
+    stories, the portfolio's line under a holding, "Holding now" and the Trailing stop menu now say
+    that rising is not a reason to sell and that the stop only starts following there.
+  - **Trading hours hold by hand too** (section 8c): "Check in now" and "Sell everything it holds"
+    only trade in markets that are open, and say which are closed and when they open; an early
+    release of the budget is taken back when nothing was bought. Rollback zip:
+    `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_clear_20261011.zip`.
+  - **A share's "sold at the latest" time is its market's next opening** after the holding time
+    ends, each holding's line says when its market is closed and when it opens, and the settings
+    line in the activity list says "over 1 day". Rollback zip: `…_before_autopilot_hours_20261011.zip`.
+    Live: function `CodeSha256` `yveoXxKn…`, `practice-portfolio.js?v=13`, `practice-autopilot.js?v=20`.
+  - **Full check of these notes against the code**: all 282 code names in section 8c exist; the
+    level table, pace table, market hours, bounds, limits and AWS settings match; test counts,
+    script versions and "where things stood" brought up to date; the function count corrected to
+    984 (the two functions made on 10 Oct were not counted) and `lambda-url-mapping.json` regenerated.
+  - First real sale by the AI review (ERG, -2.8%) and first look-back result (CFX rose a further
+    7.95% after the stop sold it) recorded in section 8c.

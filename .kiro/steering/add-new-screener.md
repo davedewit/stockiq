@@ -299,6 +299,15 @@ output line (the Nikkei formatter cuts them to 22 characters). Symbols may be 1â
 ```
 Add this alongside the existing `japan_screener` block.
 
+### 6f. Top 10 over time, and the AI autopilot (both added Oct 2026)
+- `TOP10_BENCHMARKS` in `dashboard.html`: one line that matches the report's name, giving the index the
+  Top 10 Performance popup compares with (`site-overview.md` section 8b).
+- The practice portfolio's AI autopilot buys from screeners listed in `SCREENERS` in Lambda
+  `stockiq-ai-trader` (name, coordinator option and subOption, kind, market, group). A new market
+  also needs its hours in `MARKET_HOURS` and a name in `MARKET_NAMES`, and a new currency must work
+  in `fx_pair` there and `fxFor` in `practice-portfolio.js`. Optional: only if the owner wants the
+  autopilot to use the new screener. Routine and tests: `site-overview.md` section 8c.
+
 ---
 
 ## Step 7 â€” Deploy

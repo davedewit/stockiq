@@ -15,6 +15,8 @@
   rebuilt from current members; crypto coin list and matching replaced; neutral "describe, don't advise"
   wording across the site, AI chat and all report/CSV output; pricing section and working email signup
   on the home page. Detail: `site-overview.md` sections 8, 8b and 13
+- ✅ Practice portfolio (fake money) and its AI autopilot on the dashboard, with tabs (10–11 Oct 2026).
+  Owner's account only for the autopilot; opening it to users is his decision. Detail: `site-overview.md` section 8c
 
 ## Open Items (Priority Order)
 

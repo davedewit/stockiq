@@ -1,7 +1,7 @@
 # Lambda Reference
 
 ## Overview
-- 982 functions (967 with Function URLs): ~50 named functions, ~650 stock screener workers, 54 crypto workers, plus old/unused ones
+- 984 functions (969 with Function URLs): ~50 named functions, ~650 stock screener workers, 54 crypto workers, plus old/unused ones
 - **Lambda code is not in git.** `lambda-sync/` is a gitignored mirror that keeps one copy per worker group. Before changing a Lambda, download the live code, diff it with the mirror, and keep the old zip in `~/VSCODE/backup/`
 - All use **Function URLs** (no API Gateway) called directly from frontend JS
 - All in `us-east-1`, IAM role: `arn:aws:iam::114366766218:role/acp-lambda-role`
@@ -27,7 +27,8 @@
 | `losers-scraper` | Top losers |
 | `most-active-scraper` | Most active stocks |
 | `trending-scraper` | Trending stocks |
-| `stockiq-price-proxy` | Live price proxy for stock pages (refreshes every 5s) |
+| `stockiq-price-proxy` | Price of one symbol (`?symbol=X`; 500 for an unknown one). Used by the practice portfolio, the autopilot, the dashboard tracker and for checking symbols |
+| `stockiq-popular-prices` | Live prices for a list of symbols: the ticker and "People also watch" cards on stock pages (`stock-prices.js`, refreshed every 5 s) |
 | `ticker-data-fetcher` | Ticker data for sidebar |
 
 ### Analysis (analysis.html)
@@ -79,7 +80,6 @@ New screeners: use `5-<subOption>`.
 | `stockiq-user-trial-manager` | Registration, trial status, usage tracking |
 | `stockiq-cognito-email-sender` | Verification emails via Cognito |
 | `stockiq-payment-handler` | Stripe payment processing |
-| `stockiq-acp-checkout` | Checkout flow |
 | `stockiq-ip-blocking-service` | Registration abuse prevention (5/hr, 1 per IP per 4 days) |
 | `stockiq-trial-cleanup` | Daily cron, removes abandoned trials |
 
@@ -98,7 +98,7 @@ New screeners: use `5-<subOption>`.
 | `stockiq-csv-export-proxy` | CSV export of analysis history |
 | `stockiq-auto-delete-scheduler` | Schedules S3 data deletion |
 | `stockiq-auto-delete-cleanup` | Cleans up S3 user data |
-| `stockiq-ai-trader` | AI autopilot for the practice portfolio (fake money). Every 30 minutes from EventBridge rule `stockiq-ai-trader-schedule`, or `run` through its Function URL; actions `get`, `save`, `run`, `sellall` (sell everything it holds), `tune` (put back a rule it changed, or stop its trial). Reads screener results from the coordinator, asks gpt-4o-mini to choose from a shortlist, writes practice buys/sells into `stockiq-paper-portfolios`. At each check-in it also asks the model to review each holding with the screener's figures now and recent headlines (fetched from Google News / Yahoo Finance RSS) and may sell early (gpt-4o-mini; gpt-4o when a gain is at stake, at most 8 times a day). Every 20 finished trades it reviews its own selling and buying rules in a bounded trial and emails the account's address through SES (from `autopilot@stockiq.tech`; invoke with `{"mail_test": true}` to send one test email). Table `stockiq-ai-trader`. Env `OPENAI_API_KEY`, `AI_TRADER_USERS` (allow-list). Python 3.12, 300 s, 512 MB. Created 10 Oct 2026. See `site-overview.md` section 8c |
+| `stockiq-ai-trader` | AI autopilot for the practice portfolio (fake money). Every 30 minutes from EventBridge rule `stockiq-ai-trader-schedule`, or `run` through its Function URL; actions `get`, `save`, `run`, `sellall` (sell everything it holds), `tune` (put back a rule it changed, or stop its trial). Reads screener results from the coordinator, asks gpt-4o-mini to choose from a shortlist, writes practice buys/sells into `stockiq-paper-portfolios`. A share market is only traded while it is open, on the schedule and by hand (`MARKET_HOURS`; coins at any time). At each check-in it also asks the model to review each holding with the screener's figures now and recent headlines (fetched from Google News / Yahoo Finance RSS) and may sell early (gpt-4o-mini; gpt-4o when a gain is at stake, at most 8 times a day). Every 20 finished trades it reviews its own selling and buying rules in a bounded trial and emails the account's address through SES (from `autopilot@stockiq.tech`; invoke with `{"mail_test": true}` to send one test email). Table `stockiq-ai-trader`. Env `OPENAI_API_KEY`, `AI_TRADER_USERS` (allow-list). Python 3.12, 300 s, 512 MB. Created 10 Oct 2026. See `site-overview.md` section 8c |
 | `stockiq-paper-portfolio` | Stores each user's practice portfolio (fake money) for the dashboard: actions `get`, `save` (with `expectedVersion`), `reset`. Table `stockiq-paper-portfolios`. Python 3.12, role `acp-lambda-role`, CORS set on the Function URL (POST only). Created 10 Oct 2026. See `site-overview.md` section 8c |
 
 ### Other
@@ -109,13 +109,15 @@ New screeners: use `5-<subOption>`.
 | `stockiq-email-capture` | Home page email list: saves to `stockiq-email-subscribers`, emails the owner (SES, from and to `noreply@stockiq.tech`) on each new signup. Handler file is `email-capture-with-count.py`; role `mylambdafunction-role-haabf70x`; **no CloudWatch log group exists**, so errors are not logged |
 | `stockiq-ai-chat` | GPT-4o-mini chat (128MB, 30s, 300 tokens) |
 | `stockiq-ai-chat-reporter` | Daily AI usage email at 5pm UTC |
-| `stockiq-market-data-sidebar` | Sidebar market data |
 
 ### NO_URL (event-driven, no public URL)
-`stockiq-acp-webhook`, `stockiq-auto-delete-scheduler`, `stockiq-coinspot-predictions-updater` (unused since 10 Oct 2026: its schedule now runs the orchestrator),
+`stockiq-auto-delete-scheduler`, `stockiq-coinspot-predictions-updater` (unused since 10 Oct 2026: its schedule now runs the orchestrator),
 `stockiq-daily-user-notification`, `stockiq-lambda-usage-reporter`, `stockiq-lambda-version-manager`,
 `stockiq-payment-notification`, `stockiq-usage-report-emailed`, `stockiq-stock-analysis`,
-`PostReader_*` (unused old functions)
+`PostReader_*` (unused old functions), `test-matplotlib` (an old test)
+
+Listed here until 11 Oct 2026 but no longer on AWS: `stockiq-acp-checkout`, `stockiq-acp-webhook`,
+`stockiq-market-data-sidebar`. Checked that day: every other function named in this file exists.
 
 ---
 
@@ -200,16 +202,18 @@ elif action == 'check_trial_status':
 ## Frontend Wiring
 
 Lambda URLs are **hardcoded** in these JS/HTML files:
-- `analysis-functions.js` — all analysis, screener, signal calls (310KB, main logic)
+- `analysis-functions.js` — all analysis, screener, signal calls (~340 KB, main logic)
 - `js/analysis-core.js` — core analysis helpers
 - `auth.js` — usage tracking, trial checks, Cognito auth
 - `ai-chat.js` — AI chat
-- `stock-prices.js` — live price proxy
+- `stock-prices.js` — live prices on stock pages (`stockiq-popular-prices` for a list of symbols)
 - `sidebar.js` — sidebar market data
 - `script.js` — homepage widgets
 - `dashboard.html` — dashboard data, CSV export, payment
+- `practice-portfolio.js` — practice portfolio storage (`stockiq-paper-portfolio`), prices, symbol lookup
+- `practice-autopilot.js` — the AI autopilot (`stockiq-ai-trader`)
 - `login.html` / `signup.html` — auth flow
-- `index.html` / `market-data-sidebar.html` / `market-data-widget.html` — market data widgets
+- `index.html` — market data widgets, email signup
 
 To find which JS calls a specific function: `grep -r "lambda-url-fragment" /Users/dave/VSCODE/website/`
 
@@ -261,7 +265,7 @@ rm lambda_function.zip
 
 ### 5. Wire to frontend
 - Add the Function URL to the relevant JS file
-- Update `lambda-url-mapping.json`: `python3 /Users/dave/VSCODE/stockiq/generate-lambda-url-mappings.sh`
+- Update `lambda-url-mapping.json`: `bash /Users/dave/VSCODE/stockiq/generate-lambda-url-mappings.sh` (a few minutes; read-only on AWS)
 
 ### 6. Check logs
 ```bash
