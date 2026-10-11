@@ -675,7 +675,7 @@ show. Settings holds the first five items below, Activity the last five:
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=15` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=32`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=33`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (accounts that may use it without a paid plan; everyone on a paid plan may use it; `*` would make it free for all) and `OPENAI_API_KEY` (never print it) |
@@ -1194,7 +1194,7 @@ not sure whether its improvements needed him to "push" them. They do not, and th
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
    python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 358 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 183 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 185 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 68 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
@@ -1237,7 +1237,12 @@ is written and run in one command (run it on its own, or match the process as th
 does); in zsh write `"${C}:path"` for `git show` (`$C:c…` is read as a modifier and left an empty
 file once); a stand-in page that does not finish has a syntax error in its own script (check each
 `<script>` block with `node --check`); in a browser step, take an element afresh after the panel
-has redrawn (a kept reference is to the old one and nothing happens); test expectations with dates must allow for the local time
+has redrawn (a kept reference is to the old one and nothing happens); **a link inside the panel
+must not be a bare `href="#"` unless its click is cancelled** (`preventDefault`): "What happens then"
+was one, handled by the part-switching branch that did not cancel it, so the browser went to the top
+of the page (the owner: "it just stays at top of screen"); the site's stylesheet sets
+`scroll-behavior: smooth`, and a headless browser does not play the glide, so a scroll looks like no
+movement there unless the test sets `scrollBehavior = 'auto'` first (`dashboard_page.py`, step `next`); test expectations with dates must allow for the local time
 zone; SES and the news feeds are only used when running as the Lambda, so tests need stand-ins
 (`mail=`, `headlines=`); two sessions building at once collided (the fingerprint check caught it);
 the panel test's `text()` leaves `&#39;` as it is, so a pattern that quotes a notice with an
@@ -1250,11 +1255,11 @@ weekdays and fails at the weekend.
 **What is live, and how to confirm nothing has moved since:**
 - Lambda `stockiq-ai-trader`: `CodeSha256` `PUQWAyAPbNy98SQITl2p+dSMU/wCyxzsIR+geIQ1RQE=`, equal to
   `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,587 lines).
-- Website: `practice-autopilot.js?v=32` (sha256 starts `f5c7ec16b87f`), `practice-portfolio.js?v=15`
-  (`1481a9b94beb`), `dashboard.html` (`bdef1f9c463a`), `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
+- Website: `practice-autopilot.js?v=33` (sha256 starts `406bf253b54d`), `practice-portfolio.js?v=15`
+  (`1481a9b94beb`), `dashboard.html` (`1e500c0ff449`), `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
 - Lambda `stockiq-ai-chat`: `CodeSha256` `LFyuyhd1ivEYAXqSqVkEk+Deq2H+rG9IhzSYdpho+w8=`, equal to `lambda-sync/stockiq-ai-chat/lambda_function.py`. Live files were compared byte for byte.
 - Both repos clean and pushed; **no `check-tools/pending-*` folder is left** (every package was
-  deployed and removed). Tests on the live files: 358 function, 183 panel, 68 portfolio, 13 chat, the
+  deployed and removed). Tests on the live files: 358 function, 185 panel, 68 portfolio, 13 chat, the
   panel-versus-function comparison clean (3,780 budget combinations, 2,915 spreads over markets).
 - Rollback copies of the function, one per deploy, in `~/VSCODE/backup/`:
   `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order: 10 Oct `v2, fast, panel,
@@ -1899,5 +1904,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     how the dashboard works, and what the user's own practice portfolio and autopilot show, with
     rules against advice and against adding to the figures. Changing settings by chat is not built.
     Live: `ai-chat.js?v=2`, `practice-autopilot.js?v=32`, `practice-portfolio.js?v=15`.
+  - "What happens then" beside the countdown now opens Activity and goes down to the list (it was a
+    bare "#" link that sent the page to the top). Website only, `practice-autopilot.js?v=33`.
   - Notes: section 8c ends with "Start here when resuming"; this session was closed there because
     its context had grown too large. Everything known is in these files.
