@@ -75,11 +75,11 @@ python3 check-tools/ai_trader_test.py lambda-sync/stockiq-ai-trader/lambda_funct
 node check-tools/autopilot_test.js ../website/practice-autopilot.js                      # the dashboard controls
 ```
 
-The first (246 checks) runs the Lambda's code with stand-ins for the database, the screeners, prices,
+The first (277 checks) runs the Lambda's code with stand-ins for the database, the screeners, prices,
 the AI model, headlines and email: budget pacing, risk filters, the coin share, every sell rule, the
 AI model's hold-or-sell review, headlines, the record and what it learns from it, trials of its own
 rules, the owner's own limits and switches, "sell everything", trading hours (also by hand), a switch
-of screeners while it holds something, a clash with the user, missing data, when it is due. The second (121 checks) drives the controls with a stand-in API (the file's real
+of screeners while it holds something, what happens next and what needs the owner, the email's status, a clash with the user, missing data, when it is due. The second (134 checks) drives the controls with a stand-in API (the file's real
 address is never called, because the test replaces `fetch`) and a stand-in for the browser's storage.
 Add a check for whatever you change; when wording changes, the checks that quote it must change too.
 
@@ -106,7 +106,7 @@ two sections sit in their own tabs, as on the site (step `tabs` presses each tab
 
 Steps: `type` (types in the buy row), `sale` (the autopilot sells in the background and the page refreshes
 itself), `trial` (a trial of its own rules starts), `off` (the autopilot is switched off), `open` (unfolds the
-details), `preset` (presses a quick set-up), `sellall` (presses "Sell everything it holds" and says yes), `limits` (types your own loss limit), `split` (prints the line that says whose result is whose), `cards` (prints the summary cards and every account value shown since the page opened), `pace` (hands the pace to the risk level, moves the slider, sets one field by hand), `listswitch` (switches the list to buys and sells only and reloads), `trailstop` (chooses each kind of trailing stop and prints what the page says), `tabs` (see above). The printed results are in the `<pre id="out">` of the dumped page.
+details), `preset` (presses a quick set-up), `sellall` (presses "Sell everything it holds" and says yes), `limits` (types your own loss limit), `split` (prints the line that says whose result is whose), `cards` (prints the summary cards and every account value shown since the page opened), `pace` (hands the pace to the risk level, moves the slider, sets one field by hand), `listswitch` (switches the list to buys and sells only and reloads), `trailstop` (chooses each kind of trailing stop and prints what the page says), `tabs` (see above), `next` (prints the countdown, "Needs you", the "What happens next" list and the email line, and presses "Send me a test email"). The printed results are in the `<pre id="out">` of the dumped page.
 
 ## autopilot_plan_check.py (with autopilot_plan_check.js)
 

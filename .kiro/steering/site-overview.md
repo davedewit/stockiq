@@ -582,12 +582,13 @@ with `document.querySelector('h3')`.
   the list: what a sale brought in is already in the cash). "Refresh prices", "Reset fake money".
 
 **AI autopilot** (its own tab, container `#practice-autopilot`; shown only to allowed users). The
-on/off switch, the status box (what it holds, last and next check-in) and the buttons "Check in
-now" / "Sell everything it holds" sit at the top; below them the panel is in **two parts, Activity
-and Settings**, so neither is a long scroll (it opens on Settings until it is switched on with a
+on/off switch, the status box (what it holds, last and next check-in, and **a live countdown to the
+next check-in**), a **"Needs you"** line (green "Nothing needs you right now", or an amber box
+listing what only the owner can put right) and the buttons "Check in now" / "Sell everything it
+holds" sit at the top; below them the panel is in **two parts, Activity and Settings**, so neither is a long scroll (it opens on Settings until it is switched on with a
 screener, then on Activity; the part last looked at is remembered, `stockiqAutopilotPart`). Both
 parts are always in the page and one is hidden, so settings are read and saved whichever is on
-show. Settings holds the first five items below, Activity the last three:
+show. Settings holds the first five items below, Activity the last four:
 - **Quick set-ups**: "Quick coin trading", "Steady shares", "Shares and coins".
 - **Risk level** slider (Cautious … Adventurous) with a sentence of what the level means, and
   **Your own limits**: two optional fields, "Sell at a loss of __ %" and "Sell at a gain of __ %",
@@ -600,9 +601,15 @@ show. Settings holds the first five items below, Activity the last three:
   describe what exactly these settings will do**.
 - Screeners it buys from, grouped by market (all 15).
 - **What it may do by itself**: three switches (sell early on the AI model's review, try changes
-  to its own rules, email me its reviews).
+  to its own rules, email me its reviews). Under the email switch: what became of the last email
+  ("accepted by the mail service", or "could not be sent" and why) and "Send me a test email".
 - (At the top, beside the buttons: a line saying "Saving…" / "✓ Saved." / "Not saved: reason".
   There is no save button: every change saves itself.)
+- **What happens next** (first under Activity, added 11 Oct): what is coming, soonest first, each
+  with a countdown that ticks and its time: the next check-in and what it may do, the next release
+  of the budget, the first check-in after each closed market opens, the latest each holding is
+  kept; then what goes by the number of finished trades (its own review, the AI model's notes).
+  A sentence under it says that reviews and trials happen by themselves and nothing has to be pushed.
 - **How it is doing**: what it holds now and when each will be sold, with the AI model's latest
   review of it; the last 30 days in dollars and as a share of the budget; finished trades (up /
   down, average); a folded breakdown; notes the AI model wrote from the record.
@@ -616,10 +623,10 @@ show. Settings holds the first five items below, Activity the last three:
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=13` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=20`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=21`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
-| Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
+| Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
 | Schedule | EventBridge `stockiq-ai-trader-schedule`, `cron(10,40 * * * ? *)` | Every 30 minutes; `SLOT_MINUTES` in the Lambda must match. **Disable this rule to stop everything** |
 | Screener data | `stockiq-screener-coordinator` | Called with no `userId`, so nothing is saved to anyone's history |
 | Prices | `stockiq-price-proxy` | Also exchange rates (`AUDUSD=X`, `USDJPY=X`) and the S&P 500 fund (`SPY`) |
@@ -885,19 +892,68 @@ that it at least does not fool itself.
   where relevant `kind, pct, detail[], key, n, first`); `history`; `state` with `startedAt`
   (when the budget's build-up began; reset when it is switched on or the budget or build-up
   changes), `lastRun`, `lastRunBy`, `open` (remembered buys), `exits`, `rest`, `restSince`,
-  `lessons`, `tune` (`values`, `trial`, `past`, `mark`, `seq`), `watch`, `news`, `seen`, `stay`,
-  `strong`, `ahead`, `aiSell`, `closedCount`, `realizedUsd`.
+  `lessons`, `tune` (`values`, `trial`, `past`, `mark`, `seq`, `reviewed`), `watch`, `news`, `seen`, `stay`,
+  `strong`, `ahead`, `aiSell`, `closedCount`, `realizedUsd`, `mail` (what became of the last email:
+  `t, ok, subject, why`), `fail` (a scheduled check-in that stopped on an error; cleared by the next
+  good one), `savedAt` (when the settings last changed).
 - `public()` (every action returns it): `settings, state, log, scorecard, lessons, resting, recent,
   minSample, practiceCash, rules` (in force, with `yours`, `level`, `changed`, `arm`), `tune`
   (`trial` with its figures, `past`, `nextReviewIn`, `batch`, `group`), `aiSellPausedUntil`,
   `coinShare, realizedUsd, month` (`last30`, `before30`), `now, nextCheck, holding, plans` (per
   holding: `sellBy` (the end of its holding time, moved on to its market's next opening), `market,
   closed, opens, stop, take, arm, floor, move, room, tight, mode, trail, peak, trial, view, auto`) and `options` (screeners,
-  check-in and holding-time choices, the level table). **The panel is drawn from these; change the
+  check-in and holding-time choices, the level table); and `coming`, `needs`, `mail`, `reviewed` (next section). **The panel is drawn from these; change the
   two together.**
-- Other actions: `sellall` (`sell_everything`: only the autopilot's holdings, recorded as sold by
+- Other actions: `mailtest` (one test email to the account's own address, at most every 10 minutes), `sellall` (`sell_everything`: only the autopilot's holdings, recorded as sold by
   the owner; holdings of a closed market are kept; its `summary` has `sold`, `skipped`, `closed`) and `tune` (`tune_by_hand`: `op: 'restore', param` puts one rule back to the level's;
   `op: 'stop'` ends the running trial; nothing outside `TUNABLE` can be touched).
+
+### What happens next, and what needs the owner (added 11 Oct 2026)
+
+The owner asked for "some kind of countdown timer to know when next action is going to occur… and
+what future actions are going to take place", and "something on the site to tell me whats going on
+so i'm aware of everything thats going on in the background or needing my assistance". He also was
+not sure whether its improvements needed him to "push" them. They do not, and the panel now says so.
+
+- **`coming(record, portfolio, now, plans)`** (sent as `coming`): a list of `{kind, text}` with
+  either `at` (a time) or `after` (a number of finished trades), soonest first, timed ones before
+  counted ones. Kinds: `check` (the next scheduled check-in: which market, which holdings it looks
+  at, and what it may buy, worked out with the same `allowance` the check-in will use, including
+  the coin share, a full budget and too little cash), `open` (the first check-in after each other
+  market it has opens), `release` (the next step of the budget's build-up, with amounts:
+  `released()`, which `allowance` now also uses), `sell` (the latest each holding is kept), `rest`
+  (a rested screener or the AI model's paused early sells coming back), `trial` (the latest a
+  running trial ends), `review` (trades to go until it reviews its own rules; or that this is
+  switched off), `notes` (trades to go until the AI model writes fresh notes). **It is a forecast
+  from the settings and the state: the check-in itself decides from the prices of the moment**, and
+  the panel says so. Empty when switched off.
+- **`needs(record, portfolio, now)`** (sent as `needs`): what only the owner can put right. Kinds:
+  `off` (switched off while holding something), `noscreener`, `resting` (every ticked screener
+  rested), `cash` (less practice cash than one holding), `budget` (the budget is more than the
+  practice money there is: on 11 Oct the owner had set $200,000 against $100,000 of fake money),
+  `fail` (the last scheduled check-in stopped on an error: the schedule's `except` now leaves
+  `state.fail`), `missed` (`missed_check`: two scheduled slots in a row were due and did not
+  happen, both since the settings last changed, `state.savedAt`; one miss is forgiven), `mail` (the
+  mail service refused the last email). An empty list shows as "Nothing needs you right now".
+  **Its reviews, trials and rule changes are never in this list: they happen by themselves.**
+- **Email status.** `send_mail` answers True (the mail service accepted it), False (refused; the
+  reason is kept in `MAIL_ERROR`) or None (not running as the function, nothing attempted);
+  `note_mail` keeps the outcome in `state.mail`; `test_mail` is the one test email (the `mailtest`
+  action from the panel, or `{"mail_test": true}` by hand). **"Accepted" is not "arrived"**: the
+  panel says to look in junk. Checked 11 Oct: SES healthy and sending (still in sandbox, so only
+  verified addresses), domain `stockiq.tech` verified with DKIM and its own MAIL FROM
+  (`mail.stockiq.tech`), the owner's address verified, no bounces, complaints or suppressed
+  addresses, and a test accepted at 03:00 UTC. Whether it reached his inbox only he can say.
+- **The panel** (`practice-autopilot.js`): `leftText` words the time left ("in 1 h 48 min", "in 12
+  min 05 s", "any moment now"); `tick` runs every second and only rewrites the text of elements
+  carrying `data-ap-until`, so nothing is redrawn and typing is not disturbed; `skew` is the
+  server's clock minus the browser's (from `now` in each answer), so a wrong computer clock does not
+  spoil a countdown. `countLine`, `needsHtml`, `comingHtml` (four rows shown, the rest folded),
+  `mailHtml`. An answer from an older function (none of these fields) shows as before.
+- The review email's own description of the rules was the last place with the wording the owner had
+  misread as a selling price; it now follows the wording rule above.
+- Not done: the same kind of box for the rest of the site (the daily deploy runs on the owner's Mac
+  and leaves nothing a web page can read); a summary email.
 
 ### How the panel script behaves (`practice-autopilot.js`)
 
@@ -962,8 +1018,8 @@ that it at least does not fool itself.
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 246 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 121 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 277 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 134 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 66 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
@@ -978,7 +1034,7 @@ that it at least does not fool itself.
    into the test page, step `tabs`). After any edit to `dashboard.html` also check that the
    sections still balance and that every inline script parses (`node --check` on each `<script>`
    block): the logged-in page itself cannot be opened from here, it redirects to Sign In.
-   Steps such as `type,sale,trial,preset,sellall,limits,trailstop,split,cards,pace,listswitch,open`) with headless
+   Steps such as `type,sale,trial,preset,sellall,limits,trailstop,split,cards,pace,listswitch,next,open`) with headless
    Chrome; `--dump-dom` for what it printed, `--screenshot` for the look (section 12).
 5. **Try the staged function on a copy of the real record**: read the owner's item from both tables
    (read-only), load it into stand-in storage under another name, run `run_user` / `public` with
@@ -1016,11 +1072,13 @@ weekdays and fails at the weekend.
 
 ### Where things stood on 11 Oct 2026 (02:30 UTC)
 
-- The owner tries settings out a lot, so read his record rather than trust this line. Last seen:
+- The owner tries settings out a lot, so read his record rather than trust this line. At 02:30 UTC:
   Balanced, $50,000 built up over 1 day (set by hand), check-ins every 6 hours and holdings kept at
   most 5 days (both left to the level), trailing stop "protects a gain", all three switches on,
   screeners ticked: S&P 500, Russell 1000, Russell 2000, NASDAQ 100, Dow 30, ASX 200 and crypto.
   Because shares are ticked too, coins may take a quarter of the budget ($12,500) at this level.
+  Half an hour later he had moved to Adventurous with a $200,000 budget (hourly check-ins, holdings
+  kept a day): more than the $100,000 of practice money, which the new "Needs you" box points out.
 - It holds a Nikkei share (4307.T, $12,500, bought on a Saturday at Friday's close, before the
   trading-hours rule covered "Check in now"; nothing happens to it until Tokyo opens, Monday 00:05
   UTC) and a coin (CKB, $6,250). The Nikkei screener is no longer ticked; the share is still looked after.
@@ -1504,3 +1562,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     984 (the two functions made on 10 Oct were not counted) and `lambda-url-mapping.json` regenerated.
   - First real sale by the AI review (ERG, -2.8%) and first look-back result (CFX rose a further
     7.95% after the stop sold it) recorded in section 8c.
+  - **"What happens next" and "Needs you" on the autopilot panel** (section 8c): a live countdown to
+    the next check-in, a list of what is coming with what each check-in may do, what goes by the
+    number of finished trades, a box for what only the owner can put right (a missed or failed
+    check-in, a refused email, too little practice money, no screener), the last email's status and a
+    "Send me a test email" link. Email set-up checked on AWS and one test accepted. Rollback zip:
+    `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_next_20261011.zip`. Live: `practice-autopilot.js?v=21`.
