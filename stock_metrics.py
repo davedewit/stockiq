@@ -5,7 +5,8 @@ Scoring helpers for static stock pages.
 The functions below are copied unchanged from the live single-stock analysis
 Lambda (lambda-sync/stockiq-option-1-1-custom-analysis/lambda_function2.py),
 so the score on a stock page matches the 0-100 score in the app's report.
-If the Lambda's scoring changes, copy the updated functions here too.
+If the Lambda's scoring changes, copy the updated functions here too
+(check-tools/report/patch_metrics.py does it, and report_test.py fails when the two differ).
 
 compute_analysis() prepares the inputs the same way
 analyze_stock_comprehensive_enhanced() does in the Lambda.
@@ -13,34 +14,26 @@ analyze_stock_comprehensive_enhanced() does in the Lambda.
 
 
 def calculate_rsi(closes, period=14):
-    """Calculate RSI"""
+    """RSI the standard way (Wilder's smoothing): the figure the chart and the screeners show. Until Oct 2026 this was
+    a plain average of the last 14 days, so the report said 47 under a chart that said 56."""
     if len(closes) < period + 1:
         return None
-    
-    gains = []
-    losses = []
-    
-    for i in range(1, len(closes)):
-        change = closes[i] - closes[i-1]
-        if change > 0:
-            gains.append(change)
-            losses.append(0)
-        else:
-            gains.append(0)
-            losses.append(abs(change))
-    
-    if len(gains) < period:
-        return None
-    
-    avg_gain = sum(gains[-period:]) / period
-    avg_loss = sum(losses[-period:]) / period
-    
+
+    deltas = [closes[i] - closes[i-1] for i in range(1, len(closes))]
+    gains = [max(d, 0) for d in deltas]
+    losses = [max(-d, 0) for d in deltas]
+
+    avg_gain = sum(gains[:period]) / period
+    avg_loss = sum(losses[:period]) / period
+    for i in range(period, len(gains)):
+        avg_gain = (avg_gain * (period - 1) + gains[i]) / period
+        avg_loss = (avg_loss * (period - 1) + losses[i]) / period
+
     if avg_loss == 0:
         return 100
-    
+
     rs = avg_gain / avg_loss
-    rsi = 100 - (100 / (1 + rs))
-    return rsi
+    return 100 - (100 / (1 + rs))
 
 
 def calculate_macd(closes, fast=12, slow=26, signal=9):
@@ -107,6 +100,28 @@ def calculate_support_resistance_enhanced(highs, lows):
         return 0, 0
 
 
+TREND_FULL_AT = 2.0      # percent apart at which each half of the trend factor counts in full
+
+def trend_points(current, ma20, ma50):
+    """The trend factor of the score: up to 6 points for where the price is against its 20-day average, and up to 6 for
+    where the 20-day average is against the 50-day, each in full at 2% apart. Returns (points, name, words).
+    Until Oct 2026 this was +12 or -12 on the sign alone, so a share 0.03% under its 20-day average, up 45% in a year,
+    read "Strong Downtrend: -12", and a move of a few cents swung the score by 24 points."""
+    if not ma20 or not ma50:
+        return 0, 'Flat Trend', 'not enough history for the averages'
+    price_gap = (current / ma20 - 1) * 100
+    average_gap = (ma20 / ma50 - 1) * 100
+    part = lambda gap: max(-1.0, min(1.0, gap / TREND_FULL_AT))
+    short, longer = 6 * part(price_gap), 6 * part(average_gap)
+    points = int(round(short + longer))
+    # Little either way is "flat"; two clear halves that point opposite ways are "mixed" (a bounce inside a decline)
+    middle = 'Mixed Trend' if abs(short) >= 3 and abs(longer) >= 3 and short * longer < 0 else 'Flat Trend'
+    name = ('Strong Uptrend' if points >= 9 else 'Uptrend' if points >= 3 else 'Strong Downtrend' if points <= -9
+            else 'Downtrend' if points <= -3 else middle)
+    side = lambda gap: f"{abs(gap):.1f}% {'above' if gap >= 0 else 'below'}"
+    return points, name, f"price {side(price_gap)} its 20-day average; 20-day average {side(average_gap)} the 50-day"
+
+
 def calculate_unified_investment_score(closes, highs, lows, volumes, rsi, macd_line, signal_line, 
                                       bb_upper, bb_lower, fundamentals, ytd_change, current, ma20, ma50, ma200, range_position):
     """Calculate unified 0-100 investment score with clear meaning"""
@@ -125,20 +140,11 @@ def calculate_unified_investment_score(closes, highs, lows, volumes, rsi, macd_l
             score += 5
             score_breakdown.append("RSI Neutral: +5 (Healthy condition)")
     
-    # Trend Analysis
-    if current > ma20 > ma50:
-        score += 12
-        score_breakdown.append("Strong Uptrend: +12 (Price above both MAs)")
-    elif current < ma20 < ma50:
-        score -= 12
-        score_breakdown.append("Strong Downtrend: -12 (Price below both MAs)")
-    elif current > ma20:
-        score += 6
-        score_breakdown.append("Short-term Uptrend: +6 (Above 20-day MA)")
-    elif current < ma20:
-        score -= 6
-        score_breakdown.append("Below 20-day MA: -6 (Short-term weakness)")
-    
+    # Trend: graded, not all-or-nothing (see trend_points)
+    trend, trend_name, trend_words = trend_points(current, ma20, ma50)
+    score += trend
+    score_breakdown.append(f"{trend_name}: {trend:+d} ({trend_words})")
+
     # MACD Signal
     if macd_line and signal_line:
         if macd_line > signal_line:
@@ -204,7 +210,7 @@ def calculate_unified_investment_score(closes, highs, lows, volumes, rsi, macd_l
                 score_breakdown.append(f"Strong Liquidity ({current_ratio:.2f} Current Ratio): +8")
             elif current_ratio < 1.0:
                 score -= 10
-                score_breakdown.append(f"Liquidity Crisis ({current_ratio:.2f} Current Ratio): -10")
+                score_breakdown.append(f"Low Liquidity ({current_ratio:.2f} Current Ratio): -10")
             elif current_ratio < 1.5:
                 score -= 5
                 score_breakdown.append(f"Weak Liquidity ({current_ratio:.2f} Current Ratio): -5")
@@ -258,25 +264,25 @@ def calculate_unified_investment_score(closes, highs, lows, volumes, rsi, macd_l
     # Momentum with overextension penalties
     if ytd_change > 100:
         score -= 15
-        score_breakdown.append(f"Extreme Overextension ({ytd_change:+.1f}% YTD): -15 (High pullback risk)")
+        score_breakdown.append(f"Extreme Overextension ({ytd_change:+.1f}% over 1 year): -15 (High pullback risk)")
     elif ytd_change > 50:
         score -= 8
-        score_breakdown.append(f"Overextended ({ytd_change:+.1f}% YTD): -8 (Caution - mean reversion likely)")
+        score_breakdown.append(f"Overextended ({ytd_change:+.1f}% over 1 year): -8 (Caution - mean reversion likely)")
     elif ytd_change > 30:
         score += 3
-        score_breakdown.append(f"Strong Momentum ({ytd_change:+.1f}% YTD): +3 (Good but stretched)")
+        score_breakdown.append(f"Strong Momentum ({ytd_change:+.1f}% over 1 year): +3 (Good but stretched)")
     elif ytd_change > 15:
         score += 7
-        score_breakdown.append(f"Healthy Momentum ({ytd_change:+.1f}% YTD): +7 (Ideal range)")
+        score_breakdown.append(f"Healthy Momentum ({ytd_change:+.1f}% over 1 year): +7 (Ideal range)")
     elif ytd_change > 0:
         score += 3
-        score_breakdown.append(f"Positive YTD ({ytd_change:+.1f}%): +3")
+        score_breakdown.append(f"Up Over 1 Year ({ytd_change:+.1f}%): +3")
     elif ytd_change > -20:
         score -= 5
-        score_breakdown.append(f"Underperforming ({ytd_change:+.1f}% YTD): -5")
+        score_breakdown.append(f"Underperforming ({ytd_change:+.1f}% over 1 year): -5")
     else:
         score -= 10
-        score_breakdown.append(f"Severe Underperformance ({ytd_change:+.1f}% YTD): -10")
+        score_breakdown.append(f"Severe Underperformance ({ytd_change:+.1f}% over 1 year): -10")
     
     # Volume confirmation
     if volumes:

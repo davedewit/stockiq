@@ -139,6 +139,9 @@ fi
 if [ "$UPDATE_STOCK_NEWS" = "true" ]; then
     echo "📈 Updating stock data snapshots..."
     $PYTHON "/Users/dave/VSCODE/stockiq/update_stock_analysis.py"
+    # Company figures for the single-stock report (it has none of its own for shares outside the US): one small
+    # private file built from the cache the step above keeps. It never stops the deploy; a dry run only builds the file.
+    DRY_RUN="$DRY_RUN" $PYTHON "/Users/dave/VSCODE/stockiq/publish_company_figures.py" || echo "⚠️  Company figures not published (the report then scores those shares on price and volume only)"
 else
     echo "⏭️  Skipping stock data snapshots"
 fi
