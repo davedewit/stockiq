@@ -624,17 +624,41 @@ with `document.querySelector('h3')`.
   The cards have small capital labels and a green or red top edge on Account value; "Whose result is whose" is one framed
   row (Your own buys ▲ … · 🤖 AI autopilot ▲ … sold ▲ … · still held – …); table headings are small capitals; rows
   highlight under the pointer; figures use tabular numerals.
-- **The bell** (the notification bell in the page header, dashboard only): above the report list it shows "🤖 AI autopilot
-  (Beta): buys and sells", newest first, each line saying "Sold at a profit: CFX-USD ▲ $12.79 (1.0%)" / "Sold at a loss: …
-  ▼ …" / "Bought: … $1,250", with the name and the time; new ones are marked and counted in the bell's red badge together
-  with unread reports, until the bell is opened. A click goes to the AI autopilot tab's list "What it has done". Check-in
-  notes are not notifications, only real buys and sells. Drawn by `practice-autopilot.js` (`bellHtml`, `unseenTrades`,
-  `bellSeen`, `bellOpen`, `bellRefresh`; "seen" is the time of the newest trade, kept in the browser under
-  `stockiqAutopilotBell_<address>`; the first time, what is already there is not news); `dashboard.html` has three small
-  hooks in `preloadNotifications`, `updateNotificationBell` and `goToNotifications`. A sale's dollars come from the entry's
-  `gain` (sent by the function since this deploy) or are read from an older entry's words (`gainOf`). **Limits:** the bell
-  on other pages (drawn by `auth.js` / `analysis-functions.js`) does not show them, because only the dashboard loads the
-  autopilot; and it is a notice on the page, not an email or a phone notification.
+- **The bell** (the notification bell in the header of every page that has one: 18 hand-edited pages and the stock pages).
+  Reworked the same day after the owner asked that it show a red number and work "across other pages like index.html
+  wherever the bell sits", with "whatever is newest at the top".
+  - **What it shows:** a group "🤖 AI autopilot (Beta): buys and sells", newest first, each line "Sold at a profit: CFX-USD
+    ▲ $12.79 (1.0%)" / "Sold at a loss: … ▼ …" / "Bought: … $1,250" with the name and the time. Only real buys and sells,
+    never check-in notes.
+  - **Unread and the red number, as for reports:** trades made since the bell was last opened are counted in the bell's red
+    number together with unseen reports ("seen", key `stockiqAutopilotBell_<address>`); opening the bell clears the number but
+    the lines stay marked unread (blue dot, bold, a green, red or blue edge, "N unread" in the heading) until one is clicked
+    ("read", key `stockiqAutopilotRead_<address>`). The first time, what is already there is not news.
+  - **Order:** the group with the newest item is on top: the trades when the last trade is newer than the newest report that
+    is not deleted, otherwise the report history, with the trades under it and the "View all" link kept last.
+  - **A click** on a trade goes to the AI autopilot tab's list "What it has done" (on another page: `/dashboard.html#autopilot`).
+  - **How it is built:** one script, `website/autopilot-bell.js` (`window.autopilotBell`: `set, trades, unseen, unread,
+    markSeen, markRead, html, place, open, badge, load, onTop`). It does not depend on how a page draws its bell: it listens
+    for a click on `#notification-bell` / `#mobile-notification-bell` and puts its group into `#notification-dropdown` if the
+    page opened one (dashboard, home page, analysis page; on pages whose bell just goes to the dashboard only the red number
+    shows), watches that list and puts the group back when the page redraws it, and watches the two badge elements to add
+    its count to whatever number the page's own code sets. **`theme.js` fetches it** (`/autopilot-bell.js?v=1`) for
+    signed-in visitors, because it is the one script every page with a bell loads (so no page and no generated stock page
+    had to be edited); `dashboard.html` loads it directly. Raise the `?v=` in both places when it changes.
+  - **Where the list comes from:** on the dashboard the panel hands over its own (`practiceAutopilot.bellFeed` →
+    `autopilotBell.set`); on every other page the script asks the function's **read-only action `bell`** (`bell_trades`:
+    the last 12 buys and sells with `t, type, symbol, name, usd, gain, pct`; an account without the autopilot gets an empty
+    list; it is not a visit and writes nothing) at most every two minutes (30 for an account without it), and keeps the
+    answer in the browser (`stockiqAutopilotTrades_<address>`) so that every page and tab shows the same.
+  - A sale's dollars are the entry's `gain` (stored since 11 Oct) or are read from an older entry's words ("Put in $X, got
+    back $Y": `gainOf` on the panel, the same in `bell_trades`). Entries from before that deploy have no name.
+  - **Limits:** a notice on the site, not an email or a phone notification; `theme.js` is cached for a day without a version,
+    so a browser that already had it shows the bell's new part on other pages within a day or after a refresh; nothing is
+    shown to a visitor who is not signed in.
+  - **Tests:** `node check-tools/autopilot_bell_test.js ../website/autopilot-bell.js` (16 checks) and, in a real browser,
+    `python3 check-tools/bell_page.py ../website/autopilot-bell.js /tmp/bell.html light trade` (or `report`): a stand-in page
+    with a bell drawn as the dashboard draws it; it prints the red number, the order of the list, what happens when the
+    page redraws it and on a click. Not checked: the real pages while signed in.
 - The buy row: search box (code or company name, same lookup as the home page), "Enter $" **or**
   "or quantity" (the other is worked out from the latest price), an optional note, "Practice buy".
 - The holdings table: Holding, Bought (date and time), Price then, Price now, Value, Change, Sell.
@@ -694,10 +718,11 @@ show. Settings holds the first five items below, Activity the last five:
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=17` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=36`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=37`) | Controls and reports only; decisions are made by the Lambda |
+| The bell's part | `website/autopilot-bell.js` (`?v=1`, fetched by `theme.js` on every page with a bell, loaded directly by `dashboard.html`) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
-| Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (accounts that may use it without a paid plan; everyone on a paid plan may use it; `*` would make it free for all) and `OPENAI_API_KEY` (never print it) |
+| Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`, `bell` (read-only, for the notification bell). Env `AI_TRADER_USERS` (accounts that may use it without a paid plan; everyone on a paid plan may use it; `*` would make it free for all) and `OPENAI_API_KEY` (never print it) |
 | Schedule | EventBridge `stockiq-ai-trader-schedule`, `cron(10,40 * * * ? *)` | Every 30 minutes; `SLOT_MINUTES` in the Lambda must match. **Disable this rule to stop everything** |
 | Screener data | `stockiq-screener-coordinator` | Called with no `userId`, so nothing is saved to anyone's history |
 | Prices | `stockiq-price-proxy` | Also exchange rates (`AUDUSD=X`, `USDJPY=X`) and the S&P 500 fund (`SPY`) |
@@ -1330,8 +1355,8 @@ narrow screen (nothing changes at desktop width):
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 375 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 199 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 378 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 196 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 71 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
@@ -1390,18 +1415,18 @@ weekdays and fails at the weekend.
 ### Start here when resuming (state at 06:20 UTC on 11 Oct 2026, the end of a two-day session)
 
 **What is live, and how to confirm nothing has moved since:**
-- Lambda `stockiq-ai-trader`: `CodeSha256` `MMmJJ9M5OzYmYagMJsQBJEfWTNkS/6IbCb7QQcGQqw4=`, equal to
-  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,833 lines; shared learning deployed 07:42 UTC on 11 Oct, the release wording 08:45).
-- Website: `practice-autopilot.js?v=36` (sha256 starts `45a69a3f736e`), `practice-portfolio.js?v=17`
-  (`f7ddb505486a`), `dashboard.html` (`199754e40cdb`), `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
+- Lambda `stockiq-ai-trader`: `CodeSha256` `+Z5scAfikqPIEcGPDlARJVC/f3NOcIGjmSZ7YK4YGoc=`, equal to
+  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,854 lines; shared learning deployed 07:42 UTC on 11 Oct, the release wording 08:45, the bell's action 09:01).
+- Website: `practice-autopilot.js?v=37` (sha256 starts `57956b67cf2b`), `practice-portfolio.js?v=17`
+  (`f7ddb505486a`), `autopilot-bell.js?v=1` (`26e206d722c7`), `theme.js` (`1688e4bc3adf`), `dashboard.html` (`d8991e538fdb`), `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
 - Lambda `stockiq-ai-chat`: `CodeSha256` `LFyuyhd1ivEYAXqSqVkEk+Deq2H+rG9IhzSYdpho+w8=`, equal to `lambda-sync/stockiq-ai-chat/lambda_function.py`. Live files were compared byte for byte.
 - Both repos clean and pushed; **no `check-tools/pending-*` folder is left** (every package was
-  deployed and removed). Tests on the live files: 375 function, 199 panel, 71 portfolio, 13 chat, the
+  deployed and removed). Tests on the live files: 378 function, 196 panel, 71 portfolio, 16 bell, 13 chat, the
   panel-versus-function comparison clean (3,780 budget combinations, 2,915 spreads over markets).
 - Rollback copies of the function, one per deploy, in `~/VSCODE/backup/`:
   `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order: 10 Oct `v2, fast, panel,
   autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
-  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release`.
+  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell`.
 - First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and
   the function's log (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors
   ("check-in failed", "not worked out", "not sent") and for the firsts listed below.
@@ -2062,5 +2087,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     `…_before_autopilot_release_20261011.zip`. First scheduled run of the shared learning seen in the log at 08:10 UTC
     ("shared learning: 0 new finished trades…", the record `_brain` written); the owner's four trades follow his next
     check-in.
+  - **The bell on every page** (section 8c, "What the owner sees"): the autopilot's buys and sells are in the notification
+    bell wherever a page has one, counted in its red number and marked unread like reports, and the group with the newest
+    item (the trades or the report history) is on top. New `autopilot-bell.js`, fetched through `theme.js`; the function has
+    a read-only `bell` action (`+Z5scAf…`). Rollback zip: `…_before_autopilot_bell_20261011.zip`. Checked with the owner's
+    real account: the action answered his nine buys and sells and wrote nothing.
   - Notes: section 8c ends with "Start here when resuming"; this session was closed there because
     its context had grown too large. Everything known is in these files.

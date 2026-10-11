@@ -133,6 +133,21 @@ python3 check-tools/mobile_frame.py /tmp/m.html /tmp/m-frame.html 390          #
 
 (Steps `breakdown` and `locked` open the folded breakdown and show the view of an account without a paid plan.)
 
+## autopilot_bell_test.js and bell_page.py
+
+The AI autopilot's buys and sells in the notification bell (`website/autopilot-bell.js`, on every page with a bell).
+
+```bash
+node check-tools/autopilot_bell_test.js ../website/autopilot-bell.js      # 16 checks: the red number, unread marks, profit or loss, which group is on top, when it asks the function
+python3 check-tools/bell_page.py ../website/autopilot-bell.js /tmp/bell.html light trade     # or: dark report
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars --window-size=900,900 \
+  --virtual-time-budget=8000 --dump-dom file:///tmp/bell.html > /tmp/bell.dom      # and --screenshot=/tmp/bell.png
+```
+
+`bell_page.py` writes a stand-in page whose bell is drawn the way the dashboard draws it, run by the real script with a
+made-up answer to its question: it prints the red number, the order of the list (`trade`: the last trade is the newest
+item, so the trades are on top; `report`: a report is newer), what happens when the page redraws the list, and a click.
+
 ## autopilot_plan_check.py (with autopilot_plan_check.js)
 
 Does the autopilot panel describe what the autopilot function really does? The panel works out, for
