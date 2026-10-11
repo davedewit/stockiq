@@ -40,7 +40,7 @@ updateNotificationBell();
 <script>%s</script>
 <script>
 const out = (t) => { document.getElementById('out').textContent += t + '\\n'; }, wait = (ms) => new Promise(r => setTimeout(r, ms));
-const order = () => Array.from(document.getElementById('notification-dropdown').children).map(c => c.id === 'autopilot-bell-section' ? 'AUTOPILOT (' + (c.textContent.match(/\\d+ unread/) || [''])[0] + ')' : c.tagName === 'A' ? 'view-all link' : (c.querySelector('h4') ? 'REPORTS heading' : 'report')).join(' > ');
+const order = () => Array.from(document.getElementById('notification-dropdown').children).map(c => c.id === 'autopilot-bell-pointer' ? 'POINTER (' + c.textContent.replace(/\\s+/g, ' ').trim() + ')' : c.id === 'autopilot-bell-section' ? 'AUTOPILOT (' + (c.textContent.match(/\\d+ unread/) || [''])[0] + ')' : c.tagName === 'A' ? 'view-all link' : (c.querySelector('h4') ? 'REPORTS heading' : 'report')).join(' > ');
 const badge = () => { const b = document.getElementById('notification-badge'); return b.style.display === 'none' ? 'hidden' : b.textContent; };
 (async () => {
   await wait(300); out('case: %s (the newest report is ' + analysisHistory[0].timestamp + ', the newest trade 2026-10-11T10:00:00Z)');
