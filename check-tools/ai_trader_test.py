@@ -370,7 +370,7 @@ check('with its trials switched off it starts none', m.review_tuning(off, t0) ==
 off['state']['tune']['trial'] = {'id': 1, 'risk': 3, 'param': 'take', 'old': 18, 'new': 9.0, 'since': m.iso(t0)}
 check('and a trial already running is ended, unchanged', 'its trials were switched off' in m.review_tuning(off, t0)[0]['text'] and off['state']['tune']['trial'] is None and m.rules_for(off['settings'], off['state'])['take'] == 18)
 D.t.clear(); MAILS.clear(); rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, emails=False, screeners=['3-100']); rec['state'].update(startedAt=m.iso(t0), closedCount=20); rec['history'] = [dict(risk=3, pct=1.0, rank=2, rsi=50, exit='time', sold=m.iso(t0), label='X', screener='3-100'), dict(risk=3, pct=-1.0, rank=2, rsi=50, exit='time', sold=m.iso(t0), label='X', screener='3-100')] * 10; m.save_item(U, rec)
-s, rec = run(t0); check('with its emails switched off a review is still done and listed, but no email is sent', MAILS == [] and any('Reviewed its own rules after 20 finished trades' in e['text'] for e in rec['log']), [e['text'][:60] for e in rec['log']])
+s, rec = run(t0); check('with its emails switched off a review is still done and listed, but no email is sent', MAILS == [] and any('Progress after 20 finished trades: the last 20 averaged +0.00% a trade (+$0.00, 10 up), its first batch, and not up.' in e['text'] and 'no rule was changed' in e['text'] for e in rec['log']) and not any('Reviewed its own rules' in e['text'] for e in rec['log']), [e['text'][:60] for e in rec['log']])
 PRICES.clear(); NEWS.clear(); MODEL['answer'] = None; SNAP['3-100'] = rows(); D.t.clear()
 
 # --- your own loss limit and gain mark; what its finished trades have made in all
@@ -835,4 +835,49 @@ check('the record is split by it once such holdings are sold', bands == {'under 
 old_trade = dict(rec['history'][0]); old_trade.pop('above'); check('a trade from before this was recorded is left out of that split, and nothing breaks', m.scorecard([old_trade])['groups']['above'] == [] and 'All 1 closed trades' in m.memory_text(m.scorecard([old_trade]), None))
 check('once a band has enough trades the AI model is told how it did', '- more than 50% above it: 8 trades, average +30.0%' in m.memory_text(m.scorecard([dict(rec['history'][2])] * 8), None))
 PRICES.clear(); SNAP['3-100'] = rows(); MODEL['prompts'].clear()
+
+# --- progress, 20 finished trades at a time: better than the batch before, or not; if not, it looks into why and acts within its own rules
+m.datetime = clock
+def T20(pcts, **over): return [dict(dict(risk=3, pct=p, usd=p * 10, peak=max(p, 0.5), low=min(p, 0.0), rank=2, rsi=50, exit='time', sold=m.iso(t0 + dt.timedelta(hours=i)), label=f'X{i}', screener='3-100'), **over) for i, p in enumerate(pcts)]
+def fresh(history, **state): return {'settings': dict(m.DEFAULTS, enabled=True, risk=3, screeners=['3-100']), 'state': dict({'closedCount': len(history)}, **state), 'log': [], 'history': history}
+r = fresh(T20([1.0] * 12 + [-0.5] * 8) + T20([2.0] * 15 + [-1.0] * 5) + T20([0.5] * 7)); bt = m.batches(r)
+check('finished trades are counted in batches of 20: two complete and one filling', [(b['no'], b['first'], b['last'], b['n'], b['full'], b['up'], b['avg'], b['usd']) for b in bt] == [(1, 1, 20, 20, True, 12, 0.4, 80.0), (2, 21, 40, 20, True, 15, 1.25, 250.0), (3, 41, 47, 7, False, 7, 0.5, 35.0)], bt)
+check('a complete batch is compared with the one before, allowing for chance', bt[1]['prev'] == 0.4 and bt[1]['diff'] == 0.85 and bt[1]['verdict'] == 'better' and 'verdict' not in bt[0] and 'verdict' not in bt[2], bt[1])
+check('a small difference is "about the same", a clear drop is "worse"', m.batches(fresh(T20([1.0, -1.0] * 10) + T20([1.2, -1.0] * 10)))[1]['verdict'] == 'same' and m.batches(fresh(T20([2.0] * 20) + T20([-1.0] * 15 + [1.0] * 5)))[1]['verdict'] == 'worse')
+cut = fresh(T20([1.0] * 20) + T20([2.0] * 20), closedCount=310); cut['history'] = cut['history'][5:]
+check('when old trades have dropped off the record, the batch they belonged to is left out, not shown short', [(b['no'], b['first'], b['n'], b['full']) for b in m.batches(cut)] == [(15, 281, 20, True), (16, 301, 10, False)], m.batches(cut))
+MAILS.clear(); good = fresh(T20([2.0] * 15 + [-1.0] * 5)); notes = m.review_progress(good, t0, model, lambda a, b: MAILS.append((a, b)))
+check('first batch, and up: it reports, carries on as it is, and emails that', len(notes) == 1 and 'Progress after 20 finished trades: the last 20 averaged +1.25% a trade (+$250.00, 15 up), its first batch, and up. It carries on as it is.' == notes[0]['text'] and good['state']['progress']['reports'][-1]['verdict'] == 'first-up' and 'doing better' in MAILS[0][0] and any(l == '- It carries on as it is.' for l in MAILS[0][1]) and (good['state'].get('tune') or {}).get('trial') is None, (notes, MAILS[:1]))
+check('the same batch is not reported twice', m.review_progress(good, t0, model) == [] and len(good['state']['progress']['reports']) == 1)
+# no better than the batch before: it looks into why, and tries the most promising change even under the usual bar
+MODEL['answer'] = {'pick': 2, 'reason': 'more trades behind the loss limit'}; MODEL['prompts'].clear(); MAILS.clear()
+flat = fresh(T20([1.0, -1.0] * 10) + T20([6.0] * 2 + [-6.0] * 4 + [0.3] * 14, exit='stop'), ); 
+for t in flat['history'][20:26]: t.update(peak=9.5 if t['pct'] > 0 else 0.5, low=-6.0 if t['pct'] < 0 else 0.0)
+notes = m.review_progress(flat, t0, model, lambda a, b: MAILS.append((a, b))); rep = flat['state']['progress']['reports'][-1]; tr = flat['state']['tune']['trial']
+check('about the same as before: it says so, says what stands out, and starts a trial of a change the AI model chose from its candidates', rep['verdict'] == 'same' and any('Trades sold at the loss limit: 20 of the 20' in f for f in rep['findings']) and tr is not None and 'It started a trial:' in rep['actions'][-1] and 'The AI model chose it from' in rep['actions'][-1] and 'more trades behind the loss limit' in rep['actions'][-1] and flat['state']['tune']['mark'] == 40, (rep, tr))
+ask = [p for p in MODEL['prompts'] if 'Candidate changes' in p['user']][-1]
+check('the AI model is given the batch, what stands out and a numbered list to pick from; it cannot invent a change', 'about the same as the 20 before' in ask['user'] and '1. ' in ask['user'] and '2. ' in ask['user'] and tr['param'] in m.TUNABLE and m.bounded(tr['param'], tr['new']) == tr['new'])
+check('the email says it looked into why, with what it found and what it did', 'no better: it looked into why' in MAILS[0][0] and 'WHAT STANDS OUT IN THOSE TRADES' in MAILS[0][1] and 'WHAT IT DID' in MAILS[0][1] and any(l.startswith('- It started a trial:') for l in MAILS[0][1]))
+check('the ordinary review does not then start a second change', m.review_tuning(flat, t0) == [] and flat['state']['tune']['trial'] == tr)
+MODEL['answer'] = {'pick': 99, 'reason': 'x'}; wild = fresh(T20([1.0, -1.0] * 10) + T20([6.0] * 2 + [-6.0] * 4 + [0.3] * 14, exit='stop'))
+for t in wild['history'][20:26]: t.update(peak=9.5 if t['pct'] > 0 else 0.5, low=-6.0 if t['pct'] < 0 else 0.0)
+m.review_progress(wild, t0, model); check('an answer that is not on the list is ignored: the first candidate is tried', wild['state']['tune']['trial'] is not None and 'The AI model chose it' not in wild['state']['progress']['reports'][-1]['actions'][-1])
+# clearly worse after a change it had kept: the change is put back
+MODEL['answer'] = None; worse = fresh(T20([2.0] * 20) + T20([-1.0] * 15 + [1.0] * 5, exit='time'))
+worse['state']['tune'] = {'values': {'3': {'take': 9.0}}, 'trial': None, 'past': [{'id': 1, 'risk': 3, 'param': 'take', 'old': 18, 'new': 9.0, 'verdict': 'kept', 'since': m.iso(t0 - dt.timedelta(days=9)), 'ended': m.iso(t0 - dt.timedelta(days=1))}], 'mark': 20, 'seq': 1}
+notes = m.review_progress(worse, t0, model); rep = worse['state']['progress']['reports'][-1]
+check('clearly worse since a change it had kept: the change is put back, and it says so', rep['verdict'] == 'worse' and m.rules_for(worse['settings'], worse['state'])['take'] == 18 and 'It put back a change it had kept (sell at +9%): the 20 trades since did clearly worse. The level\'s own rule applies again: sell at +18%.' in rep['actions'][0] and worse['state']['tune']['past'][0].get('undone'), rep)
+off = fresh(T20([2.0] * 20) + T20([-1.0] * 20)); off['settings']['selfTune'] = False; m.review_progress(off, t0, model)
+check('with its own trials switched off it reports and changes nothing', off['state']['progress']['reports'][-1]['actions'] == ['"Try changes to its own rules" is switched off under Settings, so nothing was changed.'] and (off['state'].get('tune') or {}).get('trial') is None)
+busy = fresh(T20([2.0] * 20) + T20([-1.0] * 20)); busy['state']['tune'] = {'values': {}, 'trial': {'id': 3, 'risk': 3, 'param': 'stop', 'old': -10, 'new': -5.0, 'since': m.iso(t0)}, 'past': [], 'mark': 20, 'seq': 3}; m.review_progress(busy, t0, model)
+check('a trial already running is left to finish', busy['state']['progress']['reports'][-1]['actions'] == ['A trial of one of its rules is already running; it is left to finish.'] and busy['state']['tune']['trial']['id'] == 3)
+pub = m.public(good, t0)
+check('the dashboard gets the batches and the reports', pub['progress']['batch'] == 20 and len(pub['progress']['batches']) == 1 and pub['progress']['reports'][0]['actions'] == ['It carries on as it is.'])
+# the budget is put right wherever it is met
+D.t.clear(); m.datetime = at(sun); rec = m.load_item(U); rec['settings'].update(enabled=True, risk=5, budgetUsd=200000.0, screeners=['7-1']); rec['state']['startedAt'] = m.iso(sun); m.save_item(U, rec)
+code_, b = call(action='get', userId=U)
+check('a budget saved before the limit existed is put right as soon as the page is opened, with a line saying why', b['settings']['budgetUsd'] == 100000.0 and m.load_item(U)['settings']['budgetUsd'] == 100000.0 and b['needs'] == [] and any(e['text'] == 'The budget was set to $100,000: that is all the practice money there is ($100,000 of cash and $0 it has invested).' for e in b['log']), (b['settings']['budgetUsd'], b['needs']))
+n_lines = len(b['log']); code_, b = call(action='get', userId=U); check('and only once', len(b['log']) == n_lines)
+rec = m.load_item(U); rec['settings']['budgetUsd'] = 200000.0; m.save_item(U, rec); m.lambda_handler({'source': 'aws.events'}, None); m.datetime = clock
+check('a scheduled check-in never works from a budget larger than the practice money either', m.load_item(U)['settings']['budgetUsd'] == 100000.0 and all(h['costUsd'] <= 25000.01 for h in portfolio()['holdings']), [h['costUsd'] for h in (portfolio() or {}).get('holdings', [])])
 print('ALL PASS' if ok else 'SOME FAILED')
