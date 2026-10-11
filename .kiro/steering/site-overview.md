@@ -330,6 +330,12 @@ line by line. What was wrong, and what it does now:
   that the Oct 9 pass had missed); volume is compared with the 20-day average the score uses (a line labelled "20-day
   average" printed the year's); while a session is still open its part-day volume is left out of the score
   (`partial_day`; it read "Low Volume: -3" every morning); "Liquidity Crisis" is "Low Liquidity"; filler lines removed.
+- **Times in the visitor's own zone** (the owner noticed: the latest article read "1:31 PM UTC" in the report and
+  "8:31 PM GMT+7" on the share's stock page). The report took the page's own text, which is UTC until the page's script
+  (`js/timezone-converter.js`) rewrites it in the browser. It now reads the article's `data-timestamp` and writes it in
+  the visitor's zone, in that script's own format (`local_news_date`), from the `timezone_offset` the analysis page and
+  the dashboard already send; with no offset it stays as the page has it. "Analysis Generated" names its zone
+  (`zone_label`: "(GMT+7)"; with no offset the report's time is five hours behind UTC, as before, and now says so).
 - **The chart** (`draw_chart`) is drawn from the very prices the report scored, sent to it by the report with its
   support and resistance (`series`, `currency`, `support`, `resistance` in the request), so picture and text cannot
   differ; asked by itself it fetches its own with the same rules. Averages and RSI start when they have their days (they
@@ -345,17 +351,17 @@ line by line. What was wrong, and what it does now:
   What changed is kept as the scripts that made the change: `check-tools/report/changes-2026-10-11/` (run in order
   against the copies in the rollback zips they rebuild the live code exactly). Tests:
   `python3 check-tools/report/report_test.py <the file from ~/VSCODE/backup/stockiq-option-1-1-custom-analysis_before_report_20261011.zip> lambda-sync/stockiq-option-1-1-custom-analysis/lambda_function2.py`
-  (79 checks: the old code and the new on the same saved prices, `--show SYMBOL` prints a whole report) and
+  (88 checks: the old code and the new on the same saved prices, `--show SYMBOL` prints a whole report) and
   `python3 check-tools/report/chart_test.py lambda-sync/stockiq-chart-generator/lambda_function_simple.py lambda-sync/stockiq-option-1-1-custom-analysis/lambda_function2.py`
   (29 checks). A live report without saving anything: POST `{"symbols":["BHP.AX"],"userId":"nobody-deploy-check@example.com","skipHistorySave":true}`
   to the function's address (with no `userId` it is treated as a background run and **saved**).
-- **Live** (13:29 UTC, 11 Oct 2026): `stockiq-option-1-1-custom-analysis` `cPDWynX/4N+25Ec/+jot60nlhFWq1aeZ8wH/ozEqKps=`,
+- **Live** (13:34 UTC, 11 Oct 2026): `stockiq-option-1-1-custom-analysis` `E906kJUM9eqAkd/JMlFFrIXjOsRXKKk6KDe8ib/h5t0=`,
   `stockiq-chart-generator` `OIDrZ2W9G3lJ2sKarnoT4c7RvoLh1ApDX43NWjR72z4=`, both equal to their mirrors. Checked with
   the live report for AAPL, BHP.AX, IMB.L, 7203.T, SHOP.TO and SPY, through the page's own code (`page_run.js 1 custom`),
   and by looking at the live chart at desktop and phone width on light and dark. **Not checked:** the analysis page
   itself in a browser, a real phone, the dashboard's "Run in Background" for a single stock.
   Rollback zips, in order: `~/VSCODE/backup/stockiq-chart-generator_before_report_20261011.zip`,
-  `stockiq-option-1-1-custom-analysis_before_report_…`, `…_before_figures_…`, `…_before_source_…`.
+  `stockiq-option-1-1-custom-analysis_before_report_…`, `…_before_figures_…`, `…_before_source_…`, `…_before_newstime_…`.
 - **Left as it is:** the first line still says "(REAL-TIME DATA)", as every screener's does (one wording decision for
   the whole site); MACD still scores +8 or -8 on its sign and RSI in steps at 30 / 40 / 60 / 70; valuation is counted
   twice for a share with a high P/E and a high price-to-book; the Finnhub call is still made for shares it never has;
@@ -1783,8 +1789,8 @@ left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line ch
 - `deploy-to-s3.sh` carries the rules for how long a browser may keep a copy (section 5, step 8); the first daily run with
   it is Monday 12 Oct: look at its log once (section 12, "After the daily run").
 - The single-stock report and its chart (section 7, "The single-stock report"): `stockiq-option-1-1-custom-analysis`
-  `cPDWynX/4N+25Ec/+jot60nlhFWq1aeZ8wH/ozEqKps=`, `stockiq-chart-generator` `OIDrZ2W9G3lJ2sKarnoT4c7RvoLh1ApDX43NWjR72z4=`,
-  both equal to their mirrors; `stock_metrics.py` sha256 starts `5c034782379b`; tests 79 report, 29 chart.
+  `E906kJUM9eqAkd/JMlFFrIXjOsRXKKk6KDe8ib/h5t0=`, `stockiq-chart-generator` `OIDrZ2W9G3lJ2sKarnoT4c7RvoLh1ApDX43NWjR72z4=`,
+  both equal to their mirrors; `stock_metrics.py` sha256 starts `5c034782379b`; tests 88 report, 29 chart.
 - Crypto: the 54 `stockiq-option-7-1-worker-N` all `NmXC9dcsA6p5tXJl+u6VZIfdsrvM3ERN/DmMSQ9zalI=`, the orchestrator
   `Tyyx+Pb2l+sy7avfCncwduEtmFtYn6Lws+5g6dj9Kc0=`, both equal to their mirrors (MACD fix of 11 Oct, section 8b).
 - Share-screener workers: all 669 show `CodeSha256` `q9ZX/UvTBcszKxRPR9lvJw9UpyfWrB5sOB3pDWccm6c=` (`workers/live.txt`), built from `workers/` in git.
@@ -2580,4 +2586,5 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     with clean lines, the 200-day average, no background and lettering that grows on a phone. Three deploys with dry
     runs (13:20, 13:27, 13:28 UTC); `stock_metrics.py` follows; tests kept in `check-tools/report/`. **Lesson: read the
     live output a second time after a deploy: the third deploy fixed a wrong source label that only a repeat report from
-    a warm function showed.**
+    a warm function showed.** A fourth (13:34 UTC), at the owner's word: the latest article's time in the visitor's own
+    zone, as the stock pages show it, and the zone named beside the report's own time.

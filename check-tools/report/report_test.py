@@ -60,6 +60,10 @@ def fake_urlopen(req, timeout=None):
     if 'finnhub.io' in url:
         symbol = urllib.parse.parse_qs(urllib.parse.urlparse(url).query).get('symbol', [''])[0]
         return Answer({'metric': FINNHUB[symbol]} if symbol in FINNHUB else {})
+    if url.endswith('/stocks/CRWD.html'):          # a stock page with one article, as the site writes it (the time is UTC)
+        return Answer(b'<html><!-- NEWS_SECTION_START --><div><a href="https://example.com/a"><strong>CrowdStrike Reports Results</strong></a>'
+                      b'<p style="margin: 5px 0;" data-timestamp="2026-10-08T13:31:00+00:00" class="article-date">Thu, October 8, 2026 at 1:31 PM UTC 4 min read</p>'
+                      b'<p>The company reported its quarterly results.</p></div><!-- NEWS_SECTION_END --></html>')
     raise urllib.error.HTTPError(url, 404, 'not found', None, None)
 
 class FakeS3:
@@ -87,11 +91,11 @@ real_open, real_sleep = urllib.request.urlopen, time.sleep
 urllib.request.urlopen = fake_urlopen; time.sleep = lambda s: None
 old = load('old_report', sys.argv[1]); new = load('new_report', sys.argv[2])
 
-def run(mod, symbol):
+def run(mod, symbol, offset=None):
     mod._api_cache.clear()
     if hasattr(mod, '_site_figures') and not state.get('keep_file'): mod._site_figures.update(figures=None, at=0)
     with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
-        return mod.analyze_stock_comprehensive_enhanced(symbol)
+        return mod.analyze_stock_comprehensive_enhanced(symbol, offset)
 text = lambda r: r['comprehensive_analysis']
 points = lambda r: [int(m.group(1)) for b in r['score_breakdown'] for m in [re.search(r': ([+-]\d+)', b)] if m]
 
@@ -191,8 +195,21 @@ bars, facts = new.bars_from_chart(c, now=last + 3600); bars2, facts2 = new.bars_
 check('open session: seen as a part of a day', facts['partial_day'] is True and facts2['partial_day'] is False, (facts, facts2))
 check('one bar a day on the ASX answer', len(new.bars_from_chart(chart_for('BHP.AX'))[0]) == len(chart_for('BHP.AX')['timestamp']) - 1)
 
+print('== times in the visitor\'s own zone')
+news_line = lambda r: next((l.strip() for l in text(r).split('\n') if 'min read' in l), '-')
+made_line = lambda r: next((l.strip() for l in text(r).split('\n') if 'Analysis Generated' in l), '-')
+check('the old code printed the page\'s UTC time whatever the visitor\'s zone', news_line(run(old, 'CRWD', 7)) == 'Thu, October 8, 2026 at 1:31 PM UTC 4 min read', news_line(run(old, 'CRWD', 7)))
+check('seven hours ahead: the article\'s time as the stock page shows it there', news_line(run(new, 'CRWD', 7)) == 'Thu, October 8, 2026 at 8:31 PM GMT+7 4 min read', news_line(run(new, 'CRWD', 7)))
+check('eleven hours ahead: the next day', news_line(run(new, 'CRWD', 11)) == 'Fri, October 9, 2026 at 12:31 AM GMT+11 4 min read', news_line(run(new, 'CRWD', 11)))
+check('four hours behind', news_line(run(new, 'CRWD', -4)) == 'Thu, October 8, 2026 at 9:31 AM GMT-4 4 min read', news_line(run(new, 'CRWD', -4)))
+check('a half-hour zone', news_line(run(new, 'CRWD', 5.5)) == 'Thu, October 8, 2026 at 7:01 PM GMT+5:30 4 min read', news_line(run(new, 'CRWD', 5.5)))
+check('UTC itself', news_line(run(new, 'CRWD', 0)) == 'Thu, October 8, 2026 at 1:31 PM GMT+0 4 min read', news_line(run(new, 'CRWD', 0)))
+check('no zone sent: the time as the page has it', news_line(run(new, 'CRWD')) == 'Thu, October 8, 2026 at 1:31 PM UTC 4 min read', news_line(run(new, 'CRWD')))
+check('a zone that cannot be: the time as the page has it', new.local_news_date({'date': 'x UTC', 'timestamp': '2026-10-08T13:31:00+00:00'}, 99) == 'x UTC' and new.local_news_date({'date': 'x UTC', 'timestamp': 'rubbish'}, 7) == 'x UTC')
+check('the report\'s own time names its zone', made_line(run(new, 'CRWD', 7)).endswith('(GMT+7)') and made_line(run(new, 'CRWD')).endswith('(GMT-5)') and made_line(run(new, 'CRWD', -3.5)).endswith('(GMT-3:30)'), (made_line(run(new, 'CRWD', 7)), made_line(run(new, 'CRWD'))))
+
 print('== what the chart function is sent')
-p = state['chart_payloads'][-1]
+e = run(new, 'ETFX'); p = state['chart_payloads'][-1]
 check('the chart function is sent the report\'s own bars, currency and levels', p.get('symbol') == 'ETFX' and len(p.get('series', {}).get('c', [])) == len(e and new.bars_from_chart(chart_for('ETFX'))[0]) and p.get('currency') == 'USD' and abs(p.get('support') - e['support']) < 1e-9 and abs(p.get('resistance') - e['resistance']) < 1e-9, {k: (v if k != 'series' else len(v['c'])) for k, v in p.items()})
 state['chart_payloads'].clear(); run(old, 'CRWD')
 check('(the live code sends the chart function the symbol only)', set(state['chart_payloads'][-1]) == {'symbol', 'return_type'}, state['chart_payloads'][-1:])
