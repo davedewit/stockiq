@@ -5,7 +5,7 @@ const dash = fs.readFileSync(process.env.DASH || '/Users/dave/VSCODE/website/das
 const grab = (start, end) => dash.slice(dash.indexOf(start), dash.indexOf(end, dash.indexOf(start)));
 const code = grab('function parseCryptoTickers', 'async function trackPerformance(');
 const [label, file, when] = process.argv.slice(2);
-let report = JSON.parse(fs.readFileSync(file, 'utf8')); report = report.report || report.text;
+let report = JSON.parse(fs.readFileSync(file, 'utf8')); report = report.report || report.text || (report.save && report.save.report);      // a page_*.json, an orchestrator answer, or a res_*.json from run_all.py
 const priceCalls = [], saved = [];
 const realFetch = fetch;
 async function fakeFetch(url, opts = {}) {

@@ -1,7 +1,8 @@
-import importlib.util, sys, json, io, contextlib, urllib.request, time, collections, re
+import importlib.util, sys, os, json, io, contextlib, urllib.request, time, collections, re
 real = urllib.request.urlopen
 SAVE_HOST = 'nwdjnlcbtj34ywy6sgawmwhcx40ologt'
-spec = importlib.util.spec_from_file_location('coord', '/Users/dave/VSCODE/stockiq/lambda-sync/stockiq-screener-coordinator/lambda_function.py')
+# COORD=<file> runs a staged copy of the coordinator instead of the mirror's
+spec = importlib.util.spec_from_file_location('coord', os.environ.get('COORD') or '/Users/dave/VSCODE/stockiq/lambda-sync/stockiq-screener-coordinator/lambda_function.py')
 m = importlib.util.module_from_spec(spec)
 with contextlib.redirect_stdout(io.StringIO()): spec.loader.exec_module(m)
 class Resp:
