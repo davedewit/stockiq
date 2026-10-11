@@ -623,7 +623,7 @@ show. Settings holds the first five items below, Activity the last four:
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=13` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=21`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=22`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
@@ -949,7 +949,8 @@ not sure whether its improvements needed him to "push" them. They do not, and th
   carrying `data-ap-until`, so nothing is redrawn and typing is not disturbed; `skew` is the
   server's clock minus the browser's (from `now` in each answer), so a wrong computer clock does not
   spoil a countdown. `countLine`, `needsHtml`, `comingHtml` (four rows shown, the rest folded),
-  `mailHtml`. An answer from an older function (none of these fields) shows as before.
+  `mailHtml`. `markTab` puts a ⚠ on the dashboard's own "AI autopilot" tab button while `needs` is
+  not empty, so it is seen from the Reports or Practice portfolio tab too. An answer from an older function (none of these fields) shows as before.
 - The review email's own description of the rules was the last place with the wording the owner had
   misread as a selling price; it now follows the wording rule above.
 - Not done: the same kind of box for the rest of the site (the daily deploy runs on the owner's Mac
@@ -1019,7 +1020,7 @@ not sure whether its improvements needed him to "push" them. They do not, and th
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
    python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 277 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 134 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 136 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 66 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
@@ -1567,4 +1568,5 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     number of finished trades, a box for what only the owner can put right (a missed or failed
     check-in, a refused email, too little practice money, no screener), the last email's status and a
     "Send me a test email" link. Email set-up checked on AWS and one test accepted. Rollback zip:
-    `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_next_20261011.zip`. Live: `practice-autopilot.js?v=21`.
+    `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_next_20261011.zip`. The dashboard's AI autopilot tab
+    carries a ⚠ while something needs the owner. Live: `practice-autopilot.js?v=22`.
