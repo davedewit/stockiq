@@ -1821,7 +1821,26 @@ apostrophe must allow for it; a test of an action that depends on the day (tradi
 must set the function's clock (`m.datetime = at(when)` in `ai_trader_test.py`), or it passes on
 weekdays and fails at the weekend.
 
-### Start here when resuming (state at 13:10 UTC on 11 Oct 2026: the full sweep, the replay, real costs and the bar, then one code base for the share screeners)
+### Start here when resuming (state at 14:40 UTC on 11 Oct 2026: the full sweep, the replay, real costs and the bar, one code base for the share screeners, the report writers)
+
+**FIRST THING IN THE NEXT SESSION: tell the owner how Monday 12 Oct went, before anything else** (his words on closing,
+11 Oct: "next time i open a session… update me on how monday went and anything else"). Lead with the result, in plain
+words. What to look at, all read-only:
+1. **The daily deploy** (11:00 on this Mac's clock, which was UTC+7: 04:00 UTC): `grep -a -E "Pages written|Indexable|No price
+   data|Sync complete|pushed|could not|failed|All done|Skipping git" ~/stockiq-daily.log`. It is the first run with the new
+   copy-keeping rules (section 5, step 8). Its GitHub push will have been skipped (a deploy by hand reset the 23-hour marker
+   at 12:16 UTC on Sunday), so look for an unpushed "Auto-update" commit: `git status -sb` in both repos.
+2. **The autopilot**: `aws logs tail /aws/lambda/stockiq-ai-trader --since 36h --profile default --region us-east-1 | grep -i -E
+   "check-in failed|shared learning|not worked out|not sent"`, then the owner's record (the page's read-only `get`): was the
+   Nikkei share 4307.T sold when Tokyo opened (00:05 UTC); any buys and sales; the first shared notes (due at 5 finished
+   trades). **At hand-over his share markets were set by hand to 0% of the budget**, so share buys only happen if he changed that.
+3. **The share screeners after a real trading day**: `python3 check-tools/workers.py` (13 groups "one", same code);
+   `cd check-tools && node page_run.js 4 ftse100` once London has closed (15:30 UTC) and read the first prices against a
+   quote: they must be that day's (the fix for an empty latest session has never been seen live); `node page_run.js 5 200`
+   during or after the ASX session: the 24-hour changes must not all be 0.00.
+4. **The report formats on real, moving prices**: `node tracker_run.js` on a `page_*.json` made an hour or more earlier (FTSE,
+   ASX, Nikkei): the moves must be small percentages, not 0.00 and not thousands (a misread pence figure or comma).
+5. Anything in section 11 the owner should decide (the public repositories first).
 
 **The job that was next is done (11 Oct 2026, evening): one code base for the share screeners.** All 669 share-screener
 workers run the one package built from `stockiq/workers/` (section 8b, "The worker groups": what changed, how it was proved
