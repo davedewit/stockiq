@@ -651,7 +651,7 @@ show. Settings holds the first five items below, Activity the last five:
   of the budget, the first check-in after each closed market opens, the latest each holding is
   kept; then what goes by the number of finished trades (its own review, the AI model's notes).
   A sentence under it says that reviews and trials happen by themselves and nothing has to be pushed.
-- **How it is doing**: what it holds now and when each will be sold, with the AI model's latest
+- **How it is doing** (its folded "Breakdown" table was laid out afresh on 11 Oct after the owner could not tell a group heading from the rows under it: each heading is a band of its own (`ap-bd-head`), its rows are indented, and the "Against an index fund" column is shown only when it differs from the average for some group; styles are the `.ap-bd` rules): what it holds now and when each will be sold, with the AI model's latest
   review of it; the last 30 days in dollars and as a share of the budget; finished trades (up /
   down, average); a folded breakdown; notes the AI model wrote from the record.
 - **Progress, 20 finished trades at a time** (added 11 Oct): a table with a row per batch of 20
@@ -669,7 +669,7 @@ show. Settings holds the first five items below, Activity the last five:
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=13` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=28`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=29`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
@@ -1155,7 +1155,7 @@ not sure whether its improvements needed him to "push" them. They do not, and th
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
    python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 348 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 169 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 172 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 66 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
@@ -1211,10 +1211,10 @@ weekdays and fails at the weekend.
 **What is live, and how to confirm nothing has moved since:**
 - Lambda `stockiq-ai-trader`: `CodeSha256` `YTXPRUhy3GpE1fLUWpaCqE5tDrBaKHTgqbpHdVtoy6k=`, equal to
   `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,525 lines).
-- Website: `practice-autopilot.js?v=28` (sha256 starts `9b51554782cf`), `practice-portfolio.js?v=13`
-  (`ad1c1372002e`), `dashboard.html` (`a1dbcd8b81e8`). Live files were compared byte for byte.
+- Website: `practice-autopilot.js?v=29` (sha256 starts `6ca787f64194`), `practice-portfolio.js?v=13`
+  (`ad1c1372002e`), `dashboard.html` (`fb321379e555`). Live files were compared byte for byte.
 - Both repos clean and pushed; **no `check-tools/pending-*` folder is left** (every package was
-  deployed and removed). Tests on the live files: 348 function, 169 panel, 66 portfolio, the
+  deployed and removed). Tests on the live files: 348 function, 172 panel, 66 portfolio, the
   panel-versus-function comparison clean (3,780 budget combinations, 2,915 spreads over markets).
 - Rollback copies of the function, one per deploy, in `~/VSCODE/backup/`:
   `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order: 10 Oct `v2, fast, panel,
@@ -1816,5 +1816,6 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     visit to the dashboard and back on at the next visit; check-ins of several accounts side by
     side; a daily limit on AI calls per account. The autopilot itself is still open to the two
     listed accounts only. Function only. Rollback zip: `…_before_autopilot_idle_20261011.zip`.
+  - The breakdown table under "How it is doing" laid out more clearly (website only, `practice-autopilot.js?v=29`).
   - Notes: section 8c ends with "Start here when resuming"; this session was closed there because
     its context had grown too large. Everything known is in these files.
