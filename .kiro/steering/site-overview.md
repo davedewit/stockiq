@@ -810,8 +810,10 @@ The owner asked for the "junky" items to be looked at: "Choose from presets" and
 
 ### Crypto
 
-- **The 54 crypto workers ignore the coin list they are sent in batch mode** and use a list
-  built into their code. So `stockiq-option-7-1-orchestrator` holds the list itself (`COINS`:
+- **The orchestrator holds the coin list; the 54 workers analyse what they are sent.** (Until 11 Oct 2026 a
+  worker called with no coin fell back to a 540-coin CoinSpot list written into its own code; that mode, its
+  report writer and its database reads were removed that day, and a worker now answers "nothing to analyse".)
+  `stockiq-option-7-1-orchestrator` holds the list (`COINS`:
   540 pairs of `(symbol shown, Yahoo ticker without -USD)`) and sends it out itself: **ten coins a
   call** (`{"coin_list": [<tickers>]}`, a mode added to the workers on 11 Oct 2026 that analyses each
   coin exactly as single-coin mode does and answers `results: [{ticker, coin}]`), 54 batches, one to
@@ -875,6 +877,28 @@ whether the top 10 is even in the right order (the 11th coin had the same score 
   its coin trades before and after.
 - **Not touched:** `stockiq-option-7-2-worker-1` (single-coin analysis on the page) has other code than the 54; whether its
   MACD has the same fault was not checked. The rules themselves (what earns points) were not changed.
+- **The worker's code reviewed (11 Oct 2026, evening; the owner: "i built it with an old AI version, its been a long time
+  since it was reviewed").** Fixed, with no score changed (`check-tools/crypto/worker_test.py`: on the price source's
+  recorded answers for ten coins every figure is the same before and after): **one request per coin where there were
+  two** (30 days for the changes, then 90 days for everything else; the second holds all of the first, and the two
+  could even disagree on the live price); **a day's high, low, close and volume stay together** (each list was
+  filtered for missing values by itself, so one gap shifted it against the others); the unused old mode and everything
+  only it used are gone (1,134 lines to 689; the database library with them, so a cold start is quicker). All 54:
+  `DaTSp0Aqxq7x8iATvdBo2w4YUy1Eccd3azPN44xFhow=`. Rollback: `~/VSCODE/backup/stockiq-option-7-1-worker_before_clean_20261011.zip`.
+- **Found in that review and NOT changed, because each would change scores (the owner's decision; they would also
+  start the top-10 log afresh a third time):**
+  1. **The ranking depends on the time of day.** Daily prices are UTC days and the last one is still running: "24h
+     change" is really the change since 00:00 UTC (near zero for every coin just after midnight UTC), and today's
+     part-day volume is compared with full days ("volume surge +2" can hardly fire in the morning, UTC). Up to about
+     five points of a score that cuts its top 10 at +6 to +11. A fix needs hourly prices (one more request per coin, as
+     many as before the clean-up) or a projected day's volume.
+  2. **RSI is a plain average of the last 14 days** here; the rest of the site uses Wilder's (the screeners, the
+     single-stock report, its chart, the trading signals). The figure differs from charting sites.
+  3. The score rewards opposite things at once (oversold, and breaking out upwards); a "large cap" point goes to ten
+     names written into the code (one of them, MATIC, has since been renamed); nothing in it has been tested against
+     what coins did next (the entry log is that test, and it needs weeks).
+  4. Its descriptive strings ("EXTREMELY OVERSOLD - Strong buy signal") still carry advice wording; the page shows only
+     the part before the dash, so none of it is seen, but any new place that prints them must do the same.
 - Deployed with a packaged script to all 54 workers (one zip, the same `CodeSha256` on each: `NmXC9dcsA6p5…`) and the
   orchestrator (`Tyyx+Pb2l+sy…`). Rollback zips: `~/VSCODE/backup/stockiq-option-7-1-worker_before_macd_20261011.zip`
   (the same to all 54) and `stockiq-option-7-1-orchestrator_before_macd_20261011.zip`.
@@ -2727,4 +2751,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     The 54 workers now take ten coins a call and the orchestrator sends 54 batches: the same 536 coins and the same
     top 10 before and after, from a tenth of the calls. Rollback zips: `~/VSCODE/backup/stockiq-option-7-1-worker_before_batch_20261011.zip`
     (the same to all 54) and `stockiq-option-7-1-orchestrator_before_batch_20261011.zip`.
+  - **The crypto worker's code reviewed** (section 8b, "How a coin is scored", last two items): one request to the price
+    source per coin where there were two, a day's figures kept together, the unused old mode and its 540-coin list
+    removed; no score changed (proved on recorded answers). Four things found that would change scores were written
+    down and left for the owner: the ranking's dependence on the time of day, the RSI method, the score's design and
+    leftover advice wording in strings nobody sees.
 

@@ -70,7 +70,7 @@ more if the list is long) and returns 48 data fields per stock: no report text. 
 | `stockiq-asia-5-5-worker-1..21` | 21 | **Japan Nikkei 225** | 225 |
 | `stockiq-europe-4-1-worker-1..10` | 10 | UK FTSE 100 | 100 |
 | `stockiq-option-3-1-worker` (10), `3-2` (100), `3-4` (150), `3-5` (100), `3-6` (200), `3-7` (10), `3-8` (3) | ~570 | S&P 100, S&P 400+600, S&P 1500, Russell 1000 (its first 50 also serve S&P 500), Russell 2000, NASDAQ 100, Dow 30 | see `site-overview.md` 8b |
-| `stockiq-option-7-1-worker-1..54` | 54 | Crypto (since 11 Oct 2026 each asks for 90 days of prices so that MACD can be worked out: `site-overview.md` 8b). Batch mode **ignores the coins it is sent**; the orchestrator calls single-coin mode (`{"single_coin": "<Yahoo ticker>"}`) once per coin | 540 coins |
+| `stockiq-option-7-1-worker-1..54` | 54 | Crypto (since 11 Oct 2026 each asks for 90 days of prices so that MACD can be worked out: `site-overview.md` 8b). Takes `{"coin_list": [...]}` (ten coins a call from the orchestrator) or `{"single_coin": "..."}`; with neither it answers that there is nothing to analyse (the old built-in list is gone). Older note: batch mode **ignores the coins it is sent**; the orchestrator calls single-coin mode (`{"single_coin": "<Yahoo ticker>"}`) once per coin | 540 coins |
 | `stockiq-option-7-2-worker-1` | 1 | Single-coin analysis from the page | – |
 
 **Coordinator key format:** `{option}-{subOption}` e.g. `4-200` (ASX 200), `5-nikkei225` (Japan), `5-ftse100` (UK).
