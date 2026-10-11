@@ -1142,9 +1142,10 @@ own results" (those routines are the same; they now run once, on everyone's trad
   check created a record for the deploy test account (switched off; harmless).
 - **Tests:** the last part of `ai_trader_test.py` (17 checks) runs with `CENTRAL` on; the rest set it off at the top so
   that each review is tested on one record. `dashboard_page.py`'s stand-in says learning is shared.
-- **Not yet seen for real:** the first fold of the owner's four trades (his next saved check-in queues them, the scheduled
-  run after that takes them in: look for "shared learning: 4 new finished trades" in the log), a shared note reaching an
-  activity list, and the bell on the logged-in page.
+- **Seen for real (09:10 UTC, 11 Oct):** the scheduled run logged "shared learning: 4 new finished trades, 4 in all from 1
+  accounts, 0 notes": the owner's four trades are in the shared record and the queue is empty again.
+  **Not yet seen for real:** a shared note reaching an activity list (the first comes with the first review, at 20
+  finished trades at a level, or the first notes at 5 more trades), and the bell on the logged-in pages.
 - Not changed: the AI chat's `DASHBOARD_GUIDE` does not mention the bell or shared learning yet (the chat is told about
   shared learning through the page's summary line).
 - Rollback zip: `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_central_20261011.zip`. The older function ignores
