@@ -4,7 +4,9 @@ How stockiq.tech works end to end, what is generated vs hand-edited, the current
 known pitfalls, and open ideas. Last full review: 10 Oct 2026 (section 8b holds what the
 9–10 Oct end-to-end test of every screener, signal and crypto path established; **section 8c is
 the dashboard's practice portfolio and AI autopilot, and the routine for working on them**, checked
-name by name and number by number against the code and AWS on 11 Oct 2026).
+name by name and number by number against the code and AWS on 11 Oct 2026; **to resume that work,
+read section 8c from "Start here when resuming"**; section 7b holds the backtests and the factor
+study of the screener score).
 
 Detailed references: `stockiq.md` (AWS resources, Cognito, Lambdas, AI chat),
 `script-reference.md` (every script), `add-new-stocks.md`, `stock-matching-system.md`,
@@ -578,8 +580,10 @@ accounts). Say so when reporting.
 Built 10 Oct 2026 from the owner's idea of "fake money" to see whether the analysis works in his
 favour, then extended the same day into an autopilot that trades it. **Everything here is fake
 money: no real trade is ever placed, and nothing here may ever be connected to real money.** This
-section is written from the code as deployed on 11 Oct 2026 (02:30 UTC), when every code name,
-constant, setting and AWS figure in it was checked against the function, the two scripts and AWS.
+section is written from the code as deployed on 11 Oct 2026 (04:00 UTC). Every code name, constant,
+setting and AWS figure in it was checked against the function, the two scripts and AWS at 02:30 UTC
+that day, and each later change was added as it went live. **A new session starts at "Start here
+when resuming" near the end of this section.**
 Verify against the code before relying on a detail (section 10).
 
 ### What the owner sees on the dashboard
@@ -623,7 +627,7 @@ listing what only the owner can put right) and the buttons "Check in now" / "Sel
 holds" sit at the top; below them the panel is in **two parts, Activity and Settings**, so neither is a long scroll (it opens on Settings until it is switched on with a
 screener, then on Activity; the part last looked at is remembered, `stockiqAutopilotPart`). Both
 parts are always in the page and one is hidden, so settings are read and saved whichever is on
-show. Settings holds the first five items below, Activity the last four:
+show. Settings holds the first five items below, Activity the last five:
 - **Quick set-ups**: "Quick coin trading", "Steady shares", "Shares and coins".
 - **Risk level** slider (Cautious … Adventurous) with a sentence of what the level means, and
   **Your own limits**: two optional fields, "Sell at a loss of __ %" and "Sell at a gain of __ %",
@@ -650,6 +654,11 @@ show. Settings holds the first five items below, Activity the last four:
 - **How it is doing**: what it holds now and when each will be sold, with the AI model's latest
   review of it; the last 30 days in dollars and as a share of the budget; finished trades (up /
   down, average); a folded breakdown; notes the AI model wrote from the record.
+- **Progress, 20 finished trades at a time** (added 11 Oct): a table with a row per batch of 20
+  (trades, dates, how many ended up, average a trade, dollars, "better / worse / about the same"
+  against the 20 before, and what it did about it), newest first, the batch still filling on top;
+  what stood out in the last complete batch can be unfolded. Before the first 20 it says when the
+  first report comes and what happens then.
 - **Improving its own rules**: the rules in force, which are set by the owner, which it changed
   itself ("put it back"), the running trial ("Stop this trial") and earlier trials.
 - **What it has done**: every buy, sell and check-in note, newest first; "Why, and the details" /
@@ -660,7 +669,7 @@ show. Settings holds the first five items below, Activity the last four:
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=13` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=25`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=26`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
@@ -704,7 +713,7 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
 |---|---|---|
 | `enabled` | on / off (default off) | Only for users in `AI_TRADER_USERS` |
 | `risk` | 1–5 (default 3) | The level: see the table below |
-| `budgetUsd` | 100 … the practice money there is (default 10,000) | The most it has invested at once. **It cannot be more than the practice cash plus what the autopilot itself has invested** (`money_of`, sent as `money`: `cash, invested, reach`). On 11 Oct the owner typed $200,000 against $100,000 of fake money and nothing objected; it would have bought one $50,000 holding and stalled. Now the panel says under the field how much there is (`budgetHint`), refuses a larger number ("Not saved: the budget can be at most …"), offers "Set it to $…" (`maxbudget`), and the `save` action sets a larger one to that amount and notes it (the backstop for an older cached script). An older, too-large budget does not block other settings from saving |
+| `budgetUsd` | 100 … the practice money there is (default 10,000) | The most it has invested at once. **It cannot be more than the practice cash plus what the autopilot itself has invested** (`money_of`, sent as `money`: `cash, invested, reach`). On 11 Oct the owner typed $200,000 against $100,000 of fake money and nothing objected; it would have bought one $50,000 holding and stalled. Now the panel says under the field how much there is (`budgetHint`), refuses a larger number ("Not saved: the budget can be at most …"), offers "Set it to $…" (`maxbudget`), and the `save` action sets a larger one to that amount and notes it (the backstop for an older cached script). An older, too-large budget does not block other settings from saving. **And a budget that is too large is put right wherever it is met** (`fit_budget`: when the page is opened (`get`), when settings are saved, at the start of every check-in), with the same line in the activity list: the owner had asked twice why $200,000 was still shown, because his saved figure predated the check. So the "Needs you" item `budget` should now never appear |
 | `periodDays` | 1–90 | "Build up to it over": the budget is released in equal steps over this long. **Not the holding time** (the owner mixed them up twice) |
 | `everyHours` | 0.5, 1, 3, 6, 12, 24 | How often it checks in |
 | `maxHoldDays` | 0.5 h … 60 days, stored in days | The longest it keeps a holding |
@@ -940,6 +949,34 @@ calls out.
   more than one standard error (`trial_figures`); otherwise the rule stays. A change dropped lately
   is not retried for three trials; a trial ends unchanged after 30 days, when the level changes,
   when the owner sets that rule himself, or when he stops it.
+- **Progress, a batch at a time, and what it does when a batch is no better** (11 Oct; the owner:
+  "if its doing well it continues improving as it is, if its doing worse or the same it needs
+  investigating and fixing, ideally i'd prefer AI actively do this").
+  - `batches(record)`: the finished trades in batches of `TUNE_BATCH` (20), numbered from the first
+    trade ever (`closedCount` keeps counting when old trades drop off the 300 remembered; a batch
+    cut off that way is left out). Per batch: `no, first, last, n, full, from, to, up, avg, usd,
+    se`, and for a complete batch after the first `prev, diff, margin, verdict`: **better / worse /
+    same, where "same" means the difference is inside the margin of error of the two averages**.
+  - `review_progress(record, now, model, mail)` runs in `run_user` just before `review_tuning`,
+    once per completed batch (`state.progress.done`). It writes a report (`state.progress.reports`,
+    last 15: `no, at, trades, avg, usd, up, n, verdict, prev, findings, actions`), a line in the
+    activity list ("Progress after 40 finished trades: …") and an email.
+  - **Better (or a first batch that is up): "It carries on as it is."** The ordinary review of
+    its rules (`review_tuning`) still runs on its own count.
+  - **Worse, the same, or a first batch that is not up:** (1) `batch_findings` says what stands out
+    in the batch's own figures (the kinds of sale and the screeners that did worst and best, what
+    holdings did after they were sold); (2) if the verdict is "worse" and a change of its own was
+    kept before this batch began, **that change is put back** (`undone` on the past trial);
+    (3) unless a trial is already running, it starts **a trial of the most promising change to one
+    of its five rules, with a lower bar than usual** (`propose(..., least=0.05)` instead of
+    `TUNE_MIN_GAIN` 0.2), and **the AI model picks which** from up to four numbered candidates (it
+    cannot invent one; an answer off the list is ignored and the first candidate is used);
+    (4) `tune.mark` is set, so the ordinary review does not start a second change. With "Try
+    changes to its own rules" off it reports and changes nothing. The trial still decides whether
+    a change is kept, so nothing is adopted on hindsight.
+  - What it cannot do stays the same: only the five rules in `TUNABLE`, inside their bounds. When
+    nothing in them stands out it says so and points at the settings only the owner can change.
+  - The panel's table is `progressHtml` (`data.progress`: `batch, batches, reports`).
 - **Emails** (`send_mail`, if `emails` is on): one at each review (no change / trial started /
   trial finished) with the record so far and suggestions about settings only the owner can change.
   `aws lambda invoke --function-name stockiq-ai-trader --payload '{"mail_test": true}' …` sends one
@@ -964,7 +1001,7 @@ the average per trade, which the panel shows, never by the share of trades that 
   (when the budget's build-up began; reset when it is switched on or the budget or build-up
   changes), `lastRun`, `lastRunBy`, `open` (remembered buys), `exits`, `rest`, `restSince`,
   `lessons`, `tune` (`values`, `trial`, `past`, `mark`, `seq`, `reviewed`), `watch`, `news`, `seen`, `stay`,
-  `strong`, `ahead`, `aiSell`, `closedCount`, `realizedUsd`, `mail` (what became of the last email:
+  `strong`, `ahead`, `aiSell`, `closedCount`, `realizedUsd`, `progress` (`done`: batches reported, `reports`), `mail` (what became of the last email:
   `t, ok, subject, why`), `fail` (a scheduled check-in that stopped on an error; cleared by the next
   good one), `savedAt` (when the settings last changed).
 - `public()` (every action returns it): `settings, state, log, scorecard, lessons, resting, recent,
@@ -973,7 +1010,7 @@ the average per trade, which the panel shows, never by the share of trades that 
   `coinShare, realizedUsd, month` (`last30`, `before30`), `now, nextCheck, holding, plans` (per
   holding: `sellBy` (the end of its holding time, moved on to its market's next opening), `market,
   closed, opens, stop, take, arm, floor, move, room, tight, mode, trail, peak, trial, view, auto`) and `options` (screeners,
-  check-in and holding-time choices, the level table, `groups`); `split` (per ticked market: `group, holdings, pct, usd, own`); `money`; and `coming`, `needs`, `mail`, `reviewed` (next section). **The panel is drawn from these; change the
+  check-in and holding-time choices, the level table, `groups`); `split` (per ticked market: `group, holdings, pct, usd, own`); `money`; `progress` (`batch, batches, reports`); and `coming`, `needs`, `mail`, `reviewed` (next section). **The panel is drawn from these; change the
   two together.**
 - Other actions: `mailtest` (one test email to the account's own address, at most every 10 minutes), `sellall` (`sell_everything`: only the autopilot's holdings, recorded as sold by
   the owner; holdings of a closed market are kept; its `summary` has `sold`, `skipped`, `closed`) and `tune` (`tune_by_hand`: `op: 'restore', param` puts one rule back to the level's;
@@ -1090,8 +1127,8 @@ not sure whether its improvements needed him to "push" them. They do not, and th
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 305 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 156 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 323 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 162 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 66 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
@@ -1106,7 +1143,7 @@ not sure whether its improvements needed him to "push" them. They do not, and th
    into the test page, step `tabs`). After any edit to `dashboard.html` also check that the
    sections still balance and that every inline script parses (`node --check` on each `<script>`
    block): the logged-in page itself cannot be opened from here, it redirects to Sign In.
-   Steps such as `type,sale,trial,preset,sellall,limits,trailstop,split,cards,pace,listswitch,next,budget,shares,open`) with headless
+   Steps such as `type,sale,trial,preset,sellall,limits,trailstop,split,cards,pace,listswitch,next,budget,shares,progress,open`) with headless
    Chrome; `--dump-dom` for what it printed, `--screenshot` for the look (section 12).
 5. **Try the staged function on a copy of the real record**: read the owner's item from both tables
    (read-only), load it into stand-in storage under another name, run `run_user` / `public` with
@@ -1142,40 +1179,78 @@ apostrophe must allow for it; a test of an action that depends on the day (tradi
 must set the function's clock (`m.datetime = at(when)` in `ai_trader_test.py`), or it passes on
 weekdays and fails at the weekend.
 
-### Where things stood on 11 Oct 2026 (02:30 UTC)
+### Start here when resuming (state at 04:00 UTC on 11 Oct 2026, the end of a two-day session)
 
-- The owner tries settings out a lot, so read his record rather than trust this line. At 02:30 UTC:
-  Balanced, $50,000 built up over 1 day (set by hand), check-ins every 6 hours and holdings kept at
-  most 5 days (both left to the level), trailing stop "protects a gain", all three switches on,
-  screeners ticked: S&P 500, Russell 1000, Russell 2000, NASDAQ 100, Dow 30, ASX 200 and crypto.
-  Because shares are ticked too, coins may take a quarter of the budget ($12,500) at this level.
-  Half an hour later he had moved to Adventurous with a $200,000 budget (hourly check-ins, holdings
-  kept a day): more than the $100,000 of practice money, which the new "Needs you" box points out.
-- It holds a Nikkei share (4307.T, $12,500, bought on a Saturday at Friday's close, before the
-  trading-hours rule covered "Check in now"; nothing happens to it until Tokyo opens, Monday 00:05
-  UTC) and a coin (CKB, $6,250). The Nikkei screener is no longer ticked; the share is still looked after.
-- **Three finished trades, two up, -$152.33 in all (-0.3% of the budget; -$169.68 after typical costs):**
-  WEMIX +0.6% (+$7.91; its score fell below zero, rank 1 → 149). CFX +1.0% (+$12.79; the first real
-  sale by the stop that follows a rising holding: up 6.15% at its best, sold on the way down). ERG
-  -2.8% (-$173.03; **the first real sale by the AI model's review**, six hours after buying: "Rank
-  dropped from 2 to 25, score down from +5.0 to +2.0").
-- **The look-back has filled in its first case, and it went against the stop:** CFX rose a further
-  7.95% in the time after it was sold. One trade proves nothing; it is exactly what the record and
-  the trials of `trail` exist to weigh once there are 20.
-- **A limit that sale showed:** the stop stood at about +2.3% but the sale came at +1.0%, because the
-  price is only seen at check-ins and it fell through between two of them. The autopilot does not
-  watch prices in between. Shorter check-in gaps narrow this; nothing removes it.
-- Seen for real: clean scheduled check-ins on every version (the function's log for the 12 hours to
-  02:10 UTC on 11 Oct has no error), headlines reaching the model, both AI models answering the test
-  question, the stop's sale with its explanation, a sale by the AI review, the look-back, "Check in
-  now" releasing the next step early (two coins bought), the counter of how long a coin has stayed.
-- Not yet seen for real: a "tighten" answer, the larger model being used in a review (`state.strong`
-  was still 0), a coin being held back until it has stayed (only when it checks in every 3 hours or
-  less), "Check in now" or "Sell everything" pressed while a market is closed, a review of its own
-  rules (after 20 finished trades), a trial, the emails that go with them (a set-up email was sent;
-  arrival not confirmed), and the logged-in dashboard itself (all checks used a stand-in server).
-  **Worth checking first in a new session:** the function's log and the owner's record for errors
-  and for the first of each of these, and what happened to 4307.T when Tokyo opened.
+**What is live, and how to confirm nothing has moved since:**
+- Lambda `stockiq-ai-trader`: `CodeSha256` `wd98MVHpFnBcjE8DEm3iwJuCEY3Kpj055CvXMHYz0Z8=`, equal to
+  `lambda-sync/stockiq-ai-trader/lambda_function.py` (about 2,250 lines).
+- Website: `practice-autopilot.js?v=26` (sha256 starts `2909cbf2f5fc`), `practice-portfolio.js?v=13`
+  (`ad1c1372002e`), `dashboard.html` (`50ed32335f86`). Live files were compared byte for byte.
+- Both repos clean and pushed; **no `check-tools/pending-*` folder is left** (every package was
+  deployed and removed). Tests on the live files: 323 function, 162 panel, 66 portfolio, the
+  panel-versus-function comparison clean (3,780 budget combinations, 2,915 spreads over markets).
+- Rollback copies of the function, one per deploy, in `~/VSCODE/backup/`:
+  `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order: 10 Oct `v2, fast, panel,
+  autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
+  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress`.
+- First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and
+  the function's log (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors
+  ("check-in failed", "not worked out", "not sent") and for the firsts listed below.
+
+**The owner's autopilot when the session ended** (he changes settings often: read the record):
+Adventurous, budget $99,941 (set by the function from his $200,000; that is all his practice
+money: $87,442 cash and $12,500 invested), built up over 1 day (by hand), hourly check-ins and
+one-day holds (left to the level), trailing stop "protects a gain", all three switches on,
+screeners S&P 500, Russell 1000, Russell 2000, NASDAQ 100, Dow 30, ASX 200 and crypto, shares of
+the budget all automatic: US shares 2 holdings, Australian shares 1, coins 1 (about $24,985 each).
+It holds one Nikkei share (4307.T, $12,500, bought on a Saturday at Friday's close before the
+trading-hours rule; its screener is no longer ticked; it is sold when Tokyo opens, Monday 00:05
+UTC, its day being long up).
+
+**Its record: four finished trades, two up, -$202.60 (-$232.40 after typical costs).** WEMIX +0.6%
+(+$7.91; score fell below zero). CFX +1.0% (+$12.79; first sale by the following stop; it rose a
+further 7.95% afterwards). ERG -2.8% (-$173.03; first sale by the AI review, rank 2 → 25). CKB
+-0.8% (-$50.27; had been up 2.5%, the stop was passed between two check-ins after the owner
+shortened the check-in gap, which also shortens the stop's distances). Far too few to judge.
+
+**Seen for real:** clean scheduled check-ins on every version; headlines reaching the model; both AI
+models answering the test question; sales by the following stop and by the AI review; the
+look-back; "Check in now" releasing the next step early; a test email accepted by the mail service
+(03:00 UTC 11 Oct); the budget being put right on opening the page (03:59 UTC).
+**Not yet seen for real:** a "tighten" answer; the larger model in a review; a coin held back until
+it has stayed; a buy spread over several markets (share markets were shut all weekend); "Check in
+now" pressed with a market closed; the share split by 52-week low filling; **the first progress
+report (at 20 finished trades), any trial, and their emails**; whether the test email reached the
+owner's inbox; and the logged-in dashboard itself (every check used a stand-in server).
+
+**Limits to remember:** a stop only acts at a check-in (CFX and CKB were both sold below where
+their stop stood); the trading hours know no public holidays; a market's share is a number of whole
+holdings; the practice portfolio takes no trading costs off (the panel shows an after-costs figure).
+
+**What the owner is after, in his words:** "trying to optimise this to always be active ever
+changing and improving", a goal of "close to 70% profit 30% loss", "seamless and straightforward so
+a dummy could figure it all out and not input things that they shouldn't", and "something on the
+site to tell me whats going on". Hold these against section 7b: the share of winning trades comes
+from the selling rule and is not profit; the screener's own factors showed no reliable link with
+what shares did next. Say so plainly each time results come up, and keep judging by dollars and
+the average per trade.
+
+**Open, in the order I would take them:**
+1. Monday: check what happened when Tokyo, Sydney and New York opened (4307.T sold; first buys
+   spread over US shares, Australian shares and coins; the "What happens next" list and the split
+   line reading right against what really happened).
+2. The first progress report at 20 finished trades: read the note, the email and the table.
+3. If the breakdown "By how far above its 52-week low when bought" shows the study's pattern after
+   8 or more trades a band: build a trial of buying shares in that order beside the current one
+   (it needs the trial machinery to take a non-numeric buying rule: `propose`, `rule_text`,
+   `own_rules`, `remember_buy`, `trial_figures` are the places).
+4. The screener scoring itself (section 7b): not touched. Changing it is the owner's decision and
+   a redeploy of worker groups; the study does not support a re-weighting yet. The same study for
+   the larger US lists, ASX / FTSE / Nikkei and coins needs prices that are not on this machine
+   (download slowly, section 8b).
+5. Smaller: a leftover holding of an odd size (after a budget change) can leave less than one
+   holding's room, which is then never used; the dashboard's S&P comparison card; a summary email.
+
 - It is the owner's account only (`AI_TRADER_USERS`). Opening it to users is his decision and
   touches the same legal question as the signals (an AI choosing stocks, even with fake money,
   reads as picks); each user's check-in also runs screeners and AI calls, so cost limits first.
@@ -1320,6 +1395,10 @@ more finished trades than there are, and would chase noise before then.
 ## 11. Open items and optimisation ideas
 
 Needs the owner's decision or more work (nothing here is fixed):
+- **Practice portfolio and AI autopilot: what is open** is listed in section 8c, "Start here when
+  resuming" (Monday's first trades across markets, the first progress report at 20 finished trades,
+  a trial of buying shares by distance above the 52-week low if the record supports it, the
+  screener scoring left untouched after the factor study of section 7b).
 - **Legal.** The business is "StockIQ", online-only, no physical address, **no financial services
   licence**; billing is in USD ($4.99 / $14.99 / $49.99 per month, confirmed on the live Stripe
   prices). The terms, About page, pricing section and FAQ say all of this, and the product
@@ -1663,3 +1742,12 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     the 52-week low) kept a modest lead. The autopilot now records that figure with each share it
     buys and splits its record by it: a measurement, not a rule. Rollback zip:
     `…_before_autopilot_low52_20261011.zip`. Live: `practice-autopilot.js?v=25`.
+  - **Progress per batch of 20 finished trades, with its own investigation** (section 8c, "Learning"):
+    a table on the panel; after each 20 it compares them with the 20 before and, if they did no
+    better, says what stands out, puts back a change of its own that was followed by a clearly
+    worse batch, and starts a trial of a change the AI model picks from its candidates. **A budget
+    larger than the practice money is now put right wherever it is met**, not only refused when
+    typed (the owner's saved $200,000 became $99,941 the moment the page was opened). Rollback zip:
+    `…_before_autopilot_progress_20261011.zip`. Live: `practice-autopilot.js?v=26`.
+  - Notes: section 8c ends with "Start here when resuming"; this session was closed there because
+    its context had grown too large. Everything known is in these files.
