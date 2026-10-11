@@ -480,7 +480,9 @@
     // Its own trial of which share to buy: as its screener ranks them, or the one furthest above its 52-week low
     function orderHtml() {
         const o = data.order;
-        if (!o) return '';
+        // not started yet: it starts with the next share it buys (the function sends `progress` from the version that has this trial)
+        if (!o) return 'progress' in data && data.settings.selfTune !== false && data.settings.screeners.some(k => (data.options.screeners[k] || {}).kind === 'stock')
+            ? `<div style="margin-top: 6px;"><strong style="color: var(--text-primary);">Next, for shares:</strong> starting with the next share it buys, every second one will be the share furthest above its 52-week low on the shortlist, instead of the one its screener ranks highest. A test on four years of prices found that figure linked to what shares did next, and the screener's own ranking not. After 10 finished each way it keeps the new order only if those trades did clearly better.</div>` : '';
         const side = (n, avg) => `${n} finished${n ? ' (average ' + pc(avg) + ')' : ''}`, cap = (x) => x ? x.charAt(0).toUpperCase() + x.slice(1) + '.' : '';
         if (o.mode === 'trial') return `<div style="margin-top: 6px;"><strong style="color: var(--text-primary);">Also trying, for shares</strong> (since ${esc(day(o.since))}): every second share it buys is the one furthest above its 52-week low on the shortlist, instead of the one its screener ranks highest. Why: ${esc(o.why)}. So far: bought that way ${side(o.with, o.avgWith)}, bought as ranked ${side(o.without, o.avgWithout)}. It decides after ${o.group} each way and keeps the new order only if it did clearly better. <a href="#" data-ap="stoporder">Stop this trial</a></div>`;
         if (o.mode === 'low52') return `<div style="margin-top: 6px;"><strong style="color: var(--text-primary);">Changed by itself after a trial</strong> (${esc(day(o.ended))}): every share it buys is now the one furthest above its 52-week low on the shortlist. ${esc(cap(o.result))} <a href="#" data-ap="restoreorder">put it back</a></div>`;
