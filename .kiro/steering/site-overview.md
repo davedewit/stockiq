@@ -99,8 +99,14 @@ Order inside `deploy-to-s3.sh`:
 7. `cleanup_broken_links.py`, `remove_news_duplicates.py`, `finalize_news_html.py` (trim news.html to 240 stock + 60 general, keep noindex)
 8. S3 upload:
    - `stocks/`: `aws s3 sync --delete` (size + mtime), 24h cache
-   - `js/`: sync --delete, 24h cache
-   - root `*.html` (1h cache), `*.css` (24h), root `*.js` (24h; news.js 1h): uploaded when the local MD5 differs from the S3 ETag
+   - `js/`: sync --delete
+   - root `*.html`, `*.css`, root `*.js`: uploaded when the local MD5 differs from the S3 ETag
+   - **How long a copy may be kept (since 11 Oct 2026; `HTML_CACHE`, `ASSET_CACHE`, `NEWS_JS_CACHE` in the script):** a
+     browser must ask again for a root page every time (`max-age=0, s-maxage=3600, must-revalidate`) and keeps a root
+     script, stylesheet or `js/` file for five minutes (`max-age=300, s-maxage=86400`; news.js `s-maxage=3600`).
+     CloudFront keeps them for the `s-maxage` and is emptied by the invalidation that ends every deploy. Before that
+     browsers kept pages an hour and scripts a day: see section 9, "A fix that is live but not seen". The stock pages
+     are still 24h
    - images (7d), and `stocks.txt robots.txt sitemap.xml`
 9. CloudFront invalidation `/*` (waits for completion), `notify_search_engines.py` (IndexNow; "202" means accepted)
 10. `sync-all-lambdas.sh` (hourly cooldown)
@@ -653,13 +659,12 @@ with `document.querySelector('h3')`.
     for a click on `#notification-bell` / `#mobile-notification-bell` and draws the one list in `#notification-dropdown` if the
     page opened one (dashboard, home page, analysis page; on pages whose bell just goes to the dashboard only the red number
     shows), watches that list and draws it again when the page redraws its own, and watches the two badge elements to add
-    its count to whatever number the page's own code sets. **Who fetches it** (`/autopilot-bell.js?v=3`, signed-in visitors
-    only): each of the 17 hand-edited pages with a bell, by one line after its `theme.js` tag between the comments
-    `AUTOPILOT_BELL_START/END`; `dashboard.html` by a script tag; and `theme.js`, which is what covers the generated stock
-    pages. **Raise the `?v=` in all three places when the script changes** (a search for `autopilot-bell.js?v=` finds them).
-    The pages fetch it themselves because **the owner did not see it on the home and analysis pages**: at first only
-    `theme.js` fetched it, pages load `theme.js` without a version, and his browser kept its day-old copy. Anything a page
-    must have at once cannot hang on a script that is loaded without a version (those are cached for a day).
+    its count to whatever number the page's own code sets. **Who fetches it** (signed-in visitors only): each of the 17
+    hand-edited pages with a bell, by one line after its `theme.js` tag between the comments `AUTOPILOT_BELL_START/END`;
+    `dashboard.html` by the same line near its other scripts; and `theme.js`, which is what covers the generated stock
+    pages. **The address has no version number**: `/autopilot-bell.js?h=<the hour>` (`Math.floor(Date.now()/36e5)`), a new
+    address every hour, so **a change to the script needs no edit to any page**; CloudFront ignores the query string, so
+    it is still one cached file there. (It had a `?v=` in three places, raised by hand in 20 files for each change.)
   - **Where the list comes from:** on the dashboard the panel hands over its own (`practiceAutopilot.bellFeed` →
     `autopilotBell.set`); on every other page the script asks the function's **read-only action `bell`** (`bell_trades`:
     the last 12 buys and sells with `t, type, symbol, name, usd, gain, pct`; an account without the autopilot gets an empty
@@ -744,8 +749,8 @@ show. Settings holds the first five items below, Activity the last five:
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=17` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=37`) | Controls and reports only; decisions are made by the Lambda |
-| The bell (one list for every page) | `website/autopilot-bell.js` (`?v=3`, fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
-| Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
+| The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
+| Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`, `bell` (read-only, for the notification bell). Env `AI_TRADER_USERS` (accounts that may use it without a paid plan; everyone on a paid plan may use it; `*` would make it free for all) and `OPENAI_API_KEY` (never print it) |
 | Schedule | EventBridge `stockiq-ai-trader-schedule`, `cron(10,40 * * * ? *)` | Every 30 minutes; `SLOT_MINUTES` in the Lambda must match. **Disable this rule to stop everything** |
@@ -1444,7 +1449,7 @@ weekdays and fails at the weekend.
 - Lambda `stockiq-ai-trader`: `CodeSha256` `+Z5scAfikqPIEcGPDlARJVC/f3NOcIGjmSZ7YK4YGoc=`, equal to
   `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,854 lines; shared learning deployed 07:42 UTC on 11 Oct, the release wording 08:45, the bell's action 09:01).
 - Website: `practice-autopilot.js?v=37` (sha256 starts `57956b67cf2b`), `practice-portfolio.js?v=17`
-  (`f7ddb505486a`), `autopilot-bell.js?v=3` (`9065d8d9662f`), `theme.js` (`d740eb5fe984`), `dashboard.html` (`a837a99ca080`), and the loader line in 17 other pages, `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
+  (`f7ddb505486a`), `autopilot-bell.js` (`9065d8d9662f`), `theme.js` (`ad5a9264d875`), `dashboard.html` (`db74619b8fbc`), and the loader line in 17 other pages, `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
 - Lambda `stockiq-ai-chat`: `CodeSha256` `LFyuyhd1ivEYAXqSqVkEk+Deq2H+rG9IhzSYdpho+w8=`, equal to `lambda-sync/stockiq-ai-chat/lambda_function.py`. Live files were compared byte for byte.
 - Both repos clean and pushed; **no `check-tools/pending-*` folder is left** (every package was
   deployed and removed). Tests on the live files: 378 function, 196 panel, 71 portfolio, 20 bell, 13 chat, the
@@ -1598,6 +1603,16 @@ more finished trades than there are, and would chase noise before then.
 
 ## 9. Pitfalls learned the hard way
 
+- **A fix that is live but not seen (11 Oct 2026).** The owner reported three times that the notification bell still had
+  "the old look" on the home and analysis pages, and asked whether "other config" was taking priority. The site was
+  serving the new files (checked on the plain addresses, `/` included; there is no service worker). What took priority
+  was his browser's own copy: the site let a browser keep a page for an hour and a script for a day, so only the page he
+  had reloaded (the dashboard) was current. Fixed at the source: pages must be asked for again every time, scripts are
+  kept five minutes (section 5, step 8; `check-tools`' one-off deploy relabelled the 36 root pages, scripts and
+  stylesheets already on the site, content untouched). **When someone says a deployed change does not show, check what a
+  normal visit is served (`curl -sI` the plain address for `cache-control` and compare the body), before looking for a
+  fault in the change.** And a check that adds `?something` to the address or uses a fresh browser proves the site, not
+  what a returning visitor sees.
 - **Template drift:** in Sep 2026 the live stock pages had a newer footer than the generator
   template, so running the generator would have reverted all 3,467 footers. Before running
   `generate-stock-pages.py` after template edits, test it on a copy of `stocks/` and diff.
@@ -1837,10 +1852,11 @@ A large "No price data" number means Yahoo rate-limited this machine: nothing is
 ```bash
 cd /Users/dave/VSCODE/website
 aws s3 cp faq.html s3://stockiq-final-websitebucket-vqekic7enf9h/faq.html \
-  --cache-control "public, max-age=3600" --content-type "text/html; charset=utf-8" --profile default --region us-east-1
+  --cache-control "public, max-age=0, s-maxage=3600, must-revalidate" --content-type "text/html; charset=utf-8" --profile default --region us-east-1
 aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R --paths "/faq.html" --profile default --region us-east-1
 ```
-(`*.js`: `--cache-control "public, max-age=86400"`, no content-type.)
+(`*.js`: `--cache-control "public, max-age=300, s-maxage=86400" --content-type "application/javascript"`. These are the values of
+section 5, step 8: a page uploaded with the old "max-age=3600" would again be kept by browsers for an hour.)
 
 **Test a template change safely** (before running `generate-stock-pages.py` for real):
 ```bash
@@ -2128,5 +2144,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     draws the whole list for every page: reports and trades together, newest first. Website only (20 files). **Lesson: a
     check with a made-up account passed twice while the owner saw nothing; reproduce with the real account's data
     (`REAL_USER`, read-only) before saying a thing works.**
+  - **Browsers no longer keep old copies** (section 5 step 8, section 9): after all that the owner still saw the old bell on
+    two pages, because his browser kept its own copy of a page for an hour and of a script for a day. Root pages must now
+    be asked for again every time and scripts are kept five minutes (`deploy-to-s3.sh`; the 36 files on the site
+    relabelled, content compared byte for byte afterwards); the bell's script is asked for under an address that changes
+    every hour, with no version number to raise. Website and deploy script only.
   - Notes: section 8c ends with "Start here when resuming"; this session was closed there because
     its context had grown too large. Everything known is in these files.
