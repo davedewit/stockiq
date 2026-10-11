@@ -13,6 +13,7 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
           tabs (needs the dashboard file as a sixth argument: presses each dashboard tab and the autopilot's two parts),
           shares (ticks three markets, sets a share by hand, tries to give out more than 100%, moves the risk level),
           progress (prints the table of progress per batch of 20 finished trades),
+          breakdown (fills the record with the owner's four trades of 11 Oct and opens the breakdown table),
           budget (types a budget larger than the practice money and presses the link that puts it right),
           next (prints the countdown, "Needs you", the "What happens next" list and the email line, and sends a test email),
           listswitch (switches the list to "buys and sells only" and reloads the page to see that it is remembered)
@@ -178,6 +179,12 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
       r.value = '3'; r.dispatchEvent(new Event('input', { bubbles: true })); await wait(1300); r.blur(); window.dashboardTabs && window.dashboardTabs.show('autopilot'); q('[data-ap-part="settings"]').click(); await wait(300); q('#ap-split').scrollIntoView({ block: 'center' });
     }
     if (step === 'progress') { const sec = Array.from(document.querySelectorAll('#practice-autopilot .ap-section')).find(x => x.textContent.includes('Progress, 20')); out('progress: ' + (sec ? sec.textContent.replace(/\\s+/g, ' ').trim() : '(none)')); if (sec) sec.scrollIntoView({ block: 'start' }); }
+    if (step === 'breakdown') {
+      const g = (label, n, avg, up, vs) => ({ label, n, avg, vs, up, beat: 0, judged: n });
+      auto.scorecard = { n: 4, avg: -0.5, up: 2, vs: -0.5, beat: 0, judged: 4, label: 'all', groups: { screener: [g('Crypto (top coins)', 4, -0.5, 2, -0.5)], rank: [g('rank 1 to 3', 2, -1.1, 1, -1.1), g('rank 4 to 10', 2, 0.1, 1, 0.1)], rsi: [g('RSI under 45', 1, 0.6, 1, 0.6), g('RSI 45 to 60', 3, -0.8, 1, -0.8)],
+        stay: [g('new to the shortlist', 2, -1.8, 0, -1.8), g('not recorded', 2, 0.8, 2, 0.8)], chosen: [g('chosen by the AI model', 4, -0.5, 2, -0.5)], exit: [g('sold to keep part of a gain', 2, 0.1, 1, 0.1), g('sold when the signal turned', 1, 0.6, 1, 0.6), g("sold early by the AI model's review", 1, -2.8, 0, -2.8)] } };
+      await window.practiceAutopilot.refresh(true); await wait(500); const d = q('#ap-breakdown'); d.open = true; out('breakdown: ' + d.textContent.replace(/\\s+/g, ' ').trim().slice(0, 400)); d.scrollIntoView({ block: 'start' });
+    }
     if (step === 'off') { q('#ap-enabled').click(); await wait(700); out('switched the autopilot off: ' + cellText('WEMIX')); }
     if (step === 'open') { document.querySelectorAll('#practice-autopilot details').forEach(d => { d.open = true; }); const s = q('#pp-sold'); if (s) s.open = true; out('unfolded the details'); }
   }
