@@ -679,6 +679,18 @@ with `document.querySelector('h3')`.
     and stops redrawing if something undoes the list more than 12 times in two seconds (`state()` says so).
     **If this script is changed in a way an older copy on the same page could fight with, raise `VERSION` and think about
     what the older copy will still do**; `OLD_THEME` / `OLD_BELL` of `live_bell_check.js` play the old copies back.
+  - **OPEN at 10:55 UTC on 11 Oct: the owner still sees no trades in the bell on any page** ("back to how it was before";
+    earlier, on the dashboard, he had seen the first form, a separate section). Every test here shows the one list, also
+    with old copies played back. So the script now **reports what it finds in his browser** (version 6, temporary): on
+    "page loaded" and "bell opened" it posts to the function's action `belllog`, which prints `bell report: {...}` to its
+    log for the site's own accounts only (`aws logs tail /aws/lambda/stockiq-ai-trader --since 30m | grep "bell report"`):
+    version, whether an older copy was on the page, trades and reports it has, what the open list holds (`bellList`),
+    `draws`, `gaveUp`, `fault` (an error while drawing), which `theme.js` the browser keeps (an old one is replaced). No
+    report had arrived by 10:55: **no report after he opens a page means the script is not running in his browser at all**
+    (a page copy from before the loader line, or something blocking the script); a report says the rest. Also hardened:
+    a stored list of unread reports that is not a list no longer stops the drawing. **Remove `tell`, `lookAtTheme` and
+    `belllog` once this is solved.** Function `Gy2rNaAXaIYsQIoSxw9U5OjBOHy2ei6PHr0tAcOZOTU=` (rollback zip
+    `…_before_autopilot_report_20261011.zip`).
   - **Where the list comes from:** on the dashboard the panel hands over its own (`practiceAutopilot.bellFeed` →
     `autopilotBell.set`); on every other page the script asks the function's **read-only action `bell`** (`bell_trades`:
     the last 12 buys and sells with `t, type, symbol, name, usd, gain, pct`; an account without the autopilot gets an empty
