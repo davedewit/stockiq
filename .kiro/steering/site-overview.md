@@ -19,6 +19,8 @@ Detailed references: `stockiq.md` (AWS resources, Cognito, Lambdas, AI chat),
 - AI-assisted stock/ETF/crypto research tool for individual investors: single-stock reports,
   trading signals, market screeners (US, Europe, Asia, other), crypto screener, AI chat.
 - 3-day free trial (5 analyses/day = 15 total), then Starter $4.99, Pro $14.99, Elite $49.99 per month (Stripe).
+  Every logged-in account has the practice portfolio (fake money, by hand); **paid plans add the AI
+  autopilot** that runs it (section 8c).
 - Traffic is very low (a few visits/day; 13 visitors/month in March 2026), revenue $0.
   The main goal is organic search traffic, then conversions.
 - Owner edits in **Kiro** (not VS Code). The top folder is still named `/Users/dave/VSCODE`.
@@ -669,10 +671,10 @@ show. Settings holds the first five items below, Activity the last five:
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=13` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=29`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=30`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
-| Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
+| Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (accounts that may use it without a paid plan; everyone on a paid plan may use it; `*` would make it free for all) and `OPENAI_API_KEY` (never print it) |
 | Schedule | EventBridge `stockiq-ai-trader-schedule`, `cron(10,40 * * * ? *)` | Every 30 minutes; `SLOT_MINUTES` in the Lambda must match. **Disable this rule to stop everything** |
 | Screener data | `stockiq-screener-coordinator` | Called with no `userId`, so nothing is saved to anyone's history |
 | Prices | `stockiq-price-proxy` | Also exchange rates (`AUDUSD=X`, `USDJPY=X`) and the S&P 500 fund (`SPY`) |
@@ -711,7 +713,7 @@ whatever the browser sends; the autopilot only acts for addresses in `AI_TRADER_
 
 | Setting | Values | Meaning |
 |---|---|---|
-| `enabled` | on / off (default off) | Only for users in `AI_TRADER_USERS` |
+| `enabled` | on / off (default off) | Only for accounts on a paid plan, or listed in `AI_TRADER_USERS` (`allowed`) |
 | `risk` | 1–5 (default 3) | The level: see the table below |
 | `budgetUsd` | 100 … the practice money there is (default 10,000) | The most it has invested at once. **It cannot be more than the practice cash plus what the autopilot itself has invested** (`money_of`, sent as `money`: `cash, invested, reach`). On 11 Oct the owner typed $200,000 against $100,000 of fake money and nothing objected; it would have bought one $50,000 holding and stalled. Now the panel says under the field how much there is (`budgetHint`), refuses a larger number ("Not saved: the budget can be at most …"), offers "Set it to $…" (`maxbudget`), and the `save` action sets a larger one to that amount and notes it (the backstop for an older cached script). An older, too-large budget does not block other settings from saving. **And a budget that is too large is put right wherever it is met** (`fit_budget`: when the page is opened (`get`), when settings are saved, at the start of every check-in), with the same line in the activity list: the owner had asked twice why $200,000 was still shown, because his saved figure predated the check. So the "Needs you" item `budget` should now never appear |
 | `periodDays` | 1–90 | "Build up to it over": the budget is released in equal steps over this long. **Not the holding time** (the owner mixed them up twice) |
@@ -1028,7 +1030,7 @@ the average per trade, which the panel shows, never by the share of trades that 
   (when the budget's build-up began; reset when it is switched on or the budget or build-up
   changes), `lastRun`, `lastRunBy`, `open` (remembered buys), `exits`, `rest`, `restSince`,
   `lessons`, `tune` (`values`, `trial`, `past`, `mark`, `seq`, `reviewed`), `watch`, `news`, `seen`, `stay`,
-  `strong`, `ahead`, `aiSell`, `closedCount`, `realizedUsd`, `progress` (`done`: batches reported, `reports`), `order` (the trial of which share to buy), `visit`, `pausedAt`, `ai` (today's AI calls), `mail` (what became of the last email:
+  `strong`, `ahead`, `aiSell`, `closedCount`, `realizedUsd`, `progress` (`done`: batches reported, `reports`), `order` (the trial of which share to buy), `visit`, `pausedAt`, `pausedWhy`, `ai` (today's AI calls), `mail` (what became of the last email:
   `t, ok, subject, why`), `fail` (a scheduled check-in that stopped on an error; cleared by the next
   good one), `savedAt` (when the settings last changed).
 - `public()` (every action returns it): `settings, state, log, scorecard, lessons, resting, recent,
@@ -1154,8 +1156,8 @@ not sure whether its improvements needed him to "push" them. They do not, and th
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 348 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 172 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 358 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 178 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 66 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
@@ -1206,20 +1208,20 @@ apostrophe must allow for it; a test of an action that depends on the day (tradi
 must set the function's clock (`m.datetime = at(when)` in `ai_trader_test.py`), or it passes on
 weekdays and fails at the weekend.
 
-### Start here when resuming (state at 05:35 UTC on 11 Oct 2026, the end of a two-day session)
+### Start here when resuming (state at 05:50 UTC on 11 Oct 2026, the end of a two-day session)
 
 **What is live, and how to confirm nothing has moved since:**
-- Lambda `stockiq-ai-trader`: `CodeSha256` `YTXPRUhy3GpE1fLUWpaCqE5tDrBaKHTgqbpHdVtoy6k=`, equal to
-  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,525 lines).
-- Website: `practice-autopilot.js?v=29` (sha256 starts `6ca787f64194`), `practice-portfolio.js?v=13`
-  (`ad1c1372002e`), `dashboard.html` (`fb321379e555`). Live files were compared byte for byte.
+- Lambda `stockiq-ai-trader`: `CodeSha256` `PUQWAyAPbNy98SQITl2p+dSMU/wCyxzsIR+geIQ1RQE=`, equal to
+  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,587 lines).
+- Website: `practice-autopilot.js?v=30` (sha256 starts `bc2c3aac1c2e`), `practice-portfolio.js?v=13`
+  (`ad1c1372002e`), `dashboard.html` (`376d4cd1e101`); `index.html` and `faq.html` carry the plan wording. Live files were compared byte for byte.
 - Both repos clean and pushed; **no `check-tools/pending-*` folder is left** (every package was
-  deployed and removed). Tests on the live files: 348 function, 172 panel, 66 portfolio, the
+  deployed and removed). Tests on the live files: 358 function, 178 panel, 66 portfolio, the
   panel-versus-function comparison clean (3,780 budget combinations, 2,915 spreads over markets).
 - Rollback copies of the function, one per deploy, in `~/VSCODE/backup/`:
   `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order: 10 Oct `v2, fast, panel,
   autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
-  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle`.
+  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid`.
 - First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and
   the function's log (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors
   ("check-in failed", "not worked out", "not sent") and for the firsts listed below.
@@ -1306,12 +1308,40 @@ the average per trade.
   3. **A daily limit on AI calls per account:** `AI_CALLS_PER_DAY` (120; `state.ai`). Past it the
      model is treated as not answering: buys go by rank, only the fixed rules sell, one line a day
      says so. Screener results were already shared between accounts for 20 minutes.
-- **It is still not open to other accounts.** These safeguards make that possible; the switch is
-  the Lambda's `AI_TRADER_USERS` setting (`*` for everyone), and it is the owner's to throw: an AI
-  choosing stocks for users, even with fake money, reads as picks, the same legal question as the
-  signals (section 11). The owner's sentence could be read as asking for it; it was not done on an
-  ambiguous instruction. If he confirms, change the setting (the session's safety check may want a
-  packaged script for that too) and re-check the panel as a second, ordinary account.
+- **Open to every account on a paid plan since 11 Oct 2026** (the owner: "you can open it for all
+  accounts, the only thing is users can only use it if they pay, users who signed up and don't pay
+  can only do the manual stuff… if they try to run it, it should direct them to make payment").
+  - **Who may use it** is decided in the function: `allowed(user)` = `listed(user)` (env
+    `AI_TRADER_USERS`, now meaning "may use it without paying": the owner's account and the deploy
+    test user) **or** `plan_of(user) == 'paid'`. `plan_of` reads table `stockiq-user-tracking`,
+    item `<email>#registration` (the record the payment function writes and the AI chat reads):
+    paid = `subscriptionStatus` `active`, or `cancelled` with `expiryDate` not yet past; anything
+    else, a free trial included, is `free`; a read that fails is `unknown`. Cached 60 seconds.
+    On 11 Oct: 66 registered accounts, 1 paid (the owner's).
+  - **Without a paid plan:** `get` answers `{allowed: false, locked: 'plan', upgrade}` and no
+    record is made; every other action is refused with HTTP 402 and the same pointer. The panel
+    then shows `lockedHtml`: what the autopilot is, that it is in every paid plan, that buying by
+    hand stays free, and a "See the plans" button (`#upgrade`, the plan cards under the tabs); its
+    dashboard tab carries a 🔒. A 402 during use (the plan ended while the page was open) switches
+    the panel to that view and sends the browser to `#upgrade`. `locked: 'unknown'`: "could not
+    be checked, refresh in a moment" (HTTP 503 for actions); nobody is paused on an unknown.
+  - **A plan that ends:** the scheduled run pauses the autopilot (`pause_for_plan`: off,
+    `state.pausedAt`, `pausedWhy: 'plan'`, a line and one email) and it switches back on by itself
+    when the account is on a paid plan again and its dashboard is opened (`seen_now`).
+  - **The practice portfolio by hand is free for every logged-in account**, as before.
+  - **What the site says** (hand-edited pages, same deploy): home page pricing (`index.html`
+    `#pricing`: the intro, a line on each plan card, the footnote), the dashboard's three plan
+    cards, and a new FAQ entry ("What are the practice portfolio and the AI autopilot, and which
+    plans include them?"). Wording rule: "practice", "fake money", "no real trade is placed", "not
+    financial advice", "past screener results have not shown a reliable edge"; never "picks".
+  - **Still to weigh, and the owner knows:** an AI choosing what to buy for paying users, even with
+    fake money, sits on the same unreviewed legal question as the signals (section 11). And, as
+    everywhere on this site, the `userId` is whatever the browser sends: someone who knows a paying
+    user's email could open that user's autopilot (fake money only).
+  - **"4 side by side" is not a limit on users** (the owner asked): the schedule works through
+    every account that is due, four at a time. One 300-second run handles a few dozen check-ins;
+    past that, accounts roll to the next slot (`waiting`). If paying users ever number in the
+    hundreds, give each account its own invocation.
 - Cost: a crypto check-in is a full crypto screener run (about 540 worker calls) unless a copy
   under 20 minutes old exists, so one user on 30-minute check-ins adds about 780,000 Lambda calls
   a month, plus up to two small AI calls per check-in and at most 8 larger ones a day: a few
@@ -1504,7 +1534,7 @@ Needs the owner's decision or more work (nothing here is fixed):
   growth (−8); and during market hours the app compares part-day volume with a full-day average
   ("Low Volume −3"). Worth fixing: the part-day volume penalty, and a Yahoo fallback when Finnhub
   lacks a figure. Both are scoring changes: change `stock_metrics.py` too.
-- **Dashboard plan cards** list features that are not verified to differ by plan ("Advanced
+- **Dashboard plan cards** (the line "AI autopilot for your practice portfolio (fake money)" added on 11 Oct is real and the same on all three plans) list features that are not verified to differ by plan ("Advanced
   screening & alerts", "Portfolio tracking", "White-label options", "Dedicated support"), while
   the FAQ says all plans get the same features. Old accounts carry legacy limits (a cancelled
   Starter at 50/day, the owner's Pro at 200/day); new purchases get 15 / 50 / unlimited. One
@@ -1817,5 +1847,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     side; a daily limit on AI calls per account. The autopilot itself is still open to the two
     listed accounts only. Function only. Rollback zip: `…_before_autopilot_idle_20261011.zip`.
   - The breakdown table under "How it is doing" laid out more clearly (website only, `practice-autopilot.js?v=29`).
+  - **The AI autopilot opened to every account on a paid plan** (section 8c, "Start here"): the
+    function checks the plan itself; accounts without one see what it is and a button to the plans,
+    and are refused and sent there if they try to use it; an ended plan pauses it. Home page
+    pricing, dashboard plan cards and a new FAQ entry say what the plans include. Rollback zip:
+    `…_before_autopilot_paid_20261011.zip`. Live: `practice-autopilot.js?v=30`.
   - Notes: section 8c ends with "Start here when resuming"; this session was closed there because
     its context had grown too large. Everything known is in these files.
