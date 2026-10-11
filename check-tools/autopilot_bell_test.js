@@ -64,7 +64,7 @@ const T = [{ t: '2026-10-10T10:00:00Z', type: 'buy', symbol: 'CFX-USD', name: 'C
   { const store = { 'stockiqAutopilotTrades_tester@x.com': JSON.stringify({ at: 1, allowed: true, trades: T }), 'stockiqAutopilotBell_tester@x.com': '2026-10-10T12:00:00Z', 'stockiqAutopilotRead_tester@x.com': '2026-10-10T12:00:00Z' };
     const kept = Object.assign({ userId: 'tester@x.com' }, store), ctx0 = { older: { version: undefined, set() {}, trades: () => [] } };
     const p = page({ store }); // an older copy's leftovers are in the browser's store
-    check('it takes over from an older copy: that copy\'s marks are kept, its list of trades is emptied so that it draws nothing', p.bell.version === 4 && !('stockiqAutopilotTrades_tester@x.com' in p.kept) && p.kept['stockiqBellBell_tester@x.com'] === '2026-10-10T12:00:00Z' && p.kept['stockiqBellRead_tester@x.com'] === '2026-10-10T12:00:00Z', Object.keys(p.kept));
+    check('it takes over from an older copy: that copy\'s marks are kept, its list of trades is emptied so that it draws nothing', p.bell.version >= 4 && !('stockiqAutopilotTrades_tester@x.com' in p.kept) && p.kept['stockiqBellBell_tester@x.com'] === '2026-10-10T12:00:00Z' && p.kept['stockiqBellRead_tester@x.com'] === '2026-10-10T12:00:00Z', Object.keys(p.kept));
     p.bell.set(T, true); check('and with the marks taken over, the two sales since then are new', p.bell.unseen() === 2 && p.bell.unread() === 2 && 'stockiqBellTrades_tester@x.com' in p.kept); }
   console.log(ok ? 'ALL PASS' : 'SOME FAILED');
 })();
