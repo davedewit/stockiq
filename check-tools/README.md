@@ -148,6 +148,13 @@ python3 check-tools/bell_page.py ../website/autopilot-bell.js /tmp/bell.html lig
 made-up answer to its question: it prints the red number, the order of the list (`trade`: the last trade is the newest
 item, so the trades are on top; `report`: a report is newer), what happens when the page redraws the list, and a click.
 
+`live_bell_check.js` does the same on the **live** pages: `node check-tools/live_bell_check.js index.html analysis.html
+stocks/AAPL.html` opens them in headless Chrome as a signed-in visitor with a made-up address and prints, per page, whether
+the bell's script loaded, the red number and the list after a click. Every call the page makes to the site's functions is
+answered locally (the bell's question with made-up trades), so nothing reaches the site or is written. `NO_THEME=1`
+withholds `theme.js`, to prove a page fetches the bell's script by itself. A page whose bell goes to the dashboard ends
+with "Inspected target navigated": that is the bell working.
+
 ## autopilot_plan_check.py (with autopilot_plan_check.js)
 
 Does the autopilot panel describe what the autopilot function really does? The panel works out, for
