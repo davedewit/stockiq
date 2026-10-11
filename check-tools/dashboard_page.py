@@ -146,7 +146,8 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
       const first = q('#practice-autopilot [data-ap-until]'), was = first.textContent; await wait(2300); out('the countdown ticks: "' + was + '" then "' + q('#practice-autopilot [data-ap-until]').textContent + '"');
       out('email line: ' + line('#ap-mail-state')); q('#practice-autopilot [data-ap="mailtest"]').click(); await wait(700); out('after "Send me a test email": ' + line('#ap-notice') + ' | ' + line('#ap-mail-state'));
       auto.needs = [{ kind: 'missed', at: iso(-1), text: 'A scheduled check-in was due and has not happened. Press "Check in now"; if that works, the schedule itself may be stopped and needs a look.' }];
-      await window.practiceAutopilot.refresh(true); await wait(500); out('with something wrong: ' + line('#ap-needs')); auto.needs = [];
+      await window.practiceAutopilot.refresh(true); await wait(500); out('with something wrong: ' + line('#ap-needs') + ' | its tab reads: ' + line('[data-dash-tab="autopilot"]')); auto.needs = [];
+      await window.practiceAutopilot.refresh(true); await wait(500); out('put right again: ' + line('#ap-needs').slice(0, 40) + ' | its tab reads: ' + line('[data-dash-tab="autopilot"]'));
     }
     if (step === 'off') { q('#ap-enabled').click(); await wait(700); out('switched the autopilot off: ' + cellText('WEMIX')); }
     if (step === 'open') { document.querySelectorAll('#practice-autopilot details').forEach(d => { d.open = true; }); const s = q('#pp-sold'); if (s) s.open = true; out('unfolded the details'); }

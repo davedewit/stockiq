@@ -387,6 +387,11 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     w.form(st.settings); w.click('mailtest'); await sleep(40);
     check('an email that is refused: the message, the status line and "Needs you" all say so', /The test email could not be sent \(MessageRejected\)\./.test(t()) && /Last email could not be sent \(MessageRejected\)/.test(t()) && /⚠ Needs you Its last email could not be sent \(MessageRejected\)\. What it would have said is under "What it has done"\. \([^)]*\d\d:\d\d[^)]*\)/.test(t()) && !/Nothing needs you/.test(t()), t().slice(t().indexOf('⚠'), t().indexOf('⚠') + 220));
     check('no broken values in the new parts', !/undefined|NaN|\[object|Infinity/.test(w.container.innerHTML));
+    { const tab = { textContent: '🤖 AI autopilot', title: '' }; w.ctx.document.querySelector = (sel) => sel === '[data-dash-tab="autopilot"]' ? tab : null;
+      await w.ctx.practiceAutopilot.refresh(true); await sleep(30);
+      check('while something needs you, the dashboard\'s AI autopilot tab carries a mark', tab.textContent === '🤖 AI autopilot ⚠' && /One thing needs you/.test(tab.title), tab);
+      st.needs = []; await w.ctx.practiceAutopilot.refresh(true); await sleep(30);
+      check('and loses it when nothing does', tab.textContent === '🤖 AI autopilot' && tab.title === '', tab); }
     const off = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, ...st, settings: { ...st.settings, enabled: false }, nextCheck: null, coming: [], mail: null, needs: [{ kind: 'off', text: 'It is switched off and still holds 1 holding: it stays until you sell it or switch it back on.' }] } })); await sleep(30);
     check('switched off: no countdown and no list, and what needs you is said', !/⏱/.test(off.text()) && !/What happens next/.test(off.text()) && /⚠ Needs you It is switched off and still holds 1 holding/.test(off.text()));
     const old = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, settings: { ...settings, enabled: true }, state: {}, practiceCash: 100000, log: [], nextCheck: { at: '2026-10-11T04:40:00Z', markets: ['coin'] } } })); await sleep(30);
