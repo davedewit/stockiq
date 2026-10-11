@@ -181,7 +181,7 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
       q('[data-ap-share="US shares"]').value = 'auto'; q('[data-ap-share="US shares"]').dispatchEvent(new Event('change', { bubbles: true })); await wait(700);
       const r = q('#ap-risk'); r.value = '5'; r.dispatchEvent(new Event('input', { bubbles: true })); await wait(1300);
       out('level moved to Adventurous (4 holdings): ' + menus() + ' || ' + line('#ap-split'));
-      r.value = '3'; r.dispatchEvent(new Event('input', { bubbles: true })); await wait(1300); r.blur(); window.dashboardTabs && window.dashboardTabs.show('autopilot'); q('[data-ap-part="settings"]').click(); await wait(300); q('#ap-split').scrollIntoView({ block: 'center' });
+      r.value = '3'; r.dispatchEvent(new Event('input', { bubbles: true })); await wait(1300); r.blur(); window.dashboardTabs && window.dashboardTabs.show('autopilot'); q('[data-ap-part="settings"]').click(); await wait(300); q('[data-ap-screener="4-200"]').click(); await wait(800); out('one market un-ticked again: ' + menus() + ' || bar: ' + line('#ap-splitbar')); window.scrollTo(0, 0);
     }
     if (step === 'progress') { const sec = Array.from(document.querySelectorAll('#practice-autopilot .ap-section')).find(x => x.textContent.includes('Progress, 20')); out('progress: ' + (sec ? sec.textContent.replace(/\\s+/g, ' ').trim() : '(none)')); if (sec) sec.scrollIntoView({ block: 'start' }); }
     if (step === 'breakdown') {
