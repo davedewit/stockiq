@@ -446,6 +446,37 @@
     function ruleWords(r) {
         return `sells at ${r.stop}% or +${r.take}%; ${r.trailMode === 'off' ? 'no stop follows a holding (switched off)' : r.trailMode === 'full' ? 'a trailing stop follows each holding from the moment it is bought, set from how much that holding normally moves and from its screener figures now' : 'a stop follows a rising holding, set from how much that holding normally moves and from its screener figures now'}; buys from the top ${r.top} of a ranking` + (r.max_rsi >= 100 ? '' : ` with RSI under ${r.max_rsi}`);
     }
+    // ---------------------------------------------------------------- progress, a batch of finished trades at a time
+    // After every batch (20) the function compares it with the batch before; if it did no better it looks into why and acts
+    // within its own rules. This shows each batch, the verdict, and what it did.
+    function progressHtml() {
+        const p = data.progress;
+        if (!p || !Array.isArray(p.batches)) return '';
+        const size = p.batch || 20, full = p.batches.filter(b => b.full), reports = {};
+        (p.reports || []).forEach(r => { reports[r.no] = r; });
+        const finished = p.batches.reduce((a, b) => Math.max(a, b.last || 0), 0);
+        const how = `After every ${size} finished trades it compares them with the ${size} before. Better: it carries on as it is. No better: it looks into why, puts back a change of its own if the trades since did clearly worse, and tries the most promising change to one of its rules. All by itself; each report is also emailed.`;
+        if (!full.length) return `<div class="ap-section"><h4>Progress, ${size} finished trades at a time</h4><div>Its first progress report comes after ${size} finished trades (${finished} so far). ${how}</div></div>`;
+        const cell = 'padding: 4px 8px; text-align: right; white-space: nowrap; vertical-align: top;', left = 'padding: 4px 8px; vertical-align: top;';
+        const word = { better: ['better', '#22c55e'], worse: ['worse', '#ef4444'], same: ['about the same', 'var(--text-secondary)'] };
+        const row = (b) => {
+            const r = reports[b.no], v = word[b.verdict];
+            return `<tr><td style="${left} padding-left: 0; color: var(--text-primary); white-space: nowrap;">${b.first} to ${b.last}${b.full ? '' : ` <span style="color: var(--text-secondary);">(${b.n} of ${size} so far)</span>`}</td>
+                <td style="${cell}">${esc(day(b.from))} to ${esc(day(b.to))}</td><td style="${cell}">${b.up} of ${b.n}</td><td style="${cell} color: ${tint(b.avg)}; font-weight: 600;">${(b.avg >= 0 ? '+' : '') + b.avg.toFixed(2)}%</td><td style="${cell} color: ${tint(b.usd)};">${usd2(b.usd)}</td>
+                <td style="${left}">${v ? `<span style="color: ${v[1]}; font-weight: 600;">${v[0]}</span> <span style="white-space: nowrap;">(${(b.prev >= 0 ? '+' : '') + b.prev.toFixed(2)}% before)</span>` : b.full ? 'the first batch' : 'still filling'}</td>
+                <td style="${left}">${r ? esc((r.actions || []).join(' ')) : ''}</td></tr>`;
+        };
+        const latest = (p.reports || []).slice(-1)[0];
+        return `<div class="ap-section"><h4>Progress, ${size} finished trades at a time</h4>
+            <div style="overflow-x: auto;"><table style="border-collapse: collapse; font-size: 0.85rem; width: 100%;">
+                <tr style="color: var(--text-secondary);"><td style="${left} padding-left: 0;">Trades</td><td style="${cell}">When</td><td style="${cell}">Ended up</td><td style="${cell}">Average a trade</td><td style="${cell}">In dollars</td><td style="${left}">Against the ${size} before</td><td style="${left}">What it did</td></tr>
+                ${p.batches.slice().reverse().map(row).join('')}
+            </table></div>
+            ${latest && (latest.findings || []).length ? fold('progress-found', `What stood out in trades ${(latest.no - 1) * size + 1} to ${latest.no * size}`, latest.findings) : ''}
+            <div style="font-size: 0.8rem; margin-top: 6px;">${how} "About the same" means the difference is inside what chance alone would give with ${size} trades. Past results of fake-money trades; they say nothing certain about the future.</div>
+        </div>`;
+    }
+
     function tuneHtml() {
         const t = data.tune, r = data.rules;
         if (!t || !r) return '';
@@ -516,6 +547,7 @@
                 <div id="ap-pane-activity" class="ap-pane" style="${part === 'activity' ? '' : 'display: none;'}">
                 ${comingHtml()}
                 ${recordHtml()}
+                ${progressHtml()}
                 ${tuneHtml()}
                 <div class="ap-section"><h4>What it has done <span class="ap-fresh"><span id="ap-fresh">${loadedAt ? 'Up to date at ' + esc(clock(loadedAt)) + '. Refreshes by itself every minute.' : ''}</span><a href="#" data-ap="refresh">↻ Refresh now</a><label class="ap-mini" title="On: only its buys and sells are listed. Off: its check-ins and notes too. Remembered in this browser."><input id="ap-tradesonly" type="checkbox" ${tradesOnly ? 'checked' : ''}><span class="ap-dot"></span>Buys and sells only</label></span></h4>
                     ${latest ? `<div class="ap-log"><time>${icons.note} ${esc(when(latest.t))}</time> Latest check-in: ${esc(latest.text.replace(/^Checked in\. /, ''))}${latest.n > 1 ? ` <span style="font-size: 0.8rem;">(the same at ${latest.n} check-ins in a row)</span>` : ''}</div>` : ''}
@@ -683,7 +715,7 @@
     // practice-portfolio.js marks the autopilot's holdings with when and at what they will be sold
     function sharePlans() { if (data && data.allowed && window.practicePortfolio && window.practicePortfolio.setPlans) window.practicePortfolio.setPlans(data.plans || [], { realizedUsd: data.realizedUsd }); }
     // What changes when the autopilot acts: its activity list and what it holds
-    const stamp = (r) => JSON.stringify([r.log && r.log.length, r.log && r.log.slice(-1), r.plans, r.state, r.tune, r.scorecard && r.scorecard.n, r.coming, r.needs, r.mail, r.nextCheck]);
+    const stamp = (r) => JSON.stringify([r.progress, r.log && r.log.length, r.log && r.log.slice(-1), r.plans, r.state, r.tune, r.scorecard && r.scorecard.n, r.coming, r.needs, r.mail, r.nextCheck]);
     // Ask again without disturbing anything: not while a change is being typed, saved or run
     async function refresh(byHand) {
         if (!data || !data.allowed || refreshing || working || saving || saveTimer || isDirty() || (editing() && !byHand)) return;

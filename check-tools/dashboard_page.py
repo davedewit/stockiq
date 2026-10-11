@@ -12,6 +12,7 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
           trailstop (chooses the full trailing stop loss in "Your own limits"),
           tabs (needs the dashboard file as a sixth argument: presses each dashboard tab and the autopilot's two parts),
           shares (ticks three markets, sets a share by hand, tries to give out more than 100%, moves the risk level),
+          progress (prints the table of progress per batch of 20 finished trades),
           budget (types a budget larger than the practice money and presses the link that puts it right),
           next (prints the countdown, "Needs you", the "What happens next" list and the email line, and sends a test email),
           listswitch (switches the list to "buys and sells only" and reloads the page to see that it is remembered)
@@ -46,7 +47,9 @@ const OPTIONS = %s;
 let auto = { settings: { enabled: true, risk: 3, budgetUsd: 10000, periodDays: 10, everyHours: 0.5, maxHoldDays: 0.25, screeners: ['7-1'], aiSell: true, selfTune: true, emails: true, stopPct: null, takePct: null, auto: [], trailMode: 'gains', shares: {} }, coinShare: 1, state: { lastRun: iso(-0.1) }, minSample: 8, practiceCash: 100000, lessons: null, resting: {}, recent: [],
   scorecard: { n: 0, groups: {} }, rules: { name: 'Balanced', stop: -10, take: 18, trail: 0.5, top: 10, max_rsi: 76, arm: 9, changed: {}, yours: [], level: { stop: -10, take: 18 } }, realizedUsd: 7.91,
   tune: { trial: null, past: [], nextReviewIn: 20, batch: 20, group: 10, finished: 0 }, month: { last30: { n: 0, up: 0, usd: 0, pct: 0 }, before30: { n: 0, up: 0, usd: 0, pct: 0 } },
-  nextCheck: { at: iso(0.4), markets: ['coin'] }, holding: { count: 1, investedUsd: 1250 }, now: iso(0), needs: [], mail: null, money: { cash: 6500, invested: 1250, reach: 7750 },
+  nextCheck: { at: iso(0.4), markets: ['coin'] }, holding: { count: 1, investedUsd: 1250 }, now: iso(0), needs: [], mail: null,
+  progress: { batch: 20, batches: [{ no: 1, first: 1, last: 20, n: 20, full: true, from: iso(-400), to: iso(-200), up: 12, avg: 0.4, usd: 80, se: 0.3 }, { no: 2, first: 21, last: 40, n: 20, full: true, from: iso(-190), to: iso(-30), up: 9, avg: -0.35, usd: -70.5, se: 0.3, prev: 0.4, diff: -0.75, margin: 0.42, verdict: 'worse' }, { no: 3, first: 41, last: 44, n: 4, full: false, from: iso(-20), to: iso(-3), up: 3, avg: 0.5, usd: 35, se: 0.4 }],
+    reports: [{ no: 1, at: iso(-200), trades: 20, avg: 0.4, usd: 80, up: 12, n: 20, verdict: 'first-up', prev: null, findings: [], actions: ['It carries on as it is.'] }, { no: 2, at: iso(-30), trades: 40, avg: -0.35, usd: -70.5, up: 9, n: 20, verdict: 'worse', prev: 0.4, findings: ['Trades sold at the loss limit: 6 of the 20, averaging -7.2%%.'], actions: ['It started a trial: sell at -5%% instead of the current "sell at -10%%". Why: 6 of the last 20 finished trades were down 5%% or more at some point while held.'] }] }, money: { cash: 6500, invested: 1250, reach: 7750 },
   coming: [{ at: iso(0.4), kind: 'check', text: 'Next check-in (coin market). It looks at the holding it has there (WEMIX-USD) and sells it if it has hit its loss limit, gain mark, stop or time limit, or if the AI review wants it out. It may buy up to 1 holding of about $1,250 from Crypto (top coins), if something on the shortlist passes its filters.' },
             { at: iso(2.1), kind: 'release', text: 'More of the budget is released: $3,750 of the $10,000 may be invested from then ($2,500 until then; $1,250 is invested now). It is spent at check-ins after that, in markets that are open.' },
             { at: iso(3.1), kind: 'sell', text: 'WEMIX-USD is sold at the latest: its 6 hours are up then.' },
@@ -174,6 +177,7 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
       out('level moved to Adventurous (4 holdings): ' + menus() + ' || ' + line('#ap-split'));
       r.value = '3'; r.dispatchEvent(new Event('input', { bubbles: true })); await wait(1300); r.blur(); window.dashboardTabs && window.dashboardTabs.show('autopilot'); q('[data-ap-part="settings"]').click(); await wait(300); q('#ap-split').scrollIntoView({ block: 'center' });
     }
+    if (step === 'progress') { const sec = Array.from(document.querySelectorAll('#practice-autopilot .ap-section')).find(x => x.textContent.includes('Progress, 20')); out('progress: ' + (sec ? sec.textContent.replace(/\\s+/g, ' ').trim() : '(none)')); if (sec) sec.scrollIntoView({ block: 'start' }); }
     if (step === 'off') { q('#ap-enabled').click(); await wait(700); out('switched the autopilot off: ' + cellText('WEMIX')); }
     if (step === 'open') { document.querySelectorAll('#practice-autopilot details').forEach(d => { d.open = true; }); const s = q('#pp-sold'); if (s) s.open = true; out('unfolded the details'); }
   }

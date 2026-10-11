@@ -2134,7 +2134,7 @@ def needs(record, portfolio, now):
                                             'Sell one of your own holdings, lower its budget, or reset the fake money.'})
     elif settings['budgetUsd'] > portfolio['cash'] + invested + 1:
         out.append({'kind': 'budget', 'text': f"Its budget (${settings['budgetUsd']:,.0f}) is more than the practice money it can reach (${portfolio['cash'] + invested:,.0f}: "
-                                              f"${portfolio['cash']:,.0f} cash and ${invested:,.0f} it has invested), so it will stop short of the budget. Lower the budget if you want its figures to add up."})
+                                              f"${portfolio['cash']:,.0f} cash and ${invested:,.0f} it has invested), which is not possible. It is set to that amount the next time this page is opened or it checks in."})
     fail = state.get('fail')
     if fail:
         out.append({'kind': 'fail', 'at': fail.get('t'), 'text': f"Its last scheduled check-in stopped on an error ({fail.get('what')}). It tries again at the next one; if this stays, the program needs a look."})

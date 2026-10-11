@@ -456,6 +456,24 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     st.scorecard.groups.above = []; const none = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, ...st } })); await sleep(30);
     check('and leaves that part out while there is nothing in it', !/By how far above its 52-week low/.test(none.text()));
   }
+  // progress, 20 finished trades at a time
+  { const base = { settings: { ...settings, enabled: true }, state: {}, practiceCash: 100000, log: [], plans: [] };
+    const early = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, ...base, progress: { batch: 20, batches: [{ no: 1, first: 1, last: 4, n: 4, full: false, from: '2026-10-10T14:35:00Z', to: '2026-10-11T03:10:00Z', up: 2, avg: -0.5, usd: -202.6, se: 0.9 }], reports: [] } } })); await sleep(30);
+    check('before the first 20 are in it says when the first report comes and what happens then', /Progress, 20 finished trades at a time Its first progress report comes after 20 finished trades \(4 so far\)\. After every 20 finished trades it compares them with the 20 before\. Better: it carries on as it is\. No better: it looks into why, puts back a change of its own if the trades since did clearly worse, and tries the most promising change to one of its rules\. All by itself; each report is also emailed\./.test(early.text()), early.text().slice(early.text().indexOf('Progress, 20'), early.text().indexOf('Progress, 20') + 300));
+    const prog = { batch: 20, batches: [{ no: 1, first: 1, last: 20, n: 20, full: true, from: '2026-10-10T14:35:00Z', to: '2026-10-14T03:10:00Z', up: 12, avg: 0.4, usd: 80, se: 0.3 },
+        { no: 2, first: 21, last: 40, n: 20, full: true, from: '2026-10-14T09:10:00Z', to: '2026-10-19T03:10:00Z', up: 9, avg: -0.35, usd: -70.5, se: 0.3, prev: 0.4, diff: -0.75, margin: 0.42, verdict: 'worse' },
+        { no: 3, first: 41, last: 47, n: 7, full: false, from: '2026-10-19T09:10:00Z', to: '2026-10-20T03:10:00Z', up: 5, avg: 0.5, usd: 35, se: 0.4 }],
+      reports: [{ no: 1, at: '2026-10-14T03:10:00Z', trades: 20, avg: 0.4, usd: 80, up: 12, n: 20, verdict: 'first-up', prev: null, findings: [], actions: ['It carries on as it is.'] },
+        { no: 2, at: '2026-10-19T03:10:00Z', trades: 40, avg: -0.35, usd: -70.5, up: 9, n: 20, verdict: 'worse', prev: 0.4, findings: ['Trades sold at the loss limit: 6 of the 20, averaging -7.2%.'], actions: ['It started a trial: sell at -5% instead of the current "sell at -10%". Why: 6 of the last 20 finished trades were down 5% or more.'] }] };
+    const w = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, ...base, progress: prog } })); await sleep(30);
+    const t = w.text(), part = t.slice(t.indexOf('Progress, 20'), t.indexOf('Improving its own rules') > 0 ? t.indexOf('Improving its own rules') : t.indexOf('What it has done'));
+    check('each batch has a row, newest first: trades, dates, how many ended up, the average, dollars', part.indexOf('41 to 47 (7 of 20 so far)') < part.indexOf('21 to 40') && part.indexOf('21 to 40') < part.indexOf('1 to 20') && /21 to 40 [^%]*9 of 20 -0\.35% -\$70\.50/.test(part) && /1 to 20 [^%]*12 of 20 \+0\.40% \+?\$80\.00/.test(part), part.slice(0, 700));
+    check('a complete batch says how it compares with the one before, and what the autopilot did about it', /worse \(\+0\.40% before\) It started a trial: sell at -5% instead of the current "sell at -10%"\./.test(part) && /the first batch It carries on as it is\./.test(part) && /still filling/.test(part), part.slice(0, 900));
+    check('and what stood out in the last complete batch can be unfolded', /What stood out in trades 21 to 40/.test(part) && /Trades sold at the loss limit: 6 of the 20, averaging -7\.2%\./.test(part) && /"About the same" means the difference is inside what chance alone would give with 20 trades\./.test(part));
+    check('no broken values in the progress table', !/undefined|NaN|\[object|Infinity/.test(w.container.innerHTML) && !/undefined|NaN/.test(early.container.innerHTML));
+    const old = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, ...base } })); await sleep(30);
+    check('an answer from the older function has no progress part', !/Progress, 20 finished trades/.test(old.text()));
+  }
   check('no broken values', !/undefined|NaN|\[object/.test(p.container.innerHTML), (p.container.innerHTML.match(/.{30}(undefined|NaN|\[object).{30}/) || [])[0]);
   console.log(ok ? 'ALL PASS' : 'SOME FAILED');
 })();
