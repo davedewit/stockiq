@@ -717,7 +717,10 @@ remove the folder. `python3 check-tools/workers.py` must show "one" for the 13 g
 
 ### CSV exports
 
-- Stock CSV columns (page `generateExcelExport` and coordinator): `Signal`, `Lower_Level`,
+- Stock CSV columns (page `generateExcelExport` and coordinator): **`Currency` straight after `Price`** (since 11 Oct 2026:
+  the code as the workers report it, `USD`, `AUD`, `JPY`, `EUR`, and `GBp (pence)` for London, so that a London figure is
+  not a bare number; `screenerCurrencyName` on the page, `currency_name` in the coordinator; 40 columns in both),
+  `Signal`, `Lower_Level`,
   `Upper_Level`, `Model_Probability_%`, `Horizon`, `Horizon_Days`, the change columns,
   indicators, `Distance_52W_High_%`, `Distance_From_Low_%`, `52W_High`, `52W_Low`,
   `Market_Regime`, `SPY_20d_Change_%`, `Score_Breakdown`. Several of these were always 0 before
@@ -730,7 +733,9 @@ The owner asked for the "junky" items to be looked at: "Choose from presets" and
 - **Presets** (`analysis.html`, `#presets`): "Magnificent 7" and "Popular ETFs" send their symbols to the single-stock
   report (7 and 4 full reports in one answer: 20 and 11 seconds, about 250 KB and 140 KB of text); "Dow Jones 30" and
   "S&P 500 Complete" simply run those screeners. They work, and they took on the report's fixes of the same day.
-  Still to do on the page: a short comparison (symbol, price, change, score, signal) above a run of several reports.
+  **A run of several reports starts with a side-by-side table** (11 Oct, `formatOption11Result`): symbol, price, the day's
+  change, the report's 0-100 score and its signal label, one line each; a single report has none. The price is taken as
+  the report itself writes it (its "Current Price:" line), because the result carries no currency field.
 - **The two signals functions run one file, kept in git: `stockiq/signals/lambda_function.py`** (no key in it).
   `stockiq-option-2-trading-signals` ("Enter Symbols for Live Signals", up to 10 symbols) and
   `stockiq-option-2-2-auto-signals` ("Auto-detect Top 5 Signals"); which of the two a call is, goes by the function's
@@ -757,10 +762,16 @@ The owner asked for the "junky" items to be looked at: "Choose from presets" and
   positive / negative / mixed) and an honest `methodology` line. On the same day: SBUX +5, VZ +3, PLTR -3, T +3, ABBV -3.
 - **Every field the page read before is still there** (`symbol, current_price, action, confidence, entry_price,
   stop_loss, take_profit, …`; `top_performers` is kept as the name of the list of five), so the page works unchanged.
-  **What a visitor sees until the page's two writers are changed** (`formatOption2Result`, `formatOption22Result` in
-  `analysis-functions.js`): the right time, the honest methodology line, real levels, but still a dollar sign on every
-  price, the words "Top Performers Found", and none of the reasons. That page work was handed to the session doing the
-  report writers (the same currency rule and the same tracker pattern apply).
+- **The page's two writers** (`formatOption2Result`, `formatOption22Result`, sharing `signalBlock`; 11 Oct, late): each
+  reading is `N. SYMBOL - name - price (change today)`, then its label with the points and confidence, the reasons one a
+  line, the trend, and "20-day high" / "20-day low" with how far each is from the price. Prices go through `screenerMoney`
+  from the reading's own currency ("A$60.94", "2,662.00p", "¥2,910.50", "€48.76"). Symbols with no prices are listed at
+  the end. The auto-detect says "Strongest readings", with how many shares were scanned and how the readings fell.
+  **The first line is read by the dashboard's tracker**: the name is cut to 30 characters and set off with " - " for that.
+  **Text from outside is escaped (`reportText`)**: reports are put on the page as HTML, so "AT&T" must be written
+  "AT&amp;T". Unescaped, the tracker also lost the line, because it clears everything from an "&" to the next ";" and
+  the trend line has a ";" (found by the test: 3 of 5 symbols read). Any new report line that prints a name or typed
+  text needs the same.
 - Tests: `python3 signals/test_signals.py` (42 checks on saved prices, beside the two old files; `--show` prints the
   readings). A run by hand against live prices: `python3 signals/lambda_function.py NVDA BHP.AX` or `--auto`.
   Checked live through both function addresses and through the page's own code (`page_run.js 2 custom`, `2 auto`).
@@ -782,7 +793,7 @@ The owner asked for the "junky" items to be looked at: "Choose from presets" and
   Yahoo gives it): `GBp` is pence and is written `503.80p`, never with a pound sign; a market's own currency is only the
   fallback. Three FTSE 100 shares are not quoted in pence at all (CPG.L and IHG.L in US dollars, MTLN.L in euros, 11 Oct
   2026) and now print as such. The coordinator pads the symbol and never cuts it (it cut to five characters until then).
-  CSV files carry bare numbers in the share's own unit and no currency column.
+  CSV files carry bare numbers in the share's own unit, with a `Currency` column beside the price ("CSV exports", above).
 - A company name between symbol and price must stay short (Nikkei names are cut to 22 chars).
 - Rebuilt 10 Oct 2026: one parser (`parseScreenerTop10`) and one calculation
   (`screenerTop10Performance`) feed both the row badge and the popup. Before that the two had
@@ -1822,8 +1833,8 @@ only); (b) an ASX run during ASX hours (the one-bar-a-day rule was only seen aft
 share buys, which now come from rankings made with the one RSI.
 **The small job after it is done too (11 Oct, 13:46 UTC): the report writers and the tracker.** Both screener reports print
 each market's own currency from the workers' `currency` field and whole symbols, and the 🎯 tracker reads them (section 8b,
-"Dashboard performance tracker"). Live: `stockiq-screener-coordinator` `CKR1cZ3wGz/t…`, `analysis-functions.js` (sha256 starts
-`a2fd5ef6c8a2`), `dashboard.html` (`bec16da1ef4c`). Way back: `~/VSCODE/backup/stockiq-screener-coordinator_before_currency_20261011.zip`
+"Dashboard performance tracker"). Live: `stockiq-screener-coordinator` `pUBd8qCLYGjt…`, `analysis-functions.js` (sha256 starts
+`72975c8c108c`), `dashboard.html` (`bec16da1ef4c`). Way back: `~/VSCODE/backup/stockiq-screener-coordinator_before_currency_20261011.zip`
 and the two website files from git.
 **The owner approved the one RSI for every screener on 11 Oct 2026** (asked directly: "Yes, keep it"), knowing that about a
 third of US and London labels and three or four of each top 10 changed on the day.
@@ -2175,8 +2186,8 @@ Needs the owner's decision or more work (nothing here is fixed):
 - **Screener reports, small things left after the currency fix of 11 Oct 2026** (section 8b, "Dashboard performance tracker"):
   the page pads a FTSE price to 8 characters, so a four-figure pence price ("1,835.00p") sits one place to the right of the
   others; equal scores are ordered differently by the page and by the coordinator, so the two top 10s can differ in a
-  tied place; the CSV has no currency column; the Nikkei background report has no company names (the page's has); the
-  trading-signals report (option 2) still prints "$" for whatever symbol it is given.
+  tied place; the Nikkei background report has no company names (the page's has); the single-stock result carries no
+  currency field (the side-by-side table reads the price from the report's own text).
 - **Share-screener workers** (section 8b, "The worker groups"): one code base since 11 Oct 2026. Open: no real company figures
   (one file to change now, once there is a source); the two fixes for Yahoo's oddities to be seen live (FTSE on a morning
   after a session, ASX during its hours); the oddities left on purpose (`MODERATE_SELL`, `STRONG_DOWN`); Russell 1000/2000
@@ -2639,6 +2650,15 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     `~/VSCODE/backup/stockiq-screener-coordinator_before_currency_20261011.zip`. `tracker_run.js` now reads a `res_*.json`,
     `run_all.py` takes `COORD=<file>`, `page_run.js` takes `FUNCS=<file>`.
   - **The owner approved the one RSI for every screener** (asked directly, 11 Oct): it stays.
+  - **Trading-signals writers, a comparison above several reports, a Currency column (14:32 UTC; section 8b, "Trading signals
+    and the presets" and "CSV exports").** The page's two signals writers print what the rebuilt functions send (currency,
+    name, change, reasons, trend, the 20-day high and low, symbols not found; "strongest readings" with the scan's
+    figures); a run of several single-stock reports starts with a side-by-side table; the screener CSV has a `Currency`
+    column in both paths. Tested through the page code, the coordinator and the dashboard's tracker before and after
+    the deploy (the tracker reads every symbol of both signals reports, 0.00% on closed markets). Found by the test and
+    fixed: a name with "&" hid its line from the tracker. Rollback zip:
+    `~/VSCODE/backup/stockiq-screener-coordinator_before_csvcurrency_20261011.zip`. `page_run.js` now keeps the
+    screener's CSV in its result file.
   - Notes: section 8c ends with "Start here when resuming". Everything known is in these files.
   - **The single-stock report and its chart rebuilt** (section 7, "The single-stock report and its chart"), in the first
     session again, after the owner asked whether the individual analysis could be improved. Prices in the share's own
