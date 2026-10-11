@@ -554,6 +554,43 @@ crypto orchestrator or any worker.
 - Equal scores are ranked in coin-list order (largest market cap first), so the top 10 is the
   same on every run. (It used to depend on which worker answered first.)
 
+**How a coin is scored and ordered, and three faults fixed on 11 Oct 2026.** The owner looked at a crypto export and asked
+whether the top 10 is even in the right order (the 11th coin had the same score as the 9th and 10th).
+- **The score** (`stockiq-option-7-1-worker-N`, in the code after "ADVANCED SCORING SYSTEM") is a whole number of points
+  from yes/no rules: MACD (strong bull +3, bull +2, bear -2, strong bear -3), RSI (extremely oversold +3, oversold +2,
+  overbought -2, extremely overbought -3), Bollinger band (oversold +2, bullish +1, bearish -1, overbought -2),
+  stochastic (±1), volume (±1), momentum (strong ±2, ±1), the day's change (over 10% +2, over 5% +1, and the reverse),
+  a breakout above the last 20 days' high (+2), a volume surge on a rising day (+2), 3- and 5-day rise together (+1),
+  a +1 for ten named large coins, and penalties (RSI over 75 and falling -3; down more than 15% in a week -2). Labels by
+  score: 7 or more Strongly positive, 4 Positive, 2 Slightly positive, -1 Mixed, -3 Slightly negative, -5 Negative.
+  **It rewards opposite things at once** (being oversold, and breaking out upwards), and nobody has tested whether it
+  predicts anything for coins (there are no saved coin prices to replay; the entry log below is the forward test).
+- **The order** is by score, and **coins with the same score are listed largest first** (their place in `COINS`), so that
+  the list is the same on every run. That was right in his export. But a whole-number score means many ties: at one run
+  six coins had +3 and three of them were "in the top 10" by size alone. The report now says so under the list when coins
+  tie at the cut ("4 coins have a score of +6; 2 of them are in this list…").
+- **Fault 1: MACD was never worked out, for any coin.** The worker asked for 30 days of prices and MACD needs 35, so
+  `calculate_macd` answered "not enough" every time, and that was read as "BEAR - Below signal line": all 540 coins got
+  "MACD Bear: -2" (the export's MACD column said the same for every row). The order was not changed by it (the same -2
+  for everyone) but every score was 2 too low, every label a notch lower, and the heaviest input was missing. Now 90 days
+  are asked for, for MACD alone (`macd_closes`; everything else still uses the last 30 days, and each coin's other figures
+  were compared before and after: identical), and too little history counts as "NEUTRAL - Not enough history", 0 points.
+  After the fix one run gave: bear 289, strong bear 138, strong bull 71, bull 38; scores from -7 to +11 (they were -7 to
+  +6); 8 coins Strongly positive (there were none).
+- **Fault 2: a coin whose price does not move could stand in the top 10.** VVS (price $0.00000097, too small for the price
+  source's digits) had the same change over 1, 7 and 30 days and an RSI of 0; a flat line reads as "extremely oversold"
+  (+3, +2, +1), which put it 5th. The orchestrator now leaves such coins out of the ranking (`stuck`: no daily range, or
+  the same change over 24 hours, 7 days and 30 days): three at the time (VVS, HTX, GEKKO), so 536 or so are ranked.
+- **What follows from the fix:** the top 10 after 11:52 UTC on 11 Oct 2026 is partly different from before, so "in the top
+  10 since" started again for the newcomers, and **rows of the entry log from before that time were ranked without MACD**:
+  do not mix the two when the track record is measured. The autopilot buys coins by this ranking, so the same goes for
+  its coin trades before and after.
+- **Not touched:** `stockiq-option-7-2-worker-1` (single-coin analysis on the page) has other code than the 54; whether its
+  MACD has the same fault was not checked. The rules themselves (what earns points) were not changed.
+- Deployed with a packaged script to all 54 workers (one zip, the same `CodeSha256` on each: `NmXC9dcsA6p5…`) and the
+  orchestrator (`Tyyx+Pb2l+sy…`). Rollback zips: `~/VSCODE/backup/stockiq-option-7-1-worker_before_macd_20261011.zip`
+  (the same to all 54) and `stockiq-option-7-1-orchestrator_before_macd_20261011.zip`.
+
 **Top-10 history (rebuilt 10 Oct 2026).** Each top-10 coin in a report shows how long it has been
 in the top 10 and what its price has done since: "In the top 10 since 10 Oct 06:02 UTC: $a → $b
 (+5.0%)", the time, the score then and now, and "in the top 10 at N of M checks since then".
@@ -1515,6 +1552,8 @@ weekdays and fails at the weekend.
   Live files were compared byte for byte at each deploy.
 - `deploy-to-s3.sh` carries the rules for how long a browser may keep a copy (section 5, step 8); the first daily run with
   it is Monday 12 Oct: look at its log once (section 12, "After the daily run").
+- Crypto: the 54 `stockiq-option-7-1-worker-N` all `NmXC9dcsA6p5tXJl+u6VZIfdsrvM3ERN/DmMSQ9zalI=`, the orchestrator
+  `Tyyx+Pb2l+sy7avfCncwduEtmFtYn6Lws+5g6dj9Kc0=`, both equal to their mirrors (MACD fix of 11 Oct, section 8b).
 - Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 386 function, 198 panel, 74 portfolio, 22 bell, 16 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
   spreads over markets).
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
@@ -1817,7 +1856,11 @@ Needs the owner's decision or more work (nothing here is fixed):
 - **Screener quality** (section 8b): no real fundamentals in the workers; ASX 24-hour change is 0
   after the ASX close; a few valid symbols return nothing (WBD, PSKY); Russell 1000/2000 lists
   not refreshed; ASX 300 is approximate. All but the lists need worker redeploys.
-- **Crypto track record (review from early Nov 2026).** The entry log (section 8b "Crypto") started
+- **Crypto scoring** (section 8b, "How a coin is scored"): the single-coin worker `stockiq-option-7-2-worker-1` was not
+  checked for the MACD fault the 54 screener workers had; the score mixes opposite ideas and has never been tested for
+  coins; whole-number scores tie often. A finer score, or a test of it, needs saved coin prices.
+- **Crypto track record (review from early Nov 2026).** Entries from before 11:52 UTC on 11 Oct 2026 were ranked without
+  MACD (section 8b): measure the two periods apart. The entry log (section 8b "Crypto") started
   10 Oct 2026. Once it holds a few hundred entries, compare each coin's price 24 hours and 7 days
   after entering the top 10 with the average coin over the same days. Leftovers that can be
   deleted when the owner agrees: Lambda `stockiq-coinspot-predictions-updater` (no longer
@@ -2226,4 +2269,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     kept two days or less; the AI chat's guide told of the cost and the bar. Live: `stockiq-ai-trader` `k2OocgJo…`,
     `stockiq-ai-chat` `cTz2ks6B…`, `practice-portfolio.js?v=18`, `practice-autopilot.js?v=38`. Tests: 386 function,
     198 panel, 74 portfolio, 22 bell, 16 chat.
+  - **Crypto screener: three faults** (section 8b, "How a coin is scored"), found when the owner asked whether the top 10 is
+    in the right order. It is; but MACD had never been worked out for any coin (30 days of prices asked for, 35 needed:
+    every coin scored "MACD Bear: -2"), a coin with a stuck price stood 5th, and ties at the cut went unsaid. The 54
+    workers now ask for 90 days for MACD; the orchestrator leaves stuck coins out and states ties. Scores and the top 10
+    changed at 11:52 UTC.
   - Notes: section 8c ends with "Start here when resuming". Everything known is in these files.
