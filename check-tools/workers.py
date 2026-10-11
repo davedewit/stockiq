@@ -51,3 +51,44 @@ if '--diff' in sys.argv:
         if not files or 'option-7-' in d: continue
         n = sum(1 for l in difflib.unified_diff(strip(base), strip(files[-1]), lineterm='', n=0) if l[:1] in '+-' and l[:3] not in ('+++', '---'))
         print(f"   {os.path.basename(d):<34}{n:>5}")
+if '--contents' in sys.argv:
+    # The honest count: a package's fingerprint changes with the dates of the files inside the zip, so 100 fingerprints can
+    # be one program zipped 100 times. This downloads every worker's package (read-only; kept in the folder given after
+    # --contents, or a temporary one) and compares the files inside it, and the settings each function runs with.
+    import hashlib, zipfile, io, tempfile, urllib.request, concurrent.futures
+    i = sys.argv.index('--contents')
+    keep = sys.argv[i + 1] if len(sys.argv) > i + 1 and not sys.argv[i + 1].startswith('--') else tempfile.mkdtemp(prefix='workers-')
+    os.makedirs(keep, exist_ok=True)
+    def fetch(f):
+        path = os.path.join(keep, f['FunctionName'] + '.zip')
+        if not (os.path.exists(path) and base64sha(path) == f['CodeSha256']):
+            for attempt in range(4):
+                try:
+                    data = urllib.request.urlopen(lam.get_function(FunctionName=f['FunctionName'])['Code']['Location'], timeout=60).read()
+                    open(path, 'wb').write(data); break
+                except Exception as e:
+                    if attempt == 3: return f['FunctionName'], None, str(e)
+        z = zipfile.ZipFile(path)
+        return f['FunctionName'], {n: hashlib.sha256(z.read(n)).hexdigest()[:12] for n in sorted(z.namelist()) if not n.endswith('/')}, None
+    def base64sha(path):
+        import base64
+        return base64.b64encode(hashlib.sha256(open(path, 'rb').read()).digest()).decode()
+    with concurrent.futures.ThreadPoolExecutor(8) as pool:
+        inside = {name: (files, err) for name, files, err in pool.map(fetch, [f for v in groups.values() for f in v])}
+    json.dump({n: v[0] for n, v in inside.items()}, open(os.path.join(keep, '_contents.json'), 'w'), indent=0, sort_keys=True)
+    print(f"\nwhat is inside the packages (kept in {keep}):")
+    code_of = {}
+    for g in sorted(groups):
+        v = groups[g]; failed = [f['FunctionName'] for f in v if inside[f['FunctionName']][0] is None]
+        got = [f for f in v if inside[f['FunctionName']][0] is not None]
+        py = collections.Counter(tuple(sorted((n, h) for n, h in inside[f['FunctionName']][0].items() if n.endswith('.py'))) for f in got)
+        other = collections.Counter(tuple(sorted((n, h) for n, h in inside[f['FunctionName']][0].items() if not n.endswith('.py'))) for f in got)
+        conf = collections.Counter((f['Handler'], f['Runtime'], f['MemorySize'], f['Timeout'], len(f.get('Layers', [])), tuple(sorted(f.get('Environment', {}).get('Variables', {})))) for f in got)
+        code_of[g] = py
+        print(f"\n{g.replace('stockiq-', '')}  ({NAMES.get(g, 'not used')}; {len(v)} functions{'; NOT READ: ' + ', '.join(failed) if failed else ''})")
+        print(f"   code: {len(py)} version(s)")
+        for files, n in py.most_common(6): print(f"      {n:>4} x  " + ', '.join(f"{a} {b}" for a, b in files))
+        print(f"   other files: {len(other)} version(s)")
+        for files, n in other.most_common(4): print(f"      {n:>4} x  " + (', '.join(f"{a} {b}" for a, b in files)[:150] or '(none)'))
+        print(f"   settings: {len(conf)} version(s)")
+        for c, n in conf.most_common(6): print(f"      {n:>4} x  handler {c[0]}, {c[1]}, {c[2]} MB, {c[3]} s, {c[4]} layer(s), env {list(c[5])}")
