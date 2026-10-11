@@ -674,8 +674,8 @@ show. Settings holds the first five items below, Activity the last five:
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=15` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=34`) | Controls and reports only; decisions are made by the Lambda |
+| Portfolio section | `website/practice-portfolio.js` (`?v=16` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=35`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (accounts that may use it without a paid plan; everyone on a paid plan may use it; `*` would make it free for all) and `OPENAI_API_KEY` (never print it) |
@@ -1163,6 +1163,42 @@ not sure whether its improvements needed him to "push" them. They do not, and th
   (the owner had the switch on, so the note that explained an empty check-in was hidden from him).
 - Styles are one `<style id="ap-style">` block the script adds.
 
+### On a phone (added 11 Oct 2026)
+
+The owner asked how the dashboard presents on a phone. Measured at 390px wide it did not: the third
+tab was half hidden (the bar had to be scrolled sideways), the holdings table was 740px wide inside
+a 308px box with its first column squeezed to a few letters a line, the progress table 729px, and
+the trailing-stop menu stuck out past the screen. What was done, all in CSS that only applies on a
+narrow screen (nothing changes at desktop width):
+- **Tabs** (`dashboard.html`, `@media (max-width: 560px)`): the three tabs share the width and their
+  names wrap onto two lines.
+- **Tables become cards** (640px and under). The holdings and sold tables carry class `pp-stack`
+  (heading row `pp-head`, name cell `pp-name`, button cell `pp-act`) and the progress table
+  `ap-stack` (`ap-stack-head`, `ap-stack-title`, `ap-stack-wide`). Each figure cell has a
+  `data-label` ("Bought", "Price then", "Price now", "Value", "Change"; "When", "Ended up", …) that
+  the phone rule prints before the figure, so a row reads as a card with one labelled line per
+  figure and a full-width Sell button. **A new column in one of these tables needs its
+  `data-label`**, or it shows on a phone as a bare figure. The cells carry inline styles, hence the
+  `!important` in those rules. `practice-portfolio.js` had no stylesheet before: it now adds one
+  small `<style id="pp-style">` block (`ensureStyle`).
+- **The breakdown** (`.ap-bd`) keeps its columns: headings and section titles wrap, padding shrinks,
+  the name column loses its 240px minimum.
+- The buy row (dollars and quantity side by side, note and button full width), the trailing-stop
+  menu, "Check in now" / "Sell everything" and the Activity / Settings switch take the full width.
+- Every box and menu was already 16px text, so a phone does not zoom in when one is tapped.
+- **How to check:** `dashboard_page.py` step `mobile` (or `mobile:practice`, `mobile:activity`,
+  `mobile:settings` to leave that view up for a screenshot) lists what sticks out past the screen
+  and what has to be scrolled sideways inside its own box. Headless Chrome will not make its window
+  as narrow as a phone, so wrap the test page first: `python3 check-tools/mobile_frame.py
+  <page.html> <frame.html> [width]` puts it in a frame of that width (default 390) and shows what
+  the page printed underneath. Checked at 320, 360, 390 and 430px, light and dark, with the
+  breakdown open, and the locked view: nothing sticks out, nothing scrolls sideways.
+- **Not checked:** a real phone, and the logged-in dashboard itself. The Reports tab (statistics,
+  Report History) was not part of this: it is the older page and has its own rules for 768px and
+  under, which were not re-measured because its content needs a login.
+- With `sips`, a crop offset of 0 means "centred": use `--cropOffset 1 0` for the top of a tall
+  screenshot, and crop at the image's full width.
+
 ### Smaller facts worth knowing
 
 - **Changing which screeners are ticked while it holds something** (the owner asked what happens
@@ -1202,9 +1238,9 @@ not sure whether its improvements needed him to "push" them. They do not, and th
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
    python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 358 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 189 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 191 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
-     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 68 checks
+     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 70 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
    ```
    `ai_trader_test.py` sets the pace by hand at its top (it patches `DEFAULTS`), as a user who chose
@@ -1217,7 +1253,7 @@ not sure whether its improvements needed him to "push" them. They do not, and th
    into the test page, step `tabs`). After any edit to `dashboard.html` also check that the
    sections still balance and that every inline script parses (`node --check` on each `<script>`
    block): the logged-in page itself cannot be opened from here, it redirects to Sign In.
-   Steps such as `type,sale,trial,preset,sellall,limits,trailstop,split,cards,pace,listswitch,next,budget,shares,progress,open`) with headless
+   Steps such as `type,sale,trial,preset,sellall,limits,trailstop,split,cards,pace,listswitch,next,budget,shares,progress,breakdown,locked,mobile,open`) with headless
    Chrome; `--dump-dom` for what it printed, `--screenshot` for the look (section 12).
 5. **Try the staged function on a copy of the real record**: read the owner's item from both tables
    (read-only), load it into stand-in storage under another name, run `run_user` / `public` with
@@ -1263,11 +1299,11 @@ weekdays and fails at the weekend.
 **What is live, and how to confirm nothing has moved since:**
 - Lambda `stockiq-ai-trader`: `CodeSha256` `PUQWAyAPbNy98SQITl2p+dSMU/wCyxzsIR+geIQ1RQE=`, equal to
   `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,587 lines).
-- Website: `practice-autopilot.js?v=34` (sha256 starts `e7690b791753`), `practice-portfolio.js?v=15`
-  (`1481a9b94beb`), `dashboard.html` (`07c2d015f7a7`), `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
+- Website: `practice-autopilot.js?v=35` (sha256 starts `0a9e814f1629`), `practice-portfolio.js?v=16`
+  (`0dcfa2390915`), `dashboard.html` (`18011c222292`), `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
 - Lambda `stockiq-ai-chat`: `CodeSha256` `LFyuyhd1ivEYAXqSqVkEk+Deq2H+rG9IhzSYdpho+w8=`, equal to `lambda-sync/stockiq-ai-chat/lambda_function.py`. Live files were compared byte for byte.
 - Both repos clean and pushed; **no `check-tools/pending-*` folder is left** (every package was
-  deployed and removed). Tests on the live files: 358 function, 189 panel, 68 portfolio, 13 chat, the
+  deployed and removed). Tests on the live files: 358 function, 191 panel, 70 portfolio, 13 chat, the
   panel-versus-function comparison clean (3,780 budget combinations, 2,915 spreads over markets).
 - Rollback copies of the function, one per deploy, in `~/VSCODE/backup/`:
   `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order: 10 Oct `v2, fast, panel,
@@ -1916,5 +1952,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     bare "#" link that sent the page to the top). Website only, `practice-autopilot.js?v=33`.
   - The "Screeners it buys from" card laid out afresh: a bar for the split, each market's share in
     a box of its own (website only, `practice-autopilot.js?v=34`).
+  - **The dashboard on a phone** (section 8c "On a phone"): the tabs fit, the holdings, sold and
+    progress tables become cards with a label on every figure, the breakdown wraps, the buy row,
+    menus and main buttons take the full width. Website only: `practice-portfolio.js?v=16`,
+    `practice-autopilot.js?v=35`, `dashboard.html`. New test tools: the `mobile` step of
+    `dashboard_page.py` and `mobile_frame.py`. Checked in a phone-width frame in a headless
+    browser, not on a real phone.
   - Notes: section 8c ends with "Start here when resuming"; this session was closed there because
     its context had grown too large. Everything known is in these files.

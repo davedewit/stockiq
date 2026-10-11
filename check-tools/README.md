@@ -119,6 +119,20 @@ Steps: `type` (types in the buy row), `sale` (the autopilot sells in the backgro
 itself), `trial` (a trial of its own rules starts), `off` (the autopilot is switched off), `open` (unfolds the
 details), `preset` (presses a quick set-up), `sellall` (presses "Sell everything it holds" and says yes), `limits` (types your own loss limit), `split` (prints the line that says whose result is whose), `cards` (prints the summary cards and every account value shown since the page opened), `pace` (hands the pace to the risk level, moves the slider, sets one field by hand), `listswitch` (switches the list to buys and sells only and reloads), `trailstop` (chooses each kind of trailing stop and prints what the page says), `tabs` (see above), `progress` (prints the table of progress per batch of 20 finished trades), `shares` (ticks three markets, sets a share by hand, tries to give out more than 100%, moves the risk level), `locked` (shows the autopilot tab as an account without a paid plan sees it), `breakdown` (fills the record with four trades and opens the breakdown table), `budget` (types a budget larger than the practice money and presses the link that puts it right), `next` (prints the countdown, "Needs you", the "What happens next" list and the email line, and presses "Send me a test email"). The printed results are in the `<pre id="out">` of the dumped page.
 
+**On a phone:** step `mobile` lists what sticks out past the edge of the screen and what has to be scrolled
+sideways inside its own box, for the practice portfolio and both parts of the autopilot (`mobile:practice`,
+`mobile:activity` or `mobile:settings` leaves that view up for a screenshot). Headless Chrome will not make its
+window as narrow as a phone, so put the test page in a phone-width frame first with `mobile_frame.py`:
+
+```bash
+python3 check-tools/dashboard_page.py ../website/practice-portfolio.js ../website/practice-autopilot.js /tmp/m.html light "progress,breakdown,mobile" ../website/dashboard.html
+python3 check-tools/mobile_frame.py /tmp/m.html /tmp/m-frame.html 390          # width in px, default 390
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars --window-size=390,3000 \
+  --virtual-time-budget=30000 --dump-dom file:///tmp/m-frame.html > /tmp/m.dom   # the lines starting "mobile" are the result
+```
+
+(Steps `breakdown` and `locked` open the folded breakdown and show the view of an account without a paid plan.)
+
 ## autopilot_plan_check.py (with autopilot_plan_check.js)
 
 Does the autopilot panel describe what the autopilot function really does? The panel works out, for
