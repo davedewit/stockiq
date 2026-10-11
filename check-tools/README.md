@@ -76,11 +76,11 @@ python3 check-tools/ai_trader_test.py lambda-sync/stockiq-ai-trader/lambda_funct
 node check-tools/autopilot_test.js ../website/practice-autopilot.js                      # the dashboard controls
 ```
 
-The first (323 checks) runs the Lambda's code with stand-ins for the database, the screeners, prices,
+The first (335 checks) runs the Lambda's code with stand-ins for the database, the screeners, prices,
 the AI model, headlines and email: budget pacing, risk filters, the coin share, every sell rule, the
 AI model's hold-or-sell review, headlines, the record and what it learns from it, trials of its own
 rules, the owner's own limits and switches, "sell everything", trading hours (also by hand), a switch
-of screeners while it holds something, the spread of the budget over markets, progress per batch of 20 trades and what it does when a batch is no better, a budget that always fits the practice money, what happens next and what needs the owner, the email's status, a clash with the user, missing data, when it is due. The second (162 checks) drives the controls with a stand-in API (the file's real
+of screeners while it holds something, the spread of the budget over markets, progress per batch of 20 trades and what it does when a batch is no better, its own trial of which share to buy, a budget that always fits the practice money, what happens next and what needs the owner, the email's status, a clash with the user, missing data, when it is due. The second (169 checks) drives the controls with a stand-in API (the file's real
 address is never called, because the test replaces `fetch`) and a stand-in for the browser's storage.
 Add a check for whatever you change; when wording changes, the checks that quote it must change too.
 

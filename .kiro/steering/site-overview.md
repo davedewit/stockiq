@@ -669,7 +669,7 @@ show. Settings holds the first five items below, Activity the last five:
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=13` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=26`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=28`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (allow-list; `*` = everyone) and `OPENAI_API_KEY` (never print it) |
@@ -977,6 +977,33 @@ calls out.
   - What it cannot do stays the same: only the five rules in `TUNABLE`, inside their bounds. When
     nothing in them stands out it says so and points at the settings only the owner can change.
   - The panel's table is `progressHtml` (`data.progress`: `batch, batches, reports`).
+- **Its own trial of which share to buy** (11 Oct, after the owner said the study had produced no
+  improvement "to increase profit": he was right, it had only been measured). The factor study
+  (section 7b) found no link between a screener's ranking and what shares did next, and a modest one
+  for how far a share stands above its 52-week low. So the autopilot tests that itself:
+  - `order_of(state, settings, now)`: `state.order` = `{mode, since, buys, ended, result, kept,
+    undone}`; mode `trial` (running), `low52` (kept), `rank` (not kept, stopped, or put back). **It
+    starts by itself at the first share buy** when "Try changes to its own rules" is on; never
+    with that off.
+  - `apply_order(order, picks, candidates)` runs straight after `choose`: on trial, **every second
+    share pick is swapped for the share furthest above its 52-week low** (`from_low`) among the
+    candidates of the same market (so the market shares still hold); once kept, every share pick
+    is. Each share buy is tagged (`o`: `low52` or `rank` on the remembered buy; `chosen: 'order'`
+    for a swapped one, shown in the record as "bought furthest above its 52-week low"). Coins are
+    never touched: they have no such figure.
+  - `review_order` judges it at check-ins: after `TUNE_GROUP` (10) finished each way, the new order
+    is kept only if its average beat the other by more than the margin of error; otherwise shares
+    go on being bought as ranked. It gives up unchanged after `ORDER_GIVE_UP_DAYS` (90), and ends
+    when its trials are switched off. A note and an email either way.
+  - The owner can stop it or put a kept order back: `tune` action with `op: 'stoporder'` /
+    `'restoreorder'`. The page gets `order` (`mode, since, ended, result, kept, undone, group, why,
+    with, without, avgWith, avgWithout`).
+  - On the panel under "Improving its own rules": **"Improvements so far: N being tried now, N kept
+    after a trial, N put back, N tried in all"** (`improvedLine`), and the trial itself
+    (`orderHtml`: "Next, for shares…" before it has started, "Also trying, for shares…" with the
+    two sides' figures and "Stop this trial", then kept with "put it back", or not kept).
+  - Honest limits: ten trades a side is little; the study's edge was modest, from one rising
+    market and today's index members. That is why it is a trial and not a rule.
 - **Emails** (`send_mail`, if `emails` is on): one at each review (no change / trial started /
   trial finished) with the record so far and suggestions about settings only the owner can change.
   `aws lambda invoke --function-name stockiq-ai-trader --payload '{"mail_test": true}' …` sends one
@@ -1001,7 +1028,7 @@ the average per trade, which the panel shows, never by the share of trades that 
   (when the budget's build-up began; reset when it is switched on or the budget or build-up
   changes), `lastRun`, `lastRunBy`, `open` (remembered buys), `exits`, `rest`, `restSince`,
   `lessons`, `tune` (`values`, `trial`, `past`, `mark`, `seq`, `reviewed`), `watch`, `news`, `seen`, `stay`,
-  `strong`, `ahead`, `aiSell`, `closedCount`, `realizedUsd`, `progress` (`done`: batches reported, `reports`), `mail` (what became of the last email:
+  `strong`, `ahead`, `aiSell`, `closedCount`, `realizedUsd`, `progress` (`done`: batches reported, `reports`), `order` (the trial of which share to buy), `mail` (what became of the last email:
   `t, ok, subject, why`), `fail` (a scheduled check-in that stopped on an error; cleared by the next
   good one), `savedAt` (when the settings last changed).
 - `public()` (every action returns it): `settings, state, log, scorecard, lessons, resting, recent,
@@ -1010,11 +1037,11 @@ the average per trade, which the panel shows, never by the share of trades that 
   `coinShare, realizedUsd, month` (`last30`, `before30`), `now, nextCheck, holding, plans` (per
   holding: `sellBy` (the end of its holding time, moved on to its market's next opening), `market,
   closed, opens, stop, take, arm, floor, move, room, tight, mode, trail, peak, trial, view, auto`) and `options` (screeners,
-  check-in and holding-time choices, the level table, `groups`); `split` (per ticked market: `group, holdings, pct, usd, own`); `money`; `progress` (`batch, batches, reports`); and `coming`, `needs`, `mail`, `reviewed` (next section). **The panel is drawn from these; change the
+  check-in and holding-time choices, the level table, `groups`); `split` (per ticked market: `group, holdings, pct, usd, own`); `money`; `progress` (`batch, batches, reports`); `order`; and `coming`, `needs`, `mail`, `reviewed` (next section). **The panel is drawn from these; change the
   two together.**
 - Other actions: `mailtest` (one test email to the account's own address, at most every 10 minutes), `sellall` (`sell_everything`: only the autopilot's holdings, recorded as sold by
   the owner; holdings of a closed market are kept; its `summary` has `sold`, `skipped`, `closed`) and `tune` (`tune_by_hand`: `op: 'restore', param` puts one rule back to the level's;
-  `op: 'stop'` ends the running trial; nothing outside `TUNABLE` can be touched).
+  `op: 'stop'` ends the running trial; `op: 'stoporder'` / `'restoreorder'` stop the trial of the buying order or put a kept order back; nothing else can be touched).
 
 ### What happens next, and what needs the owner (added 11 Oct 2026)
 
@@ -1127,8 +1154,8 @@ not sure whether its improvements needed him to "push" them. They do not, and th
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 323 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 162 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 335 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 169 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 66 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
@@ -1179,20 +1206,20 @@ apostrophe must allow for it; a test of an action that depends on the day (tradi
 must set the function's clock (`m.datetime = at(when)` in `ai_trader_test.py`), or it passes on
 weekdays and fails at the weekend.
 
-### Start here when resuming (state at 04:00 UTC on 11 Oct 2026, the end of a two-day session)
+### Start here when resuming (state at 04:30 UTC on 11 Oct 2026, the end of a two-day session)
 
 **What is live, and how to confirm nothing has moved since:**
-- Lambda `stockiq-ai-trader`: `CodeSha256` `wd98MVHpFnBcjE8DEm3iwJuCEY3Kpj055CvXMHYz0Z8=`, equal to
-  `lambda-sync/stockiq-ai-trader/lambda_function.py` (about 2,250 lines).
-- Website: `practice-autopilot.js?v=26` (sha256 starts `2909cbf2f5fc`), `practice-portfolio.js?v=13`
-  (`ad1c1372002e`), `dashboard.html` (`50ed32335f86`). Live files were compared byte for byte.
+- Lambda `stockiq-ai-trader`: `CodeSha256` `pgElWqPN3JXBw+iOsBhXwtksKgZo2EXY1tEpTpjd/Ew=`, equal to
+  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,445 lines).
+- Website: `practice-autopilot.js?v=28` (sha256 starts `9b51554782cf`), `practice-portfolio.js?v=13`
+  (`ad1c1372002e`), `dashboard.html` (`a1dbcd8b81e8`). Live files were compared byte for byte.
 - Both repos clean and pushed; **no `check-tools/pending-*` folder is left** (every package was
-  deployed and removed). Tests on the live files: 323 function, 162 panel, 66 portfolio, the
+  deployed and removed). Tests on the live files: 335 function, 169 panel, 66 portfolio, the
   panel-versus-function comparison clean (3,780 budget combinations, 2,915 spreads over markets).
 - Rollback copies of the function, one per deploy, in `~/VSCODE/backup/`:
   `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order: 10 Oct `v2, fast, panel,
   autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
-  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress`.
+  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order`.
 - First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and
   the function's log (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors
   ("check-in failed", "not worked out", "not sent") and for the firsts listed below.
@@ -1219,8 +1246,9 @@ look-back; "Check in now" releasing the next step early; a test email accepted b
 (03:00 UTC 11 Oct); the budget being put right on opening the page (03:59 UTC).
 **Not yet seen for real:** a "tighten" answer; the larger model in a review; a coin held back until
 it has stayed; a buy spread over several markets (share markets were shut all weekend); "Check in
-now" pressed with a market closed; the share split by 52-week low filling; **the first progress
-report (at 20 finished trades), any trial, and their emails**; whether the test email reached the
+now" pressed with a market closed; the share split by 52-week low filling; **the trial of which
+share to buy starting at Monday's first share buy** (`state.order` was still absent at hand-over);
+**the first progress report (at 20 finished trades), any trial, and their emails**; whether the test email reached the
 owner's inbox; and the logged-in dashboard itself (every check used a stand-in server).
 
 **Limits to remember:** a stop only acts at a check-in (CFX and CKB were both sold below where
@@ -1240,10 +1268,12 @@ the average per trade.
    spread over US shares, Australian shares and coins; the "What happens next" list and the split
    line reading right against what really happened).
 2. The first progress report at 20 finished trades: read the note, the email and the table.
-3. If the breakdown "By how far above its 52-week low when bought" shows the study's pattern after
-   8 or more trades a band: build a trial of buying shares in that order beside the current one
-   (it needs the trial machinery to take a non-numeric buying rule: `propose`, `rule_text`,
-   `own_rules`, `remember_buy`, `trial_figures` are the places).
+3. The trial of which share to buy (built and live at the end of the session): watch it start,
+   check the two kinds of buy in the activity list and the two sides' figures on the panel, and
+   read its verdict when 10 have finished each way. Next ideas of the same kind, to be tried the
+   same way and never adopted from hindsight: longer holding times for shares (the study: one-day
+   holds lost to costs, 20-day holds did not), and the same question for coins once the entry log
+   of section 8b has enough rows.
 4. The screener scoring itself (section 7b): not touched. Changing it is the owner's decision and
    a redeploy of worker groups; the study does not support a re-weighting yet. The same study for
    the larger US lists, ASX / FTSE / Nikkei and coins needs prices that are not on this machine
@@ -1749,5 +1779,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     larger than the practice money is now put right wherever it is met**, not only refused when
     typed (the owner's saved $200,000 became $99,941 the moment the page was opened). Rollback zip:
     `…_before_autopilot_progress_20261011.zip`. Live: `practice-autopilot.js?v=26`.
+  - **Its own trial of which share to buy** (section 8c, "Learning"): every second share is the one
+    furthest above its 52-week low on the shortlist, kept only if clearly better after 10 finished
+    each way; "Improvements so far" line on the panel. Built after the owner pointed out that the
+    study had been measured and reported but not acted on. Rollback zip:
+    `…_before_autopilot_order_20261011.zip`. Live: `practice-autopilot.js?v=28`.
   - Notes: section 8c ends with "Start here when resuming"; this session was closed there because
     its context had grown too large. Everything known is in these files.
