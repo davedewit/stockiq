@@ -62,7 +62,7 @@ check('someone not on the list is refused', call(action='get', userId='stranger@
 check('not on the list cannot switch it on', m.clean_settings({'enabled': True}, 'stranger@y.com')['enabled'] is False)
 s, b = call(action='get', userId=U); check('defaults', b['allowed'] and b['settings'] == dict(m.DEFAULTS) and '3-100' in b['options']['screeners'], b)
 s, b = call(action='save', userId=U, settings={'enabled': True, 'risk': 9, 'budgetUsd': 'lots', 'periodDays': 0.2, 'everyHours': 7, 'maxHoldDays': 5, 'screeners': ['3-100', 'nope'], 'x': 1})
-check('settings are cleaned', b['settings'] == {'enabled': True, 'risk': 5, 'budgetUsd': 10000.0, 'periodDays': 1, 'everyHours': 24, 'maxHoldDays': 5, 'screeners': ['3-100'], 'aiSell': True, 'selfTune': True, 'emails': True, 'stopPct': None, 'takePct': None, 'auto': [], 'trailMode': 'gains'} and b['state'].get('startedAt') and b['log'][-1]['text'].startswith('Autopilot on'), b['settings'])
+check('settings are cleaned', b['settings'] == {'enabled': True, 'risk': 5, 'budgetUsd': 10000.0, 'periodDays': 1, 'everyHours': 24, 'maxHoldDays': 5, 'screeners': ['3-100'], 'aiSell': True, 'selfTune': True, 'emails': True, 'stopPct': None, 'takePct': None, 'auto': [], 'trailMode': 'gains', 'shares': {}} and b['state'].get('startedAt') and b['log'][-1]['text'].startswith('Autopilot on'), b['settings'])
 check('run before switching on is refused', call(action='run', userId='dave@x.com')[0] == 400)
 check('garbage requests', m.lambda_handler({'requestContext': {}, 'body': 'x'}, None)['statusCode'] == 400 and call(action='zzz', userId=U)[0] == 400 and call(action='get')[0] == 400)
 
@@ -160,10 +160,10 @@ D.t.clear(); PRICES.clear(); MODEL['answer'] = None; SNAP.update({'3-100': rows(
 rec = m.load_item(U); rec['settings'].update(enabled=True, risk=5, budgetUsd=4000.0, periodDays=1, everyHours=24, maxHoldDays=20, screeners=['3-100', '4-200', '5-ftse100']); rec['state']['startedAt'] = m.iso(mon(0)); m.save_item(U, rec)
 check('due per market: Sydney open, the others shut', m.due_markets(m.load_item(U), mon(1)) == ['au'] and m.due_markets(m.load_item(U), mon(9)) == ['uk'] and m.due_markets(m.load_item(U), mon(15)) == ['us'] and m.due_markets(m.load_item(U), mon(22)) == [])
 s, rec = run2(mon(1), markets=['au']); p = portfolio(); h = p['holdings'][0]
-check('Sydney check-in buys only Australian shares, in dollars at the exchange rate', s['bought'] == 3 and all(x['symbol'].endswith('.AX') and x['currency'] == 'AUD' and x['buyFx'] == 0.70 for x in p['holdings']) and abs(h['qty'] - 1000 / (h['buyPrice'] * 0.70)) < 1e-9 and h['costUsd'] == 1000 and p['cash'] == 97000, [(x['symbol'], x['currency'], x['buyFx']) for x in p['holdings']])
+check('Sydney check-in buys only Australian shares, in dollars at the exchange rate, and only the Australian share of the budget (1 of the 4 holdings: US 2, Australia 1, UK 1)', s['bought'] == 1 and m.market_slots(m.load_item(U)['settings']) == {'US shares': 2, 'Australian shares': 1, 'UK shares': 1} and all(x['symbol'].endswith('.AX') and x['currency'] == 'AUD' and x['buyFx'] == 0.70 for x in p['holdings']) and abs(h['qty'] - 1000 / (h['buyPrice'] * 0.70)) < 1e-9 and h['costUsd'] == 1000 and p['cash'] == 99000, [(x['symbol'], x['currency'], x['buyFx']) for x in p['holdings']])
 check('each market keeps its own last check', rec['state']['lastRunBy'] == {'au': m.iso(mon(1))} and m.due_markets(rec, mon(2)) == [] and m.due_markets(rec, mon(9)) == ['uk'] and m.due_markets(rec, mon(1, day=13)) == ['au'])
 s, rec = run2(mon(9), markets=['uk']); p = portfolio(); uk = [x for x in p['holdings'] if x['symbol'].endswith('.L')]
-check('London check-in: pence handled, the budget cap holds', s['bought'] == 1 and uk[0]['currency'] == 'GBp' and abs(uk[0]['buyFx'] - 0.013) < 1e-12 and abs(uk[0]['qty'] * uk[0]['buyPrice'] * 0.013 - 1000) < 1e-6 and len(p['holdings']) == 4, [(x['symbol'], x['buyFx']) for x in p['holdings']])
+check('London check-in: pence handled, the budget cap holds', s['bought'] == 1 and uk[0]['currency'] == 'GBp' and abs(uk[0]['buyFx'] - 0.013) < 1e-12 and abs(uk[0]['qty'] * uk[0]['buyPrice'] * 0.013 - 1000) < 1e-6 and len(p['holdings']) == 2, [(x['symbol'], x['buyFx']) for x in p['holdings']])
 PRICES['S00.AX'] = 100.0 * 0.75; FX['AUDUSD=X'] = 0.77            # share down 25% in its own currency, currency up 10%: down 17.5% in dollars
 s, rec = run2(mon(15), markets=['us']); check('New York check-in leaves the Sydney holding alone while Sydney is shut', s['sold'] == 0 and any(x['symbol'] == 'S00.AX' for x in portfolio()['holdings']))
 s, rec = run2(mon(1, day=13), markets=['au']); sold = [c for c in portfolio()['closed'] if c['symbol'] == 'S00.AX']
@@ -295,8 +295,8 @@ D.t.clear(); PRICES.clear(); SNAP['7-1'] = rows('crypto', '7-1'); SNAP['3-100'] 
 rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=10000.0, periodDays=1, everyHours=0.5, maxHoldDays=20, screeners=['3-100', '7-1']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
 for i in range(60): s, rec = run(t0 + dt.timedelta(minutes=30 * i))
 coins = [h for h in portfolio()['holdings'] if h.get('by') == 'ai']; asked = len(buy_prompts()); last = rec['log'][-1]
-check('shares and coins at Balanced with no share to buy: coins stop at a quarter of the budget and it says why', len(coins) == 2 and sum(h['costUsd'] for h in coins) == 2500 and last['key'] == 'coins' and '$2,500 is in coins, and the Balanced level puts at most 25% of the budget ($2,500) in coins. Tick a share screener as well, or move the level up' in last['text'], last)
-check('the same uneventful check-in is counted, not listed again', last.get('n', 1) > 10 and last['first'] < last['t'] and len([e for e in rec['log'] if e.get('key') == 'coins']) == 1, (last.get('n'), len(rec['log'])))
+check('shares and coins at Balanced with no share to buy: coins stop at a quarter of the budget and it says why', len(coins) == 2 and sum(h['costUsd'] for h in coins) == 2500 and last['key'] == 'share' and last['text'] == 'Checked in. Coins already hold their share of the budget ($2,500 of $2,500). The rest is for US shares, bought when that market is open. The shares are set under "Screeners it buys from".', last)
+check('the same uneventful check-in is counted, not listed again', last.get('n', 1) > 10 and last['first'] < last['t'] and len([e for e in rec['log'] if e.get('key') == 'share']) == 1, (last.get('n'), len(rec['log'])))
 s, rec = run(t0 + dt.timedelta(hours=31)); SNAP['3-100'] = rows(); check('with the coin share used up the AI model is not asked to pick again', len(buy_prompts()) == asked, (asked, len(buy_prompts())))
 
 # --- hold or sell: the AI model reviews each holding the rules are keeping, with the screener's figures now and recent headlines
@@ -717,7 +717,7 @@ rec = m.load_item(U); rec['settings'].update(screeners=['7-1'], risk=3); rec['se
 full = {c['kind']: c for c in m.coming(rec, portfolio(), later, out['plans'])}
 check('a full budget: the next check-in says it buys nothing', 'It buys nothing: the $1,000 budget is fully invested.' in full['check']['text'], full['check'])
 rec = m.load_item(U); pf = dict(portfolio(), holdings=portfolio()['holdings'] + [dict(portfolio()['holdings'][0], id='c2', symbol='C05-USD', label='C05-USD')])
-check('coins at the level\'s share while shares are ticked too: it says no more coins and why', 'It buys no more coins: $2,000 is in coins and the Balanced level allows $2,000 while share screeners are ticked too.' in {c['kind']: c for c in m.coming(m.load_item(U), pf, later, out['plans'])}['check']['text'], [c['text'] for c in m.coming(m.load_item(U), pf, later, out['plans'])][:2])
+check('coins at the level\'s share while shares are ticked too: it says no more coins and why', 'It buys nothing there: Coins already hold their share of the budget ($2,000 of $2,000). The rest of the budget is for the other markets ticked.' in {c['kind']: c for c in m.coming(m.load_item(U), pf, later, out['plans'])}['check']['text'], [c['text'] for c in m.coming(m.load_item(U), pf, later, out['plans'])][:2])
 rec = m.load_item(U); rec['settings']['enabled'] = False
 check('switched off: nothing is coming, and it says its holding stays until sold or switched back on', m.coming(rec, portfolio(), later) == [] and [n['kind'] for n in m.needs(rec, portfolio(), later)] == ['off'] and 'still holds 1 holding: it stays until you sell it or switch it back on' in m.needs(rec, portfolio(), later)[0]['text'])
 rec = m.load_item(U); rec['settings']['screeners'] = []
@@ -778,4 +778,38 @@ check('another setting saved afterwards leaves the budget and adds no second not
 code_, b = call(action='save', userId=U, settings=dict(b['settings'], budgetUsd=62000.0, risk=3)); code_, b = call(action='save', userId=U, settings=dict(b['settings'], budgetUsd=50000.0))
 check('a budget within the practice money is saved as typed', b['settings']['budgetUsd'] == 50000.0)
 m.datetime = clock
+
+# --- the budget is spread over the markets ticked: evenly unless the owner sets a share, coins never above the level's on automatic
+m.datetime = clock; S = lambda risk, screeners, **shares: m.market_slots(dict(m.DEFAULTS, risk=risk, screeners=screeners, shares=shares))
+check('one market ticked gets every holding of the level, coins too', [S(r, ['7-1']) for r in (1, 3, 5)] == [{'Coins': 12}, {'Coins': 8}, {'Coins': 4}] and S(3, ['3-100', '3-8']) == {'US shares': 8})
+check('shares and coins: coins get the level\'s share at most, the rest goes to the shares', [S(r, ['3-100', '7-1']) for r in (1, 2, 3, 4, 5)] == [{'US shares': 12, 'Coins': 0}, {'US shares': 10, 'Coins': 0}, {'US shares': 6, 'Coins': 2}, {'US shares': 3, 'Coins': 3}, {'US shares': 2, 'Coins': 2}], [S(r, ['3-100', '7-1']) for r in (1, 2, 3, 4, 5)])
+check('three markets: an even spread in whole holdings, coins held to the level', S(3, ['3-100', '4-200', '7-1']) == {'US shares': 3, 'Australian shares': 3, 'Coins': 2} and S(5, ['3-100', '4-200', '7-1']) == {'US shares': 2, 'Australian shares': 1, 'Coins': 1} and S(1, ['3-100', '4-200', '5-ftse100']) == {'US shares': 4, 'Australian shares': 4, 'UK shares': 4}, (S(3, ['3-100', '4-200', '7-1']), S(5, ['3-100', '4-200', '7-1'])))
+check('several screeners of one market count as that one market', S(3, ['3-3', '3-5', '3-6', '3-7', '3-8', '4-200', '7-1']) == {'US shares': 3, 'Australian shares': 3, 'Coins': 2})
+check('a share set by hand stands, and the others share what is left', S(3, ['3-100', '4-200', '7-1'], Coins=50) == {'US shares': 2, 'Australian shares': 2, 'Coins': 4} and S(3, ['3-100', '4-200', '7-1'], **{'US shares': 25}) == {'US shares': 2, 'Australian shares': 4, 'Coins': 2} and S(1, ['3-100', '7-1'], Coins=25) == {'US shares': 9, 'Coins': 3}, (S(3, ['3-100', '4-200', '7-1'], Coins=50), S(3, ['3-100', '4-200', '7-1'], **{'US shares': 25})))
+check('shares set by hand that use the whole budget leave nothing for an automatic market; ones that use less leave the rest in cash', S(3, ['3-100', '4-200', '7-1'], **{'US shares': 62.5, 'Coins': 37.5}) == {'US shares': 5, 'Australian shares': 0, 'Coins': 3} and S(3, ['3-100'], **{'US shares': 50}) == {'US shares': 4})
+check('a share for a market that is not ticked is ignored', S(3, ['3-100'], Coins=50) == {'US shares': 8})
+check('the holdings always add up to the level\'s number at most', all(sum(S(r, list(k), **sh).values()) <= m.RISK[r]['positions'] for r in (1, 2, 3, 4, 5) for k in (('3-100',), ('3-100', '7-1'), ('3-100', '4-200', '5-ftse100', '5-nikkei225', '7-1')) for sh in ({}, {'Coins': 33.3}, {'US shares': 10, 'Coins': 10})) and all(sum(S(r, ['3-100', '4-200', '5-ftse100', '5-nikkei225', '7-1']).values()) == m.RISK[r]['positions'] for r in (1, 2, 3, 4, 5)))
+cs = m.clean_settings({'shares': {'US shares': 80, 'Coins': 50, 'Mars': 10, 'UK shares': ''}}, U)['shares']
+check('shares saved: unknown markets dropped, and together never more than 100%', cs == {'US shares': 80.0, 'Coins': 20.0} and m.clean_settings({'shares': 'x'}, U)['shares'] == {} and m.clean_settings({'shares': {'Coins': -5}}, U)['shares'] == {'Coins': 0.0}, cs)
+check('the coin share the rest of the code uses follows the split', m.coin_share(dict(m.DEFAULTS, risk=3, screeners=['3-100', '7-1'])) == 0.25 and m.coin_share(dict(m.DEFAULTS, risk=3, screeners=['7-1'])) == 1.0 and m.coin_share(dict(m.DEFAULTS, risk=3, screeners=['3-100', '7-1'], shares={'Coins': 50})) == 0.5 and m.coin_share(dict(m.DEFAULTS, risk=1, screeners=['3-100', '7-1'])) == 0.0)
+D.t.clear(); PRICES.clear(); MODEL['answer'] = None; MODEL['prompts'].clear(); SNAP.update({'3-100': rows(), '4-200': au_rows(), '7-1': rows('crypto', '7-1')})
+where = lambda: {g: len([h for h in portfolio()['holdings'] if h.get('by') == 'ai' and m.group_of(h) == g]) for g in m.GROUPS if any(m.group_of(h) == g for h in portfolio()['holdings'])}
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=20, screeners=['3-100', '4-200', '7-1']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+s, rec = run(t0); first = where()
+check('the first check-in buys from each market, not three from one', s['bought'] == 3 and first == {'US shares': 1, 'Australian shares': 1, 'Coins': 1}, first)
+for i in (1, 2, 3, 4): s, rec = run(t0 + dt.timedelta(days=i))
+check('built up: 3 US, 3 Australian and 2 coin holdings of $1,000, the whole $8,000', where() == {'US shares': 3, 'Australian shares': 3, 'Coins': 2} and sum(h['costUsd'] for h in portfolio()['holdings']) == 8000.0 and rec['log'][-1].get('key') == 'full', (where(), rec['log'][-1]))
+split = {x['group']: x for x in m.public(m.load_item(U), t0 + dt.timedelta(days=5), U)['split']}
+check('the dashboard is told the spread: holdings, percent and dollars per market, and whether it was set by hand', split == {'US shares': {'group': 'US shares', 'holdings': 3, 'pct': 37.5, 'usd': 3000.0, 'own': False}, 'Australian shares': {'group': 'Australian shares', 'holdings': 3, 'pct': 37.5, 'usd': 3000.0, 'own': False}, 'Coins': {'group': 'Coins', 'holdings': 2, 'pct': 25.0, 'usd': 2000.0, 'own': False}}, split)
+D.t.clear(); MODEL['prompts'].clear(); MODEL['answer'] = {'picks': [{'symbol': f'C0{i}-USD', 'reason': 'coin'} for i in range(3)]}
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=20, screeners=['3-100', '7-1'], shares={'Coins': 12.5}); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+s, rec = run(t0); ask = buy_prompts()[-1]['user']; bought = [(e['symbol'], 'AI model' in e['text']) for e in rec['log'] if e['type'] == 'buy']
+check('the AI model is told a market\'s limit, and picks past it are passed over and filled from the other market by rank', 'At most 1 of them from Coins (candidates of: Crypto (top coins)): that market has its share of the budget otherwise.' in ask and s['bought'] == 3 and where() == {'US shares': 2, 'Coins': 1} and bought[0] == ('C00-USD', True), (bought, where()))
+for i in (1, 2, 3): s, rec = run(t0 + dt.timedelta(days=i))
+check('a share set by hand is kept to: 1 coin holding (12.5%) and 7 US', where() == {'US shares': 7, 'Coins': 1} and m.public(m.load_item(U), t0, U)['split'][1] == {'group': 'Coins', 'holdings': 1, 'pct': 12.5, 'usd': 1000.0, 'own': True}, where())
+MODEL['answer'] = None; rec = m.load_item(U); rec['settings'].update(screeners=['4-200'], shares={}); m.save_item(U, rec)
+for h in list(portfolio()['holdings'])[:2]: PRICES[h['symbol']] = h['buyPrice'] * 1.5
+s, rec = run(t0 + dt.timedelta(days=4)); s, rec = run(t0 + dt.timedelta(days=5))
+check('ticking a different market: what it holds from the old ones stays until sold, and only freed money goes to the new one', where().get('Australian shares') == 2 and sum(where().values()) == 8 and sum(h['costUsd'] for h in portfolio()['holdings']) == 8000.0, where())
+PRICES.clear(); MODEL['prompts'].clear()
 print('ALL PASS' if ok else 'SOME FAILED')
