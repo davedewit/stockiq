@@ -58,15 +58,17 @@ def build_panel():
             for s in universe:
                 if s not in bars or d not in at[s]: continue
                 r = worker.analyze_stock_advanced(s)
-                if r: out[s] = [round(r['score'], 3), codes.get(r.get('recommendation'), 0), round(r.get('rsi') or 50, 1), round(r.get('change_30d') or 0, 2), round(r.get('distance_from_52w_low') or 0, 1)]
+                if r: out[s] = [round(r['score'], 3), codes.get(r.get('recommendation'), 0), round(r.get('rsi') or 50, 1), round(r.get('change_30d') or 0, 2), round(r.get('distance_from_52w_low') or 0, 1), 0,
+                               round(r.get('change_1yr') or 0, 1), round(r.get('change_90d') or 0, 1), round(100 * r['atr'] / r['price'], 2) if r.get('atr') and r.get('price') else 0.0, round(r.get('distance_from_52w_high') or 0, 1)]
         ranked = sorted(out, key=lambda s: -out[s][0])
-        panel[d] = {s: out[s] + [k + 1] for k, s in enumerate(ranked)}      # score, signal, RSI, 30-day change, % above 52-week low, rank
+        panel[d] = {s: out[s][:5] + [k + 1] + out[s][6:] for k, s in enumerate(ranked)}      # 0 score, 1 signal, 2 RSI, 3 30-day change, 4 % above 52-week low, 5 rank, 6 one-year change, 7 90-day change, 8 daily range %, 9 % under 52-week high
         if n % 100 == 0: print(f'  scored {n} of {len(calendar)} days', file=sys.stderr)
     json.dump(panel, open(os.path.join(HERE, 'panel.json'), 'w'))
     return panel
 
 cache = os.path.join(HERE, 'panel.json')
 panel = json.load(open(cache)) if os.path.exists(cache) and '--rebuild' not in sys.argv else build_panel()
+if len(next(iter(next(iter(panel.values())).values()))) < 10: panel = build_panel()      # kept from before the extra figures were added
 days = [d for d in calendar if d in panel]
 
 def rules_of(level, **change):
@@ -109,7 +111,9 @@ def run(rules, period, rng=None):
                 cash += slot * (1 + net / 100); del held[s]; sold_on[s] = n
         # ---- what is bought
         if n < len(period) - 1:
-            if rng is None:
+            if rng is None and rules.get('rank_by') is not None:      # another ranking than the screener's score: its top N, whatever the signal
+                key, sign = rules['rank_by']; short = sorted(rows, key=lambda s: -sign * rows[s][key])[:rules['top']]
+            elif rng is None:
                 short = [s for s, r in rows.items() if r[1] > 0 and r[0] > 0 and r[5] <= rules['top'] and r[2] < rules['max_rsi'] and abs(r[3]) <= rules['max_move30']]
                 short.sort(key=(lambda s: -rows[s][4]) if rules['picker'] == 'low52' else (lambda s: rows[s][5]))
             else:
@@ -193,6 +197,17 @@ for hold in (1, 2, 5, 10, 20, 40, 60):
 say("   and without selling on the screener's signal:")
 for hold in (5, 20, 60):
     r = rules_of(3, hold=hold, signal_exit=False); say('   ' + line(f"held up to {hold} days, no sale on the signal", figures(*run(r, days), days)))
+say(); say("6. Better inputs? The same rules (Balanced: 8 holdings from the top 10, sold at -10%, +18% or the time limit, never on the signal), ranking the list by something else than the screener's score")
+RANKINGS = [("the screener's score (as now)", None), ('furthest above its 52-week low', (4, 1)), ('biggest rise over a year', (6, 1)), ('biggest rise over 90 days', (7, 1)),
+            ('biggest rise over 30 days', (3, 1)), ('biggest fall over 30 days (a rebound)', (3, -1)), ('calmest (smallest daily range)', (8, -1)), ('jumpiest (largest daily range)', (8, 1)), ('lowest RSI', (2, -1))]
+for hold in (20, 60):
+    say(f"   kept up to {hold} days:   [first part -> second part: against the fund per trade (t); account against the fund's; share of 200 random runs that did better on the second part]")
+    for label, key in RANKINGS:
+        r = rules_of(3, hold=hold, signal_exit=False, keep_gain=False, rank_by=key) if key else rules_of(3, hold=hold, signal_exit=False, keep_gain=False)
+        a, b = figures(*run(r, learn), learn), figures(*run(r, test), test)
+        luck = [figures(*run(r, test, random.Random(seed)), test) for seed in range(200)]
+        say(f"   {label:<40} {a['vs']:+5.2f} (t {a['t']:+5.2f}) -> {b['vs']:+5.2f} (t {b['t']:+5.2f});  account {a['total']:+6.1f}% vs {a['spy']:+5.1f}% -> {b['total']:+6.1f}% vs {b['spy']:+5.1f}%;  luck better in {100 * sum(x['total'] > b['total'] for x in luck) / len(luck):3.0f}%")
+say("   None of these uses anything about the company itself (profit, debt, growth): there are no past figures of that kind on this machine to replay, and the screeners have none either.")
 say(); say("How to read it: a variant is worth a trial with the fake money only if it was ahead on BOTH parts and random buying rarely beat it. Past results; they promise nothing.")
 stamp = datetime.date.today().isoformat()
 open(os.path.join(HERE, f'results-replay-{stamp}.txt'), 'w').write('\n'.join(out) + '\n')

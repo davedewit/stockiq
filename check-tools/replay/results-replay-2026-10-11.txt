@@ -53,4 +53,27 @@ Decisions once a day at the close, traded at the next open; buys by rank (the AI
    held up to 20 days, no sale on the signal        476 trades,  58% ended up,  +1.88% a trade after costs,  +0.58 against the fund (t +1.40); account  +111.9% (the fund +107.5%), worst fall  -21.4%, held 17 days
    held up to 60 days, no sale on the signal        241 trades,  64% ended up,  +3.81% a trade after costs,  +1.22 against the fund (t +1.80); account  +114.7% (the fund +107.5%), worst fall  -15.3%, held 33 days
 
+6. Better inputs? The same rules (Balanced: 8 holdings from the top 10, sold at -10%, +18% or the time limit, never on the signal), ranking the list by something else than the screener's score
+   kept up to 20 days:   [first part -> second part: against the fund per trade (t); account against the fund's; share of 200 random runs that did better on the second part]
+   the screener's score (as now)            +0.33 (t +0.62) -> +0.58 (t +0.82);  account  +55.9% vs +53.5% ->  +48.3% vs +39.2%;  luck better in   6%
+   furthest above its 52-week low           +1.96 (t +3.28) -> +2.33 (t +2.80);  account +116.8% vs +53.5% -> +100.9% vs +39.2%;  luck better in   0%
+   biggest rise over a year                 +0.59 (t +0.99) -> +2.46 (t +2.92);  account  +65.1% vs +53.5% -> +104.0% vs +39.2%;  luck better in   0%
+   biggest rise over 90 days                +0.88 (t +1.60) -> +3.50 (t +3.90);  account  +75.2% vs +53.5% -> +131.1% vs +39.2%;  luck better in   0%
+   biggest rise over 30 days                +0.79 (t +1.53) -> +1.85 (t +2.21);  account  +70.9% vs +53.5% ->  +81.9% vs +39.2%;  luck better in   0%
+   biggest fall over 30 days (a rebound)    +0.51 (t +0.95) -> +0.74 (t +0.96);  account  +62.0% vs +53.5% ->  +48.9% vs +39.2%;  luck better in   6%
+   calmest (smallest daily range)           -0.59 (t -1.77) -> -1.97 (t -3.70);  account  +25.5% vs +53.5% ->   -6.5% vs +39.2%;  luck better in 100%
+   jumpiest (largest daily range)           +1.64 (t +2.57) -> +2.97 (t +3.39);  account +108.4% vs +53.5% -> +124.2% vs +39.2%;  luck better in   0%
+   lowest RSI                               +0.29 (t +0.61) -> -0.39 (t -0.57);  account  +54.3% vs +53.5% ->  +19.8% vs +39.2%;  luck better in  81%
+   kept up to 60 days:   [first part -> second part: against the fund per trade (t); account against the fund's; share of 200 random runs that did better on the second part]
+   the screener's score (as now)            +2.48 (t +2.12) -> +0.31 (t +0.25);  account  +81.3% vs +53.5% ->  +38.6% vs +39.2%;  luck better in  10%
+   furthest above its 52-week low           +2.35 (t +2.30) -> +3.41 (t +2.58);  account  +90.7% vs +53.5% ->  +89.7% vs +39.2%;  luck better in   0%
+   biggest rise over a year                 +1.16 (t +1.09) -> +5.09 (t +4.06);  account  +66.4% vs +53.5% -> +130.3% vs +39.2%;  luck better in   0%
+   biggest rise over 90 days                +1.77 (t +1.65) -> +3.23 (t +2.39);  account  +79.8% vs +53.5% ->  +90.9% vs +39.2%;  luck better in   0%
+   biggest rise over 30 days                +1.92 (t +1.70) -> +0.60 (t +0.43);  account  +77.7% vs +53.5% ->  +41.5% vs +39.2%;  luck better in   6%
+   biggest fall over 30 days (a rebound)    +2.67 (t +2.46) -> +2.62 (t +2.06);  account  +89.7% vs +53.5% ->  +71.1% vs +39.2%;  luck better in   0%
+   calmest (smallest daily range)           -0.50 (t -0.54) -> -3.66 (t -3.04);  account  +38.4% vs +53.5% ->   +3.6% vs +39.2%;  luck better in  90%
+   jumpiest (largest daily range)           +2.75 (t +2.59) -> +2.97 (t +2.69);  account +102.7% vs +53.5% -> +101.8% vs +39.2%;  luck better in   0%
+   lowest RSI                               +0.21 (t +0.19) -> -4.08 (t -2.85);  account  +47.8% vs +53.5% ->  -14.7% vs +39.2%;  luck better in 100%
+   None of these uses anything about the company itself (profit, debt, growth): there are no past figures of that kind on this machine to replay, and the screeners have none either.
+
 How to read it: a variant is worth a trial with the fake money only if it was ahead on BOTH parts and random buying rarely beat it. Past results; they promise nothing.
