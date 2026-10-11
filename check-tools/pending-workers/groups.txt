@@ -1,0 +1,2 @@
+# The groups this run does, one a line (lines starting with # are left out). Smallest first.
+stockiq-option-3-8-worker
