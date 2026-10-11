@@ -177,6 +177,14 @@ serves it (`cd ~/VSCODE && python3 -m http.server 8765 --bind 127.0.0.1` first, 
 that the bell's script was asked for at the top of the address and so never loaded anywhere but on stockiq.tech. A page whose bell goes to the dashboard ends
 with "Inspected target navigated": that is the bell working.
 
+## workers.py
+
+Who runs what: `python3 check-tools/workers.py` lists every screener worker group on AWS with its screener, how many
+functions it has, whether they all run one version of their code, whether the site calls them, and which groups run the
+same code as another (read-only; `--diff` also counts the lines by which each group's copy in `lambda-sync/` differs from
+the S&P 100 worker). Run it before and after any change to a worker group: after a deploy a group must show "one".
+The findings of 11 Oct 2026 and the plan for one shared source file are in `site-overview.md` section 8b, "The worker groups".
+
 ## autopilot_plan_check.py (with autopilot_plan_check.js)
 
 Does the autopilot panel describe what the autopilot function really does? The panel works out, for

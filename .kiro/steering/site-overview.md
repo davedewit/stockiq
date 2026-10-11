@@ -454,6 +454,47 @@ crypto orchestrator or any worker.
 - No worker Lambda needs creating or deleting when a list changes; idle functions cost nothing.
 - The coordinator de-duplicates results by symbol.
 
+### The worker groups: who runs what code (audit of 11 Oct 2026)
+
+The owner asked whether the screeners "all share the same function", and for it to be made simpler to manage.
+`python3 check-tools/workers.py` prints the state from AWS (`--diff` compares the code); this is what it showed.
+
+- **928 worker functions in 18 groups; 724 of them are called by the site, 204 are not** (`stockiq-option-3-3-worker` 60,
+  `stockiq-option-7-4-worker` 139, `stockiq-option-3-worker` 5: left over, never called; they cost nothing idle and can be
+  deleted when the owner agrees).
+- **The share screeners are one code base that has drifted a little, not 700 different programs.** The S&P 100, S&P 400+600
+  and S&P 1500 workers run the identical file (993 lines). NASDAQ 100 and Dow 30 share another copy: the same functions
+  and the same weights, without the Australian and UK sector lists. The four ASX groups share one file and the Nikkei
+  workers have the same code. FTSE differs from those by about 30 lines (UK sectors).
+- **Every Russell 1000 and Russell 2000 worker has its own file** (100 and 200 different ones): the same code with that
+  worker's own list of stocks written into it (the page sends those two screeners only a worker number). FTSE has 9
+  different files among its 10 workers; why was not looked at.
+- **Differences between markets that nobody chose:** RSI, which carries 20% of the score, is worked out two ways: Wilder's
+  smoothing (the standard) in the ASX and Nikkei workers, a plain 14-day average in the US and FTSE workers; and a
+  fallback for the distance from the 52-week low uses two formulas. The same stock would score a little differently
+  depending on which screener ran it.
+- **Known faults, by group** (none fixed in the share workers yet): no real company figures anywhere (below); ASX 24-hour
+  change is 0 once the ASX has closed (65 workers); FTSE prices a trading day old and pence printed with a £ sign (10);
+  a few valid symbols return nothing (WBD, PSKY); the weights add up to 102%.
+- **The crypto workers** (54, one version) are a different program; their MACD fault was fixed the same day ("Crypto",
+  below). The single-coin worker asks for 60 days and does not have it.
+- **The plan to make it one thing (not started; a job for a fresh session, in this order):**
+  1. One source file for every share-screener worker, kept **in git** (`stockiq/workers/stock_worker.py`; Lambda code has no
+     history today): the ASX / Nikkei version as the base (it handles `.AX`, `.T`, `.L`), with the UK sectors, and the
+     Russell lists moved out of the code into one data file inside the package, looked up by worker number.
+  2. Choose one RSI (Wilder's) and one 52-week formula for all, and fix the known faults there once: the ASX double bar, the
+     FTSE price (`meta.regularMarketPrice`) and pence.
+  3. Prove it before deploying: for each group, score the same saved prices with the old file and the new one
+     (`check-tools/replay` and `paper-test` load a worker's code the same way) and list every score that differs; only the
+     differences that were chosen may remain.
+  4. Deploy group by group with a packaged script like the crypto one (live code checked against the mirror, one rollback
+     zip per group, every function's `CodeSha256` verified afterwards), then run every button end to end (the method at the
+     end of this section). `check-tools/workers.py` must then show "one" for every group and the same code across them.
+  5. Afterwards a change to the scoring is one file, one test, one deploy. Real company figures (the screeners have none)
+     belong in that file too, once there is a source for them.
+  US and FTSE scores will move a little at step 2 (the RSI method): say so, and re-run the backtests' "reproduces the live
+  scores" check against the new file.
+
 ### What the screener workers really do
 
 - They return ~47 data fields per stock and no report text. Codes: `STRONG_BUY`, `BUY`,
@@ -1853,6 +1894,9 @@ Needs the owner's decision or more work (nothing here is fixed):
   wording was neutralised (section 8b). Whether issuing automated signals to paying users
   without a licence is acceptable under Australian law is a question for a lawyer; the owner
   knows and has not had it reviewed. The owner trades as an individual (no company structure).
+- **One code base for the share screeners** (section 8b, "The worker groups"): the plan is written, nothing is started. It
+  also carries the fixes for the known share-screener faults, so they are not worth patching group by group before it.
+  The 204 worker functions the site never calls can be deleted when the owner agrees.
 - **Screener quality** (section 8b): no real fundamentals in the workers; ASX 24-hour change is 0
   after the ASX close; a few valid symbols return nothing (WBD, PSKY); Russell 1000/2000 lists
   not refreshed; ASX 300 is approximate. All but the lists need worker redeploys.
@@ -2274,4 +2318,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     every coin scored "MACD Bear: -2"), a coin with a stuck price stood 5th, and ties at the cut went unsaid. The 54
     workers now ask for 90 days for MACD; the orchestrator leaves stuck coins out and states ties. Scores and the top 10
     changed at 11:52 UTC.
+  - **Audit of the worker groups** (section 8b, "The worker groups"; `check-tools/workers.py`): 928 workers in 18 groups, 204
+    never called; the share screeners are one code base with small drift (two ways of working out RSI, a file per function
+    in the two Russell groups); a plan to make it one source file in git, written and not started.
   - Notes: section 8c ends with "Start here when resuming". Everything known is in these files.
