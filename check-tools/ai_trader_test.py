@@ -703,7 +703,7 @@ rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=800
 m.datetime = at(sun); code_, b = call(action='run', userId=U); m.datetime = clock
 check('(set-up) a Sunday check-in buys a coin and no share', b['summary']['bought'] == 1 and [h['symbol'][-4:] for h in portfolio()['holdings']] == ['-USD'], b.get('summary'))
 later = sun + dt.timedelta(minutes=20); out = m.public(m.load_item(U), later, U); come = out['coming']; by = {c['kind']: c for c in come}
-check('the dashboard is told what happens next, soonest first, then what goes by the number of trades', [c['kind'] for c in come] == ['release', 'check', 'open', 'sell', 'review', 'notes'] and [c.get('at') for c in come[:4]] == sorted(c.get('at') for c in come[:4]) and all('at' not in c for c in come[4:]), [(c['kind'], c.get('at')) for c in come])
+check('the dashboard is told what happens next, soonest first, then what goes by the number of trades', [c['kind'] for c in come] == ['release', 'check', 'open', 'sell', 'pause', 'review', 'notes'] and [c.get('at') for c in come[:5]] == sorted(c.get('at') for c in come[:5]) and all('at' not in c for c in come[5:]), [(c['kind'], c.get('at')) for c in come])
 check('the next check-in: when, in which market, what it looks at and what it may buy', by['check']['at'] == '2026-10-11T09:10:00Z' == out['nextCheck']['at'] and by['check']['text'].startswith('Next check-in (coin market). It looks at the holding it has there (C0') and 'and sells it if it has hit its loss limit, gain mark, stop or time limit, or if the AI review wants it out.' in by['check']['text'] and 'It may buy up to 1 holding of about $1,000 from Crypto (top coins)' in by['check']['text'], by['check'])
 check('when more of the budget is released, with the amounts', by['release']['at'] == '2026-10-11T07:52:00Z' and 'More of the budget is released: $2,000 of the $8,000 may be invested from then ($1,000 until then; $1,000 is invested now).' in by['release']['text'], by['release'])
 check('the first check-in after the share market opens, and what it can buy from there', by['open']['at'] == '2026-10-12T14:40:00Z' and by['open']['text'] == 'First check-in after the US market opens. It can buy from S&P 100 if part of the budget is free then.', by['open'])
@@ -910,4 +910,43 @@ check('and put a kept order back', b['order']['mode'] == 'rank' and b['order']['
 card = m.scorecard(done('low52', [3.0] * 3) + [dict(t, chosen='order') for t in done('low52', [2.0] * 2)] + done('rank', [1.0] * 2))
 check('the record shows the shares bought that way as their own group', [(g['label'], g['n']) for g in card['groups']['chosen']] == [('chosen by rank', 5), ('bought furthest above its 52-week low', 2)], card['groups']['chosen'])
 PRICES.clear(); SNAP['3-100'] = rows(); MODEL['prompts'].clear()
+
+# --- every account: paused after two weeks without a visit to the dashboard, back on at the next visit; a daily limit on AI calls; check-ins side by side
+D.t.clear(); PRICES.clear(); MODEL['answer'] = None; MODEL['prompts'].clear(); SNAP['7-1'] = rows('crypto', '7-1'); SNAP['3-100'] = rows(); sent = []; real_send = m.send_mail
+m.send_mail = lambda to, subject, lines: (sent.append((to, subject, lines)), True)[1]
+m.datetime = at(sun); code_, b = call(action='save', userId=U, settings=dict(m.load_item(U)['settings'], enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=6, maxHoldDays=5, screeners=['7-1'], shares={}))
+visit = m.load_item(U)['state']['visit']
+check('a call from the dashboard is written down as a visit', visit == m.iso(sun) and {c['kind']: c for c in b['coming']}['pause']['at'] == m.iso(sun + dt.timedelta(days=14)) and 'It pauses if the dashboard has not been opened by then (14 days without a visit)' in {c['kind']: c for c in b['coming']}['pause']['text'], b['coming'][-3:])
+m.datetime = at(sun + dt.timedelta(hours=2)); call(action='get', userId=U); same = m.load_item(U)['state']['visit']; m.datetime = at(sun + dt.timedelta(hours=7)); call(action='get', userId=U)
+check('but not every minute: at most every 6 hours', same == visit and m.load_item(U)['state']['visit'] == m.iso(sun + dt.timedelta(hours=7)))
+m.datetime = at(sun + dt.timedelta(days=13)); r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body'])
+check('13 days without a visit: it still checks in', r['paused'] == 0 and len(r['ran']) == 1 and m.load_item(U)['settings']['enabled'] is True, r)
+held = len(portfolio()['holdings']); m.datetime = at(sun + dt.timedelta(days=14, hours=8)); r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); rec = m.load_item(U)
+check('more than 14 days without a visit: it is paused instead of checking in, says so, and emails once', r == {'ran': [], 'paused': 1, 'waiting': 0} and rec['settings']['enabled'] is False and D.Table(m.SETTINGS_TABLE).rows[U]['enabled'] is False and rec['state']['pausedAt'] == m.iso(sun + dt.timedelta(days=14, hours=8)) and len(portfolio()['holdings']) == held and rec['log'][-1]['text'].startswith('Paused: the dashboard has not been opened for 14 days, so the autopilot has stopped checking in.') and 'It switches back on by itself the next time the dashboard is opened.' in rec['log'][-1]['text'] and len(sent) == 1 and sent[0][0] == U and 'paused' in sent[0][1], (r, rec['log'][-1]['text'], sent[-1:]))
+m.datetime = at(sun + dt.timedelta(days=20)); r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body'])
+check('while paused the schedule passes it by: nothing runs, nothing is sent again', r == {'ran': [], 'paused': 0, 'waiting': 0} and len(sent) == 1)
+m.datetime = at(sun + dt.timedelta(days=21)); code_, b = call(action='get', userId=U); rec = m.load_item(U)
+check('the next visit switches it back on by itself, and says so', b['settings']['enabled'] is True and 'pausedAt' not in rec['state'] and D.Table(m.SETTINGS_TABLE).rows[U]['enabled'] is True and any(e['text'].startswith('Welcome back: the autopilot is on again. It had been paused since 25 Oct because the dashboard had not been opened for 14 days.') for e in b['log']) and b['nextCheck'] is not None, [e['text'] for e in b['log']][-2:])
+rec = m.load_item(U); rec['state'].pop('visit'); rec['state']['lastRunBy'] = {}; rec['state']['lastRun'] = None; m.save_item(U, rec); r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body'])
+check('a record from before visits were written down gets its two weeks from now, and is not paused', r['paused'] == 0 and len(r['ran']) == 1 and m.load_item(U)['state']['visit'] == m.iso(sun + dt.timedelta(days=21)))
+quiet = m.load_item(U); quiet['settings']['emails'] = False; quiet['state']['visit'] = m.iso(sun); n_sent = len(sent)
+check('with its emails switched off the pause is not emailed', m.pause_if_away(U, quiet, sun + dt.timedelta(days=30), m.send_mail) is True and len(sent) == n_sent and quiet['settings']['enabled'] is False)
+# several accounts: side by side, and none started when the run is short of time
+rec = m.load_item(U); rec['state'].update(lastRunBy={}, lastRun=None, visit=m.iso(sun + dt.timedelta(days=21))); m.save_item(U, rec)
+two = m.load_item('dave@x.com'); two['settings'].update(enabled=True, risk=3, screeners=['7-1']); two['state'].update(startedAt=m.iso(sun + dt.timedelta(days=21)), visit=m.iso(sun + dt.timedelta(days=21))); m.save_item('dave@x.com', two)
+class Short:
+    def get_remaining_time_in_millis(self): return 60000
+r = json.loads(m.lambda_handler({'source': 'aws.events'}, Short())['body'])
+check('with too little of the run\'s time left no check-in is started: both accounts wait for the next run', r == {'ran': [], 'paused': 0, 'waiting': 2} and m.due_markets(m.load_item(U), sun + dt.timedelta(days=21)) == ['crypto'], r)
+r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body'])
+check('two accounts due at once are both run, each on its own portfolio', len(r['ran']) == 2 and 'dave@x.com' in D.Table(m.PORTFOLIO_TABLE).rows and m.load_item('dave@x.com')['state']['lastRun'] == m.iso(sun + dt.timedelta(days=21)), r)
+# the daily limit on AI calls for one account
+m.datetime = clock; D.t.clear(); MODEL['prompts'].clear(); MODEL['answer'] = {'picks': [{'symbol': 'C03-USD', 'reason': 'model'}]}
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=8, everyHours=24, maxHoldDays=20, screeners=['7-1'], shares={}); rec['state'].update(startedAt=m.iso(t0), ai={'day': m.iso(t0)[:10], 'n': m.AI_CALLS_PER_DAY}); m.save_item(U, rec)
+s, rec = run(t0); buy = [e for e in rec['log'] if e['type'] == 'buy'][-1]
+check('past the day\'s limit the AI model is not asked: the buy goes by rank, and one line says why', MODEL['prompts'] == [] and 'chosen by rank' in buy['text'] and buy['symbol'] == 'C00-USD' and sum('its daily limit' in e['text'] for e in rec['log']) == 1 and rec['state']['ai']['n'] == m.AI_CALLS_PER_DAY, (buy['text'], rec['state']['ai']))
+s, rec = run(t0 + dt.timedelta(hours=1)); check('and it is said once a day, not at every check-in', sum('its daily limit' in e['text'] for e in rec['log']) == 1)
+s, rec = run(t0 + dt.timedelta(days=1)); buy = [e for e in rec['log'] if e['type'] == 'buy'][-1]
+check('the next day the count starts again and the AI model chooses', rec['state']['ai']['day'] == m.iso(t0 + dt.timedelta(days=1))[:10] and 1 <= rec['state']['ai']['n'] <= 3 and 'chosen by the AI model' in buy['text'] and buy['symbol'] == 'C03-USD', (buy['text'], rec['state']['ai']))
+m.send_mail = real_send; MODEL['answer'] = None; MODEL['prompts'].clear()
 print('ALL PASS' if ok else 'SOME FAILED')
