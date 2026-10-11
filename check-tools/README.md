@@ -138,21 +138,24 @@ python3 check-tools/mobile_frame.py /tmp/m.html /tmp/m-frame.html 390          #
 The AI autopilot's buys and sells in the notification bell (`website/autopilot-bell.js`, on every page with a bell).
 
 ```bash
-node check-tools/autopilot_bell_test.js ../website/autopilot-bell.js      # 16 checks: the red number, unread marks, profit or loss, which group is on top, when it asks the function
+node check-tools/autopilot_bell_test.js ../website/autopilot-bell.js      # 20 checks: the red number, unread marks, profit or loss, the one list in order of time, when it asks the function
 python3 check-tools/bell_page.py ../website/autopilot-bell.js /tmp/bell.html light trade     # or: dark report
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars --window-size=900,900 \
   --virtual-time-budget=8000 --dump-dom file:///tmp/bell.html > /tmp/bell.dom      # and --screenshot=/tmp/bell.png
 ```
 
 `bell_page.py` writes a stand-in page whose bell is drawn the way the dashboard draws it, run by the real script with a
-made-up answer to its question: it prints the red number, the order of the list (`trade`: the last trade is the newest
-item, so the trades are on top; `report`: a report is newer), what happens when the page redraws the list, and a click.
+made-up answer to its question: it prints the red number, the one list in order (`trade`: the newest item is a trade;
+`report`: it is a report), what happens when the page redraws its own list, and a click.
 
 `live_bell_check.js` does the same on the **live** pages: `node check-tools/live_bell_check.js index.html analysis.html
 stocks/AAPL.html` opens them in headless Chrome as a signed-in visitor with a made-up address and prints, per page, whether
 the bell's script loaded, the red number and the list after a click. Every call the page makes to the site's functions is
 answered locally (the bell's question with made-up trades), so nothing reaches the site or is written. `NO_THEME=1`
-withholds `theme.js`, to prove a page fetches the bell's script by itself. A page whose bell goes to the dashboard ends
+withholds `theme.js`, to prove a page fetches the bell's script by itself. `REAL_USER=<address>` opens the pages as that
+account and lets its two read-only questions through (its reports, the bell's), so the list is the real one; `SHOT=<file.png>`
+saves a picture with the bell open; `LOCAL_BELL=<file>` gives the page a staged copy of the script, to try a change on the
+live pages before it is deployed. The address is never printed. A page whose bell goes to the dashboard ends
 with "Inspected target navigated": that is the bell working.
 
 ## autopilot_plan_check.py (with autopilot_plan_check.js)
