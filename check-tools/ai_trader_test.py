@@ -352,9 +352,13 @@ rec = m.load_item(U); rec['settings']['aiSell'] = False; m.save_item(U, rec); be
 check('with "sell early on its review" switched off the AI model is not asked about holdings and nothing is sold early', s['sold'] == 0 and not any('Holdings:' in p['user'] for p in MODEL['prompts'][before:]), s)
 MODEL['answer'] = None
 held = [h for h in portfolio()['holdings']]; D.Table(m.PORTFOLIO_TABLE).rows[U]['data'] = json.dumps(dict(portfolio(), holdings=portfolio()['holdings'] + [{'id': 'mine1', 'symbol': 'S09', 'label': 'S09', 'currency': 'USD', 'qty': 1, 'buyPrice': 100, 'buyFx': 1, 'costUsd': 100, 'boughtAt': m.iso(t0)}]))
+class Open(dt.datetime):                                                                                   # a Thursday afternoon UTC: the US market is open
+    @classmethod
+    def utcnow(cls): return dt.datetime(2026, 10, 15, 15, 0, 0)
+clock = m.datetime; m.datetime = Open
 m.fetch_quote = quote; code_, b = call(action='sellall', userId=U); p = portfolio()
-check('sell everything it holds: all its holdings are sold, yours are left, and it is logged as your doing', code_ == 200 and b['summary'] == {'sold': len(held), 'skipped': []} and [h['id'] for h in p['holdings']] == ['mine1'] and len(p['closed']) == len(held) and b['plans'] == [] and 'Sold because you pressed "Sell everything it holds"' in b['log'][-1]['text'] and b['log'][-1]['kind'] == 'hand' and all(t['exit'] == 'hand' for t in m.load_item(U)['history'][-len(held):]), (code_, b.get('summary'), [h['id'] for h in p['holdings']]))
-code_, b = call(action='sellall', userId=U); check('pressing it again with nothing held does nothing', code_ == 200 and b['summary'] == {'sold': 0, 'skipped': []} and len(portfolio()['closed']) == len(held))
+check('sell everything it holds: all its holdings are sold, yours are left, and it is logged as your doing', code_ == 200 and b['summary'] == {'sold': len(held), 'skipped': [], 'closed': []} and [h['id'] for h in p['holdings']] == ['mine1'] and len(p['closed']) == len(held) and b['plans'] == [] and 'Sold because you pressed "Sell everything it holds"' in b['log'][-1]['text'] and b['log'][-1]['kind'] == 'hand' and all(t['exit'] == 'hand' for t in m.load_item(U)['history'][-len(held):]), (code_, b.get('summary'), [h['id'] for h in p['holdings']]))
+code_, b = call(action='sellall', userId=U); m.datetime = clock; check('pressing it again with nothing held does nothing', code_ == 200 and b['summary'] == {'sold': 0, 'skipped': [], 'closed': []} and len(portfolio()['closed']) == len(held))
 rec = m.load_item(U); rec['state']['tune'] = {'values': {'3': {'take': 9.0}}, 'past': [], 'mark': 0, 'trial': {'id': 4, 'risk': 3, 'param': 'stop', 'old': -10, 'new': -5.0, 'direction': 'up', 'since': m.iso(t0), 'why': 'w', 'gain': 0.5, 'buys': 0}}; m.save_item(U, rec)
 code_, b = call(action='tune', userId=U, op='stop')
 check('you can stop its running trial', b['tune']['trial'] is None and b['tune']['past'][-1]['verdict'] == 'stopped' and b['tune']['past'][-1]['result'] == 'stopped by you' and 'You stopped its trial (sell at -5% instead of "sell at -10%"). The rule stays as it was.' in b['log'][-1]['text'], b['tune'])
@@ -583,6 +587,32 @@ SNAP['3-100'] = [dict(r, signal='HOLD') for r in rows()]; PRICES['S20'] = 100.0
 rec = m.load_item(U); s = m.run_user(U, rec, t0 + dt.timedelta(hours=2), snapshot=snapshot, quote=quote, model=model, manual=True, mail=lambda a, b: None, headlines=lambda h, n: [])
 check('"Check in now" with nothing fit to buy: the budget released early is taken back, and it says why', s['bought'] == 0 and not rec['state'].get('ahead') and 'Nothing on the shortlist passed' in (s.get('why') or ''), (s.get('why'), rec['state'].get('ahead')))
 PRICES.clear(); ATR.clear(); SNAP['3-100'] = rows(); SNAP['7-1'] = rows('crypto', '7-1'); D.t.clear()
+
+# --- trading hours: also by hand, nothing is bought or sold in a market that is closed (its last price is not one to trade at)
+sat, thu = dt.datetime(2026, 10, 10, 16, 20, 0), dt.datetime(2026, 10, 15, 15, 0, 0)                          # a Saturday; a Thursday with the US market open
+check('how long until a market opens', m.opens_in('crypto', sat) == 0 and m.opens_in('us', thu) == 0 and abs(m.opens_in('jp', sat) - (31 + 45 / 60)) < 0.1 and abs(m.opens_in('us', sat) - (46 + 15 / 60)) < 0.1, (m.opens_in('jp', sat), m.opens_in('us', sat)))
+def at(when):
+    class Then(dt.datetime):
+        @classmethod
+        def utcnow(cls): return when
+    return Then
+D.t.clear(); PRICES.clear(); ATR.clear(); MODEL['answer'] = None; SNAP['3-100'] = rows(); SNAP['7-1'] = rows('crypto', '7-1'); SNAP['5-nikkei225'] = [dict(r, symbol=f'{4300 + i}.T', label=f'{4300 + i}.T', screener='5-nikkei225') for i, r in enumerate(rows())]
+m.fetch_snapshot, m.fetch_quote, m.ask_model = snapshot, quote, model; m.get_snapshot = lambda key, now=None: snapshot(key); clock = m.datetime
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=20, screeners=['5-nikkei225']); rec['state']['startedAt'] = m.iso(sat); m.save_item(U, rec)
+m.datetime = at(sat); code_, b = call(action='run', userId=U); m.datetime = clock
+check('"Check in now" on a Saturday with only a Japanese screener: nothing is bought, and it says the market is closed and when it opens', code_ == 200 and b['summary']['bought'] == 0 and portfolio() is None and 'none of its markets is open' in b['summary']['why'] and 'The Japanese market is closed, so nothing is bought or sold there now (it opens in about 1 day).' in b['summary']['why'], b.get('summary'))
+rec = m.load_item(U); rec['settings']['screeners'] = ['5-nikkei225', '7-1']; rec['state']['lastRun'] = None; m.save_item(U, rec)
+m.datetime = at(sat + dt.timedelta(minutes=20)); code_, b = call(action='run', userId=U); m.datetime = clock; held = portfolio()['holdings']
+check('with a coin screener ticked as well: coins are bought (they trade at any time), no Japanese share', b['summary']['bought'] >= 1 and all(h['symbol'].endswith('-USD') for h in held) and any('The Japanese market is closed' in e['text'] for e in b['log']), [h['symbol'] for h in held])
+D.Table(m.PORTFOLIO_TABLE).rows[U]['data'] = json.dumps(dict(portfolio(), holdings=portfolio()['holdings'] + [{'id': 'jp1', 'symbol': '4300.T', 'label': '4300.T', 'currency': 'USD', 'qty': 10.0, 'buyPrice': 100.0, 'buyFx': 1, 'costUsd': 1000.0, 'boughtAt': m.iso(sat), 'spyAtBuy': 700.0, 'by': 'ai', 'screener': '5-nikkei225'}]))
+PRICES['4300.T'] = 50.0; rec = m.load_item(U); rec['state']['lastRun'] = None; m.save_item(U, rec)
+m.datetime = at(sat + dt.timedelta(minutes=40)); code_, b = call(action='run', userId=U); m.datetime = clock
+check('a Japanese share it holds is left alone while Tokyo is closed, even far past its loss limit', 'jp1' in [h['id'] for h in portfolio()['holdings']] and b['summary']['sold'] == 0)
+m.datetime = at(sat + dt.timedelta(minutes=50)); code_, b = call(action='sellall', userId=U); m.datetime = clock; left = [h['id'] for h in portfolio()['holdings'] if h.get('by') == 'ai']
+check('"Sell everything it holds" on a Saturday sells the coins and keeps the Japanese share, and says so', left == ['jp1'] and b['summary']['closed'] == ['4300.T'] and b['summary']['sold'] >= 1, (left, b.get('summary')))
+m.datetime = at(dt.datetime(2026, 10, 12, 0, 30, 0)); rec = m.load_item(U); rec['state']['lastRun'] = None; m.save_item(U, rec); code_, b = call(action='run', userId=U); m.datetime = clock
+check('on Monday with Tokyo open it is dealt with', 'jp1' not in [h['id'] for h in portfolio()['holdings']] and b['summary']['sold'] >= 1, b.get('summary'))
+PRICES.clear(); SNAP.pop('5-nikkei225', None); SNAP['3-100'] = rows(); SNAP['7-1'] = rows('crypto', '7-1'); D.t.clear()
 
 # --- improving its own rules: what the record suggests, a trial beside the current rule, keep or drop, an email each time
 TR = lambda pct, peak=None, low=None, rank=2, rsi=50, exit='time', **k: dict(risk=3, pct=pct, peak=pct if peak is None else peak, low=min(pct, 0) if low is None else low, rank=rank, rsi=rsi, exit=exit, screener='3-100', label='X', **k)

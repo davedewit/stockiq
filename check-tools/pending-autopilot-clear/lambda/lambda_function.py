@@ -343,6 +343,14 @@ def market_open(market, now):
     return now.weekday() < 5 and start <= now.hour * 60 + now.minute <= end
 
 
+def opens_in(market, now):
+    """Hours until a market is next open (0 if it is open now); None if not within five days."""
+    for step in range(5 * 24 * 12):
+        if market_open(market, now + timedelta(minutes=5 * step)):
+            return step / 12
+    return None
+
+
 FX_DIRECT = ('AUD', 'GBP', 'EUR', 'NZD')      # quoted as dollars per unit. Others (yen ...) are quoted per dollar and turned over,
                                               # because their per-unit quote is rounded too coarsely (JPYUSD=X is 0.0063)
 
@@ -1565,7 +1573,8 @@ def run_user(user_id, record, now, snapshot=None, quote=None, model=None, manual
                                     + (f"; the next ${size:,.0f} in about {span_text(max(0.0, (more - now).total_seconds()) / 86400)}." if more else '.'))
         elif not buy_from:
             key, why = 'shut', ('Every screener you chose is resting after lagging the market.' if resting & set(settings['screeners'])
-                                else 'It looked after what it holds. None of the markets it buys from is open.' if mine else 'None of the chosen markets is open.')
+                                else 'It looked after what it holds. None of the markets it buys from is open.' if mine
+                                else 'Nothing to do: none of its markets is open.' if manual else 'None of the chosen markets is open.')
         elif coins_full and not candidates:
             key, why = 'coins', (f"${in_coins:,.0f} is in coins, and the {rules['name']} level puts at most {rules['crypto'] * 100:.0f}% of the budget "
                                  f"(${settings['budgetUsd'] * rules['crypto']:,.0f}) in coins. Tick a share screener as well, or move the level up, for it to buy more.")
@@ -1577,10 +1586,12 @@ def run_user(user_id, record, now, snapshot=None, quote=None, model=None, manual
         else:
             key, why = 'same', 'No change.'
         entries.append({'t': iso(now), 'type': 'note', 'symbol': '', 'usd': 0, 'text': 'Checked in. ' + why, 'key': key})
-    shut = sorted({MARKET_NAMES[market_of(k)] for k in settings['screeners'] if not market_open(market_of(k), now)})
+    closed_note = None
+    shut = sorted(mk for mk in its_markets(record) if not market_open(mk, now))
     if manual and shut:
-        entries.append({'t': iso(now), 'type': 'note', 'symbol': '', 'usd': 0,
-                        'text': ('US market is closed' if shut == ['US'] else 'Closed right now: ' + ', '.join(shut) + ' market' + ('s' if len(shut) > 1 else '')) + ': stock prices are the last traded ones.'})
+        waits = [(MARKET_NAMES[mk], opens_in(mk, now)) for mk in shut]
+        closed_note = ' '.join(f"The {name} market is closed, so nothing is bought or sold there now" + (f" (it opens in about {span_text(hours / 24)})." if hours else '.') for name, hours in waits)
+        entries.append({'t': iso(now), 'type': 'note', 'symbol': '', 'usd': 0, 'text': closed_note})
 
     if bought or sold:
         try:
@@ -1605,12 +1616,13 @@ def run_user(user_id, record, now, snapshot=None, quote=None, model=None, manual
     entries += review_tuning(record, now, mail)             # its own rules: judge a trial, or find the next change to try
     add_log(record, entries, now)
     return {'bought': bought, 'sold': sold, 'decidedBy': source, 'entries': entries,
-            'why': next((e['text'][len('Checked in. '):] for e in entries if e.get('key')), None)}
+            'why': ' '.join(x for x in (next((e['text'][len('Checked in. '):] for e in entries if e.get('key')), None), closed_note) if x) or None}
 
 
 def sell_everything(user_id, record, now, quote=None):
     """The user's "Sell everything it holds now": every holding the autopilot bought is sold at the latest price.
-    Returns {'sold': n, 'skipped': [labels with no price], 'conflict': bool}. Holdings the user bought are not touched."""
+    Returns {'sold': n, 'skipped': [labels with no price], 'closed': [labels whose market is shut], 'conflict': bool}.
+    Holdings the user bought are not touched. A holding whose market is closed is kept: its last price is not one to sell at."""
     quote = quote or fetch_quote
     table = db().Table(PORTFOLIO_TABLE)
     item = table.get_item(Key={'userId': user_id}).get('Item')
@@ -1618,7 +1630,9 @@ def sell_everything(user_id, record, now, quote=None):
     portfolio.setdefault('closed', [])
     mine = ai_holdings(portfolio)
     if not mine:
-        return {'sold': 0, 'skipped': []}
+        return {'sold': 0, 'skipped': [], 'closed': []}
+    shut = [h['label'] for h in mine if not market_open(market_of(h.get('screener')), now)]
+    mine = [h for h in mine if h['label'] not in shut]
     symbols = sorted({h['symbol'] for h in mine} | {BENCHMARK})
     with ThreadPoolExecutor(max_workers=8) as pool:
         quotes = dict(zip(symbols, pool.map(quote, symbols)))
@@ -1640,10 +1654,10 @@ def sell_everything(user_id, record, now, quote=None):
         except ClientError as e:
             if e.response['Error']['Code'] != 'ConditionalCheckFailedException':
                 raise
-            return {'sold': 0, 'skipped': [], 'conflict': True}
+            return {'sold': 0, 'skipped': [], 'closed': [], 'conflict': True}
         settle(record, portfolio)
         add_log(record, entries, now)
-    return {'sold': len(entries), 'skipped': skipped}
+    return {'sold': len(entries), 'skipped': skipped, 'closed': shut}
 
 
 def tune_by_hand(record, now, op, param=None):
@@ -1851,7 +1865,8 @@ def lambda_handler(event, context):
             last = parse_time(record['state'].get('lastRun'))
             if last and now - last < timedelta(minutes=RUN_NOW_COOLDOWN_MIN):
                 return respond(429, {'error': f'It checked in a moment ago. Try again in {RUN_NOW_COOLDOWN_MIN} minutes'})
-            summary = run_user(user_id, record, now, manual=True)
+            # also by hand, only the markets that are open now are traded: a closed market's last price is not one it could trade at
+            summary = run_user(user_id, record, now, manual=True, markets=sorted(mk for mk in its_markets(record) if market_open(mk, now)))
             save_item(user_id, record)
             return respond(200, {'success': True, 'allowed': True, 'options': options, 'summary': {k: summary.get(k) for k in ('bought', 'sold', 'decidedBy', 'conflict', 'why')}, **public(record, now, user_id)})
         if action == 'sellall':
