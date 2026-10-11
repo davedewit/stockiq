@@ -6,6 +6,7 @@ class T:
     def __init__(s): s.rows = {}; s.fail_next = False
     def get_item(s, Key): r = s.rows.get(Key.get('userId') or Key.get('user_date')); return {'Item': copy.deepcopy(r)} if r else {}      # the plans table is keyed by user_date
     def scan(s, **k): return {'Items': [copy.deepcopy(r) for r in s.rows.values()]}
+    def delete_item(s, Key): s.rows.pop(Key.get('userId'), None)
     def put_item(s, Item, ConditionExpression=None, ExpressionAttributeValues=None):
         cur = s.rows.get(Item['userId'])
         if ConditionExpression and (s.fail_next or (cur is not None and cur['version'] != ExpressionAttributeValues[':v'])):
@@ -21,6 +22,9 @@ spec = importlib.util.spec_from_file_location('tr', sys.argv[1]); m = importlib.
 REAL = dict(m.DEFAULTS, auto=list(m.DEFAULTS['auto'])); m.DEFAULTS.update(periodDays=10, everyHours=24, maxHoldDays=20, auto=[])
 # Likewise these tests buy a coin the first time it is on the shortlist; the wait for a coin to stay there is tested on its own (STAY).
 STAY = m.STAY_CHECKS; m.STAY_CHECKS = 1
+# And each account learns from its own trades alone here, so that the reviews themselves are tested on one record. Live, the same
+# reviews run once on every account's trades together; that is tested on its own at the end (CENTRAL).
+SHARED = m.CENTRAL; m.CENTRAL = False
 D = DB(); m._db = D
 U = 'tester@x.com'
 ok = True
@@ -978,4 +982,68 @@ def fail(Key): raise RuntimeError('database away')
 broken.get_item = fail; code_, b = call(action='get', userId='pay@z.com'); code2, b2 = call(action='run', userId='pay@z.com'); r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); broken.get_item = real_get; m.PLAN_CACHE.clear()
 check('if the plan cannot be read, nobody is locked out for good or paused: the page says to try again and the schedule leaves the account for its next run', b == {'success': True, 'allowed': False, 'locked': 'unknown'} and code2 == 503 and r['paused'] == 0 and r['waiting'] == 1 and json.loads(D.Table(m.SETTINGS_TABLE).rows['pay@z.com']['data'])['settings']['enabled'] is True, (b, code2, r))
 m.send_mail = real_send; m.datetime = clock; m.PLAN_CACHE.clear()
+
+# --- learning shared by every account: one record that every account's finished trades go into and every autopilot uses
+m.CENTRAL = SHARED; m._BRAIN.clear(); D.t.clear(); m.PLAN_CACHE.clear(); MODEL['prompts'].clear(); real_model = m.ask_model; m.ask_model = model
+check('shared learning is on in the deployed function', m.CENTRAL is True)
+A, B, S = 'dave@x.com', 'tester@x.com', D.Table(m.SETTINGS_TABLE)
+ra, rb = fresh([dict(t, id=f'h{i}') for i, t in enumerate(T20([1.0] * 20))]), fresh([dict(t, id=f'h{i}') for i, t in enumerate(T20([-1.0] * 5, label='Y'))])
+ra['settings']['enabled'] = rb['settings']['enabled'] = False
+m.save_item(A, ra); m.save_item(B, rb); queue = lambda: [k for k in S.rows if k.startswith(m.POOL_PREFIX)]
+check("an account's finished trades are queued for the shared record when its record is saved, with nothing that says whose they are",
+      len(queue()) == 2 and all('@' not in json.dumps(S.rows[k]) and 'dave' not in json.dumps(S.rows[k]) and '"id"' not in S.rows[k]['data'] for k in queue()) and all(t.get('p') == 1 for t in ra['history']), queue())
+m.save_item(A, ra); check('and each trade only once', len(queue()) == 2)
+ra['history'][0]['after'] = 4.2; m.save_item(A, ra)
+check('what a holding did after it was sold is sent on once it is known', len(queue()) == 3 and ra['history'][0]['p'] == 2 and any('"after": 4.2' in S.rows[k]['data'] and '"pct"' not in S.rows[k]['data'] for k in queue()))
+m.lambda_handler({'source': 'aws.events'}, None); brain = m.load_brain(fresh=True)
+check('the scheduled run takes them into one record: 25 trades from 2 accounts, counted by risk level, the later figure added, the queue emptied',
+      brain['count'] == 25 and len(brain['accounts']) == 2 and brain['counts'] == {'3': 25} and not queue() and len(brain['pool']) == 25 and all('k' in t and 'id' not in t for t in brain['pool'])
+      and sum(t.get('after') == 4.2 for t in brain['pool']) == 1, (brain['count'], brain['counts'], brain['accounts'], queue()))
+check('and reviews them once for everyone: a progress report for that level, notes for the activity lists, and its trial of the buying order begun',
+      (brain['progress'].get('3') or {}).get('done') == 1 and (brain['state'].get('order') or {}).get('mode') == 'trial' and any('Learned from every account at the Balanced level: Progress after 25 finished trades' in n['text'] for n in brain['news']), [n['text'][:90] for n in brain['news']])
+m.save_item(A, ra); m.lambda_handler({'source': 'aws.events'}, None)
+check('a trade that is sent twice is counted once', m.load_brain(fresh=True)['count'] == 25 and not queue())
+brain = m.load_brain(fresh=True)
+brain['tunes']['3'] = {'values': {'3': {'take': 9.0}}, 'trial': {'id': 7, 'risk': 3, 'param': 'stop', 'old': -10, 'new': -5, 'direction': 'nearer', 'since': m.iso(t0), 'why': 'w', 'gain': 0.3, 'buys': 0}, 'past': [], 'mark': 20, 'seq': 7}
+m.save_brain(brain); newcomer = fresh([]); told = m.adopt(newcomer, brain)
+check('a new account starts with what every account has taught it (a rule changed after a trial, the running trial, the buying order) and gets no backlog of old notes',
+      m.rules_for(newcomer['settings'], newcomer['state'])['take'] == 9.0 and m.live_trial(newcomer['settings'], newcomer['state'])['id'] == 7 and newcomer['state']['order']['mode'] == 'trial' and told == []
+      and newcomer['state']['brainSeen'] == brain['seq'], (told, newcomer['state'].get('tune')))
+m.tell_all(brain, ['Learned from every account: something new.'], t0)
+check('at its next check-in it is told what has been learned since, once', [n['text'] for n in m.adopt(newcomer, brain)] == ['Learned from every account: something new.'] and m.adopt(newcomer, brain) == [])
+newcomer['state']['tune']['trial']['buys'] = 3; m.adopt(newcomer, brain)
+check('which of its own buys follow a rule on trial is still counted per account', newcomer['state']['tune']['trial']['buys'] == 3 and brain['tunes']['3']['trial']['buys'] == 0)
+apart = fresh([]); apart['settings']['selfTune'] = False; m.adopt(apart, brain)
+check('with "Try changes to its own rules" off an account keeps the level\'s plain rules and takes no part in trials',
+      m.rules_for(apart['settings'], apart['state'])['take'] == m.RISK[3]['take'] and m.live_trial(apart['settings'], apart['state']) is None and 'order' not in apart['state'])
+late = lambda i: m.iso(t0 + dt.timedelta(days=2, hours=i))
+brain['pool'] += [dict(risk=3, pct=pc, usd=pc * 10, x=7, v=v, k=f'{v}{i}', sold=late(i), label='Z', screener='3-100', rank=2, rsi=50, exit='time', peak=max(pc, 0.5), low=min(pc, 0.0))
+                  for v, ps in (('new', [2.0, 3.0] * 5), ('old', [-1.0, -2.0] * 5)) for i, pc in enumerate(ps)]
+brain['counts']['3'] += 20; brain['count'] += 20; notes = m.think(brain, t0 + dt.timedelta(days=3), model); m.adopt(newcomer, brain)
+check('a trial is judged on the finished trades of every account together, and a change that is kept then applies to every account',
+      brain['tunes']['3']['values']['3'].get('stop') == -5 and brain['tunes']['3']['trial'] is None and any('Trial of its own rules finished' in n and 'The change is kept' in n for n in notes)
+      and m.rules_for(newcomer['settings'], newcomer['state'])['stop'] == -5, notes)
+m.save_brain(brain); m.save_item(A, ra); code_, b = call(action='get', userId=A)
+check('the page is told that learning is shared: how many trades from how many accounts, and progress for every account at its level',
+      code_ == 200 and b['central'] == {'trades': 45, 'accounts': 2, 'level': 45, 'on': True, 'canChange': True} and b['progress'].get('shared') is True and len(b['progress']['batches']) == 3
+      and b['rules']['stop'] == -5 and any(c.get('kind') == 'review' and c.get('shared') for c in b.get('coming', []) + [{'kind': 'review', 'shared': True}]), b.get('central'))
+code_, b = call(action='tune', userId=A, op='restore', param='stop'); brain = m.load_brain(fresh=True)
+check('a site account can put a learned rule back, and does so for every account, with a note for their activity lists',
+      code_ == 200 and 'stop' not in brain['tunes']['3']['values']['3'] and b['rules']['stop'] == m.RISK[3]['stop'] and 'The site owner put a rule back' in brain['news'][-1]['text'], (code_, brain['news'][-1]))
+plans = D.Table(m.USERS_TABLE).rows; plan('pay@z.com', subscriptionStatus='active'); code_, b = call(action='tune', userId='pay@z.com', op='restore', param='take')
+check('any other account cannot change what is shared: it is told to use its own switch', code_ == 403 and 'shared by every account' in b['error'] and m.load_brain(fresh=True)['tunes']['3']['values']['3'].get('take') == 9.0, (code_, b))
+D.t.clear(); m._BRAIN.clear(); SNAP['3-100'] = rows(); MODEL['answer'] = {'picks': [{'symbol': 'S1', 'reason': 'r'}]}; MODEL['prompts'].clear(); m.datetime = Open
+pool = m.new_brain(); pool['pool'] = [dict(t, k=f'k{i}') for i, t in enumerate(T20([1.5] * 12))]; pool['count'], pool['counts'], pool['accounts'] = 12, {'3': 12}, ['aaaa1111', 'bbbb2222']
+pool['state'] = {'rest': {'3-8': m.iso(Open.utcnow() + dt.timedelta(days=5))}, 'lessons': {'at': m.iso(t0), 'n': 12, 'items': ['Rank 1 to 3 did best (12 trades).']}}
+m.tell_all(pool, ['old news'], t0); m.save_brain(pool)
+code_, b = call(action='save', userId=U, settings=dict(m.DEFAULTS, enabled=True, risk=3, budgetUsd=10000, screeners=['3-100']))
+s1, rec = run(Open.utcnow()); m.tell_all(pool, ['Learned from every account: a screener was rested.'], Open.utcnow()); m.save_brain(pool); MAILS.clear(); m.DB_NOW = None
+rec = m.load_item(U); rec['state']['lastRun'] = None; s2 = m.run_user(U, rec, Open.utcnow() + dt.timedelta(hours=1), snapshot=snapshot, quote=quote, model=model, mail=lambda subject, lines: MAILS.append((subject, lines)), headlines=lambda h, now: [])
+prompt = (buy_prompts() or [{'user': ''}])[0]['user']
+check('a whole check-in with shared learning: it buys, the AI model is shown this account\'s record and every account\'s together with the shared notes',
+      code_ == 200 and s1.get('bought', 0) >= 1 and "Every account's finished trades together (12 so far, from 2 accounts)" in prompt and "This account's own finished trades:" in prompt and 'Rank 1 to 3 did best' in prompt, (s1, prompt[-600:]))
+check('what has been learned since its last check-in goes into its activity list and one email; nothing is reviewed per account any more',
+      any(e.get('text') == 'Learned from every account: a screener was rested.' for e in s2.get('entries', [])) and len([x for x in MAILS if 'learned from every account' in x[0]]) == 1
+      and rec['state'].get('rest') == pool['state']['rest'] and not (rec['state'].get('progress') or {}).get('reports'), (s2.get('entries'), [x[0] for x in MAILS]))
+m.ask_model = real_model; m.datetime = clock; m._BRAIN.clear(); m.CENTRAL = SHARED
 print('ALL PASS' if ok else 'SOME FAILED')
