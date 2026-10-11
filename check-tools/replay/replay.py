@@ -1,0 +1,198 @@
+"""The autopilot's own rules, replayed over years of daily prices in a few seconds: the fast way to try an idea before it trades.
+
+What it does
+  1. Scores every stock of the list on every past day with the live screener worker's own code, on the prices it would have had
+     that day (as check-tools/paper-test does). That takes about two minutes once and is kept in panel.json.
+  2. Runs the autopilot's rules over those days as it would have run them: the shortlist (top of the ranking, positive score and
+     signal, the level's RSI and 30-day limits), equal holdings out of a fixed budget, at most 3 buys a day, and the sales (loss
+     limit, gain mark, the stop that keeps part of a gain, the longest holding time, signal turned negative, slipped down the
+     ranking). The level tables, the pace and the gain-protection rule are imported from the deployed function, not copied.
+  3. Takes a trading cost off every buy and every sale.
+  4. Keeps the test honest: an idea is chosen on the FIRST part of the period only and then judged on the LAST part, which it has
+     never seen; and it is compared with luck (the same rules buying stocks at random) and with simply holding an S&P 500 fund.
+
+What it is not: decisions are taken once a day at the close and traded at the next morning's open (the live autopilot checks in
+more often); the AI model's choice among the shortlist and its review of holdings are not replayed (buys go by rank); the list
+is today's members (which flatters any result); no dividends. Shares only: there are no saved coin prices.
+
+  python3 check-tools/replay/replay.py                 # the five levels, the search and its out-of-sample test
+  python3 check-tools/replay/replay.py --rebuild       # score the days again (after the worker's scoring changed)
+"""
+import sys, os, json, glob, io, bisect, contextlib, importlib.util, datetime, itertools, random, math, statistics
+HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(os.path.dirname(HERE))
+PAPER = os.path.join(os.path.dirname(HERE), 'paper-test')
+COST = 0.1                      # percent taken off each buy and each sale
+BUDGET = 10000.0
+LEARN_SHARE = 0.6               # the first 60% of the days is for finding an idea, the last 40% for judging it
+START = '2022-10-17'
+
+def load_module(name, path):
+    spec = importlib.util.spec_from_file_location(name, path); mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod); return mod
+os.environ.setdefault('AWS_DEFAULT_REGION', 'us-east-1')
+trader = load_module('trader', os.path.join(ROOT, 'lambda-sync', 'stockiq-ai-trader', 'lambda_function.py'))
+
+universe = {l.split(':')[0]: l.split(':')[1].split() for l in open(os.path.join(PAPER, 'frozen_lists.txt')) if ':' in l and not l.startswith('#')}['sp100']
+prices = json.load(open(os.path.join(PAPER, 'data', 'prices.json')))
+day_of = lambda ts: datetime.datetime.fromtimestamp(ts, datetime.UTC).strftime('%Y-%m-%d')
+bars = {s: [{'timestamp': b[0], 'open': b[1], 'high': b[2], 'low': b[3], 'close': b[4], 'volume': int(b[5])} for b in prices[s]] for s in universe + ['SPY'] if s in prices}
+dates = {s: [day_of(b['timestamp']) for b in v] for s, v in bars.items()}
+at = {s: {d: i for i, d in enumerate(dates[s])} for s in bars}
+calendar = [d for d in dates['SPY'] if d >= START]
+
+def build_panel():
+    """Every stock's screener figures on every day, from the worker's own code."""
+    worker = load_module('worker', glob.glob(os.path.join(ROOT, 'lambda-sync', 'stockiq-option-3-1-worker-*', 'advanced_lambda.py'))[0])
+    now = {'d': None}
+    def get_stock_data(symbol, period='1y'):
+        symbol = symbol.upper()
+        if symbol not in bars: return None
+        i = bisect.bisect_right(dates[symbol], now['d']); data = bars[symbol][max(0, i - 252):i]
+        return data if len(data) >= 20 else None
+    worker.get_stock_data = get_stock_data
+    worker.check_earnings_risk = lambda symbol: 'HIGH' if int(now['d'][5:7]) in (1, 4, 7, 10) else 'LOW'
+    codes = {'STRONG_BUY': 3, 'BUY': 2, 'MODERATE_BUY': 1, 'HOLD': 0, 'MODERATE_SELL': -1, 'SELL': -2, 'STRONG_SELL': -3}
+    panel = {}
+    for n, d in enumerate(calendar):
+        now['d'] = d; out = {}
+        with contextlib.redirect_stdout(io.StringIO()):
+            for s in universe:
+                if s not in bars or d not in at[s]: continue
+                r = worker.analyze_stock_advanced(s)
+                if r: out[s] = [round(r['score'], 3), codes.get(r.get('recommendation'), 0), round(r.get('rsi') or 50, 1), round(r.get('change_30d') or 0, 2), round(r.get('distance_from_52w_low') or 0, 1)]
+        ranked = sorted(out, key=lambda s: -out[s][0])
+        panel[d] = {s: out[s] + [k + 1] for k, s in enumerate(ranked)}      # score, signal, RSI, 30-day change, % above 52-week low, rank
+        if n % 100 == 0: print(f'  scored {n} of {len(calendar)} days', file=sys.stderr)
+    json.dump(panel, open(os.path.join(HERE, 'panel.json'), 'w'))
+    return panel
+
+cache = os.path.join(HERE, 'panel.json')
+panel = json.load(open(cache)) if os.path.exists(cache) and '--rebuild' not in sys.argv else build_panel()
+days = [d for d in calendar if d in panel]
+
+def rules_of(level, **change):
+    """One level's rules as the function has them (holdings, how far down the ranking, limits, loss limit, gain mark, pace)."""
+    r = dict(trader.RISK[level]); r.setdefault('trail', 0.5)
+    r.update(hold=trader.PACE[level]['maxHoldDays'], picker='rank', signal_exit=True, keep_gain=True, level=level)
+    r.update(change); return r
+
+def open_after(s, d):
+    i = at[s].get(d)
+    return bars[s][i + 1]['open'] if i is not None and i + 1 < len(bars[s]) and bars[s][i + 1]['open'] else None
+def close_on(s, d):
+    i = at[s].get(d)
+    return bars[s][i]['close'] if i is not None else None
+
+def run(rules, period, rng=None):
+    """The rules over a run of days. Decisions at each day's close, trades at the next morning's open, a cost on each.
+    `rng`: buy at random from the whole list instead of from the shortlist (the same selling rules): what luck would give."""
+    slot, cash, held, trades, sold_on, curve = BUDGET / rules['positions'], BUDGET, {}, [], {}, []
+    for n, d in enumerate(period):
+        rows = panel[d]
+        # ---- what is sold (decided at this close, done at the next open)
+        for s in list(held):
+            h = held[s]; px = close_on(s, d)
+            if px is None: continue
+            change = (px / h['buy'] - 1) * 100; h['peak'] = max(h['peak'], change); h['days'] += 1
+            row = rows.get(s); why = None
+            arm = trader.gain_arm(rules, rules['hold']); floor = trader.gain_floor(rules, rules['hold'], h['peak'])
+            if change <= rules['stop']: why = 'stop'
+            elif change >= rules['take']: why = 'take'
+            elif rules['keep_gain'] and h['peak'] >= arm and floor is not None and change <= floor: why = 'trail'
+            elif h['days'] >= rules['hold']: why = 'time'
+            elif rules['signal_exit'] and row and (row[1] < 0 or row[0] < 0): why = 'signal'
+            elif rules['signal_exit'] and row and row[5] > trader.FADE * rules['top'] and row[0] < 0.5 * h['score']: why = 'fade'
+            if why or n == len(period) - 1:
+                out = open_after(s, d) or px
+                gross = (out / h['buy'] - 1) * 100; net = ((1 + gross / 100) * (1 - COST / 100) ** 2 - 1) * 100
+                spy = ((open_after('SPY', d) or close_on('SPY', d)) / h['spy'] - 1) * 100
+                trades.append({'s': s, 'in': h['d'], 'out': d, 'pct': net, 'vs': net - spy, 'days': h['days'], 'why': why or 'end'})
+                cash += slot * (1 + net / 100); del held[s]; sold_on[s] = n
+        # ---- what is bought
+        if n < len(period) - 1:
+            if rng is None:
+                short = [s for s, r in rows.items() if r[1] > 0 and r[0] > 0 and r[5] <= rules['top'] and r[2] < rules['max_rsi'] and abs(r[3]) <= rules['max_move30']]
+                short.sort(key=(lambda s: -rows[s][4]) if rules['picker'] == 'low52' else (lambda s: rows[s][5]))
+            else:
+                short = list(rows); rng.shuffle(short)
+            bought = 0
+            for s in short:
+                if bought >= trader.MAX_BUYS_PER_CHECK or len(held) >= rules['positions'] or cash < slot - 0.01: break
+                if s in held or n - sold_on.get(s, -99) < min(2, 2 * rules['hold']): continue
+                px, spy = open_after(s, d), open_after('SPY', d)
+                if not px or not spy: continue
+                held[s] = {'buy': px, 'spy': spy, 'd': d, 'days': 0, 'peak': 0.0, 'score': rows[s][0]}; cash -= slot; bought += 1
+        curve.append(cash + sum(slot * ((close_on(s, d) or h['buy']) / h['buy']) for s, h in held.items()))
+    return trades, curve
+
+def figures(trades, curve, period):
+    n = len(trades)
+    if n < 2: return {'n': n}
+    vs = [t['vs'] for t in trades]; se = statistics.stdev(vs) / math.sqrt(n)
+    peak, worst = curve[0], 0.0
+    for v in curve: peak = max(peak, v); worst = min(worst, (v / peak - 1) * 100)
+    spy = (close_on('SPY', period[-1]) / open_after('SPY', period[0]) - 1) * 100
+    return {'n': n, 'up': 100 * sum(t['pct'] > 0 for t in trades) / n, 'avg': statistics.mean(t['pct'] for t in trades), 'vs': statistics.mean(vs), 't': statistics.mean(vs) / se if se else 0.0,
+            'total': (curve[-1] / BUDGET - 1) * 100, 'spy': spy, 'worst': worst, 'held': statistics.mean(t['days'] for t in trades)}
+def line(label, f):
+    if f.get('n', 0) < 2: return f"{label:<46} too few trades ({f.get('n', 0)})"
+    return (f"{label:<46} {f['n']:>5} trades, {f['up']:>3.0f}% ended up, {f['avg']:+6.2f}% a trade after costs, {f['vs']:+6.2f} against the fund (t {f['t']:+5.2f}); "
+            f"account {f['total']:+7.1f}% (the fund {f['spy']:+6.1f}%), worst fall {f['worst']:6.1f}%, held {f['held']:.0f} days")
+def name(r):
+    base = trader.RISK[r['level']]
+    return (f"{base['name']}, held up to {r['hold']:g} days" + (', furthest above its 52-week low first' if r['picker'] == 'low52' else '') + ('' if r['signal_exit'] else ', no sale on the signal')
+            + ('' if r['keep_gain'] else ', no stop that keeps a gain') + (f", top {r['top']}" if r['top'] != base['top'] else ''))
+
+out = []
+say = lambda text='': (print(text), out.append(text))
+split = int(len(days) * LEARN_SHARE); learn, test = days[:split], days[split:]
+say(f"The autopilot's rules replayed on the S&P 100 list: {len(universe)} stocks, {len(days)} trading days ({days[0]} to {days[-1]}), ${BUDGET:,.0f}, {COST}% taken off each buy and each sale.")
+say("Decisions once a day at the close, traded at the next open; buys by rank (the AI model is not replayed); today's index members; no dividends.")
+say(); say("1. The five levels as they are, over the whole period")
+for level in sorted(trader.RISK):
+    r = rules_of(level); say('   ' + line(name(r), figures(*run(r, days), days)))
+say(); say(f"2. Looking for something better, honestly: found on the first {len(learn)} days ({learn[0]} to {learn[-1]}), judged on the last {len(test)} ({test[0]} to {test[-1]})")
+grid = [rules_of(level, hold=hold, picker=picker, signal_exit=sig, keep_gain=keep) for level in sorted(trader.RISK) for hold in (2, 5, 10, 20, 40, 60) for picker in ('rank', 'low52') for sig in (True, False) for keep in (True, False)]
+scored = []
+for r in grid:
+    f = figures(*run(r, learn), learn)
+    if f.get('n', 0) >= 40: scored.append((f['t'], f, r))
+scored.sort(key=lambda x: -x[0])
+say(f"   {len(grid)} variants of the rules tried on the first part. The five that looked best there (by how clearly they beat the fund per trade), and what each then did on the part it had not seen:")
+kept = []
+for t, f, r in scored[:5]:
+    g = figures(*run(r, test), test); kept.append((r, f, g))
+    say('   found: ' + line(name(r), f)); say('   then:  ' + line('', g))
+ahead = sum(1 for t, f, r in scored if f['vs'] > 0)
+later = [figures(*run(r, test), test) for t, f, r in scored]
+say(f"   Of all {len(scored)} variants with 40 or more trades: {ahead} were ahead of the fund per trade on the first part; on the second part {sum(1 for g in later if g.get('vs', -1) > 0)} were, "
+    f"and {sum(1 for g in later if g.get('t', 0) >= 2)} clearly so (t of 2 or more). The link between how a variant did on the first part and on the second: "
+    f"{statistics.correlation([f['vs'] for t, f, r in scored], [g.get('vs', 0) for g in later]):+.2f} (1 = what worked kept working, 0 = no link).")
+say(); say("3. Against luck: the best-looking variant's rules, buying stocks at random instead, 200 times, on the second part")
+best, f_learn, f_test = kept[0]
+lucky = [figures(*run(best, test, random.Random(seed)), test) for seed in range(200)]
+say(f"   the variant: account {f_test['total']:+.1f}%, {f_test['vs']:+.2f} against the fund a trade. Random buying under the same rules: account {statistics.mean(x['total'] for x in lucky):+.1f}% on average, "
+    f"and {100 * sum(x['total'] > f_test['total'] for x in lucky) / len(lucky):.0f}% of the random runs did better than the variant.")
+base = rules_of(3); f_base = figures(*run(base, test), test); lucky3 = [figures(*run(base, test, random.Random(seed)), test) for seed in range(200)]
+say(f"   the Balanced level as it is: account {f_base['total']:+.1f}%; random buying under its rules {statistics.mean(x['total'] for x in lucky3):+.1f}% on average, {100 * sum(x['total'] > f_base['total'] for x in lucky3) / len(lucky3):.0f}% of the random runs did better.")
+say(); say("4. The variants that were ahead on BOTH parts (the only ones worth a second look), each checked against luck and without the seven chip / AI names")
+CHIPS = {'SNDK', 'MU', 'AMD', 'ANET', 'NVDA', 'PLTR', 'DELL'}       # the names that carried the S&P 100 result in the earlier backtest
+both = sorted(((min(f['t'], g.get('t', -9)), r, f, g) for (t, f, r), g in zip(scored, later) if f['vs'] > 0 and g.get('vs', -1) > 0), key=lambda x: -x[0])[:4]
+whole = panel
+for _, r, f, g in both:
+    luck = [figures(*run(r, test, random.Random(seed)), test) for seed in range(200)]
+    panel = {d: {s: v for s, v in rows.items() if s not in CHIPS} for d, rows in whole.items()}
+    for d in panel:                                        # rank again without them
+        for k, s_ in enumerate(sorted(panel[d], key=lambda x: -panel[d][x][0])): panel[d][s_] = panel[d][s_][:5] + [k + 1]
+    without = figures(*run(r, test), test); panel = whole
+    say(f"   {name(r)}")
+    say(f"      first part {f['vs']:+.2f} a trade against the fund (t {f['t']:+.2f}), second part {g['vs']:+.2f} (t {g['t']:+.2f}), account on the second part {g['total']:+.1f}% (the fund {g['spy']:+.1f}%)")
+    say(f"      random buying under the same rules did better in {100 * sum(x['total'] > g['total'] for x in luck) / len(luck):.0f}% of 200 runs; without the seven chip / AI names: {without.get('vs', 0):+.2f} a trade against the fund (t {without.get('t', 0):+.2f}), account {without.get('total', 0):+.1f}%")
+say(); say("5. How long it holds, everything else as the Balanced level has it (whole period)")
+for hold in (1, 2, 5, 10, 20, 40, 60):
+    r = rules_of(3, hold=hold); say('   ' + line(f"held up to {hold} days", figures(*run(r, days), days)))
+say("   and without selling on the screener's signal:")
+for hold in (5, 20, 60):
+    r = rules_of(3, hold=hold, signal_exit=False); say('   ' + line(f"held up to {hold} days, no sale on the signal", figures(*run(r, days), days)))
+say(); say("How to read it: a variant is worth a trial with the fake money only if it was ahead on BOTH parts and random buying rarely beat it. Past results; they promise nothing.")
+stamp = datetime.date.today().isoformat()
+open(os.path.join(HERE, f'results-replay-{stamp}.txt'), 'w').write('\n'.join(out) + '\n')

@@ -2,7 +2,7 @@
 const vm = require('vm'), fs = require('fs');
 const src = fs.readFileSync(process.argv[2], 'utf8');
 // --- pure sums first
-const pure = (() => { const m = { exports: {} }; vm.runInNewContext(src, { module: m, console }); return m.exports; })();
+const pure = (() => { const m = { exports: {} }; vm.runInNewContext(src, { module: m, console, practiceTradeCostPct: 0 }); return m.exports; })();
 let ok = true; const check = (name, cond, extra) => { ok = ok && !!cond; console.log((cond ? 'PASS ' : 'FAIL ') + name + (cond ? '' : '  ' + JSON.stringify(extra))); };
 {
   const st = pure.newState('2026-10-10T00:00:00Z');
@@ -51,7 +51,7 @@ async function fakeFetch(url, opts = {}) {
   return fetch(url, opts);
 }
 const ctx = { window: {}, document, localStorage: { getItem: k => k === 'userId' ? 'tester@example.com' : null }, fetch: fakeFetch, console, setTimeout, clearTimeout, confirm: () => true, alert: m => { ctx.lastAlert = m; }, Date, Math, JSON, Promise, parseFloat, isNaN, encodeURIComponent, Object, String, Set };
-ctx.window = ctx; vm.createContext(ctx); vm.runInContext(src, ctx);
+ctx.window = ctx; ctx.practiceTradeCostPct = 0; vm.createContext(ctx); vm.runInContext(src, ctx);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const click = (action, attrs = {}) => handlers.click.forEach(f => f({ target: { closest: sel => sel === '[data-pp]' ? { getAttribute: k => k === 'data-pp' ? action : attrs[k], tagName: 'BUTTON', style: {} } : null }, preventDefault() {} }));
 const text = () => container.innerHTML.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/\s+/g, ' ');
@@ -166,5 +166,11 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
   await buy('KO', 100); check('and works after the reload', /Practice buy recorded: \$100\.00 of KO/.test(text()));
   click('reset'); await sleep(50); await waitIdle(); check('reset', !store['tester@example.com'] && /Account value \$100,000\.00/.test(text()) && /Practice portfolio reset/.test(text()));
   check('no broken values anywhere', !bad().length, bad());
+  { const real = (() => { const m = { exports: {} }; vm.runInNewContext(src, { module: m, console }); return m.exports; })();      // as on the site: with the trading cost
+    const st = real.newState(); const h = real.applyBuy(st, { symbol: 'KO', price: 50, fx: 1, amountUsd: 1000, now: '2026-10-12T15:00:00Z', spy: 500 });
+    check('a trading cost of 0.1% is taken off a practice buy: the whole amount leaves the cash and the holding starts a little below it', real.TRADE_COST_PCT === 0.1 && st.cash === 99000 && h.costUsd === 1000 && Math.abs(h.qty - 19.98) < 1e-9 && Math.abs(real.valueOf(h, { KO: { price: 50 } }).valueUsd - 999) < 0.005, h);
+    const got = real.applySell(st, h.id, { price: 50, fx: 1, now: '2026-10-12T16:00:00Z', spy: 500 });
+    check('and off a sale: sold at the same price, $998.00 comes back of $1,000', got === 998 && st.cash === 99998, got);
+    check('the page says so beside the fake-money line', /A trading cost of \$\{TRADE_COST_PCT\}% is taken off each practice buy and each sale/.test(src)); }
   console.log(ok ? 'ALL PASS' : 'SOME FAILED');
 })();

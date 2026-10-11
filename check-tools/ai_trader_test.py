@@ -25,6 +25,8 @@ STAY = m.STAY_CHECKS; m.STAY_CHECKS = 1
 # And each account learns from its own trades alone here, so that the reviews themselves are tested on one record. Live, the same
 # reviews run once on every account's trades together; that is tested on its own at the end (CENTRAL).
 SHARED = m.CENTRAL; m.CENTRAL = False
+# And no trading cost is taken off here, so that the amounts in the older checks stay round; the cost is tested on its own (COSTS).
+COSTS = getattr(m, 'TRADE_COST', 0); m.TRADE_COST = 0
 D = DB(); m._db = D
 U = 'tester@x.com'
 ok = True
@@ -520,7 +522,7 @@ H = lambda stay, pct: dict(risk=3, pct=pct, stay=stay, rank=2, rsi=50, exit='tim
 card = m.scorecard([H(1, -1.0)] * 3 + [H(3, 2.0)] * 4 + [H(8, 3.0)] * 2 + [dict(H(None, 0.0))])
 check('the record shows how buys did by how long they had stayed near the top', [(g['label'], g['n'], g['avg']) for g in card['groups']['stay']] == [('new to the shortlist', 3, -1.0), ('there 2 to 4 check-ins', 4, 2.0), ('there 5 check-ins or more', 2, 3.0), ('not recorded', 1, 0.0)], card['groups']['stay'])
 mf = m.month_figures([dict(usd=50.0, cost=1000.0, sold=m.iso(t0 - dt.timedelta(days=1))), dict(usd=-20.0, cost=2000.0, sold=m.iso(t0 - dt.timedelta(days=2)))], 10000.0, t0)['last30']
-check('results after a typical trading cost of 0.1% on each buy and each sell: $30.00 becomes $23.97', mf['usd'] == 30.0 and mf['afterCosts'] == 23.97 and m.public({'settings': dict(m.DEFAULTS), 'state': {}, 'log': [], 'history': []}, t0)['costEachWay'] == 0.1, mf)
+check('results after a typical trading cost of 0.1% on each buy and each sell: $30.00 becomes $23.97', mf['usd'] == 30.0 and mf['afterCosts'] == 23.97 and m.public({'settings': dict(m.DEFAULTS), 'state': {}, 'log': [], 'history': []}, t0)['costEachWay'] == m.TRADE_COST, mf)
 coin = lambda pct, vs: dict(risk=3, pct=pct, vs=vs, screener='7-1', label='X', sold=m.iso(t0 + dt.timedelta(hours=1)), exit='time')
 r1 = {'settings': dict(m.DEFAULTS, screeners=['7-1']), 'state': {}, 'log': [], 'history': [coin(-2.0, 3.0)] * 8}
 r2 = {'settings': dict(m.DEFAULTS, screeners=['7-1']), 'state': {}, 'log': [], 'history': [coin(2.0, -3.0)] * 8}
@@ -1060,4 +1062,23 @@ check('the bell is given the latest buys and sells only: when, code, name, dolla
 check('asking leaves no trace: nothing is written and it does not count as a visit to the dashboard', D.Table(m.SETTINGS_TABLE).rows == before and 'visit' not in json.loads(before[U]['data'])['state'])
 code_, b = call(action='bell', userId='nobody@z.com', list=2)
 check('an account without the autopilot gets an empty list and no record is made for it', code_ == 200 and b == {'success': True, 'allowed': False, 'trades': []} and 'nobody@z.com' not in D.Table(m.SETTINGS_TABLE).rows, b)
+
+# --- a trading cost on every buy and sale it makes, and the bar its record has to clear
+m.TRADE_COST = COSTS; check('a trading cost is taken off in the deployed function, the same 0.1% as on buys made by hand', m.TRADE_COST == 0.1)
+pf = m.new_portfolio(t0); hold = m.do_buy(pf, {'symbol': 'KO', 'label': 'KO', 'screener': '3-100'}, {'price': 50.0, 'name': 'Coca-Cola', 'currency': 'USD'}, 1000, 'r', 500.0, t0, 0)
+check('a buy: the whole amount leaves the cash, and a thousandth of it is the cost, so the holding starts a little below what was put in', pf['cash'] == m.STARTING_CASH - 1000 and hold['costUsd'] == 1000 and abs(hold['qty'] - 19.98) < 1e-9, hold)
+got = m.do_sell(pf, hold, 50.0, 500.0, t0)
+check('a sale at the same price brings back less by the two costs: $998.00 of $1,000', got == 998.0 and pf['cash'] == m.STARTING_CASH - 2.0, got)
+facts = m.remember_buy({'open': {}}, dict(hold, boughtAt=m.iso(t0)), {'symbol': 'KO', 'label': 'KO', 'screener': '3-100', 'rank': 1, 'score': 3.0, 'rsi': 50, 'd7': 1, 'd30': 2, 'volume': 1.0}, dict(m.DEFAULTS, risk=3), 'rank')
+check('a trade made with the cost says so, and its result is not charged a second time in the month\'s figures', facts.get('c') == 1 and m.month_figures([{'usd': 10.0, 'cost': 1000, 'c': 1, 'sold': m.iso(t0)}], 10000, t0 + dt.timedelta(days=1))['last30']['afterCosts'] == 10.0
+      and m.month_figures([{'usd': 10.0, 'cost': 1000, 'sold': m.iso(t0)}], 10000, t0 + dt.timedelta(days=1))['last30']['afterCosts'] == 7.99)
+share = lambda pct, market, **k: dict({'pct': pct, 'market': market, 'screener': '3-100', 'c': 1}, **k); coin = lambda pct, **k: dict({'pct': pct, 'market': 9.9, 'screener': '7-1', 'c': 1}, **k)
+b = m.bar_of([share(2.0, 1.0), share(1.0, 1.5), coin(3.0), coin(-1.0), share(1.0, None), share(1.0, 0.0, c=0)])
+check('the bar: a share is measured against the index fund over its days, a coin against zero, a trade from before the cost pays it here, a share without the fund\'s figure is left out',
+      b['need'] == 300 and b['n'] == 5 and abs(b['avg'] - (1.0 - 0.5 + 3.0 - 1.0 + 0.8) / 5) < 0.006 and b['met'] is False, b)
+good = m.bar_of([share(1.0 + (i % 5) * 0.2, 0.2) for i in range(300)]); short = m.bar_of([share(1.0 + (i % 5) * 0.2, 0.2) for i in range(299)]); flat = m.bar_of([share((-1) ** i * 3.0 + 0.05, 0.0) for i in range(300)])
+check('it is cleared only by 300 finished trades that are ahead by more than twice the margin of error: not by 299, not by 300 that are ahead by a hair', good['met'] is True and short['met'] is False and flat['met'] is False and flat['avg'] > 0, (good, short, flat))
+D.t.clear(); m._BRAIN.clear(); m.PLAN_CACHE.clear(); m.save_item(U, fresh([])); code_, b = call(action='get', userId=U)
+check('the page is told the cost and the bar', code_ == 200 and b['costEachWay'] == 0.1 and b['bar']['need'] == 300 and b['bar']['n'] == 0 and b['bar']['met'] is False, b.get('bar'))
+m.TRADE_COST = 0
 print('ALL PASS' if ok else 'SOME FAILED')
