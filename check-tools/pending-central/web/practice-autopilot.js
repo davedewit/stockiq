@@ -109,6 +109,9 @@
         #practice-autopilot .ap-share.none { border: 0; background: none; padding: 0 2px; font-size: 0.8rem; }
         @media (max-width: 980px) { #practice-autopilot .ap-group.shared { grid-template-columns: 150px minmax(0, 1fr); } #practice-autopilot .ap-group.shared > div:last-child { grid-column: 2; } }
         #practice-autopilot .ap-only-phone { display: none; }
+        #practice-autopilot .ap-sharedbox { margin: 0 0 8px; padding: 10px 12px; border: 1px solid rgba(124, 58, 237, 0.35); border-left: 3px solid #7c3aed; border-radius: 8px; background: rgba(124, 58, 237, 0.06); font-size: 0.85rem; line-height: 1.5; }
+        #practice-autopilot .ap-sharedbox strong { color: var(--text-primary); }
+        #practice-autopilot { font-variant-numeric: tabular-nums; }
         @media (max-width: 640px) { #practice-autopilot .ap-only-phone { display: inline; } }
         #practice-autopilot .ap-countline { margin-top: 6px; color: var(--text-primary); }
         #practice-autopilot .ap-count { display: inline-block; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -191,6 +194,18 @@
     const usd2 = (n) => (n < 0 ? '-' : '+') + '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const clock = (d) => d ? d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
     const fold = (key, title, lines) => lines && lines.length ? `<details data-ap-fold="${esc(key)}" ${openDetails[key] ? 'open' : ''}><summary>${esc(title)}</summary><ul>${lines.map(x => `<li>${esc(x)}</li>`).join('')}</ul></details>` : '';
+    // a result as a broker's screen shows it: an arrow and the amount, green up, red down (the words are the screen reader's label)
+    const deltaHtml = (amount, percent) => {
+        const r = Math.round((amount || 0) * 100) / 100 || 0, p = typeof percent === 'number' ? ' (' + Math.abs(percent).toFixed(1) + '%)' : '';
+        const money = '$' + Math.abs(r).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        return `<span class="ap-delta" role="img" aria-label="${r === 0 ? 'level' : (r > 0 ? 'profit of ' : 'loss of ') + money}${p}" style="color: ${r > 0 ? '#16a34a' : r < 0 ? '#ef4444' : 'var(--text-secondary)'}; font-weight: 700; white-space: nowrap;">${r > 0 ? '▲' : r < 0 ? '▼' : '–'} ${money}${p}</span>`;
+    };
+    // what a sale made or lost in dollars: sent by the function, or read from an older entry's own words
+    const gainOf = (e) => {
+        if (typeof e.gain === 'number') return e.gain;
+        const m = /Put in \$([\d,.]+), got back \$([\d,.]+)/.exec(e.text || '');
+        return m ? Math.round((parseFloat(m[2].replace(/,/g, '')) - parseFloat(m[1].replace(/,/g, ''))) * 100) / 100 : null;
+    };
     const tint = (n) => (n === null || n === undefined) ? 'var(--text-secondary)' : n >= 0 ? '#22c55e' : '#ef4444';
     const everyText = (v) => v === 24 ? 'once a day' : v === 12 ? 'twice a day' : v === 1 ? 'every hour' : v < 1 ? `every ${Math.round(v * 60)} minutes` : `every ${v} hours`;
     // a holding time given in days: 30 minutes, 3 hours, 5 days
@@ -526,7 +541,7 @@
         (p.reports || []).forEach(r => { reports[r.no] = r; });
         const finished = p.batches.reduce((a, b) => Math.max(a, b.last || 0), 0);
         const how = `After every ${size} finished trades it compares them with the ${size} before. Better: it carries on as it is. No better: it looks into why, puts back a change of its own if the trades since did clearly worse, and tries the most promising change to one of its rules. All by itself; each report is also emailed.`;
-        if (!full.length) return `<div class="ap-section"><h4>Progress, ${size} finished trades at a time</h4><div>Its first progress report comes after ${size} finished trades (${finished} so far). ${how}</div></div>`;
+        if (!full.length) return `<div class="ap-section"><h4>Progress, ${size} finished trades at a time</h4><div>Its first progress report comes after ${size} finished trades${p.shared ? ' at your risk level, counting every account' : ''} (${finished} so far). ${how}</div></div>`;
         const cell = 'padding: 4px 8px; text-align: right; white-space: nowrap; vertical-align: top;', left = 'padding: 4px 8px; vertical-align: top;';
         const word = { better: ['better', '#22c55e'], worse: ['worse', '#ef4444'], same: ['about the same', 'var(--text-secondary)'] };
         const row = (b) => {
@@ -537,7 +552,7 @@
                 ${r ? `<td class="ap-stack-wide" data-label="What it did" style="${left}">${esc((r.actions || []).join(' '))}</td>` : `<td style="${left}"></td>`}</tr>`;
         };
         const latest = (p.reports || []).slice(-1)[0];
-        return `<div class="ap-section"><h4>Progress, ${size} finished trades at a time</h4>
+        return `<div class="ap-section"><h4>Progress, ${size} finished trades at a time${p.shared ? ' <span style="font-size: 0.8rem; font-weight: 400; color: var(--text-secondary);">every account at your risk level together: this is what it learns from</span>' : ''}</h4>
             <div style="overflow-x: auto;"><table class="ap-stack" style="border-collapse: collapse; font-size: 0.85rem; width: 100%;">
                 <tr class="ap-stack-head" style="color: var(--text-secondary);"><td style="${left} padding-left: 0;">Trades</td><td style="${cell}">When</td><td style="${cell}">Ended up</td><td style="${cell}">Average a trade</td><td style="${cell}">In dollars</td><td style="${left}">Against the ${size} before</td><td style="${left}">What it did</td></tr>
                 ${p.batches.slice().reverse().map(row).join('')}
@@ -555,8 +570,16 @@
             ? `<div style="margin-top: 6px;"><strong style="color: var(--text-primary);">Next, for shares:</strong> starting with the next share it buys, every second one will be the share furthest above its 52-week low on the shortlist, instead of the one its screener ranks highest. A test on four years of prices found that figure linked to what shares did next, and the screener's own ranking not. After 10 finished each way it keeps the new order only if those trades did clearly better.</div>` : '';
         const side = (n, avg) => `${n} finished${n ? ' (average ' + pc(avg) + ')' : ''}`, cap = (x) => x ? x.charAt(0).toUpperCase() + x.slice(1) + '.' : '';
         if (o.mode === 'trial') return `<div style="margin-top: 6px;"><strong style="color: var(--text-primary);">Also trying, for shares</strong> (since ${esc(day(o.since))}): every second share it buys is the one furthest above its 52-week low on the shortlist, instead of the one its screener ranks highest. Why: ${esc(o.why)}. So far: bought that way ${side(o.with, o.avgWith)}, bought as ranked ${side(o.without, o.avgWithout)}. It decides after ${o.group} each way and keeps the new order only if it did clearly better. <a href="#" data-ap="stoporder">Stop this trial</a></div>`;
-        if (o.mode === 'low52') return `<div style="margin-top: 6px;"><strong style="color: var(--text-primary);">Changed by itself after a trial</strong> (${esc(day(o.ended))}): every share it buys is now the one furthest above its 52-week low on the shortlist. ${esc(cap(o.result))} <a href="#" data-ap="restoreorder">put it back</a></div>`;
+        if (o.mode === 'low52') return `<div style="margin-top: 6px;"><strong style="color: var(--text-primary);">Changed by itself after a trial</strong> (${esc(day(o.ended))}): every share it buys is now the one furthest above its 52-week low on the shortlist. ${esc(cap(o.result))} ${mayChange() ? '<a href="#" data-ap="restoreorder">put it back</a>' : ''}</div>`;
         return o.ended ? `<div style="margin-top: 6px;">Tried for shares, ${esc(day(o.since))} to ${esc(day(o.ended))}: buying the one furthest above its 52-week low instead of the top-ranked one. Not kept: shares are bought as their screener ranks them. ${esc(cap(o.result))}</div>` : '';
+    }
+    // Learning is shared: what it changes about itself comes from every account's finished trades and applies to every account
+    const mayChange = () => !data.central || !!data.central.canChange;
+    function sharedHtml() {
+        const c = data.central;
+        if (!c) return '';
+        const n = (k, one, many) => `${Number(k).toLocaleString('en-US')} ${k === 1 ? one : many}`;
+        return `<div class="ap-sharedbox"><strong>🧠 It learns from every account, not only yours.</strong> Each finished trade of every account's autopilot goes into one shared record, with nothing that says whose it was: ${n(c.trades, 'finished trade', 'finished trades')} so far from ${n(c.accounts, 'account', 'accounts')}${c.trades ? ` (${n(c.level, 'is', 'are')} at your risk level)` : ''}. The rules it changes after a trial, the screeners it rests and its notes are worked out from that record and apply to every account, so a new account starts with what the others have already taught it, and every further account makes its trials finish sooner.${c.on ? '' : ' <strong>Yours takes no part at the moment</strong>: "Try changes to its own rules" is switched off under Settings, so it keeps the level\'s plain rules.'}</div>`;
     }
     // In one line: what it has tried on itself, what it kept, what it put back
     function improvedLine() {
@@ -577,13 +600,14 @@
         const trial = t.trial, group = t.group || 10;
         const side = (n, avg) => `${n} finished${n ? ' (average ' + pc(avg) + ')' : ''}`;
         const now = trial
-            ? `<div style="margin-top: 6px;"><strong style="color: var(--text-primary);">Trying now</strong> (since ${esc(day(trial.since))}): ${esc(trial.text)}. Why: ${esc(trial.why)}. ${esc(trial.how)} So far: with the change ${side(trial.with, trial.avgWith)}, without it ${side(trial.without, trial.avgWithout)}. It decides after ${group} each way and keeps the change only if that group did clearly better. <a href="#" data-ap="stoptrial">Stop this trial</a></div>`
+            ? `<div style="margin-top: 6px;"><strong style="color: var(--text-primary);">Trying now</strong> (since ${esc(day(trial.since))}): ${esc(trial.text)}. Why: ${esc(trial.why)}. ${esc(trial.how)} So far: with the change ${side(trial.with, trial.avgWith)}, without it ${side(trial.without, trial.avgWithout)}. It decides after ${group} each way and keeps the change only if that group did clearly better. ${mayChange() ? '<a href="#" data-ap="stoptrial">Stop this trial</a>' : ''}</div>`
             : `<div style="margin-top: 6px;">${t.nextReviewIn === 0 ? 'It reviews its rules at the next sale.' : `Next review of its rules after ${t.nextReviewIn} more finished trade${t.nextReviewIn === 1 ? '' : 's'}`}${t.nextReviewIn === 0 ? '' : ` (it reviews them every ${t.batch}).`} If the record suggests a change worth trying, it tries it beside the current rule over the same days.</div>`;
         const verdicts = { kept: 'kept', dropped: 'not kept', stopped: 'stopped' };
         const past = (t.past || []).slice().reverse();
         return `<div class="ap-section"><h4>Improving its own rules</h4>
+            ${sharedHtml()}
             ${improvedLine()}
-            <div style="margin-top: 6px;">Its rules now (${esc(r.name)} level): ${esc(ruleWords(r))}.${(r.yours || []).length ? ` Set by you: ${esc(r.yours.map(k => names[k]).join(' and '))}; its trials leave ${r.yours.length === 1 ? 'that' : 'those'} alone.` : ''}${changed.length ? ` Changed by itself after a trial: ${changed.map(k => esc(names[k] + ' (the level starts at ' + r.changed[k] + ')') + ` <a href="#" data-ap="restore" data-param="${esc(k)}">put it back</a>`).join(', ')}.` : ''}</div>
+            <div style="margin-top: 6px;">Its rules now (${esc(r.name)} level): ${esc(ruleWords(r))}.${(r.yours || []).length ? ` Set by you: ${esc(r.yours.map(k => names[k]).join(' and '))}; its trials leave ${r.yours.length === 1 ? 'that' : 'those'} alone.` : ''}${changed.length ? ` Changed by itself after a trial: ${changed.map(k => esc(names[k] + ' (the level starts at ' + r.changed[k] + ')') + (mayChange() ? ` <a href="#" data-ap="restore" data-param="${esc(k)}">put it back</a>` : '')).join(', ')}.` : ''}</div>
             ${now}
             ${orderHtml()}
             ${data.aiSellPausedUntil ? `<div style="margin-top: 6px;">The AI model's early sells are paused until ${esc(day(data.aiSellPausedUntil))}: the holdings it had sold early went on rising afterwards. The fixed selling rules still apply.</div>` : ''}
@@ -618,6 +642,7 @@
         const el = box();
         if (!el) return;
         markTab();
+        bellRefresh();
         if (!data || (!data.allowed && !data.locked)) { el.innerHTML = ''; return; }
         ensureStyle();
         if (!data.allowed) { el.innerHTML = lockedHtml(); return; }
@@ -665,9 +690,9 @@
                 ${recordHtml()}
                 ${progressHtml()}
                 ${tuneHtml()}
-                <div class="ap-section"><h4>What it has done <span class="ap-fresh"><span id="ap-fresh">${loadedAt ? 'Up to date at ' + esc(clock(loadedAt)) + '. Refreshes by itself every minute.' : ''}</span><a href="#" data-ap="refresh">↻ Refresh now</a><label class="ap-mini" title="On: only its buys and sells are listed. Off: its check-ins and notes too. Remembered in this browser."><input id="ap-tradesonly" type="checkbox" ${tradesOnly ? 'checked' : ''}><span class="ap-dot"></span>Buys and sells only</label></span></h4>
+                <div class="ap-section" id="ap-done"><h4>What it has done <span class="ap-fresh"><span id="ap-fresh">${loadedAt ? 'Up to date at ' + esc(clock(loadedAt)) + '. Refreshes by itself every minute.' : ''}</span><a href="#" data-ap="refresh">↻ Refresh now</a><label class="ap-mini" title="On: only its buys and sells are listed. Off: its check-ins and notes too. Remembered in this browser."><input id="ap-tradesonly" type="checkbox" ${tradesOnly ? 'checked' : ''}><span class="ap-dot"></span>Buys and sells only</label></span></h4>
                     ${latest ? `<div class="ap-log"><time>${icons.note} ${esc(when(latest.t))}</time> Latest check-in: ${esc(latest.text.replace(/^Checked in\. /, ''))}${latest.n > 1 ? ` <span style="font-size: 0.8rem;">(the same at ${latest.n} check-ins in a row)</span>` : ''}</div>` : ''}
-                    ${log.length ? shown.map(e => `<div class="ap-log"><time>${icons[e.type] || ''} ${esc(when(e.t))}</time> ${e.type === 'buy' ? `<strong style="color: var(--text-primary);">Bought ${esc(e.symbol)}</strong> with ${usd0(e.usd)}. ` : e.type === 'sell' ? `<strong style="color: var(--text-primary);">Sold ${esc(e.symbol)}</strong>${typeof e.pct === 'number' ? ` <span style="color: ${tint(e.pct)}; font-weight: 600;">${pc(e.pct)}</span>` : ''}. ` : ''}${esc(e.text)}${e.n > 1 ? ` <span style="font-size: 0.8rem;">(the same at ${e.n} check-ins in a row, since ${esc(when(e.first))})</span>` : ''}${fold(e.type + e.t + e.symbol, e.type === 'sell' ? 'Why, and the details' : 'The plan for it', e.detail)}</div>`).join('') : `<div>${tradesOnly && all.length ? 'No buys or sells yet.' : 'Nothing yet. Its buys, sells and check-ins will be listed here.'}</div>`}
+                    ${log.length ? shown.map(e => `<div class="ap-log"><time>${icons[e.type] || ''} ${esc(when(e.t))}</time> ${e.type === 'buy' ? `<strong style="color: var(--text-primary);">Bought ${esc(e.symbol)}</strong> with ${usd0(e.usd)}. ` : e.type === 'sell' ? `<strong style="color: var(--text-primary);">Sold ${esc(e.symbol)}</strong>${gainOf(e) !== null ? ' ' + deltaHtml(gainOf(e), e.pct) : typeof e.pct === 'number' ? ` <span style="color: ${tint(e.pct)}; font-weight: 600;">${pc(e.pct)}</span>` : ''}. ` : ''}${esc(e.text)}${e.n > 1 ? ` <span style="font-size: 0.8rem;">(the same at ${e.n} check-ins in a row, since ${esc(when(e.first))})</span>` : ''}${fold(e.type + e.t + e.symbol, e.type === 'sell' ? 'Why, and the details' : 'The plan for it', e.detail)}</div>`).join('') : `<div>${tradesOnly && all.length ? 'No buys or sells yet.' : 'Nothing yet. Its buys, sells and check-ins will be listed here.'}</div>`}
                     ${log.length > shown.length ? `<a href="#" data-ap="more" style="display: inline-block; margin-top: 8px;">Show all ${log.length}</a>` : ''}</div>
                 </div>
 
@@ -985,9 +1010,56 @@
         else lines.push('Finished trades: none yet.');
         if (data.tune && data.tune.trial) lines.push('Trial of its own rules running: ' + cut(data.tune.trial.text, 160) + '.');
         if (data.order && data.order.mode === 'trial') lines.push(`Trial for shares running: every second share bought is the one furthest above its 52-week low (${data.order.with} finished that way, ${data.order.without} as ranked).`);
+        if (data.central) lines.push(`Learning: shared by every account. ${data.central.trades} finished trades from ${data.central.accounts} account${data.central.accounts === 1 ? '' : 's'} are in one record (nothing in it says whose they were); the rules it changes after a trial, the screeners it rests and its notes come from that record and apply to every account.${data.central.on ? '' : ' This account takes no part: "Try changes to its own rules" is off.'}`);
         (data.log || []).slice(-3).forEach(e => lines.push(`Recent (${when(e.t)}): ${e.type === 'buy' ? 'bought ' + e.symbol + '. ' : e.type === 'sell' ? 'sold ' + e.symbol + '. ' : ''}${cut(e.text, 200)}`));
         return lines.join('\n');
     }
-    window.practiceAutopilot = { reload: load, flush, refresh, tick, leftText, marketSlots, summary };
+    // ---- the dashboard's bell: the buys and sells it has made, the new ones counted on the bell until it is opened
+    const bellKey = () => 'stockiqAutopilotBell_' + (userId() || '');
+    const trades = () => ((data && data.log) || []).filter(e => e.type === 'buy' || e.type === 'sell');
+    const bellSeenAt = () => { try { return localStorage.getItem(bellKey()); } catch (e) { return null; } };
+    function bellSeen() { const t = trades(); try { localStorage.setItem(bellKey(), t.length ? String(t[t.length - 1].t) : new Date(0).toISOString()); } catch (e) { /* private window */ } }
+    function unseenTrades() {
+        if (!data || !data.allowed) return 0;
+        const seen = bellSeenAt();
+        if (seen === null) { bellSeen(); return 0; }       // the first time: what is already there is not news
+        return trades().filter(e => String(e.t) > seen).length;
+    }
+    function bellHtml() {
+        if (!data || !data.allowed) return '';
+        const all = trades(), seen = bellSeenAt() || '', fresh = all.filter(e => String(e.t) > seen).length;
+        if (!all.length) return '';
+        const rows = all.slice(-Math.max(6, Math.min(fresh, 12))).reverse().map(e => {
+            const isNew = String(e.t) > seen, gain = e.type === 'sell' ? gainOf(e) : null;
+            const right = e.type === 'sell' ? (gain === null ? (typeof e.pct === 'number' ? `<span style="color: ${tint(e.pct)}; font-weight: 700;">${pc(e.pct)}</span>` : '') : deltaHtml(gain, e.pct)) : `<span style="color: var(--text-secondary); white-space: nowrap;">${usd0(e.usd)}</span>`;
+            const word = e.type === 'sell' ? (gain === null ? 'Sold' : gain > 0.004 ? 'Sold at a profit' : gain < -0.004 ? 'Sold at a loss' : 'Sold level') : 'Bought';
+            const edge = !isNew ? 'transparent' : e.type === 'buy' ? '#007bff' : gain !== null && gain < 0 ? '#ef4444' : '#16a34a';
+            return `<div onclick="event.stopPropagation(); practiceAutopilot.bellOpen()" style="padding: 10px 15px; border-bottom: 1px solid var(--border-color); cursor: pointer; background: ${isNew ? 'var(--bg-secondary)' : 'var(--card-bg)'}; border-left: 3px solid ${edge};">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 13px;"><span style="font-weight: ${isNew ? '700' : '500'}; color: var(--text-primary); min-width: 0;">${word}: ${esc(e.symbol)}</span>${right}</div>
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">${e.name ? esc(e.name) + ' · ' : ''}${esc(when(e.t))}${isNew ? ' · new' : ''}</div></div>`;
+        }).join('');
+        return `<div onclick="event.stopPropagation(); practiceAutopilot.bellOpen()" style="padding: 15px; border-bottom: 1px solid var(--border-color); background: var(--bg-secondary); cursor: pointer;">
+                <h4 style="margin: 0; color: var(--text-primary); font-size: 14px;">🤖 AI autopilot (Beta): buys and sells</h4>
+                <p style="margin: 5px 0 0 0; color: var(--text-secondary); font-size: 12px;">${fresh} new · practice trades with fake money</p></div>${rows}`;
+    }
+    function bellOpen() {                                   // from the bell to the list of what it has done
+        const drop = document.getElementById('notification-dropdown');
+        if (drop && drop.remove) drop.remove();
+        if (window.dashboardTabs && window.dashboardTabs.show) window.dashboardTabs.show('autopilot');
+        showPart('activity');
+        const list = document.getElementById('ap-done');
+        if (list && list.scrollIntoView) list.scrollIntoView({ block: 'start' });
+    }
+    let bellMark = null;
+    function bellRefresh() {                                // after each load: has it bought or sold since the bell was last drawn?
+        const t = trades(), mark = t.length + '|' + (t.length ? t[t.length - 1].t : '') + '|' + (data && data.allowed ? 1 : 0);
+        if (mark === bellMark) return;
+        bellMark = mark;
+        try {
+            if (typeof window.updateNotificationBell === 'function') window.updateNotificationBell();
+            if (typeof window.preloadNotifications === 'function') window.preloadNotifications();
+        } catch (e) { /* the bell belongs to the page; the panel works without it */ }
+    }
+    window.practiceAutopilot = { reload: load, flush, refresh, tick, leftText, marketSlots, summary, bellHtml, unseenTrades, bellSeen, bellOpen, gainOf };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load); else load();
 })();

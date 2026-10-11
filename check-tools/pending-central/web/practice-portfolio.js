@@ -149,7 +149,18 @@
     function colour(n) { return Math.round(n * 100) / 100 >= 0 ? '#22c55e' : '#ef4444'; }
     // A result in words, so that a mix of gains and losses cannot be misread: "up $144.12", "down $202.60", "level"
     function moved(n) { n = Math.round(n * 100) / 100 || 0; return n === 0 ? 'level' : (n > 0 ? 'up ' : 'down ') + usd(Math.abs(n)); }
-    function movedHtml(n) { const r = Math.round(n * 100) / 100 || 0; return r === 0 ? 'level' : `<span style="color: ${colour(r)}; font-weight: 600;">${moved(r)}</span>`; }
+    // On the page a result is an arrow and an amount, green up and red down, as a broker's screen shows it; the words stay as
+    // the label a screen reader says (and in `moved`, which the AI chat's summary uses).
+    function tone(n) { const r = Math.round(n * 100) / 100 || 0; return r > 0 ? '#16a34a' : r < 0 ? '#ef4444' : 'var(--text-secondary)'; }
+    function arrow(n) { const r = Math.round(n * 100) / 100 || 0; return r > 0 ? '▲' : r < 0 ? '▼' : '–'; }
+    function movedHtml(n, percent) {
+        const r = Math.round(n * 100) / 100 || 0, p = (percent === null || percent === undefined || !isFinite(percent)) ? '' : ' (' + Math.abs(percent).toFixed(2) + '%)';
+        return `<span class="pp-delta" role="img" aria-label="${moved(r)}${p}" style="color: ${tone(r)}; font-weight: 600; white-space: nowrap;">${arrow(r)} ${usd(Math.abs(r))}${p}</span>`;
+    }
+    function pctHtml(percent, amount) {      // a change in percent first, the dollars in brackets
+        const r = Math.round(percent * 100) / 100 || 0, a = (amount === null || amount === undefined) ? '' : ' (' + usd(Math.abs(amount)) + ')';
+        return `<span class="pp-delta" role="img" aria-label="${r === 0 ? 'level' : (r > 0 ? 'up ' : 'down ') + Math.abs(r).toFixed(2) + '%'}${a}" style="color: ${tone(r)}; font-weight: 600; white-space: nowrap;">${arrow(r)} ${Math.abs(r).toFixed(2)}%${a}</span>`;
+    }
     function day(iso) { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }); }
     function when(iso) { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); }
     // Whose holding it is and what will happen to it. `plan` comes from the autopilot (practice-autopilot.js) for the
@@ -171,7 +182,7 @@
             + ' The AI model also reviews it at every check-in and may sell it earlier.' + shut;
     }
 
-    const pure = { newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine, moved, usd, pct, money, esc, STARTING_CASH, DEFAULT_AMOUNT };
+    const pure = { newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine, moved, movedHtml, usd, pct, money, esc, STARTING_CASH, DEFAULT_AMOUNT };
     if (typeof module !== 'undefined' && module.exports) module.exports = pure;
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
@@ -179,6 +190,18 @@
     // On a phone a table of seven columns cannot be read: each holding becomes a card, every figure on its own labelled line.
     // (The cells carry inline styles, hence the !important.)
     const PP_CSS = `
+        #practice-portfolio { font-variant-numeric: tabular-nums; }
+        #practice-portfolio .pp-card { flex: 1; min-width: 150px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 14px; border-top: 3px solid transparent; }
+        #practice-portfolio .pp-card.up { border-top-color: #16a34a; } #practice-portfolio .pp-card.down { border-top-color: #ef4444; }
+        #practice-portfolio .pp-card-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-secondary); }
+        #practice-portfolio .pp-card-value { font-size: 1.45rem; font-weight: 700; color: var(--text-primary); line-height: 1.3; }
+        #practice-portfolio .pp-card-sub { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; }
+        #practice-portfolio .pp-split { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; font-size: 0.85rem; color: var(--text-secondary); margin: -4px 0 14px; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; }
+        #practice-portfolio .pp-split-head { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+        #practice-portfolio .pp-split-item > span:first-child { color: var(--text-primary); font-weight: 600; margin-right: 4px; }
+        #practice-portfolio .pp-split-sub { font-size: 0.8rem; margin-left: 4px; }
+        #practice-portfolio table.pp-stack tr.pp-head th { font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-secondary); border-bottom: 2px solid var(--border-color); }
+        @media (min-width: 641px) { #practice-portfolio table.pp-stack tr:not(.pp-head):hover td { background: rgba(128, 128, 128, 0.07); } }
         @media (max-width: 640px) {
             #practice-portfolio table.pp-stack, #practice-portfolio table.pp-stack tbody, #practice-portfolio table.pp-stack tr, #practice-portfolio table.pp-stack td { display: block !important; width: auto !important; box-sizing: border-box; }
             #practice-portfolio table.pp-stack tr.pp-head { display: none !important; }
@@ -189,6 +212,7 @@
             #practice-portfolio table.pp-stack td.pp-name { padding-bottom: 6px !important; margin-bottom: 4px; border-bottom: 1px solid var(--border-color) !important; }
             #practice-portfolio table.pp-stack td.pp-act { text-align: right !important; padding-top: 8px !important; }
             #practice-portfolio table.pp-stack td.pp-act button { width: 100%; padding: 10px 12px !important; font-size: 0.95rem !important; }
+            #practice-portfolio .pp-find { flex: 1 1 100% !important; }
             #practice-portfolio #pp-amount, #practice-portfolio #pp-qty { flex: 1 1 0 !important; min-width: 0; box-sizing: border-box; }
             #practice-portfolio #pp-note { flex: 1 1 100% !important; min-width: 0 !important; box-sizing: border-box; }
             #practice-portfolio [data-pp="buy"] { flex: 1 1 100%; padding: 12px 18px !important; }
@@ -346,7 +370,7 @@
         if (!state) { el.innerHTML = `<p style="color: #ef4444;">${esc(loadError || 'The practice portfolio could not be loaded.')}</p><button data-pp="reload" style="${BTN}">Try again</button>`; return; }
 
         const s = summarize(state, quotes);
-        const card = (label, value, sub) => `<div style="flex: 1; min-width: 150px; background: var(--bg-secondary); border-radius: 8px; padding: 12px 14px;"><div style="font-size: 0.8rem; color: var(--text-secondary);">${label}</div><div style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">${value}</div><div style="font-size: 0.8rem; color: var(--text-secondary);">${sub || '&nbsp;'}</div></div>`;
+        const card = (label, value, sub, way) => `<div class="pp-card${way > 0.004 ? ' up' : way < -0.004 ? ' down' : ''}"><div class="pp-card-label">${label}</div><div class="pp-card-value">${value}</div><div class="pp-card-sub">${sub || '&nbsp;'}</div></div>`;
         const cell = 'padding: 8px 6px; border-bottom: 1px solid var(--border-color); text-align: right; white-space: nowrap;';
         const left = cell.replace('text-align: right', 'text-align: left');
 
@@ -358,31 +382,31 @@
                 <td data-label="Price then" style="${cell}">${money(h.buyPrice, h.currency)}</td>
                 <td data-label="Price now" style="${cell}">${v.priced ? money(v.price, h.currency) : '<span title="No price available right now">–</span>'}</td>
                 <td data-label="Value" style="${cell}">${usd(h.costUsd)} → ${usd(v.valueUsd)}</td>
-                <td data-label="Change" style="${cell} font-weight: 600; color: ${v.priced ? colour(v.changePct) : 'var(--text-secondary)'};">${v.priced ? pct(v.changePct) + ' (' + usd(v.gainUsd) + ')' : 'no price'}</td>
+                <td data-label="Change" style="${cell}">${v.priced ? pctHtml(v.changePct, v.gainUsd) : '<span style="color: var(--text-secondary);">no price</span>'}</td>
                 <td class="pp-act" style="${cell}"><button data-pp="sell" data-id="${esc(h.id)}" style="${BTN}" ${working ? 'disabled' : ''}>Sell</button></td>
             </tr>`;
         }).join('');
 
         const closed = state.closed.slice().reverse().map(h => {
             const change = (h.proceedsUsd / h.costUsd - 1) * 100;
-            return `<tr><td class="pp-name" style="${left}">${h.by === 'ai' ? '<span title="Bought by the AI autopilot">🤖</span> ' : ''}<strong style="color: var(--text-primary);">${esc(h.label)}</strong></td><td data-label="Held" style="${cell}">${esc(when(h.boughtAt))} → ${esc(when(h.soldAt))}</td><td data-label="Price" style="${cell}">${money(h.buyPrice, h.currency)} → ${money(h.sellPrice, h.currency)}</td><td data-label="Value" style="${cell}">${usd(h.costUsd)} → ${usd(h.proceedsUsd)}</td><td data-label="Result" style="${cell} font-weight: 600; color: ${colour(change)};">${pct(change)} (${usd(h.proceedsUsd - h.costUsd)})</td><td class="pp-act" style="${cell}"><span data-pp="unsold" data-id="${esc(h.id)}" title="Remove this line from the sold list" style="cursor: pointer; font-size: 16px; padding: 0 4px;">×</span></td></tr>`;
+            return `<tr><td class="pp-name" style="${left}">${h.by === 'ai' ? '<span title="Bought by the AI autopilot">🤖</span> ' : ''}<strong style="color: var(--text-primary);">${esc(h.label)}</strong></td><td data-label="Held" style="${cell}">${esc(when(h.boughtAt))} → ${esc(when(h.soldAt))}</td><td data-label="Price" style="${cell}">${money(h.buyPrice, h.currency)} → ${money(h.sellPrice, h.currency)}</td><td data-label="Value" style="${cell}">${usd(h.costUsd)} → ${usd(h.proceedsUsd)}</td><td data-label="Result" style="${cell}">${pctHtml(change, h.proceedsUsd - h.costUsd)}</td><td class="pp-act" style="${cell}"><span data-pp="unsold" data-id="${esc(h.id)}" title="Remove this line from the sold list" style="cursor: pointer; font-size: 16px; padding: 0 4px;">×</span></td></tr>`;
         }).join('');
         const sold = soldSummary(state);
-        const soldLine = sold.count ? `${sold.count} sold: put in ${usd(sold.cost)}, got back ${usd(sold.proceeds)}, <span style="color: ${colour(sold.gainUsd)}; font-weight: 600;">${pct(sold.gainPct)} (${usd(sold.gainUsd)})</span>.` : '';
+        const soldLine = sold.count ? `${sold.count} sold: put in ${usd(sold.cost)}, got back ${usd(sold.proceeds)}: ${movedHtml(sold.gainUsd, sold.gainPct)}.` : '';
         // one total mixes the user's own buys with the autopilot's: say which part is whose
         const split = splitGain(state, quotes, autoRealized);
-        const splitLine = split.any ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin: -6px 0 14px;">Whose result is whose: the account is ${movedHtml(split.total)} since the start. Your own buys are ${movedHtml(split.yours)}; the autopilot is ${movedHtml(split.auto)} (${moved(split.autoSold)} on what it has sold, ${moved(split.autoOpen)} on what it still holds). The two add up to the account's change; a holding that is not sold yet counts at its latest price.</div>` : '';
+        const splitLine = split.any ? `<div class="pp-split" title="The two add up to the account's change since the start. A holding that is not sold yet counts at its latest price."><span class="pp-split-head">Whose result is whose</span><span class="pp-split-item"><span>Your own buys</span> ${movedHtml(split.yours)}</span><span class="pp-split-item"><span>🤖 AI autopilot</span> ${movedHtml(split.auto)} <span class="pp-split-sub">sold ${movedHtml(split.autoSold)} · still held ${movedHtml(split.autoOpen)}</span></span></div>` : '';
         const th = (t, align) => `<th style="padding: 6px; text-align: ${align || 'right'}; font-weight: 600; white-space: nowrap;">${t}</th>`;
         el.innerHTML = `
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
-                ${card('Account value', usd(s.accountValue), `<span style="color: ${colour(s.gainUsd)}; font-weight: 600;">${Math.abs(Math.round(s.gainUsd * 100)) === 0 ? 'Level' : (s.gainUsd > 0 ? 'Up ' : 'Down ') + usd(Math.abs(s.gainUsd)) + ' (' + pct(Math.abs(s.gainPct)).replace('+', '') + ')'}</span> since the start${state.holdings.length || state.closed.length || Math.abs(s.gainUsd) > 0.004 ? `<br>Sold holdings: ${moved(s.gainUsd - s.openGainUsd)}. Still held: ${moved(s.openGainUsd)} at the latest prices.` : ''}`)}
+                ${card('Account value', usd(s.accountValue), `${movedHtml(s.gainUsd, s.gainPct)} since the start${state.holdings.length || state.closed.length || Math.abs(s.gainUsd) > 0.004 ? `<br>Sold ${movedHtml(s.gainUsd - s.openGainUsd)} · Still held ${movedHtml(s.openGainUsd)}` : ''}`, s.gainUsd)}
                 ${card('Practice cash left', usd(s.cash), 'of ' + usd(state.startingCash))}
-                ${card('In holdings', usd(s.holdingsValue), s.openGainPct === null ? 'nothing held yet' : `<span style="color: ${colour(s.openGainPct)}; font-weight: 600;">${pct(s.openGainPct)}</span> on ${usd(s.cost)} put in`)}
-                ${card('For comparison', s.marketPct === null ? '–' : s.marketFlat ? 'no change yet' : `<span style="color: ${colour(s.marketPct)};">${pct(s.marketPct)}</span>`, s.marketFlat ? 'the same money in an S&amp;P 500 index fund instead: the US stock market has not traded since you bought (it is closed at weekends), so there is nothing to compare yet' : 'the same money in an S&amp;P 500 index fund instead')}
+                ${card('In holdings', usd(s.holdingsValue), s.openGainPct === null ? 'nothing held yet' : `${movedHtml(s.openGainUsd, s.openGainPct)} on ${usd(s.cost)} put in`)}
+                ${card('For comparison', s.marketPct === null ? '–' : s.marketFlat ? 'no change yet' : pctHtml(s.marketPct), s.marketFlat ? 'the same money in an S&amp;P 500 index fund instead: the US stock market has not traded since you bought (it is closed at weekends), so there is nothing to compare yet' : 'the same money in an S&amp;P 500 index fund instead')}
             </div>
             ${splitLine}
             <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 6px;">
-                <div style="position: relative; flex: 2; min-width: 200px;">
+                <div class="pp-find" style="position: relative; flex: 2; min-width: 200px;">
                     <input id="pp-symbol" type="text" autocomplete="off" placeholder="Search for tickers or companies" aria-label="Stock code or company name" style="width: 100%; box-sizing: border-box; padding: 10px 32px 10px 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 16px;">
                     <span id="pp-clear" data-pp="clear" title="Clear" style="display: none; position: absolute; right: 10px; top: 9px; cursor: pointer; color: var(--text-secondary); font-size: 18px; line-height: 1;">×</span>
                     <div id="pp-suggest" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; z-index: 1000; max-height: 240px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>
