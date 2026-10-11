@@ -2113,6 +2113,12 @@ more finished trades than there are, and would chase noise before then.
   `check-tools/pending-<name>/` with a `deploy.sh`, run its dry run, then run it with exactly that
   command form. The full routine is in section 8c ("How to work on it"). If the rule is ever
   missing, only the owner can add it; say so plainly instead of trying another route.
+- **When two sessions are in the repository at once, name the paths in the commit itself**: `git commit -m "…" -- <paths>`
+  (and look at `git status --short` first). A plain `git commit` commits everything that is staged, whoever staged it, and
+  an edit to a notes file is made on top of whatever another session has in it uncommitted. On 11 Oct 2026 commit
+  `a0be314` (trading signals) took along the other session's notes in progress and its removal of
+  `check-tools/pending-reports/`; nothing was lost, but that work sits under the wrong message. Better still: one session
+  at a time, or tell the running one what changed.
 - **Commit and push in steps** (owner, 10 Oct: "so long as you commit to github in steps and can
   track changes"). His sessions can stop mid-task when usage runs out: push each finished stage,
   marked "work in progress, not live yet" until it is deployed, and say what is live and what is
@@ -2652,4 +2658,6 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     for the five strongest readings instead of calling five of fifteen megacaps "top performers". The page's writers
     still have to print the new fields. Memory raised (128 MB made the scan take 33 seconds). **Lesson: time a function
     after changing what it does; a function's processor share goes with its memory.**
+  - Commit `a0be314` (trading signals) also carries the report-writers session's notes in progress and its removal of
+    `check-tools/pending-reports/`: two sessions were committing at the same minute (section 10, "name the paths").
 
