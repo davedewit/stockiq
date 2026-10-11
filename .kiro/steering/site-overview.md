@@ -1193,7 +1193,10 @@ not sure whether its improvements needed him to "push" them. They do not, and th
   at, and what it may buy, worked out with the same `allowance` the check-in will use, including
   the coin share, a full budget and too little cash), `open` (the first check-in after each other
   market it has opens), `release` (the next step of the budget's build-up, with amounts:
-  `released()`, which `allowance` now also uses), `sell` (the latest each holding is kept), `rest`
+  `released()`, which `allowance` now also uses; **listed at the check-in that can first spend it, not at the minute of
+  the release**: the steps are counted from when the build-up began, so a release fell at 15:55 with the check-in at
+  16:10, and the owner read "more is released in 1 h 38 min" above "next check-in in 1 h 53 min" as two different next
+  actions and thought the countdown wrong), `sell` (the latest each holding is kept), `rest`
   (a rested screener or the AI model's paused early sells coming back), `trial` (the latest a
   running trial ends), `review` (trades to go until it reviews its own rules; or that this is
   switched off), `notes` (trades to go until the AI model writes fresh notes). **It is a forecast
@@ -1387,8 +1390,8 @@ weekdays and fails at the weekend.
 ### Start here when resuming (state at 06:20 UTC on 11 Oct 2026, the end of a two-day session)
 
 **What is live, and how to confirm nothing has moved since:**
-- Lambda `stockiq-ai-trader`: `CodeSha256` `5kK9DYb9C3iYOCR8CLMlYeiWswAlf7ixi7jCD8YDX1I=`, equal to
-  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,827 lines; shared learning, deployed 07:42 UTC on 11 Oct).
+- Lambda `stockiq-ai-trader`: `CodeSha256` `MMmJJ9M5OzYmYagMJsQBJEfWTNkS/6IbCb7QQcGQqw4=`, equal to
+  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,833 lines; shared learning deployed 07:42 UTC on 11 Oct, the release wording 08:45).
 - Website: `practice-autopilot.js?v=36` (sha256 starts `45a69a3f736e`), `practice-portfolio.js?v=17`
   (`f7ddb505486a`), `dashboard.html` (`199754e40cdb`), `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
 - Lambda `stockiq-ai-chat`: `CodeSha256` `LFyuyhd1ivEYAXqSqVkEk+Deq2H+rG9IhzSYdpho+w8=`, equal to `lambda-sync/stockiq-ai-chat/lambda_function.py`. Live files were compared byte for byte.
@@ -1398,7 +1401,7 @@ weekdays and fails at the weekend.
 - Rollback copies of the function, one per deploy, in `~/VSCODE/backup/`:
   `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order: 10 Oct `v2, fast, panel,
   autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
-  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central`.
+  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release`.
 - First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and
   the function's log (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors
   ("check-in failed", "not worked out", "not sent") and for the firsts listed below.
@@ -2054,5 +2057,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     lists and counts the autopilot's buys and sells with profit or loss. The schedule's table scan now pages through the
     whole table. Rollback zip: `…_before_autopilot_central_20261011.zip`. Live: function `5kK9DYb9…`,
     `practice-portfolio.js?v=17`, `practice-autopilot.js?v=36`.
+  - "What happens next": a release of the budget is listed at the check-in that can first spend it (it had its own,
+    earlier time, which read like a second "next action"). Function only (`MMmJJ9M5…`). Rollback zip:
+    `…_before_autopilot_release_20261011.zip`. First scheduled run of the shared learning seen in the log at 08:10 UTC
+    ("shared learning: 0 new finished trades…", the record `_brain` written); the owner's four trades follow his next
+    check-in.
   - Notes: section 8c ends with "Start here when resuming"; this session was closed there because
     its context had grown too large. Everything known is in these files.
