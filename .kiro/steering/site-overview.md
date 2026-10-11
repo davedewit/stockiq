@@ -616,6 +616,25 @@ with `document.querySelector('h3')`.
   make sense of "Of the -$58.48 since the start: your own buys +$144.12; the autopilot -$202.60".
   The Account value card follows the same rule ("Down $58.48 (0.06%) since the start. Sold
   holdings: down $58.48. Still held: level at the latest prices.").
+- **A result is an arrow and an amount** (11 Oct, later the same day; the owner: "have an arrow going up or down instead of
+  saying down or up, obviously red for down green for up… look like a professional stock portfolio"): `▲ $801.50 (0.80%)` in
+  green, `▼ $58.48 (0.06%)` in red, `– $0.00` in grey (`movedHtml`, `pctHtml` in `practice-portfolio.js`; `deltaHtml` in
+  `practice-autopilot.js`). The words stay as each arrow's `aria-label` for screen readers, and `moved()` still gives the
+  words for the AI chat's summary. **Never a bare signed figure without an arrow** (the earlier confusion over "-$58.48").
+  The cards have small capital labels and a green or red top edge on Account value; "Whose result is whose" is one framed
+  row (Your own buys ▲ … · 🤖 AI autopilot ▲ … sold ▲ … · still held – …); table headings are small capitals; rows
+  highlight under the pointer; figures use tabular numerals.
+- **The bell** (the notification bell in the page header, dashboard only): above the report list it shows "🤖 AI autopilot
+  (Beta): buys and sells", newest first, each line saying "Sold at a profit: CFX-USD ▲ $12.79 (1.0%)" / "Sold at a loss: …
+  ▼ …" / "Bought: … $1,250", with the name and the time; new ones are marked and counted in the bell's red badge together
+  with unread reports, until the bell is opened. A click goes to the AI autopilot tab's list "What it has done". Check-in
+  notes are not notifications, only real buys and sells. Drawn by `practice-autopilot.js` (`bellHtml`, `unseenTrades`,
+  `bellSeen`, `bellOpen`, `bellRefresh`; "seen" is the time of the newest trade, kept in the browser under
+  `stockiqAutopilotBell_<address>`; the first time, what is already there is not news); `dashboard.html` has three small
+  hooks in `preloadNotifications`, `updateNotificationBell` and `goToNotifications`. A sale's dollars come from the entry's
+  `gain` (sent by the function since this deploy) or are read from an older entry's words (`gainOf`). **Limits:** the bell
+  on other pages (drawn by `auth.js` / `analysis-functions.js`) does not show them, because only the dashboard loads the
+  autopilot; and it is a notice on the page, not an email or a phone notification.
 - The buy row: search box (code or company name, same lookup as the home page), "Enter $" **or**
   "or quantity" (the other is worked out from the latest price), an optional note, "Practice buy".
 - The holdings table: Holding, Bought (date and time), Price then, Price now, Value, Change, Sell.
@@ -674,8 +693,8 @@ show. Settings holds the first five items below, Activity the last five:
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=16` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=35`) | Controls and reports only; decisions are made by the Lambda |
+| Portfolio section | `website/practice-portfolio.js` (`?v=17` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=36`) | Controls and reports only; decisions are made by the Lambda |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes**: scripts are cached for a day |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`. Env `AI_TRADER_USERS` (accounts that may use it without a paid plan; everyone on a paid plan may use it; `*` would make it free for all) and `OPENAI_API_KEY` (never print it) |
@@ -1035,6 +1054,77 @@ same care: section 7b shows that share of winning trades comes from the selling 
 "wins" 74% of the time under a sell-at-+2% rule) and is not profit. Judge it by dollars and by
 the average per trade, which the panel shows, never by the share of trades that ended up.
 
+### Learning is shared by every account (11 Oct 2026, the last change of the session)
+
+The owner: "it should be learning regardless of the user that runs something. so the more users… the smarter it gets. I
+think the way you have done it is its going from scratch on each new user… It should be a smart AI that is learning in a
+central location for all users". He was right about how it was built: every account kept its own record, trials and notes.
+Now there is **one shared record**, and what follows replaces the per-account learning described under "Learning from its
+own results" (those routines are the same; they now run once, on everyone's trades).
+
+- **Where:** item `_brain` in table `stockiq-ai-trader` (one compressed attribute `z`; `load_brain`, `save_brain`,
+  `new_brain`): `pool` (finished trades of every account, newest last, at most `POOL_KEEP` 3,000), `count` (all ever
+  taken in), `counts` per risk level, `accounts` (8-character scrambled ids, only to count them), `state` (`rest`,
+  `restSince`, `lessons`, `order`), `tunes` and `progress` per risk level (the same shapes an account's `state.tune` and
+  `state.progress` had), `news` (the last 30 notes, numbered by `seq`). Switch: `CENTRAL = True` in the function.
+- **What goes in, and privacy:** when an account's record is saved (`save_item` → `share_trades`), its finished trades that
+  have not been sent yet are queued as one small item `_pool#<time>#<id>#<random>`: the figures it was bought on, the
+  result, how it was sold, the level (`POOL_FIELDS`). **No address and no holding id**; a scrambled key (`k`) only stops
+  a trade being counted twice. Sent rows are marked on the account's own history (`p`: 1 sent, 2 sent with what it did
+  after it was sold; that later figure is sent on as `{k, after}`). The codes of the shares and coins are in it; nothing
+  about who traded them.
+- **The scheduled run, before the check-ins** (single writer, so accounts running side by side never write it):
+  `gather` folds the queue into the pool and deletes the queue items once the record is saved; `think` reviews once for
+  everyone: `review_resting` (a screener whose pooled trades lag is rested for every account), `write_lessons` (notes
+  from every account's trades, every 5 more), `order_of` / `review_order` (the trial of which share to buy, over every
+  account's share buys), and per risk level, through `mind_of(brain, level)` (the shared record seen as one account at
+  that level), `review_progress` and `review_tuning`. Notes it produces go to `news` (`tell_all`), prefixed "Learned from
+  every account…". If any of this fails the log says "shared learning failed" and the accounts work from the record as
+  last saved.
+- **What an account takes over** (`adopt`, at the start of every check-in and when the page is drawn): the rules changed
+  after a trial and the running trial for its level, the trial of the buying order, the rested screeners and the notes.
+  Which of its own buys follow a rule on trial is still counted per account (`buys`). New notes go into its activity list
+  and one email ("what it has learned from every account"); an account that is new gets no backlog. **With "Try changes
+  to its own rules" off, an account keeps the level's plain rules and takes no part in trials** (rests and notes still
+  apply). In a check-in the per-account reviews no longer run (`solo` is false).
+- **The AI model is shown both** when it chooses what to buy: this account's own finished trades, and every account's
+  together (a summary of the latest `POOL_CARD` 600) with the shared notes.
+- **Who can undo what is shared:** "put it back" and "Stop this trial" act on the shared record, for everyone, and only
+  for the site's own accounts (`listed`, env `AI_TRADER_USERS`); any other account is answered HTTP 403 and pointed to
+  its own switch, and the panel does not show those links to it (`central.canChange`).
+- **What the page gets:** `central` = `{trades, accounts, level, on, canChange}`; `progress` and the figures of a trial
+  are those of every account at the user's level (`progress.shared`); "How it is doing" stays the account's own record.
+  The panel says so in a framed box at the top of "Improving its own rules" (`sharedHtml`). The chat's summary has a line.
+- **Fixed on the way:** the schedule's table scan took only the first megabyte (the stored screener results are large, so
+  with more accounts some would have been skipped without a word): it now pages through the table. Notes are refreshed by
+  the count of trades ever finished, not by the length of a list that stops growing.
+- **Does it need another AWS service or "machine learning"? No, and not yet** (the owner asked). What limits it is the
+  number of finished trades and how little the screener figures have predicted so far (section 7b), not the tools: a
+  statistical model fitted to a few dozen trades learns noise. The shared record is what any such model would be trained
+  on, and it is being collected from now. When it holds some thousands of trades, the next step is a small model (a
+  logistic regression or boosted trees on the bought-on figures, fitted inside this same function or a second small
+  one, no SageMaker needed) that scores a candidate, tried the same way as every other change: beside the current rule,
+  kept only if clearly better. The OpenAI model stays what it is: it weighs the figures and headlines of one decision; it
+  does not learn from the record except through the summary and notes it is shown.
+- **More that it could change** (the owner: "the more changes it can make the better"): still the five rules of `TUNABLE`
+  and the buying order. Candidates once the pool has the trades to judge them: the automatic pace of each level (holding
+  time, check-in gap), the stop's distances (`STOP_ARM`, `STOP_ROOM`), the wait for a coin to stay, per-screener ranking
+  depth. Each needs a tag on the buy and a trial; none should be adopted from hindsight.
+- **Limits, said plainly:** on 11 Oct there was one paying account with four finished trades, so today the shared record
+  is that one account; the gain comes with accounts. Accounts at different risk levels pool separately for the rule
+  trials (a level's rules differ), together for rests, notes and the buying order. A site account's "put it back" and the
+  schedule could write the record in the same second (not guarded; the schedule runs at :10 and :40). The deploy's own
+  check created a record for the deploy test account (switched off; harmless).
+- **Tests:** the last part of `ai_trader_test.py` (17 checks) runs with `CENTRAL` on; the rest set it off at the top so
+  that each review is tested on one record. `dashboard_page.py`'s stand-in says learning is shared.
+- **Not yet seen for real:** the first fold of the owner's four trades (his next saved check-in queues them, the scheduled
+  run after that takes them in: look for "shared learning: 4 new finished trades" in the log), a shared note reaching an
+  activity list, and the bell on the logged-in page.
+- Not changed: the AI chat's `DASHBOARD_GUIDE` does not mention the bell or shared learning yet (the chat is told about
+  shared learning through the page's summary line).
+- Rollback zip: `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_central_20261011.zip`. The older function ignores
+  `_brain` and `_pool#` items, as it does the stored screener results.
+
 ### The AI chat on the dashboard (added 11 Oct 2026)
 
 The owner noticed the chat was on every page but the dashboard, and wanted it to "know everything"
@@ -1237,10 +1327,10 @@ narrow screen (nothing changes at desktop width):
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 358 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 191 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 375 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 199 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
-     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 70 checks
+     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 71 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
    ```
    `ai_trader_test.py` sets the pace by hand at its top (it patches `DEFAULTS`), as a user who chose
@@ -1297,18 +1387,18 @@ weekdays and fails at the weekend.
 ### Start here when resuming (state at 06:20 UTC on 11 Oct 2026, the end of a two-day session)
 
 **What is live, and how to confirm nothing has moved since:**
-- Lambda `stockiq-ai-trader`: `CodeSha256` `PUQWAyAPbNy98SQITl2p+dSMU/wCyxzsIR+geIQ1RQE=`, equal to
-  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,587 lines).
-- Website: `practice-autopilot.js?v=35` (sha256 starts `0a9e814f1629`), `practice-portfolio.js?v=16`
-  (`0dcfa2390915`), `dashboard.html` (`18011c222292`), `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
+- Lambda `stockiq-ai-trader`: `CodeSha256` `5kK9DYb9C3iYOCR8CLMlYeiWswAlf7ixi7jCD8YDX1I=`, equal to
+  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,827 lines; shared learning, deployed 07:42 UTC on 11 Oct).
+- Website: `practice-autopilot.js?v=36` (sha256 starts `45a69a3f736e`), `practice-portfolio.js?v=17`
+  (`f7ddb505486a`), `dashboard.html` (`199754e40cdb`), `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
 - Lambda `stockiq-ai-chat`: `CodeSha256` `LFyuyhd1ivEYAXqSqVkEk+Deq2H+rG9IhzSYdpho+w8=`, equal to `lambda-sync/stockiq-ai-chat/lambda_function.py`. Live files were compared byte for byte.
 - Both repos clean and pushed; **no `check-tools/pending-*` folder is left** (every package was
-  deployed and removed). Tests on the live files: 358 function, 191 panel, 70 portfolio, 13 chat, the
+  deployed and removed). Tests on the live files: 375 function, 199 panel, 71 portfolio, 13 chat, the
   panel-versus-function comparison clean (3,780 budget combinations, 2,915 spreads over markets).
 - Rollback copies of the function, one per deploy, in `~/VSCODE/backup/`:
   `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order: 10 Oct `v2, fast, panel,
   autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
-  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid`.
+  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central`.
 - First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and
   the function's log (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors
   ("check-in failed", "not worked out", "not sent") and for the firsts listed below.
@@ -1958,5 +2048,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     `practice-autopilot.js?v=35`, `dashboard.html`. New test tools: the `mobile` step of
     `dashboard_page.py` and `mobile_frame.py`. Checked in a phone-width frame in a headless
     browser, not on a real phone.
+  - **Learning shared by every account; arrows; the bell** (section 8c, "Learning is shared by every account" and "What the
+    owner sees"): every account's finished trades go, anonymously, into one record that the scheduled run reviews once
+    for everyone and every autopilot uses; results are shown as green and red arrows with amounts; the dashboard's bell
+    lists and counts the autopilot's buys and sells with profit or loss. The schedule's table scan now pages through the
+    whole table. Rollback zip: `…_before_autopilot_central_20261011.zip`. Live: function `5kK9DYb9…`,
+    `practice-portfolio.js?v=17`, `practice-autopilot.js?v=36`.
   - Notes: section 8c ends with "Start here when resuming"; this session was closed there because
     its context had grown too large. Everything known is in these files.
