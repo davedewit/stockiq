@@ -48,7 +48,7 @@ Lambdas ──> Yahoo Finance + Finnhub (data), OpenAI gpt-4o-mini (AI chat), Dy
 | Folder | GitHub repo | Notes |
 |---|---|---|
 | `/Users/dave/VSCODE/website/` | `davedewit/stockiq-website` | What is served. `stocks/` and `.last_*` markers are gitignored, so stock pages exist only locally and on S3 |
-| `/Users/dave/VSCODE/stockiq/` | `davedewit/stockiq` | Scripts, Kiro steering, `check-tools/` (end-to-end test scripts, section 8b). `lambda-sync/`, `.analysis_cache/`, `*.json` are gitignored |
+| `/Users/dave/VSCODE/stockiq/` | `davedewit/stockiq` | Scripts, Kiro steering, `check-tools/` (end-to-end test scripts, section 8b), **`workers/` (the one source file every share-screener worker runs, with its build, proof and deploy tools: section 8b)**. `lambda-sync/`, `.analysis_cache/`, `*.json` are gitignored |
 | `~/VSCODE/backup/` | – | Daily backups made by every deploy: `website_backup_<UTC time>` and `stockiq_backup_<UTC time>`, 30-day retention. **This is the backup**, including `stocks/`, which GitHub does not have |
 
 **Restoring:** folder names use UTC (`website_backup_20260925_034730` = 13:47 AEST on 25 Sep).
@@ -256,6 +256,11 @@ git pull --rebase && git push
   cliffs (AAPL showed 71 on the page and 47 in the app a day later; breakdown in section 11).
 - **The screeners are price, momentum and volume only.** Their "financial", "sentiment" and "risk"
   factors do not use real company data, and the 12 weights total 102% in the code (section 8b).
+- **Every share screener is scored by one file since 11 Oct 2026** (`stockiq/workers/stock_worker.py`, section 8b "The worker
+  groups"), so a stock scores the same whichever screener lists it. Before that the US and London workers worked out RSI as a
+  plain 14-day average, the ASX and Nikkei workers by Wilder's smoothing (the standard, what charting sites show), and the
+  NASDAQ 100 and Dow 30 workers had a "financial" and a "risk" factor of their own. All now use Wilder's RSI and the common
+  factors. Crypto is a different program (section 8b "Crypto").
 - **Neutral wording everywhere**, public pages and the paid product: "Strongly positive …
   Strongly negative signals" plus "not financial advice". No BUY/SELL labels, targets or stop
   losses are shown anywhere (section 8b). The model calls its 1-year change "YTD"; pages relabel it.
@@ -289,6 +294,10 @@ replay reproduced that morning's live scores exactly (502 of 502). Tools and ful
   now exists: the dashboard's practice portfolio and its autopilot (section 8c), whose own record
   is the forward test.
   Do not publish any of this as a promise; if shown to users it is past performance with the limits.
+- **This two-year test used the US workers' RSI of the time** (a plain 14-day average). Since 11 Oct 2026 every screener uses
+  Wilder's RSI (section 7), which changes about a third of US signal labels and three or four of a day's top 10, so the dollar
+  figures above describe the scorer as it was. It was not run again (its 502 price series are not on this machine); the
+  studies that could be run again say the same thing as before (end of this section).
 
 **Factor by factor (11 Oct 2026).** The owner asked whether the scoring that produces the screeners'
 CSV could be improved to raise the chance of profit, with "70% profit, 30% loss" as the aim. Tool
@@ -324,6 +333,23 @@ and full output: `check-tools/paper-test/factor_study.py`, `results-factors-2026
   finding that survived. **If that split shows the same after 8 or more trades a band, the next
   step is a trial of buying shares in that order**, beside the current order, through its trial
   mechanism. Not covered: coins (no saved prices; the entry log of section 8b is their test).
+
+**The same studies with the one worker file (11 Oct 2026, evening).** When every share screener was moved to one file with
+Wilder's RSI, the studies that read the worker's code were pointed at `workers/stock_worker.py` and run again on the same
+saved prices. Nothing in their conclusions moved:
+- Factor study (`paper-test/results-factors-2026-10-11-one-worker.txt`): the score's top fifth over its bottom fifth +0.06
+  points the next day (t 2.0), +0.19 a week (t 1.2), +0.75 a month (t 1.2); it was +0.04 / +0.19 / +0.84. The RSI factor has
+  no reliable link with what a stock did next under either way of working it out; every other factor's line is identical,
+  figure for figure, which is also a check that nothing else in the scoring changed.
+- Fake-money tests (`paper-test/results-backtest-2026-10-11-one-worker.txt`): Dow 30 top 10 +12.2% a year against +18.4% for
+  the whole list (it was +16.8%); S&P 100 top 10 +40.4% a year against +25.2% (it was +43%), still inside the margin of error
+  from a week out. **Their top 10 for the last close equal the live Dow 30 and S&P 100 pages name for name**: the replay
+  reproduces the live scores with the new file.
+- Replay of the autopilot's rules (`replay/results-replay-2026-10-11-one-worker.txt`; the earlier run is kept beside it, and
+  `replay/panel.json` now holds the new scores): the five levels still end behind the index fund after costs, quick trading
+  still loses, and buying the share furthest above its 52-week low without selling on the signal is still what holds up on
+  the part of the period the search never saw.
+- So there is no evidence for or against either RSI: the choice was for one way everywhere and the standard definition.
 
 **The autopilot's own rules, replayed (11 Oct 2026, evening).** The owner asked, honestly, whether this will ever make
 more than it loses, and whether it could "run on some kind of rapid speed to learn faster". It can: `check-tools/replay/
@@ -408,8 +434,11 @@ crypto orchestrator or any worker.
   server-side, formats the report and CSV, and saves them to the user's history.
 - The stock lists therefore live in **two places that must stay identical**: the `*Universe`
   arrays in `analysis-functions.js` and `STOCK_UNIVERSES` in the coordinator. Exception: on the
-  page path Russell 1000/2000 send only `worker_id`, so those workers use lists built into
-  their own code; the coordinator sends its own lists for them.
+  page path Russell 1000/2000 send only `worker_id`, and each worker takes its own ten stocks from
+  `lists.txt` inside the worker package. **That file is the coordinator's two Russell lists**
+  (`workers/lists.txt`; `workers/build.py` refuses to build if they differ, `build.py --lists` writes it
+  again), so a page run and a background run now cover the same stocks. A Russell list change is therefore
+  the coordinator, `lists.txt` and a worker deploy.
 - Wording is applied only in those two places (plus the report Lambda and the crypto
   orchestrator). **Workers return data only, so a wording or list change never needs a worker
   redeploy.**
@@ -449,73 +478,101 @@ crypto orchestrator or any worker.
 
 - Each worker gets 10 stocks, or a few more only when a list is longer than workers × 10:
   `perWorker = max(10, ceil(list / workers))`. Workers accept more than 10.
-- **Never send a worker an empty batch.** Some groups (the S&P 500 / Russell 1000 workers) fall
-  back to their built-in list and return unrelated stocks. Both paths skip empty batches.
+- An empty batch returns nothing (since 11 Oct 2026; before, the Russell and NASDAQ workers fell back to a
+  built-in list and returned unrelated stocks). Both paths still skip empty batches. Only a call with **no
+  `stock_batch` at all** to a Russell 1000 / 2000 worker takes that worker's ten stocks of `lists.txt`.
 - No worker Lambda needs creating or deleting when a list changes; idle functions cost nothing.
 - The coordinator de-duplicates results by symbol.
 
-### The worker groups: who runs what code (audit of 11 Oct 2026)
+### The worker groups: one file for every share screener (done 11 Oct 2026)
 
-The owner asked whether the screeners "all share the same function", and for it to be made simpler to manage.
-`python3 check-tools/workers.py` prints the state from AWS (`--diff` compares the code); this is what it showed.
+The owner asked whether the screeners "all share the same function", and for it to be made simpler to manage. They did
+not; now they do. **All 669 share-screener workers (13 groups) run the same package, built from `stockiq/workers/` in git.**
+Checked at the end by downloading every package: one set of four files in all 669, byte for byte the files in git.
 
-- **928 worker functions in 18 groups; 724 of them are called by the site, 204 are not** (`stockiq-option-3-3-worker` 60,
-  `stockiq-option-7-4-worker` 139, `stockiq-option-3-worker` 5: left over, never called; they cost nothing idle and can be
-  deleted when the owner agrees).
-- **The share screeners are one code base that has drifted a little, not 700 different programs.** The S&P 100, S&P 400+600
-  and S&P 1500 workers run the identical file (993 lines). NASDAQ 100 and Dow 30 share another copy: the same functions
-  and the same weights, without the Australian and UK sector lists. The four ASX groups share one file and the Nikkei
-  workers have the same code. FTSE differs from those by about 30 lines (UK sectors).
-- **Every Russell 1000 and Russell 2000 worker has a package of its own** (100 and 200 different fingerprints; see "Found
-  when the work was about to start" below: probably the same code and list in each, zipped separately). FTSE has 9
-  different files among its 10 workers; why was not looked at.
-- **Differences between markets that nobody chose:** RSI, which carries 20% of the score, is worked out two ways: Wilder's
-  smoothing (the standard) in the ASX and Nikkei workers, a plain 14-day average in the US and FTSE workers; and a
-  fallback for the distance from the 52-week low uses two formulas. The same stock would score a little differently
-  depending on which screener ran it.
-- **Known faults, by group** (none fixed in the share workers yet): no real company figures anywhere (below); ASX 24-hour
-  change is 0 once the ASX has closed (65 workers); FTSE prices a trading day old and pence printed with a £ sign (10);
-  a few valid symbols return nothing (WBD, PSKY); the weights add up to 102%.
+| In `stockiq/workers/` | What it is |
+|---|---|
+| `stock_worker.py` | **The code.** Prices from Yahoo, the indicators, the 12-factor score. Change the scoring here and nowhere else |
+| `lambda_function.py`, `advanced_lambda.py` | Two lines each: the two handler names the functions are set up with (`advanced_lambda.lambda_handler` for the ten S&P 100 workers, `lambda_function.lambda_handler` for the rest) |
+| `lists.txt` | The Russell 1000 and Russell 2000 lists (the coordinator's), for page runs that send a worker number and no stocks |
+| `groups.py` | **The one table of groups and markets** (group, screener, number of functions, market; per market its currency and sample shares). `deploy.py`, `prove.py`, `build.py` and `check-tools/workers.py` all read it |
+| `build.py` | Builds the package. The same input always gives the same zip, so every function shows one fingerprint |
+| `prove.py` | What a change does: replays saved prices through the live copy (the mirror) and the changed file, lists every figure that differs, then how far scores, labels and each day's top 10 move. `--fetch` once for the non-US sample |
+| `deploy.py` | Puts the package on the functions, a group at a time, through a `check-tools/pending-<name>/deploy.sh` (its header has the three-line template). `--selftest` plays its rules against a stand-in for AWS |
+| `live.txt` | The fingerprint of the package that is live (`q9ZX/UvTB…` since 11 Oct 2026). The deploy accepts only this one or the new one on a function |
+| `results-proof-2026-10-11.txt` | The proof run before the first deploy |
+
+**To change the workers (scoring, a fault, real company figures one day):** edit `stock_worker.py`; `python3 workers/prove.py`
+and read every difference (only the ones meant may remain); commit; make `check-tools/pending-<name>/` with `deploy.sh` (the
+template) and `groups.txt` (one small group first, e.g. `stockiq-option-3-8-worker`, later the word `all`); dry run, deploy;
+run that group's button through the page and the coordinator (end of this section); then the rest; commit `workers/live.txt`;
+remove the folder. `python3 check-tools/workers.py` must show "one" for the 13 groups and the same code across them
+(`--contents` downloads and compares, the honest count).
+
+- **928 worker functions in 18 groups; 724 are called by the site** (669 share workers, 54 crypto workers, 1 single-coin
+  worker). **204 are not called at all** (`stockiq-option-3-3-worker` 60, `stockiq-option-7-4-worker` 139,
+  `stockiq-option-3-worker` 5): left over, they cost nothing idle, and can be deleted when the owner agrees. They were not
+  touched and still hold old code.
+- **What the audit really found (the first table was misleading).** `workers.py` counts package fingerprints, and a zip's
+  fingerprint changes with the dates of the files inside it. The "100 / 200 different versions" of the Russell groups were
+  two programs zipped 300 times; FTSE's "9 different" were two files differing in one default number. Across the 669 share
+  workers there were **seven code files**: S&P 100 / 400+600 / 1500 (one), Russell 1000, Russell 2000 (the same with a list
+  file each), NASDAQ 100 / Dow 30 (one), ASX x4 / Nikkei (one), FTSE (two).
+- **What the one file is:** the ASX / Nikkei copy (it had Wilder's RSI and the right 52-week formula) with the UK sector
+  list, and these changes, each shown in `results-proof-2026-10-11.txt`:
+  1. **One RSI: Wilder's smoothing, everywhere.** The US and London workers used a plain 14-day average. **This is not a
+     small change** (the notes written before it said "a little"): on saved prices about 37% of US and London signal
+     labels differ on a given day, the score moves by 0.5 or more (on a scale of about -2 to +3) on 46% of stock-days,
+     and a day's top 10 keeps 6 or 7 of its 10 names. It is no better or worse at predicting anything (section 7b). ASX
+     and Nikkei scores did not change from this.
+  2. **NASDAQ 100 and Dow 30 lost their own company-figures tables.** Their copy gave bonus points to seven named tech
+     companies and seven "growth leaders", used a wider "healthy" P/E band and its own P/E guesses, and counted earnings
+     risk differently; the Dow 30 ran this "tech" copy by accident of copying. They now use the common factors, so AAPL
+     scores the same in the Dow 30, NASDAQ 100, S&P 100 and S&P 500. With RSI held still this alone moves the score by
+     0.5 or more on 11% of stock-days and changes 17% of labels for those two screeners.
+  3. **A session Yahoo sends twice is kept once.** After the ASX closes Yahoo sends the day's bar and the closing quote as
+     two bars (seen for 12 of 12 ASX shares on 9 Oct); the 24-hour change was 0 for every ASX stock and every look-back
+     was a day short. Bars are now one per trading day on the exchange's own clock (`bars_from_chart`). On the day of the
+     deploy the ASX top 10s kept 5 to 7 of 10 for this reason.
+  4. **A latest session that arrives empty is taken from the quote** that comes with the chart (London, seen 10 Oct: prices
+     a trading day old). **Tested on a real answer with its last session emptied (12 of 12 right), not yet seen live**: by
+     11 Oct Yahoo had filled Friday's bar in. Look at a FTSE run on a morning after a London session.
+  5. **SPY is fetched once per batch**, not once per stock (the market's state is the same for all ten): half the calls to Yahoo.
+  6. **The Russell lists in the package are the coordinator's** (877 and 1,829). The old packages held 1,000 entries for the
+     Russell 1000, **125 of them company names instead of tickers** ("Amazon", "Airbnb", "3M"), without BRK-B and BF-B, and
+     1,977 for the Russell 2000 with 147 dead tickers; a page run and a background run covered different stocks.
+  7. A fallback for the distance from the 52-week low that gave a wrong figure for a share more than 500% above its low
+     (99 of 21,870 stock-days) is gone; an empty batch returns nothing; each stock carries a new field `currency` (as Yahoo
+     gives it: `USD`, `AUD`, `JPY`, `GBp` for pence); the CSV writer and test block the function never ran were removed.
+  With each copy's own RSI put back into the new file, everything else was identical: S&P family 99.5% of 21,870
+  stock-days (the rest is item 7), Tokyo 600 of 600, London 624 of 624, ASX all but the day of the doubled bar.
+- **How it was deployed:** a group at a time through a packaged script (Dow 30 first; it was then put back once to prove
+  the way back, its fingerprint matching the independent copy, and deployed again), each group's first and last worker
+  tried for real, and every one of the 14 share buttons run through the page code and the coordinator afterwards: every
+  worker call answered, no flags, the tracker found 10 symbols each time, and a live worker's answer equalled the file
+  in git run on this machine on all 480 figures of ten stocks.
+- **The way back to before 11 Oct 2026:** every function's old package is in
+  `~/VSCODE/backup/workers_before_onecode_20261011/<function>.zip` (669 files), and the deploy script of that day puts
+  them back: `git show a6edbd9:check-tools/pending-workers/deploy.sh` and `deploy.py` into a `pending-` folder with a
+  `groups.txt`, then `ROLLBACK=true bash …/deploy.sh`. A full copy of every Lambda function as it was at 12:20 UTC that
+  day, with a README, is in `~/VSCODE/backup/lambda_full_20261011_before_one_worker_code/` (made outside this session).
+  From now on `deploy.py` keeps one zip per deploy (`~/VSCODE/backup/workers_package_<fingerprint>.zip`).
+- **Settings were not changed** and still differ a little by group (Python 3.11, 3.12 or 3.13; 128 or 256 MB; timeouts of
+  30 to 900 s; a few unused environment variables). The code does not depend on any of it.
+- **Left as they are, on purpose, because changing them would change labels again** (each is one line in the one file now,
+  and the owner's to decide): `MODERATE_SELL` is only given at a score of exactly -0.8 (the test above it catches the
+  rest as `HOLD`); `momentum_signal` can never say `STRONG_DOWN` (the `DOWN` test comes first); the line "PRE-SCALE
+  TOTAL" prints the scaled score; the 12 weights total 102%; the market's state is the US market's (SPY) for every
+  country; no real company figures.
+- **Not part of the workers, found on the way and still open** (section 11): London prices are in pence and both report
+  writers print them with a currency sign as if pounds; the coordinator's report cuts every symbol to five characters
+  and prints "$" for every market.
 - **The crypto workers** (54, one version) are a different program; their MACD fault was fixed the same day ("Crypto",
   below). The single-coin worker asks for 60 days and does not have it.
-- **Found when the work was about to start (11 Oct, last hour of the session; not acted on):**
-  - The Russell workers do **not** have their lists written into the code, as these notes said until now. Their code opens
-    a data file in the package (`russell1000_stocks.json` / `russell2000_stocks.json`) and, when the caller sends only a
-    worker number, takes ten stocks from it by that number (`start = (worker_id - 1) * 10`). Apart from that their code
-    differs from the S&P 100 worker only in a few messages and the test at the bottom. **So "100 / 200 different versions"
-    may be nothing but 300 packages zipped one at a time** (a zip's fingerprint changes with its file dates): the first
-    thing to do is download three or four of them and compare the contents (`unzip -Z1`, `cmp` the `.py`, compare the
-    JSON). If the code is the same in all, the Russell groups are already one version in substance. The same check
-    settles the FTSE group's "9 different" and the unused `3-3` group's "8".
-  - Handlers and file names differ by group and must be kept: `stockiq-option-3-1-worker-N` runs
-    `advanced_lambda.lambda_handler` (its file is `advanced_lambda.py`); every other share group runs
-    `lambda_function.lambda_handler`. No share worker uses a layer (the crypto workers use `requests-layer:2`).
-  - The mirror `lambda-sync/` keeps one function per group, so it cannot show differences inside a group; `workers.py`
-    counts fingerprints of packages, not of code. A `--contents` option that downloads and compares would be the honest
-    count; it is not built.
-  - Differences in code between groups that are known: RSI (Wilder's in ASX / Nikkei, a plain average in US / FTSE); the
-    fallback for the distance from the 52-week low (`/ current_price` in US, `/ week52_low` in ASX / Nikkei, the second
-    being right); sector lists (cosmetic: the company figures are made up anyway); the Russell data-file lookup.
-- **The plan to make it one thing (not started; a job for a fresh session, in this order):**
-  1. One source file for every share-screener worker, kept **in git** (`stockiq/workers/stock_worker.py`; Lambda code has no
-     history today): the ASX / Nikkei version as the base (it handles `.AX`, `.T`, `.L`), with the UK sectors, and the
-     Russell lists moved out of the code into one data file inside the package, looked up by worker number.
-  2. Choose one RSI (Wilder's) and one 52-week formula for all, and fix the known faults there once: the ASX double bar, the
-     FTSE price (`meta.regularMarketPrice`) and pence.
-  3. Prove it before deploying: for each group, score the same saved prices with the old file and the new one
-     (`check-tools/replay` and `paper-test` load a worker's code the same way) and list every score that differs; only the
-     differences that were chosen may remain.
-  4. Deploy group by group with a packaged script like the crypto one (live code checked against the mirror, one rollback
-     zip per group, every function's `CodeSha256` verified afterwards), then run every button end to end (the method at the
-     end of this section). `check-tools/workers.py` must then show "one" for every group and the same code across them.
-  5. Afterwards a change to the scoring is one file, one test, one deploy. Real company figures (the screeners have none)
-     belong in that file too, once there is a source for them.
-  US and FTSE scores will move a little at step 2 (the RSI method): say so, and re-run the backtests' "reproduces the live
-  scores" check against the new file.
 
 ### What the screener workers really do
 
-- They return ~47 data fields per stock and no report text. Codes: `STRONG_BUY`, `BUY`,
+- They return 48 data fields per stock (`currency` since 11 Oct 2026) and no report text. Codes: `STRONG_BUY`, `BUY`,
   `MODERATE_BUY`, `HOLD`, `MODERATE_SELL`, `SELL`, `STRONG_SELL` (underscores). Field names that
   matter for CSV: `change_24h`, `distance_from_52w_low`, `52w_high`, `52w_low`.
 - **They do not fetch fundamentals.** `get_fundamentals()` returns hard-coded guesses for ~50
@@ -526,11 +583,12 @@ The owner asked whether the screeners "all share the same function", and for it 
   the CSV no longer exports P/E, market cap, beta, dividend, sector or earnings risk.
 - The 12 weights really total 102% in the code (0.18+0.08+0.06+0.20+0.20+0.10+0.06+0.05+0.03+
   0.03+0.02+0.01). The About and FAQ pages say so. Changing it would change every score.
-- **ASX quirk (open):** once the ASX has closed, Yahoo returns the last session bar twice, so the
-  ASX workers compute a 24-hour change of 0 for every stock (also flattening their sentiment
-  factor and `Momentum_Signal`). Not checked during ASX hours. Fix belongs in the 65 ASX workers.
-- A worker returns nothing for a few valid symbols even when asked directly (WBD, PSKY). Open.
-- Real fundamentals, or the ASX fix, mean redeploying worker groups (~630 functions in total).
+- **ASX quirk (fixed 11 Oct 2026):** once the ASX has closed, Yahoo returns the last session bar twice, so the
+  ASX workers computed a 24-hour change of 0 for every stock (also flattening their sentiment
+  factor and `Momentum_Signal`). Bars are now one per trading day. Not checked during ASX hours.
+- A worker returns nothing for WBD and PSKY because **Yahoo has no usable history for them** (11 Oct 2026: one bar
+  for WBD, which stopped trading on 6 Oct; 42 of PSKY's 52 bars empty). The price source, not the worker.
+- Real fundamentals are now one file and one deploy (`workers/`, above), once there is a source for them.
 
 ### Output wording: describe, don't advise
 
@@ -1598,23 +1656,26 @@ apostrophe must allow for it; a test of an action that depends on the day (tradi
 must set the function's clock (`m.datetime = at(when)` in `ai_trader_test.py`), or it passes on
 weekdays and fails at the weekend.
 
-### Start here when resuming (state at 11:45 UTC on 11 Oct 2026: the full sweep, then the replay, real costs and the bar)
+### Start here when resuming (state at 13:10 UTC on 11 Oct 2026: the full sweep, the replay, real costs and the bar, then one code base for the share screeners)
 
-**THE NEXT JOB, agreed with the owner at the very end of the session of 9–11 Oct ("put info in the md on what needs to be
-done and i'll start a new session to get it done"): one code base for the share screeners.** Everything needed is in
-section 8b, "The worker groups: who runs what code": the audit (`python3 check-tools/workers.py`), what was found at the last
-minute (the Russell lists are a data file in the package, so the "300 different versions" may only be 300 separately made
-zips: check that first), the differences that are real (two RSI methods, one 52-week formula), the known faults to fix in
-the one file (ASX 24-hour change of 0 after the close, FTSE prices a day old and pence shown as pounds), and the five-step
-plan (one source file in git, prove on saved prices, deploy group by group with rollback zips, test every button). Work in
-that order; the crypto deploy script of 11 Oct (`git show 146ffed:check-tools/pending-crypto/deploy.sh`) is the pattern
-for updating a whole group. About 720 live functions are involved: dry run, one group first (Dow 30 has 3 workers),
-and check `workers.py` and a live screener run after each group.
+**The job that was next is done (11 Oct 2026, evening): one code base for the share screeners.** All 669 share-screener
+workers run the one package built from `stockiq/workers/` (section 8b, "The worker groups": what changed, how it was proved
+and deployed, the way back). Confirm nothing has moved: `python3 check-tools/workers.py` shows "one" for the 13 share groups
+and the same code across them; `python3 workers/build.py` prints the fingerprint in `workers/live.txt`.
+**To look at first, Monday 12 Oct or the next working day:** (a) one FTSE 100 run on a morning after a London session: the
+price must be that session's, not the one before (the fix for the empty latest session was tested on a doctored answer
+only); (b) an ASX run during ASX hours (the one-bar-a-day rule was only seen after the close); (c) the autopilot's first
+share buys, which now come from rankings made with the one RSI.
+**The next small job (section 11, "Report writers"):** London prices are pence and are printed as pounds; the coordinator's
+report cuts symbols to five characters and prints "$" for every market, so the 🎯 tracker cannot read a background report
+of an ASX, Nikkei or FTSE screener. Both are in the report writers (page and coordinator), not the workers, which now send
+each stock's `currency`.
 **Other things waiting, in order:** (1) the owner's decision on the two **public** GitHub repositories and his personal
 file in one of them (section 11, first item); (2) Monday 12 Oct: the first daily deploy with the new copy-keeping rules,
 and the first share trades; (3) the autopilot's own trials of a longer holding time and of not selling on the signal, and
 recording company figures with each share bought (below, item 0); (4) deleting the 204 worker functions the site never
-calls, with his agreement; (5) thinning the bell script's handling of older copies after a week.
+calls, with his agreement; (5) thinning the bell script's handling of older copies after a week; (6) the worker oddities
+left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line change now, each changing labels.
 
 **What is live, and how to confirm nothing has moved since:**
 - Lambda `stockiq-ai-trader`: `CodeSha256` `k2OocgJogAZjcF8LYC6WOtH0n7I3VaE5nb9EmxWzAnI=`, equal to
@@ -1629,6 +1690,7 @@ calls, with his agreement; (5) thinning the bell script's handling of older copi
   it is Monday 12 Oct: look at its log once (section 12, "After the daily run").
 - Crypto: the 54 `stockiq-option-7-1-worker-N` all `NmXC9dcsA6p5tXJl+u6VZIfdsrvM3ERN/DmMSQ9zalI=`, the orchestrator
   `Tyyx+Pb2l+sy7avfCncwduEtmFtYn6Lws+5g6dj9Kc0=`, both equal to their mirrors (MACD fix of 11 Oct, section 8b).
+- Share-screener workers: all 669 show `CodeSha256` `q9ZX/UvTBcszKxRPR9lvJw9UpyfWrB5sOB3pDWccm6c=` (`workers/live.txt`), built from `workers/` in git.
 - Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 386 function, 198 panel, 74 portfolio, 22 bell, 16 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
   spreads over markets).
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
@@ -1843,7 +1905,19 @@ more finished trades than there are, and would chase noise before then.
 - **Yahoo rate-limits this machine** (HTTP 429) after a few hundred chart requests. On 10 Oct 2026
   manual symbol checks caused the daily run's snapshot step to get no prices for 2,041 stocks. It
   kept yesterday's snapshots and de-indexed nothing; a re-run an hour later was clean.
-- **Lambda code is not in git** (`lambda-sync/` is a gitignored mirror). The only history of a
+- **A count of fingerprints is not a count of programs (11 Oct 2026).** The first audit of the screener workers said the
+  Russell groups had "100 and 200 different versions" and planned a large clean-up around that. They were two programs
+  zipped 300 times: a zip's `CodeSha256` changes with the dates of the files inside it. Compare what is inside
+  (`check-tools/workers.py --contents`) before believing that functions differ.
+- **"It will move a little" was a guess; measure (11 Oct 2026).** These notes said one RSI for all screeners would move US
+  scores "a little". Replayed on saved prices it changed a third of the signal labels. `workers/prove.py` exists so that
+  the size of a scoring change is known before it is deployed: run it and read it, whatever the change looks like.
+- **A deploy by hand commits whatever is lying in both repos (11 Oct 2026).** A `./deploy-to-s3.sh` was run on a Sunday
+  evening while a session was mid-task; its git step swept seven unfinished files into an "Auto-update" commit and
+  pushed them (harmless that time). It also moved the 23-hour push marker. Another reason to commit finished stages
+  promptly, and to check `git log` for an "Auto-update" when a file is unexpectedly already committed.
+- **Lambda code is not in git** (`lambda-sync/` is a gitignored mirror; the one exception since 11 Oct 2026 is the
+  share-screener workers' code, which lives in `stockiq/workers/`). The only history of a
   Lambda is whatever zip you keep before changing it.
 - A worker address in the crypto orchestrator had a one-character typo for months and returned
   403; its coins were silently missing. Failed worker calls are easy to miss: count results.
@@ -1862,6 +1936,9 @@ more finished trades than there are, and would chase noise before then.
   (missing label codes, stocks never sent to a worker, a column that was always 0, a worker
   address with a typo). When asked to "check", run the whole thing (section 8b) and read the
   output. List every code, field or symbol a component can produce before mapping it.
+- **The share-screener workers are changed in `stockiq/workers/`, never in the AWS console and never in `lambda-sync/`**:
+  edit `stock_worker.py`, run `workers/prove.py` and read every difference, commit, deploy with `workers/deploy.py` through a
+  packaged script, one small group first (section 8b, "The worker groups").
 - **Before editing a Lambda:** download the live code and diff it with `lambda-sync/` (they must
   match). Lambda code is not in git, so keep the previous zip in `~/VSCODE/backup/` with a clear
   name as the rollback. After deploying, smoke-test the live function. If the daily run's Lambda
@@ -1928,12 +2005,24 @@ Needs the owner's decision or more work (nothing here is fixed):
   wording was neutralised (section 8b). Whether issuing automated signals to paying users
   without a licence is acceptable under Australian law is a question for a lawyer; the owner
   knows and has not had it reviewed. The owner trades as an individual (no company structure).
-- **One code base for the share screeners** (section 8b, "The worker groups"): the plan is written, nothing is started. It
-  also carries the fixes for the known share-screener faults, so they are not worth patching group by group before it.
-  The 204 worker functions the site never calls can be deleted when the owner agrees.
-- **Screener quality** (section 8b): no real fundamentals in the workers; ASX 24-hour change is 0
-  after the ASX close; a few valid symbols return nothing (WBD, PSKY); Russell 1000/2000 lists
-  not refreshed; ASX 300 is approximate. All but the lists need worker redeploys.
+- **Report writers: pence, cut symbols, "$" for every market (found 11 Oct 2026; the next small job).**
+  - London prices are pence (Yahoo's `GBp`). The page prints them with a pound sign ("£503.80" for Tesco at 503.8p; the three
+    FTSE formatters in `analysis-functions.js`, lines with `£${`), the coordinator with a dollar sign. UK shares are quoted
+    in pence, so "503.80p" is the right form. **The 🎯 tracker reads the price after a currency sign** (`[$£€¥]` in
+    `parseScreenerTop10`, `dashboard.html`), and reports already saved say "£2614.00" meaning pence, so the tracker must
+    accept both "£2614.00" and "2614.00p" as the same number of pence. The practice portfolio and the autopilot already
+    treat `GBp` as pence. Three places to change together: the page formatters, the coordinator, the tracker's pattern.
+  - **The coordinator's report cuts every symbol to five characters** (`(symbol + '     ')[:5]`, about line 633 of its
+    `lambda_function.py`) and prints "$" before every price: a background ASX report says "AGL.A  $8.43", Nikkei "4307.
+    $5613.00", FTSE "TSCO.  $503.80". The tracker cannot find those tickers, so the 🎯 button on a **background** report of
+    a non-US screener shows nothing or the wrong share (a page-run report is fine). Fix: do not cut the symbol, and take
+    the sign from the stock's `currency` field, which the workers send since 11 Oct 2026.
+  - Test with `check-tools/tracker_run.js` on a `res_<key>.json` from `run_all.py` and on a `page_*.json`, old and new.
+- **Share-screener workers** (section 8b, "The worker groups"): one code base since 11 Oct 2026. Open: no real company figures
+  (one file to change now, once there is a source); the two fixes for Yahoo's oddities to be seen live (FTSE on a morning
+  after a session, ASX during its hours); the oddities left on purpose (`MODERATE_SELL`, `STRONG_DOWN`); Russell 1000/2000
+  lists not refreshed (7 and 27 of their symbols no longer have prices); ASX 300 approximate; the 204 unused worker
+  functions to delete when the owner agrees.
 - **Crypto scoring** (section 8b, "How a coin is scored"): the single-coin worker `stockiq-option-7-2-worker-1` was not
   checked for the MACD fault the 54 screener workers had; the score mixes opposite ideas and has never been tested for
   coins; whole-number scores tie often. A finer score, or a test of it, needs saved coin prices.
@@ -1943,10 +2032,9 @@ Needs the owner's decision or more work (nothing here is fixed):
   after entering the top 10 with the average coin over the same days. Leftovers that can be
   deleted when the owner agrees: Lambda `stockiq-coinspot-predictions-updater` (no longer
   triggered) and the old-format rows in both crypto tables.
-- **UK FTSE screener shows prices one trading day old.** Yahoo's latest daily close is empty for
-  London stocks (seen 10 Oct: Friday's bar `null`), and the `stockiq-europe-4-1` workers fall back
-  to the day before (IMB.L 2,614 in the report, 2,662 actual). The report also prints pence with a
-  £ sign ("£2614.00" is 2,614p). Needs the 10 workers redeployed (use `meta.regularMarketPrice`).
+- **UK FTSE screener showed prices one trading day old** (seen 10 Oct: Yahoo's latest daily bar empty for London stocks,
+  IMB.L 2,614 in the report, 2,662 actual). Fixed in the one worker file on 11 Oct 2026 (the latest session is taken from the
+  quote); **not yet seen live**, because Yahoo had filled the bar in by then. The pence shown as pounds is the item above.
 - **Fake-money test of the screeners (owner's idea, 10 Oct 2026; first results in).** Tool:
   `stockiq/check-tools/paper-test/` (`python3 fetch.py && python3 backtest.py dow30|sp100 [start date]`).
   It replays the worker's own scoring code over daily prices (the screeners use nothing else), takes
@@ -2085,6 +2173,15 @@ autopilot; steps `type`, `sale`, `trial`, `off`, `open`, `preset`, `sellall`, `l
 for example that a sale made in the background appears without losing what is being typed.
 A deploy script that checks `pgrep -f deploy-to-s3.sh` must be run as its own command: written and run
 in one command, the check finds its own text and stops.
+
+**Share-screener workers** (one file for all 13 groups, section 8b "The worker groups"):
+```bash
+cd /Users/dave/VSCODE/stockiq
+python3 check-tools/workers.py            # every group "one", and the 13 share groups the same code as each other
+python3 workers/build.py                  # prints the package's fingerprint: must equal workers/live.txt when nothing is being changed
+python3 workers/prove.py                  # what a change to workers/stock_worker.py does, on saved prices (about 3 minutes)
+python3 workers/deploy.py --selftest      # the deploy tool's rules against a stand-in for AWS
+```
 
 **Run every analysis button end to end:** section 8b, last part.
 **Work on the dashboard's practice portfolio or autopilot:** section 8c, "How to work on it" (tests,
@@ -2355,4 +2452,20 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - **Audit of the worker groups** (section 8b, "The worker groups"; `check-tools/workers.py`): 928 workers in 18 groups, 204
     never called; the share screeners are one code base with small drift (two ways of working out RSI, a file per function
     in the two Russell groups); a plan to make it one source file in git, written and not started.
+  - **One code base for the share screeners (evening; section 8b, "The worker groups").** All 669 share-screener workers in
+    13 groups run one package built from `stockiq/workers/` in git (fingerprint `q9ZX/UvTB…`); before, seven copies that had
+    drifted. One RSI everywhere (Wilder's): **about a third of US and London signal labels and three or four of each top 10
+    changed on the day**, far more than these notes had expected; the NASDAQ 100 and Dow 30 lost their own company-figures
+    tables; the ASX 24-hour change of 0 and the London price a day old fixed at the source; the Russell lists in the
+    packages replaced by the coordinator's (the old ones held 125 company names); SPY fetched once per batch. Proved on
+    saved prices first (`workers/prove.py`, `workers/results-proof-2026-10-11.txt`), deployed a group at a time with the
+    way back tested on the Dow 30, every share button run through the page and the coordinator afterwards. The studies of
+    section 7b run again with the one file: same conclusions. New tools kept for good: `workers/build.py`, `prove.py`,
+    `deploy.py` (with a self-test), `groups.py`; `check-tools/workers.py --contents`. Old packages:
+    `~/VSCODE/backup/workers_before_onecode_20261011/`. About and FAQ pages checked: neither says how RSI is worked out,
+    nothing to change. `add-new-screener.md` rewritten around the one package, with Germany (DAX 40) as its example.
+    **Lessons: a count of zip fingerprints is not a count of programs; and measure a scoring change before describing its
+    size** (section 9).
+  - Found on the way and left open (section 11, "Report writers"): pence printed as pounds, and the coordinator's report
+    cutting symbols to five characters.
   - Notes: section 8c ends with "Start here when resuming". Everything known is in these files.

@@ -2,7 +2,8 @@
 
 ## Overview
 - 984 functions (969 with Function URLs): ~50 named functions, ~650 stock screener workers, 54 crypto workers, plus old/unused ones
-- **Lambda code is not in git.** `lambda-sync/` is a gitignored mirror that keeps one copy per worker group. Before changing a Lambda, download the live code, diff it with the mirror, and keep the old zip in `~/VSCODE/backup/`
+- **The share-screener workers' code is in git: `stockiq/workers/`** (one file, `stock_worker.py`, for all 669 workers in 13 groups since 11 Oct 2026; build, proof and deploy tools beside it; `site-overview.md` section 8b, "The worker groups"). Change it there, never in the console or in `lambda-sync/`.
+- **Other Lambda code is not in git.** `lambda-sync/` is a gitignored mirror that keeps one copy per worker group. Before changing a Lambda, download the live code, diff it with the mirror, and keep the old zip in `~/VSCODE/backup/`
 - All use **Function URLs** (no API Gateway) called directly from frontend JS
 - All in `us-east-1`, IAM role: `arn:aws:iam::114366766218:role/acp-lambda-role`
 - Runtime: Python 3.x, `$LATEST` version (no aliases)
@@ -49,12 +50,15 @@
 ### Screener Workers (~650 functions)
 Parallel workers called from the browser (`analysis-functions.js`) for on-page runs and by
 `stockiq-screener-coordinator` for background runs. Each receives a `stock_batch` (10 symbols, a few
-more if the list is long) and returns ~47 data fields per stock: no report text. Facts that matter
+more if the list is long) and returns 48 data fields per stock: no report text. Facts that matter
 (full detail in `site-overview.md` section 8b):
 - Codes returned: `STRONG_BUY, BUY, MODERATE_BUY, HOLD, MODERATE_SELL, SELL, STRONG_SELL`. Never shown raw.
+- **One package in all 669 share workers** (`stock_worker.py`, two two-line handler files, `lists.txt`), built by `workers/build.py`; its fingerprint is in `workers/live.txt`. The same stock scores the same in every screener; RSI is Wilder's everywhere.
 - **No real fundamentals**: P/E, beta, dividend, size and sector are hard-coded guesses/defaults.
-- **Never send an empty batch**: some groups fall back to a built-in list and return unrelated stocks.
-- ASX workers report a 24-hour change of 0 once the ASX has closed (open issue).
+- An empty batch returns nothing. A Russell 1000 / 2000 worker called with a `worker_id` and no `stock_batch` (the page does this) takes its own ten stocks from `lists.txt` in the package, which holds the coordinator's lists.
+- Each stock carries `currency` as Yahoo gives it (`USD`, `AUD`, `JPY`, `GBp` = pence). 48 fields in all.
+- Fixed in the one file on 11 Oct 2026: the ASX 24-hour change of 0 after its close (Yahoo sends the last session twice); a latest session that arrives empty (London prices a day old; not yet seen live).
+- Handlers: `advanced_lambda.lambda_handler` on the ten `stockiq-option-3-1-worker-N`, `lambda_function.lambda_handler` on every other share worker; both names are in the package. Settings (runtime 3.11 to 3.13, memory, timeout) differ a little by group and were left alone.
 
 | Group | Functions | Screener | Stocks |
 |---|---|---|---|
@@ -71,8 +75,7 @@ more if the list is long) and returns ~47 data fields per stock: no report text.
 **Coordinator key format:** `{option}-{subOption}` e.g. `4-200` (ASX 200), `5-nikkei225` (Japan), `5-ftse100` (UK).
 New screeners: use `5-<subOption>`.
 
-**Worker code source for new non-US screeners:** copy from the Nikkei worker in the mirror (`lambda-sync/stockiq-asia-5-5-worker-*`; see `add-new-screener.md`) — it handles
-`.T`, `.AX`, `.L` suffixes correctly via Yahoo Finance. US workers use a different base.
+**Workers for a new screener** get the same package as every other share worker (`workers/build.py`), a line in `workers/groups.py`, and are created and deployed through a packaged script: `add-new-screener.md`. Yahoo suffixes (`.T`, `.AX`, `.L`, `.DE`) need nothing special in the code.
 
 ### Auth & Users
 | Function | Purpose |

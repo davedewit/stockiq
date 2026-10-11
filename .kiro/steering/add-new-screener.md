@@ -1,403 +1,340 @@
 # Add New Screener
 
-Complete step-by-step guide for adding a new regional screener (e.g. India BSE Sensex).
-Based on the Japan Nikkei 225 build (Oct 2026). Read this before starting.
+How to add a share screener for another market, written so that a new session can build one from this file alone.
+The worked example is **Germany (DAX 40)**; India (BSE Sensex) and South Korea (KOSPI) follow the same steps with the
+differences listed in step 1. Rewritten 11 Oct 2026, when every share-screener worker was moved to one package: the
+older version of this guide (copy a worker from `lambda-sync/`, type `aws` commands) no longer applies.
+
+Read `site-overview.md` section 8b first (how the screeners work, the two code paths, the output wording rule) and
+section 10 (working rules). Three things have changed since the Nikkei build and decide how the work is done:
+
+1. **Workers come from the one package in `stockiq/workers/`** (`build.py`), never from a copy in `lambda-sync/`. A new
+   screener needs no worker code at all: the same file serves every market.
+2. **Creating functions and deploying anything goes through a packaged `check-tools/pending-<name>/deploy.sh`**, run as
+   `bash /Users/dave/VSCODE/stockiq/check-tools/pending-<name>/deploy.sh` with nothing else on the line (dry run:
+   `DRY_RUN=true` in front). The session's safety check refuses direct `aws lambda` / `aws s3` changes. Read-only `aws`
+   calls are fine.
+3. **Testing is scripted** (`check-tools/page_run.js`, `run_all.py`, `analyse.py`, `tracker_run.js`), not a checklist
+   worked through in a browser.
 
 ---
 
-## Architecture Overview
-
-Each screener = N worker Lambdas (10 stocks each) + coordinator routing + frontend UI + dashboard wiring.
+## What a screener is made of
 
 ```
 analysis.html button
-    → runAnalysis(option, subOption)
-    → calls N workers in parallel (directly from browser)
-    → results aggregated in formatXxxResult()
-    → saved to DynamoDB via saveAnalysisToHistory()
+    → runAnalysis(option, subOption)                         website/analysis-functions.js
+    → calls N workers straight from the browser, 10 stocks each
+    → a formatter writes the report text; saveAnalysisToHistory() stores it
 
 dashboard "Run in Background"
-    → processAnalysisGroup()
-    → POST to stockiq-screener-coordinator { option, subOption, userId }
-    → coordinator calls N workers in parallel (server-side)
-    → saves result to user's dashboard history
+    → processAnalysisGroup()                                 website/dashboard.html
+    → stockiq-screener-coordinator { option, subOption, userId }
+    → the coordinator calls the same N workers, writes the report and CSV, saves them
 ```
 
-Key files touched for every new screener:
-- `/Users/dave/VSCODE/website/analysis-functions.js` — runAnalysis handler + formatter
-- `/Users/dave/VSCODE/website/analysis.html` — button
-- `/Users/dave/VSCODE/website/dashboard.html` — getAnalysisKey, getSubOptionFromCompanyName, screenerMappings
-- `/Users/dave/VSCODE/stockiq/lambda-sync/stockiq-screener-coordinator/lambda_function.py` — WORKER_URLS, STOCK_UNIVERSES, titles, universe_sizes
+| Piece | Where | New for each screener |
+|---|---|---|
+| Worker functions | AWS, `<group>-1 … <group>-N` | Created from the one package; one line in `workers/groups.py` |
+| The stock list | `analysis-functions.js` (`*Universe` array) **and** the coordinator (`STOCK_UNIVERSES`) | The same list in both, no duplicates |
+| Page handler and formatter | `analysis-functions.js` | A block in `runAnalysis`, a names table, a formatter, three lookups |
+| Button | `analysis.html` | One line |
+| Dashboard wiring | `dashboard.html` | Five small entries |
+| Coordinator | `lambda-sync/stockiq-screener-coordinator/lambda_function.py` | Worker addresses, list, title, size |
+| Autopilot (optional) | Lambda `stockiq-ai-trader`, chat prompt | A `SCREENERS` line, market hours and name |
 
 ---
 
-## Step 1 — Plan
+## Step 1: decide the names, and get the list
 
-Decide:
-- **Option number** — new Asia/Pacific screeners go under **option 5**; coordinator key is
-  `5-<subOption>` (e.g. `5-sensex`). Legacy screeners are inconsistent (the frontend sends ASX as
-  option 5 subOption 50..300 but the coordinator keys are `4-50`..`4-300`; FTSE is frontend option 4
-  but coordinator `5-ftse100`). Don't copy those; follow the Nikkei pattern where frontend,
-  dashboard and coordinator all use `5` + the same subOption string.
-- **subOption string** — e.g. `nikkei225`, `sensex`, `kospi`
-- **Stock list** — get the official index constituents. Verify they work on Yahoo Finance with the
-  correct suffix (`.T`=Tokyo, `.BO`=Bombay/BSE, `.NS`=NSE India, `.KS`=Korea, `.HK`=Hong Kong).
-- **Worker count** — ceil(stocks / 10). E.g. 30 BSE Sensex stocks = 3 workers, 50 = 5 workers.
-  (If a list later grows past workers × 10, the batching gives each worker a few more; no new workers needed.)
-- **Worker naming** — follow the pattern: `stockiq-asia-5-5-worker-N` was Nikkei.
-  Next Asia group would be `stockiq-asia-5-6-worker-N`.
+| | Germany (DAX 40) | India (BSE Sensex) | South Korea (KOSPI) |
+|---|---|---|---|
+| Page call | `runAnalysis(5, 'dax40', event)` | `(5, 'sensex', event)` | `(5, 'kospi', event)` |
+| Coordinator key | `5-dax40` | `5-sensex` | `5-kospi` |
+| Worker group | `stockiq-europe-4-2-worker` | `stockiq-asia-5-6-worker` | `stockiq-asia-5-7-worker` |
+| Workers (list ÷ 10, rounded up) | 4 | 3 | by the list |
+| Yahoo suffix | `.DE` (Xetra) | `.BO` or `.NS` (try both) | `.KS` |
+| Currency Yahoo reports | `EUR` | `INR` | `KRW` |
+| Sign in the report | `€` (the tracker already reads it) | `₹` (add it to the tracker, step 6) | `₩` (add it) |
+| Index for the Top 10 popup | `^GDAXI` | `^BSESN` | `^KS11` |
+| Result type / history name | `option_5dax40_screener` / "Germany DAX 40 Screener" | … | … |
+| Market code in the autopilot | `de`, "German shares" | `in`, "Indian shares" | `kr`, "Korean shares" |
 
-### Verify stocks work on Yahoo Finance before building
-```bash
-python3 -c "
-import yfinance as yf
-symbols = ['RELIANCE.NS', 'TCS.NS', 'INFY.NS']  # test a few
-for s in symbols:
-    info = yf.Ticker(s).info
-    print(s, info.get('shortName', 'NOT FOUND'))
-"
-```
-If they return "NOT FOUND" don't proceed — the workers will get no data.
+- **Use option `5` and the same subOption string everywhere** (page, dashboard, coordinator). The older screeners are
+  inconsistent (ASX is page option 5 but coordinator `4-…`; FTSE the reverse): do not copy them, copy Nikkei.
+- Worker group names follow `stockiq-<region>-<n>-<m>-worker`: `stockiq-europe-4-1-worker` is FTSE, so the next European
+  group is `4-2`; `stockiq-asia-5-5-worker` is Nikkei, so the next Asian group is `5-6`. The name is only a label.
+- **The list.** Take the index members from a current source and say where it came from (Wikipedia's index page worked
+  for every list rebuilt in Oct 2026; the DAX page has a "Components" table with the Xetra tickers). Turn each into
+  Yahoo's form: ticker + `.DE` (`SAP.DE`, `SIE.DE`, `ALV.DE`); a share class written with a dot becomes a dash before the
+  suffix, as for London (`BT.A` → `BT-A.L`).
+- **Check every symbol through the price proxy, not Yahoo directly** (Yahoo blocks this machine after a few hundred calls,
+  and a blocked call looks like a dead symbol). `stockiq-price-proxy` answers `?symbol=SAP.DE` with a price, and HTTP 500
+  for a symbol it does not know; its address is in `lambda-url-mapping.json`. `check-tools/lists/build_lists2.py` is the
+  script that did this for the other lists. A symbol Yahoo does not know is silently dropped by a worker, so the list
+  would simply come out short.
+- No duplicates, and report the real count to the owner: `print(len(stocks), len(set(stocks)))` must match. Put the
+  **real** count on the button and in the headers, not the index's nominal size.
+- Collect the company names too (a short name per symbol, 22 characters at most: the report line and the tracker
+  depend on it, step 4).
 
-Yahoo blocks this machine (HTTP 429) after a few hundred calls, and a blocked call looks the same as
-a dead symbol. For a long list, check through the price-proxy Lambda instead (URL in
-`site-overview.md` section 8b; HTTP 500 means unknown symbol).
+---
 
-Also check the final list has the expected count and **no duplicates**. Take the members from a
-current source (Wikipedia's index page worked for the Oct 2026 rebuild; the Nikkei list went from an
-old 210 to the full 225) and report the real count to the owner:
+## Step 2: the workers
+
+**2a. One line in `workers/groups.py`** (and a market, if it is new):
+
 ```python
-print(len(stocks), len(set(stocks)))   # both must match
-```
-Use the official index constituent list and say where it came from; don't invent tickers from memory
-without verifying each on Yahoo.
-
----
-
-## Step 2 — Create Worker Lambdas on AWS
-
-### 2a. Get the base worker code
-Copy from the existing non-US worker (handles `.T`, `.AX`, `.L`, `.BO`, `.NS` etc.):
-```bash
-ls -d /Users/dave/VSCODE/stockiq/lambda-sync/stockiq-asia-5-5-worker-*/
-# The local mirror keeps ONE worker per group (duplicates are skipped), so the folder is
-# whichever number was synced, e.g. stockiq-asia-5-5-worker-10. It contains lambda_function.py
-```
-
-### 2b. Create all workers in one go
-```bash
-cd /Users/dave/VSCODE/stockiq/lambda-sync/stockiq-asia-5-5-worker-*/  # the one Nikkei worker in the mirror
-zip /tmp/worker.zip lambda_function.py
-
-TOTAL_WORKERS=3   # adjust to ceil(stocks/10)
-GROUP="stockiq-asia-5-6"   # adjust group name
-
-for i in $(seq 1 $TOTAL_WORKERS); do
-  echo "Creating worker $i..."
-  aws lambda create-function \
-    --function-name ${GROUP}-worker-${i} \
-    --runtime python3.12 \
-    --role arn:aws:iam::114366766218:role/acp-lambda-role \
-    --handler lambda_function.lambda_handler \
-    --zip-file fileb:///tmp/worker.zip \
-    --timeout 60 \
-    --memory-size 256 \
-    --profile default --region us-east-1 \
-    --query 'FunctionName' --output text
-done
-```
-
-### 2c. Add Function URLs to all workers
-```bash
-for i in $(seq 1 $TOTAL_WORKERS); do
-  aws lambda create-function-url-config \
-    --function-name ${GROUP}-worker-${i} \
-    --auth-type NONE \
-    --cors '{"AllowOrigins":["*"],"AllowMethods":["*"],"AllowHeaders":["*"]}' \
-    --profile default --region us-east-1 \
-    --query 'FunctionUrl' --output text
-done
-```
-
-### 2d. Add public invoke permissions (CRITICAL — workers return 403 without this)
-```bash
-for i in $(seq 1 $TOTAL_WORKERS); do
-  aws lambda add-permission \
-    --function-name ${GROUP}-worker-${i} \
-    --statement-id AllowPublicAccess \
-    --action lambda:InvokeFunctionUrl \
-    --principal "*" \
-    --function-url-auth-type NONE \
-    --profile default --region us-east-1
-done
-```
-
-### 2e. Collect the Function URLs
-```bash
-for i in $(seq 1 $TOTAL_WORKERS); do
-  echo -n "worker-${i}: "
-  aws lambda get-function-url-config \
-    --function-name ${GROUP}-worker-${i} \
-    --profile default --region us-east-1 \
-    --query 'FunctionUrl' --output text
-done
-```
-
----
-
-## Step 3 — Update the Coordinator Lambda
-
-File: `/Users/dave/VSCODE/stockiq/lambda-sync/stockiq-screener-coordinator/lambda_function.py`
-
-### 3a. Add to WORKER_URLS dict
-```python
-'5-sensex': [  # India BSE Sensex - 3 workers
-    'https://<worker-1-url>.lambda-url.us-east-1.on.aws/',
-    'https://<worker-2-url>.lambda-url.us-east-1.on.aws/',
-    'https://<worker-3-url>.lambda-url.us-east-1.on.aws/'
-],
-```
-
-### 3b. Add to STOCK_UNIVERSES dict
-```python
-'5-sensex': ['RELIANCE.BO','TCS.BO','INFY.BO', ...],  # all N stocks
-```
-
-### 3c. Add to titles dict (appears twice in file — update both)
-```python
-'5-sensex': 'India BSE Sensex Screener'
-```
-
-### 3d. Add to universe_sizes dict (appears twice in file — update both)
-```python
-'5-sensex': 30  # actual stock count
-```
-
-### 3e. Deploy the coordinator
-```bash
-cd /Users/dave/VSCODE/stockiq/lambda-sync/stockiq-screener-coordinator
-zip lambda_function.zip lambda_function.py
-aws lambda update-function-code \
-  --function-name stockiq-screener-coordinator \
-  --zip-file fileb://lambda_function.zip \
-  --profile default --region us-east-1
-rm lambda_function.zip
-```
-
----
-
-## Step 4 — Update analysis-functions.js
-
-File: `/Users/dave/VSCODE/website/analysis-functions.js`
-
-### 4a. Add the runAnalysis handler
-Find the `} else if (option === 5 && subOption === 'nikkei225') {` block and add a similar block after it:
-
-```javascript
-} else if (option === 5 && subOption === 'sensex') {
-    if (typeof authManager !== 'undefined' && authManager.isAuthenticated()) {
-        const canAccess = await authManager.checkStockAnalysisAccess();
-        if (!canAccess) return;
-    }
-    console.log('🚀 OPTION 5.6 - India BSE Sensex Screener');
-    const sensexUniverse = ['RELIANCE.BO', 'TCS.BO', ...];  // all stocks
-    const allWorkerUrls = [
-        'https://<worker-1>.lambda-url.us-east-1.on.aws/',
-        ...
-    ];
-    // ... dispatch pattern identical to nikkei225 block
-```
-
-The dispatch pattern is the same for all non-US screeners — copy the nikkei225 block and adjust
-the universe, worker URLs, worker count, and call the appropriate formatter.
-
-### 4b. Add a company names dict
-```javascript
-const SENSEX_COMPANY_NAMES = {
-    'RELIANCE.BO': 'Reliance Industries',
-    'TCS.BO': 'Tata Consultancy Services',
-    ...
-};
-```
-
-### 4c. Add a formatter function
-Copy `formatNikkeiResult()` and adapt:
-- Change `NIKKEI_COMPANY_NAMES` → `SENSEX_COMPANY_NAMES`
-- Change currency symbol `¥` → `₹`
-- Change header text
-- Change `result.type = 'option_5nikkei225_screener'`  → `'option_5sensex_screener'`
-- Change `result.companyName = 'Japan Nikkei 225 Screener'` → `'India BSE Sensex Screener'`
-
-### 4d. Three more lookups in analysis-functions.js (easy to miss — grep `nikkei225` to find them)
-All three are keyed on the subOption/company name; without them history saving and re-run break:
-1. **Re-run URL map** (~line 639, `'Japan Nikkei 225 Screener': 'analysis.html?option=5&subOption=nikkei225&autorun=true'`)
-   → add `'India BSE Sensex Screener': 'analysis.html?option=5&subOption=sensex&autorun=true'`
-2. **saveAnalysisToHistory symbols** (~line 3141, inside `option === 5`):
-   ```javascript
-   } else if (subOption === 'sensex') { symbols = ['INDIA_SCREENER']; uniqueSymbolsCount = 30; }
-   ```
-   Must go before the final `else` (which falls back to `ASIA_MARKETS`).
-3. **subNames map** (~line 3206): `'sensex': 'India BSE Sensex Screener'` — otherwise the saved
-   history entry is titled "ASX Stock Screener".
-
-**Important:** `const name` is declared once per forEach loop — do NOT declare it twice (caused a
-site-breaking SyntaxError on Nikkei build). Always run `node -c analysis-functions.js` after editing.
-
----
-
-## Step 5 — Update analysis.html
-
-File: `/Users/dave/VSCODE/website/analysis.html`
-
-Find the "Coming Soon" button for the new screener and activate it:
-```html
-<!-- Before -->
-<button class="screener-btn coming-soon" onclick="showComingSoonPopup()">🇮🇳 India (BSE Sensex) - Coming Soon</button>
-
-<!-- After -->
-<button class="screener-btn" onclick="runAnalysis(5, 'sensex', event)">🇮🇳 India (BSE Sensex) (30 stocks)</button>
-```
-
----
-
-## Step 6 — Update dashboard.html
-
-File: `/Users/dave/VSCODE/website/dashboard.html`
-
-Four places to update:
-
-### 6a. getAnalysisKey() — recognise the result type
-```javascript
-if (companyName.includes('India BSE') || symbol === 'INDIA_SCREENER') return 'india_screener';
-```
-
-Place the check **before** the generic ones in that function (Japan sits above `includes('ASX')`).
-
-### 6b. getSubOptionFromCompanyName() — for re-run URL
-```javascript
-'India BSE Sensex Screener': 'sensex',
-```
-
-### 6c. screenerMappings in getRerunUrl() — for refresh button
-```javascript
-'India BSE Sensex Screener': 'analysis.html?option=5&subOption=sensex&autorun=true',
-'India BSE Sensex Analysis': 'analysis.html?option=5&subOption=sensex&autorun=true',  // Japan has both names
-```
-
-### 6e. trackScreenerPerformance() regex — currency symbol (🎯 button)
-Two regexes (~line 3612) use the currency class `[$£€¥]`. **`₹` is not in it**, so India's 🎯 button
-finds no symbols. Add `₹` to both: `[$£€¥₹]`. (Same for any new currency, e.g. `₩` for Korea.)
-The `.{0,40}?` that bridges the company name is already there — keep it, and keep names short in the
-output line (the Nikkei formatter cuts them to 22 characters). Symbols may be 1–10 characters.
-
-### 6d. processAnalysisGroup() — for "Run in Background"
-```javascript
-} else if (analysisType === 'india_screener') {
-    endpoint = coordinatorUrl;
-    payload = { option: '5', subOption: 'sensex', userId };
+GROUPS = { ...
+    'stockiq-europe-4-2-worker': ('Germany DAX 40', 4, 'xetra'),
+}
+MARKETS = { ...
+    'xetra': dict(currency='EUR', try_with=['SAP.DE', 'SIE.DE', 'ALV.DE'],
+                  sample='SAP.DE SIE.DE ALV.DE DTE.DE AIR.DE MBG.DE BMW.DE BAS.DE MUV2.DE IFX.DE DBK.DE RWE.DE'.split()),
 }
 ```
-Add this alongside the existing `japan_screener` block.
 
-### 6f. Top 10 over time, and the AI autopilot (both added Oct 2026)
-- `TOP10_BENCHMARKS` in `dashboard.html`: one line that matches the report's name, giving the index the
-  Top 10 Performance popup compares with (`site-overview.md` section 8b).
-- The practice portfolio's AI autopilot buys from screeners listed in `SCREENERS` in Lambda
-  `stockiq-ai-trader` (name, coordinator option and subOption, kind, market, group). The group is also the market its
-  share of the budget is set by (a new group gets its own share menu on the panel by itself). A new market
-  also needs its hours in `MARKET_HOURS` and a name in `MARKET_NAMES`, and a new currency must work
-  in `fx_pair` there and `fxFor` in `practice-portfolio.js`. Optional: only if the owner wants the
-  autopilot to use the new screener. Routine and tests: `site-overview.md` section 8c.
+`currency` is what Yahoo reports for that exchange (check one symbol through the price proxy, or
+`python3 workers/stock_worker.py SAP.DE`, which prints it). That one table is read by `workers/deploy.py`,
+`workers/prove.py`, `workers/build.py` and `check-tools/workers.py`, so **there is no other list of groups to update**.
+Nothing changes in `stock_worker.py`: a Yahoo suffix needs nothing special in the code. (Its `get_sector_info` has small
+sector tables for US, ASX and London shares; they are cosmetic, and a market without one is "OTHER".)
 
----
-
-## Step 7 — Deploy
+**2b. Check the code on the new market before creating anything:**
 
 ```bash
-# 1. Verify JS syntax first
-node -c /Users/dave/VSCODE/website/analysis-functions.js
-
-# 2. Upload changed files
-cd /Users/dave/VSCODE/website
-aws s3 cp analysis-functions.js s3://stockiq-final-websitebucket-vqekic7enf9h/analysis-functions.js \
-  --cache-control "public, max-age=86400" --profile default --region us-east-1
-aws s3 cp analysis.html s3://stockiq-final-websitebucket-vqekic7enf9h/analysis.html \
-  --cache-control "public, max-age=3600" --content-type "text/html; charset=utf-8" \
-  --profile default --region us-east-1
-aws s3 cp dashboard.html s3://stockiq-final-websitebucket-vqekic7enf9h/dashboard.html \
-  --cache-control "public, max-age=3600" --content-type "text/html; charset=utf-8" \
-  --profile default --region us-east-1
-
-# 3. Invalidate CloudFront
-aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R \
-  --paths "/analysis-functions.js" "/analysis.html" "/dashboard.html" \
-  --profile default --region us-east-1
-
-# 4. Wait for invalidation, then test
+cd /Users/dave/VSCODE/stockiq
+python3 workers/stock_worker.py SAP.DE SIE.DE ALV.DE      # three calls to Yahoo from this machine: price, EUR, a score each
+python3 workers/prove.py --fetch                          # two years of prices for the new market's sample (12 downloads, slowly)
+python3 workers/prove.py                                  # the "faults" lines at the end show the new market: sessions sent twice, the currency
 ```
 
----
+Commit `workers/groups.py` (the creator and the deploy tool refuse to run with uncommitted changes in `workers/`).
 
-## Testing Checklist
+**2c. Create the functions** with a packaged script. `workers/create_group.py` makes each one like the Nikkei workers
+(Python 3.12, 256 MB, 60 s, handler `lambda_function.lambda_handler`, role `acp-lambda-role`), gives it an address that
+accepts POST from anywhere, adds the public permission (without it the address answers 403), tries the first and last
+worker through their addresses, and writes the addresses in order to `urls.txt`:
 
-- [ ] Run screener from analysis.html — results appear
-- [ ] Results saved to dashboard (check dashboard history)
-- [ ] Dashboard 🔄 Refresh button opens analysis.html with autorun
-- [ ] Dashboard 🔁 Run in Background completes and updates dashboard (no browser tab opened)
-- [ ] Dashboard 🎯 Track Performance button shows price changes for top 10 symbols
-- [ ] Notifications show company names (not just ticker symbols)
+```bash
+mkdir -p check-tools/pending-dax40
+cat > check-tools/pending-dax40/deploy.sh <<'EOF'
+#!/bin/bash
+# Creates the 4 workers of the Germany DAX 40 screener from the one share-screener package (workers/create_group.py).
+set -euo pipefail
+exec /opt/homebrew/bin/python3 /Users/dave/VSCODE/stockiq/workers/create_group.py stockiq-europe-4-2-worker "$(cd "$(dirname "$0")" && pwd)"
+EOF
+printf 'workers.zip\n' > check-tools/pending-dax40/.gitignore
+git add check-tools/pending-dax40 && git commit -m "DAX 40 screener (work in progress, not live yet): the script that creates its workers"
+DRY_RUN=true bash /Users/dave/VSCODE/stockiq/check-tools/pending-dax40/deploy.sh
+bash /Users/dave/VSCODE/stockiq/check-tools/pending-dax40/deploy.sh
+cat check-tools/pending-dax40/urls.txt
+```
 
----
+`create_group.py` was written on 11 Oct 2026 from the Nikkei workers' real settings and its dry run was run; **it had
+not created a function when this was written, so read its output on first use.** It is safe to run twice (a function
+that exists is passed over). It only creates: removing functions made by mistake is the owner's decision.
 
-## Existing Screeners Reference
-
-| Screener | Option | subOption | Workers | Stocks in list (Oct 2026) | Symbol suffix |
-|---|---|---|---|---|---|
-| S&P 100 | 3 | 100 | 10 | 101 | (none; share classes use a dash, `BRK-B`) |
-| S&P 500 | 3 | 3 | 50 | 502 | (none) |
-| S&P 400+600 | 3 | 2 | 100 | 995 | (none) |
-| S&P 1500 | 3 | 4 | 150 | 1,497 | (none) |
-| Russell 1000 | 3 | 5 | 100 | 877 (not refreshed) | (none) |
-| Russell 2000 | 3 | 6 | 200 | 1,829 (not refreshed) | (none) |
-| NASDAQ 100 | 3 | 7 | 10 | 101 | (none) |
-| Dow Jones 30 | 3 | 8 | 3 | 30 | (none) |
-| ASX 50 | 5 (coordinator `4-50`) | 50 | 5 | 49 | `.AX` |
-| ASX 100 | 5 (coordinator `4-100`) | 100 | 10 | 99 | `.AX` |
-| ASX 200 | 5 (coordinator `4-200`) | 200 | 20 | 195 | `.AX` |
-| ASX 300 | 5 (coordinator `4-300`) | 300 | 30 | 294 (approximate) | `.AX` |
-| UK FTSE 100 | 4 (coordinator `5-ftse100`) | ftse100 | 10 | 100 | `.L` (`BT.A` → `BT-A.L`) |
-| **Japan Nikkei 225** | **5** | **nikkei225** | **21** | **225** | **`.T`** |
-| India BSE Sensex | 5 | sensex | 3 (30 stocks) | 30 | `.BO` or `.NS` (test both on Yahoo) |
-| South Korea KOSPI | 5 | kospi | TBD | TBD | `.KS` |
-| Crypto | 7 | coinspot (coordinator `7-1`) | orchestrator + 54 workers in single-coin mode | 540 coins | `-USD`, sometimes a numbered ticker |
-
-Where each list came from, how batching works, what the workers return and how to test a screener
-end to end: `site-overview.md` section 8b.
+Afterwards `python3 check-tools/workers.py` must list the new group with "one" version and the same code as the other
+13 share groups, and from then on the group is updated with every worker deploy (`workers/deploy.py`, `groups.txt`
+saying `all`).
 
 ---
 
-## Common Pitfalls
+## Step 3: the coordinator
 
-**Rules learned from the Oct 2026 full check (apply to every screener):**
-- The stock list lives in two places that must be identical: the `*Universe` array in `analysis-functions.js`
-  and `STOCK_UNIVERSES` in the coordinator. No duplicates.
-- Use the ticker format Yahoo accepts (share classes use a dash: `BRK-B`, not `BRK.B`). Probe every symbol
-  before adding it; a symbol that returns 404 is silently dropped and the list ends up short.
-- If the list is not an exact multiple of 10, the last worker must take the remainder, and an empty batch must
-  never be sent (some workers fall back to a built-in list and return unrelated stocks).
-- Workers return codes with underscores (`STRONG_BUY`, `MODERATE_BUY`, `HOLD`, `MODERATE_SELL` ...). Output must
-  go through `signalLabel()` / `signal_label()`; never print the raw code or "buy / sell / target / stop loss".
-- CSV columns must read the field names workers actually return (`change_24h`, `distance_from_52w_low`,
-  `52w_high`, `52w_low`). Screener workers have no real fundamentals, so do not export P/E, beta, dividend,
-  sector, market cap or earnings risk.
-- Put the real list size on the button and in the header, not the index's nominal size.
+File: `lambda-sync/stockiq-screener-coordinator/lambda_function.py` (this Lambda's code is not in git: before editing,
+download the live code and compare it with the mirror; keep the live zip in `~/VSCODE/backup/` as the way back).
 
-| Problem | Cause | Fix |
+- `WORKER_URLS['5-dax40'] = [ the four addresses from urls.txt, in order ]`
+- `STOCK_UNIVERSES['5-dax40'] = [ ... ]`, the same list as on the page
+- the titles table: `'5-dax40': 'Germany DAX 40 Screener'` (search for `'5-nikkei225'` and add a line wherever it has one)
+- `universe_sizes`: `'5-dax40': 40` (the real count; it appears twice)
+
+**Known fault to fix first or at the same time** (`site-overview.md` section 11, "Report writers"): the coordinator's
+report cuts every symbol to five characters and prints "$" for every market, so `SAP.DE` would be printed "SAP.D $…"
+and the 🎯 tracker could not read a background DAX report. Print the whole symbol, and take the sign from each stock's
+`currency` field (the workers send it: `EUR` → `€`).
+
+Deploy it with a packaged script of its own (stop if the daily deploy is running; check the live `CodeSha256` is the one
+the change was built from; keep the old zip; update; copy into `lambda-sync/`; support `DRY_RUN=true`). The crypto
+deploy is the pattern for a single function: `git show 146ffed:check-tools/pending-crypto/deploy.sh` (its orchestrator
+half).
+
+---
+
+## Step 4: the page (`website/analysis-functions.js`)
+
+The file is very large: **search, do not read it whole** (`grep -n nikkei225`), and edit by exact replacement.
+
+**4a. The handler.** Copy the block that starts `} else if (option === 5 && subOption === 'nikkei225') {` and adapt:
+the `…Universe` array (the list), `allWorkerUrls` (the addresses, in order), the worker count in the loop and in
+`perWorker` (`Math.max(10, Math.ceil(list.length / 4))`), the log lines, and the formatter it calls.
+**Do not add an access check inside the block**: access is checked and the use counted once, at the top of
+`runAnalysis`; a second check eats the visitor's last free use (section 8b, "Access checks").
+Keep the line that skips an empty batch.
+
+**4b. A names table**, `DAX_COMPANY_NAMES = { 'SAP.DE': 'SAP', 'SIE.DE': 'Siemens', … }`, short names.
+
+**4c. The formatter.** Copy `formatNikkeiResult()` and change: the names table; the `universeSize` constant (the real
+count); the header text; `type: 'option_5dax40_screener'`; the company name "Germany DAX 40 Screener"; and the money
+sign. Each stock now carries `currency` (as Yahoo gives it), so write the sign from it instead of typing `¥`:
+
+```javascript
+const SIGN = { USD: '$', EUR: '€', JPY: '¥', GBP: '£', AUD: 'A$' };          // one small table for the formatter
+const money = (stock, v) => (SIGN[stock.currency] || '') + (v || 0).toFixed(2);
+```
+
+Rules the output must keep (section 8b):
+- every code goes through `signalLabel()` / `horizonLabel()`; never print `STRONG_BUY` and the like, and none of "buy",
+  "sell", "target", "stop loss", "take profit", "picks", "recommendation";
+- the top-10 line must stay `N. SYMBOL <name, 22 characters at most> <sign>PRICE …`: the dashboard's 🎯 tracker reads the
+  symbol and the price from exactly that;
+- CSV columns read the field names the workers return (`change_24h`, `distance_from_52w_low`, `52w_high`, `52w_low`);
+  no P/E, beta, dividend, sector, market cap or earnings risk (the workers have no real company figures).
+
+**4d. Three lookups keyed on the subOption or the name** (find each with `grep -n nikkei225`):
+1. the re-run address table: `'Germany DAX 40 Screener': 'analysis.html?option=5&subOption=dax40&autorun=true'`
+2. in `saveAnalysisToHistory`, inside `option === 5`: `} else if (subOption === 'dax40') { symbols = ['GERMANY_SCREENER']; uniqueSymbolsCount = 40; }`
+   (before the final `else`, which falls back to `ASIA_MARKETS`)
+3. the `subNames` table: `'dax40': 'Germany DAX 40 Screener'` (without it the saved report is titled "ASX Stock Screener")
+
+Run `node -c analysis-functions.js` after every edit. `const name` may be declared only once per `forEach` (a second one
+broke the whole site during the Nikkei build).
+
+## Step 5: the button (`website/analysis.html`)
+
+Search for the "Coming Soon" line (`grep -n "DAX" analysis.html`) and replace it:
+
+```html
+<button class="screener-btn" onclick="runAnalysis(5, 'dax40', event)">🇩🇪 Germany (DAX 40) (40 stocks)</button>
+```
+
+## Step 6: the dashboard (`website/dashboard.html`)
+
+Search for `japan_screener` and `Japan Nikkei`; add the German line beside each:
+
+- `getAnalysisKey()`: `if (companyName.includes('Germany DAX') || symbol === 'GERMANY_SCREENER') return 'germany_screener';`
+  placed **above** the generic tests (Japan sits above `includes('ASX')`).
+- `getSubOptionFromCompanyName()`: `'Germany DAX 40 Screener': 'dax40',`
+- `screenerMappings` in `getRerunUrl()`: `'Germany DAX 40 Screener'` and `'Germany DAX 40 Analysis'` →
+  `'analysis.html?option=5&subOption=dax40&autorun=true'` (Japan has both names)
+- `processAnalysisGroup()` ("Run in Background"): `} else if (analysisType === 'germany_screener') { endpoint = coordinatorUrl; payload = { option: '5', subOption: 'dax40', userId }; }`
+- `TOP10_BENCHMARKS`: `[/DAX/i, '^GDAXI', 'DAX 40 index'],` (the index the Top 10 popup compares with)
+- **The tracker's money signs.** The two patterns in `parseScreenerTop10` accept `[$£€¥]`. The euro is already there;
+  for India add `₹` and for Korea `₩` to **both**.
+
+The page has inline scripts: after editing, check each `<script>` block still parses (`node --check`), section 8c.
+
+## Step 7: the autopilot and the chat (only if the owner wants the autopilot to buy from the new screener)
+
+Lambda `stockiq-ai-trader` (routine, tests and deploy script: `site-overview.md` section 8c, "How to work on it"):
+
+- `SCREENERS`: `'5-dax40': ('Germany DAX 40', '5', 'dax40', 'stock', 'de', 'German shares'),`
+  (name, coordinator option and subOption, kind, market code, market group). A new market group gets its share-of-the-
+  budget menu and its colour on the panel by itself.
+- `MARKET_HOURS`: `'de': (8 * 60 + 5, 15 * 60 + 25)`, minutes of the day in UTC, Monday to Friday. **A fixed window that
+  lies inside the real session in both summer and winter time**: Xetra trades 09:00–17:30 Frankfurt time, which is
+  07:00–15:30 UTC in summer and 08:00–16:30 UTC in winter, so 08:05–15:25 UTC is always inside. (India: 03:45–10:00 UTC
+  all year, so `(3 * 60 + 50, 9 * 60 + 55)`. Korea: 00:00–06:30 UTC, so `(5, 6 * 60 + 25)`.) Public holidays are not known
+  to the autopilot.
+- `MARKET_NAMES`: `'de': 'German'`.
+- The currency must work in `fx_pair` there and in `fxFor` in `practice-portfolio.js` (the two must follow the same
+  rule). EUR is in both already (quoted as dollars per euro). INR and KRW go the "per dollar, turned over" way that the
+  yen uses: check a holding's value by hand once.
+- Tests: add the screener to the stand-ins in `check-tools/ai_trader_test.py` where the others are listed, and run the
+  four test commands of section 8c.
+- The AI chat (`stockiq-ai-chat`): its `DASHBOARD_GUIDE` does not name markets, so it needs nothing; the general prompt
+  has one line listing the screeners ("…ASX, UK FTSE, Japan Nikkei, Crypto"): add the new one there. Run
+  `check-tools/ai_chat_test.py`.
+
+---
+
+## Step 8: test before anything goes live, and again after
+
+Stage the website files in the pending folder and test the staged copies; nothing here needs a login.
+
+```bash
+cd /Users/dave/VSCODE/stockiq/check-tools
+node page_run.js 5 dax40                                   # the page path, with real worker calls
+#   expect: error null, flags [], worker calls 4/4, results = the list's size, trackerSymbols 10
+AWS_DEFAULT_REGION=us-east-1 python3 run_all.py 5-dax40    # the coordinator path, run locally from lambda-sync/; nothing is saved
+python3 analyse.py -v                                      # per screener: returned / listed, missing symbols, duplicates, zero prices, flags, CSV rows
+node tracker_run.js DAX page_5-dax40.json <the report's ISO time>      # the dashboard's 🎯 tracker on the page's report
+node tracker_run.js DAX res_5-dax40.json <ISO time>                    # and on the coordinator's report
+python3 ../workers/prove.py                                # only if workers/ changed
+python3 workers.py                                         # the new group: "one", same code as the other share groups
+```
+
+`page_run.js` reads `website/analysis-functions.js`; `FUNCS=<file> node page_run.js 5 dax40` runs a staged copy
+instead. Read a few outputs, do not only count lines: the names, the sign before each price, a
+plausible score and 24-hour change for stocks you can look up, no "undefined", "NaN" or "Unrated". "Unrated" means a
+worker code is missing from a label table. Then, as an anonymous visitor and a trial user
+(`anon_run.js`, `trial_run.js`): one use left must give a result, none left must redirect before running.
+
+**Deploy** the coordinator and the website files with packaged scripts (dry run, then run), away from :10 and :40 past
+the hour and not while the daily deploy runs. Website files go up with the cache rules of `site-overview.md` section 5
+step 8 (a page: `public, max-age=0, s-maxage=3600, must-revalidate`; a script: `public, max-age=300, s-maxage=86400`)
+and an invalidation of just those paths. Then run the same `page_run.js` and `run_all.py` lines against the live site,
+and `curl` the live files to compare them with the local ones.
+
+Cannot be tested from here, say so: the logged-in dashboard itself (Refresh, Run in Background from the row, the
+notification), and a real phone.
+
+---
+
+## Step 9: the notes and counts to update afterwards
+
+- `site-overview.md` section 8b: the screener table (page call, coordinator key, worker group and count, list size,
+  source of the list); section 2 and `stockiq.md` / `lambda-reference.md`: the number of functions (984 + the new
+  workers) and of worker functions; section 13: a change-log entry; section 8c if the autopilot uses it.
+- `lambda-reference.md`: the worker-group table.
+- This file: the table below.
+- `roadmap-to-9.md`: the screener list and the open item.
+- The list's size in **three** places that must agree: the button label (`analysis.html`), the formatter's
+  `universeSize` (`analysis-functions.js`), the coordinator's `universe_sizes`.
+- `lambda-url-mapping.json`: `bash generate-lambda-url-mappings.sh` (a few minutes; `check-tools/workers.py` uses it to
+  say which groups the site calls).
+- `about.html` / `faq.html` if they list the markets covered.
+- Remove the `pending-` folders, commit the website files by name, push both repos.
+
+---
+
+## Existing screeners
+
+| Screener | Page call | Coordinator key | Worker group | Workers | Stocks (Oct 2026) | Suffix | Currency |
+|---|---|---|---|---|---|---|---|
+| Dow 30 | `3, '8'` | `3-8` | `stockiq-option-3-8-worker` | 3 | 30 | none | USD |
+| S&P 100 | `3, '100'` | `3-100` | `stockiq-option-3-1-worker` | 10 | 101 | none (`BRK-B`) | USD |
+| NASDAQ 100 | `3, '7'` | `3-7` | `stockiq-option-3-7-worker` | 10 | 101 | none | USD |
+| S&P 500 | `3, '3'` | `3-3` | first 50 of `stockiq-option-3-5-worker` | 50 | 502 | none | USD |
+| S&P 400+600 | `3, '2'` | `3-2` | `stockiq-option-3-2-worker` | 100 | 995 | none | USD |
+| S&P 1500 | `3, '4'` | `3-4` | `stockiq-option-3-4-worker` | 150 | 1,497 | none | USD |
+| Russell 1000 | `3, '5'` | `3-5` | `stockiq-option-3-5-worker` | 100 | 877 (not refreshed) | none | USD |
+| Russell 2000 | `3, '6'` | `3-6` | `stockiq-option-3-6-worker` | 200 | 1,829 (not refreshed) | none | USD |
+| ASX 50 / 100 / 200 / 300 | `5, '50'` … `'300'` | `4-50` … `4-300` | `stockiq-asia-5-1` … `5-4-worker` | 5 / 10 / 20 / 30 | 49 / 99 / 195 / 294 | `.AX` | AUD |
+| UK FTSE 100 | `4, 'ftse100'` | `5-ftse100` | `stockiq-europe-4-1-worker` | 10 | 100 | `.L` (`BT.A` → `BT-A.L`) | GBp (pence) |
+| Japan Nikkei 225 | `5, 'nikkei225'` | `5-nikkei225` | `stockiq-asia-5-5-worker` | 21 | 225 | `.T` | JPY |
+| **Germany DAX 40 (next)** | `5, 'dax40'` | `5-dax40` | `stockiq-europe-4-2-worker` | 4 | 40 | `.DE` | EUR |
+| India BSE Sensex | `5, 'sensex'` | `5-sensex` | `stockiq-asia-5-6-worker` | 3 | 30 | `.BO` or `.NS` | INR |
+| Crypto | `7, 'coinspot'` | `7-1` | orchestrator + 54 `stockiq-option-7-1-worker` in single-coin mode | 54 | 540 coins | `-USD`, sometimes a numbered ticker | USD |
+
+The Russell 1000 / 2000 page runs send a worker number and no stocks; those workers take their ten from `lists.txt` in
+the package (`site-overview.md` section 8b). A new screener sends its batches like Nikkei does and needs no list there.
+
+---
+
+## Pitfalls
+
+| Problem | Cause | What to do |
 |---|---|---|
-| Workers return 403 | Missing `lambda:InvokeFunctionUrl` permission | Run `aws lambda add-permission` for each worker (Step 2d) |
-| "Unknown screener" 400 from coordinator | Key not in WORKER_URLS | Add to coordinator and redeploy |
-| No symbols in performance tracker | Company name between symbol and price breaks regex | The regex in `trackScreenerPerformance` uses `.{0,40}?` to bridge company names — keep formatter consistent |
-| `Identifier 'name' has already been declared` | `const name` declared twice in same forEach | Declare it once at top of forEach, don't repeat |
-| Run in Background opens browser tab instead of running server-side | `processAnalysisGroup` redirecting instead of calling coordinator | Wire it to coordinator like other screeners |
-| analysis-functions.js not updating on live site | Deploy script didn't upload root JS files | Upload manually: `aws s3 cp analysis-functions.js s3://...` |
-| autorun not triggering on redirect | `selectOption()` timing | The 2s timeout in autorun block handles this — don't reduce it |
+| A worker's address answers 403 | The public permission is missing | `create_group.py` adds it; run it again (it passes over what exists) |
+| "Unknown screener" (400) from the coordinator | The key is not in `WORKER_URLS` | Add it and deploy the coordinator |
+| The list comes back short | A symbol Yahoo does not know is dropped without a word | Check every symbol through the price proxy first; `analyse.py -v` lists what is missing |
+| The 🎯 tracker finds no symbols | A long name between symbol and price, a money sign the pattern does not accept, or (background reports) the coordinator cutting the symbol to five characters | Names of 22 characters at most; add the sign to both patterns; fix the coordinator's report line (step 3) |
+| "Unrated" in a report | A worker code missing from a label table | Add it to `signalLabel()` and the coordinator's `signal_label()` |
+| `Identifier 'name' has already been declared` | `const name` twice in one `forEach` | Declare it once; `node -c` after every edit |
+| A visitor's last free use gives no result | An access check inside the handler | Never check access again after the top of `runAnalysis` |
+| Page and background runs disagree | The list differs between the page and the coordinator | One list, pasted into both |
+| Workers show two fingerprints | A function was updated by hand, or created from another build | `workers.py --contents`; deploy the one package to that group with `workers/deploy.py` |
+| The autopilot buys at a stale price | The market's hours are wrong, or not inside both summer and winter time | Work the window out in UTC for both halves of the year |

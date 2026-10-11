@@ -33,6 +33,7 @@ Detailed docs live in separate files — check these first:
 - **`/Users/dave/VSCODE/website/news.js`** — Sidebar (100-item pool, displays 5)
 - **`/Users/dave/VSCODE/stockiq/update_stock_news.py`** — Contains NUMERIC_COMPANY_NAMES (144 non-US stocks)
 - **`/Users/dave/VSCODE/stockiq/lambda-sync/`** — Lambda function backups
+- **`/Users/dave/VSCODE/stockiq/workers/`** — the one source file every share-screener worker runs (669 functions), with its build, proof and deploy tools (`site-overview.md` section 8b, "The worker groups")
 
 ## Scheduled Task (Automated Daily Deploy)
 

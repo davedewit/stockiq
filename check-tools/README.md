@@ -24,6 +24,16 @@ Run them from this folder. They write `*.json` result files here, which git igno
 Button codes (option, subOption) are in the screener table in section 8b. Refresh `lambda-sync/`
 (`../sync-all-lambdas.sh`) before `run_all.py` so it tests the live coordinator code.
 
+## The share-screener workers (`../workers/`)
+
+Every share-screener worker runs one package built from `stockiq/workers/` (since 11 Oct 2026). The tools for it live
+there, not here: `build.py` (the package and its fingerprint), `prove.py` (what a change does to scores, on saved prices),
+`deploy.py` (a group at a time, through a `pending-<name>/deploy.sh` here; `--selftest`), `create_group.py` (a new
+screener's workers), `groups.py` (the one table of groups). Here: `workers.py` prints who runs what from AWS (read-only);
+`--contents` downloads every package and compares the files inside, which is the honest count (fingerprints of zips
+differ when only the file dates do). `page_run.js` takes `FUNCS=<file>` to run a staged copy of the page code.
+Detail: `site-overview.md` section 8b, "The worker groups"; a new screener: `add-new-screener.md`.
+
 ## lists/
 
 How the index lists and the crypto coin list were rebuilt. Kept as a starting point for the next

@@ -32,7 +32,8 @@ const ctx = { console: { log() {}, warn() {}, error() {}, info() {} }, setTimeou
   location: { href: 'https://stockiq.tech/analysis.html', search: '', pathname: '/analysis.html', hostname: 'stockiq.tech' }, URL, URLSearchParams, Blob: function () {}, alert() {}, gtag() {}, performance, AbortController, TextEncoder, TextDecoder, Intl, crypto: globalThis.crypto, addEventListener() {}, removeEventListener() {}, dispatchEvent() {}, innerWidth: 1300, innerHeight: 900, scrollTo() {}, scrollY: 0, open() {}, matchMedia: () => ({ matches: false, addEventListener() {} }), requestAnimationFrame: f => setTimeout(f, 0), history: { pushState() {}, replaceState() {} }, getComputedStyle: () => ({}) };
 ctx.window = new Proxy(ctx, { get: (t, k) => k in t ? t[k] : undefined, set: (t, k, v) => { t[k] = v; return true; } }); ctx.globalThis = ctx; ctx.self = ctx.window;
 vm.createContext(ctx);
-vm.runInContext(fs.readFileSync('/Users/dave/VSCODE/website/analysis-functions.js', 'utf8'), ctx, { filename: 'analysis-functions.js' });
+// FUNCS=<file> runs a staged copy of the page code instead of the one in website/
+vm.runInContext(fs.readFileSync(process.env.FUNCS || '/Users/dave/VSCODE/website/analysis-functions.js', 'utf8'), ctx, { filename: 'analysis-functions.js' });
 Object.assign(ctx, { displayResults: r => { out.result = r; }, displayError: m => { out.error = m; }, saveAnalysisToHistory: () => { blocked.push('saveAnalysisToHistory'); }, isBotOrCrawler: () => false,
   showAnonymousUpgradeModal() {}, showStickyUpgradeButton() {}, startCountdown() {}, clearCountdown() {} });
 const opt = Number(option);

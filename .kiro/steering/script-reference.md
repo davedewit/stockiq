@@ -31,6 +31,17 @@ For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-s
 | `generate_sitemap.py` | Manual sitemap rebuild (update_sitemap.py is the daily version) |
 | `notify_search_engines.py` | Ping Google/Bing IndexNow after sitemap changes |
 
+## Share-screener workers (`stockiq/workers/`, since 11 Oct 2026)
+
+| Script | What it does |
+|---|---|
+| `workers/stock_worker.py` | The code all 669 share-screener workers run. `python3 workers/stock_worker.py AAPL BHP.AX` runs it by hand |
+| `workers/build.py` | Builds the package and prints its fingerprint; `--lists` writes the Russell lists again from the coordinator |
+| `workers/prove.py` | Replays saved prices through the live copy and the changed file and lists every figure that differs (`--fetch` once) |
+| `workers/deploy.py` | Deploys the package a group at a time through `check-tools/pending-<name>/deploy.sh`; `--selftest` |
+| `workers/create_group.py` | Creates the workers of a new screener (`add-new-screener.md`) |
+| `check-tools/workers.py` | Read-only: which group runs what (`--contents` compares the files inside every package) |
+
 ## Deploy Scripts
 
 **`deploy.sh`** — Full deploy: asks about news update, then calls deploy-to-s3.sh. Use when you want news updated too. Costs ~$1-2 (OpenAI).
