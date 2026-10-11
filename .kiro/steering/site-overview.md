@@ -1281,9 +1281,21 @@ the average per trade.
 5. Smaller: a leftover holding of an odd size (after a budget change) can leave less than one
    holding's room, which is then never used; the dashboard's S&P comparison card; a summary email.
 
-- It is the owner's account only (`AI_TRADER_USERS`). Opening it to users is his decision and
-  touches the same legal question as the signals (an AI choosing stocks, even with fake money,
-  reads as picks); each user's check-in also runs screeners and AI calls, so cost limits first.
+- **Other accounts (checked 11 Oct 2026, the owner asked whether inactive accounts run check-ins).**
+  The autopilot is off for everyone by default and hidden from everyone not on the allow-list
+  (`AI_TRADER_USERS`: two named accounts, the owner's and the deploy test user; not `*`). Of 24
+  registered accounts, one has an autopilot record and it is the owner's. The schedule only looks at
+  rows of table `stockiq-ai-trader` that are switched on and allowed, so an account that never
+  switched it on costs nothing and does nothing; for an account not on the list the dashboard's one
+  call is answered "not allowed" and no record is made. The practice portfolio (buying by hand with
+  fake money) is shown to every logged-in user and stores a row only once they buy.
+- **Before it is ever opened to users** (his decision; it also touches the same legal question as
+  the signals: an AI choosing stocks, even with fake money, reads as picks): (1) an account left
+  switched on keeps checking in for ever, so pause it after some weeks without a visit to the
+  dashboard; (2) the schedule runs users one after another inside one 300-second run, which would
+  not finish for many users: run them in parallel or one invocation per user; (3) screener results
+  are already shared between users for 20 minutes, but each check-in makes its own AI calls, so set
+  a limit per user.
 - Cost: a crypto check-in is a full crypto screener run (about 540 worker calls) unless a copy
   under 20 minutes old exists, so one user on 30-minute check-ins adds about 780,000 Lambda calls
   a month, plus up to two small AI calls per check-in and at most 8 larger ones a day: a few
