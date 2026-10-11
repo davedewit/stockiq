@@ -133,6 +133,19 @@ python3 check-tools/mobile_frame.py /tmp/m.html /tmp/m-frame.html 390          #
 
 (Steps `breakdown` and `locked` open the folded breakdown and show the view of an account without a paid plan.)
 
+## replay/replay.py
+
+The autopilot's own rules over four years of daily prices in about 20 seconds: the place to try an idea about how it
+trades before it is built. `python3 check-tools/replay/replay.py` (`--rebuild` scores the days again after the screener
+worker's scoring changed; the scores are kept in `replay/panel.json`, which is not committed). It imports the level
+tables, the pace and the gain-protection rule from the deployed function's mirror, takes 0.1% off each buy and sale,
+decides once a day at the close and trades at the next open. It prints, and writes to `replay/results-replay-<date>.txt`:
+the five levels as they are; a search over 240 variants found on the first 60% of the days and judged on the last 40%;
+the same rules buying at random (luck); the variants ahead on both parts, also without the seven chip / AI names;
+a table by holding time; and the list ranked by other figures than the screener's score. Shares of the S&P 100 list
+only (the prices in `paper-test/data`), today's members, no AI model in the loop: read `site-overview.md` section 7b
+before quoting a number from it.
+
 ## autopilot_bell_test.js and bell_page.py
 
 The AI autopilot's buys and sells in the notification bell (`website/autopilot-bell.js`, on every page with a bell).

@@ -325,6 +325,39 @@ and full output: `check-tools/paper-test/factor_study.py`, `results-factors-2026
   step is a trial of buying shares in that order**, beside the current order, through its trial
   mechanism. Not covered: coins (no saved prices; the entry log of section 8b is their test).
 
+**The autopilot's own rules, replayed (11 Oct 2026, evening).** The owner asked, honestly, whether this will ever make
+more than it loses, and whether it could "run on some kind of rapid speed to learn faster". It can: `check-tools/replay/
+replay.py` runs the autopilot's rules (imported from the deployed function) over the same four years of S&P 100 prices
+in 20 seconds, with 0.1% taken off each buy and each sale, decisions once a day at the close and trades at the next
+open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep it honest an idea is found on the first
+60% of the days and judged on the last 40%, and compared with the same rules buying at random.
+- **The five levels as they are all finished behind an S&P 500 fund** (+107.5% over the period): Balanced +92%, Careful
+  +55%, Cautious +44%, Bold +26%, Adventurous -17%. Per trade none is clearly ahead of the fund.
+- **Holding time decides most of it.** Everything else as Balanced: kept 1 day -4%, 2 days +29%, 5 days +92%, 10 days
+  +97%, 20 days and longer +103% to +106%; without selling on the screener's signal, 20 to 60 days gave +112% to +115%.
+  **Shares kept a day or two lose to costs at every level**; the automatic pace of Bold (2 days) and Adventurous (1 day)
+  is that. The panel now says so when shares are ticked with a holding time of two days or less.
+- **Selling when the screener's signal turns cuts winners short** in this replay: holdings were kept 4 to 7 days on
+  average whatever the time limit, because the signal sold them.
+- **Ranking by something else than the screener's score** (same rules, 20-day holds; first part → second part, per trade
+  against the fund): the score +0.33 → +0.58 (never clear, luck better in 6%); furthest above its 52-week low +1.96 →
+  +2.33 (t about 3 both times, luck never better); biggest rise over 90 days +0.88 → +3.50; over a year +0.59 → +2.46;
+  the jumpiest stocks +1.64 → +2.97; the calmest and the lowest RSI clearly behind. That is momentum, and risk.
+- **Why this is still not a reason to believe it:** the whole period was a rising market led by a few chip and AI names;
+  without the seven of them the best variants' lead falls inside the margin of error (t about 1); the list is today's
+  members, which hands any "buy what has risen" rule the survivors; daily decisions, no AI model in the loop. Of 240
+  variants of the rules, 208 looked ahead on the first part and 103 on the second.
+- **What it changes:** nothing is adopted from it. It says what is worth a forward trial with the fake money: the order
+  shares are bought in (already on trial, section 8c), longer holding times for shares, and not selling on the signal.
+  It also gives the owner one plain piece of information for his own settings: with shares, a holding time of a week or
+  more. **Not possible here:** inputs about the company itself (profit, debt, growth). There are no past figures of that
+  kind on this machine, so they cannot be replayed; the way to test them is forward (record them with each share bought
+  and split the record), and they need a data source the function does not have.
+- **The owner's question, answered plainly to him:** as built, it is unlikely to learn its way to steady profit; the
+  inputs have shown no edge beyond momentum in a rising market; real money should wait for the bar (section 8c) and then
+  be small; the likelier income is subscriptions. He chose to carry on in the order: replay, real costs, better inputs,
+  the bar in writing.
+
 ## 8. Front end
 
 - `analysis.html`: options 1–7 (stock/ETF report, signals, US/EU/Asia/other screeners, crypto).
@@ -743,8 +776,8 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=17` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=37`) | Controls and reports only; decisions are made by the Lambda |
+| Portfolio section | `website/practice-portfolio.js` (`?v=18` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=38`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -778,6 +811,12 @@ sends. The autopilot acts for accounts on a paid plan and for the accounts liste
   own". `redraw()` re-renders without losing what is being typed in the buy row.
 - `window.practiceBuyFromTop10` is the "＋ Practice buy" button on each line of the Top 10
   Performance popup (it uses the report's price-source ticker).
+- **A trading cost is taken off every practice buy and every sale** (since 11 Oct 2026, evening): `TRADE_COST_PCT` 0.1 in
+  `practice-portfolio.js` (by hand) and `TRADE_COST` 0.1 in the function (the autopilot); **keep the two the same**. The
+  whole amount leaves the cash and a thousandth of it is the cost, so a holding starts a little below what was put in
+  (`qty = amount × 0.999 / price`); a sale brings back `qty × price × 0.999`. No new field: the cost is inside `qty` and
+  `proceedsUsd`, so every sum works as before. Holdings bought earlier have no buying cost in them. The line under the
+  buttons says so. Reason: a record without costs flatters itself, most of all when trading often (section 7b).
 - **Owner's decisions:** buying, selling and progress stay on the dashboard (no buy buttons on stock
   pages or reports). The S&P 500 columns and "N of M ahead" sentences were removed at his request;
   only the "For comparison" card remains. `spyAtBuy` / `spyAtSell` are still stored, because the
@@ -1016,9 +1055,16 @@ same code; read "its record" below as the shared record, or the shared record at
   more behind the S&P 500 fund, it is rested 14 days, then tried again with a clean slate. **A coin
   screener is judged on its own results** (an average loss of 1.5% or more), not against the fund:
   the share market says nothing about a coin and is shut at weekends.
-- **After costs.** No trading cost is taken from the fake money. `month_figures` also works out the
-  last 30 days after a typical 0.1% on each buy and each sell (`COST_EACH_WAY`, `afterCosts`); the
-  panel and the review emails show it beside the plain figure. It matters most for quick trading.
+- **After costs.** A trading cost is taken off every buy and sale (above). A finished trade made that way carries `c`; the
+  month's figures (`month_figures`, `afterCosts`) and the bar charge the same 0.1% each way (`COST_EACH_WAY`) only to
+  trades without it, and the panel says when a figure includes such older trades.
+- **The bar its record has to clear** (`bar_of`, `BAR_TRADES` 300; sent as `bar`: `need, n, avg, margin, met, shared`; on the
+  panel as an amber-edged box at the top of "How it is doing", `barHtml`). Set down on 11 Oct 2026, before the results are
+  in, so that a lucky run cannot be talked into a success: **300 finished trades whose average result, after trading
+  costs, is ahead of the yardstick by more than twice the margin of error; the yardstick is an S&P 500 index fund over
+  the same days for a share and zero for a coin.** It is measured on the shared record (every account). At the sweep: 4
+  of 300, averaging -0.68 against the yardstick. Until it is cleared no result here is evidence of anything, and it must
+  be cleared before real money is even discussed (and then discussed with a licensed adviser: section 11, "Legal").
 - **Notes** (`write_lessons`): after every 5 more finished trades the model writes up to four short
   notes on what the record shows.
 - **Pausing the AI model's early sells** (`review_ai_sells`): when the last 8–12 holdings it sold
@@ -1386,6 +1432,9 @@ narrow screen (nothing changes at desktop width):
 
 ### How to work on it: the routine that held up
 
+**Before building an idea about how it trades, replay it:** `python3 check-tools/replay/replay.py` (20 seconds; section 7b,
+last part). An idea that is not ahead on both parts of the period, or that random buying beats, is not worth a deploy.
+
 1. **Start from what is live.** Both repos clean (`git status -sb`), then check the live function is
    the mirror: download it, `cmp` with `lambda-sync/stockiq-ai-trader/lambda_function.py`, and note
    its `CodeSha256` and the `shasum -a 256` of the website files. Run one session at a time.
@@ -1394,10 +1443,10 @@ narrow screen (nothing changes at desktop width):
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 379 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 196 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 386 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 198 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
-     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 71 checks
+     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 74 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
    node autopilot_bell_test.js pending-<name>/web/autopilot-bell.js | grep -v '^PASS'                 # 22 checks (the notification bell)
    python3 ai_chat_test.py pending-<name>/chat/lambda_function.py | grep -v '^PASS'                 # 16 checks (the AI chat's function)
@@ -1453,27 +1502,26 @@ apostrophe must allow for it; a test of an action that depends on the day (tradi
 must set the function's clock (`m.datetime = at(when)` in `ai_trader_test.py`), or it passes on
 weekdays and fails at the weekend.
 
-### Start here when resuming (state at 11:30 UTC on 11 Oct 2026, after the full sweep that ended a three-day session)
+### Start here when resuming (state at 11:45 UTC on 11 Oct 2026: the full sweep, then the replay, real costs and the bar)
 
 **What is live, and how to confirm nothing has moved since:**
-- Lambda `stockiq-ai-trader`: `CodeSha256` `e6X8RM+wrRVbZAheFQfUr5uaKU1hUSGfjBHk1Q/W7xI=`, equal to
-  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,860 lines).
-- Lambda `stockiq-ai-chat`: `CodeSha256` `8QzCNJ8LqitMH5nYVJ1OsylJmek8GSLTWOuIKerjcPo=`, equal to
+- Lambda `stockiq-ai-trader`: `CodeSha256` `k2OocgJogAZjcF8LYC6WOtH0n7I3VaE5nb9EmxWzAnI=`, equal to
+  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,887 lines).
+- Lambda `stockiq-ai-chat`: `CodeSha256` `cTz2ks6BStwoDLEIod20m/pzvn59WP2VHo9Hc/RtEV8=`, equal to
   `lambda-sync/stockiq-ai-chat/lambda_function.py` (350 lines).
-- Website (sha256 starts): `practice-autopilot.js?v=37` (`57956b67cf2b`), `practice-portfolio.js?v=17` (`f7ddb505486a`),
-  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`9aa006cdf26a`),
+- Website (sha256 starts): `practice-autopilot.js?v=38` (`43520270763f`), `practice-portfolio.js?v=18` (`b48ff650293c`),
+  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`79986e57a7ee`),
   `ai-chat.js?v=2` (`87eaadf52197`); 17 more pages carry the bell's loader line; `index.html` and `faq.html` the plan wording.
   Live files were compared byte for byte at each deploy.
 - `deploy-to-s3.sh` carries the rules for how long a browser may keep a copy (section 5, step 8); the first daily run with
   it is Monday 12 Oct: look at its log once (section 12, "After the daily run").
-- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 379 function, 196
-  panel, 71 portfolio, 22 bell, 16 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
+- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 386 function, 198 panel, 74 portfolio, 22 bell, 16 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
   spreads over markets).
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
   trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell,
-  takeover, report`, then `stockiq-ai-trader_before_sweep_20261011.zip`; `stockiq-ai-chat_before_{dashboard, wording,
-  levels, sweep}_20261011.zip`.
+  takeover, report`, then `stockiq-ai-trader_before_sweep_20261011.zip` and `…_before_autopilot_costs_…`;
+  `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`.
 - First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and the function's log
   (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors ("check-in failed", "shared learning failed",
   "not worked out", "not sent") and for the firsts listed below.
@@ -1508,8 +1556,8 @@ the bell worked for him only once its addresses were relative, which points to s
 Ask early next time a change "does not show" (section 9).
 
 **Limits to remember:** a stop only acts at a check-in (CFX and CKB were both sold below where their stop stood); the
-trading hours know no public holidays; a market's share is a number of whole holdings; the practice portfolio takes no
-trading costs off (the panel shows an after-costs figure); with one account the shared learning is that account.
+trading hours know no public holidays; a market's share is a number of whole holdings; the trading cost is one typical
+figure (0.1% each way; a small coin costs more in real life); with one account the shared learning is that account.
 
 **What the owner is after, in his words:** "trying to optimise this to always be active ever changing and improving", a
 goal of "close to 70% profit 30% loss", "seamless and straightforward so a dummy could figure it all out", "something on
@@ -1518,7 +1566,19 @@ professional stock portfolio", and things "setup in one way not multiple ways". 
 share of winning trades comes from the selling rule and is not profit; the screener's own factors showed no reliable
 link with what shares did next. Say so plainly each time results come up, and judge by dollars and the average per trade.
 
+**The honest position, as told to the owner on 11 Oct (section 7b, last part):** the replay and both backtests say the
+screener's score has no clear edge; what shows up is momentum in a rising market, and that quick share trading loses to
+costs. He asked to carry on in this order: (1) the fast replay: done; (2) real costs on the practice money: done;
+(3) better inputs: the replay has tested the price-based ones, company figures are still to do (below); (4) the bar in
+writing: done, and shown on the panel.
+
 **Open, in the order I would take them:**
+0. **Better inputs, next steps.** (a) Let the autopilot try, by its own trial mechanism, what the replay points to for
+   shares: a longer holding time and not selling on the screener's signal (neither is in `TUNABLE`; each needs a tag on
+   the buy and a trial like the buying order's). (b) Company figures: record a few real ones with each share bought
+   (earnings yield, profit margin, debt, growth; the single-stock report Lambda already fetches them from Finnhub and
+   Yahoo) and split the record by them, as was done for the 52-week low; no rule until the record supports one.
+   (c) Saved coin prices, so that coins can be replayed too. (d) The replay on a list that is not today's members.
 1. Monday 12 Oct: the first daily deploy with the new copy-keeping rules (its log); what happened when Tokyo, Sydney and
    New York opened (4307.T sold; his shares for share markets are 0%, so no share buys are expected unless he changes
    that); "What happens next" reading right against what really happened.
@@ -2159,4 +2219,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     every code name these notes mention checked against the code. Found and passed to the owner: both repositories are
     public (section 11). Live at the end: `stockiq-ai-trader` `e6X8RM+w…`, `stockiq-ai-chat` `8QzCNJ8L…`,
     `autopilot-bell.js` version 8, `practice-autopilot.js?v=37`, `practice-portfolio.js?v=17`.
+  - **After the sweep, at the owner's word ("go ahead with what you think is best in that order"):** the fast replay of the
+    autopilot's rules (`check-tools/replay/replay.py`; findings in section 7b); **a trading cost of 0.1% on every practice
+    buy and sale**, by hand and by the autopilot; **the bar its record has to clear**, set down and shown on the panel
+    (300 finished trades, after costs, ahead of the yardstick by twice the margin of error); the panel's note on shares
+    kept two days or less; the AI chat's guide told of the cost and the bar. Live: `stockiq-ai-trader` `k2OocgJo…`,
+    `stockiq-ai-chat` `cTz2ks6B…`, `practice-portfolio.js?v=18`, `practice-autopilot.js?v=38`. Tests: 386 function,
+    198 panel, 74 portfolio, 22 bell, 16 chat.
   - Notes: section 8c ends with "Start here when resuming". Everything known is in these files.
