@@ -287,7 +287,7 @@ said = m.review_sells(portfolio(), rec['settings'], {'3-100': below}, {other['sy
 check('a score below zero with a signal that is only mixed: the reason says the score, not the signal', len(said) == 1 and 'Its screener score fell below zero (score -1.0, rank 149)' in said[0][2] and 'signal turned negative' not in said[0][2], said and said[0][2])
 check('far down the ranking but the score has held: kept', m.review_sells(portfolio(), rec['settings'], {'3-100': near}, {other['symbol']: {'price': other['buyPrice']}}, t0 + dt.timedelta(days=8), opened=rec['state']['open']) == [])
 s, b = call(action='get', userId=U); plan = b['plans'][0]
-check('the dashboard gets a plan for each holding: sell-by time and marks', len(b['plans']) == len([h for h in portfolio()['holdings'] if h.get('by') == 'ai']) and plan['auto'] is True and plan['stop'] == -10 and plan['take'] == 18 and plan['arm'] == 9 and m.parse_time(plan['sellBy']) - m.parse_time(plan['boughtAt']) == dt.timedelta(days=20), plan)
+check('the dashboard gets a plan for each holding: sell-by time and marks', len(b['plans']) == len([h for h in portfolio()['holdings'] if h.get('by') == 'ai']) and plan['auto'] is True and plan['stop'] == -10 and plan['take'] == 18 and plan['arm'] == 9 and m.parse_time(plan['sellBy']) == m.when_open('us', m.parse_time(plan['boughtAt']) + dt.timedelta(days=20)) and plan['sellBy'] == '2026-11-02T14:35:00Z' and plan['market'] == 'US', plan)   # 20 days from Monday 12 Oct 15:00 is a Sunday: sold when the US market opens on the Monday
 check('and the rules in force, the month so far and the review countdown', b['rules']['stop'] == -10 and b['rules']['changed'] == {} and b['month']['last30']['n'] >= 0 and b['tune']['trial'] is None and b['tune']['nextReviewIn'] == 19 and b['now'], (b['rules'], b['tune']))
 
 # --- the activity list: the same uneventful check-in is counted, not repeated; reasons name the right setting
@@ -435,7 +435,7 @@ check('every level\'s pace is one the dashboard offers', all(v['everyHours'] in 
 D.t.clear(); code_, b = call(action='get', userId=U)
 check('the dashboard is sent each level\'s pace and which settings are left to it', b['options']['pace']['4'] == {'periodDays': 2, 'everyHours': 3, 'maxHoldDays': 2} and b['settings']['auto'] == ['periodDays', 'everyHours', 'maxHoldDays'] and b['settings']['maxHoldDays'] == 5)
 code_, b = call(action='save', userId=U, settings=dict(b['settings'], enabled=True, risk=5, screeners=['7-1']))
-check('switching on at Adventurous with the pace left to the level: a day to build up, hourly check-ins, a day at most', (b['settings']['periodDays'], b['settings']['everyHours'], b['settings']['maxHoldDays']) == (1, 1, 1) and 'Autopilot on: Adventurous level, $10,000 over 1 days, checking every hour.' in b['log'][-1]['text'], b['log'][-1]['text'])
+check('switching on at Adventurous with the pace left to the level: a day to build up, hourly check-ins, a day at most', (b['settings']['periodDays'], b['settings']['everyHours'], b['settings']['maxHoldDays']) == (1, 1, 1) and 'Autopilot on: Adventurous level, $10,000 over 1 day, checking every hour.' in b['log'][-1]['text'], b['log'][-1]['text'])
 m.DEFAULTS.clear(); m.DEFAULTS.update(tested); D.t.clear()
 
 # --- the stop that follows a rising holding is set from that holding's own movement and its figures, not from fixed numbers
@@ -610,6 +610,16 @@ m.datetime = at(sat + dt.timedelta(minutes=40)); code_, b = call(action='run', u
 check('a Japanese share it holds is left alone while Tokyo is closed, even far past its loss limit', 'jp1' in [h['id'] for h in portfolio()['holdings']] and b['summary']['sold'] == 0)
 m.datetime = at(sat + dt.timedelta(minutes=50)); code_, b = call(action='sellall', userId=U); m.datetime = clock; left = [h['id'] for h in portfolio()['holdings'] if h.get('by') == 'ai']
 check('"Sell everything it holds" on a Saturday sells the coins and keeps the Japanese share, and says so', left == ['jp1'] and b['summary']['closed'] == ['4300.T'] and b['summary']['sold'] >= 1, (left, b.get('summary')))
+check('a time that falls while a market is closed is moved on to its next opening; an open market or a coin keeps the time', m.when_open('jp', dt.datetime(2026, 10, 30, 16, 20)) == dt.datetime(2026, 11, 2, 0, 5) and m.when_open('us', thu) == thu and m.when_open('crypto', sat) == sat and m.when_open('us', sat) == dt.datetime(2026, 10, 12, 14, 35), m.when_open('jp', dt.datetime(2026, 10, 30, 16, 20)))
+pl = [x for x in m.public(m.load_item(U), sat + dt.timedelta(hours=1), U)['plans'] if x['id'] == 'jp1'][0]
+check('the dashboard is told a share is sold at the latest when its market next opens after its holding time (20 days from a Saturday: the Monday after), that its market is closed now, and when it opens', pl['sellBy'] == '2026-11-02T00:05:00Z' and pl['market'] == 'Japanese' and pl['closed'] is True and pl['opens'] == '2026-10-12T00:05:00Z' and [x for x in m.public(m.load_item(U), sat + dt.timedelta(hours=1, minutes=3, seconds=35), U)['plans'] if x['id'] == 'jp1'][0]['opens'] == '2026-10-12T00:05:00Z', pl)
+pl = [x for x in m.public(m.load_item(U), dt.datetime(2026, 10, 13, 1, 0), U)['plans'] if x['id'] == 'jp1'][0]
+check('and while Tokyo is open nothing is said about a closed market', pl['closed'] is False and pl['opens'] is None and pl['sellBy'] == '2026-11-02T00:05:00Z', pl)
+D.Table(m.PORTFOLIO_TABLE).rows[U]['data'] = json.dumps(dict(portfolio(), holdings=portfolio()['holdings'] + [{'id': 'c1', 'symbol': 'S01-USD', 'label': 'S01-USD', 'currency': 'USD', 'qty': 10.0, 'buyPrice': 100.0, 'buyFx': 1, 'costUsd': 1000.0, 'boughtAt': m.iso(sat), 'spyAtBuy': 700.0, 'by': 'ai', 'screener': '7-1'}]))
+pl = [x for x in m.public(m.load_item(U), sat + dt.timedelta(hours=1), U)['plans'] if x['id'] == 'c1'][0]
+check('a coin is sold when its holding time ends, whatever the day: its market never closes', pl['sellBy'] == m.iso(sat + dt.timedelta(days=20)) and pl['market'] == 'coin' and pl['closed'] is False and pl['opens'] is None, pl)
+m.datetime = at(sat + dt.timedelta(hours=2)); code_, b = call(action='save', userId=U, settings=dict(m.load_item(U)['settings'], budgetUsd=9000.0)); m.datetime = clock
+check('the line written when settings are saved says "over 1 day", not "1 days"', any(e['text'] == 'Autopilot on: Balanced level, $9,000 over 1 day, checking every 24 hours.' for e in b['log']), [e['text'] for e in b['log'] if e['text'].startswith('Autopilot on')])
 m.datetime = at(dt.datetime(2026, 10, 12, 0, 30, 0)); rec = m.load_item(U); rec['state']['lastRun'] = None; m.save_item(U, rec); code_, b = call(action='run', userId=U); m.datetime = clock
 check('on Monday with Tokyo open it is dealt with', 'jp1' not in [h['id'] for h in portfolio()['holdings']] and b['summary']['sold'] >= 1, b.get('summary'))
 PRICES.clear(); SNAP.pop('5-nikkei225', None); SNAP['3-100'] = rows(); SNAP['7-1'] = rows('crypto', '7-1'); D.t.clear()
