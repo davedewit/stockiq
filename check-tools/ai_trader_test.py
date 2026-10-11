@@ -1052,11 +1052,12 @@ D.t.clear(); m._BRAIN.clear(); m.PLAN_CACHE.clear(); rec = fresh([])
 rec['log'] = [{'t': '2026-10-10T10:00:00Z', 'type': 'buy', 'symbol': 'CFX-USD', 'name': 'Conflux', 'usd': 1250, 'text': 'r', 'detail': ['long']}, {'t': '2026-10-10T12:00:00Z', 'type': 'note', 'symbol': '', 'usd': 0, 'text': 'Checked in.'},
               {'t': '2026-10-10T16:00:00Z', 'type': 'sell', 'symbol': 'CFX-USD', 'usd': 1262.79, 'pct': 1.02, 'text': 'Sold to keep part of the gain. Put in $1,250.00, got back $1,262.79.'},
               {'t': '2026-10-11T10:00:00Z', 'type': 'sell', 'symbol': 'ERG-USD', 'name': 'Ergo', 'gain': -173.03, 'usd': 6000, 'pct': -2.8, 'text': 'x'}]
-m.save_item(U, rec); before = copy.deepcopy(D.Table(m.SETTINGS_TABLE).rows); code_, b = call(action='bell', userId=U)
+m.save_item(U, rec); before = copy.deepcopy(D.Table(m.SETTINGS_TABLE).rows); code_, b = call(action='bell', userId=U, list=2); code0, b0 = call(action='bell', userId=U)
+check('an older copy of the bell script, which a browser may still hold, is told nothing (only the question marked list: 2 is answered)', code0 == 200 and b0 == {'success': True, 'allowed': False, 'trades': []}, b0)
 check('the bell is given the latest buys and sells only: when, code, name, dollars, and a sale\'s result (read from an older entry\'s words when it was not stored)',
       code_ == 200 and b['allowed'] is True and [(t['type'], t['symbol'], t['gain']) for t in b['trades']] == [('buy', 'CFX-USD', None), ('sell', 'CFX-USD', 12.79), ('sell', 'ERG-USD', -173.03)]
       and b['trades'][0]['name'] == 'Conflux' and b['trades'][2]['pct'] == -2.8 and all(set(t) == {'t', 'type', 'symbol', 'name', 'usd', 'gain', 'pct'} for t in b['trades']), b)
 check('asking leaves no trace: nothing is written and it does not count as a visit to the dashboard', D.Table(m.SETTINGS_TABLE).rows == before and 'visit' not in json.loads(before[U]['data'])['state'])
-code_, b = call(action='bell', userId='nobody@z.com')
+code_, b = call(action='bell', userId='nobody@z.com', list=2)
 check('an account without the autopilot gets an empty list and no record is made for it', code_ == 200 and b == {'success': True, 'allowed': False, 'trades': []} and 'nobody@z.com' not in D.Table(m.SETTINGS_TABLE).rows, b)
 print('ALL PASS' if ok else 'SOME FAILED')

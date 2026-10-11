@@ -9,7 +9,7 @@ function page({ user = 'tester@x.com', store = {}, dashboard = false, history = 
   const els = { 'notification-badge': mk(), 'mobile-notification-badge': mk() }; if (dashboard) els['practice-autopilot'] = mk();
   const document = { readyState: 'complete', hidden: false, getElementById: id => els[id] || null, addEventListener() {} };
   const ctx = { document, console, setTimeout, setInterval: () => 0, Date, JSON, Math, Array, String, Set, isNaN, Promise,
-    localStorage: { getItem: k => (k in kept ? kept[k] : null), setItem: (k, v) => { kept[k] = String(v); } },
+    localStorage: { getItem: k => (k in kept ? kept[k] : null), setItem: (k, v) => { kept[k] = String(v); }, removeItem: k => { delete kept[k]; } },
     fetch: async (url, o) => { calls.push(JSON.parse(o.body)); return { ok: true, json: async () => answer }; }, addEventListener() {} };
   ctx.window = ctx; if (history) ctx.dashboardHistory = history;
   vm.createContext(ctx); vm.runInContext(src, ctx);
@@ -34,7 +34,7 @@ const T = [{ t: '2026-10-10T10:00:00Z', type: 'buy', symbol: 'CFX-USD', name: 'C
     check('clicking one marks them read', p.bell.unread() === 0 && /0 unread/.test(plain(p.bell.html())) && !/border-radius: 50%/.test(p.bell.html())); }
   { const p = page({ store: { 'unreadReports_tester@x.com': JSON.stringify(['a', 'b', 'b']), 'seenReports_tester@x.com': JSON.stringify(['a']) } });
     p.els['notification-badge'].textContent = '1'; p.els['notification-badge'].style.display = 'flex';       // as the page's own code set it for the one unseen report
-    p.bell.set(T.slice(0, 1), true); check('with no new trade the page\'s own number is left alone', p.els['notification-badge'].textContent === '1' && p.els['notification-badge'].getAttribute('data-autopilot') === null);
+    p.bell.set(T.slice(0, 1), true); check('with no new trade the page\'s own number is left alone', p.els['notification-badge'].textContent === '1' && p.els['notification-badge'].getAttribute('data-bell') === null);
     p.bell.set(T, true); check('new trades are added to the unseen reports in the one red number', p.bell.unseen() === 2 && p.els['notification-badge'].textContent === '3' && p.els['notification-badge'].style.display === 'flex', p.els['notification-badge'].textContent);
     p.bell.markSeen(); check('and once they are seen the number is the reports\' again', p.els['notification-badge'].textContent === '1' && p.els['notification-badge'].style.display === 'flex'); }
   { const older = page({ history: [{ analysisId: 'a', timestamp: '2026-10-09T08:00:00Z' }, { analysisId: 'gone', timestamp: '2026-10-12T08:00:00Z', deleted: true }] }); older.bell.set(T, true);
@@ -54,12 +54,17 @@ const T = [{ t: '2026-10-10T10:00:00Z', type: 'buy', symbol: 'CFX-USD', name: 'C
     mixed.ctx.rerunFromNotification = () => {}; let opened = null; mixed.ctx.viewAnalysisFromNotification = (id) => { opened = id; }; mixed.bell.report('mid');
     check('where the page has them, the run-again button is shown and a click opens the report with the page\'s own routine', /rerunFromNotification\(this\.getAttribute\('data-id'\)\)/.test(mixed.bell.html()) && opened === 'mid'); }
   { const p = page({ answer: { success: true, allowed: true, trades: T } }); await sleep(20);
-    check('on a page that is not the dashboard the list is asked for once, read-only, and then kept for two minutes', p.calls.length === 1 && p.calls[0].action === 'bell' && p.calls[0].userId === 'tester@x.com' && p.bell.trades().length === 3, p.calls);
+    check('on a page that is not the dashboard the list is asked for once, read-only, and then kept for two minutes', p.calls.length === 1 && p.calls[0].action === 'bell' && p.calls[0].list === 2 && p.calls[0].userId === 'tester@x.com' && p.bell.trades().length === 3, p.calls);
     p.bell.load(); await sleep(20); check('a second page view inside that time asks nothing', p.calls.length === 1);
     const again = page({ store: p.kept, answer: { success: true, allowed: true, trades: T } }); await sleep(20); check('nor does the next page (the list is shared through the browser)', again.calls.length === 0 && again.bell.trades().length === 3);
     const dash = page({ dashboard: true, answer: { success: true, allowed: true, trades: T } }); await sleep(20); check('the dashboard does not ask: its own panel hands the list over', dash.calls.length === 0);
     const anon = page({ user: null, answer: { success: true, allowed: true, trades: T } }); await sleep(20); check('a visitor who is not signed in is never asked about, and sees nothing', anon.calls.length === 0 && anon.bell.html() === '' && anon.bell.unseen() === 0);
     const free = page({ answer: { success: true, allowed: false, trades: [] } }); await sleep(20); free.bell.load(); await sleep(20);
     check('an account without the autopilot gets no trades, no number, a list of its reports alone, and is not asked about again for a while', free.calls.length === 1 && !/data-kind="trade"/.test(free.bell.html()) && /Nothing here yet/.test(free.bell.html()) && !/autopilot/.test(plain(free.bell.html())) && free.bell.unseen() === 0 && free.els['notification-badge'].style.display === 'none'); }
+  { const store = { 'stockiqAutopilotTrades_tester@x.com': JSON.stringify({ at: 1, allowed: true, trades: T }), 'stockiqAutopilotBell_tester@x.com': '2026-10-10T12:00:00Z', 'stockiqAutopilotRead_tester@x.com': '2026-10-10T12:00:00Z' };
+    const kept = Object.assign({ userId: 'tester@x.com' }, store), ctx0 = { older: { version: undefined, set() {}, trades: () => [] } };
+    const p = page({ store }); // an older copy's leftovers are in the browser's store
+    check('it takes over from an older copy: that copy\'s marks are kept, its list of trades is emptied so that it draws nothing', p.bell.version === 4 && !('stockiqAutopilotTrades_tester@x.com' in p.kept) && p.kept['stockiqBellBell_tester@x.com'] === '2026-10-10T12:00:00Z' && p.kept['stockiqBellRead_tester@x.com'] === '2026-10-10T12:00:00Z', Object.keys(p.kept));
+    p.bell.set(T, true); check('and with the marks taken over, the two sales since then are new', p.bell.unseen() === 2 && p.bell.unread() === 2 && 'stockiqBellTrades_tester@x.com' in p.kept); }
   console.log(ok ? 'ALL PASS' : 'SOME FAILED');
 })();
