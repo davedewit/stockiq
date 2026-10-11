@@ -648,9 +648,9 @@ with `document.querySelector('h3')`.
     what a click does (`viewAnalysisFromNotification`, `rerunFromNotification`); if the script fails, the page's own
     list simply stays.
   - **Unread and the red number, as for reports:** trades made since the bell was last opened are counted in the bell's red
-    number together with unseen reports ("seen", key `stockiqAutopilotBell_<address>`); opening the bell clears the number but
+    number together with unseen reports ("seen", key `stockiqBellBell_<address>`); opening the bell clears the number but
     the lines stay marked unread (blue dot, bold, a green, red or blue edge; the heading says "3 unread: 1 report, 2
-    autopilot buys and sells") until one is clicked ("read", key `stockiqAutopilotRead_<address>`). Both marks start with the
+    autopilot buys and sells") until one is clicked ("read", key `stockiqBellRead_<address>`). Both marks start with the
     first list a browser gets: what is there then is not news. A report is unread by the pages' own key (`unreadReports_`).
   - **A click** on a trade goes to the AI autopilot tab's list "What it has done" (on another page: `/dashboard.html#autopilot`);
     on a report it does what the page does with it (`report`), or goes to the dashboard.
@@ -665,17 +665,31 @@ with `document.querySelector('h3')`.
     pages. **The address has no version number**: `/autopilot-bell.js?h=<the hour>` (`Math.floor(Date.now()/36e5)`), a new
     address every hour, so **a change to the script needs no edit to any page**; CloudFront ignores the query string, so
     it is still one cached file there. (It had a `?v=` in three places, raised by hand in 20 files for each change.)
+  - **It takes over from older copies of itself (version 4, 11 Oct).** After the fixes above the owner saw no trades in the
+    bell on any page, the dashboard included. Cause, found by playing it back: his browser still held an old `theme.js`
+    (kept for a day under the old rule), which asks for the *first* version of this script out of the browser's own store.
+    That old copy ran before the current one arrived over the network, and the current one then stood down
+    (`if (window.autopilotBell) return`). The old copy puts the trades under the reports, out of sight. Now the script
+    **always takes over** (`VERSION`, the guard only stops the same or a newer version), and leaves an older copy with
+    nothing to draw: it empties that copy's store of trades (`stockiqAutopilotTrades_…`, at the start and whenever it
+    reappears), uses other names for its own (`stockiqBellTrades_`, `stockiqBellBell_` for "seen", `stockiqBellRead_`,
+    and `data-bell` on the red number; the old marks are taken over once), marks its question to the function `list: 2`
+    (**the function answers the bell only then**: an older copy is told nothing), carries on its list the signature a
+    version-3 copy expects (`olderSig`, attribute `data-sig`; its own is `data-mine`) so that copy leaves the list alone,
+    and stops redrawing if something undoes the list more than 12 times in two seconds (`state()` says so).
+    **If this script is changed in a way an older copy on the same page could fight with, raise `VERSION` and think about
+    what the older copy will still do**; `OLD_THEME` / `OLD_BELL` of `live_bell_check.js` play the old copies back.
   - **Where the list comes from:** on the dashboard the panel hands over its own (`practiceAutopilot.bellFeed` →
     `autopilotBell.set`); on every other page the script asks the function's **read-only action `bell`** (`bell_trades`:
     the last 12 buys and sells with `t, type, symbol, name, usd, gain, pct`; an account without the autopilot gets an empty
     list; it is not a visit and writes nothing) at most every two minutes (30 for an account without it), and keeps the
-    answer in the browser (`stockiqAutopilotTrades_<address>`) so that every page and tab shows the same.
+    answer in the browser (`stockiqBellTrades_<address>`) so that every page and tab shows the same.
   - A sale's dollars are the entry's `gain` (stored since 11 Oct) or are read from an older entry's words ("Put in $X, got
     back $Y": `gainOf` on the panel, the same in `bell_trades`). Entries from before that deploy have no name.
   - **Limits:** a notice on the site, not an email or a phone notification; `theme.js` is cached for a day without a version,
     so a browser that already had it shows the bell's new part on other pages within a day or after a refresh; nothing is
     shown to a visitor who is not signed in.
-  - **Tests:** `node check-tools/autopilot_bell_test.js ../website/autopilot-bell.js` (20 checks) and, in a real browser,
+  - **Tests:** `node check-tools/autopilot_bell_test.js ../website/autopilot-bell.js` (22 checks) and, in a real browser,
     `python3 check-tools/bell_page.py ../website/autopilot-bell.js /tmp/bell.html light trade` (or `report`): a stand-in page
     with a bell drawn as the dashboard draws it; it prints the red number, the order of the list, what happens when the
     page redraws it and on a click. **On the live pages:** `node check-tools/live_bell_check.js index.html analysis.html
@@ -687,8 +701,12 @@ with `document.querySelector('h3')`.
     bell's), so the list is the real one, and saves a picture; `LOCAL_BELL=<file>` gives the page a staged copy of the
     script, **to try a change on the live pages before deploying it**. This is what found the fault: two earlier checks
     with a made-up account and no reports had passed while the owner saw nothing. Seen on 11 Oct on the home and analysis
-    pages with the owner's seven reports and ten trades: one list, newest first. Not checked: the dashboard page itself
-    (it redirects to Sign In without a real session) and a phone.
+    pages with the owner's seven reports and ten trades: one list, newest first. **The dashboard can be opened the same way**
+    (it only needs the address in the browser's store; add `PASS_GET=1` so that the autopilot's and the portfolio's own
+    opening questions go through). **`OLD_THEME=<file> OLD_BELL=<file>` play back old copies** of `theme.js` and of the
+    bell's script (from git) as a browser's own store would, the current script arriving 0.4 s later: this is what
+    reproduced "no trades anywhere", and after the fix all nine cases (old copies of versions 1, 2, 3 on the dashboard,
+    home and analysis pages) show the one list with the trades. Not checked: a phone.
 - The buy row: search box (code or company name, same lookup as the home page), "Enter $" **or**
   "or quantity" (the other is worked out from the latest price), an optional note, "Practice buy".
 - The holdings table: Holding, Bought (date and time), Price then, Price now, Value, Change, Sell.
@@ -1386,7 +1404,7 @@ narrow screen (nothing changes at desktop width):
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 378 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 379 checks
    node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 196 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
      pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 71 checks
@@ -1446,18 +1464,18 @@ weekdays and fails at the weekend.
 ### Start here when resuming (state at 06:20 UTC on 11 Oct 2026, the end of a two-day session)
 
 **What is live, and how to confirm nothing has moved since:**
-- Lambda `stockiq-ai-trader`: `CodeSha256` `+Z5scAfikqPIEcGPDlARJVC/f3NOcIGjmSZ7YK4YGoc=`, equal to
-  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,854 lines; shared learning deployed 07:42 UTC on 11 Oct, the release wording 08:45, the bell's action 09:01).
+- Lambda `stockiq-ai-trader`: `CodeSha256` `PoZ2yvK1FdAVMmoAjS+7ZOu9TAfpXQXd24qiEXG6e3w=`, equal to
+  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,856 lines; shared learning deployed 07:42 UTC on 11 Oct, the release wording 08:45, the bell's action 09:01, the bell answering only its current script 10:42).
 - Website: `practice-autopilot.js?v=37` (sha256 starts `57956b67cf2b`), `practice-portfolio.js?v=17`
-  (`f7ddb505486a`), `autopilot-bell.js` (`9065d8d9662f`), `theme.js` (`ad5a9264d875`), `dashboard.html` (`db74619b8fbc`), and the loader line in 17 other pages, `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
+  (`f7ddb505486a`), `autopilot-bell.js` (version 4, `40950bb80f91`), `theme.js` (`ad5a9264d875`), `dashboard.html` (`db74619b8fbc`), and the loader line in 17 other pages, `ai-chat.js?v=2` (`87eaadf52197`); `index.html` and `faq.html` carry the plan wording.
 - Lambda `stockiq-ai-chat`: `CodeSha256` `LFyuyhd1ivEYAXqSqVkEk+Deq2H+rG9IhzSYdpho+w8=`, equal to `lambda-sync/stockiq-ai-chat/lambda_function.py`. Live files were compared byte for byte.
 - Both repos clean and pushed; **no `check-tools/pending-*` folder is left** (every package was
-  deployed and removed). Tests on the live files: 378 function, 196 panel, 71 portfolio, 20 bell, 13 chat, the
+  deployed and removed). Tests on the live files: 379 function, 196 panel, 71 portfolio, 22 bell, 13 chat, the
   panel-versus-function comparison clean (3,780 budget combinations, 2,915 spreads over markets).
 - Rollback copies of the function, one per deploy, in `~/VSCODE/backup/`:
   `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order: 10 Oct `v2, fast, panel,
   autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
-  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell`.
+  trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell, takeover`.
 - First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and
   the function's log (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors
   ("check-in failed", "not worked out", "not sent") and for the firsts listed below.
@@ -1613,6 +1631,11 @@ more finished trades than there are, and would chase noise before then.
   normal visit is served (`curl -sI` the plain address for `cache-control` and compare the body), before looking for a
   fault in the change.** And a check that adds `?something` to the address or uses a fresh browser proves the site, not
   what a returning visitor sees.
+- **An old copy of a script can outrun the new one (11 Oct 2026).** The same episode's last turn: a script fetched by
+  another script (the bell's, fetched by `theme.js`) and guarded with "if I am already here, do nothing" was shut out by
+  its own first version, which an old `theme.js` loaded from the browser's store before the new one arrived. A script
+  that may be loaded twice must let the newer version win, and must work out what the older one will still do on the
+  page (section 8c, the bell, "It takes over").
 - **Template drift:** in Sep 2026 the live stock pages had a newer footer than the generator
   template, so running the generator would have reverted all 3,467 footers. Before running
   `generate-stock-pages.py` after template edits, test it on a copy of `stocks/` and diff.
@@ -2149,5 +2172,12 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     be asked for again every time and scripts are kept five minutes (`deploy-to-s3.sh`; the 36 files on the site
     relabelled, content compared byte for byte afterwards); the bell's script is asked for under an address that changes
     every hour, with no version number to raise. Website and deploy script only.
+  - **And then no trades in the bell on any page**: an old `theme.js` in the owner's browser loaded the first version of the
+    bell's script from the browser's store, and that copy shut the current one out. `autopilot-bell.js` (version 4) now takes
+    over from any older copy and leaves it nothing to draw; the function answers the bell only for the current script
+    (`PoZ2yvK…`). Rollback zip: `…_before_autopilot_takeover_20261011.zip`. Reproduced first, then checked after the deploy,
+    by playing the old copies back to the live dashboard, home and analysis pages as the owner's account (nine cases).
+    **Lesson: when "it works here" and the owner says it does not, the difference is the state of his browser; play that
+    state back instead of testing a clean one again.**
   - Notes: section 8c ends with "Start here when resuming"; this session was closed there because
     its context had grown too large. Everything known is in these files.

@@ -138,7 +138,7 @@ python3 check-tools/mobile_frame.py /tmp/m.html /tmp/m-frame.html 390          #
 The AI autopilot's buys and sells in the notification bell (`website/autopilot-bell.js`, on every page with a bell).
 
 ```bash
-node check-tools/autopilot_bell_test.js ../website/autopilot-bell.js      # 20 checks: the red number, unread marks, profit or loss, the one list in order of time, when it asks the function
+node check-tools/autopilot_bell_test.js ../website/autopilot-bell.js      # 22 checks: the red number, unread marks, profit or loss, the one list in order of time, when it asks the function
 python3 check-tools/bell_page.py ../website/autopilot-bell.js /tmp/bell.html light trade     # or: dark report
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars --window-size=900,900 \
   --virtual-time-budget=8000 --dump-dom file:///tmp/bell.html > /tmp/bell.dom      # and --screenshot=/tmp/bell.png
@@ -155,7 +155,10 @@ answered locally (the bell's question with made-up trades), so nothing reaches t
 withholds `theme.js`, to prove a page fetches the bell's script by itself. `REAL_USER=<address>` opens the pages as that
 account and lets its two read-only questions through (its reports, the bell's), so the list is the real one; `SHOT=<file.png>`
 saves a picture with the bell open; `LOCAL_BELL=<file>` gives the page a staged copy of the script, to try a change on the
-live pages before it is deployed. The address is never printed. A page whose bell goes to the dashboard ends
+live pages before it is deployed. The address is never printed. `PASS_GET=1` also lets the dashboard's own opening
+questions through, so `dashboard.html` can be opened as that account. `OLD_THEME=<file> OLD_BELL=<file>` play back old
+copies of `theme.js` and of the bell's script (take them from git: `git -C ../website show <commit>:theme.js`) the way a
+browser's own store would, ahead of the current script: the way to reproduce "it works for you but not in my browser". A page whose bell goes to the dashboard ends
 with "Inspected target navigated": that is the bell working.
 
 ## autopilot_plan_check.py (with autopilot_plan_check.js)
