@@ -234,3 +234,9 @@ python3 check-tools/report/patch_metrics.py lambda-sync/stockiq-option-1-1-custo
 the report's holds a key). To change a function again: copy the mirror's file, change the copy, run the two tests on
 it, and deploy with a packaged `check-tools/pending-<name>/deploy.sh` that rebuilds the change from the live code (the
 last one: `git show 2df59e0:check-tools/pending-figures/deploy.sh`).
+
+## signals/ (in the repo's top folder, not here): the two trading-signals functions
+
+`python3 signals/test_signals.py` (42 checks on saved prices; `--show` prints the readings) and `python3 signals/build.py`
+(the package and its fingerprint; `--list` rewrites the scan list from the coordinator's S&P 100). One file runs in both
+functions; `site-overview.md` section 8b, "Trading signals and the presets".

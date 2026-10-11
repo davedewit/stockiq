@@ -664,9 +664,9 @@ remove the folder. `python3 check-tools/workers.py` must show "one" for the 13 g
   rest as `HOLD`); `momentum_signal` can never say `STRONG_DOWN` (the `DOWN` test comes first); the line "PRE-SCALE
   TOTAL" prints the scaled score; the 12 weights total 102%; the market's state is the US market's (SPY) for every
   country; no real company figures.
-- **Not part of the workers, found on the way and still open** (section 11): London prices are in pence and both report
-  writers print them with a currency sign as if pounds; the coordinator's report cuts every symbol to five characters
-  and prints "$" for every market.
+- **Not part of the workers, found on the way and fixed the same evening** ("Dashboard performance tracker", below):
+  London prices in pence were printed as pounds, and the coordinator's report cut every symbol to five characters and
+  printed "$" for every market.
 - **The crypto workers** (54, one version) are a different program; their MACD fault was fixed the same day ("Crypto",
   below). The single-coin worker asks for 60 days and does not have it.
 
@@ -723,12 +723,66 @@ remove the folder. `python3 check-tools/workers.py` must show "one" for the 13 g
   `Market_Regime`, `SPY_20d_Change_%`, `Score_Breakdown`. Several of these were always 0 before
   Oct 2026 because the code read field names the workers do not return.
 
+### Trading signals and the presets (reviewed 11 Oct 2026)
+
+The owner asked for the "junky" items to be looked at: "Choose from presets" and the two buttons under Trading Signals.
+
+- **Presets** (`analysis.html`, `#presets`): "Magnificent 7" and "Popular ETFs" send their symbols to the single-stock
+  report (7 and 4 full reports in one answer: 20 and 11 seconds, about 250 KB and 140 KB of text); "Dow Jones 30" and
+  "S&P 500 Complete" simply run those screeners. They work, and they took on the report's fixes of the same day.
+  Still to do on the page: a short comparison (symbol, price, change, score, signal) above a run of several reports.
+- **The two signals functions run one file, kept in git: `stockiq/signals/lambda_function.py`** (no key in it).
+  `stockiq-option-2-trading-signals` ("Enter Symbols for Live Signals", up to 10 symbols) and
+  `stockiq-option-2-2-auto-signals` ("Auto-detect Top 5 Signals"); which of the two a call is, goes by the function's
+  own name. Package: that file and `sp100.txt` (`python3 signals/build.py`; `--list` rewrites the list from the
+  coordinator's S&P 100 and the build stops if the two differ). Fingerprint on both:
+  `6nVDLm4/8G6K0A37aSb+3r7YukSxFUUsK8tvYmwNL9M=`. Memory 512 MB and 1024 MB (they were 128: the scan below took 33
+  seconds at 128 MB and takes 5 at 1024; Lambda bills memory x time, so it costs about the same).
+- **A reading** is short-term and technical only: RSI (Wilder's, the site's one RSI), MACD against its signal line, the
+  price against its Bollinger bands. Points: RSI under 30 +2, under 40 +1, over 70 -2, over 60 -1; MACD above its signal
+  +1, below -1; at or below the lower band +2, at or above the upper -2. **+2 or more is a positive reading (code `BUY`),
+  -2 or less negative (`SELL`), between is mixed (`HOLD`); 3 or more either way is "HIGH" confidence.** It is not the
+  report's 0-100 score, uses no company figures, and nobody has tested whether it predicts anything.
+- **What was wrong:** a scoring of their own with RSI as a plain average (a third way of working it out on this site);
+  every price in dollars; a time with no zone, which a browser read as local when it was UTC; levels 2% inside the
+  20-day range or an arbitrary 5% either side of the price; reasons worked out and never shown; a symbol with no
+  prices silently dropped. **The auto-detect looked at the first 15 names of a 30-name list written into its code,
+  scored them with a fourth formula, and called its five "top performers"**: on 11 Oct that gave AAPL, NVDA, TSLA, PG
+  and MSFT, four of them mixed readings.
+- **Now:** one bar a day and the latest session from the quote (the same rules as the workers and the report); each
+  reading carries `currency`, `name`, `change_pct`, `reasons` (one plain line per ingredient with its points: "RSI 71, in
+  the overbought range (over 70): -2"), `trend` (the report's own words) and the levels as facts: the high and the low
+  of the last 20 sessions. **The auto-detect scans the screener's whole S&P 100 list** (101 shares, 8 at a time) and
+  returns **the five strongest readings in either direction**, with `scanned`, `universe`, `readings` (how many
+  positive / negative / mixed) and an honest `methodology` line. On the same day: SBUX +5, VZ +3, PLTR -3, T +3, ABBV -3.
+- **Every field the page read before is still there** (`symbol, current_price, action, confidence, entry_price,
+  stop_loss, take_profit, …`; `top_performers` is kept as the name of the list of five), so the page works unchanged.
+  **What a visitor sees until the page's two writers are changed** (`formatOption2Result`, `formatOption22Result` in
+  `analysis-functions.js`): the right time, the honest methodology line, real levels, but still a dollar sign on every
+  price, the words "Top Performers Found", and none of the reasons. That page work was handed to the session doing the
+  report writers (the same currency rule and the same tracker pattern apply).
+- Tests: `python3 signals/test_signals.py` (42 checks on saved prices, beside the two old files; `--show` prints the
+  readings). A run by hand against live prices: `python3 signals/lambda_function.py NVDA BHP.AX` or `--auto`.
+  Checked live through both function addresses and through the page's own code (`page_run.js 2 custom`, `2 auto`).
+  Rollback: `~/VSCODE/backup/stockiq-option-2-trading-signals_before_onefile_20261011.zip` and
+  `stockiq-option-2-2-auto-signals_before_onefile_20261011.zip`; memory back with `update-function-configuration`.
+
 ### Dashboard performance tracker (🎯 button)
 
 - `trackScreenerPerformance` in `dashboard.html` parses the saved report text: the symbol and
   price at the start of each numbered line. Do not change that part of a line.
-- Stock pattern: `N. SYMBOL <up to 40 chars> <currency>PRICE`, symbols 1–10 characters with an
-  optional `.XX` or `-X` suffix, currencies `$ £ € ¥`. Add `₹` / `₩` for India / Korea.
+- Stock pattern: `N. SYMBOL <up to 40 chars> PRICE`, symbols 1–10 characters with an optional `.XX` or `-X`
+  suffix. **The price is either a currency sign and a number, or a number of pence** (since 11 Oct 2026): `$118.39`,
+  `A$8.43`, `¥5,613.00`, `€48.76`, `503.80p`; thousands commas are allowed; signs read: `$ £ € ¥ ₹ ₩`. The older forms in
+  saved reports are still read (`£2614.00`, which always meant pence, `$AUD8.43`, and a background ASX symbol cut to
+  `AGL.A`). `check-tools/page_run.js` has a copy of this pattern for its own count: change the two together.
+- **One money rule in three places that must stay alike:** `screenerMoney(stock, value, fallback)` in
+  `analysis-functions.js` (every share-screener formatter), `money(stock, value, fallback)` in the coordinator, and
+  `money()` in the single-stock report (section 7). Each takes the currency the worker result carries (`currency`, as
+  Yahoo gives it): `GBp` is pence and is written `503.80p`, never with a pound sign; a market's own currency is only the
+  fallback. Three FTSE 100 shares are not quoted in pence at all (CPG.L and IHG.L in US dollars, MTLN.L in euros, 11 Oct
+  2026) and now print as such. The coordinator pads the symbol and never cuts it (it cut to five characters until then).
+  CSV files carry bare numbers in the share's own unit and no currency column.
 - A company name between symbol and price must stay short (Nikkei names are cut to 22 chars).
 - Rebuilt 10 Oct 2026: one parser (`parseScreenerTop10`) and one calculation
   (`screenerTop10Performance`) feed both the row badge and the popup. Before that the two had
@@ -1766,10 +1820,13 @@ and the same code across them; `python3 workers/build.py` prints the fingerprint
 price must be that session's, not the one before (the fix for the empty latest session was tested on a doctored answer
 only); (b) an ASX run during ASX hours (the one-bar-a-day rule was only seen after the close); (c) the autopilot's first
 share buys, which now come from rankings made with the one RSI.
-**The next small job (section 11, "Report writers"):** London prices are pence and are printed as pounds; the coordinator's
-report cuts symbols to five characters and prints "$" for every market, so the 🎯 tracker cannot read a background report
-of an ASX, Nikkei or FTSE screener. Both are in the report writers (page and coordinator), not the workers, which now send
-each stock's `currency`.
+**The small job after it is done too (11 Oct, 13:46 UTC): the report writers and the tracker.** Both screener reports print
+each market's own currency from the workers' `currency` field and whole symbols, and the 🎯 tracker reads them (section 8b,
+"Dashboard performance tracker"). Live: `stockiq-screener-coordinator` `CODESHA`, `analysis-functions.js` (sha256 starts
+`a2fd5ef6c8a2`), `dashboard.html` (`bec16da1ef4c`). Way back: `~/VSCODE/backup/stockiq-screener-coordinator_before_currency_20261011.zip`
+and the two website files from git.
+**The owner approved the one RSI for every screener on 11 Oct 2026** (asked directly: "Yes, keep it"), knowing that about a
+third of US and London labels and three or four of each top 10 changed on the day.
 **Other things waiting, in order:** (1) the owner's decision on the two **public** GitHub repositories and his personal
 file in one of them (section 11, first item); (2) Monday 12 Oct: the first daily deploy with the new copy-keeping rules,
 and the first share trades; (3) the autopilot's own trials of a longer holding time and of not selling on the signal, and
@@ -2109,19 +2166,11 @@ Needs the owner's decision or more work (nothing here is fixed):
   wording was neutralised (section 8b). Whether issuing automated signals to paying users
   without a licence is acceptable under Australian law is a question for a lawyer; the owner
   knows and has not had it reviewed. The owner trades as an individual (no company structure).
-- **Report writers: pence, cut symbols, "$" for every market (found 11 Oct 2026; the next small job).**
-  - London prices are pence (Yahoo's `GBp`). The page prints them with a pound sign ("£503.80" for Tesco at 503.8p; the three
-    FTSE formatters in `analysis-functions.js`, lines with `£${`), the coordinator with a dollar sign. UK shares are quoted
-    in pence, so "503.80p" is the right form. **The 🎯 tracker reads the price after a currency sign** (`[$£€¥]` in
-    `parseScreenerTop10`, `dashboard.html`), and reports already saved say "£2614.00" meaning pence, so the tracker must
-    accept both "£2614.00" and "2614.00p" as the same number of pence. The practice portfolio and the autopilot already
-    treat `GBp` as pence. Three places to change together: the page formatters, the coordinator, the tracker's pattern.
-  - **The coordinator's report cuts every symbol to five characters** (`(symbol + '     ')[:5]`, about line 633 of its
-    `lambda_function.py`) and prints "$" before every price: a background ASX report says "AGL.A  $8.43", Nikkei "4307.
-    $5613.00", FTSE "TSCO.  $503.80". The tracker cannot find those tickers, so the 🎯 button on a **background** report of
-    a non-US screener shows nothing or the wrong share (a page-run report is fine). Fix: do not cut the symbol, and take
-    the sign from the stock's `currency` field, which the workers send since 11 Oct 2026.
-  - Test with `check-tools/tracker_run.js` on a `res_<key>.json` from `run_all.py` and on a `page_*.json`, old and new.
+- **Screener reports, small things left after the currency fix of 11 Oct 2026** (section 8b, "Dashboard performance tracker"):
+  the page pads a FTSE price to 8 characters, so a four-figure pence price ("1,835.00p") sits one place to the right of the
+  others; equal scores are ordered differently by the page and by the coordinator, so the two top 10s can differ in a
+  tied place; the CSV has no currency column; the Nikkei background report has no company names (the page's has); the
+  trading-signals report (option 2) still prints "$" for whatever symbol it is given.
 - **Share-screener workers** (section 8b, "The worker groups"): one code base since 11 Oct 2026. Open: no real company figures
   (one file to change now, once there is a source); the two fixes for Yahoo's oddities to be seen live (FTSE on a morning
   after a session, ASX during its hours); the oddities left on purpose (`MODERATE_SELL`, `STRONG_DOWN`); Russell 1000/2000
@@ -2588,3 +2637,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     live output a second time after a deploy: the third deploy fixed a wrong source label that only a repeat report from
     a warm function showed.** A fourth (13:34 UTC), at the owner's word: the latest article's time in the visitor's own
     zone, as the stock pages show it, and the zone named beside the report's own time.
+  - **Trading signals rebuilt and the presets reviewed** (section 8b, "Trading signals and the presets"), at the owner's
+    word that they were "junky": the two signals functions now run one file in git (`signals/`), with the site's one
+    RSI, readings that say why, real levels and a time a browser reads rightly; the auto-detect scans the whole S&P 100
+    for the five strongest readings instead of calling five of fifteen megacaps "top performers". The page's writers
+    still have to print the new fields. Memory raised (128 MB made the scan take 33 seconds). **Lesson: time a function
+    after changing what it does; a function's processor share goes with its memory.**
+

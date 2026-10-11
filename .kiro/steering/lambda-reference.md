@@ -37,8 +37,8 @@
 | Function | Purpose |
 |---|---|
 | `stockiq-option-1-1-custom-analysis` | Single stock report + 0-100 score (Option 1). File `lambda_function2.py`. Rebuilt 11 Oct 2026 (`site-overview.md` section 7, "The single-stock report and its chart"): prices in the share's own currency, one bar a day, Wilder's RSI, a graded trend factor (`trend_points`), company figures from Finnhub and, for what it lacks (everything outside the US), from the private file `s3://stockiq-dynamic-stock-lists/site-data/company_figures.json` that `publish_company_figures.py` publishes daily. Sends its own prices to the chart function. **Holds the Finnhub key in its code, so the code is not in git**; changes are kept as scripts in `check-tools/report/changes-2026-10-11/`. A call with no `userId` is saved to history: test with `userId` and `skipHistorySave: true`. Tests: `check-tools/report/report_test.py` |
-| `stockiq-option-2-trading-signals` | Trading signals (Option 2) |
-| `stockiq-option-2-2-auto-signals` | Auto trading signals |
+| `stockiq-option-2-trading-signals` | "Enter Symbols for Live Signals" (Option 2): a short-term technical reading (RSI, MACD, Bollinger bands) for up to 10 symbols, with its reasons, currency and the 20-day high and low. Runs `signals/lambda_function.py` from git (one file for both signals functions; `site-overview.md` 8b "Trading signals and the presets"). 512 MB. Tests: `signals/test_signals.py` |
+| `stockiq-option-2-2-auto-signals` | "Auto-detect Top 5 Signals": the same file; scans the screener's S&P 100 list (`signals/sp100.txt`) and returns the five strongest readings in either direction. 1024 MB (33 s at 128 MB, 5 s now) |
 | `stockiq-option-3-1-us-screener` | US stock screener coordinator (Option 3) |
 | `stockiq-option-3-dynamic-coordinator` | Dynamic screener coordinator |
 | `stockiq-option-3-1-sp100` | S&P 100 screener |
