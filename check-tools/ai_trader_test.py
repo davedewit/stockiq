@@ -641,7 +641,7 @@ check('calmer buys did better: a lower RSI limit', [i for i in ideas if i['param
 check('an even record: nothing is suggested', m.propose([TR(1.0), TR(-1.0)] * 12, base_rules) == [])
 check('a change that was dropped lately is not tried again straight away', m.propose([TR(1.0, peak=10.0)] * 12 + [TR(-2.0, peak=0.5)] * 12, base_rules, [{'param': 'take', 'direction': 'down', 'verdict': 'dropped'}]) == [] or m.propose([TR(1.0, peak=10.0)] * 12 + [TR(-2.0, peak=0.5)] * 12, base_rules, [{'param': 'take', 'direction': 'down', 'verdict': 'dropped'}])[0]['param'] != 'take')
 check('its own changes stay inside fixed bounds', m.rules_for({'risk': 3}, {'tune': {'values': {'3': {'stop': -99, 'take': 500, 'top': 1, 'trail': 0.01, 'positions': 1, 'crypto': 1}}}}) == dict(m.RISK[3], stop=-30.0, take=80.0, top=3, trail=0.2))
-check('a test run never sends a real email', m.send_mail('nobody@example.com', 'x', ['y']) is False)
+check('a test run never sends a real email (and says "not attempted", which is not a failure)', m.send_mail('nobody@example.com', 'x', ['y']) is None)
 
 D.t.clear(); PRICES.clear(); MAILS.clear(); SNAP['3-100'] = rows(n=200)
 rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=1, screeners=['3-100']); rec['state'].update(startedAt=m.iso(t0), closedCount=20)
@@ -662,7 +662,7 @@ def finish(rec, with_pcts, without_pcts):
 import copy as _c
 good = _c.deepcopy(rec); good['history'] = [t for t in good['history'] if not t.get('x')]; finish(good, [3.0, 4.0, 3.5, 2.5, 3.0, 4.0, 3.5, 2.5, 3.0, 3.0], [0.5, -0.5, 0.0, 1.0, 0.0, -1.0, 0.5, 0.0, 0.5, -0.5]); MAILS.clear()
 notes = m.review_tuning(good, t0 + dt.timedelta(days=9), lambda subject, lines: MAILS.append((subject, lines)))
-check('clearly better with the change: it is kept, and the email says so with the numbers', good['state']['tune']['trial'] is None and m.rules_for(good['settings'], good['state'])['take'] == 9.0 and good['state']['tune']['past'][-1]['verdict'] == 'kept' and 'The change is kept: 10 trades with the change averaged +3.20%, 10 without it +0.05% (difference +3.15' in notes[0]['text'] and 'change kept' in MAILS[0][0] and any(l.startswith('Sells at -10% or +9%') for l in MAILS[0][1]), (notes, MAILS[:1]))
+check('clearly better with the change: it is kept, and the email says so with the numbers', good['state']['tune']['trial'] is None and m.rules_for(good['settings'], good['state'])['take'] == 9.0 and good['state']['tune']['past'][-1]['verdict'] == 'kept' and 'The change is kept: 10 trades with the change averaged +3.20%, 10 without it +0.05% (difference +3.15' in notes[0]['text'] and 'change kept' in MAILS[0][0] and any(l.startswith('Sells a holding if it falls to -10% or reaches +9%, or when its ') and 'A holding that keeps rising is kept' in l and 'slips back far enough' not in l for l in MAILS[0][1]), (notes, MAILS[:1]))
 check('the dashboard marks the rule as changed by itself', m.public(good, t0)['rules']['changed'] == {'take': 18} and m.public(good, t0)['tune']['past'][-1]['text'] == 'sell at +9% instead of "sell at +18%"')
 flat = _c.deepcopy(rec); flat['history'] = [t for t in flat['history'] if not t.get('x')]; finish(flat, [3.0, -4.0, 3.5, -2.5, 3.0, -4.0, 3.5, -2.5, 1.0, 0.0], [0.5, -0.5, 0.0, 1.0, 0.0, -1.0, 0.5, 0.0, 0.5, -0.5]); MAILS.clear()
 notes = m.review_tuning(flat, t0 + dt.timedelta(days=9), lambda subject, lines: MAILS.append((subject, lines)))
@@ -692,4 +692,68 @@ rec2 = m.load_item('stranger@y.com'); rec2['settings']['enabled'] = True; D.Tabl
 r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body'])
 check('the schedule runs the due user and skips one not on the list', len(r['ran']) == 1 and r['ran'][0]['bought'] >= 1 and 'stranger@y.com' not in D.Table(m.PORTFOLIO_TABLE).rows, r)
 check('"check in now" has a 10-minute gap', call(action='run', userId=U)[0] == 429)
+
+# --- what happens next, what needs the user, and the email's status (for the dashboard's countdowns)
+D.t.clear(); PRICES.clear(); MODEL['answer'] = None; SNAP['3-100'] = rows(); SNAP['7-1'] = rows('crypto', '7-1'); MAILS.clear()
+sun = dt.datetime(2026, 10, 11, 2, 52, 0)                                                             # a Sunday: only coins trade
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=2, everyHours=6, maxHoldDays=5, screeners=['3-100', '7-1']); rec['state']['startedAt'] = m.iso(sun - dt.timedelta(hours=1)); m.save_item(U, rec)
+m.datetime = at(sun); code_, b = call(action='run', userId=U); m.datetime = clock
+check('(set-up) a Sunday check-in buys a coin and no share', b['summary']['bought'] == 1 and [h['symbol'][-4:] for h in portfolio()['holdings']] == ['-USD'], b.get('summary'))
+later = sun + dt.timedelta(minutes=20); out = m.public(m.load_item(U), later, U); come = out['coming']; by = {c['kind']: c for c in come}
+check('the dashboard is told what happens next, soonest first, then what goes by the number of trades', [c['kind'] for c in come] == ['release', 'check', 'open', 'sell', 'review', 'notes'] and [c.get('at') for c in come[:4]] == sorted(c.get('at') for c in come[:4]) and all('at' not in c for c in come[4:]), [(c['kind'], c.get('at')) for c in come])
+check('the next check-in: when, in which market, what it looks at and what it may buy', by['check']['at'] == '2026-10-11T09:10:00Z' == out['nextCheck']['at'] and by['check']['text'].startswith('Next check-in (coin market). It looks at the holding it has there (C0') and 'and sells it if it has hit its loss limit, gain mark, stop or time limit, or if the AI review wants it out.' in by['check']['text'] and 'It may buy up to 1 holding of about $1,000 from Crypto (top coins)' in by['check']['text'], by['check'])
+check('when more of the budget is released, with the amounts', by['release']['at'] == '2026-10-11T07:52:00Z' and 'More of the budget is released: $2,000 of the $8,000 may be invested from then ($1,000 until then; $1,000 is invested now).' in by['release']['text'], by['release'])
+check('the first check-in after the share market opens, and what it can buy from there', by['open']['at'] == '2026-10-12T14:40:00Z' and by['open']['text'] == 'First check-in after the US market opens. It can buy from S&P 100 if part of the budget is free then.', by['open'])
+check('the latest each holding is kept', by['sell']['at'] == out['plans'][0]['sellBy'] and by['sell']['text'].endswith('is sold at the latest: its 5 days are up then.'), by['sell'])
+check('its own review goes by finished trades: how many more, and that it emails', by['review']['after'] == 20 and 'It reviews its own rules (0 of the 20 finished trades it waits for are in), may start a trial of one change beside the current rule, and emails you.' == by['review']['text'] and by['notes']['after'] == 5, come[4:])
+check('the amount the forecast names is what the check-in then may spend', m.allowance(portfolio(), m.load_item(U)['settings'], m.load_item(U)['state'], dt.datetime(2026, 10, 11, 9, 10))[0] == 1000.0 and m.released(m.load_item(U)['settings'], m.load_item(U)['state'], later) == (1000.0, dt.datetime(2026, 10, 11, 7, 52)))
+check('nothing needs the user, and no email has been tried yet', out['needs'] == [] and out['mail'] is None)
+rec = m.load_item(U); rec['settings'].update(selfTune=False, emails=False); texts = [c['text'] for c in m.coming(rec, portfolio(), later, out['plans'])]
+check('with its own trials switched off it says so instead of counting down to a review', any('It does not review or change its own rules' in x for x in texts) and not any('emails you' in x for x in texts))
+rec = m.load_item(U); rec['settings'].update(screeners=['7-1'], risk=3); rec['settings']['budgetUsd'] = 1000.0
+full = {c['kind']: c for c in m.coming(rec, portfolio(), later, out['plans'])}
+check('a full budget: the next check-in says it buys nothing', 'It buys nothing: the $1,000 budget is fully invested.' in full['check']['text'], full['check'])
+rec = m.load_item(U); pf = dict(portfolio(), holdings=portfolio()['holdings'] + [dict(portfolio()['holdings'][0], id='c2', symbol='C05-USD', label='C05-USD')])
+check('coins at the level\'s share while shares are ticked too: it says no more coins and why', 'It buys no more coins: $2,000 is in coins and the Balanced level allows $2,000 while share screeners are ticked too.' in {c['kind']: c for c in m.coming(m.load_item(U), pf, later, out['plans'])}['check']['text'], [c['text'] for c in m.coming(m.load_item(U), pf, later, out['plans'])][:2])
+rec = m.load_item(U); rec['settings']['enabled'] = False
+check('switched off: nothing is coming, and it says its holding stays until sold or switched back on', m.coming(rec, portfolio(), later) == [] and [n['kind'] for n in m.needs(rec, portfolio(), later)] == ['off'] and 'still holds 1 holding: it stays until you sell it or switch it back on' in m.needs(rec, portfolio(), later)[0]['text'])
+rec = m.load_item(U); rec['settings']['screeners'] = []
+check('on with no screener: that needs the user', [n['kind'] for n in m.needs(rec, portfolio(), later)] == ['noscreener'])
+rec = m.load_item(U); rec['state']['rest'] = {'3-100': m.iso(later + dt.timedelta(days=9)), '7-1': m.iso(later + dt.timedelta(days=3))}
+check('every ticked screener resting: that needs the user, and the list says when each is tried again', [n['kind'] for n in m.needs(rec, portfolio(), later)] == ['resting'] and [c['text'] for c in m.coming(rec, portfolio(), later, out['plans']) if c['kind'] == 'rest'] == ['The Crypto (top coins) screener is tried again after its rest.', 'The S&P 100 screener is tried again after its rest.'])
+check('too little practice cash for one more holding: that needs the user', [n['kind'] for n in m.needs(m.load_item(U), dict(portfolio(), cash=500.0), later)] == ['cash'] and 'It buys nothing: the practice cash ($500) is less than one holding ($1,000).' in {c['kind']: c for c in m.coming(m.load_item(U), dict(portfolio(), cash=500.0), later, out['plans'])}['check']['text'])
+# a check-in that should have happened and has not
+rec = m.load_item(U); due_at = dt.datetime(2026, 10, 11, 9, 10)
+check('a check-in is not "missed" before it is due, nor a few minutes after', m.missed_check(rec, due_at - dt.timedelta(minutes=30)) is None and m.missed_check(rec, due_at + dt.timedelta(minutes=20)) is None)
+check('two scheduled check-ins in a row not happening is noticed, and needs the user', m.missed_check(rec, due_at + dt.timedelta(minutes=37)) == due_at and [n['kind'] for n in m.needs(rec, portfolio(), due_at + dt.timedelta(minutes=37))] == ['missed'] and m.needs(rec, portfolio(), due_at + dt.timedelta(minutes=37))[0]['at'] == '2026-10-11T09:10:00Z')
+rec['state']['savedAt'] = m.iso(due_at + dt.timedelta(minutes=10))
+check('but not when the settings were changed since (the timetable changed with them)', m.missed_check(rec, due_at + dt.timedelta(minutes=37)) is None)
+m.datetime = at(sun + dt.timedelta(minutes=30)); code_, b = call(action='save', userId=U, settings=dict(m.load_item(U)['settings'], budgetUsd=9000.0)); m.datetime = clock
+check('saving a changed setting notes when; saving the same again does not', m.load_item(U)['state']['savedAt'] == m.iso(sun + dt.timedelta(minutes=30)))
+m.datetime = at(sun + dt.timedelta(minutes=40)); code_, b = call(action='save', userId=U, settings=m.load_item(U)['settings']); m.datetime = clock
+check('(the same settings saved again leave that time alone)', m.load_item(U)['state']['savedAt'] == m.iso(sun + dt.timedelta(minutes=30)))
+# a scheduled check-in that stops on an error leaves a trace, and the next good one clears it
+real_run = m.run_user; rec = m.load_item(U); rec['state']['lastRunBy'] = {}; rec['state']['lastRun'] = None; m.save_item(U, rec)
+def broken(*a, **k): raise KeyError('boom')
+m.run_user = broken; m.datetime = at(sun + dt.timedelta(hours=8)); m.lambda_handler({'source': 'aws.events'}, None); m.run_user = real_run
+rec = m.load_item(U); note = m.needs(rec, portfolio(), sun + dt.timedelta(hours=8, minutes=5))
+check('a scheduled check-in that stops on an error is shown as needing a look', rec['state']['fail'] == {'t': m.iso(sun + dt.timedelta(hours=8)), 'what': 'KeyError'} and [n['kind'] for n in note] == ['fail'] and 'stopped on an error (KeyError)' in note[0]['text'], note)
+m.lambda_handler({'source': 'aws.events'}, None); m.datetime = clock
+check('and the next check-in that goes through clears it', 'fail' not in m.load_item(U)['state'] and m.load_item(U)['state']['lastRun'] == m.iso(sun + dt.timedelta(hours=8)))
+# the email's status and the dashboard's "send me a test email"
+sent_mail = []; real_send = m.send_mail
+m.datetime = at(sun + dt.timedelta(hours=9)); code_, b = call(action='mailtest', userId=U)
+check('a test email outside the function sends nothing and records nothing', code_ == 200 and b['summary'] == {'sent': False} and b['mail'] is None)
+m.send_mail = lambda to, subject, lines: (sent_mail.append((to, subject, lines)), True)[1]
+code_, b = call(action='mailtest', userId=U)
+check('"send me a test email": one email to the account\'s own address, with the record and what it is for', code_ == 200 and b['summary'] == {'sent': True} and len(sent_mail) == 1 and sent_mail[0][0] == U and sent_mail[0][1] == 'StockIQ autopilot (fake money): review emails are set up' and any('Nothing needs doing when such an email arrives' in l for l in sent_mail[0][2]) and any(l == 'THE RECORD SO FAR (fake money)' for l in sent_mail[0][2]) and any('A holding that keeps rising is kept' in l for l in sent_mail[0][2]), sent_mail[:1])
+check('the dashboard is told the last email was sent, when and which', b['mail'] == {'t': m.iso(sun + dt.timedelta(hours=9)), 'ok': True, 'subject': 'StockIQ autopilot (fake money): review emails are set up', 'why': None} and b['needs'] == [], b.get('mail'))
+check('a second test email within 10 minutes is refused', call(action='mailtest', userId=U)[0] == 429 and len(sent_mail) == 1)
+def refuse(to, subject, lines): m.MAIL_ERROR['why'] = 'MessageRejected'; return False
+m.send_mail = refuse; m.datetime = at(sun + dt.timedelta(hours=10)); code_, b = call(action='mailtest', userId=U); m.datetime = clock
+check('an email the mail service refuses is shown as needing the user, with the reason', b['summary'] == {'sent': False} and b['mail']['ok'] is False and b['mail']['why'] == 'MessageRejected' and [n['kind'] for n in b['needs']] == ['mail'] and 'could not be sent (MessageRejected)' in b['needs'][0]['text'], (b.get('mail'), b.get('needs')))
+rec = m.load_item(U); rec['settings']['emails'] = False
+check('with its emails switched off a failed email is not held against it', m.needs(rec, portfolio(), sun + dt.timedelta(hours=10)) == [])
+check('a stranger cannot have a test email sent', call(action='mailtest', userId='stranger@y.com') == (200, {'success': True, 'allowed': False}))
+m.send_mail = real_send
 print('ALL PASS' if ok else 'SOME FAILED')
