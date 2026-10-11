@@ -143,8 +143,10 @@ saying `all`).
 
 ## Step 3: the coordinator
 
-File: `lambda-sync/stockiq-screener-coordinator/lambda_function.py` (this Lambda's code is not in git: before editing,
-download the live code and compare it with the mirror; keep the live zip in `~/VSCODE/backup/` as the way back).
+File: `lambda-sync/stockiq-screener-coordinator/lambda_function.py` (this Lambda's code is not in git, and **the daily
+backup does not include Lambda code**: before editing, download the live code and compare it with the mirror, and keep
+the live zip in `~/VSCODE/backup/` as the way back. A full copy of every function as of 11 Oct 2026 is in
+`~/VSCODE/backup/lambda_full_20261011_before_one_worker_code/`, with a README).
 
 - `WORKER_URLS['5-dax40'] = [ the four addresses from urls.txt, in order ]`
 - `STOCK_UNIVERSES['5-dax40'] = [ ... ]`, the same list as on the page

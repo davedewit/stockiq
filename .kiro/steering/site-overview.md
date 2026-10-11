@@ -57,6 +57,15 @@ Lambdas ──> Yahoo Finance + Finnhub (data), OpenAI gpt-4o-mini (AI chat), Dy
   `rsync -a ~/VSCODE/backup/website_backup_<time>/stocks/ ~/VSCODE/website/stocks/`,
   then deploy (dry run first).
 - The live site is simply whatever the last deploy uploaded; restore locally, then redeploy.
+- **The daily backup does not include Lambda code.** Both copies are made with `--exclude='lambda-sync'` (`deploy-to-s3.sh`),
+  and `lambda-sync/` is not in git either, so a Lambda's old code exists only where someone kept it:
+  - **`~/VSCODE/backup/lambda_full_20261011_before_one_worker_code/`**: every one of the 984 functions as it was live at
+    12:20 UTC on 11 Oct 2026, before the share-screener workers were moved to one code base (`functions.tsv` names each
+    function's zip and fingerprint, `packages/` holds the 385 distinct zips, `README.txt` has the restore command). Its
+    name has no `_backup_` in it on purpose: the deploy deletes `*_backup_*` folders after 30 days.
+  - `~/VSCODE/backup/workers_before_onecode_20261011/`: the same day's old package of each of the 669 share-screener workers.
+  - the single zips kept before each Lambda change (`<function>_before_<name>_<date>.zip`, listed in section 8c).
+  - The share-screener workers' code is the exception: it is in git (`stockiq/workers/`), and so in the daily backup too.
 
 ## 4. Generated vs hand-edited (most important rule)
 
@@ -1961,7 +1970,8 @@ more finished trades than there are, and would chase noise before then.
   Oct the owner approved deploys as each fix was ready; a few hand-edited files can go up with
   `aws s3 cp` plus a CloudFront invalidation of just those paths, which avoids a full pipeline run.)
 - No extra backups before changes: the daily backups in `~/VSCODE/backup/` (30 days, both
-  folders incl. `stocks/`) plus GitHub are enough. The one exception is the Lambda rollback zip.
+  folders incl. `stocks/`) plus GitHub are enough. The one exception is the Lambda rollback zip:
+  **the daily backup leaves Lambda code out** (section 3), so the zip kept before a change is the only way back.
 - Change generators and templates, not generated pages (section 4). Any script that writes into
   stock pages must anchor on the section markers, never on other template HTML.
 - **Describe, don't advise** (owner's instruction; StockIQ holds no financial services licence).
