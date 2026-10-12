@@ -336,6 +336,24 @@ line by line. What was wrong, and what it does now:
   the visitor's zone, in that script's own format (`local_news_date`), from the `timezone_offset` the analysis page and
   the dashboard already send; with no offset it stays as the page has it. "Analysis Generated" names its zone
   (`zone_label`: "(GMT+7)"; with no offset the report's time is five hours behind UTC, as before, and now says so).
+- **It reports on a coin too (12 Oct 2026), and the "single coin" button uses it.** The button had a function of its
+  own, `stockiq-option-7-2-worker-1`: a third copy of the old crypto worker (1,133 lines) with its own scoring and its
+  own RSI (45 for Bitcoin where this report says 53). Tried on Bitcoin, the report function already worked. Now a
+  request with `"asset": "crypto"` names coins by their symbols (`{"symbols": ["SUI"], "asset": "crypto"}`): each is
+  priced by the crypto screener's ticker for it (`coin_ticker`, `COIN_TICKERS`: SUI is `SUI20947-USD`; **the same
+  pairs as `COINS` in the orchestrator and `CRYPTO_TICKER_MAP` on the page: keep the three in step**, `report_test.py`
+  compares this one with the orchestrator's). A coin's report (`_report_ctx['coin']`; also for a ticker like `BTC-USD`
+  typed as a stock) is headed "🔍 SINGLE COIN ANALYSIS: SUI", says which ticker it was priced by and warns for the
+  27 symbols known to be another coin there (`COIN_WRONG_MATCH`), says "since 00:00 UTC" for the day's change (a
+  coin's day runs from midnight UTC), measures volume on the last full day, and leaves out what belongs to a company
+  or the stock market: company figures, dividends, the VIX, the stock page's news (none of them is even asked for:
+  one request to the price source, then the chart). Its score is the technical part of the 0-100 score. A background
+  run is saved as "`<SYMBOL>` Coin Analysis" with `analysisType` `crypto_single`, which is how the dashboard knows a
+  single-coin entry. **A share's report is the same character for character** (the tests compare ten sample shares
+  with the code that was live). Page: `runAnalysis(72, 'single')` and `formatSingleCoinResult` in
+  `analysis-functions.js`; dashboard: the `crypto_single` branch of "Run in Background". **`stockiq-option-7-2-worker-1`
+  is now called by nothing**; it is left in place and can be deleted with the other unused functions.
+  Not checked: the dashboard's background run and the saved entry for a real signed-in account.
 - **The chart** (`draw_chart`) is drawn from the very prices the report scored, sent to it by the report with its
   support and resistance (`series`, `currency`, `support`, `resistance` in the request), so picture and text cannot
   differ; asked by itself it fetches its own with the same rules. Averages and RSI start when they have their days (they
@@ -351,17 +369,17 @@ line by line. What was wrong, and what it does now:
   What changed is kept as the scripts that made the change: `check-tools/report/changes-2026-10-11/` (run in order
   against the copies in the rollback zips they rebuild the live code exactly). Tests:
   `python3 check-tools/report/report_test.py <the file from ~/VSCODE/backup/stockiq-option-1-1-custom-analysis_before_report_20261011.zip> lambda-sync/stockiq-option-1-1-custom-analysis/lambda_function2.py`
-  (88 checks: the old code and the new on the same saved prices, `--show SYMBOL` prints a whole report) and
+  (103 checks: the old code and the new on the same saved prices, `--show SYMBOL` prints a whole report) and
   `python3 check-tools/report/chart_test.py lambda-sync/stockiq-chart-generator/lambda_function_simple.py lambda-sync/stockiq-option-1-1-custom-analysis/lambda_function2.py`
   (29 checks). A live report without saving anything: POST `{"symbols":["BHP.AX"],"userId":"nobody-deploy-check@example.com","skipHistorySave":true}`
   to the function's address (with no `userId` it is treated as a background run and **saved**).
-- **Live** (13:34 UTC, 11 Oct 2026): `stockiq-option-1-1-custom-analysis` `E906kJUM9eqAkd/JMlFFrIXjOsRXKKk6KDe8ib/h5t0=`,
+- **Live** (03:16 UTC, 12 Oct 2026): `stockiq-option-1-1-custom-analysis` `I84SxSgLYNt7z4XcxPEOaFvZtYJhOT6qALoTeuZtXuo=`,
   `stockiq-chart-generator` `OIDrZ2W9G3lJ2sKarnoT4c7RvoLh1ApDX43NWjR72z4=`, both equal to their mirrors. Checked with
   the live report for AAPL, BHP.AX, IMB.L, 7203.T, SHOP.TO and SPY, through the page's own code (`page_run.js 1 custom`),
   and by looking at the live chart at desktop and phone width on light and dark. **Not checked:** the analysis page
   itself in a browser, a real phone, the dashboard's "Run in Background" for a single stock.
   Rollback zips, in order: `~/VSCODE/backup/stockiq-chart-generator_before_report_20261011.zip`,
-  `stockiq-option-1-1-custom-analysis_before_report_…`, `…_before_figures_…`, `…_before_source_…`, `…_before_newstime_…`.
+  `stockiq-option-1-1-custom-analysis_before_report_…`, `…_before_figures_…`, `…_before_source_…`, `…_before_newstime_…`, `…_before_coin_20261012.zip`.
 - **Left as it is:** the first line still says "(REAL-TIME DATA)", as every screener's does (one wording decision for
   the whole site); MACD still scores +8 or -8 on its sign and RSI in steps at 30 / 40 / 60 / 70; valuation is counted
   twice for a share with a high P/E and a high price-to-book; the Finnhub call is still made for shares it never has;
@@ -875,8 +893,9 @@ whether the top 10 is even in the right order (the 11th coin had the same score 
   10 since" started again for the newcomers, and **rows of the entry log from before that time were ranked without MACD**:
   do not mix the two when the track record is measured. The autopilot buys coins by this ranking, so the same goes for
   its coin trades before and after.
-- **Not touched:** `stockiq-option-7-2-worker-1` (single-coin analysis on the page) has other code than the 54; whether its
-  MACD has the same fault was not checked. The rules themselves (what earns points) were not changed.
+- **Single-coin analysis no longer has code of its own** (12 Oct 2026): the page and the dashboard ask the single-stock
+  report function, which reports on a coin (section 7, "The single-stock report", "It reports on a coin too").
+  `stockiq-option-7-2-worker-1` is unused. The screener's rules themselves (what earns points) were not changed.
 - **The worker's code reviewed (11 Oct 2026, evening; the owner: "i built it with an old AI version, its been a long time
   since it was reviewed").** Fixed, with no score changed (`check-tools/crypto/worker_test.py`: on the price source's
   recorded answers for ten coins every figure is the same before and after): **one request per coin where there were
@@ -1900,14 +1919,14 @@ left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line ch
 - Lambda `stockiq-ai-chat`: `CodeSha256` `cTz2ks6BStwoDLEIod20m/pzvn59WP2VHo9Hc/RtEV8=`, equal to
   `lambda-sync/stockiq-ai-chat/lambda_function.py` (350 lines).
 - Website (sha256 starts): `practice-autopilot.js?v=38` (`43520270763f`), `practice-portfolio.js?v=18` (`b48ff650293c`),
-  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`bec16da1ef4c`),
+  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`df1c3b9835e4`; `analysis-functions.js` `96dbcb721ec1`),
   `ai-chat.js?v=2` (`87eaadf52197`); 17 more pages carry the bell's loader line; `index.html` and `faq.html` the plan wording.
   Live files were compared byte for byte at each deploy.
 - `deploy-to-s3.sh` carries the rules for how long a browser may keep a copy (section 5, step 8); the first daily run with
   it is Monday 12 Oct: look at its log once (section 12, "After the daily run").
 - The single-stock report and its chart (section 7, "The single-stock report"): `stockiq-option-1-1-custom-analysis`
-  `E906kJUM9eqAkd/JMlFFrIXjOsRXKKk6KDe8ib/h5t0=`, `stockiq-chart-generator` `OIDrZ2W9G3lJ2sKarnoT4c7RvoLh1ApDX43NWjR72z4=`,
-  both equal to their mirrors; `stock_metrics.py` sha256 starts `5c034782379b`; tests 88 report, 29 chart.
+  `I84SxSgLYNt7z4XcxPEOaFvZtYJhOT6qALoTeuZtXuo=`, `stockiq-chart-generator` `OIDrZ2W9G3lJ2sKarnoT4c7RvoLh1ApDX43NWjR72z4=`,
+  both equal to their mirrors; `stock_metrics.py` sha256 starts `5c034782379b`; tests 103 report, 29 chart.
 - Crypto: the 54 `stockiq-option-7-1-worker-N` all `NmXC9dcsA6p5tXJl+u6VZIfdsrvM3ERN/DmMSQ9zalI=`, the orchestrator
   `Tyyx+Pb2l+sy7avfCncwduEtmFtYn6Lws+5g6dj9Kc0=`, both equal to their mirrors (MACD fix of 11 Oct, section 8b).
 - Share-screener workers: all 669 show `CodeSha256` `q9ZX/UvTBcszKxRPR9lvJw9UpyfWrB5sOB3pDWccm6c=` (`workers/live.txt`), built from `workers/` in git.
@@ -2756,4 +2775,14 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     removed; no score changed (proved on recorded answers). Four things found that would change scores were written
     down and left for the owner: the ranking's dependence on the time of day, the RSI method, the score's design and
     leftover advice wording in strings nobody sees.
+
+- **12 Oct 2026** (the same session, continued after a pause):
+  - **Single-coin analysis through the single-stock report function** (section 7, "It reports on a coin too"): the owner
+    asked whether a coin's analysis should use the function built for shares. Tried live on Bitcoin, it did the job
+    better than the button's own function (a third copy of the old crypto worker): a chart, an explained 0-100 score,
+    the site's one RSI. The report function got a coin form; the page's button and the dashboard's background run
+    use it; a share's report is unchanged to the character. For the 30-minute screener the answer was no: the share
+    screener's score has three factors that mean nothing for a coin, and neither score is proven.
+    **Lesson: a test that replays recorded prices must also set the clock to the recording** (a coin check passed on
+    the day of the recording and failed the next morning).
 

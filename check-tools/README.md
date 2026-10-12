@@ -220,7 +220,7 @@ Lambdas `stockiq-option-1-1-custom-analysis` and `stockiq-chart-generator` (`sit
 report and its chart"). Nothing live is called: prices come from `workers/data/sample.json`.
 
 ```bash
-# the report: the code from before 11 Oct 2026 against the code now, on the same saved prices (88 checks)
+# the report: the code from before 11 Oct 2026 against the code now, on the same saved prices (103 checks, a coin's report among them)
 unzip -o -q ~/VSCODE/backup/stockiq-option-1-1-custom-analysis_before_report_20261011.zip -d /tmp/report-before
 python3 check-tools/report/report_test.py /tmp/report-before/lambda_function2.py lambda-sync/stockiq-option-1-1-custom-analysis/lambda_function2.py
 #   add  --show BHP.AX  to print a whole report (BHP.AX CBA.AX IMB.L AZN.L 7203.T CRWD KHC CSX MSTR ASML)
