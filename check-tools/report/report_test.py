@@ -30,7 +30,9 @@ CACHE = {'BHP.AX': {'pe_ratio': 12.4, 'revenue_growth': -0.02, 'profit_margin': 
          'KHC': {'pe_ratio': 13.0, 'revenue_growth': -0.03, 'profit_margin': 0.11, 'debt_to_equity': 41.0, 'current_ratio': 1.1, 'return_on_equity': 0.056, 'price_to_book': 0.8},
          'ETFX': {'pe_ratio': 27.0, 'price_to_book': 4.0}}
 PUBLISHED = {'made': '2026-10-11', 'figures': {s: dict(publisher.to_score_units(e), as_of='2026-10-05') for s, e in CACHE.items()}}
-state = {'figures': 'ok', 'figure_reads': 0, 'chart_payloads': [], 'emptied': set(), 'charts': {}}
+state = {'figures': 'ok', 'figure_reads': 0, 'chart_payloads': [], 'emptied': set(), 'charts': {}, 'urls': [], 'saved': []}
+# the price source's recorded answers for ten coins (90 days each, 11 Oct 2026)
+COINS_REC = json.load(open(os.path.join(ROOT, 'check-tools', 'crypto', 'recorded.txt')))['answers']
 
 def chart_for(symbol):
     c = state['charts'].get(symbol) or SAMPLE.get(symbol)
@@ -50,8 +52,13 @@ class Answer:
 
 def fake_urlopen(req, timeout=None):
     url = req.full_url if hasattr(req, 'full_url') else req
+    state['urls'].append(url)
     if '/v8/finance/chart/' in url:
         symbol = urllib.parse.unquote(url.split('/chart/')[1].split('?')[0])
+        if symbol.endswith('-USD'):
+            answer = COINS_REC.get(symbol[:-4] + ':90')
+            if not answer or 'chart' not in answer: raise urllib.error.HTTPError(url, 404, 'Not Found', None, None)
+            return Answer(answer)
         if 'VIX' in symbol: return Answer({'chart': {'result': [{'meta': {'regularMarketPrice': 14.84}, 'timestamp': [1], 'indicators': {'quote': [{'close': [14.84]}]}}]}})
         c = chart_for(symbol)
         if c and 'events=div' in url:
@@ -207,6 +214,43 @@ check('UTC itself', news_line(run(new, 'CRWD', 0)) == 'Thu, October 8, 2026 at 1
 check('no zone sent: the time as the page has it', news_line(run(new, 'CRWD')) == 'Thu, October 8, 2026 at 1:31 PM UTC 4 min read', news_line(run(new, 'CRWD')))
 check('a zone that cannot be: the time as the page has it', new.local_news_date({'date': 'x UTC', 'timestamp': '2026-10-08T13:31:00+00:00'}, 99) == 'x UTC' and new.local_news_date({'date': 'x UTC', 'timestamp': 'rubbish'}, 7) == 'x UTC')
 check('the report\'s own time names its zone', made_line(run(new, 'CRWD', 7)).endswith('(GMT+7)') and made_line(run(new, 'CRWD')).endswith('(GMT-5)') and made_line(run(new, 'CRWD', -3.5)).endswith('(GMT-3:30)'), (made_line(run(new, 'CRWD', 7)), made_line(run(new, 'CRWD'))))
+
+print('== a coin (the single-coin button)')
+class Saved:
+    def put_item(self, Item=None, **k): state['saved'].append(Item)
+def ask(mod, body):
+    mod._api_cache.clear(); state['urls'].clear()
+    with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+        r = mod.lambda_handler({'body': json.dumps(body)}, None)
+    return json.loads(r['body'])
+out = ask(new, {'symbols': ['sui'], 'asset': 'crypto', 'userId': 'someone', 'skipHistorySave': True, 'timezone_offset': 7})
+c = out['results'][0]; t = text(c); urls = list(state['urls'])
+check('a coin named by its symbol is priced by the screener\'s ticker for it', c['symbol'] == 'SUI20947-USD' and c['label'] == 'SUI' and c['asset'] == 'crypto' and any('SUI20947-USD' in u for u in urls), (c.get('symbol'), c.get('label')))
+check('the report is headed as a coin\'s and shows the familiar symbol', '🔍 SINGLE COIN ANALYSIS: SUI' in t and 'Symbol: SUI - Sui' in t and 'CUSTOM STOCK ANALYSIS' not in t, [l for l in t.split('\n') if 'Symbol:' in l or 'ANALYSIS' in l][:3])
+check('it says what it was priced as, and "since 00:00 UTC" for the day\'s change', 'Priced as SUI20947-USD on Yahoo Finance' in t and 'since 00:00 UTC)' in t and '% today)' not in t)
+check('nothing that belongs to a company or the stock market', not any(w in t for w in ('FUNDAMENTAL ANALYSIS', 'FINANCIAL HEALTH', 'DIVIDEND', 'VIX', 'MARKET CONTEXT', 'this share', 'Company figures', 'Dividends:', 'P/E')), [l for l in t.split('\n') if any(w in l for w in ('FUNDAMENTAL', 'DIVIDEND', 'VIX', 'share', 'Company figures', 'P/E'))][:4])
+check('the sections of a report that do belong are all there', all(w in t for w in ('STOCKIQ SCORE', 'SCORE BREAKDOWN', 'HOW THE SCORE IS BUILT', 'DETAILED TECHNICAL ANALYSIS', 'RISK ASSESSMENT', 'KEY LEVELS', 'DISCLAIMER', 'A coin has no company figures', 'Coins trade around the clock')))
+check('the score is 50 plus its breakdown', c['investment_score'] == max(0, min(100, 50 + sum(points(c)))), (c['investment_score'], c['score_breakdown']))
+check('only the price source is asked: no company figures, no dividends, no news page, no VIX', all('/v8/finance/chart/SUI20947-USD' in u and 'events=div' not in u for u in urls) and len(urls) == 1, urls)
+check('the chart is titled with the familiar symbol and drawn from the report\'s own prices', state['chart_payloads'][-1]['symbol'] == 'SUI' and len(state['chart_payloads'][-1]['series']['c']) >= 50, state['chart_payloads'][-1].get('symbol'))
+out = ask(new, {'symbols': ['BTC', 'ETH-USD', 'NOSUCHCOIN'], 'asset': 'crypto', 'userId': 'someone', 'skipHistorySave': True})
+check('several coins in one request; one the price source does not know is left out', [x['label'] for x in out['results']] == ['BTC', 'ETH'] and 'Bitcoin' in text(out['results'][0]), [x.get('label') for x in out.get('results', [])])
+out = ask(new, {'symbols': ['BTC-USD'], 'userId': 'someone', 'skipHistorySave': True})
+check('a coin\'s ticker typed as a stock is still reported as a coin', out['results'][0]['asset'] == 'crypto' and 'SINGLE COIN ANALYSIS: BTC' in text(out['results'][0]))
+new.COIN_WRONG_MATCH.add('CKB'); w = ask(new, {'symbols': ['CKB'], 'asset': 'crypto', 'userId': 'x', 'skipHistorySave': True}); new.COIN_WRONG_MATCH.discard('CKB')
+check('a symbol known to be another coin at the price source carries the warning', 'lists a different coin under this symbol' in text(w['results'][0]) and 'lists a different coin' not in t)
+new.history_table = Saved(); state['saved'].clear()
+ask(new, {'symbols': ['SUI'], 'asset': 'crypto', 'userId': 'someone', 'isBackgroundTask': True}); ask(new, {'symbols': ['CRWD'], 'userId': 'someone', 'isBackgroundTask': True}); new.history_table = None
+check('a background run of a coin is saved as the dashboard knows a single-coin entry', len(state['saved']) == 2 and state['saved'][0]['symbol'] == 'SUI' and state['saved'][0]['companyName'] == 'SUI Coin Analysis' and state['saved'][0].get('analysisType') == 'crypto_single', [(s.get('symbol'), s.get('companyName'), s.get('analysisType')) for s in state['saved']])
+check('a background run of a share is saved as before', state['saved'][1]['symbol'] == 'CRWD' and state['saved'][1]['companyName'] == 'Analysis CRWD' and 'analysisType' not in state['saved'][1], state['saved'][1:] and (state['saved'][1].get('companyName'), state['saved'][1].get('analysisType')))
+import ast as _ast
+orch = open(os.path.join(ROOT, 'lambda-sync', 'stockiq-option-7-1-orchestrator', 'orchestrator.py')).read()
+pairs = _ast.literal_eval('[' + re.search(r"COINS = \[(.*?)\n    \]", orch, re.S).group(1) + ']')
+check('the coin tickers are the crypto screener\'s own', new.COIN_TICKERS == {d: tk for d, tk in pairs if d != tk} and new.coin_ticker('sui') == ('SUI', 'SUI20947-USD') and new.coin_ticker('btc-usd') == ('BTC', 'BTC-USD'), len(new.COIN_TICKERS))
+if os.environ.get('LIVE'):
+    live = load('live_report', os.environ['LIVE']); strip = lambda s: re.sub(r'Analysis Generated: [^\n]*', '', s)
+    same = [s for s in ['BHP.AX', 'CBA.AX', 'IMB.L', 'AZN.L', '7203.T', 'CRWD', 'KHC', 'CSX', 'MSTR', 'ASML'] if strip(text(run(live, s, 7))) == strip(text(run(new, s, 7)))]
+    check('a share\'s report is the same, character for character, as the one that is live', len(same) == 10, same)
 
 print('== what the chart function is sent')
 e = run(new, 'ETFX'); p = state['chart_payloads'][-1]
