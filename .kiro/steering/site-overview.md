@@ -1048,6 +1048,12 @@ is hidden. **Keep the Reports panel first in the page**: one report routine find
 with `document.querySelector('h3')`.
 
 **Practice portfolio** (its own tab, container `#practice-portfolio`):
+- **The top is three figures since 13 Oct 2026**: Account value, Today, Since the start (`.pp-top`), then one line (cash, in
+  holdings, ahead of or behind an S&P 500 fund over the same days: `.pp-facts`), then **"The breakdown" folded**
+  (`#pp-more`, kept open across redraws by `moreOpen`), which holds the four cards and the "whose result is whose" row
+  described below, unchanged. The owner, from a picture: "this is honestly confusing… its just too much": about seventeen
+  figures had stood there at once, several of them twice. **When adding a figure to this tab, put it in the breakdown
+  unless it answers "what is it worth, how is today, how is it overall".**
 - Four cards: Account value (the cash plus every holding at its latest price; under it the change
   since the start, split into what has been sold and what is still held), Practice cash left, In
   holdings, and "For comparison" (the same money in an S&P 500 index fund instead; it says "no change
@@ -1240,7 +1246,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=28` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Portfolio section | `website/practice-portfolio.js` (`?v=29` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=45`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
@@ -2300,10 +2306,10 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
-- Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=28` (`9870da2098f0`),
-  `dashboard.html` (`da1ce458d3b9`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
+- Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=29` (`5087c24bb32e`),
+  `dashboard.html` (`ea0a2612c359`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
   `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
-- Tests on the live files: 437 function, 210 panel, 107 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
+- Tests on the live files: 437 function, 210 panel, 108 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
 - Both repos pushed; **no `check-tools/pending-*` folder is left**. `website/` carries the daily job's own three files
@@ -3286,6 +3292,8 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     first changed the autopilot tab's list instead. When he describes a place on the page, find the exact words he
     quotes in the code before changing anything.** The flaky check "buying by quantity" stopped that deploy three
     times before it went through (improvements, item 0b: worth fixing next).
+  - **The top of the Practice portfolio tab made simple** (13 Oct, `practice-portfolio.js?v=29`; 108 portfolio checks; looked
+    at in a headless browser): three figures, one line, the rest folded under "The breakdown".
   - The daily job keeps a dated copy of the company figures once a week (`research-data/company-figures/`; the first is of
     12 Oct 2026): the start of a history to test ideas about company figures on. Scheduling a nightly session was asked
     about and judged not worth it yet ("GO PLAY", section 8c).
