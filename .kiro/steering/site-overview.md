@@ -1487,7 +1487,7 @@ brackets, "stock", "shares", "dividend", "earnings"). Share headlines are not to
 `autopilot_review.py` splits results by them (none found / newest under a day old / one to three days old). Of the
 first 10 buys, 3 had any headline; none of the three share buys outside the US did (Yahoo's feed is asked with a US
 region). What the model gets is headlines only, never an article's text, and it has no internet of its own. One that
-slipped through the junk filter: "Why is Walrus price up 13.5% today?" (a price page; `NEWS_JUNK` could take "price up"). Headlines are untrusted text: both prompts say so, and the model's
+slipped through the junk filter: "Why is Walrus price up 13.5% today?" (a price page). `NEWS_JUNK` takes "price up" / "price is down" since 10:29 UTC that day. Headlines are untrusted text: both prompts say so, and the model's
 answer can only pick from a list or say hold / sell. Small coins usually have none; then it is the
 figures alone. Only the deployed function fetches (`AWS_LAMBDA_FUNCTION_NAME`); a test run never
 calls out.
@@ -2101,7 +2101,7 @@ are titles only, and most candidates have none. **Not known:** how the owner loo
 preview from Kiro): ask early when a change "does not show" (section 9).
 
 **What is live, and how to confirm nothing has moved since** (all compared with the local copies on 12 Oct, 10:17 UTC):
-- `stockiq-ai-trader` `E7OY2fUBG4U4mDaCa/ZM/13sEaFSmBxP5UbQKz+UrPU=` (3,028 lines); `stockiq-ai-chat`
+- `stockiq-ai-trader` `hkZjPYBD4qyKoiiE/gpjLGK6+G7M++rt109e9sz8Sfk=` (3,028 lines; the headline filter's one line went live after the check, 10:29 UTC); `stockiq-ai-chat`
   `f6vB7CzN3cQAt9ZbTUS7+eYrFRsp75L46Xks8kx5rn4=`; `stockiq-screener-coordinator` `pUBd8qCLYGjtVSoYQObSV8YVygyP8mBSfdCxxJ+ho9Y=`;
   `stockiq-option-1-1-custom-analysis` `I84SxSgLYNt7…`; `stockiq-chart-generator` `OIDrZ2W9G3lJ…`; `stockiq-paper-portfolio`
   `s6IR+/80N/3k…`; the two signals functions `6nVDLm4/8G6K…`; the crypto orchestrator `yvmucU37gHJH…` and its 54 workers
@@ -2111,7 +2111,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
 - Website (sha256 starts): `practice-autopilot.js?v=41` (`a63a59e5a2aa`), `practice-portfolio.js?v=21` (`cf6ac94ca9b3`),
   `dashboard.html` (`6e29832d8511`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
   `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
-- Tests on the live files: 424 function, 203 panel, 95 portfolio, 22 bell, 19 chat, 42 signals; the panel-versus-function
+- Tests on the live files: 425 function, 203 panel, 95 portfolio, 22 bell, 19 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
 - Both repos pushed; **no `check-tools/pending-*` folder is left**. `website/` carries the daily job's own three files
@@ -2120,7 +2120,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
   trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell,
   takeover, report`, `stockiq-ai-trader_before_sweep_20261011.zip`, `…_costs_…`; 12 Oct `fresh, due, holdings, journal,
-  notes, heads`. `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `…_{guide, guide2}_20261012.zip`.
+  notes, heads, junk`. `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `…_{guide, guide2}_20261012.zip`.
 
 **Improvements to come: one list. Take an item out when it is done; add ideas as the data suggests them.**
 *Waiting on finished trades (each has its trigger; nothing is adopted from hindsight, a trading idea goes live as a trial):*
@@ -2143,21 +2143,19 @@ preview from Kiro): ask early when a change "does not show" (section 9).
    each needs a tag on the buy and a trial. **A small fitted model** scoring a candidate once the shared record holds
    thousands of trades (no new AWS service). The screener scoring itself is the owner's decision (section 7b).
 *Housekeeping, any session:*
-9. The headline filter lets price pages through ("Why is Walrus price up 13.5% today?"): add "price (is )?(up|down)" to
-   `NEWS_JUNK`. One line in the function, with a check.
-10. **Calls made by open browser tabs** (measured 12 Oct: 55,000 Lambda calls in a day, 13,000 of them the sidebar's
+9. **Calls made by open browser tabs** (measured 12 Oct: 55,000 Lambda calls in a day, 13,000 of them the sidebar's
     ticker, 13,000 the four movers lists, 8,500 the market widgets; the crypto history is 2,600). The money is cents,
     but a tab left open all day is about a million calls a month, the size of the free allowance. `sidebar.js` pauses
     when the tab is hidden; `script.js` (the home page widgets) does not. Slow the polling, or pause it when hidden.
-11. Delete, with the owner's explicit yes (old code of all of them is in `~/VSCODE/backup/lambda_full_20261011_…`): the 204
+10. Delete, with the owner's explicit yes (old code of all of them is in `~/VSCODE/backup/lambda_full_20261011_…`): the 204
     worker functions the site never calls, `stockiq-option-7-2-worker-1`, `stockiq-coinspot-predictions-updater`; and
     the local folder `website/stocks-backup-before-restore/` (118 MB).
-12. Thin the bell script's handling of older copies (any time after 18 Oct 2026; keep "the newer version wins").
-13. The report function holds the Finnhub key in its code: move it to the function's settings so the code can go into git.
-14. The record's size (the review tool warns above 300 KB of the 400 KB a row can hold): drop `path` from finished
+11. Thin the bell script's handling of older copies (any time after 18 Oct 2026; keep "the newer version wins").
+12. The report function holds the Finnhub key in its code: move it to the function's settings so the code can go into git.
+13. The record's size (the review tool warns above 300 KB of the 400 KB a row can hold): drop `path` from finished
     trades kept in `history`, or store the record compressed.
-15. The owner's decisions waiting: the two **public** GitHub repositories and his personal file in one (section 11).
-16. Ideas offered and not built are in the next part ("Ideas offered and not built"); section 11 has the rest of the site.
+14. The owner's decisions waiting: the two **public** GitHub repositories and his personal file in one (section 11).
+15. Ideas offered and not built are in the next part ("Ideas offered and not built"); section 11 has the rest of the site.
 
 **Who can use it, and what guards every account:**
 - **The practice portfolio by hand is free for every signed-in account.** The AI autopilot (Beta) is for accounts on a paid
@@ -2436,7 +2434,7 @@ Needs the owner's decision or more work (nothing here is fixed):
   **Measured again on 12 Oct 2026 (10:00 UTC, the 24 hours before):** 55,430 calls. 13,246 were the sidebar's ticker (`ticker-data-fetcher`), 13,300 the four movers lists (gainers, losers, most active, trending), 8,500 the seven market
   widgets, 2,300 the usage tracker, 2,200 the price proxy: **the pages' own polling while a tab is open**, busiest when the owner had the dashboard open. The crypto workers were 11,500 that day only because the old one-call-per-coin
   design ran until the evening of 11 Oct; they are about 2,600 a day now. A tab left open around the clock is about a million calls a month by itself. Past the free million, calls cost 20 cents a million, so the money is cents; the
-  computing time stayed far inside its allowance (the ticker used about 21,600 seconds that day). To bring it down: "Start here when resuming", improvements, item 10.
+  computing time stayed far inside its allowance (the ticker used about 21,600 seconds that day). To bring it down: "Start here when resuming", improvements, item 9.
 - **Legal.** The business is "StockIQ", online-only, no physical address, **no financial services
   licence**; billing is in USD ($4.99 / $14.99 / $49.99 per month, confirmed on the live Stripe
   prices). The terms, About page, pricing section and FAQ say all of this, and the product
@@ -3021,7 +3019,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     measurement only, asked for by the owner's question whether the news adds anything. 424 function checks. Rollback
     zip `…_before_autopilot_heads_20261012.zip`.
   - **Everything checked at the owner's word before he left it to run ("make sure everything is up to date… nothing is
-    erroring… go in depth")**, 10:17 to 10:45 UTC: seven functions and ten site files equal their local copies; all 13
+    erroring… go in depth")**, 10:17 to 10:30 UTC: seven functions and ten site files equal their local copies; all 13
     share-screener groups on one package; every test suite passes on the live code (424 function, 203 panel, 95
     portfolio, 22 bell, 19 chat, 42 signals, the panel-versus-function comparison, the worker deploy tool's self-test);
     no fault line in 48 hours in the logs of 15 functions and no Lambda error in three days; both schedules enabled.
@@ -3030,5 +3028,6 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     calls come from open browser tabs polling the market widgets (section 11, "What AWS costs"). "Start here when
     resuming" rewritten from the day's state, with **one list of improvements to come**; a reminder for the owner at the
     very top of this file; the stale statements this check met were corrected (script versions, test counts, the
-    single-coin function, fingerprints).
+    single-coin function, fingerprints). Last of the day, off that list: the headline filter drops pages that only
+    explain a price move (function `hkZjPYBD…`, 10:29 UTC, 425 checks; rollback zip `…_before_autopilot_junk_20261012.zip`).
   - Still not checked by a session: the logged-in dashboard itself and a real phone (neither can be opened from here).
