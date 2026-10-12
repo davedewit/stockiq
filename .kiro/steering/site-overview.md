@@ -2227,8 +2227,8 @@ goes first). Every review restocks the queue from what the losses show.
   another $515 down on paper on five holdings ($64,962, bought at the old sizes of 4 and 10 holdings).
 - **Five finished trades, two up, -$1,014.30, all coins:** WEMIX +0.6%, CFX +1.0% (rose 7.95% after the stop sold it), ERG
   -2.8% and WAL -3.25% (-$811.70; both sold by the AI review), CKB -0.8% (stop passed between check-ins).
-- Settings: Balanced, **50 holdings set by hand** ($1,983 each), budget $99,129 built up over 5 days (left to the level
-  since 12:40 UTC on 12 Oct, when the build-up began again: improvements, item 0), a check-in every 6
+- Settings: Balanced, **50 holdings set by hand** ($1,983 each), budget $99,129 built up over 1 day (set at 14:36 UTC on
+  12 Oct; it had begun again twice that day: improvements, item 0), a check-in every 3
   hours, holdings kept up to 10 days, trailing stop "protects a gain", all three switches on. Screeners: S&P 500,
   Russell 1000, Russell 2000, NASDAQ 100, Dow 30, ASX 200, FTSE 100, Nikkei 225, crypto; shares of the budget automatic.
 - Running by itself: the trial of which share to buy (3 share buys tagged; verdict at 10 finished each way); the shared
@@ -2236,14 +2236,20 @@ goes first). Every review restocks the queue from what the losses show.
 - **Waiting for:** 30 finished trades for the first notes and the first review session; 20 at one level for the first
   progress report and review of its own rules (level 3 has 4, level 5 has 1).
 
-**Still to be seen for real** (strike each when seen): the first share buys tagged for the patient-shares trial (`pt`; the
-14:10 UTC check-in on 12 Oct ran clean on the new code and bought nothing, the budget's build-up having just begun again); a "Left alone" line at a Tokyo opening with only old prices, then the
+**Still to be seen for real** (strike each when seen): a "Left alone" line at a Tokyo opening with only old prices, then the
 same market looked at again half an hour later; the first small buys at 50 holdings, up to 10 at a check-in, with
 `heads` on the remembered buy; a FTSE run on a morning after a London session showing that session's prices; the
 company figures published by the daily run itself ("Company figures published" in its log; the fixed script was run by
 hand on the scheduler's bare PATH at 10:55 UTC on 12 Oct and uploaded the file, so only the run inside the job is unseen); a "tighten" answer; the larger model in a review; a coin held back until it has stayed; any trial of a rule; the
 first progress report and its email; whether the test email reached the owner's inbox. **Never checked by a session,
 because neither can be opened from here: the logged-in dashboard itself and a real phone.**
+**Seen for real at 14:38 UTC on 12 Oct (a check-in the owner asked for by hand):** five shares bought at the new size ($1,982.58
+each): FANG, HPE, CTVA, DDOG and TSCO.L, across the US and London. **Tagged in pairs for the patient-shares trial exactly as
+designed (`pt` 0, 0, 1, 1, 0), crossed with the buying-order trial** (FANG ordinary and as ranked, HPE ordinary and
+furthest above its low, CTVA patient and as ranked, DDOG patient and furthest above its low); each carries `heads` (0, 3,
+1, 3, 0) and `headAge`; a patient share's plan says so. After it: 10 holdings, $74,875 invested, room for 12 more of this
+size until the five older, larger ones are sold (by 20 Oct at the latest). Settings then: a check-in every 3 hours, the
+build-up 1 day (both set by hand), all else as below.
 **Seen for real so far:** clean scheduled check-ins on every version; buys spread over two share markets (12 Oct); the
 fresh-price rule on live prices; headlines reaching the model; sales by the following stop and by the AI review; the
 look-back; the shared record taking in trades, its notes reaching an activity list, and its five-trade notes dropped
