@@ -2132,6 +2132,26 @@ edge**, actively, every time. How, without fooling ourselves:
   professionals fail at; a rough one in ten. The mandate is to try properly and report truthfully, with the month-3
   stop rule (the goals, below) as the backstop.
 
+**"GO PLAY" (the owner, 12 Oct 2026: "i want you running and me simply having to open a session and say go play").** When he
+says it, or anything like it, the session works by itself for as long as it lasts, without asking between steps:
+1. The opening report and, if a week has passed, the review and the standing against the month's goal.
+2. **Grow the data**, because that is what limits how many questions are worth asking: prices for far more shares than
+   the 101 here and further back (slowly, away from the daily run: section 8b on Yahoo's limits); a dated copy of
+   `.analysis_cache/company_figures.json` each time (the company figures of 3,333 shares as they are today: kept week
+   after week they become the history that does not exist yet); more recorded with each buy.
+3. **Ask and test, in bulk.** Build up the test bench in `check-tools/replay/` so that it runs hundreds of variants of an
+   idea by itself and prints only those that pass the four tests **after allowing for how many were tried** (of 1,000
+   tries on 101 shares, dozens look good by luck: on 11 Oct, 208 of 240 variants looked ahead on the first part of the
+   period and 103 on the second). Log every question in `check-tools/reviews/questions.md`, the failures too.
+4. **Put survivors live as trials** in the queue, and add measurements to the function, through the usual staged deploy
+   with tests, a dry run and a rollback copy. **Allowed without asking**: it is fake money, bounded, and a trial is
+   kept only if clearly better.
+5. End with a short report: what was asked, what was answered, what went live as a trial, what needs his yes.
+**Still needs his yes, always:** deleting anything; his own settings; what the public site says or how the screeners
+score; anything that costs more than cents; anything near real money (never). **What "go play" cannot be:** running with
+no session open. Something that searches by itself between sessions (the test bench on a nightly schedule, feeding the
+queue) is a possible later step once the bench has proved itself in sessions; say so if he asks, with its cost.
+
 **The goals, month by month** (the owner, 12 Oct 2026: "perhaps we should have goals ie month 1 it improves x amount month 2
 y amount… your primary task is to continue to fix and find improvement"). **Targets to steer by, not forecasts**; the
 review tool prints where things stand against them (its part 9; the numbers are `GOALS` at the top of
