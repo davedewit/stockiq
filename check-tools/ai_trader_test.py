@@ -1225,6 +1225,21 @@ if PATIENT_ON:
     check('nor is an account with "Try changes to its own rules" switched off', rec['state']['open'] and all('pt' not in f for f in rec['state']['open'].values()))
     check('the tag goes with a finished trade into the shared record', 'pt' in m.POOL_FIELDS)
     m.PATIENT = False; m.CENTRAL = was_central; m.datetime = clock; D.t.clear(); m._BRAIN.clear()
+# ---- a build-up that begins again paces out only what is not invested yet
+if hasattr(m, 'already_in'):
+    began = Open.utcnow(); S10 = dict(m.DEFAULTS, enabled=True, risk=3, budgetUsd=10000, periodDays=1, everyHours=3, maxHoldDays=10, auto=[], screeners=['3-100'])
+    hold = lambda i, when, cost=1250.0: {'id': f'b{i}', 'symbol': f'S{i:02d}', 'label': f'S{i:02d}', 'by': 'ai', 'screener': '3-100', 'qty': 1, 'buyPrice': cost, 'buyFx': 1, 'currency': 'USD', 'costUsd': cost, 'boughtAt': m.iso(when)}
+    old6 = {'cash': 90000.0, 'holdings': [hold(i, began - dt.timedelta(hours=5)) for i in range(6)], 'closed': []}; st_ = {'startedAt': m.iso(began)}
+    room0, inv0 = m.allowance(old6, S10, st_, began + dt.timedelta(minutes=5))
+    check('with $7,500 of $10,000 invested when the build-up begins again, the first check-in can buy at once: the steps release the rest, not the whole budget from nothing', m.already_in(old6, st_) == 7500 and inv0 == 7500 and abs(room0 - 1250) < 0.01, [m.already_in(old6, st_), room0])
+    room1, _ = m.allowance(old6, S10, st_, began + dt.timedelta(hours=12, minutes=5)); room2, _ = m.allowance(old6, S10, st_, began + dt.timedelta(hours=24, minutes=5))
+    check('half way through the day half of the rest is out, and at the end all of it', abs(room1 - 2500) < 0.01 and abs(room2 - 2500) < 0.01 and abs(m.released(S10, st_, began + dt.timedelta(hours=6, minutes=5), 7500)[0] - 8750) < 0.01, [room1, room2])
+    new2 = {'cash': 90000.0, 'holdings': [hold(i, began + dt.timedelta(hours=1)) for i in range(2)], 'closed': []}
+    check('holdings bought after it began count as before: from nothing the first step is one holding', m.already_in(new2, st_) == 0 and abs(m.allowance({'cash': 90000.0, 'holdings': [], 'closed': []}, S10, st_, began + dt.timedelta(minutes=5))[0] - 1250) < 0.01 and m.allowance(new2, S10, st_, began + dt.timedelta(hours=1, minutes=5))[0] == 0)
+    sold_one = dict(old6, holdings=old6['holdings'][:5])
+    check('when one of the older holdings is sold, its money is paced out with the rest', m.already_in(sold_one, st_) == 6250 and abs(m.allowance(sold_one, S10, st_, began + dt.timedelta(minutes=5))[0] - 1250) < 0.01 and abs(m.allowance(sold_one, S10, st_, began + dt.timedelta(hours=24, minutes=5))[0] - 3750) < 0.01)
+    nxt = m.next_release(S10, st_, 8750.0, began + dt.timedelta(minutes=5), 7500.0)
+    check('and the note that says when more is released counts the same way', nxt == began + dt.timedelta(hours=12), nxt)     # the rest ($2,500) comes in eighths: a second whole holding is out at the fifth step
 # ---- the AI model's notes wait for enough finished trades: a pattern in a handful is chance, and the notes are shown back to it
 if NOTES:
     m.LESSONS_MIN = NOTES; was_central = m.CENTRAL; m.CENTRAL = False; MODEL['answer'] = {'lessons': ['Rank 1 to 3 did worse (5 trades).']}; MODEL['prompts'].clear()
