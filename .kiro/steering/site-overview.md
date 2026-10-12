@@ -2277,6 +2277,27 @@ market's own share has less room than that left (never under the $25 smallest bu
 practice money there is at every check-in (`fit_budget`), a falling account makes each new holding a little smaller
 instead of leaving the autopilot short. What stays unused: a remainder under one holding (under 2% at 50 holdings).
 
+**EXPECT THIS AT THE NEXT SESSION: the owner wants to improve the screeners' own scoring** (his last words on 12 Oct: "its very
+likely i'll want to improve the screener functions after a week or so"; the screeners' rankings are what the autopilot
+buys from, and what every user sees). Until now the scoring was left alone as his decision (section 7b); he is now
+saying he wants it changed. So come prepared, do not start from nothing:
+- **Bring candidates that have been tested**, not opinions: before he asks, run the ideas on saved prices
+  (`check-tools/paper-test/factor_study.py`, `check-tools/replay/replay.py`, the four tests of "THE MANDATE") and have
+  ready what held up and what did not. What is known so far: none of the score's 12 factors sorted shares reliably;
+  re-weighting them showed nothing; "Financial", "Sentiment" and "Risk" use no real company data; distance above the
+  52-week low and the longer rises (90 days, a year) were the only figures that pointed the right way in both halves.
+  So the likeliest real improvements are **replacing the three empty factors with real figures** (company figures now
+  exist for 3,333 shares: `.analysis_cache/company_figures.json`, with a dated copy kept weekly) **and giving momentum
+  over months its due**, not shuffling the weights. Wider prices than the 101 shares here are needed to test it fairly.
+- **How it is done is built** (section 8b, "The worker groups"): one file, `workers/stock_worker.py`, scores all 669
+  share-screener workers; `workers/prove.py` shows every score, label and top 10 that a change moves; `workers/deploy.py`
+  rolls it out through a packaged script, one small group first (Dow 30). **Its path for updating a live package has not
+  been used for a real change yet**: read its output on first use. The CSV is built by the page and by the coordinator
+  from the workers' fields: a scoring change needs neither touched, a new column both. `about.html` and the FAQ describe
+  the 12 factors and must follow a change. Crypto is a separate program (54 workers, one version).
+- **Say what it changes for users**: every ranking and signal label on the site moves on the day (the RSI change of 11
+  Oct moved a third of the labels); the autopilot's trades before and after are different experiments.
+
 **FIRST JOB AT THE FIRST WEEKLY CHECK (on or after 19 Oct 2026): the trial queue.** Agreed on 12 Oct ("thats fine so long as
 my goal is reached"); deliberately not built at the end of that day's long session, hours before the first buys at 50
 holdings, with nothing for it to do until the buying-order trial ends. What to build: a list of trials the function works
