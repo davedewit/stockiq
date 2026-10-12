@@ -154,6 +154,7 @@ def main():
     breakdown('by how long it was held', trades, lambda t: band(t.get('days'), [0.25, 1, 5, 10 ** 9], ['under 6 hours', '6 hours to a day', '1 to 5 days', 'over 5 days']))
     breakdown('by who chose it', trades, lambda t: {'ai': 'the AI model', 'rank': 'by rank (the model did not answer)', 'order': 'furthest above its 52-week low (trial)'}.get(t.get('chosen'), str(t.get('chosen'))))
     breakdown('by headlines shown to the model when it was bought (recorded from 12 Oct 2026)', trades, lambda t: 'not recorded (bought before)' if t.get('heads') is None else 'none found' if not t['heads'] else 'newest under a day old' if (t.get('headAge') or 0) < 24 else 'newest one to three days old')
+    breakdown('the patient-shares trial (from 12 Oct 2026: a patient share is not sold on the signal, nor by the AI review)', [t for t in trades if t.get('pt') is not None], lambda t: 'patient: sold by price or time only' if t.get('pt') == 1 else 'ordinary: also sold when the signal turns')
     breakdown('by risk level at the time', trades, lambda t: m.RISK.get(t.get('risk'), {}).get('name', str(t.get('risk'))))
 
     say("\n4. THE LOSSES, ONE BY ONE (finished in the period, worst first)")
@@ -205,6 +206,10 @@ def main():
         for level, prog in sorted((brain.get('progress') or {}).items()):
             for rep in (prog.get('reports') or [])[-2:]: say(f"  progress report, level {level}, batch {rep.get('no')}: average {rep.get('avg')}%, verdict {rep.get('verdict')}; did: {'; '.join(map(str, rep.get('actions') or [])) [:200] or 'carried on'}")
         for note in ((brain.get('state') or {}).get('lessons') or {}).get('items', []): say(f"  note: {note}")
+    pat = [h for h in held.values() if h.get('pt') == 1]; plain = [h for h in held.values() if h.get('pt') == 0]
+    now_at = lambda group: (sum((h.get('path') or [[0, 0]])[-1][1] for h in group) / len(group)) if group else 0.0
+    say(f"  the patient-shares trial, still held: {len(pat)} patient (on paper {now_at(pat):+.2f}% on average at their last check-in), {len(plain)} ordinary ({now_at(plain):+.2f}%). "
+        "A fair comparison counts both: what was sold and what is still held, for buys of the same weeks.")
     say(f"  this account: trial of the buying order '{(state.get('order') or {}).get('mode')}', {(state.get('order') or {}).get('buys', 0)} share buys counted; AI calls today {((state.get('ai') or {}).get('n'))}; early sells by the AI review {'paused' if (state.get('aiSell') or {}).get('until') else 'allowed'}")
 
     say("\n7. FAULTS IN THE FUNCTION'S LOG (the period)")

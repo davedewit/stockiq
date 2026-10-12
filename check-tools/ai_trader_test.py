@@ -27,6 +27,8 @@ STAY = m.STAY_CHECKS; m.STAY_CHECKS = 1
 SHARED = m.CENTRAL; m.CENTRAL = False
 # And the AI model's notes are written from nine trades here; live it waits for 30 (LESSONS_MIN), tested on its own (NOTES).
 NOTES = getattr(m, 'LESSONS_MIN', 0); m.LESSONS_MIN = 5
+# And every share is sold by the ordinary rules here; the trial in which some are "patient" is tested on its own (PATIENT).
+PATIENT_ON = getattr(m, 'PATIENT', False); m.PATIENT = False
 # And no trading cost is taken off here, so that the amounts in the older checks stay round; the cost is tested on its own (COSTS).
 COSTS = getattr(m, 'TRADE_COST', 0); m.TRADE_COST = 0
 D = DB(); m._db = D
@@ -1177,6 +1179,46 @@ if 'heads' in m.POOL_FIELDS:
     check('a buy remembers how many headlines the model was shown for it, and how old the newest was', len(kept) >= 2 and kept[first].get('heads') == 2 and kept[first].get('headAge') == 5.0, {k: (v.get('heads'), v.get('headAge')) for k, v in kept.items()})
     check('and a buy with none says none, with no age', all(f.get('heads') == 0 and 'headAge' not in f for l, f in kept.items() if l != first))
     m.CENTRAL = was_central; m.datetime = clock
+# ---- the patient-shares trial: pairs of shares in turn are kept 30 days and sold by price or time only
+if PATIENT_ON:
+    m.PATIENT = True; D.t.clear(); m._BRAIN.clear(); was_central = m.CENTRAL; m.CENTRAL = False; m.datetime = Open; SNAP['3-100'] = rows(); SNAP['7-1'] = rows('crypto', '7-1'); MODEL['answer'] = None; MODEL['prompts'].clear()
+    base = dict(m.DEFAULTS, enabled=True, risk=3, budgetUsd=16000, periodDays=1, everyHours=24, maxHoldDays=5, auto=[], screeners=['3-100'])
+    rec = m.load_item(U); rec['settings'] = dict(base); rec['state'] = {'startedAt': m.iso(Open.utcnow() - dt.timedelta(days=2))}
+    m.run_user(U, rec, Open.utcnow(), snapshot=snapshot, quote=quote, model=model)
+    m.run_user(U, rec, Open.utcnow() + dt.timedelta(days=1), snapshot=snapshot, quote=quote, model=model)
+    tags = [f.get('pt') for f in rec['state']['open'].values()]
+    check('shares are tagged in pairs, two ordinary then two patient, so the trial does not fall together with the buying-order trial', len(tags) >= 5 and tags[:5] == [0, 0, 1, 1, 0], tags)
+    pat = [f for f in rec['state']['open'].values() if f.get('pt') == 1]; plain = [f for f in rec['state']['open'].values() if f.get('pt') == 0]
+    check('a patient share is kept no longer than any other: the time the user set stands', all(f['hold'] == 5 for f in pat) and all(f['hold'] == 5 for f in plain), [f['hold'] for f in rec['state']['open'].values()])
+    buys = [e for e in rec['log'] if e['type'] == 'buy']; words = {e['symbol']: e['detail'][0] for e in buys}
+    check('the plan under a patient buy says so, and the plan under an ordinary one still says it sells on the signal', all('A patient share, part of a trial' in words[f['label']] and 'keep it for up to 5 days' in words[f['label']] and 'Also sell if its screener signal' not in words[f['label']] for f in pat)
+          and all('Also sell if its screener signal turns negative' in words[f['label']] and 'keep it for up to 5 days' in words[f['label']] for f in plain), list(words.values())[2][:200])
+    m.save_item(U, rec); port = portfolio(); held = {h['id']: h for h in port['holdings']}; ids = list(rec['state']['open']); a_plain, a_pat = ids[0], ids[2]
+    bad = next(iter(m.NEGATIVE)); now5 = Open.utcnow() + dt.timedelta(days=3)
+    turned = {'3-100': [dict(r, signal=bad, score=-1.0, rank=90) for r in rows()]}
+    qs = {h['symbol']: {'price': h['buyPrice'], 'currency': 'USD'} for h in port['holdings']}; kinds = {}
+    sold = m.review_sells(port, rec['settings'], turned, qs, now5, opened=rec['state']['open'], kinds=kinds)
+    gone = {h['id'] for h, _p, _r in sold}
+    check('when the signal turns, the ordinary shares are sold and the patient ones are kept', all((i in gone) == (rec['state']['open'][i].get('pt') == 0) for i in ids) and set(kinds.values()) == {'signal'}, [(rec['state']['open'][i].get('pt'), i in gone) for i in ids])
+    sold = m.review_sells(port, rec['settings'], turned, qs, Open.utcnow() + dt.timedelta(days=8), opened=rec['state']['open'], kinds=(k2 := {}))
+    check('at the end of the user\'s 5 days both kinds go, the patient one at the time limit', a_pat in k2 and k2[a_pat] == 'time' and a_plain in k2, k2)
+    low = dict(qs); low[held[a_pat]['symbol']] = {'price': held[a_pat]['buyPrice'] * 0.85, 'currency': 'USD'}
+    sold = m.review_sells(port, rec['settings'], {'3-100': rows()}, low, now5, opened=rec['state']['open'], kinds=(k4 := {}))
+    check('a patient share is still sold at the loss limit', k4.get(a_pat) == 'stop')
+    MODEL['prompts'].clear(); MODEL['answer'] = {'reviews': []}; rec2 = m.load_item(U)
+    m.run_user(U, rec2, Open.utcnow() + dt.timedelta(days=2), snapshot=snapshot, quote=quote, model=model)
+    asked = ' '.join(str(p.get('user', '')) for p in MODEL['prompts'] if 'review step' in str(p.get('system', '')))
+    check('the AI model\'s review is given the ordinary shares and not the patient ones', asked and all((f['label'] + ' ' in asked or f['label'] + ':' in asked or f['label'] in asked) == (f.get('pt') == 0) for f in list(rec2['state']['open'].values())[:4]), asked[:300])
+    pub = m.public(rec2, Open.utcnow() + dt.timedelta(days=2), U); plans = {p['id']: p for p in pub['plans']}
+    check('the page is told which holdings are patient', plans[a_pat]['patient'] is True and plans[a_pat]['holdDays'] == 5 and plans[a_plain]['patient'] is False and plans[a_plain]['holdDays'] == 5, [plans[a_pat], plans[a_plain]])
+    D.t.clear(); rec = m.load_item(U); rec['settings'] = dict(base, screeners=['7-1'], everyHours=24); rec['state'] = {'startedAt': m.iso(Open.utcnow() - dt.timedelta(days=2))}
+    m.run_user(U, rec, Open.utcnow(), snapshot=snapshot, quote=quote, model=model)
+    check('coins are not part of it', rec['state']['open'] and all('pt' not in f for f in rec['state']['open'].values()), [f.get('pt') for f in rec['state']['open'].values()])
+    D.t.clear(); rec = m.load_item(U); rec['settings'] = dict(base, selfTune=False); rec['state'] = {'startedAt': m.iso(Open.utcnow() - dt.timedelta(days=2))}
+    m.run_user(U, rec, Open.utcnow(), snapshot=snapshot, quote=quote, model=model)
+    check('nor is an account with "Try changes to its own rules" switched off', rec['state']['open'] and all('pt' not in f for f in rec['state']['open'].values()))
+    check('the tag goes with a finished trade into the shared record', 'pt' in m.POOL_FIELDS)
+    m.PATIENT = False; m.CENTRAL = was_central; m.datetime = clock; D.t.clear(); m._BRAIN.clear()
 # ---- the AI model's notes wait for enough finished trades: a pattern in a handful is chance, and the notes are shown back to it
 if NOTES:
     m.LESSONS_MIN = NOTES; was_central = m.CENTRAL; m.CENTRAL = False; MODEL['answer'] = {'lessons': ['Rank 1 to 3 did worse (5 trades).']}; MODEL['prompts'].clear()
