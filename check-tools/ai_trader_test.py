@@ -1080,5 +1080,49 @@ good = m.bar_of([share(1.0 + (i % 5) * 0.2, 0.2) for i in range(300)]); short = 
 check('it is cleared only by 300 finished trades that are ahead by more than twice the margin of error: not by 299, not by 300 that are ahead by a hair', good['met'] is True and short['met'] is False and flat['met'] is False and flat['avg'] > 0, (good, short, flat))
 D.t.clear(); m._BRAIN.clear(); m.PLAN_CACHE.clear(); m.save_item(U, fresh([])); code_, b = call(action='get', userId=U)
 check('the page is told the cost and the bar', code_ == 200 and b['costEachWay'] == 0.1 and b['bar']['need'] == 300 and b['bar']['n'] == 0 and b['bar']['met'] is False, b.get('bar'))
+# --- a share is traded only at a price that has traded lately (12 Oct 2026: a Tokyo share was bought on a Japanese holiday at Friday's price)
+if hasattr(m, 'fresh'):
+    m.TRADE_COST = 0
+    AGE = {}                                                    # hours since each symbol's price last traded; not given: the quote says no time
+    def stamp(now, hours): return (now - dt.timedelta(hours=hours) - dt.datetime(1970, 1, 1)).total_seconds()
+    NOW3 = {'t': t0}
+    def quote3(sym):
+        q = quote(sym)
+        if q and sym in AGE: q = dict(q, time=stamp(NOW3['t'], AGE[sym]))
+        return q
+    def run3(now, **settings):
+        NOW3['t'] = now; rec = m.load_item(U)
+        if settings: rec['settings'].update(settings)
+        s = m.run_user(U, rec, now, snapshot=snapshot, quote=quote3, model=model); m.save_item(U, rec); return s, rec
+    check('a price is fresh: a coin always, a share that traded ten minutes ago, a quote that gives no time; not a share last traded 20 hours ago',
+          m.fresh({'time': stamp(t0, 70)}, 'crypto', t0) and m.fresh({'time': stamp(t0, 0.17)}, 'jp', t0) and m.fresh({'price': 1}, 'us', t0) and m.fresh(None, 'us', t0)
+          and not m.fresh({'time': stamp(t0, 20)}, 'jp', t0) and m.fresh({'time': stamp(t0, 2.9)}, 'us', t0) and not m.fresh({'time': stamp(t0, 3.2)}, 'us', t0))
+    D.t.clear(); m._BRAIN.clear(); m.PLAN_CACHE.clear(); PRICES.clear(); AGE.clear(); MODEL['answer'] = None; SNAP.clear(); SNAP.update({'3-100': rows()})
+    rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=1, maxHoldDays=5, screeners=['3-100'], selfTune=False, aiSell=False, auto=[])
+    rec['state']['startedAt'] = m.iso(t0 - dt.timedelta(days=2)); m.save_item(U, rec)
+    AGE.update({r['symbol']: 70 for r in SNAP['3-100']})        # the market has not traded for three days: a holiday
+    s, rec = run3(t0); note = rec['log'][-1]
+    check('on a holiday nothing is bought, and the check-in says which shares it left alone and why', s['bought'] == 0 and not (portfolio() or {'holdings': []})['holdings'] and note['type'] == 'note'
+          and 'Left alone: S00 (its price last traded 3 days ago)' in note['text'] and 'public holiday' in note['text'] and note['key'].endswith('+stale'), note)
+    s, rec = run3(t0 + dt.timedelta(hours=1))
+    check('the same note an hour later is counted on that line, not listed again', s['bought'] == 0 and rec['log'][-1].get('n') == 2 and sum(1 for e in rec['log'] if 'Left alone' in e.get('text', '')) == 1, rec['log'][-2:])
+    AGE.update({r['symbol']: 0.2 for r in SNAP['3-100']})
+    s, rec = run3(t0 + dt.timedelta(hours=2)); held3 = portfolio()['holdings']
+    check('once its price is fresh it is bought', s['bought'] >= 1 and len(held3) == s['bought'] and not any('Left alone' in e.get('text', '') for e in rec['log'][-s['bought']:]), s)
+    first = held3[0]; PRICES[first['symbol']] = first['buyPrice'] * 0.5; AGE[first['symbol']] = 70       # far below its loss limit, at a price three days old
+    s, rec = run3(t0 + dt.timedelta(hours=3))
+    check('a holding is not sold at a stale price either, and the list says it was left alone', s['sold'] == 0 and any(h['id'] == first['id'] for h in portfolio()['holdings']) and any('Left alone: ' + first['label'] in e.get('text', '') for e in rec['log'][-3:]), [s, rec['log'][-1]])
+    r = m.sell_everything(U, m.load_item(U), t0 + dt.timedelta(hours=3, minutes=5), quote=quote3)
+    check('"Sell everything it holds" keeps it too and lists it with the closed markets', first['label'] in r['closed'] and any(h['id'] == first['id'] for h in portfolio()['holdings']), r)
+    AGE[first['symbol']] = 0.1
+    s, rec = run3(t0 + dt.timedelta(hours=4))
+    check('with a fresh price it is sold at its loss limit as usual', s['sold'] >= 1 and not any(h['id'] == first['id'] for h in portfolio()['holdings']), s)
+    # the function's own fetch_quote (this test put a stand-in in its place further up): run its source against a stand-in answer
+    import re as _re, urllib.parse as _up
+    src = _re.search(r"^def fetch_quote\(symbol\):\n(?:    .*\n|\n)+", open(sys.argv[1]).read(), _re.M).group(0)
+    space = {'http_json': lambda url, timeout=20: {'chart': {'result': [{'meta': {'regularMarketPrice': 12.5, 'regularMarketTime': 1791000000, 'currency': 'JPY'}, 'indicators': {'quote': [{}]}}]}},
+             'PRICE_URL': '', 'urllib': __import__('urllib'), 'num': m.num, 'daily_range': m.daily_range}
+    exec(src, space); q = space['fetch_quote']('6976.T')
+    check('the quote the function fetches carries the time of the last trade', q and q['time'] == 1791000000 and q['price'] == 12.5 and q['currency'] == 'JPY', q)
 m.TRADE_COST = 0
 print('ALL PASS' if ok else 'SOME FAILED')
