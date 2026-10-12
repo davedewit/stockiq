@@ -97,8 +97,10 @@ def run(rules, period, rng=None):
             change = (px / h['buy'] - 1) * 100; h['peak'] = max(h['peak'], change); h['days'] += 1
             row = rows.get(s); why = None
             arm = trader.gain_arm(rules, rules['hold']); floor = trader.gain_floor(rules, rules['hold'], h['peak'])
-            if change <= rules['stop']: why = 'stop'
-            elif change >= rules['take']: why = 'take'
+            # 'scaled': (a, b): the loss limit is a times, the gain mark b times, what this share normally moves in a day (as it was when bought)
+            stop, take = (-rules['scaled'][0] * h['range'], rules['scaled'][1] * h['range']) if rules.get('scaled') and h['range'] > 0 else (rules['stop'], rules['take'])
+            if change <= stop: why = 'stop'
+            elif change >= take: why = 'take'
             elif rules['keep_gain'] and h['peak'] >= arm and floor is not None and change <= floor: why = 'trail'
             elif h['days'] >= rules['hold']: why = 'time'
             elif rules['signal_exit'] and row and (row[1] < 0 or row[0] < 0): why = 'signal'
@@ -124,7 +126,7 @@ def run(rules, period, rng=None):
                 if s in held or n - sold_on.get(s, -99) < min(2, 2 * rules['hold']): continue
                 px, spy = open_after(s, d), open_after('SPY', d)
                 if not px or not spy: continue
-                held[s] = {'buy': px, 'spy': spy, 'd': d, 'days': 0, 'peak': 0.0, 'score': rows[s][0]}; cash -= slot; bought += 1
+                held[s] = {'buy': px, 'spy': spy, 'd': d, 'days': 0, 'peak': 0.0, 'score': rows[s][0], 'range': rows[s][8]}; cash -= slot; bought += 1
         curve.append(cash + sum(slot * ((close_on(s, d) or h['buy']) / h['buy']) for s, h in held.items()))
     return trades, curve
 
@@ -149,6 +151,27 @@ def name(r):
 out = []
 say = lambda text='': (print(text), out.append(text))
 split = int(len(days) * LEARN_SHARE); learn, test = days[:split], days[split:]
+
+if '--limits' in sys.argv:
+    # One question, asked the honest way (12 Oct 2026, the owner: "it is making similar decisions for every stock?"): would a loss
+    # limit and a gain mark set from each share's own movement do better than the same two numbers for every share? The multiples
+    # are chosen on the first part of the period and judged on the last, which the choice never saw.   python3 replay.py --limits
+    ranges = sorted(r[8] for d in days[::20] for r in panel[d].values() if r[8] > 0)
+    print(f"What these {len(universe)} shares normally move in a day: a calm one {ranges[len(ranges) // 10]:.1f}%, a middling one {ranges[len(ranges) // 2]:.1f}%, a jumpy one {ranges[9 * len(ranges) // 10]:.1f}%")
+    grid = [(a, b) for a in (1.5, 2, 3, 4, 6) for b in (2, 3, 5, 8, 12)]
+    for level in (1, 2, 3, 4):
+        base = rules_of(level); fixed_learn, fixed_test = figures(*run(base, learn), learn), figures(*run(base, test), test)
+        print(f"\n{trader.RISK[level]['name']} (the same for every share: {base['stop']}% / +{base['take']}%, held up to {base['hold']:g} days)")
+        print(line('   fixed limits, first part', fixed_learn)); print(line('   fixed limits, last part', fixed_test))
+        tried = sorted(((figures(*run(rules_of(level, scaled=g), learn), learn), g) for g in grid), key=lambda x: -x[0].get('vs', -99))
+        ahead = sum(1 for f, g in tried if f.get('vs', -99) > fixed_learn['vs'])
+        best_f, best = tried[0]; judged = figures(*run(rules_of(level, scaled=best), test), test)
+        print(f"   {ahead} of the {len(grid)} pairs of multiples did better than the fixed limits on the first part. The best: loss limit {best[0]:g}x, gain mark {best[1]:g}x a day's movement")
+        print(line('   that pair, first part (chosen here)', best_f)); print(line('   that pair, last part (never seen)', judged))
+        middle = figures(*run(rules_of(level, scaled=(3, 5)), test), test)
+        print(line('   a plain pair (3x / 5x), last part', middle))
+        print(f"   on the last part: fixed {fixed_test['vs']:+.2f} against the fund a trade, the chosen pair {judged['vs']:+.2f}, the plain pair {middle['vs']:+.2f}")
+    sys.exit()
 say(f"The autopilot's rules replayed on the S&P 100 list: {len(universe)} stocks, {len(days)} trading days ({days[0]} to {days[-1]}), ${BUDGET:,.0f}, {COST}% taken off each buy and each sale.")
 say("Decisions once a day at the close, traded at the next open; buys by rank (the AI model is not replayed); today's index members; no dividends.")
 say(); say("1. The five levels as they are, over the whole period")

@@ -469,6 +469,25 @@ saved prices. Nothing in their conclusions moved:
   the part of the period the search never saw.
 - So there is no evidence for or against either RSI: the choice was for one way everywhere and the standard definition.
 
+**Would limits set for each share do better than the same two numbers for all? (12 Oct 2026.)** The owner noticed that every
+holding's plan reads alike ("sooner if it falls to -7% or reaches +12%") and asked whether the autopilot could be smarter.
+What is per holding already: the stop that follows a rise (from the holding's own daily movement), the AI model's review,
+and the choice of what to buy. What is the same for all: the loss limit, the gain mark, the holding time, the size.
+`python3 check-tools/replay/replay.py --limits` (two seconds; `results-limits-2026-10-12.txt`) sets the loss limit and the gain
+mark as multiples of each share's own daily movement, picks the multiples on the first 60% of the period and judges them on
+the last 40%:
+- These 101 shares move 1.5% (calm), 2.3% (middling) to 4.0% (jumpy) a day: not far apart.
+- **It made no real difference.** Per trade against the index fund on the unseen part: Cautious -0.69 fixed, -0.46 with the
+  chosen multiples; Careful -0.26 and -0.25; Balanced -0.33 and -0.33; Bold -0.35 and -0.32. None of it clear, and every
+  level stayed behind the fund either way.
+- **What it says:** for large shares the selling limits are not what holds the autopilot back; what it buys is (the score
+  has no reliable edge, above). The ideas that did hold up are the ones already on trial or queued: the share furthest
+  above its 52-week low, longer holding times, not selling on the signal.
+- **Not tested, and where it could matter:** coins. A coin can move 5 to 15% in a day, so a -7% limit is an ordinary dip
+  for one and a real fall for another. There are no saved coin prices to replay; the honest route is a live trial in the
+  autopilot (every second coin with limits scaled to its own movement, kept only if clearly better), through its trial
+  mechanism. Offered to the owner on 12 Oct; not built.
+
 **The autopilot's own rules, replayed (11 Oct 2026, evening).** The owner asked, honestly, whether this will ever make
 more than it loses, and whether it could "run on some kind of rapid speed to learn faster". It can: `check-tools/replay/
 replay.py` runs the autopilot's rules (imported from the deployed function) over the same four years of S&P 100 prices

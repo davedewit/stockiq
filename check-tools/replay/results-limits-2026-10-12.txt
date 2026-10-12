@@ -1,0 +1,37 @@
+What these 101 shares normally move in a day: a calm one 1.5%, a middling one 2.3%, a jumpy one 4.0%
+
+Cautious (the same for every share: -5% / +8%, held up to 20 days)
+   fixed limits, first part                      958 trades,  52% ended up,  +0.78% a trade after costs,  +0.39 against the fund (t +2.71); account   +62.4% (the fund  +53.5%), worst fall  -11.1%, held 5 days
+   fixed limits, last part                       601 trades,  43% ended up,  -0.23% a trade after costs,  -0.69 against the fund (t -3.48); account   -11.5% (the fund  +39.2%), worst fall  -18.4%, held 5 days
+   22 of the 25 pairs of multiples did better than the fixed limits on the first part. The best: loss limit 3x, gain mark 8x a day's movement
+   that pair, first part (chosen here)           919 trades,  52% ended up,  +0.89% a trade after costs,  +0.47 against the fund (t +2.69); account   +68.4% (the fund  +53.5%), worst fall   -9.9%, held 6 days
+   that pair, last part (never seen)             570 trades,  43% ended up,  +0.01% a trade after costs,  -0.46 against the fund (t -1.72); account    +0.7% (the fund  +39.2%), worst fall  -15.0%, held 6 days
+   a plain pair (3x / 5x), last part             569 trades,  44% ended up,  -0.10% a trade after costs,  -0.57 against the fund (t -2.51); account    -4.8% (the fund  +39.2%), worst fall  -17.0%, held 6 days
+   on the last part: fixed -0.69 against the fund a trade, the chosen pair -0.46, the plain pair -0.57
+
+Careful (the same for every share: -7% / +12%, held up to 10 days)
+   fixed limits, first part                      952 trades,  53% ended up,  +0.75% a trade after costs,  +0.28 against the fund (t +1.79); account   +71.6% (the fund  +53.5%), worst fall  -17.4%, held 6 days
+   fixed limits, last part                       625 trades,  48% ended up,  +0.21% a trade after costs,  -0.26 against the fund (t -1.21); account   +12.9% (the fund  +39.2%), worst fall  -19.8%, held 6 days
+   20 of the 25 pairs of multiples did better than the fixed limits on the first part. The best: loss limit 2x, gain mark 8x a day's movement
+   that pair, first part (chosen here)           961 trades,  53% ended up,  +0.86% a trade after costs,  +0.41 against the fund (t +2.48); account   +82.8% (the fund  +53.5%), worst fall  -13.3%, held 6 days
+   that pair, last part (never seen)             611 trades,  47% ended up,  +0.26% a trade after costs,  -0.25 against the fund (t -1.04); account   +16.0% (the fund  +39.2%), worst fall  -18.3%, held 6 days
+   a plain pair (3x / 5x), last part             595 trades,  46% ended up,  +0.20% a trade after costs,  -0.28 against the fund (t -1.20); account   +11.9% (the fund  +39.2%), worst fall  -19.5%, held 6 days
+   on the last part: fixed -0.26 against the fund a trade, the chosen pair -0.25, the plain pair -0.28
+
+Balanced (the same for every share: -10% / +18%, held up to 5 days)
+   fixed limits, first part                     1080 trades,  52% ended up,  +0.58% a trade after costs,  +0.25 against the fund (t +1.92); account   +78.9% (the fund  +53.5%), worst fall  -12.3%, held 4 days
+   fixed limits, last part                       635 trades,  47% ended up,  +0.01% a trade after costs,  -0.33 against the fund (t -1.73); account    +1.1% (the fund  +39.2%), worst fall  -20.5%, held 4 days
+   13 of the 25 pairs of multiples did better than the fixed limits on the first part. The best: loss limit 3x, gain mark 5x a day's movement
+   that pair, first part (chosen here)          1078 trades,  53% ended up,  +0.64% a trade after costs,  +0.30 against the fund (t +2.26); account   +85.8% (the fund  +53.5%), worst fall  -11.1%, held 4 days
+   that pair, last part (never seen)             636 trades,  47% ended up,  +0.02% a trade after costs,  -0.33 against the fund (t -1.70); account    +1.8% (the fund  +39.2%), worst fall  -20.7%, held 4 days
+   a plain pair (3x / 5x), last part             636 trades,  47% ended up,  +0.02% a trade after costs,  -0.33 against the fund (t -1.70); account    +1.8% (the fund  +39.2%), worst fall  -20.7%, held 4 days
+   on the last part: fixed -0.33 against the fund a trade, the chosen pair -0.33, the plain pair -0.33
+
+Bold (the same for every share: -14% / +28%, held up to 2 days)
+   fixed limits, first part                     1788 trades,  51% ended up,  +0.15% a trade after costs,  +0.00 against the fund (t +0.03); account   +44.4% (the fund  +53.5%), worst fall  -10.1%, held 2 days
+   fixed limits, last part                       942 trades,  47% ended up,  -0.19% a trade after costs,  -0.35 against the fund (t -3.11); account   -30.3% (the fund  +39.2%), worst fall  -34.7%, held 2 days
+   10 of the 25 pairs of multiples did better than the fixed limits on the first part. The best: loss limit 3x, gain mark 2x a day's movement
+   that pair, first part (chosen here)          1788 trades,  51% ended up,  +0.16% a trade after costs,  +0.01 against the fund (t +0.19); account   +47.3% (the fund  +53.5%), worst fall  -10.0%, held 2 days
+   that pair, last part (never seen)             959 trades,  47% ended up,  -0.16% a trade after costs,  -0.32 against the fund (t -2.93); account   -26.2% (the fund  +39.2%), worst fall  -28.8%, held 2 days
+   a plain pair (3x / 5x), last part             939 trades,  46% ended up,  -0.17% a trade after costs,  -0.32 against the fund (t -2.91); account   -26.4% (the fund  +39.2%), worst fall  -29.1%, held 2 days
+   on the last part: fixed -0.35 against the fund a trade, the chosen pair -0.32, the plain pair -0.32
