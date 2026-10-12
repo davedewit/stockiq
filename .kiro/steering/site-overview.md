@@ -23,8 +23,8 @@ Detailed references: `stockiq.md` (AWS resources, Cognito, Lambdas, AI chat),
 **EVERY SESSION, WITHOUT BEING ASKED (the owner's instruction, 12 Oct 2026):** open with what has happened since the last
 session, and **if the newest file in `stockiq/check-tools/reviews/` is seven or more days old, run the full review** (section
 8c, "The diary, and the review every week or two") before anything else. Then give him, in plain words: the result in
-dollars; **a numbered list of the improvements found**, for profit first and for anything else on the site; and the
-question whether to go ahead with them. Change nothing on that list until he says yes. His words: "i jump on after 8 days
+dollars **and against the month's goal** (section 8c, "The goals, month by month"); **a numbered list of the improvements
+found**, for profit first and for anything else on the site; and the question whether to go ahead with them. Change nothing on that list until he says yes. His words: "i jump on after 8 days
 and it says oh we have these improvements to make, it lists them then asks if i want to continue and make the changes…
 any improvement it found for the site in any way really but especially in making profit. There is no point having this
 run if its not making profit. well over 100,000." If the reviews keep showing no edge, say that plainly and recommend
@@ -2082,6 +2082,38 @@ counts from about 30 trades in a group and beyond twice its margin of error; jud
 **He asked whether code changes by itself in the background. It does not, and must not:** the autopilot changes five
 numbers of its own and the order it buys shares in, through trials; code changes only in a session.
 
+**The goals, month by month** (the owner, 12 Oct 2026: "perhaps we should have goals ie month 1 it improves x amount month 2
+y amount… your primary task is to continue to fix and find improvement"). **Targets to steer by, not forecasts**; the
+review tool prints where things stand against them (its part 9; the numbers are `GOALS` at the top of
+`check-tools/autopilot_review.py`: change the two together). The start: 12 Oct 2026, five finished trades averaging -1.03%,
+the account at about $98,600.
+
+| Due | Goal | Finished trades in all | Average a trade in that month, after costs | The account |
+|---|---|---|---|---|
+| 12 Nov 2026 | **Month 1: stop the losing, and enough trades to see** | 100 | -0.2% or better | $98,000 or more (no lower than now) |
+| 12 Dec 2026 | **Month 2: break even** | 300 (the bar's count) | 0% or better | $100,000 or more |
+| 12 Jan 2027 | **Month 3: ahead, or a decision** | 500 | +0.3% or better, and the bar cleared | $102,000 or more |
+
+- **What a session owes each month besides the numbers:** month 1: the buying-order trial has its verdict and the trial
+  queue (below) is built and running; a review every week. Month 2: at least one change kept after a trial, or a plain
+  statement that none of them helped. Month 3: the answer to "does this make money", either way.
+- **If a goal is missed:** say so first thing, say why (which groups lost the money), and bring the changes that follow.
+  **If month 3 ends with the average a trade still not above zero: stop tuning this strategy.** Then the choice put to the
+  owner is to change what it buys from (real company figures, a model fitted to its own record, other inputs) or to
+  switch it off. His words: "There is no point having this run if its not making profit."
+- These numbers are what would count as progress, chosen before the results are in so that nobody argues with them
+  afterwards. Section 7b gives no reason to expect them to be met; they are the test.
+
+**FIRST JOB AT THE FIRST WEEKLY CHECK (on or after 19 Oct 2026): the trial queue.** Agreed on 12 Oct ("thats fine so long as
+my goal is reached"); deliberately not built at the end of that day's long session, hours before the first buys at 50
+holdings, with nothing for it to do until the buying-order trial ends. What to build: a list of trials the function works
+through by itself, one at a time, each beside the current rule and kept only if clearly better, so that the end of one
+starts the next without a session. In it, in this order (the ideas that held up in the replay, section 7b): (1) a longer
+holding time for shares; (2) not selling a share on the screener's signal alone; (3) for coins, a loss limit and gain
+mark sized to each coin's own daily movement. Each needs a tag on the buy (as `o` for the buying order) and its verdict
+by `trial_figures`. Read the first week's trades before fixing the order (if nearly every sale is "signal turned", (2)
+goes first). Every review restocks the queue from what the losses show.
+
 **Where it stands (12 Oct 2026, 10:30 UTC; he changes settings often, so read the record):**
 - The account is at cost $99,130 (own buys by hand up $144, the autopilot's finished trades down $1,014), with about
   another $515 down on paper on five holdings ($64,962, bought at the old sizes of 4 and 10 holdings).
@@ -2127,7 +2159,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
 - Tests on the live files: 425 function, 203 panel, 95 portfolio, 22 bell, 19 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
-- Both repos pushed; the only `check-tools/pending-*` folder is `pending-cleanup` (an unrun delete script waiting for the owner's decision: improvements, item 10). `website/` carries the daily job's own three files
+- Both repos pushed; **no `check-tools/pending-*` folder is left**. `website/` carries the daily job's own three files
   uncommitted (news.html, news.js, sitemap.xml) until its next push.
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
@@ -2167,9 +2199,9 @@ preview from Kiro): ask early when a change "does not show" (section 9).
     4 to 7 Sep 2025 only; **`stockiq-option-3-3-worker` (60) was NOT unused: 50 of them were the old S&P 500 path, called
     about once a month until 11 Sep 2026** (the S&P 500 has used the first 50 `stockiq-option-3-5-worker` since). None of
     the three groups' addresses or names is in any page or script of the site, in the coordinator or in any other
-    function's code (385 packages read). Idle functions cost nothing: the recommendation given was to leave them. A
-    script that would delete the first two groups after checking each again sits unrun in
-    `check-tools/pending-cleanup/` until he decides (remove the folder if he says leave them). Also still there, in use
+    function's code (385 packages read). Idle functions cost nothing: the recommendation given was to leave them. The
+    script that would have deleted the first two groups was never run and was taken out again the same day (it is in
+    git history: commit `33588f1`, `check-tools/pending-cleanup/`). Also still there, in use
     until this month: `stockiq-option-7-2-worker-1`, `stockiq-coinspot-predictions-updater`. The local folder
     `website/stocks-backup-before-restore/` (118 MB) can go when he says.
 11. Thin the bell script's handling of older copies (any time after 18 Oct 2026; keep "the newer version wins").
@@ -3060,4 +3092,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     count the calls (CloudWatch keeps 455 days) before calling a function unused, and show the owner the list before
     preparing a delete.** The standing instruction for every session (review when a week has passed, list the
     improvements, ask) was written at the top of this file at his word.
+  - **Goals month by month, and the trial queue agreed** (section 8c, "The goals, month by month"): targets for 12 Nov, 12
+    Dec and 12 Jan with what happens when one is missed; the review tool prints the standing against them (part 9). The
+    queue of trials that runs itself is the first job of the first weekly check (on or after 19 Oct).
   - Still not checked by a session: the logged-in dashboard itself and a real phone (neither can be opened from here).

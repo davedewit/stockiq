@@ -25,6 +25,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 MIN_GROUP = 30                                              # fewer finished trades than this in a group: no reading
 BAR = 300                                                   # the number of finished trades the panel's own "bar to clear" asks for
 FAULTS = ['check-in failed', 'not worked out', 'not sent', 'not written', 'learning failed', 'not read', 'not shared', 'Task timed out', 'Traceback']
+# The goals the owner asked for on 12 Oct 2026 ("month 1 it improves x amount month 2 y amount"). Targets to measure against,
+# not forecasts: site-overview.md section 8c, "The goals, month by month". Each: the day it is due, its name, the number of
+# finished trades in all by then, the average result a trade after costs of the trades finished in that month, and the
+# account's value. The start: 12 Oct 2026, five finished trades averaging -1.03%, the account at about $98,600.
+GOALS_START = '2026-10-12'
+GOALS = [('2026-11-12', 'Month 1: stop the losing, and enough trades to see', 100, -0.2, 98000),
+         ('2026-12-12', 'Month 2: break even', 300, 0.0, 100000),
+         ('2027-01-12', 'Month 3: ahead, or a decision', 500, 0.3, 102000)]
 EXITS = {'stop': 'at the loss limit', 'take': 'at the gain mark', 'trail': 'by the stop that followed it', 'cut': 'by its trailing stop before it had risen',
          'time': 'at the time limit', 'signal': 'signal or score turned', 'fade': 'slipped down the ranking', 'ai': 'by the AI review', 'hand': 'by the owner'}
 out_lines = []
@@ -126,7 +134,7 @@ def main():
     say("\n2. THE RESULT IN DOLLARS")
     say(line('finished in the period', inside)); say(line('finished, all recorded', trades))
     try:
-        port = json.loads(db.Table('stockiq-paper-portfolios').get_item(Key={'userId': account})['Item']['data']); cost = {h['id']: h.get('costUsd') or 0 for h in port.get('holdings', []) if h.get('by') == 'ai'}
+        port = None; port = json.loads(db.Table('stockiq-paper-portfolios').get_item(Key={'userId': account})['Item']['data']); cost = {h['id']: h.get('costUsd') or 0 for h in port.get('holdings', []) if h.get('by') == 'ai'}
     except Exception: cost = {}
     held, paper = state.get('open') or {}, 0.0
     for hid, h in held.items(): paper += (cost.get(hid) or 0) * ((h.get('path') or [[0, 0]])[-1][1]) / 100
@@ -223,6 +231,23 @@ def main():
     unsent = sum(1 for e in rec.get('log', []) if not e.get('j')) + sum(1 for t in rec.get('history', []) if t.get('pct') is not None and not t.get('j'))
     say(f"  not yet in the diary: {unsent} (they go with the record's next save)")
 
+    say("\n9. AGAINST THE GOALS (targets set on 12 Oct 2026, not forecasts)")
+    value = (port['cash'] + sum(h.get('costUsd') or 0 for h in port.get('holdings', [])) + paper) if port else None
+    today, before = now.strftime('%Y-%m-%d'), GOALS_START
+    for due, name, want_n, want_avg, want_value in GOALS:
+        month = [t for t in trades if before <= str(t.get('sold'))[:10] < due]
+        n_m, avg_m, se_m = stats([(t.get('pct') or 0) - (0 if t.get('c') else 0.2) for t in month])      # a trade from before costs were taken off is charged them here
+        if today >= due and due != GOALS[-1][0]:
+            say(f"  {name} (due {due}): past. It ended with {len([t for t in trades if str(t.get('sold'))[:10] < due])} finished trades and {avg_m:+.2f}% a trade in its month ({n_m} trades).")
+            before = due; continue
+        span = (parse(due + 'T00:00:00') - parse(before + 'T00:00:00')).days; gone = max(0, (now - parse(before + 'T00:00:00')).days)
+        start_n = len([t for t in trades if str(t.get('sold'))[:10] < before]); pace = start_n + (want_n - start_n) * min(1, gone / span)
+        say(f"  {name}. Due {due} ({max(0, span - gone)} days left).")
+        say(f"    finished trades in all:           {len(trades):>5}   target {want_n}   " + ('reached' if len(trades) >= want_n else 'on course' if len(trades) >= pace - 0.5 else f'behind (about {pace:.0f} by today at an even pace)'))
+        say(f"    average a trade this month:       {avg_m:+5.2f}% (± {se_m:.2f}, {n_m} trades, after costs)   target {want_avg:+.1f}% or better   " + ('too few to read' if n_m < MIN_GROUP else 'reached' if avg_m >= want_avg else 'not yet'))
+        if value is not None: say(f"    the account, about:            ${value:>10,.0f}   target ${want_value:,.0f} or more   " + ('reached' if value >= want_value else 'not yet'))
+        break
+    say("  If a month's goal is missed: say so first thing, say why, and bring the changes that follow from it (the notes, same part).")
     say("\nWHAT TO DO WITH THIS: site-overview.md section 8c, 'The review every week or two'.")
     if a.out:
         os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True); open(a.out, 'w').write('\n'.join(out_lines) + '\n'); print(f"\nsaved as {a.out}")

@@ -1,4 +1,4 @@
-REVIEW OF THE AI AUTOPILOT (fake money)   09 Oct 2026 09:23 to 12 Oct 2026 09:23 UTC (3 days)
+REVIEW OF THE AI AUTOPILOT (fake money)   09 Oct 2026 11:07 to 12 Oct 2026 11:07 UTC (3 days)
 Read-only. Past practice results; nothing here is a forecast. Judge by dollars and the average per trade, not by how many ended up.
 
 1. SETTINGS
@@ -41,6 +41,9 @@ by how long it was held
 by who chose it
   the AI model                          5 trades    2 up  average  -1.03% (± 0.87)    -1,014.30 USD   too few to read
 
+by headlines shown to the model when it was bought (recorded from 12 Oct 2026)
+  not recorded (bought before)          5 trades    2 up  average  -1.03% (± 0.87)    -1,014.30 USD   too few to read
+
 by risk level at the time
   Adventurous                           1 trades    0 up  average  -3.25% (± 0.00)      -811.70 USD   too few to read
   Balanced                              4 trades    2 up  average  -0.48% (± 0.86)      -202.60 USD   too few to read
@@ -73,10 +76,6 @@ by risk level at the time
     furthest above its 52-week low      0 trades    0 up  average  +0.00% (± 0.00)        +0.00 USD   too few to read
     as ranked                           0 trades    0 up  average  +0.00% (± 0.00)        +0.00 USD   too few to read
   screeners rested: none
-  note: All trades had negative average performance, with an average of -1.0% across 5 trades.
-  note: Higher rank (1 and 2) did not guarantee better results; rank 2 had -2.8%.
-  note: RSI values varied; trades with RSI around 50 did not perform well overall.
-  note: Exit strategies varied; 'signal' and 'trail' exits had mixed results, with no clear advantage.
   this account: trial of the buying order 'trial', 3 share buys counted; AI calls today 3; early sells by the AI review allowed
 
 7. FAULTS IN THE FUNCTION'S LOG (the period)
@@ -86,5 +85,12 @@ by risk level at the time
   the account's record is 31 KB (a row can hold 400 KB): 5 of 300 finished trades kept, 54 of 80 activity lines, 5 holdings remembered
   the diary: 60 rows in all (54 activity lines, 5 finished trades, 1 settings), first 2026-10-10T10:31
   not yet in the diary: 0 (they go with the record's next save)
+
+9. AGAINST THE GOALS (targets set on 12 Oct 2026, not forecasts)
+  Month 1: stop the losing, and enough trades to see. Due 2026-11-12 (31 days left).
+    finished trades in all:               5   target 100   on course
+    average a trade this month:       -3.45% (± 0.00, 1 trades, after costs)   target -0.2% or better   too few to read
+    the account, about:            $    98,615   target $98,000 or more   reached
+  If a month's goal is missed: say so first thing, say why, and bring the changes that follow from it (the notes, same part).
 
 WHAT TO DO WITH THIS: site-overview.md section 8c, 'The review every week or two'.

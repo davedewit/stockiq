@@ -107,7 +107,7 @@ visit to the dashboard and never prints the account's address. What each part me
 python3 check-tools/autopilot_review.py --days 14 --out check-tools/reviews/review-$(date +%F).txt
 ```
 
-`reviews/` keeps one file a review: read the last one before running the next.
+`reviews/` keeps one file a review: read the last one before running the next. Its last part measures against the month's goal (`GOALS` at the top of the tool; the table is in `site-overview.md` section 8c).
 
 ## ai_chat_test.py
 
