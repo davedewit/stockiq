@@ -1105,7 +1105,8 @@ with `document.querySelector('h3')`.
   "The notification bell".
 - The buy row: search box (code or company name, same lookup as the home page), "Enter $" **or**
   "or quantity" (the other is worked out from the latest price), an optional note, "Practice buy".
-- The holdings table: Holding, Bought (date and time), Price then, Price now, Value, Change, Sell.
+- The holdings table: Holding (with how many are held, "Holding (5)", as the sold list says "Sold (7)"; 12 Oct 2026, at the
+  owner's word; on a phone the heading row is hidden, so the count shows on wider screens only), Bought (date and time), Price then, Price now, Value, Change, Sell.
   Under each name a line says whose it is: "Bought by you: it stays until you sell it", or for the
   autopilot's, when it will sell at the latest, at what loss or gain sooner, how the stop that
   follows it works, and, while its market is closed, that nothing happens to it until the market
@@ -1220,7 +1221,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=21` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Portfolio section | `website/practice-portfolio.js` (`?v=22` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=41`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
@@ -2153,10 +2154,10 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
-- Website (sha256 starts): `practice-autopilot.js?v=41` (`a63a59e5a2aa`), `practice-portfolio.js?v=21` (`cf6ac94ca9b3`),
-  `dashboard.html` (`6e29832d8511`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
+- Website (sha256 starts): `practice-autopilot.js?v=41` (`a63a59e5a2aa`), `practice-portfolio.js?v=22` (`26eb5153d24a`),
+  `dashboard.html` (`97b2bb8b5c16`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
   `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
-- Tests on the live files: 425 function, 203 panel, 95 portfolio, 22 bell, 19 chat, 42 signals; the panel-versus-function
+- Tests on the live files: 425 function, 203 panel, 96 portfolio, 22 bell, 19 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
 - Both repos pushed; **no `check-tools/pending-*` folder is left**. `website/` carries the daily job's own three files
@@ -3095,4 +3096,5 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - **Goals month by month, and the trial queue agreed** (section 8c, "The goals, month by month"): targets for 12 Nov, 12
     Dec and 12 Jan with what happens when one is missed; the review tool prints the standing against them (part 9). The
     queue of trials that runs itself is the first job of the first weekly check (on or after 19 Oct).
+  - The holdings table's heading says how many are held (`practice-portfolio.js?v=22`, `dashboard.html`; 96 portfolio checks).
   - Still not checked by a session: the logged-in dashboard itself and a real phone (neither can be opened from here).
