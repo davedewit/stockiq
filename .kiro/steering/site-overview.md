@@ -2149,6 +2149,27 @@ writing: done, and shown on the panel.
 
 ### Ideas offered and not built
 
+**The number of holdings as a setting of its own (thought through on 12 Oct 2026 at the owner's question; not built).** He saw
+that it buys "say 10 stocks max across the 100,000", that the less risk he picks the more holdings it has, and wondered
+about a second slider ("one customer would want to auto trade 50 stocks a day, another 2"). What is so today: the number of
+holdings comes only from the risk level (12 / 10 / 8 / 6 / 4), each holding is the budget divided by that number, and a
+check-in buys at most 3 (`MAX_BUYS_PER_CHECK`). Replayed on the saved share prices with 2 to 50 holdings under the Careful
+and Balanced rules (four years, 101 US shares, costs taken off): **the number of holdings is a matter of how bumpy the ride
+is, not of profit.** Fewer, larger holdings did better in that period (2 to 4 holdings: account +137% to +142% against the
+fund's +107% at Careful) but not clearly (t 1.3 to 1.8) and with deeper falls (-17% to -21%); 10 to 20 holdings sat a
+little behind the fund with shallower falls (-14% to -16%); **30 and 50 could not even be filled**, because of the 3 buys a
+check-in, so much of the money sat idle (which is why their falls look small).
+- **Recommended, if he wants it:** one optional field, "Number of holdings", left to the level or set by hand, in the same
+  "automatic / set by you" pattern as the three pace fields, with the size of a holding shown beside it; and the buys per
+  check-in made to follow it (3 cannot fill 50). A larger number also makes the shares of the budget per market finer.
+- **Not recommended:** a minimum or maximum number of trades a day. How often it trades already follows from the number
+  of holdings, the holding time and the check-in gap; a minimum would force buys that passed no filter. Say the
+  consequence in words on the panel instead ("with these settings, about N trades a week").
+- **To be honest about when building it:** more holdings means buying further down each screener's ranking (rank 30,
+  not rank 8), and the ranking has shown no reliable edge at any depth (section 7b).
+- Touches: `clean_settings`, `rules_for` (positions), `MAX_BUYS_PER_CHECK`, `market_slots` and its copy in the panel
+  (`autopilot_plan_check.py`), the level table on the panel, `DASHBOARD_GUIDE`.
+
 (A chart of the account and of the autopilot's result over time was built on 12 Oct 2026: "What the owner sees".) A weekly summary email even when
 there is no review; a coin yardstick (Bitcoin) for coin trades in the breakdown; watching prices
 between check-ins (a stop can only act at a check-in); trials that cover the owner's settings
