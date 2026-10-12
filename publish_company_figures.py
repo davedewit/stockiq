@@ -82,6 +82,32 @@ def build(info_dir=INFO_DIR, now=None):
     return {'made': now.strftime('%Y-%m-%d'), 'count': len(figures), 'figures': figures}
 
 
+HISTORY_DIR = os.path.join(SCRIPTS_DIR, 'research-data', 'company-figures')
+HISTORY_EVERY_DAYS = 7
+
+
+def keep_history(data, now=None):
+    """Keep a dated copy of the figures once a week (research-data/company-figures/, not in git). Yahoo gives only today's
+    company figures, so there is no history of them to test an idea on; kept week after week, these copies become one
+    (site-overview.md section 8c, "GO PLAY"). Never stops the run."""
+    try:
+        now = now or datetime.now(timezone.utc)
+        os.makedirs(HISTORY_DIR, exist_ok=True)
+        kept = sorted(f for f in os.listdir(HISTORY_DIR) if f.startswith('company_figures-') and f.endswith('.json'))
+        if kept:
+            last = datetime.strptime(kept[-1][len('company_figures-'):-5], '%Y-%m-%d').replace(tzinfo=timezone.utc)
+            if (now - last).days < HISTORY_EVERY_DAYS:
+                return None
+        path = os.path.join(HISTORY_DIR, f"company_figures-{now.strftime('%Y-%m-%d')}.json")
+        with open(path, 'w') as f:
+            json.dump(data, f, separators=(',', ':'), sort_keys=True)
+        print(f"    kept a dated copy for research ({len(kept) + 1} so far): {os.path.basename(path)}")
+        return path
+    except Exception as e:
+        print(f"    (no dated copy kept: {type(e).__name__}: {e})")
+        return None
+
+
 def main():
     dry_run = '--dry-run' in sys.argv or os.environ.get('DRY_RUN') == 'true'
     data = build()
@@ -92,6 +118,7 @@ def main():
     if data['count'] < MIN_STOCKS:
         print(f"⚠️  Fewer than {MIN_STOCKS} stocks: not uploaded (the file on AWS is left as it is)")
         return 1
+    keep_history(data)
     target = f"s3://{BUCKET}/{KEY}"
     if dry_run:
         print(f"    (dry run) upload: company_figures.json to {target}")

@@ -3,3 +3,5 @@ lambda-sync/
 *.json
 .analysis_cache/
 __pycache__/
+# dated copies of data kept for research (prices, company figures): large, and not ours to publish
+research-data/

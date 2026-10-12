@@ -2147,6 +2147,19 @@ says it, or anything like it, the session works by itself for as long as it last
    with tests, a dry run and a rollback copy. **Allowed without asking**: it is fake money, bounded, and a trial is
    kept only if clearly better.
 5. End with a short report: what was asked, what was answered, what went live as a trial, what needs his yes.
+**Could a session start by itself every night?** (He asked on 12 Oct; answered, not built.) Technically yes, the way the daily
+deploy starts: a launchd job on this Mac that checks every ten minutes whether a day has passed and then runs Claude
+Code without a window (`claude -p "<the instruction>"` in this folder, with the tools it may use allowed beforehand,
+since nobody is there to approve). It needs the laptop open, awake and online; a cloud session cannot do it (no AWS
+access, section 5b). **Not worth it yet, and told him so:** the autopilot finishes a handful of trades a day, so a nightly
+session would mostly find nothing new; every run draws on the same usage allowance he works with (it ran out several
+times on 12 Oct); and an unattended session should not deploy anything (twice that day a person or a check caught a
+mistake before it went live). If it is built later: research only (the review, tests on past prices, findings written
+to a file and committed), never a deploy, with a limit on how long it runs; changes go live when he is there.
+**What needs no session at all is gathering data, and that started the same day:** the daily job keeps a dated copy of the
+company figures once a week (`publish_company_figures.py` → `research-data/company-figures/`, not in git); next, slowly,
+prices for more shares the same way.
+
 **Still needs his yes, always:** deleting anything; his own settings; what the public site says or how the screeners
 score; anything that costs more than cents; anything near real money (never). **What "go play" cannot be:** running with
 no session open. Something that searches by itself between sessions (the test bench on a nightly schedule, feeding the
@@ -3184,6 +3197,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     sold by price or time only, not on the signal and not by the AI review. 436 function checks. **The comparison of
     the panel with the function caught the first design's side effect** (a 30-day hold of its own would have overridden
     the user's holding time): run it for every change to the function, not only for changes to the budget.
+  - The daily job keeps a dated copy of the company figures once a week (`research-data/company-figures/`; the first is of
+    12 Oct 2026): the start of a history to test ideas about company figures on. Scheduling a nightly session was asked
+    about and judged not worth it yet ("GO PLAY", section 8c).
   - **Later that day:** the company-figures script run by hand on the scheduler's bare PATH: published (10:55 UTC). **A
     clean-up of unused worker functions was prepared and stopped by the owner before its dry run; nothing was deleted**
     ("Start here when resuming", improvements, item 10): the audit's "204 never called" was wrong for 60 of them, the old
