@@ -29,6 +29,7 @@ It refuses to upload a file with fewer than 1,000 stocks (a broken cache must no
 import glob
 import json
 import os
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -95,7 +96,10 @@ def main():
     if dry_run:
         print(f"    (dry run) upload: company_figures.json to {target}")
         return 0
-    result = subprocess.run(['aws', 's3', 'cp', OUT, target, '--content-type', 'application/json', '--only-show-errors',
+    # The daily run is started by launchd, whose PATH does not hold Homebrew: "aws" alone was not found there on its
+    # first daily run (12 Oct 2026) and nothing was published. The full path is the one deploy-to-s3.sh uses.
+    aws = shutil.which('aws') or '/opt/homebrew/bin/aws'
+    result = subprocess.run([aws, 's3', 'cp', OUT, target, '--content-type', 'application/json', '--only-show-errors',
                              '--profile', 'default', '--region', 'us-east-1'], capture_output=True, text=True)
     if result.returncode != 0:
         print(f"⚠️  Company figures not uploaded: {(result.stderr or result.stdout).strip()[:200]}")

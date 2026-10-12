@@ -1,7 +1,15 @@
+<!--
+  DAVE: to go through the autopilot in depth (what it lost and why, what to change), open a session and say:
+
+      review the autopilot
+
+  Every week or two is about right; the first one around 26 Oct 2026, or once 30 trades have finished.
+  (This note is hidden in a preview; it shows when the file is opened as text.)
+-->
 # StockIQ Site Overview (read this first)
 
 How stockiq.tech works end to end, what is generated vs hand-edited, the current SEO setup,
-known pitfalls, and open ideas. **Last full sweep: 11 Oct 2026, evening** (every part of section 8c
+known pitfalls, and open ideas. **Last full sweep: 11 Oct 2026, evening; everything checked again on 12 Oct 2026** (live code against local copies, every test suite, 48 hours of logs: section 8c, "Start here when resuming") (every part of section 8c
 rewritten or checked against the deployed code; the other steering files, the README files and the AI chat's
 own guide brought into line). Section 8b holds what the 9–10 Oct end-to-end test of every screener, signal
 and crypto path established; section 7b the backtests and the factor study of the screener score; **section 8c
@@ -594,7 +602,7 @@ crypto orchestrator or any worker.
 | UK FTSE 100 | `4, 'ftse100'` | `5-ftse100` | `stockiq-europe-4-1-worker-N` (10) | 100 | Wikipedia |
 | Japan Nikkei 225 | `5, 'nikkei225'` | `5-nikkei225` | `stockiq-asia-5-5-worker-N` (21) | 225 | Wikipedia |
 | Crypto universe | `7, 'coinspot'` | `7-1` | orchestrator + 54 `stockiq-option-7-1-worker-N` | 540 coins | CoinGecko top by market cap, price-checked |
-| Single coin | `72, 'single'` | – | `stockiq-option-7-2-worker-1` | – | – |
+| Single coin | `72, 'single'` | – | the single-stock report function, `"asset": "crypto"` (since 12 Oct 2026; section 7) | – | – |
 
 - The option numbers are inconsistent for historical reasons (ASX is page option 5 but
   coordinator `4-…`; FTSE the reverse). New screeners: use `5` + the same subOption everywhere.
@@ -646,9 +654,9 @@ run that group's button through the page and the coordinator (end of this sectio
 remove the folder. `python3 check-tools/workers.py` must show "one" for the 13 groups and the same code across them
 (`--contents` downloads and compares, the honest count).
 
-- **928 worker functions in 18 groups; 724 are called by the site** (669 share workers, 54 crypto workers, 1 single-coin
-  worker). **204 are not called at all** (`stockiq-option-3-3-worker` 60, `stockiq-option-7-4-worker` 139,
-  `stockiq-option-3-worker` 5): left over, they cost nothing idle, and can be deleted when the owner agrees. They were not
+- **928 worker functions in 18 groups; 723 are called by the site** (669 share workers, 54 crypto workers). **205 are not
+  called at all** (the single-coin worker since 12 Oct 2026, and `stockiq-option-3-3-worker` 60, `stockiq-option-7-4-worker` 139,
+  `stockiq-option-3-worker` 5: left over, they cost nothing idle, and can be deleted when the owner agrees. They were not
   touched and still hold old code.
 - **What the audit really found (the first table was misleading).** `workers.py` counts package fingerprints, and a zip's
   fingerprint changes with the dates of the files inside it. The "100 / 200 different versions" of the Russell groups were
@@ -1051,8 +1059,8 @@ with `document.querySelector('h3')`.
     the start, which the note under the graph says with the amount; a "Reset fake money" starts the line again.
   - The line is one blue (checked against the light and dark backgrounds), never green or red: up and down are said by the
     arrow and amount above it. The picture is drawn to the width it has and again when that changes (`ResizeObserver`).
-  - Not built: an hourly line (the price source would need an `interval` setting), a line for an index fund beside it,
-    and telling the AI chat about the graph (`DASHBOARD_GUIDE` in `stockiq-ai-chat` does not mention it yet).
+  - Not built: an hourly line (the price source would need an `interval` setting) and a line for an index fund beside it.
+    The AI chat knows the graph (its guide, 12 Oct).
 - **A result is an arrow and an amount**, as a broker's screen shows it: `▲ $801.50 (0.80%)` in green, `▼ $58.48 (0.06%)`
   in red, `– $0.00` in grey (`movedHtml`, `pctHtml` in `practice-portfolio.js`; `deltaHtml` in `practice-autopilot.js`).
   The words stay as each arrow's `aria-label` for screen readers, and `moved()` gives the words ("down $58.48") for the
@@ -1201,7 +1209,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=21` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=40`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=41`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -1699,7 +1707,7 @@ there. Setting things up for the user by chat was judged too much for now and is
 - **The risk-level numbers in `DASHBOARD_GUIDE` are a copy of `RISK` in `stockiq-ai-trader`**
   (holdings, loss limit, gain mark per level): `check-tools/ai_chat_test.py` compares them. They
   were added after the model told a test question that Cautious means "fewer" holdings.
-- Test: `python3 check-tools/ai_chat_test.py lambda-sync/stockiq-ai-chat/lambda_function.py` (16
+- Test: `python3 check-tools/ai_chat_test.py lambda-sync/stockiq-ai-chat/lambda_function.py` (19
   checks; stand-ins for the database and the AI model). The guide was brought up to date in the evening sweep of 11 Oct
   (results as arrows, the bell's one list, a release of the budget listed at its check-in, learning shared by every
   account). Tried live with real questions on 11 Oct:
@@ -1975,13 +1983,13 @@ last part). An idea that is not ahead on both parts of the period, or that rando
 3. **Test the copies** (none of these touches anything real):
    ```bash
    cd /Users/dave/VSCODE/stockiq/check-tools
-   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 386 checks
-   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 198 checks
+   python3 -W ignore ai_trader_test.py pending-<name>/lambda/lambda_function.py | grep -v '^PASS'   # 424 checks
+   node autopilot_test.js pending-<name>/web/practice-autopilot.js | grep -v '^PASS'                 # 203 checks
    sed 's#https://5c7pt7qurshld4cwaqyopfxcei0cuurj.lambda-url.us-east-1.on.aws/#__PRACTICE_API_URL__#' \
-     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 74 checks
+     pending-<name>/web/practice-portfolio.js > /tmp/pp.js && node practice_test.js /tmp/pp.js | grep -v '^PASS'   # 95 checks
    python3 -W ignore autopilot_plan_check.py pending-<name>/lambda/lambda_function.py pending-<name>/web/practice-autopilot.js 150
    node autopilot_bell_test.js pending-<name>/web/autopilot-bell.js | grep -v '^PASS'                 # 22 checks (the notification bell)
-   python3 ai_chat_test.py pending-<name>/chat/lambda_function.py | grep -v '^PASS'                 # 16 checks (the AI chat's function)
+   python3 ai_chat_test.py pending-<name>/chat/lambda_function.py | grep -v '^PASS'                 # 19 checks (the AI chat's function)
    ```
    `ai_trader_test.py` sets the pace by hand at its top (it patches `DEFAULTS`), as a user who chose
    his own values; the real defaults, where the level sets the pace, are tested in their own part.
@@ -2034,206 +2042,122 @@ apostrophe must allow for it; a test of an action that depends on the day (tradi
 must set the function's clock (`m.datetime = at(when)` in `ai_trader_test.py`), or it passes on
 weekdays and fails at the weekend.
 
-### Start here when resuming (state at 14:40 UTC on 11 Oct 2026: the full sweep, the replay, real costs and the bar, one code base for the share screeners, the report writers)
+### Start here when resuming (state at 10:30 UTC on 12 Oct 2026, after a full check of everything)
 
-**Monday 12 Oct, seen at 03:30 UTC (the owner was told; the rest of the day is still to report):**
-- At 00:10 UTC, when Sydney and Tokyo "opened", the autopilot bought ASX.AX and QBE.AX ($9,994 each) and 6976.T ($7,488):
-  **the first buy spread over two share markets.** No errors in its log; the shared learning ran clean (4 trades, 1 account).
-- **12 Oct 2026 was a public holiday in Japan (Sports Day): Tokyo did not trade, so 6976.T was bought at Friday's closing
-  price.** The known limit (the trading hours know no public holidays) cost a stale-price buy on its first Monday.
-  **Closed the same morning (03:52 UTC):** a share is traded only at a price under 3 hours old ("The autopilot: settings",
-  "Limits"). Tried on live prices that hour: both Tokyo shares "left alone" (last traded 3 days ago), Sydney's tradable.
-- 4307.T was still held: with the holding time now set to 2 days its time is up at 15:33 UTC on Monday, when Tokyo is
-  shut, so by the rule it goes at Tuesday's opening (not verified in the plan the page shows).
-- **The ASX fix seen during ASX hours:** a live ASX worker gave real 24-hour changes for 8 of 8 shares, none of them zero.
-- The practice account stood at $99,048 (down $952): down $58 on what has been sold, down $893 on the six holdings still
-  held, all bought by the autopilot. The new graph on the Practice portfolio tab shows the path.
-- Not yet seen at that hour: the daily deploy (11:00 on the Mac), a FTSE run after a London session.
+**FIRST THING IN EVERY SESSION: tell the owner, in plain words and before anything else, what has happened since the last
+one.** (His words on 11 Oct: "next time i open a session… update me on how monday went and anything else"; Monday 12 Oct
+was reported to him through that day.) Lead with dollars. All read-only:
+1. `python3 check-tools/autopilot_review.py --days <since the last session>`: the result, the losses, faults, the trials.
+2. `grep -a -E "Pages written|Indexable|No price data|Company figures|Sync complete|pushed|could not|failed|All done|Skipping git" ~/stockiq-daily.log`
+   (the daily deploy), and `git status -sb` in both repos.
+3. The "still to be seen" list below: say which of them has now been seen.
 
-**"Can you make the autopilot any smarter?" (the owner, 12 Oct). The answer given, and agreed ("go ahead with what you think is
-best or update md if we can't do anything now and its future task once more logs are gathered"): nothing more is changed in
-how it trades for now; it needs finished trades, not more ideas.**
-- **Why not now.** One account, 4 finished trades (all coins, all from 10–11 Oct at the Balanced level), 0 finished share
-  trades. Every way it has of improving itself counts finished trades, and a second trial running beside the first would
-  split the few there are. The one new idea that could be tested on saved prices (limits set per share) made no difference
-  (section 7b, last part).
-- **What is already running and what it is waiting for** (read the owner's record and the shared record `_brain` to see):
-  1. **The trial of which share to buy** (as ranked, or the one furthest above its 52-week low) **started for real on 12 Oct**:
-     3 share buys tagged (ASX.AX and 6976.T as "furthest above", QBE.AX as ranked). Verdict at 10 finished share trades
-     each way. With holdings kept up to 10 days that is weeks, not days.
-  2. The AI model's first notes: at 5 finished trades in the shared record (one more).
-  3. The first progress report and review of its own rules: at 20 finished trades at one level. The four so far are at
-     level 3; the owner is now on level 2 (Careful), whose count starts at 0.
-- **The owner's settings on 12 Oct** (he changes them: read the record): Careful; budget $99,941; a check-in every 12 hours
-  (left to the level); holdings kept up to 10 days; nine screeners ticked, coins among them; shares of the budget automatic.
-  **At Careful, with a share market ticked, coins get 0% of the budget on automatic** (the level table), so no new coin is
-  bought: the two coins it holds are the last until that changes, and nothing about coins can be learned meanwhile.
-- **When to act, and on what:**
-  - *At the order trial's verdict:* read it; whichever way it goes, the next trial in line is a longer holding time for
-    shares, then not selling a share on the signal alone (the two other ideas that held up in the replay). One at a time.
-  - *If the owner goes back to trading coins* (a level with a coin share, or coins set by hand): build the trial of **limits
-    set from each coin's own daily movement** (every second coin; kept only if clearly better). Not before: with no coin
-    trades it would never finish. A coin moves 5 to 15% a day, so a fixed -7% is an ordinary dip for one and a real fall
-    for another; there are no saved coin prices to test it on first.
-  - *At 20 finished trades at one level:* read the first progress report and what it did about it.
-  - *If more accounts switch the autopilot on:* all of the above arrives sooner, since the record is shared.
-- **Do not** re-weight the screener score, add trials, or adopt anything from the replay without a live trial: section 7b.
+**WHEN THE OWNER SAYS "review the autopilot"** (every week or two; the first around 26 Oct 2026, or at 30 finished trades): run
+the routine in "The diary, and the review every week or two" above. Read `check-tools/reviews/` first; the baseline is
+`review-2026-10-12.txt` (five finished trades, down $1,014).
 
-**Monday 12 Oct, later (seen at 08:45 UTC):**
-- **The owner set 50 holdings within hours of the field going live**, on Balanced: budget $99,129, built up over 2 days,
-  a check-in every 6 hours, holdings kept up to 10 days. Under the new code that is $1,983 a holding, up to 10 buys a
-  check-in, the top 30 of each screener, 10 holdings for each of five markets. **Five older, larger holdings ($7,500 to
-  $25,000, bought at 4 and 10 holdings) still take $64,962 of the budget**, so the first small buys wait until the
-  build-up has released more than that (about a day), and the account is a mix of sizes until the old ones are sold.
-- 05:40 UTC: WAL-USD sold by the AI model's review at -3.1% (-$811.70): the fifth finished trade.
-- **08:10 UTC: the first shared notes reached the activity list** ("Reviewed the record of every account (5 finished
-  trades): …"). Seen for real for the first time.
-- **The daily deploy ran 04:08 to 04:41 UTC and finished**, the first with the new copy-keeping rules. **"No price data:
-  2039"**: the price source or the network failed for most stocks during the snapshot step ("Cookie/crumb fetch failed
-  (DNSError)" in the log). As designed nothing was de-indexed (957 indexable, 720 snapshots kept from the day before, 235
-  pages written). The next daily run refreshes them; or `python3 update_stock_analysis.py` and a deploy, with the owner's
-  word. Its GitHub push was skipped (the 23-hour marker), so `news.html`, `news.js` and `sitemap.xml` sit uncommitted in
-  `website/` until Tuesday's run.
-- Both autopilot changes of the day went live after it (04:47 and 04:50 UTC). Not yet seen: a "Left alone" line (Tokyo's
-  next opening, 00:10 UTC Tuesday, then again at 00:40 with prices of the session), a FTSE run on a morning after.
+**What the owner is after, in his words:** "the goal is to pickup on patterns if we see patterns that are much more success
+than failure its something to repeat, if we see consistent loss patterns we also steer away… end goal here is make money
+we need it over 100,000"; earlier: "always be active ever changing and improving", "close to 70% profit 30% loss",
+"seamless and straightforward so a dummy could figure it all out", "something on the site to tell me whats going on",
+"a smart AI that is learning in a central location for all users", things "setup in one way not multiple ways". He goes
+with the session's advice on changes ("sure i'll go with advice you give to make changes and improvements").
+**The honest position, said to him each time results come up (section 7b):** the replays and backtests found no reliable
+edge in the screener scores, only momentum in a rising market; quick share trading loses to costs; the share of trades
+that end up is set by the selling rule and is not profit. Nothing here promises an account above $100,000. A pattern
+counts from about 30 trades in a group and beyond twice its margin of error; judge by dollars and the average a trade.
+**He asked whether code changes by itself in the background. It does not, and must not:** the autopilot changes five
+numbers of its own and the order it buys shares in, through trials; code changes only in a session.
 
-**A REVIEW SESSION (every week or two; the first around 26 Oct 2026, or at 30 finished trades):** run the routine in "The diary, and the review every week or two" above, starting with `python3 check-tools/autopilot_review.py`, and read `check-tools/reviews/` for the last one. The baseline is `review-2026-10-12.txt` (five finished trades, -$1,014).
+**Where it stands (12 Oct 2026, 10:30 UTC; he changes settings often, so read the record):**
+- The account is at cost $99,130 (own buys by hand up $144, the autopilot's finished trades down $1,014), with about
+  another $515 down on paper on five holdings ($64,962, bought at the old sizes of 4 and 10 holdings).
+- **Five finished trades, two up, -$1,014.30, all coins:** WEMIX +0.6%, CFX +1.0% (rose 7.95% after the stop sold it), ERG
+  -2.8% and WAL -3.25% (-$811.70; both sold by the AI review), CKB -0.8% (stop passed between check-ins).
+- Settings: Balanced, **50 holdings set by hand** ($1,983 each), budget $99,129 built up over 2 days, a check-in every 6
+  hours, holdings kept up to 10 days, trailing stop "protects a gain", all three switches on. Screeners: S&P 500,
+  Russell 1000, Russell 2000, NASDAQ 100, Dow 30, ASX 200, FTSE 100, Nikkei 225, crypto; shares of the budget automatic.
+- Running by itself: the trial of which share to buy (3 share buys tagged; verdict at 10 finished each way); the shared
+  record (5 trades, 1 account); the diary (every line since 10 Oct).
+- **Waiting for:** 30 finished trades for the first notes and the first review session; 20 at one level for the first
+  progress report and review of its own rules (level 3 has 4, level 5 has 1).
 
-**FIRST THING IN THE NEXT SESSION: tell the owner how Monday 12 Oct went, before anything else** (his words on closing,
-11 Oct: "next time i open a session… update me on how monday went and anything else"). Lead with the result, in plain
-words. What to look at, all read-only:
-1. **The daily deploy** (11:00 on this Mac's clock, which was UTC+7: 04:00 UTC): `grep -a -E "Pages written|Indexable|No price
-   data|Sync complete|pushed|could not|failed|All done|Skipping git" ~/stockiq-daily.log`. It is the first run with the new
-   copy-keeping rules (section 5, step 8). Its GitHub push will have been skipped (a deploy by hand reset the 23-hour marker
-   at 12:16 UTC on Sunday), so look for an unpushed "Auto-update" commit: `git status -sb` in both repos.
-2. **The autopilot**: `aws logs tail /aws/lambda/stockiq-ai-trader --since 36h --profile default --region us-east-1 | grep -i -E
-   "check-in failed|shared learning|not worked out|not sent"`, then the owner's record (the page's read-only `get`): was the
-   Nikkei share 4307.T sold when Tokyo opened (00:05 UTC); any buys and sales; the first shared notes (due at 5 finished
-   trades). **At hand-over his share markets were set by hand to 0% of the budget**, so share buys only happen if he changed that.
-3. **The share screeners after a real trading day**: `python3 check-tools/workers.py` (13 groups "one", same code);
-   `cd check-tools && node page_run.js 4 ftse100` once London has closed (15:30 UTC) and read the first prices against a
-   quote: they must be that day's (the fix for an empty latest session has never been seen live); `node page_run.js 5 200`
-   during or after the ASX session: the 24-hour changes must not all be 0.00.
-4. **The report formats on real, moving prices**: `node tracker_run.js` on a `page_*.json` made an hour or more earlier (FTSE,
-   ASX, Nikkei): the moves must be small percentages, not 0.00 and not thousands (a misread pence figure or comma).
-5. Anything in section 11 the owner should decide (the public repositories first).
+**Still to be seen for real** (strike each when seen): a "Left alone" line at a Tokyo opening with only old prices, then the
+same market looked at again half an hour later; the first small buys at 50 holdings, up to 10 at a check-in, with
+`heads` on the remembered buy; a FTSE run on a morning after a London session showing that session's prices; the
+company figures published by the daily run ("Company figures" in its log without a warning: fixed 12 Oct, first run 13
+Oct); a "tighten" answer; the larger model in a review; a coin held back until it has stayed; any trial of a rule; the
+first progress report and its email; whether the test email reached the owner's inbox. **Never checked by a session,
+because neither can be opened from here: the logged-in dashboard itself and a real phone.**
+**Seen for real so far:** clean scheduled check-ins on every version; buys spread over two share markets (12 Oct); the
+fresh-price rule on live prices; headlines reaching the model; sales by the following stop and by the AI review; the
+look-back; the shared record taking in trades, its notes reaching an activity list, and its five-trade notes dropped
+again at 10:10 UTC on 12 Oct; the diary's first 60 rows; the bell confirmed by the owner; the chat answering from its guide.
 
-**The job that was next is done (11 Oct 2026, evening): one code base for the share screeners.** All 669 share-screener
-workers run the one package built from `stockiq/workers/` (section 8b, "The worker groups": what changed, how it was proved
-and deployed, the way back). Confirm nothing has moved: `python3 check-tools/workers.py` shows "one" for the 13 share groups
-and the same code across them; `python3 workers/build.py` prints the fingerprint in `workers/live.txt`.
-**To look at first, Monday 12 Oct or the next working day:** (a) one FTSE 100 run on a morning after a London session: the
-price must be that session's, not the one before (the fix for the empty latest session was tested on a doctored answer
-only); (b) an ASX run during ASX hours (the one-bar-a-day rule was only seen after the close); (c) the autopilot's first
-share buys, which now come from rankings made with the one RSI.
-**The small job after it is done too (11 Oct, 13:46 UTC): the report writers and the tracker.** Both screener reports print
-each market's own currency from the workers' `currency` field and whole symbols, and the 🎯 tracker reads them (section 8b,
-"Dashboard performance tracker"). Live: `stockiq-screener-coordinator` `pUBd8qCLYGjt…`, `analysis-functions.js` (sha256 starts
-`72975c8c108c`), `dashboard.html` (`bec16da1ef4c`). Way back: `~/VSCODE/backup/stockiq-screener-coordinator_before_currency_20261011.zip`
-and the two website files from git.
-**The owner approved the one RSI for every screener on 11 Oct 2026** (asked directly: "Yes, keep it"), knowing that about a
-third of US and London labels and three or four of each top 10 changed on the day.
-**Other things waiting, in order:** (1) the owner's decision on the two **public** GitHub repositories and his personal
-file in one of them (section 11, first item); (2) Monday 12 Oct: the first daily deploy with the new copy-keeping rules,
-and the first share trades; (3) the autopilot's own trials of a longer holding time and of not selling on the signal, and
-recording company figures with each share bought (below, item 0); (4) deleting the 204 worker functions the site never
-calls, with his agreement; (5) thinning the bell script's handling of older copies after a week; (6) the worker oddities
-left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line change now, each changing labels.
+**Limits to remember:** a stop only acts at a check-in; trading hours know no public holidays (covered by the 3-hour
+price rule); a market's share is a number of whole holdings; holdings bought at an earlier size keep it until sold; the
+trading cost is one typical figure (0.1% each way); with one account the shared learning is that account; headlines
+are titles only, and most candidates have none. **Not known:** how the owner looks at the site (stockiq.tech, or a local
+preview from Kiro): ask early when a change "does not show" (section 9).
 
-**What is live, and how to confirm nothing has moved since:**
-- Lambda `stockiq-ai-trader`: `CodeSha256` `E7OY2fUBG4U4mDaCa/ZM/13sEaFSmBxP5UbQKz+UrPU=`, equal to
-  `lambda-sync/stockiq-ai-trader/lambda_function.py` (3,028 lines; 12 Oct 2026: the fresh-price rule, a market that stays due, the number of holdings, the diary, notes only from 30 finished trades, headlines counted with each buy). Table `stockiq-ai-trader-journal` (the diary) made the same day.
-- Lambda `stockiq-ai-chat`: `CodeSha256` `f6vB7CzN3cQAt9ZbTUS7+eYrFRsp75L46Xks8kx5rn4=` (its guide to the dashboard brought up to date on 12 Oct), equal to
-  `lambda-sync/stockiq-ai-chat/lambda_function.py` (350 lines).
+**What is live, and how to confirm nothing has moved since** (all compared with the local copies on 12 Oct, 10:17 UTC):
+- `stockiq-ai-trader` `E7OY2fUBG4U4mDaCa/ZM/13sEaFSmBxP5UbQKz+UrPU=` (3,028 lines); `stockiq-ai-chat`
+  `f6vB7CzN3cQAt9ZbTUS7+eYrFRsp75L46Xks8kx5rn4=`; `stockiq-screener-coordinator` `pUBd8qCLYGjtVSoYQObSV8YVygyP8mBSfdCxxJ+ho9Y=`;
+  `stockiq-option-1-1-custom-analysis` `I84SxSgLYNt7…`; `stockiq-chart-generator` `OIDrZ2W9G3lJ…`; `stockiq-paper-portfolio`
+  `s6IR+/80N/3k…`; the two signals functions `6nVDLm4/8G6K…`; the crypto orchestrator `yvmucU37gHJH…` and its 54 workers
+  `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
+  shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
+- Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
 - Website (sha256 starts): `practice-autopilot.js?v=41` (`a63a59e5a2aa`), `practice-portfolio.js?v=21` (`cf6ac94ca9b3`),
-  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`6e29832d8511`; `analysis-functions.js` `96dbcb721ec1`),
-  `ai-chat.js?v=2` (`87eaadf52197`); 17 more pages carry the bell's loader line; `index.html` and `faq.html` the plan wording.
-  Live files were compared byte for byte at each deploy.
-- `deploy-to-s3.sh` carries the rules for how long a browser may keep a copy (section 5, step 8); the first daily run with
-  it is Monday 12 Oct: look at its log once (section 12, "After the daily run").
-- The single-stock report and its chart (section 7, "The single-stock report"): `stockiq-option-1-1-custom-analysis`
-  `I84SxSgLYNt7z4XcxPEOaFvZtYJhOT6qALoTeuZtXuo=`, `stockiq-chart-generator` `OIDrZ2W9G3lJ2sKarnoT4c7RvoLh1ApDX43NWjR72z4=`,
-  both equal to their mirrors; `stock_metrics.py` sha256 starts `5c034782379b`; tests 103 report, 29 chart.
-- Crypto: the 54 `stockiq-option-7-1-worker-N` all `NmXC9dcsA6p5tXJl+u6VZIfdsrvM3ERN/DmMSQ9zalI=`, the orchestrator
-  `Tyyx+Pb2l+sy7avfCncwduEtmFtYn6Lws+5g6dj9Kc0=`, both equal to their mirrors (MACD fix of 11 Oct, section 8b).
-- Share-screener workers: all 669 show `CodeSha256` `q9ZX/UvTBcszKxRPR9lvJw9UpyfWrB5sOB3pDWccm6c=` (`workers/live.txt`), built from `workers/` in git.
-- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 424 function, 203 panel, 95 portfolio, 22 bell, 19 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
-  spreads over markets).
+  `dashboard.html` (`6e29832d8511`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
+  `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
+- Tests on the live files: 424 function, 203 panel, 95 portfolio, 22 bell, 19 chat, 42 signals; the panel-versus-function
+  comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
+- No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
+- Both repos pushed; **no `check-tools/pending-*` folder is left**. `website/` carries the daily job's own three files
+  uncommitted (news.html, news.js, sitemap.xml) until its next push.
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
   trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell,
-  takeover, report`, then `stockiq-ai-trader_before_sweep_20261011.zip`, `…_before_autopilot_costs_…` and, 12 Oct, `…_before_autopilot_fresh_20261012.zip`, `…_due_…`, `…_holdings_…`, `…_journal_…`, `…_notes_…`, `…_heads_…`;
-  `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `stockiq-ai-chat_before_{guide, guide2}_20261012.zip`.
-- First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and the function's log
-  (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors ("check-in failed", "shared learning failed",
-  "not worked out", "not sent") and for the firsts listed below.
+  takeover, report`, `stockiq-ai-trader_before_sweep_20261011.zip`, `…_costs_…`; 12 Oct `fresh, due, holdings, journal,
+  notes, heads`. `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `…_{guide, guide2}_20261012.zip`.
 
-**The owner's autopilot at the sweep** (he changes settings often: read the record, do not trust this):
-Adventurous; budget $99,941 (all his practice money); built up over 1 day (by hand); checks in every hour (left to the
-level); keeps a holding at most 2 days (by hand); trailing stop "protects a gain"; all three switches on. Screeners
-ticked: S&P 500, Russell 1000, Russell 2000, NASDAQ 100, Dow 30, ASX 200, FTSE 100, Nikkei 225 and crypto, **with the
-share of the budget set by hand to 0% for US, Australian, UK and Japanese shares: everything goes to coins.** It holds
-WAL-USD and MANTA-USD ($24,985 each, bought 11 Oct) and one Nikkei share (4307.T, $12,500, bought on a Saturday before
-the trading-hours rule; it is sold when Tokyo opens, Monday 00:05 UTC). Practice cash $37,471.
-
-**Its record: four finished trades, two up, -$202.60.** WEMIX +0.6% (+$7.91; score fell below zero). CFX +1.0% (+$12.79;
-first sale by the following stop; it rose a further 7.95% afterwards). ERG -2.8% (-$173.03; first sale by the AI review).
-CKB -0.8% (-$50.27; the stop was passed between two check-ins). All four were bought at the Balanced level, so the
-shared record holds 4 trades from 1 account at that level. Far too few to judge anything.
-
-**Seen for real:** clean scheduled check-ins on every version; headlines reaching the model; both AI models answering
-the test question; sales by the following stop and by the AI review; the look-back; "Check in now" releasing the next
-step early; a test email accepted by the mail service; the budget being put right on opening the page; the shared
-record taking in the four trades (09:10 UTC, 11 Oct) and its trial of the buying order starting; the bell's one list on
-the live dashboard, home, analysis and a stock page, opened as the owner's account in a test browser, **and the owner's
-own confirmation that the bell works ("ah all good now")**; the AI chat answering dashboard questions from its new guide.
-**Not yet seen for real:** a "tighten" answer; the larger model in a review; a coin held back until it has stayed; a buy
-spread over several markets; "Check in now" with a market closed; the first notes (at 5 finished trades in the shared
-record: one more), a shared note reaching an activity list and its email; the first progress report and review of its
-rules (at 20 finished trades at one level); any trial of a rule; a share bought under the buying-order trial; whether
-the test email reached the owner's inbox; the dashboard on a real phone.
-
-**Not known:** how the owner looks at the site (stockiq.tech, or a local preview from Kiro). He was asked and did not say;
-the bell worked for him only once its addresses were relative, which points to something other than the live domain.
-Ask early next time a change "does not show" (section 9).
-
-**Limits to remember:** a stop only acts at a check-in (CFX and CKB were both sold below where their stop stood); the
-trading hours know no public holidays (a share is only traded at a price under 3 hours old, which covers them); a market's share is a number of whole holdings; the trading cost is one typical
-figure (0.1% each way; a small coin costs more in real life); with one account the shared learning is that account.
-
-**What the owner is after, in his words:** "trying to optimise this to always be active ever changing and improving", a
-goal of "close to 70% profit 30% loss", "seamless and straightforward so a dummy could figure it all out", "something on
-the site to tell me whats going on", "a smart AI that is learning in a central location for all users", "look like a
-professional stock portfolio", and things "setup in one way not multiple ways". Hold the goal against section 7b: the
-share of winning trades comes from the selling rule and is not profit; the screener's own factors showed no reliable
-link with what shares did next. Say so plainly each time results come up, and judge by dollars and the average per trade.
-
-**The honest position, as told to the owner on 11 Oct (section 7b, last part):** the replay and both backtests say the
-screener's score has no clear edge; what shows up is momentum in a rising market, and that quick share trading loses to
-costs. He asked to carry on in this order: (1) the fast replay: done; (2) real costs on the practice money: done;
-(3) better inputs: the replay has tested the price-based ones, company figures are still to do (below); (4) the bar in
-writing: done, and shown on the panel.
-
-**Open, in the order I would take them:**
-0. **Better inputs, next steps.** (a) Let the autopilot try, by its own trial mechanism, what the replay points to for
-   shares: a longer holding time and not selling on the screener's signal (neither is in `TUNABLE`; each needs a tag on
-   the buy and a trial like the buying order's). (b) Company figures: record a few real ones with each share bought
-   (earnings yield, profit margin, debt, growth; the single-stock report Lambda already fetches them from Finnhub and
-   Yahoo) and split the record by them, as was done for the 52-week low; no rule until the record supports one.
-   (c) Saved coin prices, so that coins can be replayed too. (d) The replay on a list that is not today's members.
-1. Monday 12 Oct: the first daily deploy with the new copy-keeping rules (its log); what happened when Tokyo, Sydney and
-   New York opened (4307.T sold; his shares for share markets are 0%, so no share buys are expected unless he changes
-   that); "What happens next" reading right against what really happened.
-2. The first shared notes (5 trades) and the first progress report (20 at one level): read the note, the email, the table.
-3. The trial of which share to buy: it cannot move while every share market's share is 0%. If he asks why nothing is
-   being tried, that is why.
-4. Thin out the bell script's dealings with older copies after a week (see "The notification bell").
-5. Next ideas of the same kind as the buying-order trial, each to be tried and never adopted from hindsight: longer
-   holding times for shares, the automatic pace of each level, the stop's distances, the wait for a coin to stay; and,
-   once the shared record holds thousands of trades, a small fitted model scoring a candidate (no new AWS service needed).
-6. The screener scoring itself (section 7b): untouched; changing it is the owner's decision and a redeploy of worker groups.
-7. Smaller: a leftover holding of an odd size can leave less than one holding's room, never used; a summary email; the
-   deploy test account has an empty, switched-off autopilot record (harmless; made by a deploy check).
+**Improvements to come: one list. Take an item out when it is done; add ideas as the data suggests them.**
+*Waiting on finished trades (each has its trigger; nothing is adopted from hindsight, a trading idea goes live as a trial):*
+1. **The buying-order trial's verdict** (10 finished share trades each way). Whichever way it goes, next in line, one at a
+   time: a longer holding time for shares, then not selling a share on the screener's signal alone (the two other ideas
+   that held up in the replay, section 7b).
+2. **Do headlines earn their place?** At 30 trades with and 30 without (`heads`; the review tool's split). If buys with
+   headlines do no better: stop fetching them for candidates (fewer calls, shorter prompts). If better: widen them (the
+   feed's summary text as well as the title; a feed that covers Sydney, Tokyo and London shares, which get none now).
+3. **The AI review's early sales** (its two so far are the two largest losses): read `after` for them at 8 to 12 sales;
+   the pause for sales that came too early is already built (`review_ai_sells`).
+4. **Stops passed between check-ins** (part 4 of the review counts them). If common: a light look at prices every half
+   hour for holdings whose stop has started, with no screener run and no AI call.
+5. **Coins: limits from each coin's own daily movement** instead of one loss limit and gain mark for all (a live trial,
+   every second coin; only worth building while coins are being traded).
+6. **Scorecard lines the model is shown from 8 trades a group** (`MIN_SAMPLE`): thin; consider 30, as for the notes.
+7. **Company figures recorded with each share bought** (profit margin, debt, growth; the report function already has
+   them) and the record split by them: a measurement first, as for the 52-week low and the headlines.
+8. **What each level sets by itself** (holding time, check-in gap), the stop's distances, the wait for a coin to stay:
+   each needs a tag on the buy and a trial. **A small fitted model** scoring a candidate once the shared record holds
+   thousands of trades (no new AWS service). The screener scoring itself is the owner's decision (section 7b).
+*Housekeeping, any session:*
+9. The headline filter lets price pages through ("Why is Walrus price up 13.5% today?"): add "price (is )?(up|down)" to
+   `NEWS_JUNK`. One line in the function, with a check.
+10. **Calls made by open browser tabs** (measured 12 Oct: 55,000 Lambda calls in a day, 13,000 of them the sidebar's
+    ticker, 13,000 the four movers lists, 8,500 the market widgets; the crypto history is 2,600). The money is cents,
+    but a tab left open all day is about a million calls a month, the size of the free allowance. `sidebar.js` pauses
+    when the tab is hidden; `script.js` (the home page widgets) does not. Slow the polling, or pause it when hidden.
+11. Delete, with the owner's explicit yes (old code of all of them is in `~/VSCODE/backup/lambda_full_20261011_…`): the 204
+    worker functions the site never calls, `stockiq-option-7-2-worker-1`, `stockiq-coinspot-predictions-updater`; and
+    the local folder `website/stocks-backup-before-restore/` (118 MB).
+12. Thin the bell script's handling of older copies (any time after 18 Oct 2026; keep "the newer version wins").
+13. The report function holds the Finnhub key in its code: move it to the function's settings so the code can go into git.
+14. The record's size (the review tool warns above 300 KB of the 400 KB a row can hold): drop `path` from finished
+    trades kept in `history`, or store the record compressed.
+15. The owner's decisions waiting: the two **public** GitHub repositories and his personal file in one (section 11).
+16. Ideas offered and not built are in the next part ("Ideas offered and not built"); section 11 has the rest of the site.
 
 **Who can use it, and what guards every account:**
 - **The practice portfolio by hand is free for every signed-in account.** The AI autopilot (Beta) is for accounts on a paid
@@ -2509,6 +2433,10 @@ Needs the owner's decision or more work (nothing here is fixed):
   AWS/Lambda --metric-name Invocations --period 86400 --statistics Sum …` for calls a day (free). If the calls ever
   near a million a month again: the crypto history could run hourly (the schedule, plus the 65- and 100-minute limits in
   the orchestrator).
+  **Measured again on 12 Oct 2026 (10:00 UTC, the 24 hours before):** 55,430 calls. 13,246 were the sidebar's ticker (`ticker-data-fetcher`), 13,300 the four movers lists (gainers, losers, most active, trending), 8,500 the seven market
+  widgets, 2,300 the usage tracker, 2,200 the price proxy: **the pages' own polling while a tab is open**, busiest when the owner had the dashboard open. The crypto workers were 11,500 that day only because the old one-call-per-coin
+  design ran until the evening of 11 Oct; they are about 2,600 a day now. A tab left open around the clock is about a million calls a month by itself. Past the free million, calls cost 20 cents a million, so the money is cents; the
+  computing time stayed far inside its allowance (the ticker used about 21,600 seconds that day). To bring it down: "Start here when resuming", improvements, item 10.
 - **Legal.** The business is "StockIQ", online-only, no physical address, **no financial services
   licence**; billing is in USD ($4.99 / $14.99 / $49.99 per month, confirmed on the live Stripe
   prices). The terms, About page, pricing section and FAQ say all of this, and the product
@@ -2525,8 +2453,8 @@ Needs the owner's decision or more work (nothing here is fixed):
   after a session, ASX during its hours); the oddities left on purpose (`MODERATE_SELL`, `STRONG_DOWN`); Russell 1000/2000
   lists not refreshed (7 and 27 of their symbols no longer have prices); ASX 300 approximate; the 204 unused worker
   functions to delete when the owner agrees.
-- **Crypto scoring** (section 8b, "How a coin is scored"): the single-coin worker `stockiq-option-7-2-worker-1` was not
-  checked for the MACD fault the 54 screener workers had; the score mixes opposite ideas and has never been tested for
+- **Crypto scoring** (section 8b, "How a coin is scored"): the single-coin worker `stockiq-option-7-2-worker-1` is no longer used (12 Oct 2026: the
+  single-stock report function reports on a coin); the score mixes opposite ideas and has never been tested for
   coins; whole-number scores tie often. A finer score, or a test of it, needs saved coin prices.
 - **Crypto track record (review from early Nov 2026).** Entries from before 11:52 UTC on 11 Oct 2026 were ranked without
   MACD (section 8b): measure the two periods apart. The entry log (section 8b "Crypto") started
@@ -2567,8 +2495,10 @@ Needs the owner's decision or more work (nothing here is fixed):
 - **Single-stock report, left open on 11 Oct 2026** (section 7): its code cannot go into git while the Finnhub key is
   written in it (move the key to the function's settings first; both repositories are public); company figures only for
   the 3,333 stocks the site's daily job keeps them for, up to a month old; the analysis page in a browser and on a real
-  phone was not looked at; the first run of `publish_company_figures.py` inside the daily deploy is Monday 12 Oct:
-  look for "Company figures" in `~/stockiq-daily.log`.
+  phone was not looked at; the first run of `publish_company_figures.py` inside the daily deploy (12 Oct) built the
+  file and **could not upload it**: launchd's PATH has no Homebrew, so "aws" was not found. Fixed the same day (the full
+  path, as `deploy-to-s3.sh` uses); the file on S3 is the one of 11 Oct until the run of 13 Oct. Look for "Company
+  figures" in `~/stockiq-daily.log` without a warning after it.
 - **Dashboard plan cards** (the line "AI autopilot for your practice portfolio (fake money)" added on 11 Oct is real and the same on all three plans) list features that are not verified to differ by plan ("Advanced
   screening & alerts", "Portfolio tracking", "White-label options", "Dedicated support"), while
   the FAQ says all plans get the same features. Old accounts carry legacy limits (a cancelled
@@ -3090,4 +3020,15 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - **Each buy remembers how many headlines the model was shown** (function `E7OY2fUB…`, 10:14 UTC; "Headlines"): a
     measurement only, asked for by the owner's question whether the news adds anything. 424 function checks. Rollback
     zip `…_before_autopilot_heads_20261012.zip`.
+  - **Everything checked at the owner's word before he left it to run ("make sure everything is up to date… nothing is
+    erroring… go in depth")**, 10:17 to 10:45 UTC: seven functions and ten site files equal their local copies; all 13
+    share-screener groups on one package; every test suite passes on the live code (424 function, 203 panel, 95
+    portfolio, 22 bell, 19 chat, 42 signals, the panel-versus-function comparison, the worker deploy tool's self-test);
+    no fault line in 48 hours in the logs of 15 functions and no Lambda error in three days; both schedules enabled.
+    **Found and fixed:** the daily run could not publish the company figures (`publish_company_figures.py` called "aws"
+    by its bare name, which launchd's PATH does not hold; now the full path). **Found and written down:** most Lambda
+    calls come from open browser tabs polling the market widgets (section 11, "What AWS costs"). "Start here when
+    resuming" rewritten from the day's state, with **one list of improvements to come**; a reminder for the owner at the
+    very top of this file; the stale statements this check met were corrected (script versions, test counts, the
+    single-coin function, fingerprints).
   - Still not checked by a session: the logged-in dashboard itself and a real phone (neither can be opened from here).
