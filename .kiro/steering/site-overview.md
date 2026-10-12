@@ -1951,6 +1951,35 @@ weekdays and fails at the weekend.
   held, all bought by the autopilot. The new graph on the Practice portfolio tab shows the path.
 - Not yet seen at that hour: the daily deploy (11:00 on the Mac), a FTSE run after a London session.
 
+**"Can you make the autopilot any smarter?" (the owner, 12 Oct). The answer given, and agreed ("go ahead with what you think is
+best or update md if we can't do anything now and its future task once more logs are gathered"): nothing more is changed in
+how it trades for now; it needs finished trades, not more ideas.**
+- **Why not now.** One account, 4 finished trades (all coins, all from 10–11 Oct at the Balanced level), 0 finished share
+  trades. Every way it has of improving itself counts finished trades, and a second trial running beside the first would
+  split the few there are. The one new idea that could be tested on saved prices (limits set per share) made no difference
+  (section 7b, last part).
+- **What is already running and what it is waiting for** (read the owner's record and the shared record `_brain` to see):
+  1. **The trial of which share to buy** (as ranked, or the one furthest above its 52-week low) **started for real on 12 Oct**:
+     3 share buys tagged (ASX.AX and 6976.T as "furthest above", QBE.AX as ranked). Verdict at 10 finished share trades
+     each way. With holdings kept up to 10 days that is weeks, not days.
+  2. The AI model's first notes: at 5 finished trades in the shared record (one more).
+  3. The first progress report and review of its own rules: at 20 finished trades at one level. The four so far are at
+     level 3; the owner is now on level 2 (Careful), whose count starts at 0.
+- **The owner's settings on 12 Oct** (he changes them: read the record): Careful; budget $99,941; a check-in every 12 hours
+  (left to the level); holdings kept up to 10 days; nine screeners ticked, coins among them; shares of the budget automatic.
+  **At Careful, with a share market ticked, coins get 0% of the budget on automatic** (the level table), so no new coin is
+  bought: the two coins it holds are the last until that changes, and nothing about coins can be learned meanwhile.
+- **When to act, and on what:**
+  - *At the order trial's verdict:* read it; whichever way it goes, the next trial in line is a longer holding time for
+    shares, then not selling a share on the signal alone (the two other ideas that held up in the replay). One at a time.
+  - *If the owner goes back to trading coins* (a level with a coin share, or coins set by hand): build the trial of **limits
+    set from each coin's own daily movement** (every second coin; kept only if clearly better). Not before: with no coin
+    trades it would never finish. A coin moves 5 to 15% a day, so a fixed -7% is an ordinary dip for one and a real fall
+    for another; there are no saved coin prices to test it on first.
+  - *At 20 finished trades at one level:* read the first progress report and what it did about it.
+  - *If more accounts switch the autopilot on:* all of the above arrives sooner, since the record is shared.
+- **Do not** re-weight the screener score, add trials, or adopt anything from the replay without a live trial: section 7b.
+
 **FIRST THING IN THE NEXT SESSION: tell the owner how Monday 12 Oct went, before anything else** (his words on closing,
 11 Oct: "next time i open a session… update me on how monday went and anything else"). Lead with the result, in plain
 words. What to look at, all read-only:
