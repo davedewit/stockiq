@@ -36,12 +36,16 @@ page = '''<!doctype html><html data-theme="%s"><head><meta charset="utf-8"><titl
 <style>body{padding:20px;background:var(--bg-primary);margin:0} .history-section{background:var(--card-bg);border:1px solid var(--border-color);border-radius:8px;padding:20px;margin-bottom:20px} #out{font:12px monospace;white-space:pre-wrap;color:var(--text-primary)}</style></head><body>
 TABS_GO_HERE<pre id="out"></pre>
 <script>
-localStorage.setItem('userId', 'owner@example.com');
+localStorage.setItem('userId', 'owner@example.com'); window.CHART_DEMO = /chart/.test(location.search + location.hash);
 // every account value the page shows, in order: a figure that flashes up before the prices are in would be listed here
 window.SEEN = []; new MutationObserver(() => { const m = document.getElementById('practice-portfolio').textContent.match(/Account value\\s*(\\$[\\d,.]+)/); if (m && SEEN[SEEN.length - 1] !== m[1]) SEEN.push(m[1]); }).observe(document.getElementById('practice-portfolio'), { childList: true, subtree: true });
 const iso = (h) => new Date(Date.now() + h * 3600000).toISOString().slice(0, 19) + 'Z';
 const PRICES = { 'BTC-USD': 83500, 'WEMIX-USD': 0.1946, 'SPY': 700 };
-let portfolio = { v: 1, startingCash: 100000, cash: 15899.07, createdAt: iso(-4), closed: [], holdings: [
+let portfolio = { v: 1, startingCash: 100000, cash: 15899.07 + (window.CHART_DEMO ? 351.4 : 0), createdAt: iso(window.CHART_DEMO ? -24 * 19 : -4), closed: !window.CHART_DEMO ? [] : [
+  { id: 'c1', symbol: 'CFX-USD', label: 'CFX-USD', name: 'Conflux', currency: 'USD', qty: 10000, buyPrice: 0.125, buyFx: 1, costUsd: 1251.25, boughtAt: iso(-24 * 17), soldAt: iso(-24 * 15.5), sellPrice: 0.118, sellFx: 1, proceedsUsd: 1178.8, by: 'ai', spyAtBuy: 700, spyAtSell: 700 },
+  { id: 'c2', symbol: 'ERG-USD', label: 'ERG-USD', name: 'Ergo', currency: 'USD', qty: 5000, buyPrice: 1.25, buyFx: 1, costUsd: 6256.25, boughtAt: iso(-24 * 13), soldAt: iso(-24 * 11), sellPrice: 1.21, sellFx: 1, proceedsUsd: 6043.9, by: 'ai', spyAtBuy: 700, spyAtSell: 700 },
+  { id: 'c3', symbol: 'CKB-USD', label: 'CKB-USD', name: 'Nervos', currency: 'USD', qty: 800000, buyPrice: 0.0078, buyFx: 1, costUsd: 6246.2, boughtAt: iso(-24 * 8), soldAt: iso(-24 * 6), sellPrice: 0.0086, sellFx: 1, proceedsUsd: 6873.1, by: 'ai', spyAtBuy: 700, spyAtSell: 700 },
+  { id: 'c4', symbol: 'AAPL', label: 'AAPL', name: 'Apple Inc.', currency: 'USD', qty: 6, buyPrice: 330, buyFx: 1, costUsd: 1982, boughtAt: iso(-24 * 10), soldAt: iso(-24 * 3), sellPrice: 342, sellFx: 1, proceedsUsd: 2049.9, spyAtBuy: 700, spyAtSell: 700 }], holdings: [
   { id: 'm1', symbol: 'BTC-USD', label: 'BTC-USD', name: 'Bitcoin USD', currency: 'USD', qty: 1, buyPrice: 82750.93, buyFx: 1, costUsd: 82750.93, boughtAt: iso(-3.1), spyAtBuy: 700, note: 'fun' },
   { id: 'm2', symbol: 'BTC-USD', label: 'BTC-USD', name: 'Bitcoin USD', currency: 'USD', qty: 100 / 82734.62, buyPrice: 82734.62, buyFx: 1, costUsd: 100, boughtAt: iso(-3), spyAtBuy: 700, note: '' },
   { id: 'a1', symbol: 'WEMIX-USD', label: 'WEMIX-USD', name: 'WEMIX USD', currency: 'USD', qty: 1250 / 0.1868991, buyPrice: 0.1868991, buyFx: 1, costUsd: 1250, boughtAt: iso(-2.9), spyAtBuy: 700, note: 'AI: rank 1, RSI 14, down 3.8%% in 7 days on 1.0x volume', by: 'ai', screener: '7-1' }] };
@@ -67,7 +71,9 @@ const calls = [];
 window.fetch = async (url, opts) => {
   const u = String(url); await new Promise(r => setTimeout(r, 60));
   const json = (o) => ({ ok: true, status: 200, json: async () => o });
-  if (u.includes('?symbol=')) { const sym = decodeURIComponent(u.split('?symbol=')[1]); const p = PRICES[sym]; if (!p) return { ok: false, status: 500, json: async () => ({}) }; return json({ chart: { result: [{ meta: { regularMarketPrice: p, currency: 'USD', longName: sym } }] } }); }
+  if (u.includes('?symbol=')) { const sym = decodeURIComponent(u.split('?symbol=')[1]); const p = PRICES[sym]; if (!p) return { ok: false, status: 500, json: async () => ({}) }; const nowS = Math.floor(Date.now() / 1000), day0 = Math.floor(nowS / 86400) * 86400, wave = (i) => p * (1 + 0.035 * Math.sin(i / 2.3 + sym.length) - 0.0012 * i);
+    const ts = [], close = []; for (let i = 29; i >= 0; i--) { ts.push(day0 - i * 86400 + (sym.endsWith('-USD') ? 0 : 48600)); close.push(wave(i)); }
+    return json({ chart: { result: [{ meta: { regularMarketPrice: p, regularMarketTime: nowS, currency: 'USD', longName: sym }, timestamp: ts, indicators: { quote: [{ close }] } }] } }); }
   const b = JSON.parse(opts.body); calls.push((b.settings ? 'autopilot-' : b.portfolio ? 'portfolio-' : '') + b.action);
   if (b.action === 'get' && !('settings' in b) && u.includes('5c7pt7q')) return json({ success: true, portfolio, version });
   if (b.action === 'save' && b.portfolio) { portfolio = b.portfolio; version++; return json({ success: true, version }); }
@@ -95,6 +101,15 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
   out('the autopilot holding: ' + cellText('WEMIX'));
   out('how it is doing: ' + Array.from(document.querySelectorAll('#practice-autopilot .ap-section')).map(x => x.textContent.replace(/\\s+/g, ' ').trim().slice(0, 330)).join('\\n   '));
   for (const step of %s) {
+    if (step === 'chart' || step.startsWith('chart:')) {      // the graph of the account over time (give the page ?chart=1 for an account with a few weeks of history)
+      const svg = q('#pp-chart-svg'); if (!svg) { out('chart: NO GRAPH on the page'); } else {
+        const d = q('#pp-chart-svg .pp-line').getAttribute('d'), n = (d.match(/[ML]/g) || []).length, r = svg.getBoundingClientRect(), holder = q('#practice-portfolio').getBoundingClientRect();
+        out('chart: ' + q('.pp-chart-title').textContent + ' | ' + n + ' points | drawn ' + Math.round(r.width) + ' x ' + Math.round(r.height) + ' in a section ' + Math.round(holder.width) + ' wide | tabs: ' + Array.from(document.querySelectorAll('.pp-chart-tabs button')).map(b => b.textContent + (b.getAttribute('aria-pressed') === 'true' ? '*' : '')).join(', '));
+        out('chart reads: ' + q('#pp-chart-read').textContent.replace(/\\s+/g, ' ') + ' | card: ' + (q('#practice-portfolio').textContent.match(/Account value\\s*(\\$[\\d,.]+)/) || [])[1]);
+        svg.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: r.left + r.width * 0.45, clientY: r.top + 40 })); out('chart, pointer at 45%%: ' + q('#pp-chart-read').textContent.replace(/\\s+/g, ' ') + ' | line shown: ' + (q('#pp-cross').style.display !== 'none'));
+        const want = step.split(':')[1]; if (want) { const b = Array.from(document.querySelectorAll('.pp-chart-tabs button')).find(x => x.getAttribute('data-id') === want); if (b) { b.click(); await wait(200); out('chart, pressed ' + want + ': ' + q('.pp-chart-title').textContent + ' | ' + q('#pp-chart-read').textContent.replace(/\\s+/g, ' ')); } }
+        out('chart, wider than its section: ' + (q('#pp-chart-svg').getBoundingClientRect().width > holder.width + 1) + ' | NaN in the picture: ' + /NaN|undefined/.test(q('.pp-chart').innerHTML));
+      } }
     if (step === 'type') { const b = q('#pp-symbol'); b.focus(); b.value = 'APPL'; q('#pp-amount').value = '500'; out('typed APPL and 500 in the buy row'); }
     if (step === 'sale') {
       portfolio.closed.push(Object.assign({}, portfolio.holdings[2], { sellPrice: 0.1946, sellFx: 1, proceedsUsd: 1301.5, soldAt: iso(0), spyAtSell: 700 })); portfolio.holdings.pop(); portfolio.cash += 1301.5; version++;

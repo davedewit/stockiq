@@ -4,6 +4,53 @@ const src = fs.readFileSync(process.argv[2], 'utf8');
 // --- pure sums first
 const pure = (() => { const m = { exports: {} }; vm.runInNewContext(src, { module: m, console, practiceTradeCostPct: 0 }); return m.exports; })();
 let ok = true; const check = (name, cond, extra) => { ok = ok && !!cond; console.log((cond ? 'PASS ' : 'FAIL ') + name + (cond ? '' : '  ' + JSON.stringify(extra))); };
+if (pure.valueSeries) {      // the graph of the account over time (a copy of the script from before 12 Oct 2026 has none)
+  const T = (s) => Date.parse(s), DAY = 86400, near = (a, b, e) => Math.abs(a - b) < (e || 0.01);
+  // a stock: bars at 13:30 UTC, the last one still running; the quote is its figure
+  const stock = pure.seriesOf({ timestamp: [1, 2, 3].map(d => T('2026-10-0' + (d + 4) + 'T13:30:00Z') / 1000), indicators: { quote: [{ close: [100, 102, 101] }] }, meta: { regularMarketTime: T('2026-10-07T15:00:00Z') / 1000, regularMarketPrice: 105 } }, 'AAA');
+  check('daily prices of a share: each close six and a half hours after its bar, the running session from the quote', stock.length === 3 && stock[0][0] === T('2026-10-05T20:00:00Z') && stock[1][1] === 102 && stock[2][0] === T('2026-10-07T15:00:00Z') && stock[2][1] === 105, stock);
+  const twice = pure.seriesOf({ timestamp: [T('2026-10-08T23:00:00Z') / 1000, T('2026-10-09T05:20:39Z') / 1000], indicators: { quote: [{ close: [60, 60] }] }, meta: { regularMarketTime: T('2026-10-09T05:20:39Z') / 1000, regularMarketPrice: 60 } }, 'BHP.AX');
+  check('a session sent twice counts once', twice.length === 1 && twice[0][1] === 60, twice);
+  const coin = pure.seriesOf({ timestamp: [T('2026-10-09T00:00:00Z') / 1000, T('2026-10-10T00:00:00Z') / 1000, T('2026-10-11T00:00:00Z') / 1000], indicators: { quote: [{ close: [10, 11, null] }] }, meta: { regularMarketTime: T('2026-10-11T06:00:00Z') / 1000, regularMarketPrice: 12 } }, 'XYZ-USD');
+  check('a coin closes a day after its bar starts', coin.length === 3 && coin[0][0] === T('2026-10-10T00:00:00Z') && coin[1][0] === T('2026-10-11T00:00:00Z') && coin[2][1] === 12, coin);
+  check('a value between two known points lies on the straight line', near(pure.valueAt([[0, 10], [10, 20]], 5), 15) && pure.valueAt([[0, 10]], -1) === null && pure.valueAt([[0, 10], [10, 20]], 99) === 20);
+
+  // an account: one share bought and sold by the autopilot, one coin bought by hand and still held
+  const st = pure.newState('2026-10-01T00:00:00Z');
+  const a = pure.applyBuy(st, { symbol: 'AAA', currency: 'USD', price: 100, fx: 1, spy: 700, amountUsd: 1000, now: '2026-10-02T00:00:00Z' }); a.by = 'ai';
+  pure.applySell(st, a.id, { price: 110, fx: 1, spy: 700, now: '2026-10-04T00:00:00Z' });
+  pure.applyBuy(st, { symbol: 'XYZ-USD', currency: 'USD', price: 10, fx: 1, spy: 700, amountUsd: 2000, now: '2026-10-05T00:00:00Z' });
+  const quotes = { 'XYZ-USD': { price: 12, series: [[T('2026-10-06T00:00:00Z'), 9], [T('2026-10-07T00:00:00Z'), 11], [T('2026-10-08T00:00:00Z'), 12]] }, SPY: { price: 700 } };
+  const now = T('2026-10-08T00:00:00Z'), s = pure.valueSeries(st, quotes, now, null), at = (iso) => s.points.reduce((best, p) => Math.abs(p.t - T(iso)) < Math.abs(best.t - T(iso)) ? p : best);
+  const sums = pure.summarize(st, quotes), last = s.points[s.points.length - 1];
+  check('the graph ends on the account value the card shows', near(last.value, sums.accountValue) && near(last.all, sums.gainUsd) && last.t === now, [last, sums.accountValue]);
+  check('it starts at the starting cash, when the account began', near(s.points[0].value, 100000) && s.points[0].t === T('2026-10-01T00:00:00Z') && near(s.undated, 0), s.points[0]);
+  check('nothing moves before the first buy', near(at('2026-10-01T18:00:00Z').all, 0));
+  check('a sold holding: half way between buying and selling it shows half its result, afterwards all of it', near(at('2026-10-03T00:00:00Z').ai, 50, 2) && near(at('2026-10-04T12:00:00Z').ai, 100) && near(at('2026-10-07T00:00:00Z').ai, 100), [at('2026-10-03T00:00:00Z'), at('2026-10-04T12:00:00Z')]);
+  check('a holding still held follows its daily prices', near(at('2026-10-06T00:00:00Z').own, 200 * 9 - 2000) && near(at('2026-10-07T00:00:00Z').own, 200 * 11 - 2000) && near(last.own, 400), [at('2026-10-06T00:00:00Z'), last]);
+  check('the user\'s part and the autopilot\'s add up to the whole, at every point', s.points.every(p => near(p.own + p.ai, p.all, 1e-6)) && s.anyAi);
+  check('points are in time order and include the moments of buying and selling', s.points.every((p, i) => !i || p.t > s.points[i - 1].t) && [ '2026-10-02T00:00:00Z', '2026-10-04T00:00:00Z', '2026-10-05T00:00:00Z' ].every(iso => s.points.some(p => p.t === T(iso))));
+  // the sold list cleared: its result has no dates left
+  const cleared = JSON.parse(JSON.stringify(st)); pure.applyClearSold(cleared, null);
+  const c = pure.valueSeries(cleared, quotes, now, 100);
+  check('a cleared sold list: its result is counted from the start and said so, and stays the autopilot\'s', near(c.undated, 100) && near(c.undatedAi, 100) && near(c.points[0].all, 100) && near(c.points[c.points.length - 1].all, sums.gainUsd) && near(c.points[0].ai, 100), [c.undated, c.undatedAi, c.points[0]]);
+  // a shorter stretch
+  const week = pure.valueSeries(st, quotes, now, null, T('2026-10-06T00:00:00Z'));
+  check('a shorter stretch starts where asked and ends on the same figure', week.points[0].t === T('2026-10-06T00:00:00Z') && near(week.points[0].all, 100 + 200 * 9 - 2000) && near(week.points[week.points.length - 1].all, sums.gainUsd), week.points[0]);
+  // a holding in another currency uses that day's exchange rate
+  const yen = pure.newState('2026-10-01T00:00:00Z'); pure.applyBuy(yen, { symbol: '7203.T', currency: 'JPY', price: 3000, fx: 1 / 150, spy: 700, amountUsd: 3000, now: '2026-10-02T00:00:00Z' });
+  const yq = { '7203.T': { price: 3000, series: [[T('2026-10-03T06:00:00Z'), 3000], [T('2026-10-06T06:00:00Z'), 3000]] }, 'USDJPY=X': { price: 150, series: [[T('2026-10-03T06:00:00Z'), 160], [T('2026-10-06T06:00:00Z'), 150]] }, SPY: { price: 700 } };
+  const ys = pure.valueSeries(yen, yq, T('2026-10-06T06:00:00Z'), null), day3 = ys.points.find(p => p.t === T('2026-10-03T06:00:00Z'));
+  check('a yen holding is turned into dollars at that day\'s rate', day3 && near(day3.all, 150 * 3000 / 160 - 3000, 0.5), day3);
+  // the picture
+  const pic = pure.chartSvg(s, 'value', 700, 220), gains = pure.chartSvg(s, 'ai', 360, 180);
+  check('the picture: one point placed per figure, left to right, inside the frame', pic.placed.length === s.points.length && pic.placed.every((p, i) => p.x >= 0 && p.x <= 700 && p.y >= 0 && p.y <= 220 && (!i || p.x >= pic.placed[i - 1].x)) && /<path class="pp-line" d="M/.test(pic.svg) && pic.base === 100000, pic.placed.slice(0, 2));
+  check('the picture of one part is measured against zero and says so for a screen reader', gains.base === 0 && /aria-label="The autopilot/.test(gains.svg) && gains.width === 360 && !/NaN|undefined/.test(pic.svg + gains.svg));
+  const flat = pure.valueSeries(pure.newState('2026-10-01T00:00:00Z'), {}, now, null);
+  check('an account with nothing in it is a level line, not an error', flat.lots === 0 && flat.points.every(p => p.value === 100000) && !/NaN/.test(pure.chartSvg(flat, 'value', 700, 220).svg));
+  const ticks = pure.axisTicks(99870, 100130, 4).ticks;
+  check('axis figures are round numbers', ticks.length >= 3 && ticks.every(v => v % 50 === 0), ticks);
+}
 {
   const st = pure.newState('2026-10-10T00:00:00Z');
   const h = pure.applyBuy(st, { symbol: 'IMB.L', currency: 'GBp', price: 2662, fx: 1.3233 / 100, spy: 778.57, amountUsd: 1000, now: '2026-10-10T00:00:00Z' });
