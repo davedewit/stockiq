@@ -1891,6 +1891,19 @@ weekdays and fails at the weekend.
 
 ### Start here when resuming (state at 14:40 UTC on 11 Oct 2026: the full sweep, the replay, real costs and the bar, one code base for the share screeners, the report writers)
 
+**Monday 12 Oct, seen at 03:30 UTC (the owner was told; the rest of the day is still to report):**
+- At 00:10 UTC, when Sydney and Tokyo "opened", the autopilot bought ASX.AX and QBE.AX ($9,994 each) and 6976.T ($7,488):
+  **the first buy spread over two share markets.** No errors in its log; the shared learning ran clean (4 trades, 1 account).
+- **12 Oct 2026 was a public holiday in Japan (Sports Day): Tokyo did not trade, so 6976.T was bought at Friday's closing
+  price.** The known limit (the trading hours know no public holidays) cost a stale-price buy on its first Monday. A list
+  of each market's holidays, or "the price's own time is today" as the test before a buy, would close it. Not built.
+- 4307.T was still held: with the holding time now set to 2 days its time is up at 15:33 UTC on Monday, when Tokyo is
+  shut, so by the rule it goes at Tuesday's opening (not verified in the plan the page shows).
+- **The ASX fix seen during ASX hours:** a live ASX worker gave real 24-hour changes for 8 of 8 shares, none of them zero.
+- The practice account stood at $99,048 (down $952): down $58 on what has been sold, down $893 on the six holdings still
+  held, all bought by the autopilot. The new graph on the Practice portfolio tab shows the path.
+- Not yet seen at that hour: the daily deploy (11:00 on the Mac), a FTSE run after a London session.
+
 **FIRST THING IN THE NEXT SESSION: tell the owner how Monday 12 Oct went, before anything else** (his words on closing,
 11 Oct: "next time i open a session… update me on how monday went and anything else"). Lead with the result, in plain
 words. What to look at, all read-only:
