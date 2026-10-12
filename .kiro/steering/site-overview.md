@@ -1201,7 +1201,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=21` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=39`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=40`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -1259,6 +1259,7 @@ sends. The autopilot acts for accounts on a paid plan and for the accounts liste
 | `auto` | any of `periodDays`, `everyHours`, `maxHoldDays` | **Which of those three are left to the risk level.** For a listed one `clean_settings` puts in the level's own value (`PACE`) every time, so the rest of the code only ever sees numbers. A new user leaves all three; settings saved before 10 Oct evening have none (all set by hand) |
 | `screeners` | any of the 15 keys (default none) | Coordinator keys: `3-8 3-100 3-7 3-3 3-2 3-4 3-5 3-6 4-50 4-100 4-200 4-300 5-ftse100 5-nikkei225 7-1` |
 | `aiSell`, `selfTune`, `emails` | on unless switched off | "What it may do by itself" |
+| `holdings` | empty, or 2–50 | **The number of equal holdings the budget is spread over** (12 Oct 2026). Empty: the risk level's own (12 / 10 / 8 / 6 / 4). With a number: each holding is the budget over it (`holdings_of`); it buys up to a fifth of them at a check-in instead of 3 (`buys_per_check`: 3 could never fill 50); it looks at least that far down each ranking, up to 30 (`rules_for` widens `top`); the shares of the budget per market are counted in that number (`market_slots`); never so many that one is under the $25 smallest buy. The panel: a field beside the budget, the level's number in grey, tagged automatic / set by you, with a line saying what the number means (`holdingsHint`; `positionsOf`, `buysPerCheck`, `withHoldings` are the panel's copies of the sums: `autopilot_plan_check.py` compares them). **A matter of how bumpy the ride is, not of profit** ("Ideas offered", the replay). Holdings bought at an earlier size stay their size until sold, so after a change the budget holds a mix |
 | `stopPct`, `takePct` | empty, or 1.5–30 and 2–80 | The owner's own loss limit and gain mark, as sizes in percent |
 | `shares` | `{market: percent}`, only for markets set by hand (default none) | A market's share of the budget. Markets are the groups of `SCREENERS` (`GROUPS`: US shares, Australian shares, UK shares, Japanese shares, Coins). A market left out is automatic. Together at most 100 (`clean_settings` takes the excess off the later ones). See "How the budget is spread" below |
 | `trailMode` | `gains` (default), `full`, `off` | The kind of stop that follows a holding. `gains`: it starts once the holding has risen beyond its normal wobble. `full`: a full trailing stop loss, under the price from the moment of buying, so a faller is cut early (exit kind `cut`). `off`: none |
@@ -1342,6 +1343,12 @@ sends. The autopilot acts for accounts on a paid plan and for the accounts liste
   the check-in's own closing line (key `…+stale`), so a holiday shows as one counted line, not one an hour. Coins are
   not affected. A quote that gives no time counts as fresh. **Not covered:** a share so thinly traded that three hours
   pass without a trade in an open market is left alone too (rare for index members; the note says why).
+  **A market in which only old prices were seen stays due** (12 Oct, the same day; `untraded` in `run_user`): it is not
+  counted as checked (its last check is put where the chosen gap is already over), so it comes up again at the next
+  half-hourly run. Without this, a check-in every 12 or 24 hours would have looked at Tokyo once a day, ten minutes
+  after its opening, found the session before every time, and never managed a Tokyo holding. On a real holiday the
+  market is looked at every half hour of its session and left alone each time (one counted line). One old price in a
+  market that is trading does not keep the whole market due.
 - Add a screener: one line in `SCREENERS` (name, coordinator option and subOption, kind, market,
   group). The panel lists whatever the Lambda sends.
 
@@ -1980,6 +1987,24 @@ how it trades for now; it needs finished trades, not more ideas.**
   - *If more accounts switch the autopilot on:* all of the above arrives sooner, since the record is shared.
 - **Do not** re-weight the screener score, add trials, or adopt anything from the replay without a live trial: section 7b.
 
+**Monday 12 Oct, later (seen at 08:45 UTC):**
+- **The owner set 50 holdings within hours of the field going live**, on Balanced: budget $99,129, built up over 2 days,
+  a check-in every 6 hours, holdings kept up to 10 days. Under the new code that is $1,983 a holding, up to 10 buys a
+  check-in, the top 30 of each screener, 10 holdings for each of five markets. **Five older, larger holdings ($7,500 to
+  $25,000, bought at 4 and 10 holdings) still take $64,962 of the budget**, so the first small buys wait until the
+  build-up has released more than that (about a day), and the account is a mix of sizes until the old ones are sold.
+- 05:40 UTC: WAL-USD sold by the AI model's review at -3.1% (-$811.70): the fifth finished trade.
+- **08:10 UTC: the first shared notes reached the activity list** ("Reviewed the record of every account (5 finished
+  trades): …"). Seen for real for the first time.
+- **The daily deploy ran 04:08 to 04:41 UTC and finished**, the first with the new copy-keeping rules. **"No price data:
+  2039"**: the price source or the network failed for most stocks during the snapshot step ("Cookie/crumb fetch failed
+  (DNSError)" in the log). As designed nothing was de-indexed (957 indexable, 720 snapshots kept from the day before, 235
+  pages written). The next daily run refreshes them; or `python3 update_stock_analysis.py` and a deploy, with the owner's
+  word. Its GitHub push was skipped (the 23-hour marker), so `news.html`, `news.js` and `sitemap.xml` sit uncommitted in
+  `website/` until Tuesday's run.
+- Both autopilot changes of the day went live after it (04:47 and 04:50 UTC). Not yet seen: a "Left alone" line (Tokyo's
+  next opening, 00:10 UTC Tuesday, then again at 00:40 with prices of the session), a FTSE run on a morning after.
+
 **FIRST THING IN THE NEXT SESSION: tell the owner how Monday 12 Oct went, before anything else** (his words on closing,
 11 Oct: "next time i open a session… update me on how monday went and anything else"). Lead with the result, in plain
 words. What to look at, all read-only:
@@ -2022,12 +2047,12 @@ calls, with his agreement; (5) thinning the bell script's handling of older copi
 left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line change now, each changing labels.
 
 **What is live, and how to confirm nothing has moved since:**
-- Lambda `stockiq-ai-trader`: `CodeSha256` `1Wabeqp4ieAo0V40eRx7nKBMdj8lcyCuku7uPSI3atU=`, equal to
-  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,930 lines; the fresh-price rule of 12 Oct 2026).
+- Lambda `stockiq-ai-trader`: `CodeSha256` `dRaKpUf9FPnFzz/Y4owNWcfzqxX4Cq2pVZYBv0884Fs=`, equal to
+  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,970 lines; 12 Oct 2026: the fresh-price rule, a market that stays due, the number of holdings).
 - Lambda `stockiq-ai-chat`: `CodeSha256` `cTz2ks6BStwoDLEIod20m/pzvn59WP2VHo9Hc/RtEV8=`, equal to
   `lambda-sync/stockiq-ai-chat/lambda_function.py` (350 lines).
-- Website (sha256 starts): `practice-autopilot.js?v=39` (`11c9ae8cd83e`), `practice-portfolio.js?v=21` (`cf6ac94ca9b3`),
-  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`8459fbe0ee68`; `analysis-functions.js` `96dbcb721ec1`),
+- Website (sha256 starts): `practice-autopilot.js?v=40` (`ce687dfa103f`), `practice-portfolio.js?v=21` (`cf6ac94ca9b3`),
+  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`5935f9fa8292`; `analysis-functions.js` `96dbcb721ec1`),
   `ai-chat.js?v=2` (`87eaadf52197`); 17 more pages carry the bell's loader line; `index.html` and `faq.html` the plan wording.
   Live files were compared byte for byte at each deploy.
 - `deploy-to-s3.sh` carries the rules for how long a browser may keep a copy (section 5, step 8); the first daily run with
@@ -2038,12 +2063,12 @@ left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line ch
 - Crypto: the 54 `stockiq-option-7-1-worker-N` all `NmXC9dcsA6p5tXJl+u6VZIfdsrvM3ERN/DmMSQ9zalI=`, the orchestrator
   `Tyyx+Pb2l+sy7avfCncwduEtmFtYn6Lws+5g6dj9Kc0=`, both equal to their mirrors (MACD fix of 11 Oct, section 8b).
 - Share-screener workers: all 669 show `CodeSha256` `q9ZX/UvTBcszKxRPR9lvJw9UpyfWrB5sOB3pDWccm6c=` (`workers/live.txt`), built from `workers/` in git.
-- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 394 function, 198 panel, 95 portfolio, 22 bell, 16 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
+- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 404 function, 202 panel, 95 portfolio, 22 bell, 16 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
   spreads over markets).
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
   trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell,
-  takeover, report`, then `stockiq-ai-trader_before_sweep_20261011.zip`, `…_before_autopilot_costs_…` and, 12 Oct, `…_before_autopilot_fresh_20261012.zip`;
+  takeover, report`, then `stockiq-ai-trader_before_sweep_20261011.zip`, `…_before_autopilot_costs_…` and, 12 Oct, `…_before_autopilot_fresh_20261012.zip`, `…_due_…`, `…_holdings_…`;
   `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`.
 - First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and the function's log
   (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors ("check-in failed", "shared learning failed",
@@ -2149,7 +2174,7 @@ writing: done, and shown on the panel.
 
 ### Ideas offered and not built
 
-**The number of holdings as a setting of its own (thought through on 12 Oct 2026 at the owner's question; not built).** He saw
+**The number of holdings as a setting of its own (thought through on 12 Oct 2026 at the owner's question, and built the same day at his word: the settings table in "The autopilot: settings").** He saw
 that it buys "say 10 stocks max across the 100,000", that the less risk he picks the more holdings it has, and wondered
 about a second slider ("one customer would want to auto trade 50 stocks a day, another 2"). What is so today: the number of
 holdings comes only from the risk level (12 / 10 / 8 / 6 / 4), each holding is the budget divided by that number, and a
@@ -2938,3 +2963,12 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     fresh-price rule.
   - The "For comparison" card says when the US market opens, in the sidebar's own figure (`practice-portfolio.js?v=21`; 95
     portfolio checks; `dashboard_page.py` takes `?sidebar=1`).
+  - **A market that showed only old prices stays due** (function `2gv02OdM…`, 04:47 UTC; section 8c, "Limits"): found the same
+    morning when the owner's settings turned out to be a check-in every 12 hours. Rollback zip `…_before_autopilot_due_20261012.zip`.
+  - **The number of holdings as a setting of its own** (function `dRaKpUf9…`, `practice-autopilot.js?v=40`, 04:50 UTC; the
+    settings table in section 8c): asked for by the owner after a replay showed it changes the bumpiness, not the profit.
+    Tests: 404 function, 202 panel, the panel-versus-function comparison with 3, 20 and 50 holdings (4,166 spreads); a
+    `holdings` step in `dashboard_page.py`. Rollback zip `…_before_autopilot_holdings_20261012.zip`. **A slip caught by the
+    tests:** a new variable named `waiting` overwrote an existing one in `run_user` (the coins "waiting to stay"); the
+    2,970-line function has one namespace per check-in, so search for a name before using it.
+  - Not done: the AI chat's `DASHBOARD_GUIDE` does not mention the number of holdings either.
