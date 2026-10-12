@@ -1125,7 +1125,8 @@ with `document.querySelector('h3')`.
 - The holdings table (its columns since 12 Oct: Holding, Bought, Price then, Price now, Value, Today, Since bought, Sell): Holding (with how many are held, "Holding (5)", as the sold list says "Sold (7)"; 12 Oct 2026, at the
   owner's word; on a phone the heading row is hidden, so the count shows on wider screens only), Bought (date and time), Price then, Price now, Value, Change, Sell.
   Under each name a line says whose it is: "Bought by you: it stays until you sell it", or for the
-  autopilot's, when it will sell at the latest, at what loss or gain sooner, how the stop that
+  autopilot's, **folded behind "🤖 Autopilot: its plan for this ▸" since 12 Oct 2026** (`details.pp-plan`; an opened one
+  stays open across redraws, `openPlans`; the owner wanted the row down to the name, the company and why it was bought), when it will sell at the latest, at what loss or gain sooner, how the stop that
   follows it works, and, while its market is closed, that nothing happens to it until the market
   opens, with the time.
 - "Sold (N)" folded list with a summary, "Clear sold list" and an × per line (clearing only tidies
@@ -1239,7 +1240,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=27` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Portfolio section | `website/practice-portfolio.js` (`?v=28` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=45`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
@@ -2299,10 +2300,10 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
-- Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=27` (`3578ea993ebd`),
-  `dashboard.html` (`cb705712607d`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
+- Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=28` (`9870da2098f0`),
+  `dashboard.html` (`da1ce458d3b9`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
   `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
-- Tests on the live files: 437 function, 210 panel, 106 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
+- Tests on the live files: 437 function, 210 panel, 107 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
 - Both repos pushed; **no `check-tools/pending-*` folder is left**. `website/` carries the daily job's own three files
@@ -3280,6 +3281,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     `…_before_autopilot_rows_20261012.zip`. **He also asked why DDOG was bought at its high for the year: it was the
     buying-order trial's pick (the share furthest above its 52-week low), which is the idea under test.** His wider
     point stands and is on the list: the loss limit and gain mark are the same for every holding of a level.
+  - The Practice portfolio's holdings table folds the autopilot's plan for a holding behind an arrow (`practice-portfolio.js?v=28`;
+    107 portfolio checks). **The owner had meant this table when he asked for "minimal info and a drop down"; the session
+    first changed the autopilot tab's list instead. When he describes a place on the page, find the exact words he
+    quotes in the code before changing anything.** The flaky check "buying by quantity" stopped that deploy three
+    times before it went through (improvements, item 0b: worth fixing next).
   - The daily job keeps a dated copy of the company figures once a week (`research-data/company-figures/`; the first is of
     12 Oct 2026): the start of a history to test ideas about company figures on. Scheduling a nightly session was asked
     about and judged not worth it yet ("GO PLAY", section 8c).
