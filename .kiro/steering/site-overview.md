@@ -2136,7 +2136,7 @@ left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line ch
 
 **What is live, and how to confirm nothing has moved since:**
 - Lambda `stockiq-ai-trader`: `CodeSha256` `FObfjaG/9yOthlqQgm4378SyjpC58jb1hqvCUyLw6RA=`, equal to
-  `lambda-sync/stockiq-ai-trader/lambda_function.py` (3,024 lines; 12 Oct 2026: the fresh-price rule, a market that stays due, the number of holdings, the diary, notes only from 30 finished trades). Table `stockiq-ai-trader-journal` (the diary) made the same day.
+  `lambda-sync/stockiq-ai-trader/lambda_function.py` (3,023 lines; 12 Oct 2026: the fresh-price rule, a market that stays due, the number of holdings, the diary, notes only from 30 finished trades). Table `stockiq-ai-trader-journal` (the diary) made the same day.
 - Lambda `stockiq-ai-chat`: `CodeSha256` `f6vB7CzN3cQAt9ZbTUS7+eYrFRsp75L46Xks8kx5rn4=` (its guide to the dashboard brought up to date on 12 Oct), equal to
   `lambda-sync/stockiq-ai-chat/lambda_function.py` (350 lines).
 - Website (sha256 starts): `practice-autopilot.js?v=41` (`a63a59e5a2aa`), `practice-portfolio.js?v=21` (`cf6ac94ca9b3`),
@@ -3074,7 +3074,8 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     `check-tools/reviews/review-2026-10-12.txt`. No trading rule changed. Rollback zip `…_before_autopilot_journal_20261012.zip`.
   - **The AI model's notes wait for 30 finished trades** (function `FObfjaG/…`, 09:49 UTC; "Learning from its own results"):
     the first thing the review tool's baseline showed, done at the owner's word. 422 function checks. Rollback zip
-    `…_before_autopilot_notes_20261012.zip`. **The owner's aim, in his words that day:** "pickup on patterns… much more
+    `…_before_autopilot_notes_20261012.zip`. Not yet seen live at hand-over: the shared record's five-trade notes being dropped
+    (the next scheduled run, 10:10 UTC; `autopilot_review.py` part 6 then shows no "note:" lines). **The owner's aim, in his words that day:** "pickup on patterns… much more
     success than failure its something to repeat, if we see consistent loss patterns we also steer away… end goal here is
     make money we need it over 100,000. currently its continually losing". Told plainly in answer: that is what the
     review routine does, with one condition, a pattern counts only from about 30 trades in a group and beyond its margin
