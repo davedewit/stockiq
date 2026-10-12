@@ -193,7 +193,7 @@ check('the stored copy is small enough for the table', len(D.Table(m.SETTINGS_TA
 D.t.clear(); PRICES.clear(); SNAP['3-100'] = rows(); MODEL['answer'] = None; MODEL['prompts'].clear()
 rec = m.load_item(U); rec['settings'].update(enabled=True, risk=5, budgetUsd=4000.0, periodDays=1, everyHours=24, maxHoldDays=5, screeners=['3-100']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
 s, rec = run(t0); s, rec = run(t0 + dt.timedelta(days=1)); ids = {h['symbol']: h['id'] for h in portfolio()['holdings']}
-check('remembers what each buy was based on', len(rec['state']['open']) == 4 and rec['state']['open'][ids['S00']] == {'symbol': 'S00', 'label': 'S00', 'screener': '3-100', 'risk': 5, 'chosen': 'rules', 'rank': 1, 'score': 4.0, 'rsi': 50.0, 'd7': 3.0, 'd30': 5.0, 'volume': 1.2, 't': m.iso(t0), 'hold': 5.0, 'peak': 0.0, 'low': 0.0, 'stay': 1, 'path': [[24.0, 0.0]], 'stop': {'arm': 11.2, 'floor': None, 'move': None, 'room': None, 'mode': 'gains'}}, rec['state']['open'].get(ids['S00']))
+check('remembers what each buy was based on', len(rec['state']['open']) == 4 and {k: v for k, v in rec['state']['open'][ids['S00']].items() if k != 'heads'} == {'symbol': 'S00', 'label': 'S00', 'screener': '3-100', 'risk': 5, 'chosen': 'rules', 'rank': 1, 'score': 4.0, 'rsi': 50.0, 'd7': 3.0, 'd30': 5.0, 'volume': 1.2, 't': m.iso(t0), 'hold': 5.0, 'peak': 0.0, 'low': 0.0, 'stay': 1, 'path': [[24.0, 0.0]], 'stop': {'arm': 11.2, 'floor': None, 'move': None, 'room': None, 'mode': 'gains'}}, rec['state']['open'].get(ids['S00']))
 PRICES.update(S00=79.0, S01=150.0)
 s, rec = run(t0 + dt.timedelta(days=2)); hist = {x['symbol']: x for x in rec['history']}
 check('sold holdings go into the history with their result', s['sold'] == 2 and set(hist) == {'S00', 'S01'} and hist['S00']['pct'] == -21.0 and hist['S00']['exit'] == 'stop' and hist['S00']['market'] == 0.0 and hist['S00']['vs'] == -21.0 and hist['S00']['days'] == 2.0
@@ -1164,6 +1164,16 @@ if hasattr(m, 'holdings_of'):
     code_, b = call(action='save', userId=U, settings=dict(rec['settings'], holdings=None))
     check('emptied again, it goes back to the level\'s', code_ == 200 and b['settings']['holdings'] is None and b['rules']['positions'] == 8, [b['settings'].get('holdings'), b['rules'].get('positions')])
 m.TRADE_COST = 0
+# ---- each buy remembers how many headlines the model was shown for it (a measurement: the review splits the record by it)
+if 'heads' in m.POOL_FIELDS:
+    D.t.clear(); m._BRAIN.clear(); was_central = m.CENTRAL; m.CENTRAL = False; m.datetime = Open; SNAP['3-100'] = rows(); MODEL['answer'] = None
+    told = lambda holding, now: [{'title': 'Something about it', 'hours': 5.0}, {'title': 'Older', 'hours': 30.0}] if holding.get('label') == SNAP['3-100'][0]['label'] else []
+    rec = m.load_item(U); rec['settings'] = dict(m.DEFAULTS, enabled=True, risk=3, budgetUsd=10000, periodDays=1, screeners=['3-100']); rec['state'] = {'startedAt': m.iso(Open.utcnow() - dt.timedelta(days=2))}
+    m.run_user(U, rec, Open.utcnow(), snapshot=snapshot, quote=quote, model=model, headlines=told)
+    kept = {f['label']: f for f in rec['state']['open'].values()}; first = SNAP['3-100'][0]['label']
+    check('a buy remembers how many headlines the model was shown for it, and how old the newest was', len(kept) >= 2 and kept[first].get('heads') == 2 and kept[first].get('headAge') == 5.0, {k: (v.get('heads'), v.get('headAge')) for k, v in kept.items()})
+    check('and a buy with none says none, with no age', all(f.get('heads') == 0 and 'headAge' not in f for l, f in kept.items() if l != first))
+    m.CENTRAL = was_central; m.datetime = clock
 # ---- the AI model's notes wait for enough finished trades: a pattern in a handful is chance, and the notes are shown back to it
 if NOTES:
     m.LESSONS_MIN = NOTES; was_central = m.CENTRAL; m.CENTRAL = False; MODEL['answer'] = {'lessons': ['Rank 1 to 3 did worse (5 trades).']}; MODEL['prompts'].clear()

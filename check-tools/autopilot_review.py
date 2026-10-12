@@ -145,6 +145,7 @@ def main():
     breakdown('by RSI when bought', trades, lambda t: band(t.get('rsi'), [50, 65, 75, 10 ** 9], ['RSI to 50', 'RSI 50 to 65', 'RSI 65 to 75', 'RSI above 75']))
     breakdown('by how long it was held', trades, lambda t: band(t.get('days'), [0.25, 1, 5, 10 ** 9], ['under 6 hours', '6 hours to a day', '1 to 5 days', 'over 5 days']))
     breakdown('by who chose it', trades, lambda t: {'ai': 'the AI model', 'rank': 'by rank (the model did not answer)', 'order': 'furthest above its 52-week low (trial)'}.get(t.get('chosen'), str(t.get('chosen'))))
+    breakdown('by headlines shown to the model when it was bought (recorded from 12 Oct 2026)', trades, lambda t: 'not recorded (bought before)' if t.get('heads') is None else 'none found' if not t['heads'] else 'newest under a day old' if (t.get('headAge') or 0) < 24 else 'newest one to three days old')
     breakdown('by risk level at the time', trades, lambda t: m.RISK.get(t.get('risk'), {}).get('name', str(t.get('risk'))))
 
     say("\n4. THE LOSSES, ONE BY ONE (finished in the period, worst first)")
