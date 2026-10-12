@@ -4,6 +4,7 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
 
    python3 check-tools/dashboard_page.py <practice-portfolio.js> <practice-autopilot.js> <out.html> <light|dark> "<steps>"
    steps: type (types in the buy row), sale (the autopilot sells in the background, then the page refreshes itself),
+          refresh ("Refresh prices": where it sits, its busy and done feedback, that typing in the buy row is kept; the buttons' classes),
           chart (the graph of the account over time: its size, what it reads, the pointer; chart:ai or chart:own presses that
           button; open the page with ?chart=1 for an account with a few weeks of history),
           trial (a trial of its own rules starts), off (the autopilot is switched off), open (unfolds the details),
@@ -112,6 +113,19 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
         const want = step.split(':')[1]; if (want) { const b = Array.from(document.querySelectorAll('.pp-chart-tabs button')).find(x => x.getAttribute('data-id') === want); if (b) { b.click(); await wait(200); out('chart, pressed ' + want + ': ' + q('.pp-chart-title').textContent + ' | ' + q('#pp-chart-read').textContent.replace(/\\s+/g, ' ')); } }
         out('chart, wider than its section: ' + (q('#pp-chart-svg').getBoundingClientRect().width > holder.width + 1) + ' | NaN in the picture: ' + /NaN|undefined/.test(q('.pp-chart').innerHTML));
       } }
+    if (step === 'refresh') {      // "Refresh prices": where it sits, that it says it is working and when it is done, and that what is typed in the buy row stays
+      q('#pp-symbol').value = 'APPL'; q('#pp-amount').value = '500'; q('#pp-note').value = 'my note';
+      const tools = q('#pp-tools'), head = tools && tools.closest('.pp-headrow'), btn = () => q('[data-pp="refresh"]');
+      out('refresh: the two buttons sit ' + (head ? 'beside the heading' : 'at the bottom') + ': ' + Array.from(tools.querySelectorAll('button')).map(b => b.textContent.trim() + ' [' + b.className + ']').join(' | ') + ' | says: "' + q('#pp-updated').textContent + '"');
+      const top = (el) => Math.round(el.getBoundingClientRect().top), h2 = document.querySelector('.pp-headrow h2'); if (h2) out('refresh: heading at ' + top(h2) + 'px, buttons at ' + top(btn()) + 'px from the top; first card at ' + top(q('.pp-card')) + 'px');
+      btn().click(); await wait(30); out('refresh, just pressed: button "' + btn().textContent.trim() + '" [' + btn().className + '] disabled ' + btn().disabled + ' | says: "' + q('#pp-updated').textContent + '"');
+      await wait(900); out('refresh, done: button "' + btn().textContent.trim() + '" [' + btn().className + '] | says: "' + q('#pp-updated').textContent + '" [' + q('#pp-updated').className + ']');
+      out('refresh: what was typed is still there: ' + [q('#pp-symbol').value, q('#pp-amount').value, q('#pp-note').value].join(' / '));
+      out('buttons with a class each: ' + Array.from(document.querySelectorAll('#practice-portfolio button, #pp-tools button')).filter(b => !b.closest('.pp-chart-tabs')).map(b => (b.getAttribute('data-pp') || '?') + ':' + (b.className || 'NO CLASS') + (b.getAttribute('style') ? ' INLINE STYLE' : '')).filter((v, i, a) => a.indexOf(v) === i).join(', '));
+      const cs = getComputedStyle(btn()); out('refresh button look: background ' + cs.backgroundColor + ', border ' + cs.borderTopColor + ', cursor ' + cs.cursor);
+      out('autopilot buttons: ' + Array.from(document.querySelectorAll('#practice-autopilot .ap-btn, #practice-autopilot a[data-ap="refresh"], #practice-autopilot a[data-ap="mailtest"]')).map(b => b.textContent.trim().slice(0, 26) + ' [' + b.className + ']').join(' | '));
+      const link = q('#practice-autopilot a[data-ap="refresh"]'); if (link) { link.click(); await wait(20); const now = q('#practice-autopilot a[data-ap="refresh"]'); out('autopilot Refresh now, just pressed: "' + now.textContent + '" [' + now.className + ']'); await wait(900); const after = q('#practice-autopilot a[data-ap="refresh"]'); out('autopilot Refresh now, done: "' + after.textContent + '" [' + after.className + '] | "' + q('#ap-fresh').textContent.slice(0, 60) + '" [' + q('#ap-fresh').className + ']'); }
+    }
     if (step === 'type') { const b = q('#pp-symbol'); b.focus(); b.value = 'APPL'; q('#pp-amount').value = '500'; out('typed APPL and 500 in the buy row'); }
     if (step === 'sale') {
       portfolio.closed.push(Object.assign({}, portfolio.holdings[2], { sellPrice: 0.1946, sellFx: 1, proceedsUsd: 1301.5, soldAt: iso(0), spyAtSell: 700 })); portfolio.holdings.pop(); portfolio.cash += 1301.5; version++;
@@ -246,6 +260,6 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
     open(pp).read().replace('</script>', '<\\/script>'), open(ap).read().replace('</script>', '<\\/script>'), json.dumps([x for x in steps.split(',') if x]))
 one_section = '<div class="history-section"><h2 style="color:var(--text-primary);margin-top:0">Practice portfolio</h2><div id="practice-portfolio"></div><div id="practice-autopilot"></div></div>'
 tabbed = (STYLE + BAR + '<div data-dash-panel="reports"><div class="history-section"><h2 style="color:var(--text-primary);margin-top:0">Report History</h2><p style="color:var(--text-secondary)">(the reports would be here)</p></div></div>'
-          + '<div data-dash-panel="practice" hidden><div class="history-section"><h2 style="color:var(--text-primary);margin-top:0">Practice Portfolio</h2><div id="practice-portfolio"></div></div></div>'
+          + '<div data-dash-panel="practice" hidden><div class="history-section"><div class="pp-headrow"><h2 style="color:var(--text-primary);margin-top:0">Practice Portfolio</h2><div id="pp-tools"></div></div><div id="practice-portfolio"></div></div></div>'
           + '<div data-dash-panel="autopilot" hidden><div class="history-section"><div id="practice-autopilot"></div></div></div>' + SCRIPT)
 open(out, 'w').write(page.replace('TABS_GO_HERE', tabbed if BAR else one_section))
