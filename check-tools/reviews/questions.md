@@ -16,7 +16,7 @@ Status: **open** (not tested yet), **waiting** (needs trades or data that are no
 | 2 | 12 Oct, owner | The same for coins | The entry log against prices now: `crypto/entry_study.py` | **Waiting** (one day of data says yes: entries fell 4%, the fastest risers 5 to 7%). Needs five separate days. Low priority: his interest is shares |
 | 3 | 12 Oct, owner | Do headlines add anything to a choice? | `heads` on each buy; the review's split | **Waiting** for 30 buys with and 30 without |
 | 4 | 11 Oct | Is the share furthest above its 52-week low a better buy than the top of the ranking? | Replay: yes in both parts (+2 points a trade against the fund). Live: every second share buy | **On trial** (verdict at 10 finished each way) |
-| 5 | 11 Oct | Does selling a share when the screener's signal turns cut winners short? | Replay: yes (holdings kept 4 to 7 days whatever the limit) | **Open**: second in the trial queue |
+| 5 | 11 Oct | Does selling a share when the screener's signal turns cut winners short? | Replay: yes (holdings kept 4 to 7 days whatever the limit) | **On trial** since 12 Oct 2026 (the patient-shares trial: every second pair of shares is not sold on the signal nor by the AI review) |
 | 6 | 11 Oct | Is a longer holding time better for shares? | Replay: 1 day -4%, 5 days +92%, 20 days and more +103% to +106% | **Open**: first in the trial queue |
 | 7 | 12 Oct | Would a loss limit and gain mark set from each share's own movement do better than the same two numbers for all? | Replay, `--limits` | **Answered: no real difference** for large shares (`replay/results-limits-2026-10-12.txt`) |
 | 8 | 12 Oct | Does the number of holdings change the profit? | Replay with 2 to 50 holdings | **Answered: no**, it changes how bumpy the account is |
