@@ -2241,7 +2241,7 @@ are titles only, and most candidates have none. **Not known:** how the owner loo
 preview from Kiro): ask early when a change "does not show" (section 9).
 
 **What is live, and how to confirm nothing has moved since** (all compared with the local copies on 12 Oct, 10:17 UTC):
-- `stockiq-ai-trader` `8bg71SuG/fkCGYlCWlqTJGJprK++hb5JU+MUsfWxoDA=` (3,057 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC); `stockiq-ai-chat`
+- `stockiq-ai-trader` `8bg71SuG/fkCGYlCWlqTJGJprK++hb5JU+MUsfWxoDA=` (3,060 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC); `stockiq-ai-chat`
   `f6vB7CzN3cQAt9ZbTUS7+eYrFRsp75L46Xks8kx5rn4=`; `stockiq-screener-coordinator` `pUBd8qCLYGjtVSoYQObSV8YVygyP8mBSfdCxxJ+ho9Y=`;
   `stockiq-option-1-1-custom-analysis` `I84SxSgLYNt7…`; `stockiq-chart-generator` `OIDrZ2W9G3lJ…`; `stockiq-paper-portfolio`
   `s6IR+/80N/3k…`; the two signals functions `6nVDLm4/8G6K…`; the crypto orchestrator `yvmucU37gHJH…` and its 54 workers
