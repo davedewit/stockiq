@@ -1040,8 +1040,21 @@ with `document.querySelector('h3')`.
   AI chat's summary. History: the owner could not make sense of bare signed figures ("Of the -$58.48 since the start: your
   own buys +$144.12…"), so they became words, and then at his request arrows ("look like a professional stock
   portfolio"). **Never a bare signed figure without an arrow.**
-- One framed row, **whose result is whose**: "Your own buys ▲ $793.59 · 🤖 AI autopilot ▲ $7.91 sold ▲ $7.91 · still held
-  – $0.00" (`splitGain`; shown once the autopilot has bought anything; the two add up to the account's change).
+- One framed row, **whose result is whose**, with **the same split for both parties** (12 Oct 2026): "Your own buys ▲ $144.12
+  (sold ▲ $144.12 · still held – $0.00) · 🤖 AI autopilot ▼ $1,138.16 (sold ▼ $202.60 · still held ▼ $935.56)" (`splitGain`,
+  with `yoursSold` / `yoursOpen`; shown once the autopilot has bought anything). The Account value card's own two lines
+  then read "Sold, yours and the autopilot's together ▼ …" and "Still held, together ▼ …". Before this the card said
+  "Sold ▼ $58.48" and the row "sold ▼ $202.60", which add up but looked to the owner as if they disagreed. **Whenever one
+  figure is a total of two others shown nearby, say so in its label.**
+- **"↻ Refresh prices" and "Reset fake money" sit beside the heading** (12 Oct 2026; on a phone, under it), in a place the
+  page holds for them (`#pp-tools` inside `.pp-headrow` in `dashboard.html`; `toolsHtml`). Without that place (an older
+  page) they are drawn at the bottom as before. A refresh says "Getting the latest prices…" with a spinner on the button,
+  then "✓ Prices updated 10:21:05" in green for a moment; afterwards the line reads "Prices as of …".
+- **Buttons are classes, not inline styles** (`.pp-btn`, `.ghost`, `.big`, `.busy` in the `pp-style` block; `.ap-btn` and the
+  two links "Refresh now" / "Send me a test email" in the autopilot's): a hover colour, a pressed look, a spinner and a
+  word for what it is doing ("Buying…", "Selling…", "Clearing…", "Resetting…", "Refreshing…"). An inline style cannot
+  change on hover, which is why nothing did. `busy` says which button is at work (`run(task, key)`).
+- **What is typed in the buy row survives a refresh of prices** (it was wiped: only a completed buy or a reset clears it now).
 - The cards have small capital labels and a green or red top edge on Account value; table headings are small capitals,
   rows highlight under the pointer, figures use tabular numerals.
 - The notification bell in the page header lists the autopilot's buys and sells with the reports: its own part below,
@@ -1163,8 +1176,8 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=19` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=38`) | Controls and reports only; decisions are made by the Lambda |
+| Portfolio section | `website/practice-portfolio.js` (`?v=20` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=39`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -1294,8 +1307,17 @@ sends. The autopilot acts for accounts on a paid plan and for the accounts liste
   them (`summary.closed`). A longest-holding time that ends while the holding's market is closed is
   acted on at the next opening, and the dashboard is given that time (`when_open`). Before this, a
   Nikkei share (4307.T) was bought on a Saturday at Friday's closing price.
-  **Limits:** the hours are fixed windows a little inside the real sessions; public holidays and
-  Tokyo's lunch break are not known, so on such a day a share can still be traded at its last price.
+  **Limits:** the hours are fixed windows a little inside the real sessions and know no public holidays.
+  **So a share is bought or sold only at a price that has traded in the last 3 hours** (12 Oct 2026; `fresh`,
+  `price_age`, `FRESH_HOURS`; every quote now carries `time`, the price source's `regularMarketTime`). On 12 Oct 2026,
+  Sports Day in Japan, the autopilot had bought 6976.T at the Friday's closing price. Now such a share is passed over as a
+  buy, left alone as a holding (not sold by the rules, not put to the AI model's review, its best and worst not moved)
+  and kept by "Sell everything it holds" (listed with the closed markets). It also covers the first minutes of a session,
+  while the price source (delayed about 20 minutes for Sydney and Tokyo) still shows the session before: the buy comes a
+  check-in later, at a real price. The activity list says which shares were left alone and how old their prices were, on
+  the check-in's own closing line (key `…+stale`), so a holiday shows as one counted line, not one an hour. Coins are
+  not affected. A quote that gives no time counts as fresh. **Not covered:** a share so thinly traded that three hours
+  pass without a trade in an open market is left alone too (rare for index members; the note says why).
 - Add a screener: one line in `SCREENERS` (name, coordinator option and subOption, kind, market,
   group). The panel lists whatever the Lambda sends.
 
@@ -1895,8 +1917,9 @@ weekdays and fails at the weekend.
 - At 00:10 UTC, when Sydney and Tokyo "opened", the autopilot bought ASX.AX and QBE.AX ($9,994 each) and 6976.T ($7,488):
   **the first buy spread over two share markets.** No errors in its log; the shared learning ran clean (4 trades, 1 account).
 - **12 Oct 2026 was a public holiday in Japan (Sports Day): Tokyo did not trade, so 6976.T was bought at Friday's closing
-  price.** The known limit (the trading hours know no public holidays) cost a stale-price buy on its first Monday. A list
-  of each market's holidays, or "the price's own time is today" as the test before a buy, would close it. Not built.
+  price.** The known limit (the trading hours know no public holidays) cost a stale-price buy on its first Monday.
+  **Closed the same morning (03:52 UTC):** a share is traded only at a price under 3 hours old ("The autopilot: settings",
+  "Limits"). Tried on live prices that hour: both Tokyo shares "left alone" (last traded 3 days ago), Sydney's tradable.
 - 4307.T was still held: with the holding time now set to 2 days its time is up at 15:33 UTC on Monday, when Tokyo is
   shut, so by the rule it goes at Tuesday's opening (not verified in the plan the page shows).
 - **The ASX fix seen during ASX hours:** a live ASX worker gave real 24-hour changes for 8 of 8 shares, none of them zero.
@@ -1946,12 +1969,12 @@ calls, with his agreement; (5) thinning the bell script's handling of older copi
 left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line change now, each changing labels.
 
 **What is live, and how to confirm nothing has moved since:**
-- Lambda `stockiq-ai-trader`: `CodeSha256` `k2OocgJogAZjcF8LYC6WOtH0n7I3VaE5nb9EmxWzAnI=`, equal to
-  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,887 lines).
+- Lambda `stockiq-ai-trader`: `CodeSha256` `1Wabeqp4ieAo0V40eRx7nKBMdj8lcyCuku7uPSI3atU=`, equal to
+  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,930 lines; the fresh-price rule of 12 Oct 2026).
 - Lambda `stockiq-ai-chat`: `CodeSha256` `cTz2ks6BStwoDLEIod20m/pzvn59WP2VHo9Hc/RtEV8=`, equal to
   `lambda-sync/stockiq-ai-chat/lambda_function.py` (350 lines).
-- Website (sha256 starts): `practice-autopilot.js?v=38` (`43520270763f`), `practice-portfolio.js?v=19` (`2a3f8209d48e`),
-  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`b86167e4cc23`; `analysis-functions.js` `96dbcb721ec1`),
+- Website (sha256 starts): `practice-autopilot.js?v=39` (`11c9ae8cd83e`), `practice-portfolio.js?v=20` (`d6ef1c451bb6`),
+  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`8b8c186a2028`; `analysis-functions.js` `96dbcb721ec1`),
   `ai-chat.js?v=2` (`87eaadf52197`); 17 more pages carry the bell's loader line; `index.html` and `faq.html` the plan wording.
   Live files were compared byte for byte at each deploy.
 - `deploy-to-s3.sh` carries the rules for how long a browser may keep a copy (section 5, step 8); the first daily run with
@@ -1962,12 +1985,12 @@ left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line ch
 - Crypto: the 54 `stockiq-option-7-1-worker-N` all `NmXC9dcsA6p5tXJl+u6VZIfdsrvM3ERN/DmMSQ9zalI=`, the orchestrator
   `Tyyx+Pb2l+sy7avfCncwduEtmFtYn6Lws+5g6dj9Kc0=`, both equal to their mirrors (MACD fix of 11 Oct, section 8b).
 - Share-screener workers: all 669 show `CodeSha256` `q9ZX/UvTBcszKxRPR9lvJw9UpyfWrB5sOB3pDWccm6c=` (`workers/live.txt`), built from `workers/` in git.
-- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 386 function, 198 panel, 92 portfolio, 22 bell, 16 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
+- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 394 function, 198 panel, 93 portfolio, 22 bell, 16 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
   spreads over markets).
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
   trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell,
-  takeover, report`, then `stockiq-ai-trader_before_sweep_20261011.zip` and `…_before_autopilot_costs_…`;
+  takeover, report`, then `stockiq-ai-trader_before_sweep_20261011.zip`, `…_before_autopilot_costs_…` and, 12 Oct, `…_before_autopilot_fresh_20261012.zip`;
   `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`.
 - First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and the function's log
   (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors ("check-in failed", "shared learning failed",
@@ -2003,7 +2026,7 @@ the bell worked for him only once its addresses were relative, which points to s
 Ask early next time a change "does not show" (section 9).
 
 **Limits to remember:** a stop only acts at a check-in (CFX and CKB were both sold below where their stop stood); the
-trading hours know no public holidays; a market's share is a number of whole holdings; the trading cost is one typical
+trading hours know no public holidays (a share is only traded at a price under 3 hours old, which covers them); a market's share is a number of whole holdings; the trading cost is one typical
 figure (0.1% each way; a small coin costs more in real life); with one account the shared learning is that account.
 
 **What the owner is after, in his words:** "trying to optimise this to always be active ever changing and improving", a
@@ -2828,3 +2851,14 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     copy. The deploy script's fingerprint check refused the stale copy; it was staged again from the current file. And a
     reminder of the zsh trap in section 8c: `$NEW:application/…` inside a here-document is read as a modifier (`:a`, `:t`);
     write `${NEW}` or fill such lines in with Python.
+  - **The holiday gap closed in the autopilot** (section 8c, "The autopilot: settings", "Limits"): a share is bought or sold
+    only at a price that has traded in the last 3 hours. Function `1Wabeqp4…`; 8 new checks (394). Tried on live prices
+    during the Japanese holiday before deploying. Rollback zip: `…_before_autopilot_fresh_20261012.zip`. **To see for
+    real:** the owner's next check-in for Tokyo should write "Left alone: 4307.T …, 6976.T …" and sell neither.
+  - **Practice portfolio buttons and wording** (section 8c, "What the owner sees"): the two tools beside the heading;
+    hover, pressed and busy feedback on every button there and in the autopilot panel; "Prices updated <time>"; typing
+    kept through a refresh (found by the new browser step: it had always been wiped); the same sold / still-held split
+    for both parties. Live: `practice-portfolio.js?v=20`, `practice-autopilot.js?v=39`, `dashboard.html`.
+    `dashboard_page.py` has a `refresh` step; 93 portfolio checks.
+  - Not done: the AI chat's `DASHBOARD_GUIDE` does not yet mention the graph, the tools beside the heading or the
+    fresh-price rule.
