@@ -1246,7 +1246,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=29` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Portfolio section | `website/practice-portfolio.js` (`?v=30` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=45`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
@@ -1894,6 +1894,14 @@ narrow screen (nothing changes at desktop width):
   <page.html> <frame.html> [width]` puts it in a frame of that width (default 390) and shows what
   the page printed underneath. Checked at 320, 360, 390 and 430px, light and dark, with the
   breakdown open, and the locked view: nothing sticks out, nothing scrolls sideways.
+- **Checked again at 390px on 13 Oct 2026, after the day's changes** (the owner: "i'm wondering how this will all work on
+  mobile"): the three figures stack full width, the line of facts and "The breakdown" wrap, the holdings are cards with
+  "Today" and "Since bought" labelled and the plan folded; on the autopilot tab the tabs fit, the buttons take the width,
+  and a "Holding now" row keeps "its plan ▸" on the right with the reason under the name. One flaw found and fixed: four
+  date labels under the graph ran into each other (three below 420px now, `practice-portfolio.js?v=30`). Looked at: the
+  Practice portfolio tab and the autopilot's Activity part; Settings was rendered but not looked at again. **To switch to
+  the autopilot tab the test page needs `dashboard.html` as its sixth argument** (without it the `mobile:activity` step
+  stops with "Cannot read properties of undefined (reading 'show')" and the picture is of the wrong tab).
 - **Not checked:** a real phone, and the logged-in dashboard itself. The Reports tab (statistics,
   Report History) was not part of this: it is the older page and has its own rules for 768px and
   under, which were not re-measured because its content needs a login.
@@ -2306,8 +2314,8 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
-- Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=29` (`5087c24bb32e`),
-  `dashboard.html` (`ea0a2612c359`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
+- Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=30` (`762467a62af6`),
+  `dashboard.html` (`a9ce8c9fe74d`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
   `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
 - Tests on the live files: 437 function, 210 panel, 108 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
@@ -3294,6 +3302,8 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     times before it went through (improvements, item 0b: worth fixing next).
   - **The top of the Practice portfolio tab made simple** (13 Oct, `practice-portfolio.js?v=29`; 108 portfolio checks; looked
     at in a headless browser): three figures, one line, the rest folded under "The breakdown".
+  - The dashboard checked at phone width after the day's changes; the graph's date labels no longer collide there
+    (`practice-portfolio.js?v=30`).
   - The daily job keeps a dated copy of the company figures once a week (`research-data/company-figures/`; the first is of
     12 Oct 2026): the start of a history to test ideas about company figures on. Scheduling a nightly session was asked
     about and judged not worth it yet ("GO PLAY", section 8c).
