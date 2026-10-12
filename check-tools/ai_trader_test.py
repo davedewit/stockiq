@@ -1162,4 +1162,42 @@ if hasattr(m, 'holdings_of'):
     code_, b = call(action='save', userId=U, settings=dict(rec['settings'], holdings=None))
     check('emptied again, it goes back to the level\'s', code_ == 200 and b['settings']['holdings'] is None and b['rules']['positions'] == 8, [b['settings'].get('holdings'), b['rules'].get('positions')])
 m.TRADE_COST = 0
+# ---- the diary: every activity line, finished trade and change of settings, written once to a table that is never trimmed
+if hasattr(m, 'keep_diary'):
+    class Diary:                                            # keyed by the account and the time, as the real table is
+        def __init__(s): s.rows = {}; s.fail = 0; s.puts = 0
+        def put_item(s, Item):
+            if s.fail: s.fail -= 1; raise RuntimeError('table away')
+            s.puts += 1; s.rows[(Item['userId'], Item['at'])] = copy.deepcopy(Item)
+        def of(s, kind): return [json.loads(r['data']) for (u, a), r in sorted(s.rows.items()) if r['kind'] == kind]
+    diary = Diary(); D.t[m.DIARY_TABLE] = diary; who = 'diary@x.com'
+    note = lambda t, text, **k: dict({'t': t, 'type': 'note', 'symbol': '', 'usd': 0, 'text': text}, **k)
+    rec = {'settings': dict(m.DEFAULTS, enabled=True, risk=3, screeners=['3-100']), 'state': {}, 'history': [],
+           'log': [note('2026-10-12T00:10:00Z', 'Autopilot on.'), {'t': '2026-10-12T00:40:00Z', 'type': 'buy', 'symbol': 'AAA', 'usd': 1250, 'text': 'Bought AAA.', 'detail': ['why']},
+                   {'t': '2026-10-12T00:40:00Z', 'type': 'buy', 'symbol': 'BBB', 'usd': 1250, 'text': 'Bought BBB.'}]}
+    m.save_item(who, rec)
+    check('the diary gets a row for the settings and one for each line of the activity list, two buys of the same second included', len(diary.of('settings')) == 1 and sorted(e.get('symbol') for e in diary.of('log')) == ['', 'AAA', 'BBB']
+          and [e for e in diary.of('log') if e['symbol'] == 'AAA'][0]['detail'] == ['why'] and diary.of('settings')[0]['risk'] == 3, [len(diary.rows), diary.of('log')])
+    was = diary.puts; m.save_item(who, rec)
+    check('a second save writes nothing again', diary.puts == was and all(e.get('j') == 1 for e in rec['log']) and 'j' not in diary.of('log')[0], diary.puts - was)
+    m.add_log(rec, [note('2026-10-12T01:10:00Z', 'Nothing to do (1).', key='pace')], None); m.save_item(who, rec)
+    m.add_log(rec, [note('2026-10-12T01:40:00Z', 'Nothing to do (2).', key='pace')], None); m.save_item(who, rec)
+    notes = [e for e in diary.of('log') if e.get('key') == 'pace']
+    check('a check-in note that is counted again is one row, brought up to date, not two', len(notes) == 1 and notes[0]['n'] == 2 and notes[0]['text'] == 'Nothing to do (2).' and notes[0]['first'] == '2026-10-12T01:10:00Z', notes)
+    rec['history'].append(dict(trade(1, -2.0), id='h1', sold='2026-10-12T02:10:00Z')); m.save_item(who, rec)
+    check('a finished trade goes in with everything it was bought on', len(diary.of('trade')) == 1 and diary.of('trade')[0]['symbol'] == 'T1' and diary.of('trade')[0]['rank'] == 2 and 'after' not in diary.of('trade')[0] and rec['history'][0]['j'] == 1, diary.of('trade'))
+    rec['history'][0]['after'] = 3.5; m.save_item(who, rec)
+    check('and is brought up to date, in the same row, when what it did after it was sold is known', len(diary.of('trade')) == 1 and diary.of('trade')[0]['after'] == 3.5 and rec['history'][0]['j'] == 2, diary.of('trade'))
+    rec['settings'] = dict(rec['settings'], holdings=20); m.save_item(who, rec)
+    check('a change of the settings is a row of its own, so a review knows which settings a trade was made under', sorted(str(x.get('holdings')) for x in diary.of('settings')) == ['20', 'None'], [x.get('holdings') for x in diary.of('settings')])
+    diary.fail = 1; rec['log'].append(note('2026-10-12T03:10:00Z', 'A line while the table is away.')); before = len(diary.rows); m.save_item(who, rec)
+    saved = json.loads(D.Table(m.SETTINGS_TABLE).rows[who]['data'])
+    check('when the diary cannot be written the save still happens, and the line goes with the next save', len(diary.rows) == before and saved['log'][-1]['text'] == 'A line while the table is away.' and 'j' not in rec['log'][-1], len(diary.rows) - before)
+    m.save_item(who, rec); check('(it does)', diary.of('log')[-1]['text'] == 'A line while the table is away.' and rec['log'][-1]['j'] == 1)
+    for i in range(m.LOG_KEEP + 40): rec['log'].append({'t': m.iso(t0 + dt.timedelta(minutes=i)), 'type': 'buy', 'symbol': f'S{i}', 'usd': 100, 'text': f'Bought S{i}.'})
+    m.save_item(who, rec)
+    check('the activity list is still cut to its last lines, and the diary keeps every one', len(rec['log']) == m.LOG_KEEP and sum(1 for e in diary.of('log') if str(e.get('symbol')).startswith('S')) == m.LOG_KEEP + 40, [len(rec['log']), len(diary.of('log'))])
+    was = diary.puts; m.save_item('_brain', {'settings': {}, 'state': {}, 'log': [note('2026-10-12T00:10:00Z', 'x')], 'history': []}) if False else m.keep_diary('_brain', {'settings': {}, 'state': {}, 'log': [note('2026-10-12T00:10:00Z', 'x')], 'history': []})
+    check('the shared record and the stored screener results are no account: nothing of theirs goes in', diary.puts == was)
+    code_, b = call(action='get', userId=U); check('the page still gets its activity list as before', code_ == 200 and isinstance(b.get('log'), list))
 print('ALL PASS' if ok else 'SOME FAILED')
