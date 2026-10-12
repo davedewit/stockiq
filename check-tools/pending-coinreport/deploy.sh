@@ -95,8 +95,9 @@ import sys, json, re
 d = json.load(open(sys.argv[1])); coin = sys.argv[2]
 out = json.load(open('page_72-single.json')); t = re.sub(r'data:image/svg\+xml;base64,[A-Za-z0-9+/=]+', '<CHART>', out.get('text') or '')
 line = lambda key: next((l.strip() for l in t.split('\n') if key in l), '-')
-print(coin + ':', 'error', d['error'], '| flags', d['flags'], '|', line('Symbol:'), '|', line('STOCKIQ SCORE'), '|', line('Priced as')[:60], '|', line('No price data')[:50], '| chart', '<CHART>' in t)
-ok = d['error'] is None and (('STOCKIQ SCORE' in t and '<CHART>' in t and 'SINGLE COIN ANALYSIS: ' + coin in t) if coin != 'NOSUCHCOINX' else 'No price data was found' in t)
+# (the tool's text has the picture's tag taken out: a report of tens of thousands of characters is one that carries its chart)
+print(coin + ':', 'error', d['error'], '| flags', d['flags'], '|', line('Symbol:'), '|', line('STOCKIQ SCORE'), '|', line('Priced as')[:60], '|', line('No price data')[:50], '|', d['chars'], 'characters')
+ok = d['error'] is None and (('STOCKIQ SCORE' in t and d['chars'] > 15000 and 'SINGLE COIN ANALYSIS: ' + coin in t) if coin != 'NOSUCHCOINX' else 'No price data was found' in t)
 sys.exit(0 if ok else 1)
 PY
 done
