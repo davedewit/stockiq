@@ -29,10 +29,12 @@ FAULTS = ['check-in failed', 'not worked out', 'not sent', 'not written', 'learn
 # not forecasts: site-overview.md section 8c, "The goals, month by month". Each: the day it is due, its name, the number of
 # finished trades in all by then, the average result a trade after costs of the trades finished in that month, and the
 # account's value. The start: 12 Oct 2026, five finished trades averaging -1.03%, the account at about $98,600.
+# The owner had the first two raised the same day ("this is negative? we want positive. profit not loss"): every month's
+# goal is a profit; the first versions asked month 1 only to stop losing (-0.2% a trade, $98,000).
 GOALS_START = '2026-10-12'
-GOALS = [('2026-11-12', 'Month 1: stop the losing, and enough trades to see', 100, -0.2, 98000),
-         ('2026-12-12', 'Month 2: break even', 300, 0.0, 100000),
-         ('2027-01-12', 'Month 3: ahead, or a decision', 500, 0.3, 102000)]
+GOALS = [('2026-11-12', 'Month 1: in profit', 100, 0.0, 100000),
+         ('2026-12-12', 'Month 2: in profit, and more of it', 300, 0.2, 101000),
+         ('2027-01-12', 'Month 3: clearly ahead, or a decision', 500, 0.3, 102000)]
 EXITS = {'stop': 'at the loss limit', 'take': 'at the gain mark', 'trail': 'by the stop that followed it', 'cut': 'by its trailing stop before it had risen',
          'time': 'at the time limit', 'signal': 'signal or score turned', 'fade': 'slipped down the ranking', 'ai': 'by the AI review', 'hand': 'by the owner'}
 out_lines = []

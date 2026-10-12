@@ -2223,9 +2223,9 @@ the account at about $98,600.
 
 | Due | Goal | Finished trades in all | Average a trade in that month, after costs | The account |
 |---|---|---|---|---|
-| 12 Nov 2026 | **Month 1: stop the losing, and enough trades to see** | 100 | -0.2% or better | $98,000 or more (no lower than now) |
-| 12 Dec 2026 | **Month 2: break even** | 300 (the bar's count) | 0% or better | $100,000 or more |
-| 12 Jan 2027 | **Month 3: ahead, or a decision** | 500 | +0.3% or better, and the bar cleared | $102,000 or more |
+| 12 Nov 2026 | **Month 1: in profit** | 100 | above 0% | $100,000 or more |
+| 12 Dec 2026 | **Month 2: in profit, and more of it** | 300 (the bar's count) | +0.2% or better | $101,000 or more |
+| 12 Jan 2027 | **Month 3: clearly ahead, or a decision** | 500 | +0.3% or better, and the bar cleared | $102,000 or more |
 
 - **What a session owes each month besides the numbers:** month 1: the buying-order trial has its verdict and the trial
   queue (below) is built and running; a review every week. Month 2: at least one change kept after a trial, or a plain
@@ -2234,6 +2234,10 @@ the account at about $98,600.
   **If month 3 ends with the average a trade still not above zero: stop tuning this strategy.** Then the choice put to the
   owner is to change what it buys from (real company figures, a model fitted to its own record, other inputs) or to
   switch it off. His words: "There is no point having this run if its not making profit."
+- **Every month's goal is a profit, at the owner's word** (12 Oct, on reading the first version, which asked month 1 only to
+  stop losing, -0.2% a trade and $98,000: "this is negative? we want positive. profit not loss"). A goal here is the line
+  that decides when a month counts as a miss and something has to change, not a forecast: set at profit, a losing
+  month brings changes sooner, which is what he wants.
 - These numbers are what would count as progress, chosen before the results are in so that nobody argues with them
   afterwards. Section 7b gives no reason to expect them to be met; they are the test.
 
@@ -2305,7 +2309,7 @@ the record):**
   keeps every line. Nothing else is to be changed in how it trades until there are trades to read.
 - **Waiting for:** 30 finished trades for the first notes and the first real review; 20 at one level for the first
   progress report; 10 finished each way for the order trial's verdict, 30 for the patient trial's.
-- **The month's goal** (12 Nov): 100 finished trades, -0.2% a trade or better, the account no lower than $98,000.
+- **The month's goal** (12 Nov): 100 finished trades, an average above 0% a trade after costs, the account at $100,000 or more.
 
 **Still to be seen for real** (strike each when seen): a "Left alone" line at a Tokyo opening with only old prices, then the
 same market looked at again half an hour later; the first small buys at 50 holdings, up to 10 at a check-in, with
