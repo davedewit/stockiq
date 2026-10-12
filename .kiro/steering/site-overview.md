@@ -1288,6 +1288,9 @@ sends. The autopilot acts for accounts on a paid plan and for the accounts liste
   (`qty = amount × 0.999 / price`); a sale brings back `qty × price × 0.999`. No new field: the cost is inside `qty` and
   `proceedsUsd`, so every sum works as before. Holdings bought earlier have no buying cost in them. The line under the
   buttons says so. Reason: a record without costs flatters itself, most of all when trading often (section 7b).
+- **The heading is just "💵 Practice Portfolio" since 13 Oct 2026**: the owner had the subtitle "fake money, no real trades" taken
+  off ("it looks odd there and is obvious by the tab"). That it is fake money is still said on the Account value card
+  ("fake money · it started with $100,000.00") and in the small print under the holdings; keep it in both.
 - **Owner's decisions:** buying, selling and progress stay on the dashboard (no buy buttons on stock
   pages or reports). The S&P 500 columns and "N of M ahead" sentences were removed at his request;
   only the "For comparison" card remains. `spyAtBuy` / `spyAtSell` are still stored, because the
@@ -2315,7 +2318,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
 - Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=30` (`762467a62af6`),
-  `dashboard.html` (`a9ce8c9fe74d`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
+  `dashboard.html` (`1cf1b90a7de3`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
   `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
 - Tests on the live files: 437 function, 210 panel, 108 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
@@ -3304,6 +3307,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     at in a headless browser): three figures, one line, the rest folded under "The breakdown".
   - The dashboard checked at phone width after the day's changes; the graph's date labels no longer collide there
     (`practice-portfolio.js?v=30`).
+  - The subtitle beside the Practice Portfolio heading taken off at the owner's word (13 Oct; `dashboard.html` only).
   - The daily job keeps a dated copy of the company figures once a week (`research-data/company-figures/`; the first is of
     12 Oct 2026): the start of a history to test ideas about company figures on. Scheduling a nightly session was asked
     about and judged not worth it yet ("GO PLAY", section 8c).
