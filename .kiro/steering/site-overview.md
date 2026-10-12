@@ -1054,6 +1054,16 @@ with `document.querySelector('h3')`.
   yet" while the US stock market has not traded since the buys, e.g. a weekend: `marketFlat`).
   **Nothing is shown until the latest prices are in** (4 seconds at most): before 10 Oct the page
   first showed holdings at what was paid, which the owner took for a second, "correct" account value.
+- **"Today"** (12 Oct 2026, evening; the owner: "say i jump on in the middle of the day ideally what i probably want to know is
+  how much has it gained or lost today"). The Account value and In holdings cards show "Today ▲ $198.49 (0.27%)" above the
+  total, and the holdings table has a **Today** column beside **Since bought** (it was "Change"). `dayMove(h, quotes)`: each
+  holding since its market's previous close (a coin: since 00:00 UTC), or since it was bought when that was later; while
+  its market is closed it is its last session, as a broker shows it; `summarize` adds them up (`dayUsd`, `dayPct`,
+  `dayCount`). From the daily prices that already come with every quote (`series`): no extra request. A share's session
+  ends are worked out from a 6.5-hour session, so a point under five hours before the latest price is taken for the
+  session still running (London's afternoon), not the one before. **What it leaves out, and the fine print says so: a
+  sale made today** (its result is in "Sold"); the exchange rate's own move in the day. The chat's summary carries the
+  day figure; its guide does not describe it yet.
 - **A graph of the account over time, under the cards** (12 Oct 2026; the owner: "an easy way to see progress… if we lose
   money for a week or two then gain over a few weeks, its clear we are making progress"). One line: the account's value
   since it began against a dashed line at the $100,000 it started with. Buttons switch the line to "Your own buys" or
@@ -1112,7 +1122,7 @@ with `document.querySelector('h3')`.
   "The notification bell".
 - The buy row: search box (code or company name, same lookup as the home page), "Enter $" **or**
   "or quantity" (the other is worked out from the latest price), an optional note, "Practice buy".
-- The holdings table: Holding (with how many are held, "Holding (5)", as the sold list says "Sold (7)"; 12 Oct 2026, at the
+- The holdings table (its columns since 12 Oct: Holding, Bought, Price then, Price now, Value, Today, Since bought, Sell): Holding (with how many are held, "Holding (5)", as the sold list says "Sold (7)"; 12 Oct 2026, at the
   owner's word; on a phone the heading row is hidden, so the count shows on wider screens only), Bought (date and time), Price then, Price now, Value, Change, Sell.
   Under each name a line says whose it is: "Bought by you: it stays until you sell it", or for the
   autopilot's, when it will sell at the latest, at what loss or gain sooner, how the stop that
@@ -1229,7 +1239,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=26` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Portfolio section | `website/practice-portfolio.js` (`?v=27` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=44`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
@@ -2289,10 +2299,10 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
-- Website (sha256 starts): `practice-autopilot.js?v=44` (`8e6e07ce4eba`), `practice-portfolio.js?v=26` (`da35f48fb9cd`),
-  `dashboard.html` (`f42017bf3366`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
+- Website (sha256 starts): `practice-autopilot.js?v=44` (`8e6e07ce4eba`), `practice-portfolio.js?v=27` (`3578ea993ebd`),
+  `dashboard.html` (`17ee40133216`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
   `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
-- Tests on the live files: 436 function, 209 panel, 98 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
+- Tests on the live files: 436 function, 209 panel, 106 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
 - Both repos pushed; **no `check-tools/pending-*` folder is left**. `website/` carries the daily job's own three files
@@ -3259,6 +3269,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     portfolio checks), after the owner read the fund's figure as his own lead.
   - **"Holding now" as a row a holding** with the plan folded under each, and "tests changes" for "tries changes" (the owner,
     from a picture of his own panel; `practice-autopilot.js?v=44`; 209 panel checks; looked at in a headless browser).
+  - **"Today" on the practice portfolio**: for the holdings together on two cards, and a column a holding (`dayMove`;
+    `practice-portfolio.js?v=27`; 106 portfolio checks; tried on the owner's real holdings with live prices and looked at
+    in a headless browser).
   - The daily job keeps a dated copy of the company figures once a week (`research-data/company-figures/`; the first is of
     12 Oct 2026): the start of a history to test ideas about company figures on. Scheduling a nightly session was asked
     about and judged not worth it yet ("GO PLAY", section 8c).
