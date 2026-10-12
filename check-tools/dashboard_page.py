@@ -4,6 +4,8 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
 
    python3 check-tools/dashboard_page.py <practice-portfolio.js> <practice-autopilot.js> <out.html> <light|dark> "<steps>"
    steps: type (types in the buy row), sale (the autopilot sells in the background, then the page refreshes itself),
+          chart (the graph of the account over time: its size, what it reads, the pointer; chart:ai or chart:own presses that
+          button; open the page with ?chart=1 for an account with a few weeks of history),
           trial (a trial of its own rules starts), off (the autopilot is switched off), open (unfolds the details),
           preset (presses the "Quick coin trading" set-up), sellall (presses "Sell everything it holds" and says yes),
           limits (types your own loss limit), split (prints the line that says whose result is whose),

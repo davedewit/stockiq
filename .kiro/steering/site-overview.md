@@ -1015,6 +1015,25 @@ with `document.querySelector('h3')`.
   yet" while the US stock market has not traded since the buys, e.g. a weekend: `marketFlat`).
   **Nothing is shown until the latest prices are in** (4 seconds at most): before 10 Oct the page
   first showed holdings at what was paid, which the owner took for a second, "correct" account value.
+- **A graph of the account over time, under the cards** (12 Oct 2026; the owner: "an easy way to see progress… if we lose
+  money for a week or two then gain over a few weeks, its clear we are making progress"). One line: the account's value
+  since it began against a dashed line at the $100,000 it started with. Buttons switch the line to "Your own buys" or
+  "🤖 AI autopilot" (that part's gain or loss against zero; shown once the autopilot has traded) and, once the account is
+  old enough, to the last week or month. The pointer (or a finger) reads off the moment and the figure; "Show the
+  figures" unfolds a line a day. Remembered in the browser: `stockiqPracticeChartKey`, `stockiqPracticeChartRange`.
+  - **Worked out in the browser, nothing stored and nothing extra fetched** (`valueSeries`, `seriesOf`, `chartSvg` in
+    `practice-portfolio.js`): the price source answers every quote with a month of daily prices, which the page used to
+    throw away. A holding still held is valued at those daily prices and at its latest price now. **A holding that was
+    sold is a straight line from what was put in to what came back**: exact at both ends, a guess in between. The line
+    always ends on the figure the Account value card shows, and the user's and the autopilot's parts always add up to it.
+  - **Limits, say them when the graph is discussed:** daily prices, not hourly (a quick trade shows as a straight segment);
+    a holding kept longer than the month the price source covers is a straight line before that month; the result of
+    sales no longer in the sold list (cleared, or past the 200 the storage keeps) has no dates left and is counted from
+    the start, which the note under the graph says with the amount; a "Reset fake money" starts the line again.
+  - The line is one blue (checked against the light and dark backgrounds), never green or red: up and down are said by the
+    arrow and amount above it. The picture is drawn to the width it has and again when that changes (`ResizeObserver`).
+  - Not built: an hourly line (the price source would need an `interval` setting), a line for an index fund beside it,
+    and telling the AI chat about the graph (`DASHBOARD_GUIDE` in `stockiq-ai-chat` does not mention it yet).
 - **A result is an arrow and an amount**, as a broker's screen shows it: `▲ $801.50 (0.80%)` in green, `▼ $58.48 (0.06%)`
   in red, `– $0.00` in grey (`movedHtml`, `pctHtml` in `practice-portfolio.js`; `deltaHtml` in `practice-autopilot.js`).
   The words stay as each arrow's `aria-label` for screen readers, and `moved()` gives the words ("down $58.48") for the
@@ -1144,7 +1163,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=18` in `dashboard.html`) | Sums and page. Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Portfolio section | `website/practice-portfolio.js` (`?v=19` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=38`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
@@ -1918,8 +1937,8 @@ left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line ch
   `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,887 lines).
 - Lambda `stockiq-ai-chat`: `CodeSha256` `cTz2ks6BStwoDLEIod20m/pzvn59WP2VHo9Hc/RtEV8=`, equal to
   `lambda-sync/stockiq-ai-chat/lambda_function.py` (350 lines).
-- Website (sha256 starts): `practice-autopilot.js?v=38` (`43520270763f`), `practice-portfolio.js?v=18` (`b48ff650293c`),
-  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`df1c3b9835e4`; `analysis-functions.js` `96dbcb721ec1`),
+- Website (sha256 starts): `practice-autopilot.js?v=38` (`43520270763f`), `practice-portfolio.js?v=19` (`2a3f8209d48e`),
+  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`b86167e4cc23`; `analysis-functions.js` `96dbcb721ec1`),
   `ai-chat.js?v=2` (`87eaadf52197`); 17 more pages carry the bell's loader line; `index.html` and `faq.html` the plan wording.
   Live files were compared byte for byte at each deploy.
 - `deploy-to-s3.sh` carries the rules for how long a browser may keep a copy (section 5, step 8); the first daily run with
@@ -1930,7 +1949,7 @@ left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line ch
 - Crypto: the 54 `stockiq-option-7-1-worker-N` all `NmXC9dcsA6p5tXJl+u6VZIfdsrvM3ERN/DmMSQ9zalI=`, the orchestrator
   `Tyyx+Pb2l+sy7avfCncwduEtmFtYn6Lws+5g6dj9Kc0=`, both equal to their mirrors (MACD fix of 11 Oct, section 8b).
 - Share-screener workers: all 669 show `CodeSha256` `q9ZX/UvTBcszKxRPR9lvJw9UpyfWrB5sOB3pDWccm6c=` (`workers/live.txt`), built from `workers/` in git.
-- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 386 function, 198 panel, 74 portfolio, 22 bell, 16 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
+- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 386 function, 198 panel, 92 portfolio, 22 bell, 16 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
   spreads over markets).
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
@@ -2041,7 +2060,7 @@ writing: done, and shown on the panel.
 
 ### Ideas offered and not built
 
-A chart of the account and of the autopilot's result over time; a weekly summary email even when
+(A chart of the account and of the autopilot's result over time was built on 12 Oct 2026: "What the owner sees".) A weekly summary email even when
 there is no review; a coin yardstick (Bitcoin) for coin trades in the breakdown; watching prices
 between check-ins (a stop can only act at a check-in); trials that cover the owner's settings
 (holding time, how often it checks in); selling part of a holding; sorting the tables; recording
@@ -2785,4 +2804,14 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     screener's score has three factors that mean nothing for a coin, and neither score is proven.
     **Lesson: a test that replays recorded prices must also set the clock to the recording** (a coin check passed on
     the day of the recording and failed the next morning).
-
+- **12 Oct 2026** (the session of 11 Oct, continued):
+  - **A graph of the account over time on the Practice portfolio tab** (section 8c, "What the owner sees"), at the owner's
+    wish. Worked out in the browser from the holdings, the sold list and the daily prices that already come with every
+    quote: no function changed, nothing stored, no extra requests. Checked on stand-in data in a real browser (light,
+    dark, phone width) and on the owner's real record with live prices, where it ended on the figure the Account value card
+    shows. Live: `practice-portfolio.js?v=19`, `dashboard.html`. Tests: 92 portfolio checks (18 new); `dashboard_page.py` has
+    a `chart` step and an account with a few weeks of history (`?chart=1`).
+  - **Two sessions at once, again:** the other session deployed `dashboard.html` one minute after this one had staged its
+    copy. The deploy script's fingerprint check refused the stale copy; it was staged again from the current file. And a
+    reminder of the zsh trap in section 8c: `$NEW:application/…` inside a here-document is read as a modifier (`:a`, `:t`);
+    write `${NEW}` or fill such lines in with Python.
