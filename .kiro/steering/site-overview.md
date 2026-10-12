@@ -1054,6 +1054,11 @@ with `document.querySelector('h3')`.
   two links "Refresh now" / "Send me a test email" in the autopilot's): a hover colour, a pressed look, a spinner and a
   word for what it is doing ("Buying…", "Selling…", "Clearing…", "Resetting…", "Refreshing…"). An inline style cannot
   change on hover, which is why nothing did. `busy` says which button is at work (`run(task, key)`).
+- **The "For comparison" card says when there will be something to compare** (12 Oct 2026): while the US market has not
+  traded since the buys it reads "…has not traded since you bought (it opens in 9h 35m)". The figure is the dashboard
+  sidebar's own (`#market-countdown-sidebar`, read by `marketWait`) when that is on the page, so the two cannot disagree;
+  without the sidebar the script works it out by the same rule (`usOpensIn`: 9:30 to 16:00 New York time, weekdays, no
+  public holidays in either). It used to say "it is closed at weekends", which was wrong on a Monday morning.
 - **What is typed in the buy row survives a refresh of prices** (it was wiped: only a completed buy or a reset clears it now).
 - The cards have small capital labels and a green or red top edge on Account value; table headings are small capitals,
   rows highlight under the pointer, figures use tabular numerals.
@@ -1176,7 +1181,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=20` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Portfolio section | `website/practice-portfolio.js` (`?v=21` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=39`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
@@ -1973,8 +1978,8 @@ left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line ch
   `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,930 lines; the fresh-price rule of 12 Oct 2026).
 - Lambda `stockiq-ai-chat`: `CodeSha256` `cTz2ks6BStwoDLEIod20m/pzvn59WP2VHo9Hc/RtEV8=`, equal to
   `lambda-sync/stockiq-ai-chat/lambda_function.py` (350 lines).
-- Website (sha256 starts): `practice-autopilot.js?v=39` (`11c9ae8cd83e`), `practice-portfolio.js?v=20` (`d6ef1c451bb6`),
-  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`8b8c186a2028`; `analysis-functions.js` `96dbcb721ec1`),
+- Website (sha256 starts): `practice-autopilot.js?v=39` (`11c9ae8cd83e`), `practice-portfolio.js?v=21` (`cf6ac94ca9b3`),
+  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`8459fbe0ee68`; `analysis-functions.js` `96dbcb721ec1`),
   `ai-chat.js?v=2` (`87eaadf52197`); 17 more pages carry the bell's loader line; `index.html` and `faq.html` the plan wording.
   Live files were compared byte for byte at each deploy.
 - `deploy-to-s3.sh` carries the rules for how long a browser may keep a copy (section 5, step 8); the first daily run with
@@ -1985,7 +1990,7 @@ left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line ch
 - Crypto: the 54 `stockiq-option-7-1-worker-N` all `NmXC9dcsA6p5tXJl+u6VZIfdsrvM3ERN/DmMSQ9zalI=`, the orchestrator
   `Tyyx+Pb2l+sy7avfCncwduEtmFtYn6Lws+5g6dj9Kc0=`, both equal to their mirrors (MACD fix of 11 Oct, section 8b).
 - Share-screener workers: all 669 show `CodeSha256` `q9ZX/UvTBcszKxRPR9lvJw9UpyfWrB5sOB3pDWccm6c=` (`workers/live.txt`), built from `workers/` in git.
-- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 394 function, 198 panel, 93 portfolio, 22 bell, 16 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
+- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 394 function, 198 panel, 95 portfolio, 22 bell, 16 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
   spreads over markets).
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
@@ -2862,3 +2867,5 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     `dashboard_page.py` has a `refresh` step; 93 portfolio checks.
   - Not done: the AI chat's `DASHBOARD_GUIDE` does not yet mention the graph, the tools beside the heading or the
     fresh-price rule.
+  - The "For comparison" card says when the US market opens, in the sidebar's own figure (`practice-portfolio.js?v=21`; 95
+    portfolio checks; `dashboard_page.py` takes `?sidebar=1`).
