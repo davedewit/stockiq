@@ -1953,7 +1953,8 @@ function's log; the size of the record and of the diary.
 **The routine for a review session**
 1. "How to work on it", step 1 (both repos clean, live equals the mirror).
 2. `python3 check-tools/autopilot_review.py --days <since the last review> --out check-tools/reviews/review-<date>.txt`
-   and read all of it. The files in `check-tools/reviews/` are the memory between reviews: read the last one first.
+   and read all of it. Then `check-tools/reviews/questions.md`: answer what can now be answered, test the open ones that
+   can be tested on saved prices, and add at least five new questions of your own. The files in `check-tools/reviews/` are the memory between reviews: read the last one first.
 3. **Faults before figures** (parts 7 and 8): a fault is fixed whatever the sample size.
 4. **The dollars** (part 2) against the bar. Say the number of finished trades with every figure. Under 30 in a group
    there is nothing to read; that is not a reason to invent something to change.
@@ -2097,6 +2098,11 @@ edge**, actively, every time. How, without fooling ourselves:
   ahead of the same rules buying at random; still ahead with the seven chip / AI names left out; and a reason to
   believe it that was written down before the result. Write every idea tried into `check-tools/replay/` with its
   result, the failures too, so that nothing is tested twice and nobody counts only the winners.
+- **The session asks the questions, it does not wait for them** (the owner: "what i'm after is for you to ask these
+  questions and actively gather more ways to improve"). **`check-tools/reviews/questions.md` is the running list**: every
+  question asked, by him or by a session, how to test it and what became of it. Each weekly check adds at least five
+  new ones of its own from what the review shows, tests those that can be tested, and reports the answers to him with
+  the improvements. Eighteen were in it on 12 Oct 2026 (ten of the session's own, shares first).
 - **Survivors go live as trials** in the queue (below), never as rules. The live record is the judge.
 - **Where an edge could plausibly come from** (the leads, best first): (1) momentum, the one thing that has held up
   (shares furthest above their 52-week low: about +2 points a trade against the fund in both parts of the replay),
