@@ -1213,6 +1213,12 @@ if PATIENT_ON:
     check('the page is told which holdings are patient', plans[a_pat]['patient'] is True and plans[a_pat]['holdDays'] == 5 and plans[a_plain]['patient'] is False and plans[a_plain]['holdDays'] == 5, [plans[a_pat], plans[a_plain]])
     D.t.clear(); rec = m.load_item(U); rec['settings'] = dict(base, screeners=['7-1'], everyHours=24); rec['state'] = {'startedAt': m.iso(Open.utcnow() - dt.timedelta(days=2))}
     m.run_user(U, rec, Open.utcnow(), snapshot=snapshot, quote=quote, model=model)
+    if "facts['stop'] = {'arm': first_stop['arm']" in open(sys.argv[1]).read():
+        D.t.clear(); ATR['S00'] = 1.5; ATR['S01'] = 4.0; r3 = m.load_item(U); r3['settings'] = dict(base); r3['state'] = {'startedAt': m.iso(Open.utcnow() - dt.timedelta(days=2))}
+        m.run_user(U, r3, Open.utcnow(), snapshot=snapshot, quote=quote, model=model); stops = {x['label']: x.get('stop') for x in r3['state']['open'].values()}
+        pub3 = m.public(r3, Open.utcnow(), U); arms = {p_['label']: p_['arm'] for p_ in pub3['plans']}
+        check('a new holding carries its own stop from the moment it is bought, so the page does not show one figure for all until the next check-in', stops['S00'] and stops['S01'] and stops['S00']['move'] and stops['S00']['arm'] != stops['S01']['arm'] and arms['S00'] == stops['S00']['arm'] and arms['S01'] == stops['S01']['arm'], [stops.get('S00'), stops.get('S01'), arms])
+        ATR.clear()
     check('coins are not part of it', rec['state']['open'] and all('pt' not in f for f in rec['state']['open'].values()), [f.get('pt') for f in rec['state']['open'].values()])
     D.t.clear(); rec = m.load_item(U); rec['settings'] = dict(base, selfTune=False); rec['state'] = {'startedAt': m.iso(Open.utcnow() - dt.timedelta(days=2))}
     m.run_user(U, rec, Open.utcnow(), snapshot=snapshot, quote=quote, model=model)
