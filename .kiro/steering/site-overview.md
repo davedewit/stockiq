@@ -1133,7 +1133,8 @@ with `document.querySelector('h3')`.
 - The notification bell in the page header lists the autopilot's buys and sells with the reports: its own part below,
   "The notification bell".
 - The buy row: search box (code or company name, same lookup as the home page), "Enter $" **or**
-  "or quantity" (the other is worked out from the latest price), an optional note, "Practice buy".
+  "or quantity" (the other is worked out from the latest price), an optional note, "Practice buy". The note is shown on
+  a line of its own under the company's name ("Note: …"; the autopilot's reason, "AI: rank 1, …", likewise).
 - The holdings table (its columns since 12 Oct: Holding, Bought, Price then, Price now, Value, Today, Since bought, Sell): Holding (with how many are held, "Holding (5)", as the sold list says "Sold (7)"; 12 Oct 2026, at the
   owner's word; on a phone the heading row is hidden, so the count shows on wider screens only), Bought (date and time), Price then, Price now, Value, Change, Sell.
   Under each name a line says whose it is: "Bought by you: it stays until you sell it", or for the
@@ -1252,7 +1253,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=31` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Portfolio section | `website/practice-portfolio.js` (`?v=32` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=45`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
@@ -2106,7 +2107,7 @@ apostrophe must allow for it; a test of an action that depends on the day (tradi
 must set the function's clock (`m.datetime = at(when)` in `ai_trader_test.py`), or it passes on
 weekdays and fails at the weekend.
 
-### Start here when resuming (state at 10:30 UTC on 12 Oct 2026, after a full check of everything)
+### Start here when resuming (state at 17:45 UTC on 12 Oct 2026: the end of a three-day session)
 
 **FIRST THING IN EVERY SESSION: tell the owner, in plain words and before anything else, what has happened since the last
 one, and when the last review is a week or more old run the review and bring him the list of improvements to say yes or
@@ -2283,19 +2284,28 @@ mark sized to each coin's own daily movement. Each needs a tag on the buy (as `o
 by `trial_figures`. Read the first week's trades before fixing the order (if nearly every sale is "signal turned", (2)
 goes first). Every review restocks the queue from what the losses show.
 
-**Where it stands (12 Oct 2026, 10:30 UTC; he changes settings often, so read the record):**
-- The account is at cost $99,130 (own buys by hand up $144, the autopilot's finished trades down $1,014), with about
-  another $515 down on paper on five holdings ($64,962, bought at the old sizes of 4 and 10 holdings).
-- **Five finished trades, two up, -$1,014.30, all coins:** WEMIX +0.6%, CFX +1.0% (rose 7.95% after the stop sold it), ERG
-  -2.8% and WAL -3.25% (-$811.70; both sold by the AI review), CKB -0.8% (stop passed between check-ins).
-- Settings: Balanced, **50 holdings set by hand** ($1,983 each), budget $99,129 built up over 1 day (set at 14:36 UTC on
-  12 Oct; it had begun again twice that day: improvements, item 0), a check-in every 3
-  hours, holdings kept up to 10 days, trailing stop "protects a gain", all three switches on. Screeners: S&P 500,
-  Russell 1000, Russell 2000, NASDAQ 100, Dow 30, ASX 200, FTSE 100, Nikkei 225, crypto; shares of the budget automatic.
-- Running by itself: the trial of which share to buy (3 share buys tagged; verdict at 10 finished each way); the shared
-  record (5 trades, 1 account); the diary (every line since 10 Oct).
-- **Waiting for:** 30 finished trades for the first notes and the first review session; 20 at one level for the first
-  progress report and review of its own rules (level 3 has 4, level 5 has 1).
+**Where it stands (12 Oct 2026, 17:45 UTC, when the owner closed the session to let it run; he changes settings often, so read
+the record):**
+- **The account: about $99,050** (down about $950 since the start): the autopilot's finished trades are down about $1,035
+  (six now), the owner's own are up $144, and what is held was about level on the day. The dashboard has the live figure.
+- **Six finished trades, two up, all but the last coins:** WEMIX +0.6%, CFX +1.0%, ERG -2.8%, WAL -3.25% (-$811.70), CKB
+  -0.8%, and **HPE -1.1% (-$21), the first finished share trade**: bought at 14:38 UTC, sold at 17:40 by the AI review
+  (its rank had dropped from 2 to 117 within three hours, the day down 4.6%). It was an ordinary share of the patient
+  trial and the "furthest above its low" pick of the order trial.
+- **It holds 11** (the practice portfolio 12: the owner bought TLS.AX by hand, $5,000, at 17:28 UTC): five older, larger
+  ones (4307.T $12,500, MANTA-USD $24,985, ASX.AX and QBE.AX $9,994 each, 6976.T $7,488) and six at the new size of about
+  $1,900: FANG, CTVA, DDOG, TSCO.L (14:38 UTC) and FTNT, LINC (17:40 UTC). $76,657 invested, cash $17,452.
+- Settings: Balanced, **50 holdings set by hand**, budget $94,108 (all the practice money the autopilot can reach, set by
+  the function after the owner's own buy), built up over 1 day, **a check-in every 3 hours**, holdings kept up to 10
+  days (all three set by hand), trailing stop "protects a gain", all three switches on. Screeners: S&P 500, Russell
+  1000, Russell 2000, NASDAQ 100, Dow 30, ASX 200, FTSE 100, Nikkei 225, crypto; shares of the budget automatic (10
+  holdings a market). **His interest is the share screeners, not coins** (he leaves crypto ticked as a small part).
+- **Three things are running by themselves:** the trial of which share to buy (`o`); the patient-shares trial (`pt`: of
+  the six small holdings, CTVA, DDOG and LINC are patient); the count of headlines with each buy (`heads`). The diary
+  keeps every line. Nothing else is to be changed in how it trades until there are trades to read.
+- **Waiting for:** 30 finished trades for the first notes and the first real review; 20 at one level for the first
+  progress report; 10 finished each way for the order trial's verdict, 30 for the patient trial's.
+- **The month's goal** (12 Nov): 100 finished trades, -0.2% a trade or better, the account no lower than $98,000.
 
 **Still to be seen for real** (strike each when seen): a "Left alone" line at a Tokyo opening with only old prices, then the
 same market looked at again half an hour later; the first small buys at 50 holdings, up to 10 at a check-in, with
@@ -2305,6 +2315,11 @@ hand on the scheduler's bare PATH at 10:55 UTC on 12 Oct and uploaded the file, 
 first progress report and its email; whether the test email reached the owner's inbox. **Never opened by a session: the logged-in dashboard and a real phone. The owner sent a screenshot of the Practice
 portfolio tab on 12 Oct (desktop, dark): heading with the two tools beside it, the four cards, the "whose result" row and
 the sidebar all as intended; the usage badge still sits over the top right corner (section 11).**
+**Seen for real at 17:40 UTC on 12 Oct (the first scheduled check-in on the day's last code):** the build-up fix let it buy at
+once (FTNT and LINC, $1,883 each; before the fix there was no room until the next afternoon); new holdings carry their own
+stop from the buy (FANG starts after +1.3%, CTVA +3.4%, DDOG +2.4%, FTNT +1.6%, LINC +2.4%; TSCO.L not yet, London being
+shut); the patient tags went on in pairs (FTNT ordinary, LINC patient); the AI review sold HPE and left the patient
+shares alone; the budget was fitted to the money after the owner's own buy. No fault in the log.
 **Seen for real at 14:38 UTC on 12 Oct (a check-in the owner asked for by hand):** five shares bought at the new size ($1,982.58
 each): FANG, HPE, CTVA, DDOG and TSCO.L, across the US and London. **Tagged in pairs for the patient-shares trial exactly as
 designed (`pt` 0, 0, 1, 1, 0), crossed with the buying-order trial** (FANG ordinary and as ranked, HPE ordinary and
@@ -2331,10 +2346,10 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
-- Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=31` (`c411bbe97aba`),
-  `dashboard.html` (`27ad373a26c2`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
+- Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=32` (`0a1f709f6dbb`),
+  `dashboard.html` (`7513f0cf1622`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
   `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
-- Tests on the live files: 442 function, 210 panel, 109 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
+- Tests on the live files: 442 function, 210 panel, 110 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
 - Both repos pushed; **no `check-tools/pending-*` folder is left**. `website/` carries the daily job's own three files
@@ -3322,6 +3337,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - The Practice portfolio shows the site's spinner while it loads and loads sooner after a refresh (13 Oct;
     `practice-portfolio.js?v=31`, `dashboard.html`; 109 portfolio checks). The portfolio tests waited for the word
     "Loading…" to go: they wait for the spinner now (`waitIdle` in `practice_test.js`).
+  - A holding's note sits on a line of its own under the company ("Note: …"; `practice-portfolio.js?v=32`; 110 portfolio
+    checks), asked for after the owner's first buy by hand with a note.
+  - **The session ended here (17:45 UTC, 12 Oct)**, the owner leaving it to run: "Start here when resuming" holds the state.
   - The daily job keeps a dated copy of the company figures once a week (`research-data/company-figures/`; the first is of
     12 Oct 2026): the start of a history to test ideas about company figures on. Scheduling a nightly session was asked
     about and judged not worth it yet ("GO PLAY", section 8c).
