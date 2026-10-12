@@ -32,7 +32,8 @@ CACHE = {'BHP.AX': {'pe_ratio': 12.4, 'revenue_growth': -0.02, 'profit_margin': 
 PUBLISHED = {'made': '2026-10-11', 'figures': {s: dict(publisher.to_score_units(e), as_of='2026-10-05') for s, e in CACHE.items()}}
 state = {'figures': 'ok', 'figure_reads': 0, 'chart_payloads': [], 'emptied': set(), 'charts': {}, 'urls': [], 'saved': []}
 # the price source's recorded answers for ten coins (90 days each, 11 Oct 2026)
-COINS_REC = json.load(open(os.path.join(ROOT, 'check-tools', 'crypto', 'recorded.txt')))['answers']
+_coins = json.load(open(os.path.join(ROOT, 'check-tools', 'crypto', 'recorded.txt')))
+COINS_REC = _coins['answers']; COINS_TIME = _coins['end']     # the moment they were recorded
 
 def chart_for(symbol):
     c = state['charts'].get(symbol) or SAMPLE.get(symbol)
@@ -223,6 +224,8 @@ def ask(mod, body):
     with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
         r = mod.lambda_handler({'body': json.dumps(body)}, None)
     return json.loads(r['body'])
+# the clock stands at the moment the coin prices were recorded (a coin's last daily bar is the day still running)
+real_clock = time.time; time.time = lambda: COINS_TIME
 out = ask(new, {'symbols': ['sui'], 'asset': 'crypto', 'userId': 'someone', 'skipHistorySave': True, 'timezone_offset': 7})
 c = out['results'][0]; t = text(c); urls = list(state['urls'])
 check('a coin named by its symbol is priced by the screener\'s ticker for it', c['symbol'] == 'SUI20947-USD' and c['label'] == 'SUI' and c['asset'] == 'crypto' and any('SUI20947-USD' in u for u in urls), (c.get('symbol'), c.get('label')))
@@ -246,6 +249,7 @@ check('a background run of a share is saved as before', state['saved'][1]['symbo
 import ast as _ast
 orch = open(os.path.join(ROOT, 'lambda-sync', 'stockiq-option-7-1-orchestrator', 'orchestrator.py')).read()
 pairs = _ast.literal_eval('[' + re.search(r"COINS = \[(.*?)\n    \]", orch, re.S).group(1) + ']')
+time.time = real_clock
 check('the coin tickers are the crypto screener\'s own', new.COIN_TICKERS == {d: tk for d, tk in pairs if d != tk} and new.coin_ticker('sui') == ('SUI', 'SUI20947-USD') and new.coin_ticker('btc-usd') == ('BTC', 'BTC-USD'), len(new.COIN_TICKERS))
 if os.environ.get('LIVE'):
     live = load('live_report', os.environ['LIVE']); strip = lambda s: re.sub(r'Analysis Generated: [^\n]*', '', s)
