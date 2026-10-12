@@ -1222,8 +1222,8 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=22` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=42`) | Controls and reports only; decisions are made by the Lambda |
+| Portfolio section | `website/practice-portfolio.js` (`?v=23` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=43`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -2206,10 +2206,22 @@ actively do things try things"). The replay's clearest lesson for shares, put to
   is still held). Count both what was sold and what is still held, for buys of the same weeks: patient shares finish
   later, so the first to finish are the ones a limit caught. If patient shares are clearly ahead after 30 finished each
   way: make it the rule for shares (a deploy); if clearly behind: switch `PATIENT` off.
-- The buy's plan and the sale's story say which kind a share is; the page's plans carry `patient`. **Not done:** nothing
-  on the panel's "Improving its own rules" part shows this trial, and the AI chat's guide does not mention it.
+- The buy's plan and the sale's story say which kind a share is; the page's plans carry `patient`. Since 15:08 UTC the same
+  day the panel lists the trial under "Improving its own rules" (`patientHtml`, with how many patient shares it holds),
+  its description of the selling rules and its two switches name the exception, a patient holding's line on the
+  portfolio says so (`planLine`), and the AI chat's guide knows both standing trials.
 - Tests: 12 in `ai_trader_test.py` (the older tests switch `PATIENT` off at the top). Rollback zip
   `…_before_autopilot_patient_20261012.zip`.
+
+**What it does when the money does not quite fit (the owner asked, 12 Oct; read from the code):** a check-in buys only
+whole holdings. How many: the room (the least of the practice cash, the budget less what is invested, and what the
+build-up has released less what is invested) divided by the size of a holding, with a cent a holding of slack for
+rounding; the last buy of a budget takes exactly what is left, so **a cent or two short still buys**. **Short by more
+than that, it does not buy a smaller holding**: it buys nothing, the check-in says "Not enough practice cash for another
+holding ($X left, a holding is $Y)" and "Needs you" shows it. A buy is smaller than a full holding only when its
+market's own share has less room than that left (never under the $25 smallest buy). Because the budget is set to the
+practice money there is at every check-in (`fit_budget`), a falling account makes each new holding a little smaller
+instead of leaving the autopilot short. What stays unused: a remainder under one holding (under 2% at 50 holdings).
 
 **FIRST JOB AT THE FIRST WEEKLY CHECK (on or after 19 Oct 2026): the trial queue.** Agreed on 12 Oct ("thats fine so long as
 my goal is reached"); deliberately not built at the end of that day's long session, hours before the first buys at 50
@@ -2263,16 +2275,16 @@ preview from Kiro): ask early when a change "does not show" (section 9).
 
 **What is live, and how to confirm nothing has moved since** (all compared with the local copies on 12 Oct, 10:17 UTC):
 - `stockiq-ai-trader` `8bg71SuG/fkCGYlCWlqTJGJprK++hb5JU+MUsfWxoDA=` (3,060 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC); `stockiq-ai-chat`
-  `f6vB7CzN3cQAt9ZbTUS7+eYrFRsp75L46Xks8kx5rn4=`; `stockiq-screener-coordinator` `pUBd8qCLYGjtVSoYQObSV8YVygyP8mBSfdCxxJ+ho9Y=`;
+  `rs1M0DqaxL5DCY08qCQTWpudd7QqpvRvrg2IwaGRi/c=`; `stockiq-screener-coordinator` `pUBd8qCLYGjtVSoYQObSV8YVygyP8mBSfdCxxJ+ho9Y=`;
   `stockiq-option-1-1-custom-analysis` `I84SxSgLYNt7…`; `stockiq-chart-generator` `OIDrZ2W9G3lJ…`; `stockiq-paper-portfolio`
   `s6IR+/80N/3k…`; the two signals functions `6nVDLm4/8G6K…`; the crypto orchestrator `yvmucU37gHJH…` and its 54 workers
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
-- Website (sha256 starts): `practice-autopilot.js?v=42` (`4e98de550303`), `practice-portfolio.js?v=22` (`26eb5153d24a`),
-  `dashboard.html` (`1c61cc5681a6`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
+- Website (sha256 starts): `practice-autopilot.js?v=43` (`83dfb5e06e1b`), `practice-portfolio.js?v=23` (`490a1af9fa06`),
+  `dashboard.html` (`33310f5dc78f`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
   `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
-- Tests on the live files: 436 function, 204 panel, 96 portfolio, 22 bell, 19 chat, 42 signals; the panel-versus-function
+- Tests on the live files: 436 function, 207 panel, 97 portfolio, 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
 - Both repos pushed; **no `check-tools/pending-*` folder is left**. `website/` carries the daily job's own three files
@@ -2281,7 +2293,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
   trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell,
   takeover, report`, `stockiq-ai-trader_before_sweep_20261011.zip`, `…_costs_…`; 12 Oct `fresh, due, holdings, journal,
-  notes, heads, junk, patient`. `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `…_{guide, guide2}_20261012.zip`.
+  notes, heads, junk, patient`. `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `…_{guide, guide2, guide3}_20261012.zip`.
 
 **Improvements to come: one list. Take an item out when it is done; add ideas as the data suggests them.**
 *Waiting on finished trades (each has its trigger; nothing is adopted from hindsight, a trading idea goes live as a trial):*
@@ -2692,6 +2704,10 @@ Needs the owner's decision or more work (nothing here is fixed):
   resets it; the Lambda also looks up paid status from the `userId` the browser sends.
 - **Email signup:** the endpoint is public (a bot could flood signups and notification emails),
   the Lambda has no CloudWatch log group, and nothing is sent to subscribers yet.
+- **Claims left on two public pages that the site does not meet** (found 12 Oct 2026): `contact.html` says it serves
+  "individual investors, financial advisors, and institutional clients with real-time market data"; `technical-analysis-guide.html`
+  offers "15+ indicators, real-time charts, and AI-powered pattern recognition". Data is delayed and there is no pattern
+  recognition. The owner's wording to change.
 - Home page: the comparison table still benchmarks against Bloomberg ($24,000/yr) and
   Morningstar. `analysis.html` shows 12 "Coming Soon" screener buttons.
 - Guides are ~800 words of definitions with no worked examples.
@@ -3218,6 +3234,15 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     better of it ("maybe i'm wrong and current spot for it is ok"): they stay at the top, beside the countdown and reachable
     from both parts of the panel. A link under "Checks in" doing the same was staged and **not deployed** (commit `f4e5e81`,
     `check-tools/pending-link/`, if he ever wants it); its check in `autopilot_test.js` only applies when the link is there.
+  - **Every statement on the dashboard checked against the code at the owner's word ("has to be accurate!")**, 15:08 UTC. Wrong
+    and put right: "it buys at most 3 at a check-in" (a fifth of the holdings: 10 at 50); "every holding is sold when its
+    signal turns and is reviewed by the AI model" (not the patient shares); the trial was not listed. Right as they
+    stood: the schedule every 30 minutes (`cron(10,40 …)`, enabled), the check-in choices, the crypto history every 30
+    minutes, prices on stock pages every 5 seconds, $100,000, the 0.1% cost, the public pages' sentences about the
+    practice portfolio and the autopilot. `practice-autopilot.js?v=43`, `practice-portfolio.js?v=23`, the chat `rs1M0Dqa…`.
+    **Left for the owner (what public pages say is his): "real-time market data" on `contact.html` and "15+ indicators,
+    real-time charts, and AI-powered pattern recognition" on `technical-analysis-guide.html`**, which the site does not
+    deliver (data is delayed; section 11).
   - The daily job keeps a dated copy of the company figures once a week (`research-data/company-figures/`; the first is of
     12 Oct 2026): the start of a history to test ideas about company figures on. Scheduling a nightly session was asked
     about and judged not worth it yet ("GO PLAY", section 8c).
