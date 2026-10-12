@@ -202,6 +202,7 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
       const sm = pure.summarize(st, { AAA: q(110, [[T - 19 * H, 105], [T, 110]]), BBB: q(49, [[T - 19 * H, 52], [T, 49]]) });
       check('the holdings\' day adds up: +$50 on the one held since before, -$20 on the one bought today', near(sm.dayUsd, 50 - 20) && sm.dayCount === 2 && near(sm.dayPct, 30 / (1100 - 50 + 980 + 20) * 100), [sm.dayUsd, sm.dayPct]);
       check('with no holding that has a day figure the summary says so, not zero', pure.summarize({ cash: 5, startingCash: 5, closed: [], holdings: [] }, {}).dayUsd === null); }
+    if (/details class="pp-plan"/.test(src)) check('the script folds the autopilot\'s plan for a holding behind an arrow, keeps it open across a redraw, and leaves a holding of the user\'s own as one plain line', /<details class="pp-plan" data-id="\$\{esc\(h\.id\)\}"\$\{openPlans\.has\(h\.id\) \? ' open' : ''\}><summary>🤖 Autopilot: its plan for this/.test(src) && /querySelectorAll\('details\.pp-plan'\)/.test(src) && /h\.by === 'ai' && plans\[h\.id\] && plans\[h\.id\]\.auto/.test(src));
     check('the plan line itself', pure.planLine({ by: 'me' }, null) === 'Bought by you: it stays until you sell it.' && pure.planLine({ by: 'ai' }, undefined) === '🤖 Bought by the autopilot.');
   }
   // whose result is whose: the owner's real figures of 10 Oct 2026 (his own Bitcoin up $201.85, an autopilot sale +$7.91, an autopilot holding up $17.08)
