@@ -2101,6 +2101,20 @@ edge**, actively, every time. How, without fooling ourselves:
   (3) real company figures (profit, debt, growth), never tested because there is no history of them here: start
   recording them with each buy; (4) the market's own state (stay out, or hold fewer, when the index is below its
   long average); (5) a model fitted to the shared record once it holds hundreds of trades.
+- **The first lead found this way, the owner's own (12 Oct 2026): "i think alot of those are there because they did just rise
+  up fast. typically stocks rise fast hit a high then drop".** For **shares** four years of prices say no: the screener's
+  top 10 did about what the whole list did a day, a week and a month later, and a fast rise over 1, 5, 10 or 30 days was
+  followed by neither a clear fall nor a clear rise (`paper-test/results-*-one-worker.txt`). For **coins** the first look
+  says he may be right: `python3 check-tools/crypto/entry_study.py` (new; read-only; the entry log of section 8b against
+  prices now) found that the 51 entries into the coin top 10 of 11–12 Oct were down 4.0% on average (± 0.8; 41 down, 10
+  up) a median 16 hours later, while Bitcoin, Ethereum and Solana were down 0.4 to 1.5% over the day; **and the faster
+  the rise before entering, the worse**: up 10% or more the day before, -5.4%; up 20% or more the week before, -7.4%;
+  under 5% the week before, +0.2% (six entries). **One market day, 30 coins, entries that are not independent: a lead,
+  not a finding.** Run it at every weekly check (results in `check-tools/crypto/results/`). If it shows the same over
+  five or more separate days: a trial in the queue, "pass over a coin that has just risen fast" (the level's limit on
+  the 30-day move is the nearest thing there is now; nothing looks at the last day or week). It would also say
+  something about the crypto screener itself, whose score rewards exactly such a rise (section 8b, "How a coin is
+  scored"): the owner's to decide, with the evidence.
 - **What the search needs and does not have yet:** prices for more than the 101 shares on this machine (a list of
   today's members flatters every "buy what rose" rule; download a wider and older list slowly, away from the daily
   run, section 8b on Yahoo's limits), saved coin prices, and company figures over time.
@@ -3124,6 +3138,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - **The mandate written down** (section 8c, "Start here when resuming"): the owner wants each session to look for ways to
     beat an index fund, as its own job ("this is your playground"); the method (replay first, four tests, survivors go
     live as trials) and the leads are set out there.
+  - **The owner's hunch about fast risers, tested the same hour**: not so for shares (four years), possibly so for coins (one
+    day of the entry log: entries into the top 10 fell about 4%, the fastest risers most). New tool
+    `check-tools/crypto/entry_study.py`, to be run at every weekly check.
   - The holdings table's heading says how many are held (`practice-portfolio.js?v=22`, `dashboard.html`; 96 portfolio checks).
   - An empty "Build up to it over" or "Number of holdings" box reads "Automatic: 5", not a bare 5 (`autoWord`;
     `practice-autopilot.js?v=42`; 204 panel checks; measured in a browser: the text needs about 90px, the boxes have 136px or more).

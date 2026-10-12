@@ -109,6 +109,15 @@ python3 check-tools/autopilot_review.py --days 14 --out check-tools/reviews/revi
 
 `reviews/` keeps one file a review: read the last one before running the next. Its last part measures against the month's goal (`GOALS` at the top of the tool; the table is in `site-overview.md` section 8c).
 
+## crypto/entry_study.py
+
+What coins have done since they entered the crypto screener's top 10, split by how fast they had risen before (read-only:
+the entry log and the price proxy, about 80 calls). Run it at each weekly check; results in `crypto/results/`.
+
+```bash
+python3 check-tools/crypto/entry_study.py | tee check-tools/crypto/results/entry-study-$(date +%F).txt
+```
+
 ## ai_chat_test.py
 
 The AI chat function's prompt, with stand-ins for the database and the AI model (19 checks): what it is told away from
