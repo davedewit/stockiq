@@ -179,6 +179,8 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
     check('a holding in a trial of its rules says so', /sooner if it falls to -10% or reaches \+9%\. While it rises it is kept; once it has been up 4\.5% a stop follows it up, and it is sold only if it then falls back\. Part of a trial of one of its own rules\./.test(text()));
     ctx.window.practicePortfolio.setPlans([{ id: hid, auto: false, sellBy: '2026-10-10T16:42:41Z', stop: -10, take: 18, arm: 9 }]);
     check('with the autopilot off: it says the holding now stays', /🤖 Bought by the autopilot, which is switched off: it stays until you sell it or switch the autopilot back on\./.test(text()));
+    { const pat = pure.planLine({ by: 'ai' }, { auto: true, sellBy: '2026-10-22T14:40:00Z', stop: -10, take: 18, arm: 4, patient: true }), plain = pure.planLine({ by: 'ai' }, { auto: true, sellBy: '2026-10-22T14:40:00Z', stop: -10, take: 18, arm: 4, patient: false });
+      if (/plan\.patient/.test(src)) check('a patient share says it is not sold on its signal nor reviewed; an ordinary one says the AI model reviews it', /A patient share, part of a trial: it is not sold because its screener signal turns, and the AI model does not review it\./.test(pat) && !/may sell it earlier/.test(pat) && /The AI model also reviews it at every check-in and may sell it earlier\./.test(plain) && !/patient/.test(plain), pat.slice(-160)); }
     check('the plan line itself', pure.planLine({ by: 'me' }, null) === 'Bought by you: it stays until you sell it.' && pure.planLine({ by: 'ai' }, undefined) === '🤖 Bought by the autopilot.');
   }
   // whose result is whose: the owner's real figures of 10 Oct 2026 (his own Bitcoin up $201.85, an autopilot sale +$7.91, an autopilot holding up $17.08)
