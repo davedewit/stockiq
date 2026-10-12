@@ -2369,7 +2369,11 @@ preview from Kiro): ask early when a change "does not show" (section 9).
    headlines do no better: stop fetching them for candidates (fewer calls, shorter prompts). If better: widen them (the
    feed's summary text as well as the title; a feed that covers Sydney, Tokyo and London shares, which get none now).
 3. **The AI review's early sales** (its two so far are the two largest losses): read `after` for them at 8 to 12 sales;
-   the pause for sales that came too early is already built (`review_ai_sells`).
+   the pause for sales that came too early is already built (`review_ai_sells`). **The owner asked on 12 Oct whether a sale
+   like HPE's (sold by the review three hours after it was bought, -1.1%) is checked afterwards. It is (`look_back`), but
+   only over the same length of time again: three hours for HPE, which says little. Add a second look at a fixed
+   distance, five trading days after every sale (`after5`), so that a review can say whether selling early saved money
+   over a week, not only over the next few hours.**
 4. **Stops passed between check-ins** (part 4 of the review counts them). If common: a light look at prices every half
    hour for holdings whose stop has started, with no screener run and no AI call.
 5. **Coins: limits from each coin's own daily movement** instead of one loss limit and gain mark for all (a live trial,
@@ -2381,6 +2385,8 @@ preview from Kiro): ask early when a change "does not show" (section 9).
    each needs a tag on the buy and a trial. **A small fitted model** scoring a candidate once the shared record holds
    thousands of trades (no new AWS service). The screener scoring itself is the owner's decision (section 7b).
 *Housekeeping, any session:*
+0c. A sale's story says "chosen by rank" for a share that was the buying-order trial's pick (`sale_detail`: HPE on 12 Oct;
+   the buy's own line and the record say it rightly: "bought as the share furthest above its 52-week low"). One line.
 0b. **Buying by quantity is a hair off while a market is trading** (seen 12 Oct in the portfolio tests, which use live prices:
    3 shares asked for, 3.00006 bought). The page turns the quantity into dollars at the price it has, then buys at the
    price of that moment, which has moved. Cosmetic; the fix is to buy the quantity asked for at the price of the buy.
