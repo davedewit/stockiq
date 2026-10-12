@@ -25,6 +25,8 @@ STAY = m.STAY_CHECKS; m.STAY_CHECKS = 1
 # And each account learns from its own trades alone here, so that the reviews themselves are tested on one record. Live, the same
 # reviews run once on every account's trades together; that is tested on its own at the end (CENTRAL).
 SHARED = m.CENTRAL; m.CENTRAL = False
+# And the AI model's notes are written from nine trades here; live it waits for 30 (LESSONS_MIN), tested on its own (NOTES).
+NOTES = getattr(m, 'LESSONS_MIN', 0); m.LESSONS_MIN = 5
 # And no trading cost is taken off here, so that the amounts in the older checks stay round; the cost is tested on its own (COSTS).
 COSTS = getattr(m, 'TRADE_COST', 0); m.TRADE_COST = 0
 D = DB(); m._db = D
@@ -223,7 +225,7 @@ check('not again until five more trades have closed', not m.write_lessons(rec, t
 MODEL['answer'] = None; rec['history'] += [trade(20 + i, 1.0) for i in range(5)]; kept = dict(rec['state']['lessons'])
 check('if the model gives nothing, the old notes stay', not m.write_lessons(rec, t0, model) and rec['state']['lessons'] == kept)
 text = m.memory_text(m.scorecard(rec['history']), rec['state']['lessons'])
-check('the record and notes are put in front of the model when it chooses', 'All 14 closed trades' in text and '- S&P 100: 14 trades' in text and 'Note from the last review: Trades bought with RSI under 45' in text and 'own record so far' in m.build_prompt(rec['settings'], SNAP['3-100'][:3], '', 1, text)['user'] and 'own record' not in m.build_prompt(rec['settings'], SNAP['3-100'][:3], '', 1)['user'])
+check('the record and notes are put in front of the model when it chooses', 'All 14 closed trades' in text and '- S&P 100: 14 trades' in text and ('Note from the last review: Trades bought with RSI under 45' in text or 'Note from the last review (of 9 finished trades): Trades bought with RSI under 45' in text) and 'own record so far' in m.build_prompt(rec['settings'], SNAP['3-100'][:3], '', 1, text)['user'] and 'own record' not in m.build_prompt(rec['settings'], SNAP['3-100'][:3], '', 1)['user'])
 m.save_item(U, rec); s, b = call(action='get', userId=U)
 check('the dashboard gets the scorecard, notes and resting list, not the bulk', b['scorecard']['n'] == 14 and b['lessons']['items'] and isinstance(b['resting'], dict) and len(b['recent']) == 10 and 'history' not in b and 'open' not in b['state'] and b['minSample'] == 8, list(b))
 # --- nothing is chosen for the user, and each change can be saved on its own
@@ -1162,6 +1164,22 @@ if hasattr(m, 'holdings_of'):
     code_, b = call(action='save', userId=U, settings=dict(rec['settings'], holdings=None))
     check('emptied again, it goes back to the level\'s', code_ == 200 and b['settings']['holdings'] is None and b['rules']['positions'] == 8, [b['settings'].get('holdings'), b['rules'].get('positions')])
 m.TRADE_COST = 0
+# ---- the AI model's notes wait for enough finished trades: a pattern in a handful is chance, and the notes are shown back to it
+if NOTES:
+    m.LESSONS_MIN = NOTES; was_central = m.CENTRAL; m.CENTRAL = False; MODEL['answer'] = {'lessons': ['Rank 1 to 3 did worse (5 trades).']}; MODEL['prompts'].clear()
+    rec = {'settings': dict(m.DEFAULTS), 'state': {'lessons': {'at': m.iso(t0), 'n': 5, 'items': ['RSI around 50 did not perform well.']}}, 'log': [], 'history': [trade(i, -1.0) for i in range(NOTES - 1)]}
+    early = m.memory_text(m.scorecard(rec['history']), rec['state']['lessons'])
+    check('a note that rests on fewer than 30 trades is not shown to the model', 'RSI around 50' not in early and 'Note from' not in early, early)
+    check('nor to the page', m.public(rec, t0, U)['lessons'] is None)
+    check('with 29 finished trades no notes are written, the model is not asked, and the early notes are dropped', not m.write_lessons(rec, t0, model) and not MODEL['prompts'] and not rec['state'].get('lessons'))
+    n = [c for c in m.coming(dict(rec, settings=dict(m.DEFAULTS, enabled=True, screeners=['3-100']), state=dict(rec['state'], startedAt=m.iso(t0), lastRun=m.iso(t0))), m.new_portfolio(t0), t0 + dt.timedelta(hours=1), []) if c['kind'] == 'notes']
+    check('"What happens next" says how many trades the first notes wait for, and why', bool(n) and (n[0]['after'] == 1 and 'waits for 30 finished trades' in n[0]['text']), n)
+    rec['history'].append(trade(99, 2.0))
+    check('at 30 they are written', m.write_lessons(rec, t0, model) and rec['state']['lessons']['n'] == NOTES and len(MODEL['prompts']) == 1)
+    late = m.memory_text(m.scorecard(rec['history']), rec['state']['lessons'])
+    check('and shown to the model with the number of trades they rest on', 'Note from the last review (of 30 finished trades): Rank 1 to 3 did worse' in late, late[-200:])
+    check('and to the page', m.public(rec, t0, U)['lessons']['items'] == ['Rank 1 to 3 did worse (5 trades).'])
+    m.LESSONS_MIN = 5; m.CENTRAL = was_central
 # ---- the diary: every activity line, finished trade and change of settings, written once to a table that is never trimmed
 if hasattr(m, 'keep_diary'):
     class Diary:                                            # keyed by the account and the time, as the real table is
