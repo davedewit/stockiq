@@ -1473,7 +1473,13 @@ headline now counts only if it names the coin by its own name ("Ergo"; taken fro
 for candidates), or by its ticker beside a crypto word (`COIN_WORDS`), or the ticker has five
 letters or more; and never if it reads like share news (`SHARE_NEWS`: an exchange code in
 brackets, "stock", "shares", "dividend", "earnings"). Share headlines are not touched by this. Kept two hours
-(`state.news`, `state.seen`). Headlines are untrusted text: both prompts say so, and the model's
+(`state.news`, `state.seen`). **Whether headlines help is not known, so it is measured** (12 Oct 2026, the owner asked
+"does it also review the news?"): a remembered buy carries `heads` (how many headlines the model was shown for it) and
+`headAge` (hours, the newest); both go with the finished trade into the shared record (`POOL_FIELDS`), and
+`autopilot_review.py` splits results by them (none found / newest under a day old / one to three days old). Of the
+first 10 buys, 3 had any headline; none of the three share buys outside the US did (Yahoo's feed is asked with a US
+region). What the model gets is headlines only, never an article's text, and it has no internet of its own. One that
+slipped through the junk filter: "Why is Walrus price up 13.5% today?" (a price page; `NEWS_JUNK` could take "price up"). Headlines are untrusted text: both prompts say so, and the model's
 answer can only pick from a list or say hold / sell. Small coins usually have none; then it is the
 figures alone. Only the deployed function fetches (`AWS_LAMBDA_FUNCTION_NAME`); a test run never
 calls out.
@@ -2135,8 +2141,8 @@ calls, with his agreement; (5) thinning the bell script's handling of older copi
 left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line change now, each changing labels.
 
 **What is live, and how to confirm nothing has moved since:**
-- Lambda `stockiq-ai-trader`: `CodeSha256` `FObfjaG/9yOthlqQgm4378SyjpC58jb1hqvCUyLw6RA=`, equal to
-  `lambda-sync/stockiq-ai-trader/lambda_function.py` (3,023 lines; 12 Oct 2026: the fresh-price rule, a market that stays due, the number of holdings, the diary, notes only from 30 finished trades). Table `stockiq-ai-trader-journal` (the diary) made the same day.
+- Lambda `stockiq-ai-trader`: `CodeSha256` `E7OY2fUBG4U4mDaCa/ZM/13sEaFSmBxP5UbQKz+UrPU=`, equal to
+  `lambda-sync/stockiq-ai-trader/lambda_function.py` (3,028 lines; 12 Oct 2026: the fresh-price rule, a market that stays due, the number of holdings, the diary, notes only from 30 finished trades, headlines counted with each buy). Table `stockiq-ai-trader-journal` (the diary) made the same day.
 - Lambda `stockiq-ai-chat`: `CodeSha256` `f6vB7CzN3cQAt9ZbTUS7+eYrFRsp75L46Xks8kx5rn4=` (its guide to the dashboard brought up to date on 12 Oct), equal to
   `lambda-sync/stockiq-ai-chat/lambda_function.py` (350 lines).
 - Website (sha256 starts): `practice-autopilot.js?v=41` (`a63a59e5a2aa`), `practice-portfolio.js?v=21` (`cf6ac94ca9b3`),
@@ -2151,12 +2157,12 @@ left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line ch
 - Crypto: the 54 `stockiq-option-7-1-worker-N` all `NmXC9dcsA6p5tXJl+u6VZIfdsrvM3ERN/DmMSQ9zalI=`, the orchestrator
   `Tyyx+Pb2l+sy7avfCncwduEtmFtYn6Lws+5g6dj9Kc0=`, both equal to their mirrors (MACD fix of 11 Oct, section 8b).
 - Share-screener workers: all 669 show `CodeSha256` `q9ZX/UvTBcszKxRPR9lvJw9UpyfWrB5sOB3pDWccm6c=` (`workers/live.txt`), built from `workers/` in git.
-- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 422 function, 203 panel, 95 portfolio, 22 bell, 19 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
+- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 424 function, 203 panel, 95 portfolio, 22 bell, 19 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
   spreads over markets).
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
   trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell,
-  takeover, report`, then `stockiq-ai-trader_before_sweep_20261011.zip`, `…_before_autopilot_costs_…` and, 12 Oct, `…_before_autopilot_fresh_20261012.zip`, `…_due_…`, `…_holdings_…`, `…_journal_…`, `…_notes_…`;
+  takeover, report`, then `stockiq-ai-trader_before_sweep_20261011.zip`, `…_before_autopilot_costs_…` and, 12 Oct, `…_before_autopilot_fresh_20261012.zip`, `…_due_…`, `…_holdings_…`, `…_journal_…`, `…_notes_…`, `…_heads_…`;
   `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `stockiq-ai-chat_before_{guide, guide2}_20261012.zip`.
 - First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and the function's log
   (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors ("check-in failed", "shared learning failed",
@@ -3074,11 +3080,14 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     `check-tools/reviews/review-2026-10-12.txt`. No trading rule changed. Rollback zip `…_before_autopilot_journal_20261012.zip`.
   - **The AI model's notes wait for 30 finished trades** (function `FObfjaG/…`, 09:49 UTC; "Learning from its own results"):
     the first thing the review tool's baseline showed, done at the owner's word. 422 function checks. Rollback zip
-    `…_before_autopilot_notes_20261012.zip`. Not yet seen live at hand-over: the shared record's five-trade notes being dropped
-    (the next scheduled run, 10:10 UTC; `autopilot_review.py` part 6 then shows no "note:" lines). **The owner's aim, in his words that day:** "pickup on patterns… much more
+    `…_before_autopilot_notes_20261012.zip`. **Seen live:** the 10:10 UTC run dropped the
+    shared record's five-trade notes ("shared learning: 0 new finished trades, 5 in all from 1 accounts, 0 notes"; no errors). **The owner's aim, in his words that day:** "pickup on patterns… much more
     success than failure its something to repeat, if we see consistent loss patterns we also steer away… end goal here is
     make money we need it over 100,000. currently its continually losing". Told plainly in answer: that is what the
     review routine does, with one condition, a pattern counts only from about 30 trades in a group and beyond its margin
     of error; five finished trades (-$1,014, most of it two $25,000 coin holdings) say nothing yet; and the backtests
     (section 7b) give no promise that it ends above $100,000.
+  - **Each buy remembers how many headlines the model was shown** (function `E7OY2fUB…`, 10:14 UTC; "Headlines"): a
+    measurement only, asked for by the owner's question whether the news adds anything. 424 function checks. Rollback
+    zip `…_before_autopilot_heads_20261012.zip`.
   - Still not checked by a session: the logged-in dashboard itself and a real phone (neither can be opened from here).
