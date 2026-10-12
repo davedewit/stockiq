@@ -2227,7 +2227,8 @@ goes first). Every review restocks the queue from what the losses show.
   another $515 down on paper on five holdings ($64,962, bought at the old sizes of 4 and 10 holdings).
 - **Five finished trades, two up, -$1,014.30, all coins:** WEMIX +0.6%, CFX +1.0% (rose 7.95% after the stop sold it), ERG
   -2.8% and WAL -3.25% (-$811.70; both sold by the AI review), CKB -0.8% (stop passed between check-ins).
-- Settings: Balanced, **50 holdings set by hand** ($1,983 each), budget $99,129 built up over 2 days, a check-in every 6
+- Settings: Balanced, **50 holdings set by hand** ($1,983 each), budget $99,129 built up over 5 days (left to the level
+  since 12:40 UTC on 12 Oct, when the build-up began again: improvements, item 0), a check-in every 6
   hours, holdings kept up to 10 days, trailing stop "protects a gain", all three switches on. Screeners: S&P 500,
   Russell 1000, Russell 2000, NASDAQ 100, Dow 30, ASX 200, FTSE 100, Nikkei 225, crypto; shares of the budget automatic.
 - Running by itself: the trial of which share to buy (3 share buys tagged; verdict at 10 finished each way); the shared
@@ -2235,7 +2236,8 @@ goes first). Every review restocks the queue from what the losses show.
 - **Waiting for:** 30 finished trades for the first notes and the first review session; 20 at one level for the first
   progress report and review of its own rules (level 3 has 4, level 5 has 1).
 
-**Still to be seen for real** (strike each when seen): a "Left alone" line at a Tokyo opening with only old prices, then the
+**Still to be seen for real** (strike each when seen): the first share buys tagged for the patient-shares trial (`pt`; the
+14:10 UTC check-in on 12 Oct ran clean on the new code and bought nothing, the budget's build-up having just begun again); a "Left alone" line at a Tokyo opening with only old prices, then the
 same market looked at again half an hour later; the first small buys at 50 holdings, up to 10 at a check-in, with
 `heads` on the remembered buy; a FTSE run on a morning after a London session showing that session's prices; the
 company figures published by the daily run itself ("Company figures published" in its log; the fixed script was run by
@@ -2296,6 +2298,15 @@ preview from Kiro): ask early when a change "does not show" (section 9).
    each needs a tag on the buy and a trial. **A small fitted model** scoring a candidate once the shared record holds
    thousands of trades (no new AWS service). The screener scoring itself is the owner's decision (section 7b).
 *Housekeeping, any session:*
+0. **A restarted build-up blocks all buying while most of the budget is already invested** (seen 12 Oct 2026). The owner
+   emptied "Build up to it over" at 12:40 UTC (trying the "Automatic: 5" box): the build-up became the level's 5 days and
+   began again from zero, while $64,962 of the $99,129 was invested in older holdings. The release counts the whole
+   budget from zero, so nothing can be bought until it has passed what is invested: about three days (the 14:10 check-in
+   said so: "the next $1,983 in about 3 days"). Nothing is wrong by the rules, but it is not what anyone would expect,
+   and it starves the trials of share buys. **Better:** when the build-up begins again, release only the part that is not
+   invested, from that moment (`released`, `allowance`, and the panel's copy in `buildUp()`: the comparison tool checks
+   the two). Until then the way round it is a shorter build-up set by hand, or "Check in now" while a market is open
+   (each press releases enough for one more holding).
 9. **Calls made by open browser tabs** (measured 12 Oct: 55,000 Lambda calls in a day, 13,000 of them the sidebar's
     ticker, 13,000 the four movers lists, 8,500 the market widgets; the crypto history is 2,600). The money is cents,
     but a tab left open all day is about a million calls a month, the size of the free allowance. `sidebar.js` pauses
