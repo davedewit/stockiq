@@ -1058,7 +1058,13 @@ with `document.querySelector('h3')`.
   since the start, split into what has been sold and what is still held), Practice cash left, In
   holdings, and "For comparison" (the same money in an S&P 500 index fund instead; it says "no change
   yet" while the US stock market has not traded since the buys, e.g. a weekend: `marketFlat`).
-  **Nothing is shown until the latest prices are in** (4 seconds at most): before 10 Oct the page
+  **Nothing is shown until the latest prices are in** (4 seconds at most; **the site's spinner meanwhile, not the word
+  "Loading…", since 13 Oct 2026**: `.spinner` of `styles.css` inside `.pp-wait`, in `dashboard.html`'s first markup and in
+  the script's `render`; and the wait is shorter: the symbols it needed last time are kept in the browser,
+  `stockiqPracticeSymbols_<address>`, and their prices are asked for at once, alongside the portfolio, `knownSymbols`.
+  Measured on the owner's account: 3.5 s → 2.3 s on a first load, 1.4 s → 1.1 s after. What is left is the prices
+  themselves, fifteen calls to the price function: one call that answers for a list of symbols with their daily
+  prices would be the next gain): before 10 Oct the page
   first showed holdings at what was paid, which the owner took for a second, "correct" account value.
 - **"Today"** (12 Oct 2026, evening; the owner: "say i jump on in the middle of the day ideally what i probably want to know is
   how much has it gained or lost today"). The Account value and In holdings cards show "Today ▲ $198.49 (0.27%)" above the
@@ -1246,7 +1252,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=30` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Portfolio section | `website/practice-portfolio.js` (`?v=31` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=45`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
@@ -2325,10 +2331,10 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
-- Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=30` (`762467a62af6`),
-  `dashboard.html` (`1cf1b90a7de3`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
+- Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=31` (`c411bbe97aba`),
+  `dashboard.html` (`27ad373a26c2`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
   `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
-- Tests on the live files: 442 function, 210 panel, 108 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
+- Tests on the live files: 442 function, 210 panel, 109 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
 - Both repos pushed; **no `check-tools/pending-*` folder is left**. `website/` carries the daily job's own three files
@@ -3313,6 +3319,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     check-in after. 442 function checks; the panel-versus-function comparison unchanged. Rollback zip
     `…_before_autopilot_buildup_20261012.zip`. **And a correction: the session had told him the five new shares' own stops
     "should already" show; their first check-in was still twenty minutes off. Read the record before saying what it shows.**
+  - The Practice portfolio shows the site's spinner while it loads and loads sooner after a refresh (13 Oct;
+    `practice-portfolio.js?v=31`, `dashboard.html`; 109 portfolio checks). The portfolio tests waited for the word
+    "Loading…" to go: they wait for the spinner now (`waitIdle` in `practice_test.js`).
   - The daily job keeps a dated copy of the company figures once a week (`research-data/company-figures/`; the first is of
     12 Oct 2026): the start of a history to test ideas about company figures on. Scheduling a nightly session was asked
     about and judged not worth it yet ("GO PLAY", section 8c).
