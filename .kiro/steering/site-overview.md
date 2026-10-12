@@ -1507,7 +1507,10 @@ same code; read "its record" below as the shared record, or the shared record at
   of 300, averaging -0.68 against the yardstick. Until it is cleared no result here is evidence of anything, and it must
   be cleared before real money is even discussed (and then discussed with a licensed adviser: section 11, "Legal").
 - **Notes** (`write_lessons`): after every 5 more finished trades the model writes up to four short
-  notes on what the record shows.
+  notes on what the record shows, **but never from fewer than 30 finished trades** (`LESSONS_MIN`, 12 Oct 2026): notes that
+  rest on fewer are dropped, and are shown neither to the model (`memory_text`, which now says how many trades a note rests
+  on) nor on the page. After five coin trades it had written "trades with RSI around 50 did not perform well overall" and
+  was being shown that at every choice.
 - **Pausing the AI model's early sells** (`review_ai_sells`): when the last 8–12 holdings it sold
   early went on to rise 0.5% or more on average, its early sells are paused 14 days.
 - **Trials of its own rules** (`review_tuning`, if `selfTune` is on). It may change only what is in
@@ -1939,10 +1942,11 @@ function's log; the size of the record and of the diary.
     7b stands: the screener scores have shown no reliable edge, and the share of trades that ended up is not profit.
 
 **Weak spots already seen, to look at in the first reviews** (12 Oct, from five finished trades: observations, not findings)
-- **The AI model's notes are written from very few trades and shown back to it at every choice.** After five coin trades
-  it wrote "trades with RSI around 50 did not perform well overall". `write_lessons` asks it to say when the numbers are
-  too few; it did not. Candidate: show no note that rests on fewer than 30 trades (`memory_text`), or none at all until
-  the pool has 30.
+- **The AI model's notes were written from very few trades and shown back to it at every choice** (after five coin trades:
+  "trades with RSI around 50 did not perform well overall"). **Fixed the same day at the owner's word** ("i'll go with advice
+  you give"): no notes under 30 finished trades (`LESSONS_MIN`; "Learning from its own results"). Still thin and worth a look
+  at a later review: the scorecard lines the model is shown for a group of 8 or more trades (`MIN_SAMPLE`); they are plain
+  figures with their count, not conclusions.
 - Both sales by the AI review were the two largest losses (-$985 together). Two trades say nothing; watch `after` for
   them: did they go on falling?
 - CKB had been up 2.5% and ended down 0.8%: the stop was passed between two check-ins. With check-ins every 6 hours this
@@ -2131,8 +2135,8 @@ calls, with his agreement; (5) thinning the bell script's handling of older copi
 left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line change now, each changing labels.
 
 **What is live, and how to confirm nothing has moved since:**
-- Lambda `stockiq-ai-trader`: `CodeSha256` `tBSm1I3R85bqoAt5/VBZbTRnNtULdq/DR8yJ51v9DmM=`, equal to
-  `lambda-sync/stockiq-ai-trader/lambda_function.py` (3,012 lines; 12 Oct 2026: the fresh-price rule, a market that stays due, the number of holdings, the diary). Table `stockiq-ai-trader-journal` (the diary) made the same day.
+- Lambda `stockiq-ai-trader`: `CodeSha256` `FObfjaG/9yOthlqQgm4378SyjpC58jb1hqvCUyLw6RA=`, equal to
+  `lambda-sync/stockiq-ai-trader/lambda_function.py` (3,024 lines; 12 Oct 2026: the fresh-price rule, a market that stays due, the number of holdings, the diary, notes only from 30 finished trades). Table `stockiq-ai-trader-journal` (the diary) made the same day.
 - Lambda `stockiq-ai-chat`: `CodeSha256` `f6vB7CzN3cQAt9ZbTUS7+eYrFRsp75L46Xks8kx5rn4=` (its guide to the dashboard brought up to date on 12 Oct), equal to
   `lambda-sync/stockiq-ai-chat/lambda_function.py` (350 lines).
 - Website (sha256 starts): `practice-autopilot.js?v=41` (`a63a59e5a2aa`), `practice-portfolio.js?v=21` (`cf6ac94ca9b3`),
@@ -2147,12 +2151,12 @@ left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line ch
 - Crypto: the 54 `stockiq-option-7-1-worker-N` all `NmXC9dcsA6p5tXJl+u6VZIfdsrvM3ERN/DmMSQ9zalI=`, the orchestrator
   `Tyyx+Pb2l+sy7avfCncwduEtmFtYn6Lws+5g6dj9Kc0=`, both equal to their mirrors (MACD fix of 11 Oct, section 8b).
 - Share-screener workers: all 669 show `CodeSha256` `q9ZX/UvTBcszKxRPR9lvJw9UpyfWrB5sOB3pDWccm6c=` (`workers/live.txt`), built from `workers/` in git.
-- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 415 function, 203 panel, 95 portfolio, 22 bell, 19 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
+- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 422 function, 203 panel, 95 portfolio, 22 bell, 19 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
   spreads over markets).
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
   trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell,
-  takeover, report`, then `stockiq-ai-trader_before_sweep_20261011.zip`, `…_before_autopilot_costs_…` and, 12 Oct, `…_before_autopilot_fresh_20261012.zip`, `…_due_…`, `…_holdings_…`, `…_journal_…`;
+  takeover, report`, then `stockiq-ai-trader_before_sweep_20261011.zip`, `…_before_autopilot_costs_…` and, 12 Oct, `…_before_autopilot_fresh_20261012.zip`, `…_due_…`, `…_holdings_…`, `…_journal_…`, `…_notes_…`;
   `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `stockiq-ai-chat_before_{guide, guide2}_20261012.zip`.
 - First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and the function's log
   (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors ("check-in failed", "shared learning failed",
@@ -3068,4 +3072,12 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     two doing the in-depth part. New table `stockiq-ai-trader-journal`; `keep_diary` in `save_item`; 415 function checks;
     `check-tools/autopilot_review.py`; the first review (the baseline, five finished trades) is
     `check-tools/reviews/review-2026-10-12.txt`. No trading rule changed. Rollback zip `…_before_autopilot_journal_20261012.zip`.
+  - **The AI model's notes wait for 30 finished trades** (function `FObfjaG/…`, 09:49 UTC; "Learning from its own results"):
+    the first thing the review tool's baseline showed, done at the owner's word. 422 function checks. Rollback zip
+    `…_before_autopilot_notes_20261012.zip`. **The owner's aim, in his words that day:** "pickup on patterns… much more
+    success than failure its something to repeat, if we see consistent loss patterns we also steer away… end goal here is
+    make money we need it over 100,000. currently its continually losing". Told plainly in answer: that is what the
+    review routine does, with one condition, a pattern counts only from about 30 trades in a group and beyond its margin
+    of error; five finished trades (-$1,014, most of it two $25,000 coin holdings) say nothing yet; and the backtests
+    (section 7b) give no promise that it ends above $100,000.
   - Still not checked by a session: the logged-in dashboard itself and a real phone (neither can be opened from here).
