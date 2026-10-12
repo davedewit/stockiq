@@ -96,9 +96,22 @@ of screeners while it holds something, the spread of the budget over markets, pr
 address is never called, because the test replaces `fetch`) and a stand-in for the browser's storage.
 Add a check for whatever you change; when wording changes, the checks that quote it must change too.
 
+## autopilot_review.py (and reviews/)
+
+The review of the AI autopilot that a session runs every week or two. Read-only: the account's record, its diary (table
+`stockiq-ai-trader-journal`, never trimmed), the shared record, what each holding cost and the function's log. It is not a
+visit to the dashboard and never prints the account's address. What each part means and what to do with it:
+`site-overview.md` section 8c, "The diary, and the review every week or two".
+
+```bash
+python3 check-tools/autopilot_review.py --days 14 --out check-tools/reviews/review-$(date +%F).txt
+```
+
+`reviews/` keeps one file a review: read the last one before running the next.
+
 ## ai_chat_test.py
 
-The AI chat function's prompt, with stand-ins for the database and the AI model (13 checks): what it is told away from
+The AI chat function's prompt, with stand-ins for the database and the AI model (19 checks): what it is told away from
 the dashboard and on it, that the user's dashboard summary is treated as data and cut to length, that the rule against
 advice stands, and that the risk-level numbers it quotes are the autopilot's own.
 

@@ -289,6 +289,7 @@ aws logs tail /aws/lambda/stockiq-my-function --since 5m --profile default --reg
 | `stockiq-email-subscribers` | email | email-capture |
 | `stockiq-paper-portfolios` | userId (one item per user: `data` JSON, `version`) | paper-portfolio, ai-trader |
 | `stockiq-ai-trader` | userId (one item per user: `data` JSON with settings, state, log and history; `enabled` flag). Items `_snapshot#<screener key>` hold screener results for 20 minutes. **`_brain`** is the record every account learns from (finished trades of all accounts without anything that says whose, the rules, trials, rests and notes worked out from them); `_pool#…` items are finished trades waiting to be taken into it by the next scheduled run | ai-trader |
+| `stockiq-ai-trader-journal` | userId + `at` (time, kind and a short key). Rows `kind` `log` / `trade` / `settings`, `data` JSON. Written once by `keep_diary` at every save of an account's record; never trimmed, never read while trading | ai-trader (writes), `check-tools/autopilot_review.py` (reads) |
 | `stockiq-ai-chat-limits` | userId (TTL 2h) | ai-chat |
 | `stockiq-ai-chat-stats` | userId+date (TTL 90d) | ai-chat, ai-chat-reporter |
 

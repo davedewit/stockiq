@@ -1,0 +1,89 @@
+REVIEW OF THE AI AUTOPILOT (fake money)   09 Oct 2026 09:21 to 12 Oct 2026 09:21 UTC (3 days)
+Read-only. Past practice results; nothing here is a forecast. Judge by dollars and the average per trade, not by how many ended up.
+
+1. SETTINGS
+  now: ON, Balanced level, 50 holdings (set by hand), budget $99,129 over 2 days, checks in every 6 h, keeps a holding at most 10 days; loss limit -10%, gain mark +18%, buys from the top 30; trailing stop 'gains'
+  screeners: S&P 500, Russell 1000, Russell 2000 (small), NASDAQ 100, Dow 30, ASX 200, UK FTSE 100, Japan Nikkei 225, Crypto (top coins)
+  changes of the settings in the period: 0 (the diary has none yet: it starts on 12 Oct 2026)
+
+2. THE RESULT IN DOLLARS
+  finished in the period                5 trades    2 up  average  -1.03% (± 0.87)    -1,014.30 USD   too few to read
+  finished, all recorded                5 trades    2 up  average  -1.03% (± 0.87)    -1,014.30 USD   too few to read
+  still held: 5 holdings, $64,962 put in, about -514.69 USD on paper at their last check-in (not final; the dashboard has the live figure)
+  the bar: 300 finished trades whose average is clearly ahead. So far 5. Far too few to judge anything: read what follows as a diary, not as evidence.
+
+3. WHERE THE MONEY WENT (finished trades, all recorded; the group that lost most first)
+
+by how it was sold
+  by the AI review                      2 trades    0 up  average  -3.01% (± 0.24)      -984.73 USD   too few to read
+  by the stop that followed it          2 trades    1 up  average  +0.11% (± 0.91)       -37.48 USD   too few to read
+  signal or score turned                1 trades    1 up  average  +0.63% (± 0.00)        +7.91 USD   too few to read
+
+by market
+  Coins                                 5 trades    2 up  average  -1.03% (± 0.87)    -1,014.30 USD   too few to read
+
+by screener
+  Crypto (top coins)                    5 trades    2 up  average  -1.03% (± 0.87)    -1,014.30 USD   too few to read
+
+by place in the ranking when bought
+  rank 1 to 3                           3 trades    1 up  average  -1.80% (± 1.22)      -976.82 USD   too few to read
+  rank 4 to 10                          2 trades    1 up  average  +0.11% (± 0.91)       -37.48 USD   too few to read
+
+by RSI when bought
+  RSI 50 to 65                          3 trades    1 up  average  -1.67% (± 1.35)      -971.94 USD   too few to read
+  RSI to 50                             2 trades    1 up  average  -0.09% (± 0.72)       -42.36 USD   too few to read
+
+by how long it was held
+  6 hours to a day                      3 trades    0 up  average  -2.27% (± 0.75)    -1,035.00 USD   too few to read
+  under 6 hours                         2 trades    2 up  average  +0.82% (± 0.20)       +20.70 USD   too few to read
+
+by who chose it
+  the AI model                          5 trades    2 up  average  -1.03% (± 0.87)    -1,014.30 USD   too few to read
+
+by risk level at the time
+  Adventurous                           1 trades    0 up  average  -3.25% (± 0.00)      -811.70 USD   too few to read
+  Balanced                              4 trades    2 up  average  -0.48% (± 0.86)      -202.60 USD   too few to read
+
+4. THE LOSSES, ONE BY ONE (finished in the period, worst first)
+  WAL-USD: -3.25% (-811.70 USD) in 0.8 days, sold by the AI review. Bought at rank 3 of Crypto (top coins), score 4.0, RSI 51.0, 30-day move 46.4%. Best +0.0%, worst -3.1%.
+      the AI review's last word: Rank dropped from 3 to 150, score fell from +4.0 to +1.0, indicating weak performance.
+  ERG-USD: -2.77% (-173.03 USD) in 0.3 days, sold by the AI review. Bought at rank 2 of Crypto (top coins), score 5.0, RSI 52.9, 30-day move 31.7%. Best +0.0%, worst -2.8%.
+      the AI review's last word: Rank dropped from 2 to 25, score down from +5.0 to +2.0.
+  CKB-USD: -0.80% (-50.27 USD) in 0.4 days, sold by the stop that followed it. Bought at rank 9 of Crypto (top coins), score 3.0, RSI 47.6, 30-day move 35.1%. Best +2.5%, worst -0.8%.
+      the AI review's last word: Still up +2.5% with no significant negative changes.
+
+  had been up 2% or more and still ended down: 1 of 5 (CKB-USD); a stop only acts at a check-in
+  what sold holdings did in the same length of time again (a plus means it was sold too early, a minus that selling saved money):
+    sold by the stop that followed it                 1 trades  went on +7.95% (± 0.00)
+    sold signal or score turned                       1 trades  went on +0.49% (± 0.00)
+
+5. WHAT IT DID AND DID NOT DO (activity lines in the period)
+  10 buys, 5 sales, 39 notes (from the record: only its last 80 lines; the diary fills from 12 Oct 2026)
+       8 check-ins: waiting for the next step of the budget
+       1 check-ins: a coin had not stayed near the top yet
+       1 check-ins: nothing on the shortlist fit to buy
+
+6. WHAT IT HAS LEARNED AND IS TRYING (the record every account learns from)
+  every account together                5 trades    2 up  average  -1.03% (± 0.87)    -1,014.30 USD   too few to read
+  5 finished trades taken in from 1 account(s); per level: {'3': 4, '5': 1}
+  level 3: rules changed after a trial: none; trial running: none; earlier trials: 0
+  level 5: rules changed after a trial: none; trial running: none; earlier trials: 0
+  trial of which share to buy: trial since 2026-10-11
+    furthest above its 52-week low      0 trades    0 up  average  +0.00% (± 0.00)        +0.00 USD   too few to read
+    as ranked                           0 trades    0 up  average  +0.00% (± 0.00)        +0.00 USD   too few to read
+  screeners rested: none
+  note: All trades had negative average performance, with an average of -1.0% across 5 trades.
+  note: Higher rank (1 and 2) did not guarantee better results; rank 2 had -2.8%.
+  note: RSI values varied; trades with RSI around 50 did not perform well overall.
+  note: Exit strategies varied; 'signal' and 'trail' exits had mixed results, with no clear advantage.
+  this account: trial of the buying order 'trial', 3 share buys counted; AI calls today 3; early sells by the AI review allowed
+
+7. FAULTS IN THE FUNCTION'S LOG (the period)
+  0 lines: none
+
+8. THE RECORD ITSELF
+  the account's record is 30 KB (a row can hold 400 KB): 5 of 300 finished trades kept, 54 of 80 activity lines, 5 holdings remembered
+  the diary: 0 rows in all (0 activity lines, 0 finished trades, 0 settings), first none
+  not yet in the diary: 59 (they go with the record's next save)
+
+WHAT TO DO WITH THIS: site-overview.md section 8c, 'The review every week or two'.

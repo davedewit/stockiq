@@ -1206,6 +1206,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
 | Autopilot | Lambda `stockiq-ai-trader` (Python 3.12, 512 MB, 300 s, role `acp-lambda-role`), table `stockiq-ai-trader` | Actions `get`, `save`, `run`, `sellall`, `tune`, `mailtest`, `bell` (read-only, for the notification bell; `belllog` is answered and ignored, a leftover). Env `AI_TRADER_USERS` (accounts that may use it without a paid plan; everyone on a paid plan may use it; `*` would make it free for all) and `OPENAI_API_KEY` (never print it) |
+| The diary | Table `stockiq-ai-trader-journal` (key `userId` + `at`, pay per request) | Every activity line, finished trade and change of settings, never trimmed; written by `keep_diary` at each save; read by `check-tools/autopilot_review.py` ("The diary, and the review every week or two") |
 | Schedule | EventBridge `stockiq-ai-trader-schedule`, `cron(10,40 * * * ? *)` | Every 30 minutes; `SLOT_MINUTES` in the Lambda must match. **Disable this rule to stop everything** |
 | Screener data | `stockiq-screener-coordinator` | Called with no `userId`, so nothing is saved to anyone's history |
 | Prices | `stockiq-price-proxy` | Also exchange rates (`AUDUSD=X`, `USDJPY=X`) and the S&P 500 fund (`SPY`) |
@@ -1699,10 +1700,12 @@ there. Setting things up for the user by chat was judged too much for now and is
 - When a dashboard feature changes, **update `DASHBOARD_GUIDE` and the two `summary()` functions**,
   or the chat will describe the old dashboard.
 - Cost: about 1,600 tokens a dashboard question instead of 650 elsewhere, roughly $0.0003 each.
-- Rollback zips: `~/VSCODE/backup/stockiq-ai-chat_before_dashboard_20261011.zip`, `…_wording_…`, `…_levels_…`, `…_before_sweep_…`.
+- Rollback zips: `~/VSCODE/backup/stockiq-ai-chat_before_dashboard_20261011.zip`, `…_wording_…`, `…_levels_…`, `…_before_sweep_…`, and 12 Oct `…_before_guide_20261012.zip`, `…_guide2_…`.
+- **12 Oct 2026:** the guide was brought up to date (graph, buttons beside the heading, the split of both parties' results, Number of holdings, the 3-hour price rule); the numbers it quotes for those are compared with the autopilot's own by the test (19 checks). A number of holdings set by the user is said outright in the panel's `summary()`: the guide alone did not stop the model answering with the level's number.
 
 ### What the Lambda keeps per user, and what it sends the page
 
+- Marks of the diary (12 Oct 2026): `j` on a line of `log` and on a trade in `history` (written to the diary; 2 on a trade once its `after` went too), `state.diary` (a fingerprint of the settings last written). They travel to the page with the rest and mean nothing there.
 - The record: `settings`; `log` (last 80: `t, type` buy / sell / note, `symbol, usd, text`, and
   where relevant `kind, pct, detail[], key, n, first`); `history`; `state` with `startedAt`
   (when the budget's build-up began; reset when it is switched on or the budget or build-up
@@ -1870,6 +1873,84 @@ narrow screen (nothing changes at desktop width):
 - `panel_page.py` is the older browser page for the autopilot panel alone; `dashboard_page.py`
   (both sections together) is the one to use.
 
+### The diary, and the review every week or two (12 Oct 2026)
+
+The owner asked how losses should be logged and how the autopilot will improve from here: "small changes could be
+automated, but large improvements i may have to hop on like i am now to analyze in depth and look at improvements to make
+every week or two". That is the arrangement. **When he opens a session for a review, run the routine below.**
+
+**Who changes what**
+- **The autopilot, by itself (as before, nothing added):** its five rules in `TUNABLE`, the order in which it buys shares,
+  resting a screener, pausing the AI review's early sells. Each only through a trial beside the current rule, kept only
+  when clearly better; never anything outside the function, never a setting of the owner's.
+- **A session, every week or two:** everything else: what each level sets, the pace, the stop's distances, what the AI
+  model is told, a new kind of trial, faults. It reads the review, picks **at most one or two** things, and follows
+  "How to work on it" below. An idea about a trading rule is replayed on saved prices first
+  (`check-tools/replay/replay.py`) and then goes live **as a trial beside the current rule**, not as the new rule.
+- **The owner:** his settings, and yes or no to anything that changes the product (the screener scoring, section 7b).
+
+**What is recorded, and for how long**
+- **Each finished trade** (the record's `history`, last 300 an account; the shared record's `pool`, last 3,000 of all
+  accounts): what it was bought on (screener, rank, score, RSI, 7- and 30-day change, volume, who chose, how long it had
+  stayed, how far above its 52-week low), the level at the time, result in percent and dollars, the S&P 500 fund over the
+  same days, how long it was held, how it was sold, its best and worst, its path, the stop as last worked out, the AI
+  review's last word, its rank and score at the sale, and what it did in the same time again after the sale (`after`).
+- **The diary, never trimmed** (new on 12 Oct): table `stockiq-ai-trader-journal`, key `userId` + `at`, pay per request.
+  `keep_diary(user_id, record)` runs inside `save_item` and writes one row for **every line of the activity list**
+  (`kind` `log`: buys, sales and notes with their reasons and details), **every finished trade** (`trade`: the whole row)
+  and **every change of the settings** (`settings`: all of them, so a review knows which settings a trade was made
+  under). Why: the activity list keeps 80 lines, which for an account with many holdings was under three days; the
+  "why" of a sale was gone before anyone could read it. A row is written once (`j` on the line or the trade, `state.diary`
+  for the settings); a note that is counted again and a trade whose `after` has arrived are written again under the same
+  key. A write that fails is tried at the next save and never stops a save ("diary not written" in the log). The first
+  save after the deploy took in what the record still held (54 lines from 10 Oct, 5 trades). Nothing reads the table while
+  trading. It is keyed by the account's address like the other tables: **never copy its rows into git.**
+- **Not recorded:** the shares and coins it passed over (for shares a replay rebuilds any day's ranking from saved prices;
+  for coins the entry log of section 8b), prices between check-ins, and the full text sent to the AI model.
+
+**The review tool:** `python3 check-tools/autopilot_review.py [--days 14] [--account <address>] [--out <file>]`.
+Read-only (the record, the diary, the shared record, what each holding cost, the function's log); not a visit to the
+dashboard; never prints the address. With no account named it takes the one account that has the autopilot switched on.
+Eight parts: the settings and their changes; the result in dollars against the bar of 300 finished trades; where the
+money went (by how it was sold, market, screener, rank, RSI, time held, who chose, level; the group that lost most
+first, each with its margin of error and the words "too few to read" under 30 trades); the losses one by one with what
+each was bought on and the AI review's last word, those that had been up 2% and still ended down, and what sold holdings
+did afterwards; what it did and why it did nothing; what the shared record has learned and is trying; faults in the
+function's log; the size of the record and of the diary.
+
+**The routine for a review session**
+1. "How to work on it", step 1 (both repos clean, live equals the mirror).
+2. `python3 check-tools/autopilot_review.py --days <since the last review> --out check-tools/reviews/review-<date>.txt`
+   and read all of it. The files in `check-tools/reviews/` are the memory between reviews: read the last one first.
+3. **Faults before figures** (parts 7 and 8): a fault is fixed whatever the sample size.
+4. **The dollars** (part 2) against the bar. Say the number of finished trades with every figure. Under 30 in a group
+   there is nothing to read; that is not a reason to invent something to change.
+5. **The losses** (parts 3 and 4): is there a group of 30 or more that is clearly down (beyond twice its margin of
+   error)? Did holdings go on rising after one kind of sale (sold too early) or falling (the sale saved money)? How many
+   had been up and ended down (a stop only acts at a check-in)?
+6. **The trials and the progress reports** (part 6): verdicts since the last review; anything that has not moved.
+7. **The settings** (part 1): trades made under different settings are different experiments; do not pool them blindly.
+8. **Decide, at most one or two things.** Each names the group and the figures it rests on; a trading rule is replayed
+   first and built as a trial; a fault or a wording goes straight in. "Nothing to change yet" is a full answer.
+9. Write the findings and the decision into the change log (section 13) and "Start here when resuming"; commit the
+   review file.
+10. Tell the owner in plain words: the dollars, what was found, what was changed, what waits for more trades. Section
+    7b stands: the screener scores have shown no reliable edge, and the share of trades that ended up is not profit.
+
+**Weak spots already seen, to look at in the first reviews** (12 Oct, from five finished trades: observations, not findings)
+- **The AI model's notes are written from very few trades and shown back to it at every choice.** After five coin trades
+  it wrote "trades with RSI around 50 did not perform well overall". `write_lessons` asks it to say when the numbers are
+  too few; it did not. Candidate: show no note that rests on fewer than 30 trades (`memory_text`), or none at all until
+  the pool has 30.
+- Both sales by the AI review were the two largest losses (-$985 together). Two trades say nothing; watch `after` for
+  them: did they go on falling?
+- CKB had been up 2.5% and ended down 0.8%: the stop was passed between two check-ins. With check-ins every 6 hours this
+  will recur; the count is in part 4.
+- **The size of the record.** A finished trade takes about 0.7 KB and a remembered holding about 1 KB, so 300 trades and
+  50 holdings come to roughly 300 KB of the 400 KB a row can hold. The tool warns above 300 KB. If it does: drop `path`
+  from the trades kept in `history` (the diary has it), or store the record compressed as `_brain` is.
+- **When:** the first review around 26 Oct 2026, or sooner if 30 trades have finished or the tool shows a fault.
+
 ### How to work on it: the routine that held up
 
 **Before building an idea about how it trades, replay it:** `python3 check-tools/replay/replay.py` (20 seconds; section 7b,
@@ -2005,6 +2086,8 @@ how it trades for now; it needs finished trades, not more ideas.**
 - Both autopilot changes of the day went live after it (04:47 and 04:50 UTC). Not yet seen: a "Left alone" line (Tokyo's
   next opening, 00:10 UTC Tuesday, then again at 00:40 with prices of the session), a FTSE run on a morning after.
 
+**A REVIEW SESSION (every week or two; the first around 26 Oct 2026, or at 30 finished trades):** run the routine in "The diary, and the review every week or two" above, starting with `python3 check-tools/autopilot_review.py`, and read `check-tools/reviews/` for the last one. The baseline is `review-2026-10-12.txt` (five finished trades, -$1,014).
+
 **FIRST THING IN THE NEXT SESSION: tell the owner how Monday 12 Oct went, before anything else** (his words on closing,
 11 Oct: "next time i open a session… update me on how monday went and anything else"). Lead with the result, in plain
 words. What to look at, all read-only:
@@ -2047,12 +2130,12 @@ calls, with his agreement; (5) thinning the bell script's handling of older copi
 left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line change now, each changing labels.
 
 **What is live, and how to confirm nothing has moved since:**
-- Lambda `stockiq-ai-trader`: `CodeSha256` `dRaKpUf9FPnFzz/Y4owNWcfzqxX4Cq2pVZYBv0884Fs=`, equal to
-  `lambda-sync/stockiq-ai-trader/lambda_function.py` (2,970 lines; 12 Oct 2026: the fresh-price rule, a market that stays due, the number of holdings).
-- Lambda `stockiq-ai-chat`: `CodeSha256` `cTz2ks6BStwoDLEIod20m/pzvn59WP2VHo9Hc/RtEV8=`, equal to
+- Lambda `stockiq-ai-trader`: `CodeSha256` `tBSm1I3R85bqoAt5/VBZbTRnNtULdq/DR8yJ51v9DmM=`, equal to
+  `lambda-sync/stockiq-ai-trader/lambda_function.py` (3,012 lines; 12 Oct 2026: the fresh-price rule, a market that stays due, the number of holdings, the diary). Table `stockiq-ai-trader-journal` (the diary) made the same day.
+- Lambda `stockiq-ai-chat`: `CodeSha256` `f6vB7CzN3cQAt9ZbTUS7+eYrFRsp75L46Xks8kx5rn4=` (its guide to the dashboard brought up to date on 12 Oct), equal to
   `lambda-sync/stockiq-ai-chat/lambda_function.py` (350 lines).
-- Website (sha256 starts): `practice-autopilot.js?v=40` (`ce687dfa103f`), `practice-portfolio.js?v=21` (`cf6ac94ca9b3`),
-  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`5935f9fa8292`; `analysis-functions.js` `96dbcb721ec1`),
+- Website (sha256 starts): `practice-autopilot.js?v=41` (`a63a59e5a2aa`), `practice-portfolio.js?v=21` (`cf6ac94ca9b3`),
+  `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`), `dashboard.html` (`6e29832d8511`; `analysis-functions.js` `96dbcb721ec1`),
   `ai-chat.js?v=2` (`87eaadf52197`); 17 more pages carry the bell's loader line; `index.html` and `faq.html` the plan wording.
   Live files were compared byte for byte at each deploy.
 - `deploy-to-s3.sh` carries the rules for how long a browser may keep a copy (section 5, step 8); the first daily run with
@@ -2063,13 +2146,13 @@ left on purpose (section 8b: `MODERATE_SELL`, `STRONG_DOWN`), each a one-line ch
 - Crypto: the 54 `stockiq-option-7-1-worker-N` all `NmXC9dcsA6p5tXJl+u6VZIfdsrvM3ERN/DmMSQ9zalI=`, the orchestrator
   `Tyyx+Pb2l+sy7avfCncwduEtmFtYn6Lws+5g6dj9Kc0=`, both equal to their mirrors (MACD fix of 11 Oct, section 8b).
 - Share-screener workers: all 669 show `CodeSha256` `q9ZX/UvTBcszKxRPR9lvJw9UpyfWrB5sOB3pDWccm6c=` (`workers/live.txt`), built from `workers/` in git.
-- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 404 function, 202 panel, 95 portfolio, 22 bell, 16 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
+- Both repos clean and pushed; **no `check-tools/pending-*` folder is left**. Tests on the live files: 415 function, 203 panel, 95 portfolio, 22 bell, 19 chat; the panel-versus-function comparison clean (3,780 budget combinations, 2,915
   spreads over markets).
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
   trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell,
-  takeover, report`, then `stockiq-ai-trader_before_sweep_20261011.zip`, `…_before_autopilot_costs_…` and, 12 Oct, `…_before_autopilot_fresh_20261012.zip`, `…_due_…`, `…_holdings_…`;
-  `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`.
+  takeover, report`, then `stockiq-ai-trader_before_sweep_20261011.zip`, `…_before_autopilot_costs_…` and, 12 Oct, `…_before_autopilot_fresh_20261012.zip`, `…_due_…`, `…_holdings_…`, `…_journal_…`;
+  `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `stockiq-ai-chat_before_{guide, guide2}_20261012.zip`.
 - First thing to do: the routine's step 1 ("How to work on it"), then read the owner's record and the function's log
   (`aws logs tail /aws/lambda/stockiq-ai-trader --since 12h`) for errors ("check-in failed", "shared learning failed",
   "not worked out", "not sent") and for the firsts listed below.
@@ -2971,4 +3054,17 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     `holdings` step in `dashboard_page.py`. Rollback zip `…_before_autopilot_holdings_20261012.zip`. **A slip caught by the
     tests:** a new variable named `waiting` overwrote an existing one in `run_user` (the coins "waiting to stay"); the
     2,970-line function has one namespace per check-in, so search for a name before using it.
-  - Not done: the AI chat's `DASHBOARD_GUIDE` does not mention the number of holdings either.
+  - **The AI chat knows the dashboard as it is now** (function `f6vB7CzN…`, 08:58 UTC; `practice-autopilot.js?v=41`, 09:00
+    UTC): its guide has the account graph and its three views, "Refresh prices" / "Reset fake money" beside the heading,
+    the sold / still-held split for both parties, the comparison card's opening time, the Number of holdings setting and
+    the rule that a share is traded only at a price under 3 hours old; `ai_chat_test.py` compares those numbers with the
+    autopilot's own (19 checks). **Found by asking it real questions:** told "up to 50 holdings" for a Balanced account it
+    answered "it will aim for 8"; a clearer guide fixed one wording of the question and not the other, so the panel's
+    `summary()` now says it outright ("it uses 50, not the level's own 8"). Then right three times of three. The lesson
+    of 11 Oct again: read its answers, do not trust the guide alone. Rollback zips `stockiq-ai-chat_before_guide_20261012.zip`, `…_guide2_…`.
+  - **A diary that is never trimmed, and a review tool** (function `tBSm1I3R…`, 09:17 UTC; section 8c, "The diary, and the
+    review every week or two"): asked for by the owner as the way to log losses and improve, with a session every week or
+    two doing the in-depth part. New table `stockiq-ai-trader-journal`; `keep_diary` in `save_item`; 415 function checks;
+    `check-tools/autopilot_review.py`; the first review (the baseline, five finished trades) is
+    `check-tools/reviews/review-2026-10-12.txt`. No trading rule changed. Rollback zip `…_before_autopilot_journal_20261012.zip`.
+  - Still not checked by a session: the logged-in dashboard itself and a real phone (neither can be opened from here).
