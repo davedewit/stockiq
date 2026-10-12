@@ -121,8 +121,9 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
   const saved = JSON.parse(store['tester@example.com'].data);
   check('stored: 5 holdings, cash $95,200', saved.holdings.length === 5 && saved.cash === 95200 && store['tester@example.com'].version === 5, { n: saved.holdings.length, cash: saved.cash });
   check('page shows cash and no broken values', /Practice cash left \$95,200\.00/.test(text()) && !bad().length, bad());
+  if (/Holding \(\d+\)/.test(text())) check('the holdings table says how many are held, as the sold list says how many were sold', /Holding \(5\) Bought/.test(text()), (text().match(/Holding[^B]{0,12}Bought/) || [''])[0]);
   console.log('   summary: ' + (text().match(/Account value.*?bought on the same days/) || [''])[0]);
-  console.log('   rows: ' + (text().match(/Holding Bought.*?(?=Fake money)/) || [''])[0].slice(0, 900));
+  console.log('   rows: ' + (text().match(/Holding(?: \(\d+\))? Bought.*?(?=Fake money)/) || [''])[0].slice(0, 900));
   // company-name lookup, as on the home page
   const type = async (v) => { document.getElementById('pp-symbol').value = v; handlers.input.forEach(f => f({ target: document.getElementById('pp-symbol') })); };
   const sug = document.getElementById('pp-suggest');
