@@ -1094,7 +1094,8 @@ with `document.querySelector('h3')`.
   word for what it is doing ("Buying…", "Selling…", "Clearing…", "Resetting…", "Refreshing…"). An inline style cannot
   change on hover, which is why nothing did. `busy` says which button is at work (`run(task, key)`).
 - **The "For comparison" card says who is ahead** (12 Oct 2026, evening; `versusFund`): under the fund's figure it adds "over
-  the same days. Your holdings: ▼ 0.69%, so they are **behind the fund by 0.72 points**" (or ahead of, or level with). The
+  the same days. Your holdings: ▼ 0.69%, so they are **behind the fund by 0.72%**" (or ahead of, or level with; first worded
+  "by 0.72 points", which he found odd: "shouldn't it say .72%?"; plain wording wins over the precise term here). The
   owner had read the fund's "▲ 0.06%" as his account beating the fund. He considered a dollar figure for the fund too and
   decided against it ("too confusing % is probably enough"). The figure compares the holdings still held with the fund on
   the same money over the same days, not the whole account.
@@ -1227,7 +1228,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=24` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Portfolio section | `website/practice-portfolio.js` (`?v=25` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=43`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
@@ -2286,8 +2287,8 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
-- Website (sha256 starts): `practice-autopilot.js?v=43` (`83dfb5e06e1b`), `practice-portfolio.js?v=24` (`9235c3df079d`),
-  `dashboard.html` (`b1e91624b15d`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
+- Website (sha256 starts): `practice-autopilot.js?v=43` (`83dfb5e06e1b`), `practice-portfolio.js?v=25` (`821b07cc0515`),
+  `dashboard.html` (`980135d25508`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
   `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
 - Tests on the live files: 436 function, 207 panel, 98 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
@@ -3252,7 +3253,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     **Left for the owner (what public pages say is his): "real-time market data" on `contact.html` and "15+ indicators,
     real-time charts, and AI-powered pattern recognition" on `technical-analysis-guide.html`**, which the site does not
     deliver (data is delayed; section 11).
-  - The "For comparison" card says in words who is ahead, the holdings or the fund (`practice-portfolio.js?v=24`; 98
+  - The "For comparison" card says in words who is ahead, the holdings or the fund (`practice-portfolio.js?v=25`; 98
     portfolio checks), after the owner read the fund's figure as his own lead.
   - The daily job keeps a dated copy of the company figures once a week (`research-data/company-figures/`; the first is of
     12 Oct 2026): the start of a history to test ideas about company figures on. Scheduling a nightly session was asked
