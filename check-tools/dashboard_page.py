@@ -4,6 +4,7 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
 
    python3 check-tools/dashboard_page.py <practice-portfolio.js> <practice-autopilot.js> <out.html> <light|dark> "<steps>"
    steps: type (types in the buy row), sale (the autopilot sells in the background, then the page refreshes itself),
+          holdings (the autopilot's "Number of holdings" field: its hint, typing 20, that it is saved),
           refresh ("Refresh prices": where it sits, its busy and done feedback, that typing in the buy row is kept; the buttons' classes),
           chart (the graph of the account over time: its size, what it reads, the pointer; chart:ai or chart:own presses that
           button; open the page with ?chart=1 for an account with a few weeks of history),
@@ -56,7 +57,7 @@ let portfolio = { v: 1, startingCash: 100000, cash: 15899.07 + (window.CHART_DEM
   { id: 'a1', symbol: 'WEMIX-USD', label: 'WEMIX-USD', name: 'WEMIX USD', currency: 'USD', qty: 1250 / 0.1868991, buyPrice: 0.1868991, buyFx: 1, costUsd: 1250, boughtAt: iso(-2.9), spyAtBuy: 700, note: 'AI: rank 1, RSI 14, down 3.8%% in 7 days on 1.0x volume', by: 'ai', screener: '7-1' }] };
 let version = 3;
 const OPTIONS = %s;
-let auto = { costEachWay: 0.1, bar: { need: 300, n: 45, avg: -0.31, margin: 0.42, met: false, shared: true }, central: { trades: 45, accounts: 3, level: 20, on: true, canChange: false }, settings: { enabled: true, risk: 3, budgetUsd: 10000, periodDays: 10, everyHours: 0.5, maxHoldDays: 0.25, screeners: ['7-1'], aiSell: true, selfTune: true, emails: true, stopPct: null, takePct: null, auto: [], trailMode: 'gains', shares: {} }, coinShare: 1, state: { lastRun: iso(-0.1) }, minSample: 8, practiceCash: 100000, lessons: null, resting: {}, recent: [],
+let auto = { costEachWay: 0.1, bar: { need: 300, n: 45, avg: -0.31, margin: 0.42, met: false, shared: true }, central: { trades: 45, accounts: 3, level: 20, on: true, canChange: false }, settings: { holdings: null, enabled: true, risk: 3, budgetUsd: 10000, periodDays: 10, everyHours: 0.5, maxHoldDays: 0.25, screeners: ['7-1'], aiSell: true, selfTune: true, emails: true, stopPct: null, takePct: null, auto: [], trailMode: 'gains', shares: {} }, coinShare: 1, state: { lastRun: iso(-0.1) }, minSample: 8, practiceCash: 100000, lessons: null, resting: {}, recent: [],
   scorecard: { n: 0, groups: {} }, rules: { name: 'Balanced', stop: -10, take: 18, trail: 0.5, top: 10, max_rsi: 76, arm: 9, changed: {}, yours: [], level: { stop: -10, take: 18 } }, realizedUsd: 7.91,
   tune: { trial: null, past: [], nextReviewIn: 20, batch: 20, group: 10, finished: 0 }, month: { last30: { n: 0, up: 0, usd: 0, pct: 0 }, before30: { n: 0, up: 0, usd: 0, pct: 0 } },
   nextCheck: { at: iso(0.4), markets: ['coin'] }, holding: { count: 1, investedUsd: 1250 }, now: iso(0), needs: [], mail: null,
@@ -128,6 +129,14 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
       out('autopilot buttons: ' + Array.from(document.querySelectorAll('#practice-autopilot .ap-btn, #practice-autopilot a[data-ap="refresh"], #practice-autopilot a[data-ap="mailtest"]')).map(b => b.textContent.trim().slice(0, 26) + ' [' + b.className + ']').join(' | '));
       const link = q('#practice-autopilot a[data-ap="refresh"]'); if (link) { link.click(); await wait(20); const now = q('#practice-autopilot a[data-ap="refresh"]'); out('autopilot Refresh now, just pressed: "' + now.textContent + '" [' + now.className + ']'); await wait(900); const after = q('#practice-autopilot a[data-ap="refresh"]'); out('autopilot Refresh now, done: "' + after.textContent + '" [' + after.className + '] | "' + q('#ap-fresh').textContent.slice(0, 60) + '" [' + q('#ap-fresh').className + ']'); }
     }
+    if (step === 'holdings') {      // the number of holdings as a setting of its own: the field, what typing a number says, that it is saved
+      const part = q('[data-ap-part="settings"]'); if (part) { part.click(); await wait(200); }
+      const box = q('#ap-holdings'); if (!box) out('holdings: NO FIELD on the page'); else {
+        out('holdings: field with placeholder "' + box.placeholder + '", value "' + box.value + '", tag "' + q('#ap-tag-holdings').textContent + '" | ' + q('#ap-holdings-hint').textContent);
+        box.focus(); box.value = '20'; box.dispatchEvent(new Event('input', { bubbles: true })); await wait(100);
+        out('holdings, typed 20: tag "' + q('#ap-tag-holdings').textContent + '" | ' + q('#ap-holdings-hint').textContent); out('holdings, the plan in words: ' + q('#ap-plan').textContent.slice(0, 200));
+        await wait(1400); out('holdings, saved: ' + JSON.stringify(auto.settings.holdings) + ' | the box still holds "' + q('#ap-holdings').value + '" | ' + (q('#ap-saved') ? q('#ap-saved').textContent : ''));
+      } }
     if (step === 'type') { const b = q('#pp-symbol'); b.focus(); b.value = 'APPL'; q('#pp-amount').value = '500'; out('typed APPL and 500 in the buy row'); }
     if (step === 'sale') {
       portfolio.closed.push(Object.assign({}, portfolio.holdings[2], { sellPrice: 0.1946, sellFx: 1, proceedsUsd: 1301.5, soldAt: iso(0), spyAtSell: 700 })); portfolio.holdings.pop(); portfolio.cash += 1301.5; version++;
@@ -255,7 +264,7 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
   if (window.parent !== window) window.parent.postMessage({ out: document.getElementById('out').textContent, height: document.documentElement.scrollHeight }, '*');   // inside a phone-width frame (mobile_frame.py)
   document.title = 'done';
 })().catch(e => { out('ERROR ' + e.message); if (window.parent !== window) window.parent.postMessage({ out: document.getElementById('out').textContent, height: 2000 }, '*'); });
-</script></body></html>''' % (theme, json.dumps({'screeners': {'3-100': {'name': 'S&P 100', 'kind': 'stock', 'group': 'US shares'}, '4-200': {'name': 'ASX 200', 'kind': 'stock', 'group': 'Australian shares'}, '7-1': {'name': 'Crypto (top coins)', 'kind': 'crypto', 'group': 'Coins'}}, 'groups': ['US shares', 'Australian shares', 'Coins'],
+</script></body></html>''' % (theme, json.dumps({'holdings': {'min': 2, 'max': 50, 'buysEach': 3}, 'screeners': {'3-100': {'name': 'S&P 100', 'kind': 'stock', 'group': 'US shares'}, '4-200': {'name': 'ASX 200', 'kind': 'stock', 'group': 'Australian shares'}, '7-1': {'name': 'Crypto (top coins)', 'kind': 'crypto', 'group': 'Coins'}}, 'groups': ['US shares', 'Australian shares', 'Coins'],
     'everyHours': [0.5, 1, 3, 6, 12, 24], 'holdDays': [h / 24 for h in (0.5, 1, 3, 6, 12, 24, 48, 120, 240, 480, 1440)],
     'pace': {'1': dict(periodDays=10, everyHours=24, maxHoldDays=20), '2': dict(periodDays=7, everyHours=12, maxHoldDays=10), '3': dict(periodDays=5, everyHours=6, maxHoldDays=5), '4': dict(periodDays=2, everyHours=3, maxHoldDays=2), '5': dict(periodDays=1, everyHours=1, maxHoldDays=1)},
     'risk': {str(k): dict(name=n, positions=p, top=t, stop=s, take=g, crypto=c, trail=0.5, max_rsi=r) for k, (n, p, t, s, g, c, r) in {1: ('Cautious', 12, 5, -5, 8, 0, 68), 2: ('Careful', 10, 8, -7, 12, 0, 72), 3: ('Balanced', 8, 10, -10, 18, 0.25, 76), 4: ('Bold', 6, 15, -14, 28, 0.5, 82), 5: ('Adventurous', 4, 20, -20, 45, 1, 101)}.items()}}),

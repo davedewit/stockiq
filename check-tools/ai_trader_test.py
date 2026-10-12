@@ -68,7 +68,7 @@ check('someone not on the list and not on a paid plan is refused, and pointed to
 check('not on the list cannot switch it on', m.clean_settings({'enabled': True}, 'stranger@y.com')['enabled'] is False)
 s, b = call(action='get', userId=U); check('defaults', b['allowed'] and b['settings'] == dict(m.DEFAULTS) and '3-100' in b['options']['screeners'], b)
 s, b = call(action='save', userId=U, settings={'enabled': True, 'risk': 9, 'budgetUsd': 'lots', 'periodDays': 0.2, 'everyHours': 7, 'maxHoldDays': 5, 'screeners': ['3-100', 'nope'], 'x': 1})
-check('settings are cleaned', b['settings'] == {'enabled': True, 'risk': 5, 'budgetUsd': 10000.0, 'periodDays': 1, 'everyHours': 24, 'maxHoldDays': 5, 'screeners': ['3-100'], 'aiSell': True, 'selfTune': True, 'emails': True, 'stopPct': None, 'takePct': None, 'auto': [], 'trailMode': 'gains', 'shares': {}} and b['state'].get('startedAt') and b['log'][-1]['text'].startswith('Autopilot on'), b['settings'])
+check('settings are cleaned', b['settings'] == {'enabled': True, 'risk': 5, 'budgetUsd': 10000.0, 'periodDays': 1, 'everyHours': 24, 'maxHoldDays': 5, 'screeners': ['3-100'], 'aiSell': True, 'selfTune': True, 'emails': True, 'stopPct': None, 'takePct': None, 'auto': [], 'trailMode': 'gains', 'shares': {}, **({'holdings': None} if hasattr(m, 'holdings_of') else {})} and b['state'].get('startedAt') and b['log'][-1]['text'].startswith('Autopilot on'), b['settings'])
 check('run before switching on is refused', call(action='run', userId='dave@x.com')[0] == 400)
 check('garbage requests', m.lambda_handler({'requestContext': {}, 'body': 'x'}, None)['statusCode'] == 400 and call(action='zzz', userId=U)[0] == 400 and call(action='get')[0] == 400)
 
@@ -1139,5 +1139,27 @@ if hasattr(m, 'fresh'):
              'PRICE_URL': '', 'urllib': __import__('urllib'), 'num': m.num, 'daily_range': m.daily_range}
     exec(src, space); q = space['fetch_quote']('6976.T')
     check('the quote the function fetches carries the time of the last trade', q and q['time'] == 1791000000 and q['price'] == 12.5 and q['currency'] == 'JPY', q)
+# --- the number of holdings as a setting of its own (12 Oct 2026): the level's, or the user's own number
+if hasattr(m, 'holdings_of'):
+    m.TRADE_COST = 0
+    cs = lambda **k: m.clean_settings(dict(dict(m.DEFAULTS, enabled=True, risk=3, budgetUsd=20000, screeners=['3-100']), **k), U)
+    check('the number of holdings: left to the level when empty, kept when set, held between 2 and 50, never so many that one is under the smallest buy',
+          cs()['holdings'] is None and cs(holdings='')['holdings'] is None and cs(holdings=0)['holdings'] is None and cs(holdings=20)['holdings'] == 20 and cs(holdings=1)['holdings'] == 2
+          and cs(holdings=500)['holdings'] == 50 and cs(holdings=50, budgetUsd=100)['holdings'] == 4 and m.holdings_of(cs()) == 8 and m.holdings_of(cs(holdings=20)) == 20, [cs(holdings=50, budgetUsd=100)['holdings']])
+    r20, r3 = m.rules_for(cs(holdings=20)), m.rules_for(cs(holdings=3))
+    check('with more holdings than the level looks at it buys further down each ranking; with fewer the ranking limit stays; the limits stay the level\'s', r20['positions'] == 20 and r20['top'] == 20 and r3['positions'] == 3 and r3['top'] == m.RISK[3]['top']
+          and m.rules_for(cs(holdings=50))['top'] == 30 and r20['stop'] == m.RISK[3]['stop'] and m.rules_for(cs())['positions'] == 8, [r20['top'], r3['top']])
+    check('buys at one check-in: three, or a fifth of the holdings when there are many', m.buys_per_check(cs()) == 3 and m.buys_per_check(cs(holdings=15)) == 3 and m.buys_per_check(cs(holdings=20)) == 4 and m.buys_per_check(cs(holdings=50)) == 10)
+    sl = m.market_slots(cs(holdings=20, screeners=['3-100', '4-200', '7-1']))
+    check('the spread over markets is in the user\'s number of holdings: 20 over US shares, Australian shares and coins, coins held to the level\'s quarter', sum(sl.values()) == 20 and sl.get('Coins') == 5 and sl.get('US shares') >= 7, sl)
+    D.t.clear(); m._BRAIN.clear(); m.PLAN_CACHE.clear(); PRICES.clear(); MODEL['answer'] = None; SNAP.clear(); SNAP.update({'3-100': rows(n=40)})
+    rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=20000.0, periodDays=1, everyHours=24, maxHoldDays=5, screeners=['3-100'], selfTune=False, aiSell=False, auto=[], holdings=20)
+    rec['state']['startedAt'] = m.iso(t0 - dt.timedelta(days=2)); m.save_item(U, rec)
+    s, rec = run(t0); held20 = portfolio()['holdings']
+    check('a check-in with 20 holdings set: four buys of a twentieth of the budget each', s['bought'] == 4 and len(held20) == 4 and all(abs(h['costUsd'] - 1000.0) < 0.01 for h in held20), [s, [h['costUsd'] for h in held20]])
+    code_, b = call(action='get', userId=U)
+    check('the page is told the number in force and its bounds', code_ == 200 and b['settings']['holdings'] == 20 and b['rules']['positions'] == 20 and b['options']['holdings'] == {'min': 2, 'max': 50, 'buysEach': 3}, [b['settings'].get('holdings'), b['rules'].get('positions'), b['options'].get('holdings')])
+    code_, b = call(action='save', userId=U, settings=dict(rec['settings'], holdings=None))
+    check('emptied again, it goes back to the level\'s', code_ == 200 and b['settings']['holdings'] is None and b['rules']['positions'] == 8, [b['settings'].get('holdings'), b['rules'].get('positions')])
 m.TRADE_COST = 0
 print('ALL PASS' if ok else 'SOME FAILED')

@@ -265,6 +265,26 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     check('not when it checks in once a day, and not for shares', !/A coin is only bought once/.test(slow.text()) && !/A coin is only bought once/.test(shares.text()));
   }
   // the kind of trailing stop is a choice in "Your own limits"
+  // the number of holdings as a setting of its own (12 Oct 2026): empty = the level's, a number = the user's
+  { const st = { settings: { ...settings, enabled: true, risk: 3, budgetUsd: 20000, screeners: ['3-100'], aiSell: true, selfTune: true, emails: true, stopPct: null, takePct: null, holdings: null, auto: [], shares: {}, trailMode: 'gains' }, state: {}, log: [], practiceCash: 100000,
+      rules: { name: 'Balanced', stop: -10, take: 18, trail: 0.5, top: 10, max_rsi: 76, arm: 9, changed: {}, yours: [], level: { stop: -10, take: 18 }, trailMode: 'gains', positions: 8, buysEach: 3 }, tune: { past: [], trial: null, nextReviewIn: 20, batch: 20, group: 10 }, plans: [] };
+    let saves = 0;
+    const w = page(b => { if (b.action === 'save') { saves++; st.settings = b.settings; } return { status: 200, body: { success: true, allowed: true, options: { ...OPTIONS, holdings: { min: 2, max: 50, buysEach: 3 } }, ...st } }; }); await sleep(30);
+    const html = () => w.container.innerHTML;
+    if (/id="ap-holdings"/.test(html())) {
+      check('the number of holdings has its own field: empty, with the level\'s own number greyed in it, tagged automatic', /<input id="ap-holdings" type="number" min="2" max="50" step="1" placeholder="8" value=""/.test(html()) && /Number of holdings<span id="ap-tag-holdings" class="ap-auto ">automatic<\/span>/.test(html()) && /Left to the risk level: 8 holdings of about \$2,500 each/.test(html()), (html().match(/ap-holdings-hint[^<]*>[^<]*/) || [''])[0]);
+      const stub = () => ({ disabled: false, textContent: '', title: '', placeholder: '', classList: { on: {}, toggle(c, v) { this.on[c] = v; } } });
+      Object.assign(w.els, { 'ap-run': stub(), 'ap-saved': stub(), 'ap-plan': stub(), 'ap-pace': stub(), 'ap-chosen': stub(), 'ap-status': stub(), 'ap-switch-text': stub(), 'ap-trail-text': stub(), 'ap-holdings-hint': stub(), 'ap-tag-holdings': stub() });
+      w.form({ ...st.settings }); w.els['ap-holdings'] = { id: 'ap-holdings', value: '20', placeholder: '' };
+      w.handlers.input.forEach(f => f({ type: 'input', target: { id: 'ap-holdings', getAttribute: () => null } }));
+      check('typing 20 says at once what that means: twenty smaller holdings, more bought at a check-in, further down each ranking', /Set by you: 20 holdings of about \$1,000 each \(the Balanced level by itself would use 8\)/.test(w.els['ap-holdings-hint'].textContent) && /buys up to 4 at a check-in and looks at the top 20 of each screener/.test(w.els['ap-holdings-hint'].textContent) && w.els['ap-tag-holdings'].textContent === 'set by you' && /20 holdings/.test(w.els['ap-plan'].textContent), [w.els['ap-holdings-hint'].textContent, w.els['ap-plan'].textContent.slice(0, 160)]);
+      await sleep(1300);
+      check('and it is saved like any other setting, in the place the function keeps it', saves === 1 && st.settings.holdings === 20 && Object.keys(st.settings).indexOf('holdings') === Object.keys(st.settings).indexOf('takePct') + 1, [saves, Object.keys(st.settings)]);
+      w.form({ ...st.settings }); w.els['ap-holdings'] = { id: 'ap-holdings', value: '', placeholder: '' };
+      w.handlers.input.forEach(f => f({ type: 'input', target: { id: 'ap-holdings', getAttribute: () => null } })); await sleep(1300);
+      check('emptied, it goes back to the level', st.settings.holdings === null && /Left to the risk level: 8 holdings/.test(w.els['ap-holdings-hint'].textContent), [st.settings.holdings, w.els['ap-holdings-hint'].textContent]);
+    }
+  }
   { const st = { settings: { ...settings, enabled: true, screeners: ['7-1'], aiSell: true, selfTune: true, emails: true, stopPct: null, takePct: null, auto: [], trailMode: 'gains' }, state: {}, log: [], practiceCash: 100000,
       rules: { name: 'Balanced', stop: -10, take: 18, trail: 0.5, top: 10, max_rsi: 76, arm: 9, changed: {}, yours: [], level: { stop: -10, take: 18 }, trailMode: 'gains' }, tune: { past: [], trial: null, nextReviewIn: 20, batch: 20, group: 10 },
       plans: [{ id: 'a1', label: 'SOL-USD', boughtAt: '2026-10-10T15:40:04Z', sellBy: '2026-10-11T15:40:04Z', auto: true, stop: -10, take: 18, arm: 1.9, trail: 0.5, peak: 0.4, floor: -3.5, move: 1.3, room: 3, tight: false, mode: 'full' }] };

@@ -77,6 +77,8 @@ if hasattr(m, 'market_slots'):
         if len(groups) >= 2:
             yield {groups[0]: 30.0, groups[-1]: 30.0}; yield {groups[0]: 50.0, groups[1]: 50.0}; yield {groups[0]: 33.3333, groups[-1]: 12.5}; yield {g: round(100 / len(groups), 4) for g in groups}
     split = [dict(risk=r, screeners=sorted(one[g] for g in groups), shares=sh) for r in m.RISK for groups in subsets for sh in by_hand(groups, m.RISK[r]['positions'])]
+    if hasattr(m, 'holdings_of'):                       # the user's own number of holdings (12 Oct 2026): the same markets and shares with 3, 20 and 50 holdings
+        split += [dict(c, holdings=n) for n in (3, 20, 50) for c in split[::7]]
     opts = {'groups': list(m.GROUPS), 'screeners': {k: {'group': v[5]} for k, v in m.SCREENERS.items()}, 'risk': {str(k): {'positions': v['positions'], 'crypto': v['crypto']} for k, v in m.RISK.items()}}
     with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False) as f: json.dump({'options': opts, 'cases': split}, f)
     theirs = json.loads(subprocess.run(['node', HERE + 'autopilot_plan_check.js', sys.argv[2], f.name, 'slots'], capture_output=True, text=True, check=True).stdout); os.unlink(f.name)
