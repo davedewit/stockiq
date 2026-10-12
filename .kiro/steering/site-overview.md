@@ -2370,10 +2370,11 @@ preview from Kiro): ask early when a change "does not show" (section 9).
    feed's summary text as well as the title; a feed that covers Sydney, Tokyo and London shares, which get none now).
 3. **The AI review's early sales** (its two so far are the two largest losses): read `after` for them at 8 to 12 sales;
    the pause for sales that came too early is already built (`review_ai_sells`). **The owner asked on 12 Oct whether a sale
-   like HPE's (sold by the review three hours after it was bought, -1.1%) is checked afterwards. It is (`look_back`), but
-   only over the same length of time again: three hours for HPE, which says little. Add a second look at a fixed
-   distance, five trading days after every sale (`after5`), so that a review can say whether selling early saved money
-   over a week, not only over the next few hours.**
+   like HPE's (sold by the review three hours after it was bought, -1.1%) is checked afterwards. It is: `look_back`
+   prices every sold holding again after the holding time that was set, five days at most (`settle`: `later`), not
+   after the time it was actually held, and writes the further change into the trade (`after`). For HPE that is about
+   17 Oct. The review's part 4 lists it by kind of sale. Earlier wording in these notes ("the same length of time
+   again") was loose: read it as this.**
 4. **Stops passed between check-ins** (part 4 of the review counts them). If common: a light look at prices every half
    hour for holdings whose stop has started, with no screener run and no AI call.
 5. **Coins: limits from each coin's own daily movement** instead of one loss limit and gain mark for all (a live trial,
