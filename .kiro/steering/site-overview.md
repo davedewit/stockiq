@@ -2084,6 +2084,30 @@ counts from about 30 trades in a group and beyond twice its margin of error; jud
 **He asked whether code changes by itself in the background. It does not, and must not:** the autopilot changes five
 numbers of its own and the order it buys shares in, through trials; code changes only in a session.
 
+**THE MANDATE (the owner, 12 Oct 2026): "its like this is your playground, i want you to be smart and find ways to make
+money that beat an index fund such as s&p".** So a session's job is not only to tend what exists but to **look for an
+edge**, actively, every time. How, without fooling ourselves:
+- **The fast lane is the replay, not the live account.** `check-tools/replay/replay.py` tests an idea on four years of
+  prices in about 20 seconds; the live account needs weeks for 30 trades. Every weekly check: think up a batch of new
+  ideas (what to buy, when to sell, how long to hold, how much, which market), replay each, and keep only what passes
+  **all four**: ahead of the index fund after costs on the first 60% of the days **and** on the last 40% it never saw;
+  ahead of the same rules buying at random; still ahead with the seven chip / AI names left out; and a reason to
+  believe it that was written down before the result. Write every idea tried into `check-tools/replay/` with its
+  result, the failures too, so that nothing is tested twice and nobody counts only the winners.
+- **Survivors go live as trials** in the queue (below), never as rules. The live record is the judge.
+- **Where an edge could plausibly come from** (the leads, best first): (1) momentum, the one thing that has held up
+  (shares furthest above their 52-week low: about +2 points a trade against the fund in both parts of the replay),
+  combined with longer holds and no selling on the signal alone; (2) trading less (costs are the surest loss);
+  (3) real company figures (profit, debt, growth), never tested because there is no history of them here: start
+  recording them with each buy; (4) the market's own state (stay out, or hold fewer, when the index is below its
+  long average); (5) a model fitted to the shared record once it holds hundreds of trades.
+- **What the search needs and does not have yet:** prices for more than the 101 shares on this machine (a list of
+  today's members flatters every "buy what rose" rule; download a wider and older list slowly, away from the daily
+  run, section 8b on Yahoo's limits), saved coin prices, and company figures over time.
+- **The honest odds, as told to him the same day:** beating an index fund from public price data is something most
+  professionals fail at; a rough one in ten. The mandate is to try properly and report truthfully, with the month-3
+  stop rule (the goals, below) as the backstop.
+
 **The goals, month by month** (the owner, 12 Oct 2026: "perhaps we should have goals ie month 1 it improves x amount month 2
 y amount… your primary task is to continue to fix and find improvement"). **Targets to steer by, not forecasts**; the
 review tool prints where things stand against them (its part 9; the numbers are `GOALS` at the top of
@@ -3097,6 +3121,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - **Goals month by month, and the trial queue agreed** (section 8c, "The goals, month by month"): targets for 12 Nov, 12
     Dec and 12 Jan with what happens when one is missed; the review tool prints the standing against them (part 9). The
     queue of trials that runs itself is the first job of the first weekly check (on or after 19 Oct).
+  - **The mandate written down** (section 8c, "Start here when resuming"): the owner wants each session to look for ways to
+    beat an index fund, as its own job ("this is your playground"); the method (replay first, four tests, survivors go
+    live as trials) and the leads are set out there.
   - The holdings table's heading says how many are held (`practice-portfolio.js?v=22`, `dashboard.html`; 96 portfolio checks).
   - An empty "Build up to it over" or "Number of holdings" box reads "Automatic: 5", not a bare 5 (`autoWord`;
     `practice-autopilot.js?v=42`; 204 panel checks; measured in a browser: the text needs about 90px, the boxes have 136px or more).
