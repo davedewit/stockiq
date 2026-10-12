@@ -40,6 +40,8 @@ page = '''<!doctype html><html data-theme="%s"><head><meta charset="utf-8"><titl
 TABS_GO_HERE<pre id="out"></pre>
 <script>
 localStorage.setItem('userId', 'owner@example.com'); window.CHART_DEMO = /chart/.test(location.search + location.hash);
+// ?sidebar=1: the dashboard's own countdown to the US opening is on the page (the "For comparison" card must then show its figure, not work out its own)
+if (/sidebar/.test(location.search)) document.body.insertAdjacentHTML('afterbegin', '<span style="display:none"><span id="market-status-sidebar">● U.S. markets open in</span><span id="market-countdown-sidebar">7h 7m</span></span>');
 // every account value the page shows, in order: a figure that flashes up before the prices are in would be listed here
 window.SEEN = []; new MutationObserver(() => { const m = document.getElementById('practice-portfolio').textContent.match(/Account value\\s*(\\$[\\d,.]+)/); if (m && SEEN[SEEN.length - 1] !== m[1]) SEEN.push(m[1]); }).observe(document.getElementById('practice-portfolio'), { childList: true, subtree: true });
 const iso = (h) => new Date(Date.now() + h * 3600000).toISOString().slice(0, 19) + 'Z';

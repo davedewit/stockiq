@@ -48,6 +48,9 @@ if (pure.valueSeries) {      // the graph of the account over time (a copy of th
   check('the picture of one part is measured against zero and says so for a screen reader', gains.base === 0 && /aria-label="The autopilot/.test(gains.svg) && gains.width === 360 && !/NaN|undefined/.test(pic.svg + gains.svg));
   const flat = pure.valueSeries(pure.newState('2026-10-01T00:00:00Z'), {}, now, null);
   check('an account with nothing in it is a level line, not an error', flat.lots === 0 && flat.points.every(p => p.value === 100000) && !/NaN/.test(pure.chartSvg(flat, 'value', 700, 220).svg));
+  // how long until the US stock market opens (New York was on summer time, four hours behind UTC, on these days)
+  check('US market: nine and a half hours before a Monday opening, as the sidebar counts it', pure.usOpensIn(Date.parse('2026-10-12T04:00:00Z')) === '9h 30m', pure.usOpensIn(Date.parse('2026-10-12T04:00:00Z')));
+  check('US market: open during the session, and Friday evening counts to Monday morning', pure.usOpensIn(Date.parse('2026-10-12T15:00:00Z')) === null && pure.usOpensIn(Date.parse('2026-10-09T21:00:00Z')) === '64h 30m' && pure.usOpensIn(Date.parse('2026-10-10T13:30:00Z')) === '48h 0m', [pure.usOpensIn(Date.parse('2026-10-09T21:00:00Z')), pure.usOpensIn(Date.parse('2026-10-10T13:30:00Z'))]);
   const ticks = pure.axisTicks(99870, 100130, 4).ticks;
   check('axis figures are round numbers', ticks.length >= 3 && ticks.every(v => v % 50 === 0), ticks);
 }
