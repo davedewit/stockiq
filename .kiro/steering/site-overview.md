@@ -3214,6 +3214,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     sold by price or time only, not on the signal and not by the AI review. 436 function checks. **The comparison of
     the panel with the function caught the first design's side effect** (a 30-day hold of its own would have overridden
     the user's holding time): run it for every change to the function, not only for changes to the budget.
+  - Asked whether "Check in now" and "Sell everything it holds" should sit beside the "Checks in" setting, then thought
+    better of it ("maybe i'm wrong and current spot for it is ok"): they stay at the top, beside the countdown and reachable
+    from both parts of the panel. A link under "Checks in" doing the same was staged and **not deployed** (commit `f4e5e81`,
+    `check-tools/pending-link/`, if he ever wants it); its check in `autopilot_test.js` only applies when the link is there.
   - The daily job keeps a dated copy of the company figures once a week (`research-data/company-figures/`; the first is of
     12 Oct 2026): the start of a history to test ideas about company figures on. Scheduling a nightly session was asked
     about and judged not worth it yet ("GO PLAY", section 8c).
