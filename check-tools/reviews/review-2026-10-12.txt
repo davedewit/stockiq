@@ -1,10 +1,11 @@
-REVIEW OF THE AI AUTOPILOT (fake money)   09 Oct 2026 09:21 to 12 Oct 2026 09:21 UTC (3 days)
+REVIEW OF THE AI AUTOPILOT (fake money)   09 Oct 2026 09:23 to 12 Oct 2026 09:23 UTC (3 days)
 Read-only. Past practice results; nothing here is a forecast. Judge by dollars and the average per trade, not by how many ended up.
 
 1. SETTINGS
   now: ON, Balanced level, 50 holdings (set by hand), budget $99,129 over 2 days, checks in every 6 h, keeps a holding at most 10 days; loss limit -10%, gain mark +18%, buys from the top 30; trailing stop 'gains'
   screeners: S&P 500, Russell 1000, Russell 2000 (small), NASDAQ 100, Dow 30, ASX 200, UK FTSE 100, Japan Nikkei 225, Crypto (top coins)
-  changes of the settings in the period: 0 (the diary has none yet: it starts on 12 Oct 2026)
+  changes of the settings in the period: 1
+    2026-10-12T09:22  enabled True, risk 3, holdings 50, budgetUsd 99129.0, periodDays 2, everyHours 6, maxHoldDays 10.0, trailMode gains, stopPct None, takePct None, screeners 9
 
 2. THE RESULT IN DOLLARS
   finished in the period                5 trades    2 up  average  -1.03% (± 0.87)    -1,014.30 USD   too few to read
@@ -58,7 +59,7 @@ by risk level at the time
     sold signal or score turned                       1 trades  went on +0.49% (± 0.00)
 
 5. WHAT IT DID AND DID NOT DO (activity lines in the period)
-  10 buys, 5 sales, 39 notes (from the record: only its last 80 lines; the diary fills from 12 Oct 2026)
+  10 buys, 5 sales, 39 notes
        8 check-ins: waiting for the next step of the budget
        1 check-ins: a coin had not stayed near the top yet
        1 check-ins: nothing on the shortlist fit to buy
@@ -82,8 +83,8 @@ by risk level at the time
   0 lines: none
 
 8. THE RECORD ITSELF
-  the account's record is 30 KB (a row can hold 400 KB): 5 of 300 finished trades kept, 54 of 80 activity lines, 5 holdings remembered
-  the diary: 0 rows in all (0 activity lines, 0 finished trades, 0 settings), first none
-  not yet in the diary: 59 (they go with the record's next save)
+  the account's record is 31 KB (a row can hold 400 KB): 5 of 300 finished trades kept, 54 of 80 activity lines, 5 holdings remembered
+  the diary: 60 rows in all (54 activity lines, 5 finished trades, 1 settings), first 2026-10-10T10:31
+  not yet in the diary: 0 (they go with the record's next save)
 
 WHAT TO DO WITH THIS: site-overview.md section 8c, 'The review every week or two'.

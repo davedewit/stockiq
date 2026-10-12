@@ -1902,8 +1902,9 @@ every week or two". That is the arrangement. **When he opens a session for a rev
   under). Why: the activity list keeps 80 lines, which for an account with many holdings was under three days; the
   "why" of a sale was gone before anyone could read it. A row is written once (`j` on the line or the trade, `state.diary`
   for the settings); a note that is counted again and a trade whose `after` has arrived are written again under the same
-  key. A write that fails is tried at the next save and never stops a save ("diary not written" in the log). The first
-  save after the deploy took in what the record still held (54 lines from 10 Oct, 5 trades). Nothing reads the table while
+  key. A write that fails is tried at the next save and never stops a save ("diary not written" in the log). **Seen for
+  real:** the first save after the deploy (09:22 UTC, a visit to the dashboard) wrote 60 rows, all the record still held
+  (54 lines from 10 Oct, 5 trades, the settings), with nothing in the function's log. Nothing reads the table while
   trading. It is keyed by the account's address like the other tables: **never copy its rows into git.**
 - **Not recorded:** the shares and coins it passed over (for shares a replay rebuilds any day's ranking from saved prices;
   for coins the entry log of section 8b), prices between check-ins, and the full text sent to the AI model.
