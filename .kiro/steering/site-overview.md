@@ -20,6 +20,16 @@ Detailed references: `stockiq.md` (AWS resources, Cognito, Lambdas, AI chat),
 `script-reference.md` (every script), `add-new-stocks.md`, `stock-matching-system.md`,
 `stocks-txt-csv-format.md`, `roadmap-to-9.md`, `backlinks-progress.md`, `future-work.md`.
 
+**EVERY SESSION, WITHOUT BEING ASKED (the owner's instruction, 12 Oct 2026):** open with what has happened since the last
+session, and **if the newest file in `stockiq/check-tools/reviews/` is seven or more days old, run the full review** (section
+8c, "The diary, and the review every week or two") before anything else. Then give him, in plain words: the result in
+dollars; **a numbered list of the improvements found**, for profit first and for anything else on the site; and the
+question whether to go ahead with them. Change nothing on that list until he says yes. His words: "i jump on after 8 days
+and it says oh we have these improvements to make, it lists them then asks if i want to continue and make the changes…
+any improvement it found for the site in any way really but especially in making profit. There is no point having this
+run if its not making profit. well over 100,000." If the reviews keep showing no edge, say that plainly and recommend
+changing what it buys from, or stopping, instead of tuning without end.
+
 ---
 
 ## 1. What the site is
@@ -655,9 +665,11 @@ remove the folder. `python3 check-tools/workers.py` must show "one" for the 13 g
 (`--contents` downloads and compares, the honest count).
 
 - **928 worker functions in 18 groups; 723 are called by the site** (669 share workers, 54 crypto workers). **205 are not
-  called at all** (the single-coin worker since 12 Oct 2026, and `stockiq-option-3-3-worker` 60, `stockiq-option-7-4-worker` 139,
-  `stockiq-option-3-worker` 5: left over, they cost nothing idle, and can be deleted when the owner agrees. They were not
-  touched and still hold old code.
+  called by the site now** (the single-coin worker since 12 Oct 2026, and `stockiq-option-3-3-worker` 60, `stockiq-option-7-4-worker` 139,
+  `stockiq-option-3-worker` 5). They cost nothing idle, were not touched and hold old code. **"Not called by the site" is
+  not "never used"**: counted on 12 Oct, the 3-3 group was the S&P 500 path until 11 Sep 2026; only the 7-4 group has no
+  call at all on record (section 8c, "Start here when resuming", improvements, item 10). Nothing is deleted without the
+  owner's yes to an exact list.
 - **What the audit really found (the first table was misleading).** `workers.py` counts package fingerprints, and a zip's
   fingerprint changes with the dates of the files inside it. The "100 / 200 different versions" of the Russell groups were
   two programs zipped 300 times; FTSE's "9 different" were two files differing in one default number. Across the 669 share
@@ -2045,7 +2057,8 @@ weekdays and fails at the weekend.
 ### Start here when resuming (state at 10:30 UTC on 12 Oct 2026, after a full check of everything)
 
 **FIRST THING IN EVERY SESSION: tell the owner, in plain words and before anything else, what has happened since the last
-one.** (His words on 11 Oct: "next time i open a session… update me on how monday went and anything else"; Monday 12 Oct
+one, and when the last review is a week or more old run the review and bring him the list of improvements to say yes or
+no to (the instruction at the top of this file).** (His words on 11 Oct: "next time i open a session… update me on how monday went and anything else"; Monday 12 Oct
 was reported to him through that day.) Lead with dollars. All read-only:
 1. `python3 check-tools/autopilot_review.py --days <since the last session>`: the result, the losses, faults, the trials.
 2. `grep -a -E "Pages written|Indexable|No price data|Company figures|Sync complete|pushed|could not|failed|All done|Skipping git" ~/stockiq-daily.log`
@@ -2085,8 +2098,8 @@ numbers of its own and the order it buys shares in, through trials; code changes
 **Still to be seen for real** (strike each when seen): a "Left alone" line at a Tokyo opening with only old prices, then the
 same market looked at again half an hour later; the first small buys at 50 holdings, up to 10 at a check-in, with
 `heads` on the remembered buy; a FTSE run on a morning after a London session showing that session's prices; the
-company figures published by the daily run ("Company figures" in its log without a warning: fixed 12 Oct, first run 13
-Oct); a "tighten" answer; the larger model in a review; a coin held back until it has stayed; any trial of a rule; the
+company figures published by the daily run itself ("Company figures published" in its log; the fixed script was run by
+hand on the scheduler's bare PATH at 10:55 UTC on 12 Oct and uploaded the file, so only the run inside the job is unseen); a "tighten" answer; the larger model in a review; a coin held back until it has stayed; any trial of a rule; the
 first progress report and its email; whether the test email reached the owner's inbox. **Never checked by a session,
 because neither can be opened from here: the logged-in dashboard itself and a real phone.**
 **Seen for real so far:** clean scheduled check-ins on every version; buys spread over two share markets (12 Oct); the
@@ -2114,7 +2127,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
 - Tests on the live files: 425 function, 203 panel, 95 portfolio, 22 bell, 19 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
-- Both repos pushed; **no `check-tools/pending-*` folder is left**. `website/` carries the daily job's own three files
+- Both repos pushed; the only `check-tools/pending-*` folder is `pending-cleanup` (an unrun delete script waiting for the owner's decision: improvements, item 10). `website/` carries the daily job's own three files
   uncommitted (news.html, news.js, sitemap.xml) until its next push.
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
@@ -2147,14 +2160,24 @@ preview from Kiro): ask early when a change "does not show" (section 9).
     ticker, 13,000 the four movers lists, 8,500 the market widgets; the crypto history is 2,600). The money is cents,
     but a tab left open all day is about a million calls a month, the size of the free allowance. `sidebar.js` pauses
     when the tab is hidden; `script.js` (the home page widgets) does not. Slow the polling, or pause it when hidden.
-10. Delete, with the owner's explicit yes (old code of all of them is in `~/VSCODE/backup/lambda_full_20261011_…`): the 204
-    worker functions the site never calls, `stockiq-option-7-2-worker-1`, `stockiq-coinspot-predictions-updater`; and
-    the local folder `website/stocks-backup-before-restore/` (118 MB).
+10. **Unused functions: nothing was deleted, and nothing is to be deleted without the owner seeing the exact list and saying
+    yes to it.** On 12 Oct he first said to go ahead "if you are 100% never used", then stopped the dry run ("i don't
+    think its right to delete workers. they must be used via the screeners?!"). What a check of every call in the 455
+    days CloudWatch keeps showed: `stockiq-option-7-4-worker` (139) never called; `stockiq-option-3-worker` (5) called on
+    4 to 7 Sep 2025 only; **`stockiq-option-3-3-worker` (60) was NOT unused: 50 of them were the old S&P 500 path, called
+    about once a month until 11 Sep 2026** (the S&P 500 has used the first 50 `stockiq-option-3-5-worker` since). None of
+    the three groups' addresses or names is in any page or script of the site, in the coordinator or in any other
+    function's code (385 packages read). Idle functions cost nothing: the recommendation given was to leave them. A
+    script that would delete the first two groups after checking each again sits unrun in
+    `check-tools/pending-cleanup/` until he decides (remove the folder if he says leave them). Also still there, in use
+    until this month: `stockiq-option-7-2-worker-1`, `stockiq-coinspot-predictions-updater`. The local folder
+    `website/stocks-backup-before-restore/` (118 MB) can go when he says.
 11. Thin the bell script's handling of older copies (any time after 18 Oct 2026; keep "the newer version wins").
 12. The report function holds the Finnhub key in its code: move it to the function's settings so the code can go into git.
 13. The record's size (the review tool warns above 300 KB of the 400 KB a row can hold): drop `path` from finished
     trades kept in `history`, or store the record compressed.
-14. The owner's decisions waiting: the two **public** GitHub repositories and his personal file in one (section 11).
+14. Both GitHub repositories are public (section 11). The personal file in one is the owner's own business ("that youtube
+    stuff is mine only focus on the repo for stockiq", 12 Oct): leave it alone and out of these lists.
 15. Ideas offered and not built are in the next part ("Ideas offered and not built"); section 11 has the rest of the site.
 
 **Who can use it, and what guards every account:**
@@ -2495,7 +2518,7 @@ Needs the owner's decision or more work (nothing here is fixed):
   the 3,333 stocks the site's daily job keeps them for, up to a month old; the analysis page in a browser and on a real
   phone was not looked at; the first run of `publish_company_figures.py` inside the daily deploy (12 Oct) built the
   file and **could not upload it**: launchd's PATH has no Homebrew, so "aws" was not found. Fixed the same day (the full
-  path, as `deploy-to-s3.sh` uses); the file on S3 is the one of 11 Oct until the run of 13 Oct. Look for "Company
+  path, as `deploy-to-s3.sh` uses); run by hand on a bare PATH at 10:55 UTC it uploaded the file. Look for "Company
   figures" in `~/stockiq-daily.log` without a warning after it.
 - **Dashboard plan cards** (the line "AI autopilot for your practice portfolio (fake money)" added on 11 Oct is real and the same on all three plans) list features that are not verified to differ by plan ("Advanced
   screening & alerts", "Portfolio tracking", "White-label options", "Dedicated support"), while
@@ -3030,4 +3053,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     very top of this file; the stale statements this check met were corrected (script versions, test counts, the
     single-coin function, fingerprints). Last of the day, off that list: the headline filter drops pages that only
     explain a price move (function `hkZjPYBD…`, 10:29 UTC, 425 checks; rollback zip `…_before_autopilot_junk_20261012.zip`).
+  - **Later that day:** the company-figures script run by hand on the scheduler's bare PATH: published (10:55 UTC). **A
+    clean-up of unused worker functions was prepared and stopped by the owner before its dry run; nothing was deleted**
+    ("Start here when resuming", improvements, item 10): the audit's "204 never called" was wrong for 60 of them, the old
+    S&P 500 workers, which had calls until 11 Sep 2026. **Lesson: "the site does not call it" is not "nothing calls it";
+    count the calls (CloudWatch keeps 455 days) before calling a function unused, and show the owner the list before
+    preparing a delete.** The standing instruction for every session (review when a week has passed, list the
+    improvements, ask) was written at the top of this file at his word.
   - Still not checked by a session: the logged-in dashboard itself and a real phone (neither can be opened from here).
