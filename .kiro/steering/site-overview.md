@@ -2087,6 +2087,9 @@ numbers of its own and the order it buys shares in, through trials; code changes
 **THE MANDATE (the owner, 12 Oct 2026): "its like this is your playground, i want you to be smart and find ways to make
 money that beat an index fund such as s&p".** So a session's job is not only to tend what exists but to **look for an
 edge**, actively, every time. How, without fooling ourselves:
+- **Shares first.** The owner, the same day: "i'm honestly not that interested in the crypto more so the stock screeners".
+  The search, the trials and the reviews put the share screeners first; coins get what costs nothing (the entry study
+  below runs by itself at a check) and no building of their own unless he asks.
 - **The fast lane is the replay, not the live account.** `check-tools/replay/replay.py` tests an idea on four years of
   prices in about 20 seconds; the live account needs weeks for 30 trades. Every weekly check: think up a batch of new
   ideas (what to buy, when to sell, how long to hold, how much, which market), replay each, and keep only what passes
@@ -2111,7 +2114,8 @@ edge**, actively, every time. How, without fooling ourselves:
   the rise before entering, the worse**: up 10% or more the day before, -5.4%; up 20% or more the week before, -7.4%;
   under 5% the week before, +0.2% (six entries). **One market day, 30 coins, entries that are not independent: a lead,
   not a finding.** Run it at every weekly check (results in `check-tools/crypto/results/`). If it shows the same over
-  five or more separate days: a trial in the queue, "pass over a coin that has just risen fast" (the level's limit on
+  five or more separate days: tell him, and only if he wants coins worked on, a trial in the queue, "pass over a coin
+  that has just risen fast" (the level's limit on
   the 30-day move is the nearest thing there is now; nothing looks at the last day or week). It would also say
   something about the crypto screener itself, whose score rewards exactly such a rise (section 8b, "How a coin is
   scored"): the owner's to decide, with the evidence.
