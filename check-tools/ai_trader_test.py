@@ -1117,6 +1117,21 @@ if hasattr(m, 'fresh'):
     AGE[first['symbol']] = 0.1
     s, rec = run3(t0 + dt.timedelta(hours=4))
     check('with a fresh price it is sold at its loss limit as usual', s['sold'] >= 1 and not any(h['id'] == first['id'] for h in portfolio()['holdings']), s)
+    # a market that showed only old prices stays due: with a check-in every 12 hours the one look a day would otherwise find old prices every day
+    D.t.clear(); m._BRAIN.clear(); m.PLAN_CACHE.clear(); PRICES.clear(); AGE.clear(); MODEL['answer'] = None
+    rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=12, maxHoldDays=5, screeners=['3-100'], selfTune=False, aiSell=False, auto=[])
+    rec['state']['startedAt'] = m.iso(t0 - dt.timedelta(days=2)); m.save_item(U, rec)
+    AGE.update({r['symbol']: 18 for r in SNAP['3-100']})        # ten minutes after an opening: the quotes are still the session before
+    s, rec = run3(t0); half = t0 + dt.timedelta(minutes=30)
+    check('a market that showed only old prices is not counted as checked: it is due again half an hour later, and the note says so', s['bought'] == 0 and (rec['state'].get('lastRunBy') or {}).get('us') == m.iso(t0 - dt.timedelta(hours=12))
+          and m.due_markets(rec, half) == ['us'] and 'in about half an hour' in rec['log'][-1]['text'], [rec['state'].get('lastRunBy'), rec['log'][-1]['text'][-120:]])
+    AGE.update({r['symbol']: 0.3 for r in SNAP['3-100']})
+    s, rec = run3(half)
+    check('half an hour later the prices are of this session: it buys, and the 12-hour gap counts from then', s['bought'] >= 1 and rec['state']['lastRunBy'].get('us') == m.iso(half) and m.due_markets(rec, half + dt.timedelta(minutes=30)) == [], [s, rec['state'].get('lastRunBy')])
+    one = portfolio()['holdings'][0]; AGE[one['symbol']] = 30   # one thinly traded holding with an old price, in a market that is trading
+    later = half + dt.timedelta(hours=12, minutes=30); later = later if m.market_open('us', later) else t0 + dt.timedelta(days=1)
+    s, rec = run3(later)
+    check('one old price in a market that is trading does not keep the whole market due', rec['state']['lastRunBy'].get('us') == m.iso(later) and any('Left alone: ' + one['label'] in e.get('text', '') and 'next check-in' in e.get('text', '') for e in rec['log'][-4:]), [rec['state'].get('lastRunBy'), [e.get('text', '')[:90] for e in rec['log'][-3:]]])
     # the function's own fetch_quote (this test put a stand-in in its place further up): run its source against a stand-in answer
     import re as _re, urllib.parse as _up
     src = _re.search(r"^def fetch_quote\(symbol\):\n(?:    .*\n|\n)+", open(sys.argv[1]).read(), _re.M).group(0)
