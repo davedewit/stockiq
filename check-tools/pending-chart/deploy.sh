@@ -17,7 +17,7 @@ DRY="${DRY_RUN:-false}"; TMP="$(mktemp -d)"
 # file : sha256 before : sha256 after : content type : how long a copy may be kept (site-overview.md section 5, step 8)
 FILES=(
  "practice-portfolio.js:b48ff650293ce09eb8c892ba53825b7f607d531f060f55970629351f5cac8123:/Users/dave/VSCODE/stockiq/check-tools/pending-chart/2a3f8209d48e02881765d3bbee7941ee2a5be0497280d2b57d2e71a94dc38e73pplication/javascript:public, max-age=300, s-maxage=86400"
- "dashboard.html:bec16da1ef4cb2796e9505ba802994f44898f9a079139ac966a337a91d78a45d:a847afdbe81aa4602727b6a20177466f58e32f8d1d39f3a6e6dbea40cb4c398cext/html; charset=utf-8:public, max-age=0, s-maxage=3600, must-revalidate"
+ "dashboard.html:df1c3b9835e483f6f6bb00dbc4940bd5e0840a68d49fe33354faf509c6481942:b86167e4cc2355d39a1da6fd360668fa157ce260d8f2efe308ab7c26f0783d06:public, max-age=0, s-maxage=3600, must-revalidate"
 )
 say()  { printf '\n== %s\n' "$*"; }
 stop() { printf '\nSTOPPED: %s\nNothing further was changed.\n' "$*"; exit 1; }

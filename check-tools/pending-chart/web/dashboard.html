@@ -3220,9 +3220,16 @@ ${analysis.report}
                     endpoint = coordinatorUrl;
                     payload = { option: '7', subOption: '1', userId };
                 } else if (analysisType === 'crypto_single') {
-                    // Use direct single coin endpoint
-                    endpoint = 'https://uotf7ibcklwyuehblv7zsl7ney0ngmrl.lambda-url.us-east-1.on.aws/';
-                    payload = { single_coin: item.symbol, timestamp: new Date().toISOString(), userId };
+                    // The single-stock report function reports on a coin too (since 12 Oct 2026) and saves the entry itself,
+                    // as "<SYMBOL> Coin Analysis". It prices the coin by the crypto screener's ticker for it.
+                    endpoint = 'https://5oqosafg2mflk7oyydkk3d3rdq0amufq.lambda-url.us-east-1.on.aws/';
+                    payload = {
+                        symbols: [item.symbol],
+                        asset: 'crypto',
+                        timezone_offset: -new Date().getTimezoneOffset() / 60,
+                        userId: userId,
+                        isBackgroundTask: true
+                    };
                 } else if (analysisType === 'trading_signals') {
                     // Trading signals (2-1)
                     endpoint = 'https://bqsbauyuyo2fygbgeswaloqtse0oxtio.lambda-url.us-east-1.on.aws/';
