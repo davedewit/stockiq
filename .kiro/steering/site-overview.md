@@ -1153,7 +1153,7 @@ show. Settings holds the first five items below, Activity the last five:
   of the budget, the first check-in after each closed market opens, the latest each holding is
   kept; then what goes by the number of finished trades (its own review, the AI model's notes).
   A sentence under it says that reviews and trials happen by themselves and nothing has to be pushed.
-- **How it is doing** (its folded "Breakdown" table was laid out afresh on 11 Oct after the owner could not tell a group heading from the rows under it: each heading is a band of its own (`ap-bd-head`), its rows are indented, and the "Against an index fund" column is shown only when it differs from the average for some group; styles are the `.ap-bd` rules): what it holds now and when each will be sold, with the AI model's latest
+- **How it is doing** (**"Holding now" is a row a holding since 12 Oct 2026**, newest first: bought, sold by, its limits, and small tags for what is particular to it (market closed until…, where its stop stands, a patient share, the AI review's last word), with the full sentence of its plan folded under it ("the plan for it"); eight rows on show, the older ones folded away (`heldRow`, `heldPlan`, the `.ap-held` styles). Ten holdings had been one paragraph nobody could read, and there can be fifty. Its folded "Breakdown" table was laid out afresh on 11 Oct after the owner could not tell a group heading from the rows under it: each heading is a band of its own (`ap-bd-head`), its rows are indented, and the "Against an index fund" column is shown only when it differs from the average for some group; styles are the `.ap-bd` rules): what it holds now and when each will be sold, with the AI model's latest
   review of it; the last 30 days in dollars and as a share of the budget; finished trades (up /
   down, average); a folded breakdown; notes the AI model wrote from the record.
 - **Progress, 20 finished trades at a time** (added 11 Oct): a table with a row per batch of 20
@@ -1230,7 +1230,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=26` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=43`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=44`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -2289,10 +2289,10 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
-- Website (sha256 starts): `practice-autopilot.js?v=43` (`83dfb5e06e1b`), `practice-portfolio.js?v=26` (`da35f48fb9cd`),
-  `dashboard.html` (`e816e88829d8`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
+- Website (sha256 starts): `practice-autopilot.js?v=44` (`8e6e07ce4eba`), `practice-portfolio.js?v=26` (`da35f48fb9cd`),
+  `dashboard.html` (`f42017bf3366`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
   `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
-- Tests on the live files: 436 function, 207 panel, 98 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
+- Tests on the live files: 436 function, 209 panel, 98 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
 - Both repos pushed; **no `check-tools/pending-*` folder is left**. `website/` carries the daily job's own three files
@@ -3257,6 +3257,8 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     deliver (data is delayed; section 11).
   - The "For comparison" card says in words who is ahead, the holdings or the fund, and names the S&P 500 fund in its title (`practice-portfolio.js?v=26`; 98
     portfolio checks), after the owner read the fund's figure as his own lead.
+  - **"Holding now" as a row a holding** with the plan folded under each, and "tests changes" for "tries changes" (the owner,
+    from a picture of his own panel; `practice-autopilot.js?v=44`; 209 panel checks; looked at in a headless browser).
   - The daily job keeps a dated copy of the company figures once a week (`research-data/company-figures/`; the first is of
     12 Oct 2026): the start of a history to test ideas about company figures on. Scheduling a nightly session was asked
     about and judged not worth it yet ("GO PLAY", section 8c).
