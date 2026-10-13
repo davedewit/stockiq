@@ -77,8 +77,8 @@ const calls = [];
 window.fetch = async (url, opts) => {
   const u = String(url); await new Promise(r => setTimeout(r, 60));
   const json = (o) => ({ ok: true, status: 200, json: async () => o });
-  if (u.includes('?symbol=')) { const sym = decodeURIComponent(u.split('?symbol=')[1]); const p = PRICES[sym]; if (!p) return { ok: false, status: 500, json: async () => ({}) }; const nowS = Math.floor(Date.now() / 1000), day0 = Math.floor(nowS / 86400) * 86400, wave = (i) => p * (1 + 0.035 * Math.sin(i / 2.3 + sym.length) - 0.0012 * i);
-    const ts = [], close = []; for (let i = 29; i >= 0; i--) { ts.push(day0 - i * 86400 + (sym.endsWith('-USD') ? 0 : 48600)); close.push(wave(i)); }
+  if (u.includes('?symbol=')) { const sym = decodeURIComponent(u.split('?symbol=')[1].split('&')[0]); const p = PRICES[sym]; const span = { '3mo': 90, '6mo': 180, '1y': 365 }[(u.split('&range=')[1] || '')] || 30; if (!p) return { ok: false, status: 500, json: async () => ({}) }; const nowS = Math.floor(Date.now() / 1000), day0 = Math.floor(nowS / 86400) * 86400, wave = (i) => p * (1 + 0.035 * Math.sin(i / 2.3 + sym.length) - 0.0012 * i);
+    const ts = [], close = []; for (let i = span - 1; i >= 0; i--) { ts.push(day0 - i * 86400 + (sym.endsWith('-USD') ? 0 : 48600)); close.push(wave(i)); }
     return json({ chart: { result: [{ meta: { regularMarketPrice: p, regularMarketTime: nowS, currency: 'USD', longName: sym }, timestamp: ts, indicators: { quote: [{ close }] } }] } }); }
   const b = JSON.parse(opts.body); calls.push((b.settings ? 'autopilot-' : b.portfolio ? 'portfolio-' : '') + b.action);
   if (b.action === 'get' && !('settings' in b) && u.includes('5c7pt7q')) return json({ success: true, portfolio, version });
