@@ -30,7 +30,8 @@ const VISITORS = {
   unlimited: { pill: null, in: true, paid: 'paid', status: Object.assign({ dailyLimit: 999999 }, sub), used: 40, chip: /^(Unlimited|∞)$/, bad: false, says: /Unlimited analyses/, act: null }
 };
 const args = process.argv.slice(2), PAGES = args.length ? args : ['index.html', 'analysis.html', 'dashboard.html', 'stocks/AAPL.html', 'blog.html'];
-const SIZES = [['desktop', 1500, 900, false], ['narrow', 1024, 800, false], ['phone', 390, 844, true], ['small phone', 320, 640, true]];
+//   WIDTHS=1150,900,780 node ...   those widths instead of the usual four (above 768 a desktop, else a phone)
+const SIZES = process.env.WIDTHS ? process.env.WIDTHS.split(',').map(w => [+w > 768 ? 'desktop' : 'phone', +w, +w > 768 ? 800 : 844, +w <= 768]) : [['desktop', 1500, 900, false], ['narrow', 1024, 800, false], ['phone', 390, 844, true], ['small phone', 320, 640, true]];
 const ONLY = (process.env.ONLY || '').split(',').filter(Boolean);
 const jwt = (o) => 'x.' + Buffer.from(JSON.stringify(o)).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '') + '.y';
 
@@ -80,7 +81,7 @@ const server = http.createServer((q, r) => {
       const one = (q) => box(document.querySelector(q));
       const chip = document.getElementById('vb-chip'), card = document.getElementById('vb-card'), act = card && card.querySelector('a.vb-act'), old = document.getElementById('trial-status-display');
       return { at: location.pathname, w: window.innerWidth, script: !!window.visitorBar, state: window.visitorBar && window.visitorBar.state(), chip: one('#vb-chip'), text: chip ? chip.textContent : null, cls: chip ? chip.className : null,
-        nav: one('.top-nav'), brand: one('.nav-brand'), menu: one('.top-nav .desktop-nav'), burger: one('.hamburger-btn'), bell: one('#mobile-notification-bell'),
+        nav: one('.top-nav'), brand: one('.top-nav .nav-brand'), menu: one('.top-nav .desktop-nav'), burger: one('.hamburger-btn'), bell: one('#mobile-notification-bell'),
         old: old ? { shown: !!box(old), text: old.textContent.replace(/\\s+/g, ' ').trim().slice(0, 70) } : null, yellow: !!document.getElementById('limited-time-banner'),
         oldButtons: document.querySelectorAll('#sticky-register-btn, #sticky-upgrade-btn').length, pill: one('#vb-pill'), pillText: (document.getElementById('vb-pill') || {}).textContent || null, pillHref: (document.getElementById('vb-pill') || {}).href || null, h: window.innerHeight,
         card: one('#vb-card'), says: card ? card.textContent.replace(/\\s+/g, ' ').trim() : null, act: act ? act.href : null, strip: one('#promo-banner') || one('#sticky-banner') };
@@ -115,6 +116,7 @@ const server = http.createServer((q, r) => {
           check(label + ': it is on the screen', s.chip.l >= 0 && s.chip.r <= s.w, s.chip);
           check(label + ': it covers nothing in the bar (name, menu, menu button, bell)', apart(s.chip, s.brand) && apart(s.chip, s.menu) && apart(s.chip, s.burger) && apart(s.chip, s.bell), { chip: s.chip, brand: s.brand, menu: s.menu, burger: s.burger, bell: s.bell });
           check(label + ': the old floating badge is not shown', !s.old || !s.old.shown, s.old);
+          check(label + ': the name and the menu in the bar do not run into each other', apart(s.brand, s.menu), { brand: s.brand, menu: s.menu });
           if (/index/.test(page)) check(label + ': the yellow LIMITED TIME bar is gone', !s.yellow, s.yellow);
           const pillPage = /index|analysis/.test(page), wantPill = pillPage ? v.pill : null;
           check(label + ': the round button is ' + (wantPill ? 'there, bottom left, and goes to the right place' : 'not shown'), wantPill ? !!s.pill && wantPill[0].test(s.pillText || '') && wantPill[1].test(s.pillHref || '') && s.pill.l <= 24 && s.pill.b <= s.h && s.pill.b >= s.h - 80 : !s.pill, { pill: s.pill, text: s.pillText, href: s.pillHref });
