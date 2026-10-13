@@ -2825,9 +2825,45 @@ Needs the owner's decision or more work (nothing here is fixed):
   the FAQ says all plans get the same features. Old accounts carry legacy limits (a cancelled
   Starter at 50/day, the owner's Pro at 200/day); new purchases get 15 / 50 / unlimited. One
   `@dewit.com.au` test account has a limit of 20, which is why a "19/20 today" badge can appear.
-- **Usage badge** (`#trial-status-display`, created in `auth.js`, fixed top-right) overlaps the
-  index cards under the nav. Bottom-left is taken by the anonymous "Start 3-Day Free Trial"
-  sticky button, so it needs a placement decision.
+- **The banners, the usage badge and the sticky buttons: mapped on 13 Oct 2026, not changed.** The owner: "it was incredibly
+  complicated… i think it was done very bad - but does seem to work". It works, and it is the same thing built several
+  times over. **Read this before touching any of it.**
+  - **Three kinds of visitor, told apart in the browser:** anonymous (no `userId` in `localStorage`), signed in and not
+    paying (a trial, or a trial that has run out), paying. "Paying" is a cached note, `localStorage`
+    `userPaidStatus_<address>` = `paid` / `unpaid`, written at sign-in (`auth.js`, only ever `paid`), by
+    `analysis-functions.js` (which then **reloads the page** if it finds the visitor has paid) and by `dashboard.html`.
+    Every page reads the note in its `<head>` to lay itself out before anything is drawn. A paying visitor whose note
+    is missing sees the unpaid banner until one of those pages has put it right.
+  - **What each sees.** *The strip across the top* (desktop only; `styles.css` hides it up to 768px): anonymous "Sign up
+    FREE to get 15 free analyses…", signed in and not paying "Professional Stock Analysis starting at $4.99/month…",
+    paying none (the page moves up 41px: `--nav-top`, `--body-padding`, `--mobile-menu-top`, `--quick-panel-top`,
+    `--news-panel-top`). It is `#promo-banner` in `index.html`, `analysis.html`, `dashboard.html` and `signup.html`,
+    each with its own copy of the code, and a different element, `#sticky-banner`, with a third wording of the same
+    code in the stock pages' template. *The yellow "LIMITED TIME: Get 15 free analyses" bar* (`#limited-time-banner`):
+    home page, anonymous, desktop only; it says what the strip 250px above it says, and the offer is not limited in
+    time. *The usage badge* (`#trial-status-display`, top right under the header, every visitor, every page that loads
+    `auth.js`): "1/1 Analyses remaining today", "3/5 today (resets 00:00 UTC) • Trial: 2d 4h", "Trial expired -
+    Upgrade", "Unlimited", "12/15 today • Subscription: 20d 3h" (`getStockAnalysisStatus` in `auth.js`). *After the
+    free uses are gone:* anonymous: a pop-up on the analysis page once 30% of it is scrolled ("You've Used Your Free
+    Daily Analysis!… 5 Free Reports per day"), then a round "🚀 Start 3-Day Free Trial" button (`#sticky-register-btn`;
+    bottom left on the home page, bottom right on the analysis page; remembered as `showStickyRegister`); signed in
+    with none left: "🚀 Upgrade Plan" (`#sticky-upgrade-btn`, bottom right).
+  - **Why it is hard to work on:** the badge is created in four places with four sets of positions and styles
+    (`displayTrialStatus` in `auth.js`; inline in `index.html`; in `analysis-functions.js`; `dashboard.html`, which
+    defines a second `displayTrialStatus` over the first), and faded on scroll by a separate handler on each page; the
+    sticky buttons in three and two places; the strip's layout sums in every page's head. A change to one copy leaves
+    the others as they were.
+  - **What looks wrong (seen in pictures of the live site as each kind of visitor, desktop and phone):** the badge floats
+    over content (the corner of the search panel on a desktop, the index cards on a phone, the company name on a
+    stock page); three different counts are shown to one anonymous visitor ("15 free analyses", "5 Free Reports per
+    day", "1/1 Analyses remaining today"); on a phone the green sidebar button and the blue chat button sit on top of
+    each other over the text, with the trial button as a third; a phone visitor never sees the sign-up strip at all.
+    **`auth.js` also has the owner's own address written into it** (a rule for the "Unlimited" wording), in a public
+    file of a public repository.
+  - **Offered to the owner, not built:** one script for every page, as for the bell and the sliding panels: it works
+    out the kind of visitor once and draws the strip, the badge (inside the header bar, not floating) and the one
+    sticky button; `theme.js` can load it on the stock pages without regenerating them. Wording (one count everywhere;
+    "LIMITED TIME") is his to decide.
 - **Mobile:** the owner reports the page zooms when tapping the AI chat input. The input is
   already 16px; cause not found. Need the phone model and browser to chase it. One candidate is
   the fixed 500px window height when the keyboard opens.
@@ -3487,3 +3523,6 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     the page to the top either; `script.js` holds a third copy of the menu's open and close code that no page loads.
     Way back: `git checkout 8074df1e~1 -- styles.css mobile-sidebar.js index.html dashboard.html analysis.html` in `website/`,
     then upload the five files (that state has the sidebar's fix and not the menu's).
+  - **The banners, usage badge and sticky buttons mapped** (section 11, first item on them), at the owner's question
+    whether the session understood them. Read from the code and looked at on the live site as an anonymous, a
+    signed-in unpaid and a paying visitor, desktop and phone (GETs only; every POST answered locally). Nothing changed.
