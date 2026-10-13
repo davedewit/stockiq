@@ -211,6 +211,20 @@ serves it (`cd ~/VSCODE && python3 -m http.server 8765 --bind 127.0.0.1` first, 
 that the bell's script was asked for at the top of the address and so never loaded anywhere but on stockiq.tech. A page whose bell goes to the dashboard ends
 with "Inspected target navigated": that is the bell working.
 
+## screener_equiv.js (does a changed analysis-functions.js give the same reports?)
+
+```bash
+PRE=<new screeners.js> node check-tools/screener_equiv.js <old analysis-functions.js> <new analysis-functions.js>            # the 14 share screeners
+PRE=<…> node check-tools/screener_equiv.js <old> <new> 3-8 1-custom 2-custom 2-auto 72-single                               # some buttons
+```
+For each button: the old page code is run once for real (the workers are really called) and their answers kept; then the
+old and the new code are run on those answers with the clock stopped, and what each asked the workers and what each
+produced (report text, type, CSV) is compared character for character. `PRE_OLD=<file>` when the old side has a
+`screeners.js` of its own. Nothing is saved to anyone's history and no usage is counted. The crypto screener cannot be
+replayed (its request carries the time): run it with `page_run.js 7 coinspot`. Written for the change of 13 Oct 2026 that
+replaced 14 copies of the screener routine with one; use it for any change to how the page runs a screener.
+**`pending-screeners-undo/` is the way back from that change** (see the folders note below; run it before the other two).
+
 ## visitor_bar_check.js (the usage chip in the header bar, as every kind of visitor) and pending-banners-undo/
 
 ```bash

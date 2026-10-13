@@ -36,8 +36,8 @@ dashboard "Run in Background"
 | Piece | Where | New for each screener |
 |---|---|---|
 | Worker functions | AWS, `<group>-1 … <group>-N` | Created from the one package; one line in `workers/groups.py` |
-| The stock list | `analysis-functions.js` (`*Universe` array) **and** the coordinator (`STOCK_UNIVERSES`) | The same list in both, no duplicates |
-| Page handler and formatter | `analysis-functions.js` | A block in `runAnalysis`, a names table, a formatter, three lookups |
+| The stock list | `screeners.js` (the entry's `list`) **and** the coordinator (`STOCK_UNIVERSES`) | The same list in both, no duplicates |
+| Page entry and formatter | `screeners.js`, `analysis-functions.js` | An entry in `screeners.js`; in `analysis-functions.js` a names table, a formatter, three lookups |
 | Button | `analysis.html` | One line |
 | Dashboard wiring | `dashboard.html` | Five small entries |
 | Coordinator | `lambda-sync/stockiq-screener-coordinator/lambda_function.py` | Worker addresses, list, title, size |
@@ -168,12 +168,24 @@ half).
 
 The file is very large: **search, do not read it whole** (`grep -n nikkei225`), and edit by exact replacement.
 
-**4a. The handler.** Copy the block that starts `} else if (option === 5 && subOption === 'nikkei225') {` and adapt:
-the `…Universe` array (the list), `allWorkerUrls` (the addresses, in order), the worker count in the loop and in
-`perWorker` (`Math.max(10, Math.ceil(list.length / 4))`), the log lines, and the formatter it calls.
-**Do not add an access check inside the block**: access is checked and the use counted once, at the top of
-`runAnalysis`; a second check eats the visitor's last free use (section 8b, "Access checks").
-Keep the line that skips an empty batch.
+**4a. The entry.** Since 13 Oct 2026 the page runs every share screener with one routine (`runShareScreener` in
+`analysis-functions.js`), and a screener is one entry in **`website/screeners.js`** (`site-overview.md` section 8b, "The
+page's one screener routine"). Add:
+
+```js
+    '5-dax40': {
+        name: 'Germany DAX 40', size: 40, use: 4, csv: 'Germany_DAX40_Screener', format: 'dax', merge: 'guarded', timeText: false,
+        list: ['SAP.DE', 'SIE.DE', … ],
+        workers: [ the four addresses from urls.txt, in order ]
+    },
+```
+
+`use` is the number of workers, `size` the number the report prints, `merge: 'guarded'` and `timeText: false` are the
+plain choices (as Nikkei has). `format` names the formatter: add one line for it where `runShareScreener` picks the
+formatter (`def.format === 'dax' ? formatDAXResult(apiData) : …`). Nothing else changes in `runAnalysis`: no block to
+copy, no access check to remember (access is checked and the use counted once, at the top of `runAnalysis`).
+**Adding an entry is the point after which the way back to the old 14 copies (`pending-screeners-undo`) no longer
+applies by itself.**
 
 **4b. A names table**, `DAX_COMPANY_NAMES = { 'SAP.DE': 'SAP', 'SIE.DE': 'Siemens', … }`, short names.
 

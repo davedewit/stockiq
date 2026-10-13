@@ -542,7 +542,8 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
 ## 8. Front end
 
 - `analysis.html`: options 1–7 (stock/ETF report, signals, US/EU/Asia/other screeners, crypto).
-  Logic in `analysis-functions.js` (~350 KB, holds the stock lists and all formatters) +
+  Logic in `analysis-functions.js` (169 KB: `runAnalysis`, the formatters) and, **since 13 Oct 2026, `screeners.js`**
+  (99 KB of data: each share screener's list and worker addresses; section 8b, "The page's one screener routine") +
   `js/analysis-core.js`. How the screeners, signals and crypto work: section 8b.
 - `dashboard.html`: report history, favourites, plans/upgrade (Stripe), manage subscription,
   "Run in Background" (through `stockiq-screener-coordinator`), 🎯 performance tracker. **Since 10 Oct
@@ -672,8 +673,8 @@ crypto orchestrator or any worker.
   worker Lambdas straight from the browser and formats the text itself.
 - **"Run in Background" (dashboard):** `stockiq-screener-coordinator` calls the same workers
   server-side, formats the report and CSV, and saves them to the user's history.
-- The stock lists therefore live in **two places that must stay identical**: the `*Universe`
-  arrays in `analysis-functions.js` and `STOCK_UNIVERSES` in the coordinator. Exception: on the
+- The stock lists therefore live in **two places that must stay identical**: the `list` of each
+  entry in `website/screeners.js` (until 13 Oct 2026 the `*Universe` arrays inside `runAnalysis`) and `STOCK_UNIVERSES` in the coordinator. Exception: on the
   page path Russell 1000/2000 send only `worker_id`, and each worker takes its own ten stocks from
   `lists.txt` inside the worker package. **That file is the coordinator's two Russell lists**
   (`workers/lists.txt`; `workers/build.py` refuses to build if they differ, `build.py --lists` writes it
@@ -713,6 +714,51 @@ crypto orchestrator or any worker.
 - Button labels in `analysis.html`, the `universeSize` constants in the formatters and the
   coordinator's `universe_sizes` all carry the real list sizes. Update all three with a list.
 - `NIKKEI_COMPANY_NAMES` in `analysis-functions.js` supplies names for the Nikkei output.
+
+### The page's one screener routine (13 Oct 2026)
+
+The owner called the analysis page "insane and a very large page" and asked for a look at "splitting it up or just
+less repetitive". The page itself (`analysis.html`) is 34 KB; the size was its script, and in it `runAnalysis`:
+1,943 lines, 175 KB, holding **14 copies of the same routine**, one for each share screener, each with its list and
+its worker addresses written inside it.
+
+- **Now:** `runShareScreener(def, subOption)` in `analysis-functions.js` runs every share screener, and a screener is
+  one entry in **`website/screeners.js`** (`SHARE_SCREENERS`, keyed `'<option>-<subOption>'`, e.g. `'3-8'`): `name,
+  list` (null = the workers hold it: Russell 1000 / 2000), `workers` (addresses in order), `use` (how many of them a
+  run uses), `size` (the round number the reports print), `csv` (the file's name), `format` (`us` / `asx` / `nikkei`
+  / `ftse`), `merge` and `timeText` (two small habits each copy had and keeps: which worker answers are counted, and
+  whether the run's time is handed on as a number or as text). The header of `screeners.js` explains every field.
+  In `runAnalysis` the 14 branches are one: `shareScreener(key)` finds the entry.
+- `analysis.html` loads `screeners.js` before `analysis-functions.js`. **Should a visitor's page be an older copy
+  without that tag, `shareScreener` fetches the file itself** the first time a screener is asked for, so no order of
+  arrival can leave a screener without its list.
+- The FTSE 100 report, which was written out inside `runAnalysis`, is `formatFTSEResult(apiData)`, beside the others.
+- **Code that could never run went with it:** a third copy of the ASX 300 routine standing after a `return`, a second
+  `(5, '50')` branch for a Shanghai screener that was never built (it asked `'YOUR_LAMBDA_URL'`), and two functions
+  nothing called (`runFTSE100Screener`, `formatUKResult`). The two "coming soon" alerts for `(5,'180')` and
+  `(5,'csi300')` are still there.
+- `analysis-functions.js`: 324 KB to 169 KB, 5,001 lines to 3,416. The crypto screener, the single report, the signals
+  and the access check at the top of `runAnalysis` were not touched.
+- **Proved the same, not assumed:** `check-tools/screener_equiv.js <old> <new>` (with `PRE=<screeners.js>`) runs each
+  button through the old page code once for real, keeps the workers' answers, then runs old and new on those answers
+  with the clock stopped and compares what each asked the workers and what each produced. All 14 screeners and the
+  single report, both signals buttons and the single coin: the same requests, the same report, the same CSV,
+  character for character; a copy broken on purpose (11 stocks a worker) was caught. (The crypto screener cannot be
+  replayed that way, its request carries the time; it was run for real through the new code.) After the deploy six
+  screeners were run for real through the deployed code: every worker answered.
+- The files were **built by a script from the live code** (`make.py`, in git history with the staging folder: commit
+  `7ea216d`): every list and address was copied as text and each branch checked against the pattern, so nothing was
+  typed again.
+- **The way back:** `bash /Users/dave/VSCODE/stockiq/check-tools/pending-screeners-undo/deploy.sh` (`DRY_RUN=true`
+  first) reverts website commit `e0d47f15` and uploads the two files. **Once a screener has been added to
+  `screeners.js`, that way back needs the new screener put into the old code by hand: decide before adding.**
+- **To add a screener now:** an entry in `screeners.js` (list, workers, the fields above), a formatter if its report
+  differs from the four there are, a button in `analysis.html`, and the rest of `add-new-screener.md` (workers,
+  coordinator, dashboard). `page_run.js`, `anon_run.js` and `trial_run.js` load `screeners.js` when it lies beside
+  the page code they are given.
+- Not done: the coordinator still has its own copy of the lists (a Lambda cannot read the site's file); the page's
+  four formatters are still four; `saveAnalysisToHistory` (374 lines) and the notification code in the same script
+  were not looked at.
 
 ### Batching
 
@@ -2466,12 +2512,12 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
 - Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=33` (`9e0b1dd9aa63`),
-  `dashboard.html` (`1dbb2a18c3a8`), `index.html` (`50c1c387520a`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`0a647633748e`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
-  `analysis-functions.js` (`3b7efa2f0cc6`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
+  `dashboard.html` (`1dbb2a18c3a8`), `index.html` (`50c1c387520a`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`51af1bc0c0f9`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
+  `analysis-functions.js` (`af0a454dafc7`), `screeners.js` (`8c6ad16832c6`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
 - Tests on the live files: 442 function, 210 panel, 118 portfolio, 21 chat (13 Oct 2026; they were 110 and 20) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
-- Both repos pushed; **the only `check-tools/pending-*` folders left are `pending-cleanup-undo` and `pending-banners-undo`, kept on purpose** (the two steps back from the header chip). `website/` carries the daily job's own three files
+- Both repos pushed; **the only `check-tools/pending-*` folders left are the three ways back, kept on purpose:** `pending-screeners-undo` (the analysis page's one screener routine), then `pending-cleanup-undo` and `pending-banners-undo` (the two steps back from the header chip). Run them in that order if more than one is wanted: the first two touch the same script. `website/` carries the daily job's own three files
   uncommitted (news.html, news.js, sitemap.xml) until its next push.
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
@@ -3640,3 +3686,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     regeneration (not regenerated now). Checked: every page's scripts and structured data still parse; whole-page
     pictures at desktop and phone width with nothing sticking out sideways; the visitor test and the sliding-panel
     test on the reworded pages. Website commit `56224f83`; to go back, `git revert` it and upload the eleven pages.
+  - **The analysis page's script: one screener routine in place of 14 copies, and the lists in a data file** (section 8b,
+    "The page's one screener routine"), at the owner's word ("fix up the analysis.html and the logic in it all. its
+    insane… take a look see if you can improve it"). He had also asked for the "Coming Soon" screeners (Germany's DAX 40
+    first): **not started; this was done first because each new screener would otherwise have been a fifteenth copy.**
+    `analysis-functions.js` 324 KB to 169 KB; new `screeners.js`; proved to give the same requests, reports and CSV for
+    every button. Website commit `e0d47f15`. **A slip in a test command on the way:** `for b in "3 8" …; node
+    page_run.js $b` passes "3 8" as one argument in zsh (it does not split words), and the tool then reports nonsense
+    without saying why; pass the two arguments separately.

@@ -206,7 +206,8 @@ elif action == 'check_trial_status':
 ## Frontend Wiring
 
 Lambda URLs are **hardcoded** in these JS/HTML files:
-- `analysis-functions.js` — all analysis, screener, signal calls (~340 KB, main logic)
+- `analysis-functions.js` — all analysis, screener, signal calls (169 KB, main logic)
+- `screeners.js` — the share screeners' lists and their 777 worker addresses, one entry a screener (since 13 Oct 2026; they stood inside `runAnalysis`)
 - `js/analysis-core.js` — core analysis helpers
 - `auth.js` — usage tracking, trial checks, Cognito auth
 - `ai-chat.js` — AI chat
