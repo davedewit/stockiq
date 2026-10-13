@@ -90,7 +90,7 @@ for row in "${FILES[@]}"; do
     if [ "$DRY" = "true" ]; then echo "(dry run) would copy $f into website/ and upload it"; continue; fi
     cp "$HERE/web/$f" "$WEB/$f"
     "${AWS[@]}" s3 cp "$WEB/$f" "s3://$BUCKET/$f" --cache-control "public, max-age=0, s-maxage=3600, must-revalidate" --content-type "text/html; charset=utf-8" --only-show-errors
-    PATHS+=("/$f*"); echo "$f: uploaded"
+    PATHS+=("/$f"); echo "$f: uploaded"      # a plain path: CloudFront allows only 15 wildcard paths in progress at once
 done
 if [ ${#PATHS[@]} -gt 0 ]; then
     INV="$("${AWS[@]}" cloudfront create-invalidation --distribution-id "$DIST" --paths "${PATHS[@]}" --query Invalidation.Id --output text)"
