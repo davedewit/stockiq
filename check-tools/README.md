@@ -359,7 +359,8 @@ fund's line is drawn, the figures table, the three views, the chat summary and a
 
 `node pricing_link_check.js` opens the live home page in headless Chrome under an ordinary browser name, clicks the
 link to `#pricing` with a real mouse click and prints where the pricing section and its heading stop against the bottom
-of the fixed header (PASS when the heading is in view below it). Read-only: GETs and the market-data functions that
+of the fixed header (PASS when the section stops 15 to 40px under the header, with or without the strip across the top;
+where the header has slid away, as on a phone scrolling down, within 60px of the top of the window). Read-only: GETs and the market-data functions that
 only read go through, everything else is answered locally. `SIZE=390x844` a phone's size; `DIRECT=1` opens
 `index.html#pricing` as a link from another page does; `PAID=paid|unpaid` a signed-in visitor (a made-up address);
 `WEB=<folder>` a staged or local copy served from this machine; `WAIT=<ms>` when the click comes; `SHOT=<file.png>`.

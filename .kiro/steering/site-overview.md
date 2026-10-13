@@ -3833,8 +3833,21 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     at phone size, opened directly at `#pricing`, signed in with and without the paid note, and from the local folder;
     the page as it was before the fix fails the same check with the heading 65px under the header (his picture). **Not
     reproduced: what he saw after the fix; he was asked to reload and, if it persists, to say which browser and whether
-    it is stockiq.tech or a local preview** (section 9). Any other in-page link to a section of a page with this header
-    needs the same style.
+    it is stockiq.tech or a local preview** (section 9).
+  - **What he had seen was this: "it scrolls down differently depending if the banner is showing or not"** (his words, later
+    the same day; live 13 Oct 2026, about 15:55 UTC). A fixed 130px left 24px of room under the header with the strip
+    showing and 65px without it (a paying visitor: 64px of header). The room now follows the header's own height: a rule
+    in `index.html`'s first style block, `#pricing { scroll-margin-top: calc(var(--body-padding, 105px) + 24px); }`, and
+    20px on a phone (up to 768px), where the header slides away while the page scrolls down; the inline 130px is gone.
+    `--body-padding` is the height of the fixed header, set in the head of every page (section 11, the banners): **use it
+    for any other in-page link to a section of a page with this header.** `pricing_link_check.js` now judges the room
+    itself (15 to 40px under the header; where the header has slid away, within 60px of the top) and failed on the
+    first fix for a paid visitor (65px). Live after the deploy: 23px with the strip, 23px without it, 20px on a phone,
+    23px opened directly at `#pricing`. **Lesson: the first check passed because it only asked whether the heading was
+    in view; he was looking at the size of the gap. And a visitor's state (strip or no strip) is a case to try every
+    time on this site, since the header's height depends on it.** A second slip, in a test loop: zsh does not split
+    `${c##*:}` into words, so "SIZE=… PAID=paid" went in as one setting and three cases silently repeated another's
+    result; pass each setting by itself.
   - **Two more screeners: Italy FTSE MIB (40) and Spain IBEX 35 (35)**, live 11:47 UTC, 13 Oct 2026, by the same steps and
     again **data only on the page** (two entries in `screeners.js`, two buttons). 8 workers created
     (`stockiq-europe-4-5-worker-1..4`, `stockiq-europe-4-6-worker-1..4`); coordinator `8QIBorce…` (rollback zip
