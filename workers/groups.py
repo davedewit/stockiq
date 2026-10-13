@@ -24,6 +24,10 @@ GROUPS = {
     'stockiq-europe-4-6-worker': ('Spain IBEX 35', 4, 'madrid'),
     'stockiq-asia-5-8-worker': ('Hong Kong Hang Seng', 10, 'hongkong'),
     'stockiq-asia-5-9-worker': ('Singapore STI', 3, 'singapore'),
+    'stockiq-europe-4-7-worker': ('Switzerland SMI', 2, 'zurich'),
+    'stockiq-asia-5-6-worker': ('India Sensex', 3, 'mumbai'),
+    'stockiq-asia-5-7-worker': ('South Korea KOSPI 200', 21, 'seoul'),
+    'stockiq-americas-6-2-worker': ('Brazil Bovespa', 8, 'saopaulo'),
 }
 
 # market: the currency Yahoo quotes it in (London is pence), three symbols a freshly deployed worker is tried with, and the
@@ -41,6 +45,10 @@ MARKETS = {
     'madrid': dict(currency='EUR', try_with=['ITX.MC', 'SAN.MC', 'IBE.MC'], sample='ITX.MC SAN.MC IBE.MC BBVA.MC CABK.MC TEF.MC REP.MC AENA.MC FER.MC AMS.MC ELE.MC ACS.MC'.split()),
     'hongkong': dict(currency='HKD', try_with=['0005.HK', '0700.HK', '9988.HK'], sample='0005.HK 0700.HK 9988.HK 1299.HK 0939.HK 0941.HK 3690.HK 1810.HK 0388.HK 2318.HK 0883.HK 0016.HK'.split()),
     'singapore': dict(currency='SGD', try_with=['D05.SI', 'O39.SI', 'Z74.SI'], sample='D05.SI O39.SI U11.SI Z74.SI C6L.SI S68.SI BN4.SI C38U.SI A17U.SI F34.SI S63.SI G13.SI'.split()),
+    'zurich': dict(currency='CHF', try_with=['NESN.SW', 'NOVN.SW', 'UBSG.SW'], sample='NESN.SW NOVN.SW RO.SW UBSG.SW ABBN.SW ZURN.SW CFR.SW SREN.SW HOLN.SW LONN.SW SIKA.SW GIVN.SW'.split()),
+    'mumbai': dict(currency='INR', try_with=['RELIANCE.NS', 'TCS.NS', 'M&M.NS'], sample='RELIANCE.NS TCS.NS HDFCBANK.NS INFY.NS ICICIBANK.NS ITC.NS LT.NS SBIN.NS BHARTIARTL.NS M&M.NS MARUTI.NS TITAN.NS'.split()),
+    'seoul': dict(currency='KRW', try_with=['005930.KS', '000660.KS', '005380.KS'], sample='005930.KS 000660.KS 005380.KS 035420.KS 051910.KS 068270.KS 105560.KS 000270.KS 012330.KS 055550.KS 066570.KS 035720.KS'.split()),
+    'saopaulo': dict(currency='BRL', try_with=['PETR4.SA', 'VALE3.SA', 'ITUB4.SA'], sample='PETR4.SA VALE3.SA ITUB4.SA BBDC4.SA ABEV3.SA BBAS3.SA WEGE3.SA B3SA3.SA RENT3.SA SUZB3.SA EMBJ3.SA GGBR4.SA'.split()),
 }
 
 # The groups the page calls with a worker number and no stocks (group: the coordinator's key for its list). Their lists are
