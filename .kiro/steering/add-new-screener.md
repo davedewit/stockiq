@@ -254,9 +254,11 @@ The page has inline scripts: after editing, check each `<script>` block still pa
 
 Lambda `stockiq-ai-trader` (routine, tests and deploy script: `site-overview.md` section 8c, "How to work on it"):
 
-- `SCREENERS`: `'5-dax40': ('Germany DAX 40', '5', 'dax40', 'stock', 'de', 'German shares'),`
-  (name, coordinator option and subOption, kind, market code, market group). A new market group gets its share-of-the-
-  budget menu and its colour on the panel by itself.
+- `SCREENERS`: `'5-dax40': ('Germany DAX 40', '5', 'dax40', 'stock', 'eu', 'Europe markets'),`
+  (name, coordinator option and subOption, kind, market code, group). **All 27 screeners are in it since 13 Oct 2026.**
+  The market code is whose trading hours the screener keeps; the group is the region of the site's Screeners menu
+  whose share of the budget it draws on (US markets, Europe markets, Asia-Pacific markets, Americas markets, Coins).
+  A new group gets its share-of-the-budget menu and its colour on the panel by itself.
 - `MARKET_HOURS`: `'de': (8 * 60 + 5, 15 * 60 + 25)`, minutes of the day in UTC, Monday to Friday. **A fixed window that
   lies inside the real session in both summer and winter time**: Xetra trades 09:00–17:30 Frankfurt time, which is
   07:00–15:30 UTC in summer and 08:00–16:30 UTC in winter, so 08:05–15:25 UTC is always inside. (India: 03:45–10:00 UTC

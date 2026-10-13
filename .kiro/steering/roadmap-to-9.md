@@ -30,7 +30,7 @@ DynamoDB `stockiq-price-alerts`, Lambda checker (EventBridge hourly), email via 
 Uses existing email infrastructure, cost $0/month. See old roadmap for full spec.
 
 ### 2. Screeners (DONE 13 Oct 2026)
-All twelve "Coming Soon" screeners are live (27 screeners in all). A further market is the steps of `add-new-screener.md`. Not done: the autopilot buys from none of the twelve.
+All twelve "Coming Soon" screeners are live (27 screeners in all). A further market is the steps of `add-new-screener.md`. The autopilot can buy from all of them (grouped by region, 13 Oct 2026). Six further markets are listed as "Coming Soon" on the analysis page.
 
 ### 3. Backlinks (ONGOING)
 4-5 backlinks as of March 2026 (X, StockTwits, TradingView, Medium). See `backlinks-progress.md`.
