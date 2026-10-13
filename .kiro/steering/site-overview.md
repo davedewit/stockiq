@@ -566,6 +566,22 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   only from 1401px wide (the panel is hidden below that).
 - Every public page footer carries a "General information only, not financial advice …" line.
 - Theme: light/dark by time of day unless the user overrides (`localStorage.theme`).
+- **The market-data sidebar on a phone** (home page and dashboard only; up to 768px wide; the green round button, or a
+  swipe to the left): shown, hidden and dragged by one script for both pages, **`website/mobile-sidebar.js`**
+  (`?v=1`; `window.mobileSidebar`: `open, close, toggle, isOpen, busy, last`). It follows the finger (a quarter of a
+  swipe shows a quarter of it; it can be pushed back in the same touch); let go with a third or more out and it comes out
+  fully, otherwise it slides back; a quick flick decides either way; closing is the same in reverse. **The page behind
+  is only stopped from scrolling (`overflow: hidden` on the body), never given `position: fixed`**: that was the old
+  way and it threw the page to the top. Each page keeps what is its own: `fillMobileSidebar()` moves its two panels
+  into the sidebar and `emptyMobileSidebar()` moves them back; the page's own `toggleMobileSidebar()` /
+  `closeMobileSidebar()` are only a fallback for a page on which the script did not load (the script replaces them).
+  The pages' `handleSwipe` still opens the menu on the left and leaves a touch alone while `mobileSidebar.busy()`.
+  Other code takes the sidebar for open while `#mobile-sidebar-modal` has `style.display === 'block'` (`sidebar.js`,
+  both pages' `renderMarketDataSidebar`): keep that true. A swipe is left to what is under the finger when that is a
+  text box, the portfolio graph (`#pp-chart-svg`), anything marked `data-no-swipe`, or a row that scrolls sideways and
+  has room to go. Test: `node check-tools/mobile_sidebar_check.js index.html dashboard.html` (`LIVE=1` for the site
+  itself). **The menu on the left (☰, or a swipe to the right) still freezes the page the old way** (`body.menu-open`
+  in `styles.css`, `position: fixed !important`, on every page): the same jump to the top, not changed, offered to the owner.
 - Live prices on stock pages (main ticker + "People also watch" cards) come from
   `stock-prices.js` → Lambda `stockiq-popular-prices`, refreshed every 5 s. Pages opened from local files
   show `--` (the proxy only answers the live site), which is expected.
@@ -2335,8 +2351,8 @@ the record):**
 **Still to be seen for real** (strike each when seen): a "Left alone" line at a Tokyo opening with only old prices, then the
 same market looked at again half an hour later; the first small buys at 50 holdings, up to 10 at a check-in, with
 `heads` on the remembered buy; a FTSE run on a morning after a London session showing that session's prices; the
-company figures published by the daily run itself ("Company figures published" in its log; the fixed script was run by
-hand on the scheduler's bare PATH at 10:55 UTC on 12 Oct and uploaded the file, so only the run inside the job is unseen); a "tighten" answer; the larger model in a review; a coin held back until it has stayed; any trial of a rule; the
+(the company figures published by the daily run itself: **seen on 13 Oct 2026**, "Company figures published for the
+single-stock report", 3,332 stocks); a "tighten" answer; the larger model in a review; a coin held back until it has stayed; any trial of a rule; the
 first progress report and its email; whether the test email reached the owner's inbox. **Never opened by a session: the logged-in dashboard and a real phone. The owner sent a screenshot of the Practice
 portfolio tab on 12 Oct (desktop, dark): heading with the two tools beside it, the four cards, the "whose result" row and
 the sidebar all as intended; the usage badge still sits over the top right corner (section 11).**
@@ -2372,7 +2388,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
 - Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=32` (`0a1f709f6dbb`),
-  `dashboard.html` (`7513f0cf1622`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
+  `dashboard.html` (`48444abcb5c4`), `index.html` (`6f251b365a40`), `mobile-sidebar.js?v=1` (`28652e48d856`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
   `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
 - Tests on the live files: 442 function, 210 panel, 110 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
@@ -3414,3 +3430,18 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - `clear_stock_news.py` writes an empty file with an older, simpler display code; the next daily run replaces it, so
     it was left. Not done: the check is not part of `deploy-to-s3.sh` (the script was running; a line there after the
     news steps would catch a script reverted by an "Auto-update" commit, as happened on 2 Oct).
+  - **The market-data sidebar on a phone follows the finger and no longer throws the page to the top** (section 8, "The
+    market-data sidebar on a phone"), at the owner's report from his own phone. Opening it gave the body
+    `position: fixed`, which puts the page at the top, and closing left it there; the home page and the dashboard each
+    had their own copy of that code. Now one script, `mobile-sidebar.js`, for both. Deployed after the daily run had
+    finished (06:10 UTC): `index.html`, `dashboard.html`, the new script. **Checked** with a new test that drags a finger
+    in headless Chrome at phone size, 27 checks a page, on the staged copies, on the local files and on the live site
+    (`check-tools/mobile_sidebar_check.js`; it fails on the old pages with exactly the jump he described). **Not checked:
+    a real phone, and Safari on an iPhone in particular**: his phone is the test. Lessons for that test: a made-up
+    flick has to carry its own clock (a busy page slowed it into a drag, which read as a failure of the page), and one
+    failed step cascades (a swipe to the right with the sidebar shut opens the menu, which still jumps to the top).
+    Way back: `git checkout 65eb39f1~1 -- index.html dashboard.html` in `website/` and upload the two pages.
+  - **The daily run of 13 Oct had Yahoo's limit again:** "No price data: 2021, kept yesterday's snapshot: 719", 957 still
+    indexable, nothing de-indexed (section 9). Nothing in this session asked Yahoo for prices in bulk. Its other steps
+    were clean and both repos were pushed. If the data dates on stock pages look a day old: `python3
+    update_stock_analysis.py` later, then a deploy.

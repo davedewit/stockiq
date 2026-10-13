@@ -5,6 +5,7 @@
 //   node check-tools/mobile_sidebar_check.js index.html dashboard.html
 //   WEB=<folder> node ...    files found in that folder are served instead of the ones in ../website (a staged copy)
 //   SHOT=<file.png> node ... a picture of the last page with the sidebar a quarter out
+//   LIVE=1 node ...          the pages and their files come from https://stockiq.tech itself (read only: plain GETs of the site's own files)
 //
 // Nothing is written anywhere and nothing outside this machine is asked: the pages come from a server started here, and
 // every other request a page makes (the site's functions, fonts, analytics) is answered here with an empty reply. The
@@ -12,6 +13,7 @@
 const { spawn } = require('child_process'); const os = require('os'), fs = require('fs'), path = require('path'), http = require('http');
 const pages = process.argv.slice(2).length ? process.argv.slice(2) : ['index.html'];
 const SITE = path.join(__dirname, '..', '..', 'website'), WEB = process.env.WEB || '', PORT = 9347, HTTP = 8791, START = 1200;
+const BASE = process.env.LIVE ? 'https://stockiq.tech/' : `http://127.0.0.1:${HTTP}/`;
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.txt': 'text/plain' };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -41,7 +43,7 @@ const server = http.createServer((q, r) => {
       if (d.id && waiting[d.id]) { waiting[d.id](d.result || d.error); delete waiting[d.id]; return; }
       if (d.method === 'Fetch.requestPaused') {
         const q = d.params.request;
-        if (q.url.startsWith(`http://127.0.0.1:${HTTP}/`)) { send('Fetch.continueRequest', { requestId: d.params.requestId }); return; }
+        if (q.url.startsWith(BASE) && q.method === 'GET') { send('Fetch.continueRequest', { requestId: d.params.requestId }); return; }
         const js = /\.js(\?|$)/.test(q.url), css = /\.css(\?|$)|fonts\.googleapis/.test(q.url);
         send('Fetch.fulfillRequest', { requestId: d.params.requestId, responseCode: 200,
           responseHeaders: [{ name: 'Content-Type', value: js ? 'application/javascript' : css ? 'text/css' : 'application/json' }, { name: 'Access-Control-Allow-Origin', value: '*' }, { name: 'Access-Control-Allow-Headers', value: '*' }],
@@ -55,14 +57,16 @@ const server = http.createServer((q, r) => {
     await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
     await send('Page.addScriptToEvaluateOnNewDocument', { source: `try { localStorage.setItem('userId', 'sidebar-check@example.com'); localStorage.setItem('userEmail', 'sidebar-check@example.com'); } catch (e) {}` });
 
-    const touch = (type, x, y) => send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y, id: 1 }] });
+    const touch = (type, x, y, at) => send('Input.dispatchTouchEvent', Object.assign({ type, touchPoints: type === 'touchEnd' ? [] : [{ x, y, id: 1 }] }, at ? { timestamp: at } : {}));
     // One finger from (x0, y0) to (x1, y1) over about `ms`; `hold` leaves it down, `after` runs with the finger still down.
     const swipe = async (x0, y0, x1, y1, ms, o = {}) => {
       const steps = o.steps || Math.max(4, Math.round(ms / 16));
-      if (!o.resume) await touch('touchStart', x0, y0);
-      for (let i = 1; i <= steps; i++) { await touch('touchMove', x0 + (x1 - x0) * i / steps, y0 + (y1 - y0) * i / steps); if (!o.steps) await sleep(16); }
+      // A flick (o.steps) is sent with a clock of its own, 12ms a step: a busy page must not turn it into a slow drag.
+      const t0 = Date.now() / 1000, at = (i) => (o.steps ? t0 + i * 0.012 : undefined);
+      if (!o.resume) await touch('touchStart', x0, y0, at(0));
+      for (let i = 1; i <= steps; i++) { await touch('touchMove', x0 + (x1 - x0) * i / steps, y0 + (y1 - y0) * i / steps, at(i)); if (!o.steps) await sleep(16); }
       if (o.pause) await sleep(o.pause);
-      if (!o.hold) { await touch('touchEnd'); await sleep(o.rest === undefined ? 450 : o.rest); }
+      if (!o.hold) { await touch('touchEnd', 0, 0, at(steps + 1)); await sleep(o.rest === undefined ? 450 : o.rest); }
     };
     const look = () => js(`(function () {
       var m = document.getElementById('mobile-sidebar-modal'), o = document.getElementById('mobile-sidebar-overlay'), c = document.getElementById('mobile-sidebar-content');
@@ -76,9 +80,9 @@ const server = http.createServer((q, r) => {
     const near = (a, b, by) => Math.abs(a - b) <= by;
 
     for (const page of pages) {
-      console.log(page);
+      console.log(BASE + page);
       errors.length = 0;
-      await send('Page.navigate', { url: `http://127.0.0.1:${HTTP}/${page}` }); await sleep(3500);
+      await send('Page.navigate', { url: BASE + page }); await sleep(process.env.LIVE ? 6000 : 3500);
       await js(`document.documentElement.style.scrollBehavior = 'auto'; window.scrollTo(0, ${START}); 1`); await sleep(300);
       let s = await look();
       check('the page is the one asked for, with the sidebar script', s.path.endsWith(page) && s.script, s);
