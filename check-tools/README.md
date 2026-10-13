@@ -211,6 +211,16 @@ serves it (`cd ~/VSCODE && python3 -m http.server 8765 --bind 127.0.0.1` first, 
 that the bell's script was asked for at the top of the address and so never loaded anywhere but on stockiq.tech. A page whose bell goes to the dashboard ends
 with "Inspected target navigated": that is the bell working.
 
+## news_sidebar_test.js (the home page's Market News list)
+
+```bash
+node check-tools/news_sidebar_test.js                    # the local ../website/news.js
+node check-tools/news_sidebar_test.js /path/to/copy.js   # a downloaded copy of the live file
+```
+Read-only. Runs the display code that is inside `news.js` against a stand-in page and checks that what it shows is the
+newest general article and the four newest stock articles by timestamp. Written on 13 Oct 2026, when the list turned out
+not to be sorted at all (`site-overview.md` section 13).
+
 ## workers.py
 
 Who runs what: `python3 check-tools/workers.py` lists every screener worker group on AWS with its screener, how many

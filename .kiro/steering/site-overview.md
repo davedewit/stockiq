@@ -96,7 +96,7 @@ Lambdas ──> Yahoo Finance + Finnhub (data), OpenAI gpt-4o-mini (AI chat), Dy
 | `stocks/*.html` RELATED section ("People also watch") | `people_also_watch_stocks.py --missing` (daily) | Script only |
 | `stocks/*.html` ANALYSIS section, robots, meta description | `update_stock_analysis.py` (daily) | Script only |
 | `news.html` article list | `update_news.py`, `update_stock_news.py`, then trimmed by `finalize_news_html.py` | Head and footer are preserved by all writers, so hand edits there stick |
-| `news.js` (sidebar, 100-item pool) | `update_news.py`, `update_stock_news.py` | Script only |
+| `news.js` (sidebar, 100-item pool) | `update_news.py`, `update_stock_news.py` | Script only. **The file holds its own display code** (`renderNewsItems`, written into it by both scripts: change the two alike). It shows the newest general article and the four newest stock articles **by each item's `timestamp`**, whatever order the file is in. Check: `node check-tools/news_sidebar_test.js` |
 | `sitemap.xml` | `update_sitemap.py` (daily), `generate_sitemap.py` (manual) | Scripts only |
 | `stocks.txt` (3,467 symbols, CSV) | Hand-edited + `fetch_stock_data.py` | See `stocks-txt-csv-format.md` |
 | `index.html`, `about.html`, `faq.html`, `analysis.html`, `dashboard.html`, guides, legal pages, `*.js`, `styles.css` | Hand-edited, no generator | Edit directly |
@@ -2849,6 +2849,8 @@ grep -l 'Read full article' ../website/stocks/*.html | wc -l         # ~3,150; s
 ```bash
 grep -a -E "Pages written|Indexable|No price data|Sync complete|pushed|could not|failed|All done" ~/stockiq-daily.log
 ```
+`node check-tools/news_sidebar_test.js` (read-only) says whether the home page's Market News list would show the newest
+articles of the local `news.js`; give it a downloaded copy of the live file to check the site.
 A large "No price data" number means Yahoo rate-limited this machine: nothing is de-indexed
 (yesterday's snapshot is kept); re-run `python3 update_stock_analysis.py` later, then
 `./deploy-to-s3.sh`.
@@ -3395,3 +3397,20 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - An empty "Build up to it over" or "Number of holdings" box reads "Automatic: 5", not a bare 5 (`autoWord`;
     `practice-autopilot.js?v=42`; 204 panel checks; measured in a browser: the text needs about 90px, the boxes have 136px or more).
   - Still not checked by a session: the logged-in dashboard itself and a real phone (neither can be opened from here).
+
+- **13 Oct 2026** (a short session; the owner asked why the home page's Market News had nothing from the last two days):
+  - **The Market News list was never sorted, and now is.** The display code inside `news.js` sorted on each item's date
+    text ("Mon, October 12, 2026 at 9:49 PM UTC 4 min read"), which a browser cannot read as a date (the "at" and the
+    "min read"), so the sort did nothing and the page showed the first general article and the first four stock
+    articles in the order of the file. That order is the order the daily run met the stocks in, and it takes articles
+    up to four days old: on the live file of 12 Oct the page showed articles of 9, 11, 10 and 11 Oct while eleven of 12
+    Oct sat further down. The wording of the date has been this way since at least 27 Sep 2026. Both writers
+    (`update_news.py`, `update_stock_news.py`) now write display code that sorts on the item's `timestamp` (the date
+    text only as a fallback). Tested by running each writer on a copy of the live file with an old article added at
+    the top: the page shows the newest five. New test: `check-tools/news_sidebar_test.js` (it fails on the old file).
+  - **Not uploaded by hand, at the owner's word** ("i don't care about whether it shows up today"): the daily run of 13 Oct
+    was under way with the old code in memory, so the site gets the corrected file from the run of 14 Oct. **To see
+    then:** `node check-tools/news_sidebar_test.js` on the live `news.js` passes.
+  - `clear_stock_news.py` writes an empty file with an older, simpler display code; the next daily run replaces it, so
+    it was left. Not done: the check is not part of `deploy-to-s3.sh` (the script was running; a line there after the
+    news steps would catch a script reverted by an "Auto-update" commit, as happened on 2 Oct).

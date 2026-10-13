@@ -800,12 +800,15 @@ function renderNewsItems() {
     const container = document.getElementById('news-items');
     if (!container) return;
     
-    // Sort all items by date (newest first)
-    const sortedItems = [...newsItems].sort((a, b) => {
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
-        return dateB - dateA;
-    });
+    // Sort all items newest first, by each item's timestamp. The date text is for reading only:
+    // a browser cannot turn "Mon, October 12, 2026 at 9:49 PM UTC 4 min read" into a date.
+    const timeOf = item => {
+        const stamp = Date.parse(item.timestamp || '');
+        if (!isNaN(stamp)) return stamp;
+        const text = Date.parse(String(item.date || '').replace(' at ', ' ').replace(/ [0-9]+ min read$/, ''));
+        return isNaN(text) ? 0 : text;
+    };
+    const sortedItems = [...newsItems].sort((a, b) => timeOf(b) - timeOf(a));
     
     // Separate stock news and general news from sorted items
     const stockNews = sortedItems.filter(item => item.stockSymbol);
