@@ -29,7 +29,7 @@
 | `losers-scraper` | Top losers |
 | `most-active-scraper` | Most active stocks |
 | `trending-scraper` | Trending stocks |
-| `stockiq-price-proxy` | Price of one symbol (`?symbol=X`; 500 for an unknown one). Used by the practice portfolio, the autopilot, the dashboard tracker and for checking symbols |
+| `stockiq-price-proxy` | Price of one symbol (`?symbol=X`; 500 for an unknown one), with a month of daily prices; an optional `&range=` (`3mo, 6mo, 1y, 2y, 5y`; since 13 Oct 2026, for the S&P 500 fund's line on the practice portfolio's graph) gives more, and anything else is answered with the month as before. Used by the practice portfolio, the autopilot, the dashboard tracker and for checking symbols |
 | `stockiq-popular-prices` | Live prices for a list of symbols: the ticker and "People also watch" cards on stock pages (`stock-prices.js`, refreshed every 5 s) |
 | `ticker-data-fetcher` | Ticker data for sidebar |
 
@@ -111,7 +111,7 @@ New screeners: use `5-<subOption>`.
 | `stockiq-dynamic-stock-lists` | Dynamic stock list API |
 | `stockiq-stock-list-api` | Stock list API |
 | `stockiq-email-capture` | Home page email list: saves to `stockiq-email-subscribers`, emails the owner (SES, from and to `noreply@stockiq.tech`) on each new signup. Handler file is `email-capture-with-count.py`; role `mylambdafunction-role-haabf70x`; **no CloudWatch log group exists**, so errors are not logged |
-| `stockiq-ai-chat` | GPT-4o-mini chat (128MB, 30s, 300 tokens; 400 on the dashboard, where it is also given `DASHBOARD_GUIDE` and the user's own dashboard summary from `pageContext.dashboard`; the guide was brought up to date on 12 Oct 2026). Test: `check-tools/ai_chat_test.py` (21 checks) |
+| `stockiq-ai-chat` | GPT-4o-mini chat (128MB, 30s, 300 tokens; 400 on the dashboard, where it is also given `DASHBOARD_GUIDE` and the user's own dashboard summary from `pageContext.dashboard`; the guide was brought up to date on 12 Oct 2026). Test: `check-tools/ai_chat_test.py` (22 checks) |
 | `stockiq-ai-chat-reporter` | Daily AI usage email at 5pm UTC |
 
 ### NO_URL (event-driven, no public URL)

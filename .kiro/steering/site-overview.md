@@ -1180,7 +1180,7 @@ with `document.querySelector('h3')`.
 
 **Practice portfolio** (its own tab, container `#practice-portfolio`):
 - **The top is three figures since 13 Oct 2026**: Account value, Today, Since the start (`.pp-top`), then one line (cash, in
-  holdings, ahead of or behind an S&P 500 fund over the same days: `.pp-facts`), then **"The breakdown" folded**
+  holdings, ahead of or behind the same $100,000 in an S&P 500 fund since the start, in dollars: `.pp-facts`), then **"The breakdown" folded**
   (`#pp-more`, kept open across redraws by `moreOpen`), which holds the four cards and the "whose result is whose" row
   described below, unchanged. The owner, from a picture: "this is honestly confusing… its just too much": about seventeen
   figures had stood there at once, several of them twice. **When adding a figure to this tab, put it in the breakdown
@@ -1233,8 +1233,35 @@ with `document.querySelector('h3')`.
     the start, which the note under the graph says with the amount; a "Reset fake money" starts the line again.
   - The line is one blue (checked against the light and dark backgrounds), never green or red: up and down are said by the
     arrow and amount above it. The picture is drawn to the width it has and again when that changes (`ResizeObserver`).
-  - Not built: an hourly line (the price source would need an `interval` setting) and a line for an index fund beside it.
-    The AI chat knows the graph (its guide, 12 Oct).
+  - **A second line: the same $100,000 in an S&P 500 fund since the account began** (13 Oct 2026, the owner's idea: "add the s&p
+    as if i was in at the same time with 100k… then i can see over time how i'm comparing"). On the Account view only (the
+    two part views are a gain against zero). `fundKnots(state, quotes, now)`: the starting cash put into the fund (SPY) at
+    `createdAt` and left there, built as a holding is (the fund's daily closes, then its latest price); **no trading cost
+    is taken off it and no dividends are counted**, and the note under the graph says so. The fund's price at the start is
+    the last close at or before it; or, when the US market was open at that moment and something was bought later in the
+    same session, the `spyAtBuy` kept with that buy. `versusStart` gives the fund's worth now and the gap.
+    - **Above the graph are two lines, each led by its colour (they are the key as well):** "Your account $98,463.27 ▼ $1,536.73
+      (1.54%) since the start" and "The same $100,000 in an S&P 500 fund $99,939.63 ▼ $60.37 (0.06%) · your account is
+      **behind it by $1,476.36**" (`chartRead`; who is ahead is said in words and in dollars; the pointer moves both dots).
+      "Show the figures" has the fund and "Against the fund" a day.
+    - **The one line under the three figures now says the same thing as the graph** ("Against the same $100,000 in an S&P 500
+      fund since the start: behind by $1,476.36"). It used to give the breakdown card's figure (only what is still held,
+      against the same dollars in the fund on the days they were put in, in percent): two different "behind the fund"
+      figures on one screen would have been read as a contradiction. The card in the breakdown is unchanged and says
+      whose figure it is. Without the fund's prices back to the start, the old wording stands.
+    - **Colours:** the account `--pp-line` blue, the fund `--pp-fund` `#c98500` (gold) in both themes; the pair was run
+      through the dataviz skill's validator on the light and the dark background (colour-blind separation, contrast).
+      Never green or red for a line.
+    - **The fund's prices must reach back to the start.** The price function answers with a month of daily prices; it now takes
+      an optional `&range=` (`3mo, 6mo, 1y, 2y, 5y`; anything else is the month, as before). `fundRange(createdAt, now)`
+      says which is needed (none until the account is 24 days old), `refreshQuotes` asks for it for SPY only, and it is
+      remembered in the browser (`stockiqPracticeFundRange_<address>`) so the first request of a visit is already the
+      right one. **This path has not been seen live yet: the owner's account is 3 days old. Look at the graph after
+      about 4 Nov 2026** (the fund's line must still start at $100,000 on 10 Oct). Past five years there is no line.
+    - Limits: daily closes, so the fund's line is straight within a day; the two lines share one axis, so a large move
+      of the fund flattens the look of the account's line; a "Reset fake money" starts both again.
+  - Not built: an hourly line (the price source would need an `interval` setting).
+    The AI chat knows the graph and the fund's line (its guide, and the page's `summary()` gives it the figures).
 - **A result is an arrow and an amount**, as a broker's screen shows it: `▲ $801.50 (0.80%)` in green, `▼ $58.48 (0.06%)`
   in red, `– $0.00` in grey (`movedHtml`, `pctHtml` in `practice-portfolio.js`; `deltaHtml` in `practice-autopilot.js`).
   The words stay as each arrow's `aria-label` for screen readers, and `moved()` gives the words ("down $58.48") for the
@@ -1393,7 +1420,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=33` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Portfolio section | `website/practice-portfolio.js` (`?v=34` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=45`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
@@ -2505,16 +2532,16 @@ preview from Kiro): ask early when a change "does not show" (section 9).
 
 **What is live, and how to confirm nothing has moved since** (all compared with the local copies on 12 Oct, 10:17 UTC):
 - `stockiq-ai-trader` `0tynNBjnvnTkUmLZGPBc+v6CGxabNKGgNCaQE95YYUE=` (3,079 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC, a holding's own stop kept with the buy 16:51 UTC, the build-up that leaves out what is invested 17:25 UTC); `stockiq-ai-chat`
-  `cQHzRlpev41uioqwNkos3CtAPA3oGOyOV2nsSn1BYU0=` (since 13 Oct 2026); `stockiq-screener-coordinator` `pUBd8qCLYGjtVSoYQObSV8YVygyP8mBSfdCxxJ+ho9Y=`;
+  `Ogr84Q5NISc0OBpyR+I9rOLafnozV9VZRechmUvIoaw=` (since 13 Oct 2026, 10:43 UTC); `stockiq-price-proxy` `lzqBC+6a/h51byePPZpa+e29ACnMZGPQp+TEt2SQJ8g=`; `stockiq-screener-coordinator` `pUBd8qCLYGjtVSoYQObSV8YVygyP8mBSfdCxxJ+ho9Y=`;
   `stockiq-option-1-1-custom-analysis` `I84SxSgLYNt7…`; `stockiq-chart-generator` `OIDrZ2W9G3lJ…`; `stockiq-paper-portfolio`
   `s6IR+/80N/3k…`; the two signals functions `6nVDLm4/8G6K…`; the crypto orchestrator `yvmucU37gHJH…` and its 54 workers
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
-- Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=33` (`9e0b1dd9aa63`),
-  `dashboard.html` (`1dbb2a18c3a8`), `index.html` (`50c1c387520a`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`51af1bc0c0f9`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
+- Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=34` (`4f100feea69d`),
+  `dashboard.html` (`69a09a3328b5`), `index.html` (`50c1c387520a`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`51af1bc0c0f9`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
   `analysis-functions.js` (`af0a454dafc7`), `screeners.js` (`8c6ad16832c6`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
-- Tests on the live files: 442 function, 210 panel, 118 portfolio, 21 chat (13 Oct 2026; they were 110 and 20) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
+- Tests on the live files: 442 function, 210 panel, 130 portfolio, 22 chat (13 Oct 2026, after the fund's line; they were 118 and 21) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
 - Both repos pushed; **the only `check-tools/pending-*` folders left are the three ways back, kept on purpose:** `pending-screeners-undo` (the analysis page's one screener routine), then `pending-cleanup-undo` and `pending-banners-undo` (the two steps back from the header chip). Run them in that order if more than one is wanted: the first two touch the same script. `website/` carries the daily job's own three files
@@ -2523,7 +2550,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
   trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell,
   takeover, report`, `stockiq-ai-trader_before_sweep_20261011.zip`, `…_costs_…`; 12 Oct `fresh, due, holdings, journal,
-  notes, heads, junk, patient, rows, buildup`. `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `…_{guide, guide2, guide3}_20261012.zip`, `…_before_filter_20261013.zip`.
+  notes, heads, junk, patient, rows, buildup`. `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `…_{guide, guide2, guide3}_20261012.zip`, `…_before_filter_20261013.zip`, `…_before_fund_20261013.zip`; `stockiq-price-proxy_before_fund_20261013.zip`.
 
 **Improvements to come: one list. Take an item out when it is done; add ideas as the data suggests them.**
 *Waiting on finished trades (each has its trigger; nothing is adopted from hindsight, a trading idea goes live as a trial):*
@@ -3694,3 +3721,14 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     every button. Website commit `e0d47f15`. **A slip in a test command on the way:** `for b in "3 8" …; node
     page_run.js $b` passes "3 8" as one argument in zsh (it does not split words), and the tool then reports nonsense
     without saying why; pass the two arguments separately.
+  - **The practice portfolio's graph shows the S&P 500 beside the account** (section 8c, "What the owner sees", under the graph),
+    at the owner's idea: the same $100,000 put into an S&P 500 fund when the account began, as a second, gold line, with
+    who is ahead said in dollars above the graph and on the one line under the three figures. `practice-portfolio.js?v=34`,
+    `dashboard.html` (the version number), the price function (an optional `range`, so the fund's prices can reach back
+    past a month) and a sentence in the AI chat's guide. Tests: 130 portfolio checks (12 new), 22 chat checks; looked at
+    in a headless browser (desktop light and dark, phone width); run on a copy of the owner's real record with live
+    prices before and after the deploy (fund $99,939.63, the account behind it by about $1,450); the live chat asked two
+    questions (it explained the line and declined "should I just buy the fund"). **Not checked: the logged-in dashboard
+    itself, a real phone, and the longer range in use** (needed from about 4 Nov 2026). Rollback zips
+    `stockiq-price-proxy_before_fund_20261013.zip`, `stockiq-ai-chat_before_fund_20261013.zip`; the website files from
+    git. Another session was building the DAX 40 screener at the same time: commits were made by path.
