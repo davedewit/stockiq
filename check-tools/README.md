@@ -211,6 +211,24 @@ serves it (`cd ~/VSCODE && python3 -m http.server 8765 --bind 127.0.0.1` first, 
 that the bell's script was asked for at the top of the address and so never loaded anywhere but on stockiq.tech. A page whose bell goes to the dashboard ends
 with "Inspected target navigated": that is the bell working.
 
+## visitor_bar_check.js (the usage chip in the header bar, as every kind of visitor) and pending-banners-undo/
+
+```bash
+node check-tools/visitor_bar_check.js                                  # seven kinds of visitor x five pages x four widths (about six minutes)
+ONLY=trial3,expired node check-tools/visitor_bar_check.js index.html   # some of them
+WEB=check-tools/pending-<name>/web SHOTS=/tmp/vb node check-tools/visitor_bar_check.js   # a staged copy, with pictures
+```
+Opens the pages in headless Chrome as an anonymous visitor (with and without a free analysis left), one on the free
+trial (some left, none left), one whose trial is over, a paying one with a daily count and one with no limit, and checks
+that the chip is in the header bar, says the right thing, covers nothing, that the old floating badge is hidden, and that
+a click opens the right sentence and the right thing to do next. Signed-in visitors are made-up sessions; what the trial
+function would answer is supplied per visitor; every other request gets an empty reply; nothing is written anywhere.
+The browser is given an ordinary name, because the site takes headless Chrome for a crawler and skips its sign-in check.
+
+**`pending-banners-undo/` is not a leftover: it is the way back** from the header chip
+(`bash /Users/dave/VSCODE/stockiq/check-tools/pending-banners-undo/deploy.sh`, `DRY_RUN=true` first). Keep it while
+`theme.js` has the lines between `VISITOR_BAR_START` and `VISITOR_BAR_END`.
+
 ## mobile_sidebar_check.js (the two panels that slide in on a phone, tried with a finger)
 
 ```bash
