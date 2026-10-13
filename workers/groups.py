@@ -16,6 +16,7 @@ GROUPS = {
     'stockiq-asia-5-4-worker': ('ASX 300', 30, 'asx'),
     'stockiq-asia-5-5-worker': ('Nikkei 225', 21, 'tokyo'),
     'stockiq-europe-4-1-worker': ('FTSE 100', 10, 'london'),
+    'stockiq-europe-4-2-worker': ('Germany DAX 40', 4, 'xetra'),
 }
 
 # market: the currency Yahoo quotes it in (London is pence), three symbols a freshly deployed worker is tried with, and the
@@ -25,6 +26,7 @@ MARKETS = {
     'asx': dict(currency='AUD', try_with=['BHP.AX', 'CBA.AX', 'CSL.AX'], sample='BHP.AX CBA.AX CSL.AX NAB.AX WBC.AX ANZ.AX WES.AX MQG.AX WOW.AX TLS.AX RIO.AX FMG.AX'.split()),
     'tokyo': dict(currency='JPY', try_with=['7203.T', '6758.T', '9984.T'], sample='7203.T 6758.T 9984.T 8306.T 6861.T 9432.T 7974.T 6501.T 8035.T 4063.T 6098.T 9983.T'.split()),
     'london': dict(currency='GBp', try_with=['IMB.L', 'AZN.L', 'HSBA.L'], sample='IMB.L AZN.L HSBA.L SHEL.L ULVR.L BP.L GSK.L RIO.L LLOY.L BARC.L VOD.L BT-A.L'.split()),
+    'xetra': dict(currency='EUR', try_with=['SAP.DE', 'SIE.DE', 'ALV.DE'], sample='SAP.DE SIE.DE ALV.DE DTE.DE AIR.DE MBG.DE BMW.DE BAS.DE MUV2.DE IFX.DE DBK.DE RWE.DE'.split()),
 }
 
 # The groups the page calls with a worker number and no stocks (group: the coordinator's key for its list). Their lists are
