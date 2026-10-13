@@ -37,7 +37,7 @@ for row in "${FILES[@]}"; do
 done
 grep -q "setProperty('--body-padding', window.innerWidth > 768 ? '64px' : '105px')" "$HERE/web/dashboard.html" || stop "the staged dashboard does not carry the change"
 grep -q 'main:has(> div > #live-ticker)' "$HERE/web/styles.css" || stop "the staged stylesheet does not carry the stock pages' rule"
-for f in dashboard.html:7 signup.html:4 styles.css:8; do n="${f##*:}"; f="${f%%:*}"; [ "$(filesha "$WEB/$f")" = "$(filesha "$HERE/web/$f")" ] || [ "$(diff "$WEB/$f" "$HERE/web/$f" | grep -c '^[<>]')" = "$n" ] || stop "the staged $f differs from the site's in more than this change"; done
+for f in dashboard.html:8 signup.html:4 styles.css:8; do n="${f##*:}"; f="${f%%:*}"; [ "$(filesha "$WEB/$f")" = "$(filesha "$HERE/web/$f")" ] || [ "$(diff "$WEB/$f" "$HERE/web/$f" | grep -c '^[<>]')" = "$n" ] || stop "the staged $f differs from the site's in more than this change"; done
 python3 - "$HERE/web/dashboard.html" "$HERE/web/signup.html" <<'PY' || stop "an inline script of a staged page does not parse"
 import re, subprocess, sys, tempfile, os
 for f in sys.argv[1:]:
