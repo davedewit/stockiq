@@ -2660,10 +2660,18 @@ preview from Kiro): ask early when a change "does not show" (section 9).
    3 shares asked for, 3.00006 bought). The page turns the quantity into dollars at the price it has, then buys at the
    price of that moment, which has moved. Cosmetic; the fix is to buy the quantity asked for at the price of the buy.
    The same thing makes the check "buying by quantity buys exactly that many" fail on and off during US hours.
-9. **Calls made by open browser tabs** (measured 12 Oct: 55,000 Lambda calls in a day, 13,000 of them the sidebar's
-    ticker, 13,000 the four movers lists, 8,500 the market widgets; the crypto history is 2,600). The money is cents,
-    but a tab left open all day is about a million calls a month, the size of the free allowance. `sidebar.js` pauses
-    when the tab is hidden; `script.js` (the home page widgets) does not. Slow the polling, or pause it when hidden.
+9. **Calls made by open browser tabs: the next job the owner asked for (13 Oct 2026, "add this to the to do list").** His
+    daily usage report for the 24 hours to 17:03 UTC on 13 Oct: 66,033 Lambda calls, and 418,875 of the free million used
+    by day 13 (41.9%: on course to end the month close to the limit). About 54,000 of the day's calls were pages polling
+    while a tab was open: `ticker-data-fetcher` 19,578, the four movers lists about 18,200, the seven market widgets
+    about 7,800, `stockiq-price-proxy` 5,743, the usage tracker about 3,000. The autopilot was 400 and the crypto history
+    about 3,200. (That day was heavy: his dashboard was open most of it and a session ran many screener tests.) Past
+    the free million a call costs 20 cents a million, so the money is cents; he wants to stay under it all the same.
+    **To do, biggest saving first:** (1) stop all polling while the tab is hidden (`script.js`, the home page widgets,
+    does not; `sidebar.js` does); (2) slow the ticker and the movers lists to every 30 to 60 seconds; (3) one call for
+    the four movers lists and one for the seven market widgets, in place of eleven; (4) one price call for the whole
+    practice portfolio in place of one a holding. (1) and (2) are small front-end changes and should about halve the
+    daily calls. Measure before and after with his report, or `aws cloudwatch get-metric-statistics` (section 11).
 10. **Unused functions: nothing was deleted, and nothing is to be deleted without the owner seeing the exact list and saying
     yes to it.** On 12 Oct he first said to go ahead "if you are 100% never used", then stopped the dry run ("i don't
     think its right to delete workers. they must be used via the screeners?!"). What a check of every call in the 455
