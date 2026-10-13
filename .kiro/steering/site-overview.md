@@ -614,6 +614,12 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
     browser an ordinary name** (`Emulation.setUserAgentOverride`). After any change to `analysis-functions.js` also
     run `anon_run.js` and `trial_run.js` (they take `FUNCS=<file>`): same results and redirects as before.
   - **Not checked: a real phone, a real signed-in account, a real paying account** (all were made-up sessions).
+- **The header bar on a narrow desktop window or a tablet** (769 to 1150px; `styles.css`, the two `@media` blocks above
+  "Home link specific styling"): the menu sits in the row beside the name, with tighter spacing below 900px. On a wide
+  screen it is centred on the page (`.desktop-nav` is `position: absolute; left: 50%`), and until 13 Oct 2026 it stayed
+  centred at every width, so it ran over the name from about 1100px down. Those rules say `.desktop-nav .nav-item`
+  with two classes on purpose: the plain `.nav-item` rule comes later in the file and would win. Checked by
+  `WIDTHS=1150,1024,900,780 node check-tools/visitor_bar_check.js` ("the name and the menu do not run into each other").
 - **The two panels that slide in on a phone** (up to 768px wide): the **market-data sidebar on the right** (home page and
   dashboard only; the green round button, or a swipe to the left) and the **menu on the left** (the ☰ button on the
   eight kinds of page that have it: home, analysis, dashboard, blog, news, sign in, sign up, stock pages; a swipe to
@@ -2459,8 +2465,8 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
 - Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=33` (`9e0b1dd9aa63`),
-  `dashboard.html` (`5f9b9b27945b`), `index.html` (`daeec05a2810`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`042cf9d0dd43`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`3f2f0f83e142`), `autopilot-bell.js` version 8 (`88119f40c022`),
-  `analysis-functions.js` (`2ef8631a9e8f`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
+  `dashboard.html` (`5f9b9b27945b`), `index.html` (`daeec05a2810`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`042cf9d0dd43`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
+  `analysis-functions.js` (`3b7efa2f0cc6`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
 - Tests on the live files: 442 function, 210 panel, 118 portfolio, 21 chat (13 Oct 2026; they were 110 and 20) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
@@ -2917,8 +2923,10 @@ Needs the owner's decision or more work (nothing here is fixed):
     stock template (it has to run before the page is drawn, so it cannot move into a late script; its two wordings
     are his to decide); the anonymous pop-up, which exists in both `auth.js` and `analysis-functions.js`; a few lines
     in `blog.html`, `news.html` and the stock pages that fade the old badge on scroll (they find nothing and do
-    nothing). **Also open:** the three floating round things on a phone; the red underlined button on the home page;
-    his address in `auth.js`.
+    nothing). **Also open:** the three floating round things on a phone (the green sidebar button, the blue chat
+    button, the round trial button: each is where such buttons usually are; left as they are); his address in
+    `auth.js`; the home page's own claims ("Institutional-Grade Tools", "600+ parallel AWS Lambda workers"), which
+    are his wording to decide.
 - **Mobile:** the owner reports the page zooms when tapping the AI chat input. The input is
   already 16px; cause not found. Need the phone model and browser to chase it. One candidate is
   the fixed 500px window height when the keyboard opens.
@@ -3601,3 +3609,13 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     commit `5b2a68d5`; its way back is `check-tools/pending-cleanup-undo/deploy.sh` (a `git revert` tried on a copy
     first). **Lesson: before calling a copy a duplicate, read to the end of it.** The dashboard's "badge function" turned
     out to be the function that draws a paying member's plan.
+  - **Three small things seen while the banners were mapped** (the owner: "just keep doing your thing improving how it
+    looks"). The header on narrow desktop widths (section 8, "The header bar on a narrow desktop window"); the main
+    button of a section, `.cta-primary`, is the site's blue with no underline (it was red and underlined; only the home
+    page uses it); the pop-up after the free analysis says "15 free analyses? That is 5 a day for 3 days", the count
+    the strip and the other pop-up give (it said "5 Free Reports per day"). `styles.css`, `analysis-functions.js` (one
+    line). Website commit `8e50ee53`; to go back, `git revert` it and upload the two files. Checked with the visitor
+    test at the usual widths and at 1150, 1024, 900 and 780px, the sliding-panel test and an anonymous analysis run.
+    **A trap met twice today: headless Chrome's `--screenshot` with `--virtual-time-budget` never finishes on a stock
+    page** (the page asks for prices every five seconds); take pictures of stock pages through one of the test tools
+    (`SHOTS=<folder>`), which wait a fixed time instead.
