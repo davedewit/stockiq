@@ -48,7 +48,7 @@ changing what it buys from, or stopping, instead of tuning without end.
 ```
 Browser ──> CloudFront (EHXV50CPHY07R, www→apex redirect function)
               └─> S3 bucket stockiq-final-websitebucket-vqekic7enf9h (static files)
-Browser ──> Lambda function URLs directly (no API Gateway; 988 functions, 973 with URLs, ~650 are screener workers)
+Browser ──> Lambda function URLs directly (no API Gateway; 1,001 functions, 986 with URLs, ~660 are screener workers)
               ├─ analysis-functions.js: single-stock report, signals, screener workers, charts
               ├─ index/dashboard/sidebar: market data, gainers/losers/trending, email capture
               └─ auth.js: usage/trial trackers
@@ -698,6 +698,9 @@ crypto orchestrator or any worker.
 | UK FTSE 100 | `4, 'ftse100'` | `5-ftse100` | `stockiq-europe-4-1-worker-N` (10) | 100 | Wikipedia |
 | Japan Nikkei 225 | `5, 'nikkei225'` | `5-nikkei225` | `stockiq-asia-5-5-worker-N` (21) | 225 | Wikipedia |
 | **Germany DAX 40** (since 13 Oct 2026) | `5, 'dax40'` | `5-dax40` | `stockiq-europe-4-2-worker-N` (4) | 40 | German Wikipedia's DAX page (members as of the review of 22 June 2026) |
+| **France CAC 40** (since 13 Oct 2026) | `5, 'cac40'` | `5-cac40` | `stockiq-europe-4-3-worker-N` (4) | 40 | Wikipedia (composition effective December 2025) |
+| **Netherlands AEX** (since 13 Oct 2026) | `5, 'aex'` | `5-aex` | `stockiq-europe-4-4-worker-N` (3) | 30 | Dutch Wikipedia (composition of 22 June 2026; the index has had 30 members since Sept 2025) |
+| **Canada TSX 60** (since 13 Oct 2026) | `5, 'tsx60'` | `5-tsx60` | `stockiq-americas-6-1-worker-N` (6) | 60 | Wikipedia (as of 31 January 2026) |
 | Crypto universe | `7, 'coinspot'` | `7-1` | orchestrator + 54 `stockiq-option-7-1-worker-N` | 540 coins | CoinGecko top by market cap, price-checked |
 | Single coin | `72, 'single'` | – | the single-stock report function, `"asset": "crypto"` (since 12 Oct 2026; section 7) | – | – |
 
@@ -784,7 +787,7 @@ its worker addresses written inside it.
 ### The worker groups: one file for every share screener (done 11 Oct 2026)
 
 The owner asked whether the screeners "all share the same function", and for it to be made simpler to manage. They did
-not; now they do. **All 673 share-screener workers (14 groups since the DAX 40's four were added on 13 Oct 2026; 669 in 13 until then) run the same package, built from `stockiq/workers/` in git.**
+not; now they do. **All 686 share-screener workers (17 groups: 669 in 13 until 13 Oct 2026, when the DAX 40's four and then the CAC 40's four, the AEX's three and the TSX 60's six were added) run the same package, built from `stockiq/workers/` in git.**
 Checked at the end by downloading every package: one set of four files in all 669, byte for byte the files in git.
 
 | In `stockiq/workers/` | What it is |
@@ -806,7 +809,7 @@ run that group's button through the page and the coordinator (end of this sectio
 remove the folder. `python3 check-tools/workers.py` must show "one" for the 13 groups and the same code across them
 (`--contents` downloads and compares, the honest count).
 
-- **932 worker functions in 19 groups; 727 are called by the site** (673 share workers, 54 crypto workers; 928 / 18 / 723 before the DAX 40). **205 are not
+- **945 worker functions in 22 groups; 740 are called by the site** (686 share workers, 54 crypto workers; 928 / 18 / 723 before the four screeners of 13 Oct 2026). **205 are not
   called by the site now** (the single-coin worker since 12 Oct 2026, and `stockiq-option-3-3-worker` 60, `stockiq-option-7-4-worker` 139,
   `stockiq-option-3-worker` 5). They cost nothing idle, were not touched and hold old code. **"Not called by the site" is
   not "never used"**: counted on 12 Oct, the 3-3 group was the S&P 500 path until 11 Sep 2026; only the 7-4 group has no
@@ -2543,15 +2546,15 @@ preview from Kiro): ask early when a change "does not show" (section 9).
 
 **What is live, and how to confirm nothing has moved since** (all compared with the local copies on 12 Oct, 10:17 UTC):
 - `stockiq-ai-trader` `0tynNBjnvnTkUmLZGPBc+v6CGxabNKGgNCaQE95YYUE=` (3,079 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC, a holding's own stop kept with the buy 16:51 UTC, the build-up that leaves out what is invested 17:25 UTC); `stockiq-ai-chat`
-  `Ogr84Q5NISc0OBpyR+I9rOLafnozV9VZRechmUvIoaw=` (since 13 Oct 2026, 10:43 UTC); `stockiq-price-proxy` `lzqBC+6a/h51byePPZpa+e29ACnMZGPQp+TEt2SQJ8g=`; `stockiq-screener-coordinator` `ofFfnb/mZHi1cJpM0lRQdu6FKWTKPfk4AG0oqK6wZZE=` (since 13 Oct 2026, with the DAX 40);
+  `Ogr84Q5NISc0OBpyR+I9rOLafnozV9VZRechmUvIoaw=` (since 13 Oct 2026, 10:43 UTC); `stockiq-price-proxy` `lzqBC+6a/h51byePPZpa+e29ACnMZGPQp+TEt2SQJ8g=`; `stockiq-screener-coordinator` `0Fmz+0ENkIhm38fYhA+kY34ZQcES3RPx1ixlnXndblk=` (since 13 Oct 2026, with the DAX 40, CAC 40, AEX and TSX 60);
   `stockiq-option-1-1-custom-analysis` `I84SxSgLYNt7…`; `stockiq-chart-generator` `OIDrZ2W9G3lJ…`; `stockiq-paper-portfolio`
   `s6IR+/80N/3k…`; the two signals functions `6nVDLm4/8G6K…`; the crypto orchestrator `yvmucU37gHJH…` and its 54 workers
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
 - Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=34` (`4f100feea69d`),
-  `dashboard.html` (`4fa17b8157f4`), `index.html` (`a05879103ed2`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`132837064793`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
-  `analysis-functions.js` (`317e4e43fc49`), `screeners.js` (`e3266e5d4704`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
+  `dashboard.html` (`6ef370d9ca03`), `index.html` (`b67e8d1c2f92`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`d35dd08a8f28`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
+  `analysis-functions.js` (`317e4e43fc49`), `screeners.js` (`7f131afab142`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
 - Tests on the live files: 442 function, 210 panel, 130 portfolio, 22 chat (13 Oct 2026, after the fund's line; they were 118 and 21) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
@@ -3022,7 +3025,7 @@ Needs the owner's decision or more work (nothing here is fixed):
 - **Email signup:** the endpoint is public (a bot could flood signups and notification emails),
   the Lambda has no CloudWatch log group, and nothing is sent to subscribers yet.
 - **The site's wording (rewritten 13 Oct 2026; section 13): what it now says, so that it stays true.** The numbers on the
-  home page are each checkable and must be changed with what they count: **16** screeners (15 until the DAX 40 of 13 Oct 2026; the table in section 8b),
+  home page are each checkable and must be changed with what they count: **19** screeners (15 until 13 Oct 2026, when the DAX 40, CAC 40, AEX and TSX 60 were added; the table in section 8b),
   **1,800+** stocks in the largest (Russell 2000: 1,829), **540** coins, **$100,000** practice money; the FAQ says "more
   than 700 small programs working side by side" (723 worker functions are called by the site). The home page's cards
   and the About page list what the site does: add a card and a line when something is added. Gone, and not to come
@@ -3764,3 +3767,24 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     an entry with a `report`, a button, five dashboard lines, the wording's count.
   - A second session worked on the practice portfolio at the same time (its own notes are above or below this). Its
     uncommitted files were left alone, and the dashboard's DAX entries were staged only after it had committed.
+  - **Three more screeners the same evening: France CAC 40, Netherlands AEX, Canada TSX 60** (the owner: "sure go ahead",
+    "do what makes sense to you"). The same steps as the DAX 40, and this time **the page needed data only**: three
+    entries in `screeners.js`, three buttons, no change to `analysis-functions.js`. 13 workers created
+    (`stockiq-europe-4-3-worker` 4, `stockiq-europe-4-4-worker` 3, `stockiq-americas-6-1-worker` 6); coordinator
+    `0Fmz+0EN…` (rollback zip `…_before_batch2_20261013.zip`); the dashboard's lines; the wording now says 19 screeners
+    and names the markets by region ("US, Canadian, UK, European, Australian and Japanese indexes"), so that a further
+    European index changes only the count and the list on the home page's card. Website commit `7b5d4f05`.
+    **What the lists taught:** the English Wikipedia page for the AEX still showed 25 members as of 2024, while the
+    index has had 30 since September 2025: **check the page in the market's own language and the date it gives**; three
+    of the 30 needed another symbol at the price source (`EXO.AS`, `SHELL.AS`, `WDP.BR`: the proxy answers 500 for a
+    symbol it does not know, which is how they were found). The TSX 60's own index (`^TX60`) is not at the price
+    source, so its Top 10 comparison uses the S&P/TSX Composite (`^GSPTSE`). Canadian share classes take a dash
+    (`RCI-B.TO`, `BIP-UN.TO`). **Checked:** each button through the staged and the deployed page code and the
+    coordinator (40 / 30 / 60 results, every worker answering, euros and Canadian dollars), the dashboard's tracker on
+    the page's and the coordinator's report of each, the history names and "run again", the access rules, the browser
+    tests. **A trap for the tools:** `generate-lambda-url-mappings.sh` takes about half an hour and rewrites
+    `lambda-url-mapping.json` in place; while it runs `page_run.js` and `screener_equiv.js` cannot start. Do not start
+    it before a batch of tests; the tracker check on a page report can be done without the map by letting through
+    only the new workers' addresses (as was done here).
+    **Still "Coming Soon":** Switzerland (SMI), Italy (FTSE MIB), Spain (IBEX 35), India (BSE Sensex), South Korea
+    (KOSPI), Hong Kong (Hang Seng), Singapore (STI), Brazil (Bovespa). The autopilot buys from none of the four new ones.
