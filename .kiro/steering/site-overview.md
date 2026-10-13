@@ -1465,7 +1465,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=35` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=46`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=47`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -2324,6 +2324,29 @@ weekdays and fails at the weekend.
 
 ### Start here when resuming (state at 17:45 UTC on 12 Oct 2026: the end of a three-day session)
 
+**ADDED AT THE END OF 13 OCT 2026 (a long day on the screeners; read this before the older text below, which is of 12 Oct):**
+- **27 screeners, none "Coming Soon" of the old twelve.** Twelve were added that day (section 8b's table; section 13 has
+  each batch's story). Six further markets are listed as "Coming Soon" on the analysis page (Euro Stoxx 50, Sweden,
+  China, Taiwan, New Zealand, Mexico): `add-new-screener.md` is the recipe, and it was used twelve times.
+- **The autopilot buys from all 27**, grouped as the site's Screeners menu is: US markets, Europe markets, Asia-Pacific
+  markets, Americas markets, Coins. **A group is a region now** (it was a country), so the budget's spread changed.
+- **The quick set-ups are gone**; the screeners card has shortcuts that change only what is ticked. **A scheduled
+  check-in waits until the settings have been left alone for 10 minutes** (`SETTLE_MINUTES`).
+- **The owner's settings at the end of the day:** Balanced, 50 holdings, built up over 1 day, a check-in every 3 hours,
+  holdings kept up to 10 days, 17 screeners (the main index of every country, and crypto), 10 holdings a region.
+- **For the first review: 13 Oct from 16:11 UTC is not one experiment.** The settings changed about fifty times in an
+  hour (quick set-ups pressed, a 6-hour holding limit in force at the 16:40 check-in, which sold five holdings), and
+  the screeners and groups changed at 16:32. `autopilot_review.py` part 1 lists every change. 18 trades had finished
+  by then, down about $1,818 in all; the first buy from a new screener was CVE.TO (Canada TSX 60) at 16:40.
+- **Do not write his settings while he is at the page** (section 13, the entry on the regions): say what they are.
+- **The breakdown table** heads its column "Made money" (it was "Ended up") and says that it counts only the autopilot's
+  finished trades: **what the owner buys and sells by hand is on the Practice portfolio tab**, not there.
+- Live at the end: `stockiq-ai-trader` `wLHHlexH…`, `stockiq-ai-chat` `9K5HRpiz…`, `stockiq-screener-coordinator`
+  `979X4yAm…`, 741 share-screener workers in 25 groups on the one package, `practice-autopilot.js?v=47`. Tests: 451
+  function, 216 panel, 22 chat. Kept on purpose: the three `pending-*-undo` folders.
+- **Still to be seen for real:** "settings just changed, left for the next run" in the function's log; `M&M.NS` in a top
+  10; the stock pages' menu (old two labels until regenerated); a signed-in browser and a phone for all of the day's work.
+
 **FIRST THING IN EVERY SESSION: tell the owner, in plain words and before anything else, what has happened since the last
 one, and when the last review is a week or more old run the review and bring him the list of improvements to say yes or
 no to (the instruction at the top of this file).** (His words on 11 Oct: "next time i open a session… update me on how monday went and anything else"; Monday 12 Oct
@@ -2591,8 +2614,8 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
-- Website (sha256 starts): `practice-autopilot.js?v=46` (`f3fee809abcd`), `practice-portfolio.js?v=35` (`77079a71f71a`),
-  `dashboard.html` (`7bc4f2a11c70`), `index.html` (`5fcb3652b459`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`f214d39b01ed`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
+- Website (sha256 starts): `practice-autopilot.js?v=47` (`15e2d0d78a1f`), `practice-portfolio.js?v=35` (`77079a71f71a`),
+  `dashboard.html` (`c50823acc18d`), `index.html` (`5fcb3652b459`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`f214d39b01ed`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
   `analysis-functions.js` (`0207a09e771b`), `screeners.js` (`4512115ab389`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
 - Tests on the live files: 451 function, 216 panel (13 Oct 2026, with the regions, the shortcuts and the waiting rule; they were 442 and 210), 130 portfolio, 22 chat (13 Oct 2026, after the fund's line; they were 118 and 21) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
@@ -4089,3 +4112,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
       10 holdings a region. Set from outside once more at his word, at 16:48 UTC, after he had stopped clicking.
     - **Not checked:** the logged-in dashboard itself; a phone. **To see for real:** the log line "settings just changed,
       left for the next run" the first time he changes a setting within ten minutes of :10 or :40.
+  - **The breakdown's words** (13 Oct 2026, late; `practice-autopilot.js?v=47`, website commit `acceca8b`): the owner did not
+    know what "Ended up" meant ("oh it means ended up made money. maybe change it to winners?") and looked in "By who
+    chose" for a trade he had made by hand. The column is "Made money" in the breakdown and the progress table; "By
+    place in the ranking when bought" is "By place in the screener ranking when bought"; a line under the breakdown says
+    it counts only the autopilot's finished trades and where his own are. 216 panel checks. The chat's guide uses none
+    of those words and needed no change. **The session ended here.**
