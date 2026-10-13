@@ -7,7 +7,7 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
           holdings (the autopilot's "Number of holdings" field: its hint, typing 20, that it is saved),
           refresh ("Refresh prices": where it sits, its busy and done feedback, that typing in the buy row is kept; the buttons' classes),
           chart (the graph of the account over time: its size, what it reads, the pointer; chart:ai or chart:own presses that
-          button; open the page with ?chart=1 for an account with a few weeks of history),
+          button and says what the two lists under it then show; open the page with ?chart=1 for an account with a few weeks of history),
           trial (a trial of its own rules starts), off (the autopilot is switched off), open (unfolds the details),
           preset (presses the "Quick coin trading" set-up), sellall (presses "Sell everything it holds" and says yes),
           limits (types your own loss limit), split (prints the line that says whose result is whose),
@@ -114,6 +114,9 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
         out('chart reads: ' + q('#pp-chart-read').textContent.replace(/\\s+/g, ' ') + ' | card: ' + (q('#practice-portfolio').textContent.match(/Account value\\s*(\\$[\\d,.]+)/) || [])[1]);
         svg.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: r.left + r.width * 0.45, clientY: r.top + 40 })); out('chart, pointer at 45%%: ' + q('#pp-chart-read').textContent.replace(/\\s+/g, ' ') + ' | line shown: ' + (q('#pp-cross').style.display !== 'none'));
         const want = step.split(':')[1]; if (want) { const b = Array.from(document.querySelectorAll('.pp-chart-tabs button')).find(x => x.getAttribute('data-id') === want); if (b) { b.click(); await wait(200); out('chart, pressed ' + want + ': ' + q('.pp-chart-title').textContent + ' | ' + q('#pp-chart-read').textContent.replace(/\\s+/g, ' ')); } }
+        if (want) { const part = q('#pp-part'), rowsNow = document.querySelectorAll('#practice-portfolio table.pp-stack [data-pp="sell"]').length, headNow = q('#practice-portfolio table.pp-stack tr.pp-head th');
+          q('#pp-note').value = 'kept?'; const again = Array.from(document.querySelectorAll('.pp-chart-tabs button')).find(x => x.getAttribute('data-id') === want); if (again) { again.click(); await wait(150); }
+          out('chart, the lists after pressing ' + want + ': ' + rowsNow + ' holding(s) listed | heading "' + (headNow ? headNow.textContent : '') + '" | line: "' + (part ? part.textContent.replace(/\\s+/g, ' ').trim() : 'none') + '" | sold: "' + ((q('#pp-sold summary') || {}).textContent || 'none') + '" | typing kept: ' + (q('#pp-note').value === 'kept?')); q('#pp-note').value = ''; }
         out('chart, wider than its section: ' + (q('#pp-chart-svg').getBoundingClientRect().width > holder.width + 1) + ' | NaN in the picture: ' + /NaN|undefined/.test(q('.pp-chart').innerHTML));
       } }
     if (step === 'refresh') {      // "Refresh prices": where it sits, that it says it is working and when it is done, and that what is typed in the buy row stays

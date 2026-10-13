@@ -173,6 +173,20 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
   { const d = JSON.parse(store['tester@example.com'].data); d.holdings[0].by = 'ai'; d.holdings[0].screener = '7-1'; store['tester@example.com'].data = JSON.stringify(d);
     await ctx.window.practicePortfolio.reload(); await sleep(50); await waitIdle(); const hid = d.holdings[0].id;
     check('a holding is marked as bought by you or by the autopilot', /🤖 Bought by the autopilot\./.test(text()) && /Bought by you: it stays until you sell it\./.test(text()), text().slice(0, 500));
+    // the graph's three buttons also choose whose holdings the lists show (13 Oct 2026)
+    if (pure.partOf) { const all = d.holdings.length, sells = () => (container.innerHTML.match(/data-pp="sell"/g) || []).length, mix = [{ id: 1, by: 'ai' }, { id: 2 }, { id: 3, by: 'me' }];
+      check('whose holdings a list shows: all, the user\'s own, the autopilot\'s', pure.partOf(mix, 'value').length === 3 && pure.partOf(mix, 'own').map(h => h.id).join() === '2,3' && pure.partOf(mix, 'ai').map(h => h.id).join() === '1' && pure.partOf(mix, 'nonsense').length === 3);
+      check('opened afresh, every holding is listed and nothing says a part is shown', sells() === all && !/id="pp-part"/.test(container.innerHTML) && new RegExp('Holding \\(' + all + '\\)').test(text()), { sells: sells(), all });
+      click('chart-key', { 'data-id': 'ai' }); await sleep(50);
+      check('"AI autopilot" on the graph: only its holding is listed, and a line says so with a way back', sells() === 1 && new RegExp('Showing the 🤖 AI autopilot’s : 1 of ' + all + ' holdings\\. Show all').test(text()) && new RegExp('Holding \\(1 of ' + all + '\\)').test(text()) && !/Bought by you/.test(text()) && /data-pp="chart-key" data-id="value"/.test(container.innerHTML), text().match(/Showing[^.]*\.[^.]{0,12}|Holding \([^)]*\)/g));
+      click('refresh'); await sleep(50); await waitIdle();
+      check('a refresh of prices keeps the choice', sells() === 1 && /id="pp-part"/.test(container.innerHTML), { sells: sells() });
+      click('chart-key', { 'data-id': 'own' }); await sleep(50);
+      check('"Your own buys": the others are listed, not the autopilot\'s', sells() === all - 1 && new RegExp('Showing your own buys : ' + (all - 1) + ' of ' + all + ' holdings').test(text()) && !/Bought by the autopilot/.test(text()), text().match(/Showing[^.]*\./));
+      check('the three figures at the top are still the whole account', /Account value/.test(text()) && bad().length === 0, bad());
+      click('chart-key', { 'data-id': 'value' }); await sleep(50);
+      check('"Account" (or "Show all") lists everything again', sells() === all && !/id="pp-part"/.test(container.innerHTML), { sells: sells(), all });
+      check('the choice is not remembered for the next visit', !/setItem\('stockiqPracticeChartKey'/.test(src) && !/getItem\('stockiqPracticeChartKey'\)/.test(src)); }
     ctx.window.practicePortfolio.setPlans([{ id: hid, auto: true, sellBy: '2026-10-10T16:42:41Z', stop: -10, take: 18, arm: 9 }]);
     check('with the autopilot on: when and at what it will be sold', /🤖 Autopilot: it sells this by itself, at the check-in around [^.]*\d\d:\d\d[^.]* at the latest, sooner if it falls to -10% or reaches \+18%\. While it rises it is kept; once it has been up 9% a stop follows it up, and it is sold only if it then falls back\. The AI model also reviews it at every check-in and may sell it earlier\./.test(text()), (text().match(/🤖 Autopilot:[^.]*\.[^.]*\./) || [''])[0]);
     ctx.window.practicePortfolio.setPlans([{ id: hid, auto: true, sellBy: '2026-10-10T16:42:41Z', stop: -10, take: 9, arm: 4.5, trial: true }]);
