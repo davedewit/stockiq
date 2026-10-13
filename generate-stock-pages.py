@@ -204,11 +204,11 @@ if (hasPaid) {{
   document.documentElement.style.setProperty('--nav-top', '0');
 }} else if (userId && userId !== 'anonymous') {{
   banner.style.display = 'block';
-  banner.innerHTML = 'Professional Stock Analysis starting at <strong style="color: #22c55e;">$4.99/month</strong> - Get institutional-grade tools at accessible pricing';
+  banner.innerHTML = 'Plans from <strong style="color: #22c55e;">$4.99/month</strong>: more analyses a day, and the AI autopilot (Beta) for your practice portfolio';
   document.documentElement.style.setProperty('--nav-top', '41px');
 }} else {{
   banner.style.display = 'block';
-  banner.innerHTML = 'Sign up FREE to get <strong style="color: #22c55e;">15 free analyses</strong> - Professional tools at your fingertips';
+  banner.innerHTML = 'Free 3-day trial: <strong style="color: #22c55e;">15 analyses</strong>, no credit card needed';
   document.documentElement.style.setProperty('--nav-top', '41px');
 }}
 }} else {{

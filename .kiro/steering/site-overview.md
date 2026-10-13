@@ -552,7 +552,8 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   code scrolls there.
 - `index.html`: market overview widgets, guides, "How StockIQ Works", **Pricing section**
   (`#pricing`, three plans in USD), email signup ("Get Screener Highlights by Email", details in
-  `stockiq.md`), comparison table.
+  `stockiq.md`), **"What you can do with StockIQ"** (`#features`: eight cards, one for each thing the site does) and, last,
+  "What StockIQ is, and what it is not". **The page's wording was rewritten on 13 Oct 2026** (section 13): keep to it.
 - **Practice portfolio and AI autopilot** (dashboard, built 10 Oct 2026): a fake-money portfolio the
   owner buys and sells in by hand, and an autopilot that trades it from the screeners' results,
   reviews its holdings with the AI model and recent headlines, and tries bounded changes to its own
@@ -2465,7 +2466,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
 - Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=33` (`9e0b1dd9aa63`),
-  `dashboard.html` (`5f9b9b27945b`), `index.html` (`daeec05a2810`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`042cf9d0dd43`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
+  `dashboard.html` (`1dbb2a18c3a8`), `index.html` (`50c1c387520a`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`0a647633748e`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
   `analysis-functions.js` (`3b7efa2f0cc6`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
 - Tests on the live files: 442 function, 210 panel, 118 portfolio, 21 chat (13 Oct 2026; they were 110 and 20) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
@@ -2888,8 +2889,10 @@ Needs the owner's decision or more work (nothing here is fixed):
     `analysis-functions.js` (which then **reloads the page** if it finds the visitor has paid) and by `dashboard.html`.
     Every page reads the note in its `<head>` to lay itself out before anything is drawn. A paying visitor whose note
     is missing sees the unpaid banner until one of those pages has put it right.
-  - **What each sees.** *The strip across the top* (desktop only; `styles.css` hides it up to 768px): anonymous "Sign up
-    FREE to get 15 free analyses…", signed in and not paying "Professional Stock Analysis starting at $4.99/month…",
+  - **What each sees.** *The strip across the top* (desktop only; `styles.css` hides it up to 768px): anonymous "Free
+    3-day trial: 15 analyses, no credit card needed", signed in and not paying "Plans from $4.99/month: more analyses a
+    day, and the AI autopilot (Beta) for your practice portfolio" (since 13 Oct 2026; the stock pages keep the older
+    two sentences until they are next regenerated: the template has the new ones),
     paying none (the page moves up 41px: `--nav-top`, `--body-padding`, `--mobile-menu-top`, `--quick-panel-top`,
     `--news-panel-top`). It is `#promo-banner` in `index.html`, `analysis.html`, `dashboard.html` and `signup.html`,
     each with its own copy of the code, and a different element, `#sticky-banner`, with a third wording of the same
@@ -2934,12 +2937,16 @@ Needs the owner's decision or more work (nothing here is fixed):
   resets it; the Lambda also looks up paid status from the `userId` the browser sends.
 - **Email signup:** the endpoint is public (a bot could flood signups and notification emails),
   the Lambda has no CloudWatch log group, and nothing is sent to subscribers yet.
-- **Claims left on two public pages that the site does not meet** (found 12 Oct 2026): `contact.html` says it serves
-  "individual investors, financial advisors, and institutional clients with real-time market data"; `technical-analysis-guide.html`
-  offers "15+ indicators, real-time charts, and AI-powered pattern recognition". Data is delayed and there is no pattern
-  recognition. The owner's wording to change.
-- Home page: the comparison table still benchmarks against Bloomberg ($24,000/yr) and
-  Morningstar. `analysis.html` shows 12 "Coming Soon" screener buttons.
+- **The site's wording (rewritten 13 Oct 2026; section 13): what it now says, so that it stays true.** The numbers on the
+  home page are each checkable and must be changed with what they count: **15** screeners (the table in section 8b),
+  **1,800+** stocks in the largest (Russell 2000: 1,829), **540** coins, **$100,000** practice money; the FAQ says "more
+  than 700 small programs working side by side" (723 worker functions are called by the site). The home page's cards
+  and the About page list what the site does: add a card and a line when something is added. Gone, and not to come
+  back: "institutional-grade", "professional-grade", "real-time", "2000+ stocks in seconds", "15+ indicators",
+  "AI-generated signals", "pattern recognition", any table against named competitors. The FAQ's first two answers
+  are also in its structured data (`FAQPage`), and `investment-research-tools.html` has four such pairs: **change the
+  visible answer and the structured one together.** Still as they were: `analysis.html` shows 12 "Coming Soon"
+  screener buttons; the guides' own body text (general education, not claims about StockIQ).
 - Guides are ~800 words of definitions with no worked examples.
 - `uniqueSymbolsCount` constants in `saveAnalysisToHistory` (`analysis-functions.js`) still use
   the old list sizes (bookkeeping only).
@@ -3619,3 +3626,17 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     **A trap met twice today: headless Chrome's `--screenshot` with `--virtual-time-budget` never finishes on a stock
     page** (the page asks for prices every five seconds); take pictures of stock pages through one of the test tools
     (`SHOTS=<folder>`), which wait a fixed time instead.
+  - **The site's wording brought up to date** (section 11, "The site's wording"), at the owner's word: "for the wording you can
+    update it however you like, it was originally done via AI anyway. would love an update of the site as alot has
+    changed on the AI side". Eleven pages, words only. **Home page:** a new intro card ("Research tools for individual
+    investors"), four numbers that can be checked, the three "How StockIQ Works" steps, a new section of eight cards
+    ("What you can do with StockIQ": the report, the screeners, the signals, the crypto screener, the AI chat, the
+    practice portfolio, the AI autopilot (Beta), the dashboard) above the pricing, and "What StockIQ is, and what it is
+    not" at the end; the "Common Challenges" list and the table against Bloomberg and Morningstar are gone; new
+    descriptions for search engines and shared links. **FAQ:** 14 answers rewritten and one question reworded ("What
+    makes StockIQ's scoring methodology better?" is now "How are the scores calculated?"), with its structured data.
+    **Guides, contact, About:** their sentences about StockIQ. **The strip across the top:** one new wording for each
+    kind of visitor on the four pages that carry it, and in `generate-stock-pages.py` for the stock pages' next
+    regeneration (not regenerated now). Checked: every page's scripts and structured data still parse; whole-page
+    pictures at desktop and phone width with nothing sticking out sideways; the visitor test and the sliding-panel
+    test on the reworded pages. Website commit `56224f83`; to go back, `git revert` it and upload the eleven pages.
