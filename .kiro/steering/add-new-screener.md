@@ -2,7 +2,12 @@
 
 How to add a share screener for another market, written so that a new session can build one from this file alone.
 The worked example is **Germany (DAX 40)**; India (BSE Sensex) and South Korea (KOSPI) follow the same steps with the
-differences listed in step 1. Rewritten 11 Oct 2026, when every share-screener worker was moved to one package: the
+differences listed in step 1.
+
+**The DAX 40 was built from this guide on 13 Oct 2026 and is live**, so the example below is also the record of a
+real one (its story: `site-overview.md` section 13). What that run changed in the guide: `workers/create_group.py` has
+now created functions for real and worked as written; on the page a new market needs **no formatter and no lookups**,
+only an entry with a `report` block (step 4); and **a company name must not be one word in capitals** (step 4b). Rewritten 11 Oct 2026, when every share-screener worker was moved to one package: the
 older version of this guide (copy a worker from `lambda-sync/`, type `aws` commands) no longer applies.
 
 Read `site-overview.md` section 8b first (how the screeners work, the two code paths, the output wording rule) and
@@ -168,50 +173,39 @@ half).
 
 The file is very large: **search, do not read it whole** (`grep -n nikkei225`), and edit by exact replacement.
 
-**4a. The entry.** Since 13 Oct 2026 the page runs every share screener with one routine (`runShareScreener` in
-`analysis-functions.js`), and a screener is one entry in **`website/screeners.js`** (`site-overview.md` section 8b, "The
-page's one screener routine"). Add:
+**4a. The entry.** The page runs every share screener with one routine (`runShareScreener` in `analysis-functions.js`),
+and a screener is one entry in **`website/screeners.js`** (`site-overview.md` section 8b, "The page's one screener
+routine"). The DAX 40's, as it is live:
 
 ```js
     '5-dax40': {
-        name: 'Germany DAX 40', size: 40, use: 4, csv: 'Germany_DAX40_Screener', format: 'dax', merge: 'guarded', timeText: false,
-        list: ['SAP.DE', 'SIE.DE', … ],
+        name: 'Germany DAX 40', size: 40, use: 4, csv: 'Germany_DAX40_Screener', format: 'market', merge: 'guarded', timeText: false,
+        report: { heading: '🇩🇪 GERMANY DAX 40', stocks: 'Germany DAX stocks', exchange: 'Frankfurt Stock Exchange (Xetra)', currency: 'EUR', done: 'Germany DAX 40',
+                  type: 'option_5dax40_screener', title: 'Germany DAX 40 Screener', symbol: 'GERMANY_SCREENER',
+                  names: {'ADS.DE': 'Adidas', 'SAP.DE': 'SAP SE', … } },
+        list: ['ADS.DE', 'AIR.DE', … ],
         workers: [ the four addresses from urls.txt, in order ]
     },
 ```
 
-`use` is the number of workers, `size` the number the report prints, `merge: 'guarded'` and `timeText: false` are the
-plain choices (as Nikkei has). `format` names the formatter: add one line for it where `runShareScreener` picks the
-formatter (`def.format === 'dax' ? formatDAXResult(apiData) : …`). Nothing else changes in `runAnalysis`: no block to
-copy, no access check to remember (access is checked and the use counted once, at the top of `runAnalysis`).
-**Adding an entry is the point after which the way back to the old 14 copies (`pending-screeners-undo`) no longer
-applies by itself.**
+`use` is the number of workers, `size` the number the report prints, `merge: 'guarded'` and `timeText: false` the plain
+choices. `format: 'market'` hands the report to `formatMarketResult`, which takes every word that differs between
+markets from `report`; `report.title` and `report.symbol` are what the dashboard's history files it under, and "run
+again" finds its address from the entry. **So there is no formatter to copy, no `subNames` line, no re-run table line
+and no `saveAnalysisToHistory` branch to add.** Nothing changes in `runAnalysis`: access is checked and the use counted
+once, at its top.
 
-**4b. A names table**, `DAX_COMPANY_NAMES = { 'SAP.DE': 'SAP', 'SIE.DE': 'Siemens', … }`, short names.
+**4b. The names** (`report.names`): a short name a symbol, 22 characters at most, plain ASCII. **Never one word in
+capitals** ("SAP", "BASF", "BMW", "RWE", "DHL"): the dashboard's Top 10 tracker then reads the line as a coin. Write
+"SAP SE", "BMW AG". `tracker_run.js` (step 8) shows it at once: it looks up `SAP-USD` and finds nothing.
 
-**4c. The formatter.** Copy `formatNikkeiResult()` and change: the names table; the `universeSize` constant (the real
-count); the header text; `type: 'option_5dax40_screener'`; the company name "Germany DAX 40 Screener"; and the fallback
-currency. Prices are written with `screenerMoney(stock, value, 'EUR')` (one rule for every share-screener formatter,
-above `formatOption3Result`): it takes the sign from the `currency` each stock carries, and the third argument is only
-the fallback. Never type a sign into a formatter. If the currency is new, add its sign to `SCREENER_MONEY_SIGNS` there,
-to `MONEY_SIGNS` in the coordinator and to the single-stock report's table (the three must stay alike).
+**4c. The output rules** are kept by `formatMarketResult` (section 8b): every code goes through `signalLabel()` /
+`horizonLabel()`, prices through `screenerMoney(stock, value, report.currency)` (the sign comes from the `currency` each
+stock carries; a new currency's sign goes into `SCREENER_MONEY_SIGNS` there, `MONEY_SIGNS` in the coordinator and the
+single-stock report's table), and the top-10 line stays `N. SYMBOL <name> <sign>PRICE …`.
 
-Rules the output must keep (section 8b):
-- every code goes through `signalLabel()` / `horizonLabel()`; never print `STRONG_BUY` and the like, and none of "buy",
-  "sell", "target", "stop loss", "take profit", "picks", "recommendation";
-- the top-10 line must stay `N. SYMBOL <name, 22 characters at most> <sign>PRICE …`: the dashboard's 🎯 tracker reads the
-  symbol and the price from exactly that;
-- CSV columns read the field names the workers return (`change_24h`, `distance_from_52w_low`, `52w_high`, `52w_low`);
-  no P/E, beta, dividend, sector, market cap or earnings risk (the workers have no real company figures).
-
-**4d. Three lookups keyed on the subOption or the name** (find each with `grep -n nikkei225`):
-1. the re-run address table: `'Germany DAX 40 Screener': 'analysis.html?option=5&subOption=dax40&autorun=true'`
-2. in `saveAnalysisToHistory`, inside `option === 5`: `} else if (subOption === 'dax40') { symbols = ['GERMANY_SCREENER']; uniqueSymbolsCount = 40; }`
-   (before the final `else`, which falls back to `ASIA_MARKETS`)
-3. the `subNames` table: `'dax40': 'Germany DAX 40 Screener'` (without it the saved report is titled "ASX Stock Screener")
-
-Run `node -c analysis-functions.js` after every edit. `const name` may be declared only once per `forEach` (a second one
-broke the whole site during the Nikkei build).
+**4d.** (There were three lookups to fill in here by hand: the re-run table, a branch in `saveAnalysisToHistory`, the
+`subNames` table. Since the DAX 40 they read the entry's `report`.) Run `node --check` on both files after every edit.
 
 ## Step 5: the button (`website/analysis.html`)
 
@@ -328,7 +322,7 @@ notification), and a real phone.
 | ASX 50 / 100 / 200 / 300 | `5, '50'` … `'300'` | `4-50` … `4-300` | `stockiq-asia-5-1` … `5-4-worker` | 5 / 10 / 20 / 30 | 49 / 99 / 195 / 294 | `.AX` | AUD |
 | UK FTSE 100 | `4, 'ftse100'` | `5-ftse100` | `stockiq-europe-4-1-worker` | 10 | 100 | `.L` (`BT.A` → `BT-A.L`) | GBp (pence) |
 | Japan Nikkei 225 | `5, 'nikkei225'` | `5-nikkei225` | `stockiq-asia-5-5-worker` | 21 | 225 | `.T` | JPY |
-| **Germany DAX 40 (next)** | `5, 'dax40'` | `5-dax40` | `stockiq-europe-4-2-worker` | 4 | 40 | `.DE` | EUR |
+| Germany DAX 40 (live since 13 Oct 2026) | `5, 'dax40'` | `5-dax40` | `stockiq-europe-4-2-worker` | 4 | 40 | `.DE` | EUR |
 | India BSE Sensex | `5, 'sensex'` | `5-sensex` | `stockiq-asia-5-6-worker` | 3 | 30 | `.BO` or `.NS` | INR |
 | Crypto | `7, 'coinspot'` | `7-1` | orchestrator + 54 `stockiq-option-7-1-worker` in single-coin mode | 54 | 540 coins | `-USD`, sometimes a numbered ticker | USD |
 
