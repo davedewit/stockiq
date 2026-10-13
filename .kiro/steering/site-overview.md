@@ -3812,3 +3812,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     bookkeeping:** a notes edit stopped on a line the other session had changed, and the commands after it still ran, so
     commit `4e4556b` says "Notes" and holds none; they are in the commit after it. Put `set -e` or `&&` between a
     notes edit and the commit that depends on it.
+  - **"View Pricing Plans" on the home page stopped too far down** (the owner sent a picture, 12 Oct; live 13 Oct 2026, 11:45
+    UTC). The link is a plain anchor to `#pricing`, so the browser put the section's top at the top of the window, under
+    the fixed trial banner and menu (41px + 64px = `--body-padding` 105px; 64px on a paid account): the heading and the
+    first lines were hidden. One style on the section in `index.html`: `scroll-margin-top: 130px`. Live file equals the
+    local one. **Not seen in a browser:** the home page comes out blank in headless Chrome here (served locally and
+    live), so the landing place is by the arithmetic, not by a picture; the owner's own click is the check. Any other
+    in-page link to a section of a page with this header needs the same style.
