@@ -43,7 +43,7 @@ done
 for f in index.html dashboard.html; do
     grep -q '<script src="mobile-sidebar.js?v=1"></script>' "$HERE/web/$f" || stop "the staged $f does not ask for the sidebar script"
     grep -q 'function fillMobileSidebar' "$HERE/web/$f" && grep -q 'function emptyMobileSidebar' "$HERE/web/$f" || stop "the staged $f lacks its two sidebar functions"
-    if grep -q "position = 'fixed';$" <(sed -n '/function fillMobileSidebar/,/function emptyMobileSidebar/p' "$HERE/web/$f"); then stop "the staged $f still freezes the page when the sidebar opens"; fi
+    if grep -q "'fixed'" <(sed -n '/function fillMobileSidebar/,/function emptyMobileSidebar/p' "$HERE/web/$f"); then stop "the staged $f still freezes the page when the sidebar opens"; fi
 done
 
 say "the website: the sidebar script, then the two pages"
