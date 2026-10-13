@@ -60,9 +60,17 @@ const server = http.createServer((q, r) => {
     if (process.env.DIRECT) {   // arriving from another page: the address already carries #pricing
       await send('Page.navigate', { url: BASE + 'index.html#pricing' }); await sleep(WAIT);
       const now = await look(), gap = now.heading - now.header; console.log('opened at #pricing', JSON.stringify(now));
-      const ok = now.section >= now.header && gap >= 0 && gap < H / 2; console.log(ok ? 'PASS' : 'FAIL: the heading is ' + (gap < 0 ? 'hidden under the header' : 'not near the top')); if (!ok) bad = 1;
+      console.log(`the section's top is ${now.section - now.header}px below the header`); const why = judge(now); console.log(why ? 'FAIL: ' + why : 'PASS'); if (why) bad = 1;
       if (process.env.SHOT) { const p = await send('Page.captureScreenshot', { format: 'png' }); fs.writeFileSync(process.env.SHOT, Buffer.from(p.data, 'base64')); }
       throw { done: true };
+    }
+    // Right when the section's top stops 15 to 40px under the header (the same whether the strip across the top shows or
+    // not), or, where the header has slid away (a phone scrolling down), within 60px of the top of the window.
+    function judge(at) {
+      const room = at.section - at.header;
+      if (at.heading < at.header) return 'the heading is hidden under the header';
+      if (at.header > 0 ? (room < 15 || room > 40) : (room < 0 || room > 60)) return `the section stops ${room}px under ${at.header > 0 ? 'the header' : 'the top of the window'}, not just under it`;
+      return '';
     }
     await send('Page.navigate', { url: BASE + 'index.html' }); await sleep(WAIT);
     const before = await look(); console.log('before the click', JSON.stringify(before));
@@ -73,7 +81,7 @@ const server = http.createServer((q, r) => {
     for (let i = 1; i <= 16; i++) { await sleep(250); const now = await look(); if (!last || now.y !== last.y || now.height !== last.height) console.log(`  ${(i * 0.25).toFixed(2)}s`, JSON.stringify(now)); last = now; }
     const gap = last.heading - last.header;
     console.log(`"${at.text}": the section's top is ${last.section - last.header}px below the header, its heading ${gap}px below`);
-    if (!(last.section >= last.header && gap >= 0 && gap < H / 2)) { bad = 1; console.log('FAIL: the heading is ' + (gap < 0 ? 'hidden under the header' : 'not near the top')); } else console.log('PASS');
+    const why = judge(last); if (why) { bad = 1; console.log('FAIL: ' + why); } else console.log('PASS');
     if (process.env.SHOT) { const p = await send('Page.captureScreenshot', { format: 'png' }); fs.writeFileSync(process.env.SHOT, Buffer.from(p.data, 'base64')); }
   } catch (e) { if (!e.done) { bad = 1; console.log('ERROR', e.message); } }
   chrome.kill(); server.close(); try { fs.rmSync(dir, { recursive: true, force: true }); } catch (e) { /* in use */ }
