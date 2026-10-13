@@ -1352,10 +1352,12 @@ holds" sit at the top; below them the panel is in **two parts, Activity and Sett
 screener, then on Activity; the part last looked at is remembered, `stockiqAutopilotPart`). Both
 parts are always in the page and one is hidden, so settings are read and saved whichever is on
 show. Settings holds the first five items below, Activity the last five:
-- **Quick set-ups**: "Quick coin trading", "Steady shares", "Shares and coins". **Each replaces the screeners ticked and the
-  pace** (build-up, check-in, holding time, and the level for the first). Since 13 Oct 2026 the notice says so and carries
-  **"Undo: put my settings back"** (`presetUndo`: what the fields held before the first quick set-up pressed; it goes
-  when another action is taken). The owner pressed them that day and lost his nine ticked screeners; see section 13.
+- (**The "Quick set-ups" are gone since 13 Oct 2026.** "Quick coin trading", "Steady shares" and "Shares and coins" each
+  replaced the screeners ticked **and the pace and the level**; the owner lost his settings to them twice in one evening
+  and a check-in traded on one of them: section 13. Their place is taken by the shortcuts in the screeners card, below,
+  which change only what is ticked. In their place at the top of Settings stands one sentence: every change saves
+  itself, a change by itself buys or sells nothing, and a scheduled check-in waits until the settings have been left
+  alone for 10 minutes.)
 - **Risk level** slider (Cautious … Adventurous) with a sentence of what the level means, and
   **Your own limits**: two optional fields, "Sell at a loss of __ %" and "Sell at a gain of __ %",
   and a **Trailing stop** menu (protects a gain / from the moment it is bought / off) with a line
@@ -1367,7 +1369,13 @@ show. Settings holds the first five items below, Activity the last five:
   "set by you" (it stays put); a link hands all three back to the level. Then **two lines that
   describe what exactly these settings will do**.
 - Screeners it buys from: all 27 of the site's, grouped as its Screeners menu is (US markets, Europe markets,
-  Asia-Pacific markets, Americas markets, Coins). Under each market with a ticked screener: a
+  Asia-Pacific markets, Americas markets, Coins). **Shortcuts** (`data-ap-pick`, `MAIN`): "🌍 Main index of every country"
+  (one index a country, none inside another: S&P 500, FTSE 100, DAX 40, CAC 40, SMI, AEX, FTSE MIB, IBEX 35, ASX 200,
+  Nikkei 225, Hang Seng, Sensex, KOSPI 200, STI, TSX 60, Bovespa; the coin screener is left as it is) and "Clear all";
+  **a click on a market's name** (`data-ap-group`) ticks all of its screeners, or clears them when all are ticked. Each
+  is followed by an "Undo" in the notice (`presetUndo`: what was ticked before the first of them). They never touch
+  the pace, the level or the budget. **Never call them "picks" on the page or in the chat's guide** (the wording
+  rule; the chat's own test refuses the word). The card also says that overlapping lists do no harm. Under each market with a ticked screener: a
   menu "Share of the budget" (automatic, or a step picked by hand), and under the card one line in
   words on how the budget is spread.
 - **What it may do by itself**: three switches (sell early on the AI model's review, try changes
@@ -1457,7 +1465,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=35` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=45`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=46`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -2080,8 +2088,8 @@ not sure whether its improvements needed him to "push" them. They do not, and th
   (`rules.level`), then the owner's own limits as typed. `readDraft` turns an empty build-up box or
   "Automatic" in a menu into the level's own value (`paceOf`) and lists the field in `auto`; while
   the slider moves, `syncDraft` updates the greyed value, the "Automatic: …" menu entries and the
-  descriptions. `auto` is only sent if the Lambda sent it. Quick set-ups are `PRESETS` (they never
-  touch the budget or the switch).
+  descriptions. `auto` is only sent if the Lambda sent it. The shortcuts for the screeners (`MAIN`, `data-ap-pick`, `data-ap-group`) only
+  tick and untick boxes and then save like any other change.
 - "Buys and sells only" is a way of looking at the list, not a setting: it is remembered in the
   browser (`localStorage` key `stockiqAutopilotTradesOnly`) and nothing is sent to the Lambda. With
   it on, the latest check-in's own line is still shown above the trades when it is newer than the
@@ -2576,17 +2584,17 @@ are titles only, and most candidates have none. **Not known:** how the owner loo
 preview from Kiro): ask early when a change "does not show" (section 9).
 
 **What is live, and how to confirm nothing has moved since** (all compared with the local copies on 12 Oct, 10:17 UTC):
-- `stockiq-ai-trader` `i9WtL7oPtGiQah4rFa5dSvLhCrGTLYenPZu3SfU+jY4=` (since 16:32 UTC, 13 Oct 2026: 27 screeners in five regions; before that `0tynNBjn…`, 3,079 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC, a holding's own stop kept with the buy 16:51 UTC, the build-up that leaves out what is invested 17:25 UTC); `stockiq-ai-chat`
-  `1BYRMwTABRcOHcaosoRNd3d90XE+NPLE88qN4bnkESU=` (since 13 Oct 2026, 16:36 UTC); `stockiq-price-proxy` `lzqBC+6a/h51byePPZpa+e29ACnMZGPQp+TEt2SQJ8g=`; `stockiq-screener-coordinator` `979X4yAm37f76T4RQfYT8ClqaR9P8NO0r+5LeqgDK7A=` (since 13 Oct 2026, 16:11 UTC, with the twelve screeners added that day);
+- `stockiq-ai-trader` `wLHHlexHRLeH+FsB0KOIGgV0QaYzKgLxM6mftirUpBI=` (since 16:59 UTC, 13 Oct 2026: the waiting rule; `i9WtL7oP…` from 16:32 that day: 27 screeners in five regions; before that `0tynNBjn…`, 3,079 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC, a holding's own stop kept with the buy 16:51 UTC, the build-up that leaves out what is invested 17:25 UTC); `stockiq-ai-chat`
+  `9K5HRpizpV9lHdwP8eOwKpB00IGaNRgUz2qQEQRi6rs=` (since 13 Oct 2026, 17:00 UTC); `stockiq-price-proxy` `lzqBC+6a/h51byePPZpa+e29ACnMZGPQp+TEt2SQJ8g=`; `stockiq-screener-coordinator` `979X4yAm37f76T4RQfYT8ClqaR9P8NO0r+5LeqgDK7A=` (since 13 Oct 2026, 16:11 UTC, with the twelve screeners added that day);
   `stockiq-option-1-1-custom-analysis` `I84SxSgLYNt7…`; `stockiq-chart-generator` `OIDrZ2W9G3lJ…`; `stockiq-paper-portfolio`
   `s6IR+/80N/3k…`; the two signals functions `6nVDLm4/8G6K…`; the crypto orchestrator `yvmucU37gHJH…` and its 54 workers
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
-- Website (sha256 starts): `practice-autopilot.js?v=45` (`1311fd196daa`), `practice-portfolio.js?v=35` (`77079a71f71a`),
-  `dashboard.html` (`519c12fdc6b8`), `index.html` (`5fcb3652b459`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`f214d39b01ed`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
+- Website (sha256 starts): `practice-autopilot.js?v=46` (`f3fee809abcd`), `practice-portfolio.js?v=35` (`77079a71f71a`),
+  `dashboard.html` (`7bc4f2a11c70`), `index.html` (`5fcb3652b459`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`f214d39b01ed`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
   `analysis-functions.js` (`0207a09e771b`), `screeners.js` (`4512115ab389`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
-- Tests on the live files: 447 function, 212 panel (13 Oct 2026, with the regions and the Undo; they were 442 and 210), 130 portfolio, 22 chat (13 Oct 2026, after the fund's line; they were 118 and 21) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
+- Tests on the live files: 451 function, 216 panel (13 Oct 2026, with the regions, the shortcuts and the waiting rule; they were 442 and 210), 130 portfolio, 22 chat (13 Oct 2026, after the fund's line; they were 118 and 21) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
 - Both repos pushed; **the only `check-tools/pending-*` folders left are the three ways back, kept on purpose:** `pending-screeners-undo` (the analysis page's one screener routine), then `pending-cleanup-undo` and `pending-banners-undo` (the two steps back from the header chip). Run them in that order if more than one is wanted: the first two touch the same script. `website/` carries the daily job's own three files
@@ -2595,7 +2603,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
   trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell,
   takeover, report`, `stockiq-ai-trader_before_sweep_20261011.zip`, `…_costs_…`; 12 Oct `fresh, due, holdings, journal,
-  notes, heads, junk, patient, rows, buildup`; 13 Oct `regions`. `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `…_{guide, guide2, guide3}_20261012.zip`, `…_before_filter_20261013.zip`, `…_before_fund_20261013.zip`; `stockiq-price-proxy_before_fund_20261013.zip`.
+  notes, heads, junk, patient, rows, buildup`; 13 Oct `regions, settle`. `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `…_{guide, guide2, guide3}_20261012.zip`, `…_before_filter_20261013.zip`, `…_before_fund_20261013.zip`; `stockiq-price-proxy_before_fund_20261013.zip`.
 
 **Improvements to come: one list. Take an item out when it is done; add ideas as the data suggests them.**
 *Waiting on finished trades (each has its trigger; nothing is adopted from hindsight, a trading idea goes live as a trial):*
@@ -2669,6 +2677,11 @@ preview from Kiro): ask early when a change "does not show" (section 9).
 - **Paused after two weeks without a visit** (`seen_now` writes `state.visit` at most every 6 hours; `pause_if_away`,
   `IDLE_DAYS` 14): switched off, a line and one email; back on at the next visit to the dashboard. The bell's question on
   other pages is not a visit. What it holds is neither sold nor watched while paused.
+- **A scheduled check-in waits for the settings to settle** (`SETTLE_MINUTES` 10, `settling`; 13 Oct 2026): an account whose
+  settings were changed less than 10 minutes before a scheduled run is left for the next run (the log says "settings
+  just changed, left for the next run"), and `next_check` forecasts accordingly. The dashboard saves every click, so
+  without this a check-in could trade on a setting someone was half-way through changing (it did, once). "Check in
+  now" does not wait: that is a request to act on the settings as they are.
 - **The schedule** runs every account that is due, up to `RUN_TOGETHER` (4) side by side, and starts no check-in with less
   than `RUN_RESERVE_SECONDS` (100) left; such an account runs at the next slot. This is not a limit on users. It scans
   the whole table page by page. If paying users ever number in the hundreds, give each account its own invocation.
@@ -4041,3 +4054,38 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     - **Not checked:** the logged-in dashboard itself, a phone. **Not done:** `dashboard.html` still asks for
       `practice-autopilot.js?v=45` (another session had the page staged; browsers keep a script five minutes, so the
       change arrives anyway): raise it to 46 at the next change of that page.
+  - **Shortcuts for the screeners in place of the quick set-ups; a scheduled check-in waits for settings to settle**
+    (16:59 to 17:01 UTC, 13 Oct 2026), after the owner asked for a click on "US markets" to tick everything beside it,
+    called the quick set-ups "pretty useless", wondered whether they belong near the screeners or should go, and asked
+    whether his clicking about "breaks anything in the automation". **What was decided, since he left it to the
+    session ("do what makes sense… keep it consistent and straight forward"):**
+    - **The three quick set-ups are removed.** They changed the pace and the level as well as the screeners, which is
+      what made them dangerous; the risk level already sets the pace by itself ("Let the risk level set all three").
+      What a user does want quickly is to tick screeners, so the card "Screeners it buys from" has **shortcuts that
+      change only what is ticked** (section 8c, "What the owner sees"): "Main index of every country", "Clear all", and
+      a click on a market's name. An Undo follows each.
+    - **`stockiq-ai-trader` `wLHHlexH…`: the waiting rule** (`SETTLE_MINUTES`; rollback zip
+      `…_before_autopilot_settle_20261013.zip`). The honest answer to his question was: a click saves at once and
+      trades nothing by itself, **but the next check-in acts on whatever the settings are at that minute**, and that
+      had just cost him five sales. Now a scheduled check-in waits until the settings have been left alone for 10
+      minutes. What a change still does at once: changing the budget or "Build up to it over" starts the build-up
+      again; changing "Checks in" moves the next check-in; un-ticking a screener sells nothing (what it holds from it
+      stays until sold).
+    - **His other questions.** *Is the ASX right under Asia-Pacific?* Yes: that is the usual name for the region that
+      takes in Australia. *Do the S&P 500 and the S&P 1500 overlap, and can it buy the same share twice?* They overlap
+      (the 1500 holds every share of the 500, 400 and 600), and no: `shortlist` passes over a share it already holds
+      and keeps a share that is on several ticked lists once, at its best place among them. Ticking both adds little;
+      it does no harm. The card says so.
+    - `stockiq-ai-chat` `9K5HRpiz…` (rollback zip `…_before_shortcuts_20261013.zip`): its guide describes the shortcuts,
+      the waiting rule and the overlap. **A test caught a word on the way:** the buttons were first called "Quick
+      picks", and the chat's own test refuses "picks" in its guide (the wording rule of section 10). They are "Shortcuts".
+    - Tests: 451 function (4 new: settling, the scheduled run that waits and then runs, "Check in now" that does not),
+      216 panel (the old quick set-up checks replaced by seven for the shortcuts, the market names, the Undo and the
+      notes), 22 chat, the panel-versus-function comparison clean. Looked at in a headless browser at desktop width
+      and in a 390px frame (nothing sticks out); the market-name column was widened for "Asia-Pacific markets".
+      `dashboard_page.py`'s `preset` / `undo` step now exercises the shortcuts.
+    - **The owner's settings at the end** (he asked for them "back how it was"): Balanced, 50 holdings, built up over 1
+      day, a check-in every 3 hours, holdings kept up to 10 days, 17 screeners (one main index a country and crypto),
+      10 holdings a region. Set from outside once more at his word, at 16:48 UTC, after he had stopped clicking.
+    - **Not checked:** the logged-in dashboard itself; a phone. **To see for real:** the log line "settings just changed,
+      left for the next run" the first time he changes a setting within ten minutes of :10 or :40.
