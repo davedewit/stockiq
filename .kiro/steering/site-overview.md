@@ -566,22 +566,36 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   only from 1401px wide (the panel is hidden below that).
 - Every public page footer carries a "General information only, not financial advice …" line.
 - Theme: light/dark by time of day unless the user overrides (`localStorage.theme`).
-- **The market-data sidebar on a phone** (home page and dashboard only; up to 768px wide; the green round button, or a
-  swipe to the left): shown, hidden and dragged by one script for both pages, **`website/mobile-sidebar.js`**
-  (`?v=1`; `window.mobileSidebar`: `open, close, toggle, isOpen, busy, last`). It follows the finger (a quarter of a
-  swipe shows a quarter of it; it can be pushed back in the same touch); let go with a third or more out and it comes out
-  fully, otherwise it slides back; a quick flick decides either way; closing is the same in reverse. **The page behind
-  is only stopped from scrolling (`overflow: hidden` on the body), never given `position: fixed`**: that was the old
-  way and it threw the page to the top. Each page keeps what is its own: `fillMobileSidebar()` moves its two panels
-  into the sidebar and `emptyMobileSidebar()` moves them back; the page's own `toggleMobileSidebar()` /
-  `closeMobileSidebar()` are only a fallback for a page on which the script did not load (the script replaces them).
-  The pages' `handleSwipe` still opens the menu on the left and leaves a touch alone while `mobileSidebar.busy()`.
-  Other code takes the sidebar for open while `#mobile-sidebar-modal` has `style.display === 'block'` (`sidebar.js`,
-  both pages' `renderMarketDataSidebar`): keep that true. A swipe is left to what is under the finger when that is a
-  text box, the portfolio graph (`#pp-chart-svg`), anything marked `data-no-swipe`, or a row that scrolls sideways and
-  has room to go. Test: `node check-tools/mobile_sidebar_check.js index.html dashboard.html` (`LIVE=1` for the site
-  itself). **The menu on the left (☰, or a swipe to the right) still freezes the page the old way** (`body.menu-open`
-  in `styles.css`, `position: fixed !important`, on every page): the same jump to the top, not changed, offered to the owner.
+- **The two panels that slide in on a phone** (up to 768px wide): the **market-data sidebar on the right** (home page and
+  dashboard only; the green round button, or a swipe to the left) and the **menu on the left** (the ☰ button on the
+  eight kinds of page that have it: home, analysis, dashboard, blog, news, sign in, sign up, stock pages; a swipe to
+  the right on the three pages that load the script). **One script moves both: `website/mobile-sidebar.js`** (`?v=2`;
+  loaded by `index.html`, `dashboard.html`, `analysis.html`; `window.mobileSidebar`: `version, open, close, toggle,
+  isOpen, busy, last`). No page has swipe code of its own any more.
+  - **How a panel moves:** it follows the finger (a quarter of a swipe shows a quarter of it; it can be pushed back in
+    the same touch); let go with a third or more out and it comes out fully, otherwise it slides back; a quick flick
+    decides either way; pushing it back works the same in reverse. A sideways finger pushes back the panel that is
+    out, or pulls out the one on that side when both are in (`choose`). A swipe is left to what is under the finger
+    when that is a text box, the portfolio graph (`#pp-chart-svg`), a slider of the analysis page, anything marked
+    `data-no-swipe`, or a row that scrolls sideways and has room to go; and to the page while one of its pop-ups is up.
+  - **The page behind never moves, and must never be given `position: fixed` or a height: that was the old way of
+    stopping it scrolling, and it threw the page to the top.** For the sidebar the script sets `overflow: hidden` on the
+    body. For the menu `styles.css` does it: `body.menu-open { overflow: hidden; position: relative; top: auto; height:
+    auto }`, all `!important`, **which also undoes the `position: fixed` that older page code still writes on the body
+    when ☰ is pressed** (`blog.html`, `news.html`, the stock pages' template in `generate-stock-pages.py`, the home
+    page's own toggle and pop-ups). Those lines were left where they are: the stylesheet wins, so the stock pages
+    needed no regeneration. If a page ever sets it with `setProperty(..., 'important')`, as the dashboard did, the
+    stylesheet loses: do not.
+  - **What each side keeps:** sidebar: the page's `fillMobileSidebar()` / `emptyMobileSidebar()` (move its two panels in
+    and out), and it counts as open while `#mobile-sidebar-modal` has `style.display === 'block'` (`sidebar.js`, both
+    pages' `renderMarketDataSidebar`); the page's own `toggleMobileSidebar()` / `closeMobileSidebar()` are a fallback
+    that the script replaces. Menu: the pages' own `toggleMobileMenu()` / `closeMobileMenu()` stay as they are; the
+    menu is open while `#mobile-menu` has the class `open`; the script drags it by inline `left`, and when it has
+    stopped sets the classes the pages set (shutting goes through the page's `closeMobileMenu()`).
+  - Test: `node check-tools/mobile_sidebar_check.js index.html dashboard.html analysis.html blog.html news.html
+    login.html signup.html stocks/AAPL.html` (`LIVE=1` for the site itself): a finger in headless Chrome at phone
+    size; after every step, that the page has not moved. **Not checked: a real phone; Safari on an iPhone.** The
+    pages without the script (blog, news, sign in, sign up, stock pages) open the menu by ☰ only, as before.
 - Live prices on stock pages (main ticker + "People also watch" cards) come from
   `stock-prices.js` → Lambda `stockiq-popular-prices`, refreshed every 5 s. Pages opened from local files
   show `--` (the proxy only answers the live site), which is expected.
@@ -2397,7 +2411,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
 - Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=33` (`9e0b1dd9aa63`),
-  `dashboard.html` (`b2b7a5019289`), `index.html` (`6f251b365a40`), `mobile-sidebar.js?v=1` (`28652e48d856`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
+  `dashboard.html` (`5f9b9b27945b`), `index.html` (`81ce578a2958`), `analysis.html` (`1e8e226ceaa9`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`3f2f0f83e142`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
   `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
 - Tests on the live files: 442 function, 210 panel, 118 portfolio, 21 chat (13 Oct 2026; they were 110 and 20) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
@@ -3461,3 +3475,15 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     not remembered), 21 chat checks, the stand-in page's `chart:ai` step now reports the lists; looked at in a headless
     browser, desktop and phone width, dark. The chat was asked a real question after the deploy and pointed to "Account"
     or "Show all". **Not checked: the logged-in dashboard itself.**
+  - **The menu on the left works like the sidebar on the right** (section 8, "The two panels that slide in on a phone"), at
+    the owner's word after trying the sidebar on his phone ("the right side is all good"). The menu froze the page the
+    same way, on all eight kinds of page that have it. Fixed in one place, `styles.css` (`body.menu-open` no longer
+    `position: fixed` with a height; its `!important` lines also undo what older page code still writes), so the 3,467
+    stock pages needed no regeneration; `mobile-sidebar.js` (v2) now moves both panels, and `index.html`,
+    `dashboard.html` and `analysis.html` lost their own swipe code. **Checked** with the finger test on the staged
+    files, the local files and the live site: 183 checks over nine pages (home, dashboard, analysis, blog, news, sign
+    in, sign up, two stock pages); the same test fails on the old pages with the jump. **Not checked: a real phone.**
+    Found on the way: a pop-up of the home page uses the same class to stop the page scrolling, so it no longer throws
+    the page to the top either; `script.js` holds a third copy of the menu's open and close code that no page loads.
+    Way back: `git checkout 8074df1e~1 -- styles.css mobile-sidebar.js index.html dashboard.html analysis.html` in `website/`,
+    then upload the five files (that state has the sidebar's fix and not the menu's).
