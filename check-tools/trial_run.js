@@ -33,7 +33,7 @@ ctx.window = new Proxy(ctx, { get: (t, k) => (k in t ? t[k] : undefined), set: (
 vm.createContext(ctx);
 // class declarations are not visible across scripts unless exposed: load auth.js and make authManager global
 vm.runInContext(fs.readFileSync('/Users/dave/VSCODE/website/auth.js', 'utf8') + '\n;try{globalThis.authManager = authManager;}catch(e){}', ctx, { filename: 'auth.js' });
-vm.runInContext(fs.readFileSync('/Users/dave/VSCODE/website/analysis-functions.js', 'utf8'), ctx, { filename: 'analysis-functions.js' });
+vm.runInContext(fs.readFileSync(process.env.FUNCS || '/Users/dave/VSCODE/website/analysis-functions.js', 'utf8'), ctx, { filename: 'analysis-functions.js' });
 if (process.env.TRIAL) {
   usage = Number(process.env.USED || 4); const am = ctx.authManager; am.currentUser = { email: 'trial-user@example.com' };
   am.isAuthenticated = () => true; am.getUserTier = () => 'free'; am.refreshUsageData = async () => {};

@@ -33,7 +33,7 @@ ctx.window = new Proxy(ctx, { get: (t, k) => (k in t ? t[k] : undefined), set: (
 vm.createContext(ctx);
 // class declarations are not visible across scripts unless exposed: load auth.js and make authManager global
 vm.runInContext(fs.readFileSync('/Users/dave/VSCODE/website/auth.js', 'utf8') + '\n;try{globalThis.authManager = authManager;}catch(e){}', ctx, { filename: 'auth.js' });
-vm.runInContext(fs.readFileSync('/Users/dave/VSCODE/website/analysis-functions.js', 'utf8'), ctx, { filename: 'analysis-functions.js' });
+vm.runInContext(fs.readFileSync(process.env.FUNCS || '/Users/dave/VSCODE/website/analysis-functions.js', 'utf8'), ctx, { filename: 'analysis-functions.js' });
 const out = {};
 Object.assign(ctx, { displayResults: (r) => { out.result = r; log(`RESULT displayed (type ${r && r.type}, ${String(r && r.data || '').length} chars)`); }, displayError: (m) => { out.error = m; log('ERROR displayed: ' + m); }, saveAnalysisToHistory: () => log('saveAnalysisToHistory called'),
   showAnonymousUpgradeModal: () => log('showAnonymousUpgradeModal'), startCountdown() {}, clearCountdown() {} });

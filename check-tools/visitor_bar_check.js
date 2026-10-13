@@ -21,13 +21,13 @@ const WHO_AT = 'visitor-check@example.com';
 const sub = { success: true, isTrialActive: true, daysRemaining: 20, hoursRemaining: 483 }, trial = { success: true, isTrialActive: true, dailyLimit: 5, daysRemaining: 2, hoursRemaining: 52 };
 // name: who (signed in or not, the plan in the session, the cached "paid" note), what the functions answer, what the chip must say, the action in its card
 const VISITORS = {
-  anon1:     { used: 0, chip: /^1 free( today)?$/, bad: false, says: /1 of 1 free analysis left today/, act: /signup\.html$/ },
-  anon0:     { used: 1, chip: /^0 free( today)?$/, bad: true, says: /Today’s free analysis is used/, act: /signup\.html$/ },
-  trial3:    { in: true, paid: 'unpaid', status: trial, used: 2, chip: /^3\/5( today)?$/, bad: false, says: /3 of 5 analyses left today.*Free trial: 2d 4h left/, act: /dashboard\.html\?redirect=upgrade#upgrade$/ },
-  trial0:    { in: true, paid: 'unpaid', status: trial, used: 5, chip: /^0\/5( today)?$/, bad: true, says: /0 of 5 analyses left today/, act: /dashboard\.html\?redirect=upgrade#upgrade$/ },
-  expired:   { in: true, paid: 'unpaid', status: { success: true, isTrialActive: false }, used: 0, chip: /^(Trial ended|Expired)$/, bad: true, says: /Your free trial has ended/, act: /dashboard\.html\?redirect=upgrade#upgrade$/ },
-  paid12:    { in: true, paid: 'paid', status: Object.assign({ dailyLimit: 15 }, sub), used: 3, chip: /^12\/15( today)?$/, bad: false, says: /12 of 15 analyses left today.*Subscription: 20d 3h left/, act: null },
-  unlimited: { in: true, paid: 'paid', status: Object.assign({ dailyLimit: 999999 }, sub), used: 40, chip: /^(Unlimited|∞)$/, bad: false, says: /Unlimited analyses/, act: null }
+  anon1:     { pill: null, used: 0, chip: /^1 free( today)?$/, bad: false, says: /1 of 1 free analysis left today/, act: /signup\.html$/ },
+  anon0:     { pill: [/Start 3-Day Free Trial/, /signup\.html$/], used: 1, chip: /^0 free( today)?$/, bad: true, says: /Today’s free analysis is used/, act: /signup\.html$/ },
+  trial3:    { pill: null, in: true, paid: 'unpaid', status: trial, used: 2, chip: /^3\/5( today)?$/, bad: false, says: /3 of 5 analyses left today.*Free trial: 2d 4h left/, act: /dashboard\.html\?redirect=upgrade#upgrade$/ },
+  trial0:    { pill: [/Upgrade Plan/, /dashboard\.html\?redirect=upgrade$/], in: true, paid: 'unpaid', status: trial, used: 5, chip: /^0\/5( today)?$/, bad: true, says: /0 of 5 analyses left today/, act: /dashboard\.html\?redirect=upgrade#upgrade$/ },
+  expired:   { pill: [/Upgrade Plan/, /dashboard\.html\?redirect=upgrade$/], in: true, paid: 'unpaid', status: { success: true, isTrialActive: false }, used: 0, chip: /^(Trial ended|Expired)$/, bad: true, says: /Your free trial has ended/, act: /dashboard\.html\?redirect=upgrade#upgrade$/ },
+  paid12:    { pill: null, in: true, paid: 'paid', status: Object.assign({ dailyLimit: 15 }, sub), used: 3, chip: /^12\/15( today)?$/, bad: false, says: /12 of 15 analyses left today.*Subscription: 20d 3h left/, act: null },
+  unlimited: { pill: null, in: true, paid: 'paid', status: Object.assign({ dailyLimit: 999999 }, sub), used: 40, chip: /^(Unlimited|∞)$/, bad: false, says: /Unlimited analyses/, act: null }
 };
 const args = process.argv.slice(2), PAGES = args.length ? args : ['index.html', 'analysis.html', 'dashboard.html', 'stocks/AAPL.html', 'blog.html'];
 const SIZES = [['desktop', 1500, 900, false], ['narrow', 1024, 800, false], ['phone', 390, 844, true], ['small phone', 320, 640, true]];
@@ -82,7 +82,7 @@ const server = http.createServer((q, r) => {
       return { at: location.pathname, w: window.innerWidth, script: !!window.visitorBar, state: window.visitorBar && window.visitorBar.state(), chip: one('#vb-chip'), text: chip ? chip.textContent : null, cls: chip ? chip.className : null,
         nav: one('.top-nav'), brand: one('.nav-brand'), menu: one('.top-nav .desktop-nav'), burger: one('.hamburger-btn'), bell: one('#mobile-notification-bell'),
         old: old ? { shown: !!box(old), text: old.textContent.replace(/\\s+/g, ' ').trim().slice(0, 70) } : null, yellow: !!document.getElementById('limited-time-banner'),
-        sticky: ['#sticky-register-btn a', '#sticky-upgrade-btn a'].map(one).filter(Boolean),
+        oldButtons: document.querySelectorAll('#sticky-register-btn, #sticky-upgrade-btn').length, pill: one('#vb-pill'), pillText: (document.getElementById('vb-pill') || {}).textContent || null, pillHref: (document.getElementById('vb-pill') || {}).href || null, h: window.innerHeight,
         card: one('#vb-card'), says: card ? card.textContent.replace(/\\s+/g, ' ').trim() : null, act: act ? act.href : null, strip: one('#promo-banner') || one('#sticky-banner') };
     })()`);
     const apart = (a, b) => !a || !b || a.r <= b.l || b.r <= a.l || a.b <= b.t || b.b <= a.t;
@@ -116,7 +116,9 @@ const server = http.createServer((q, r) => {
           check(label + ': it covers nothing in the bar (name, menu, menu button, bell)', apart(s.chip, s.brand) && apart(s.chip, s.menu) && apart(s.chip, s.burger) && apart(s.chip, s.bell), { chip: s.chip, brand: s.brand, menu: s.menu, burger: s.burger, bell: s.bell });
           check(label + ': the old floating badge is not shown', !s.old || !s.old.shown, s.old);
           if (/index/.test(page)) check(label + ': the yellow LIMITED TIME bar is gone', !s.yellow, s.yellow);
-          check(label + ': a round button, if there is one, sits bottom left', s.sticky.every(b => b.l <= 24), s.sticky);
+          const pillPage = /index|analysis/.test(page), wantPill = pillPage ? v.pill : null;
+          check(label + ': the round button is ' + (wantPill ? 'there, bottom left, and goes to the right place' : 'not shown'), wantPill ? !!s.pill && wantPill[0].test(s.pillText || '') && wantPill[1].test(s.pillHref || '') && s.pill.l <= 24 && s.pill.b <= s.h && s.pill.b >= s.h - 80 : !s.pill, { pill: s.pill, text: s.pillText, href: s.pillHref });
+          check(label + ': none of the old round buttons is made any more', s.oldButtons === 0, s.oldButtons);
           // the sentence behind it
           await js(`document.getElementById('vb-chip').click(); 1`); await sleep(250); s = await look();
           check(label + ': a click opens the sentence, on the screen', !!s.card && s.card.l >= 0 && s.card.r <= s.w && s.card.t >= 0, s.card);
@@ -125,6 +127,16 @@ const server = http.createServer((q, r) => {
           if (process.env.SHOTS) { const p = await send('Page.captureScreenshot', { format: 'png' }); fs.writeFileSync(path.join(process.env.SHOTS, `${who}_${page.replace(/[^a-z0-9]/gi, '_')}_${w}.png`), Buffer.from(p.data, 'base64')); }
           await js(`document.body.click(); 1`); await sleep(120); s = await look();
           check(label + ': a click elsewhere shuts it', !s.card, s.card);
+          if (/analysis/.test(page) && size === 'desktop' && typeof await js(`typeof refreshUsageCount`) === 'string' && await js(`typeof refreshUsageCount`) === 'function') {
+            if (who === 'trial3') {                               // one more use is counted: the functions now answer 3 used
+              now = Object.assign({}, v, { used: 3 }); await js(`refreshUsageCount(); 1`); await sleep(1600); s = await look(); now = v;
+              check(label + ': after a use is counted the chip says one fewer', /^2\/5( today)?$/.test(s.text || ''), s.text);
+            }
+            if (who === 'anon1') {                                // the pop-up's "Maybe Later"
+              await js(`showStickyRegisterButton(); 1`); await sleep(300); s = await look();
+              check(label + ': "Maybe Later" in the pop-up leaves the round button', !!s.pill && /Start 3-Day Free Trial/.test(s.pillText || ''), s.pillText);
+            }
+          }
           check(label + ': no script error on the page', errors.length === 0, errors.slice(0, 2));
         }
       }
