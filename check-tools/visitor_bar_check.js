@@ -80,7 +80,7 @@ const server = http.createServer((q, r) => {
       const box = (e) => { if (!e) return null; const r = e.getBoundingClientRect(), c = getComputedStyle(e); return c.display === 'none' || c.visibility === 'hidden' || r.width === 0 ? null : { l: Math.round(r.left), t: Math.round(r.top), r: Math.round(r.right), b: Math.round(r.bottom) }; };
       const one = (q) => box(document.querySelector(q));
       const chip = document.getElementById('vb-chip'), card = document.getElementById('vb-card'), act = card && card.querySelector('a.vb-act'), old = document.getElementById('trial-status-display');
-      return { at: location.pathname, w: window.innerWidth, script: !!window.visitorBar, state: window.visitorBar && window.visitorBar.state(), chip: one('#vb-chip'), text: chip ? chip.textContent : null, cls: chip ? chip.className : null,
+      return { at: location.pathname, w: window.innerWidth, script: !!window.visitorBar, screeners: typeof SHARE_SCREENERS !== 'undefined' && typeof runShareScreener === 'function' ? Object.keys(SHARE_SCREENERS).length : (typeof runAnalysis === 'function' ? 0 : null), state: window.visitorBar && window.visitorBar.state(), chip: one('#vb-chip'), text: chip ? chip.textContent : null, cls: chip ? chip.className : null,
         nav: one('.top-nav'), brand: one('.top-nav .nav-brand'), menu: one('.top-nav .desktop-nav'), burger: one('.hamburger-btn'), bell: one('#mobile-notification-bell'),
         old: old ? { shown: !!box(old), text: old.textContent.replace(/\\s+/g, ' ').trim().slice(0, 70) } : null, yellow: !!document.getElementById('limited-time-banner'),
         oldButtons: document.querySelectorAll('#sticky-register-btn, #sticky-upgrade-btn').length, pill: one('#vb-pill'), pillText: (document.getElementById('vb-pill') || {}).textContent || null, pillHref: (document.getElementById('vb-pill') || {}).href || null, h: window.innerHeight,
@@ -116,6 +116,7 @@ const server = http.createServer((q, r) => {
           check(label + ': it is on the screen', s.chip.l >= 0 && s.chip.r <= s.w, s.chip);
           check(label + ': it covers nothing in the bar (name, menu, menu button, bell)', apart(s.chip, s.brand) && apart(s.chip, s.menu) && apart(s.chip, s.burger) && apart(s.chip, s.bell), { chip: s.chip, brand: s.brand, menu: s.menu, burger: s.burger, bell: s.bell });
           check(label + ': the old floating badge is not shown', !s.old || !s.old.shown, s.old);
+          if (/analysis\.html/.test(page) && s.screeners !== null && fs.existsSync(path.join(WEB || SITE, 'screeners.js'))) check(label + ': the page has its share screeners and the one routine that runs them (' + s.screeners + ')', s.screeners >= 14, s.screeners);
           check(label + ': the name and the menu in the bar do not run into each other', apart(s.brand, s.menu), { brand: s.brand, menu: s.menu });
           if (/index/.test(page)) check(label + ': the yellow LIMITED TIME bar is gone', !s.yellow, s.yellow);
           const pillPage = /index|analysis/.test(page), wantPill = pillPage ? v.pill : null;

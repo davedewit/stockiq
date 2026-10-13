@@ -34,6 +34,8 @@ const ctx = { console: { log() {}, warn() {}, error() {}, info() {} }, setTimeou
 ctx.window = new Proxy(ctx, { get: (t, k) => k in t ? t[k] : undefined, set: (t, k, v) => { t[k] = v; return true; } }); ctx.globalThis = ctx; ctx.self = ctx.window;
 vm.createContext(ctx);
 // FUNCS=<file> runs a staged copy of the page code instead of the one in website/
+// the share screeners' lists and workers live in screeners.js, beside the page code: loaded first, as analysis.html does
+{ const funcs = process.env.FUNCS || '/Users/dave/VSCODE/website/analysis-functions.js', data = require('path').join(require('path').dirname(funcs), 'screeners.js'); if (fs.existsSync(data)) vm.runInContext(fs.readFileSync(data, 'utf8'), ctx, { filename: 'screeners.js' }); }
 vm.runInContext(fs.readFileSync(process.env.FUNCS || '/Users/dave/VSCODE/website/analysis-functions.js', 'utf8'), ctx, { filename: 'analysis-functions.js' });
 Object.assign(ctx, { displayResults: r => { out.result = r; }, displayError: m => { out.error = m; }, saveAnalysisToHistory: () => { blocked.push('saveAnalysisToHistory'); }, isBotOrCrawler: () => false,
   showAnonymousUpgradeModal() {}, showStickyUpgradeButton() {}, startCountdown() {}, clearCountdown() {} });

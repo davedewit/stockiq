@@ -33,6 +33,8 @@ ctx.window = new Proxy(ctx, { get: (t, k) => (k in t ? t[k] : undefined), set: (
 vm.createContext(ctx);
 // class declarations are not visible across scripts unless exposed: load auth.js and make authManager global
 vm.runInContext(fs.readFileSync('/Users/dave/VSCODE/website/auth.js', 'utf8') + '\n;try{globalThis.authManager = authManager;}catch(e){}', ctx, { filename: 'auth.js' });
+// the share screeners' lists and workers live in screeners.js, beside the page code: loaded first, as analysis.html does
+{ const funcs = process.env.FUNCS || '/Users/dave/VSCODE/website/analysis-functions.js', data = require('path').join(require('path').dirname(funcs), 'screeners.js'); if (fs.existsSync(data)) vm.runInContext(fs.readFileSync(data, 'utf8'), ctx, { filename: 'screeners.js' }); }
 vm.runInContext(fs.readFileSync(process.env.FUNCS || '/Users/dave/VSCODE/website/analysis-functions.js', 'utf8'), ctx, { filename: 'analysis-functions.js' });
 const out = {};
 Object.assign(ctx, { displayResults: (r) => { out.result = r; log(`RESULT displayed (type ${r && r.type}, ${String(r && r.data || '').length} chars)`); }, displayError: (m) => { out.error = m; log('ERROR displayed: ' + m); }, saveAnalysisToHistory: () => log('saveAnalysisToHistory called'),
