@@ -3852,6 +3852,37 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     time on this site, since the header's height depends on it.** A second slip, in a test loop: zsh does not split
     `${c##*:}` into words, so "SIZE=… PAID=paid" went in as one setting and three cases silently repeated another's
     result; pass each setting by itself.
+  - **A page starts the same distance under the header with or without the strip** (live 13 Oct 2026, 16:20 UTC), at the
+    owner's word: "a few things change the location of things due to that banner showing or not, eg on the dashboard the
+    'your dashboard' is lower down when the banner isn't showing". Every page with the header was measured for three
+    kinds of visitor (anonymous, signed in without a plan, with the paid note), desktop and phone, with a new tool, kept:
+    **`node check-tools/header_room_check.js [pages]`** (`WEB=<folder>` a staged copy, `SHOTS=<folder>` pictures of each
+    top; pages served from this machine, every other request answered locally, nothing written). What it found, all on a
+    desktop only (a phone never has the strip):
+    - **Dashboard:** for a paying visitor the head script set `--body-padding` to 105px although the strip is hidden and
+      the bar is 64px, so "Your Dashboard" stood 60px under the header instead of 19px. Now 64px above 768px wide
+      (a phone's layout counts on the 105px: with 64px there the title went under the bar, which the tool caught before
+      anything was live). The room left when the page scrolls to `#upgrade` or the history
+      (`scroll-margin-top: 120px`) follows the header as well: `calc(var(--body-padding, 105px) + 15px)`.
+    - **Stock pages, the other way round:** they leave 105px whoever is looking, so with the strip showing the title sat
+      4px under the bar and without it 45px. Fixed without regenerating them: one rule in `styles.css`,
+      `main:has(> div > #live-ticker) { margin-top: var(--nav-top, 0px) !important; }` (the pages' own script sets
+      `--nav-top` to the strip's 41px or to 0; `#live-ticker` is only on stock pages). 45px either way now. **The
+      template in `generate-stock-pages.py` was not changed and does not need to be; if it ever sets a top margin on
+      its `<main>`, this rule still wins.** A browser without `:has()` (before 2022-23) shows it as before.
+    - **Sign-up page:** for a paying visitor the bar hung 41px below the top with nothing above it; its script now sets
+      `--nav-top` 0 and `--body-padding` 64px for that case on a desktop.
+    - Right already: the home page, the analysis page, and the 15 pages without the strip.
+    **The rule to keep:** the header is 105px tall with the strip and 64px without it, on a desktop; `--nav-top` and
+    `--body-padding` must say so together, in every page's own head script (they have to be set before the page is
+    drawn, which is why this is not in one shared script). Run `header_room_check.js` after any change to a page's top.
+    **Seen and left:** the menu bar covers the last 4px of the strip on every page that has it (the strip is 45px tall,
+    the bar starts at 41px); `#ap-coming` in `practice-autopilot.js` still has a fixed `scroll-margin-top: 120px`.
+    `pricing_link_check.js` takes `PAGE=` and `TARGET=` now (`PAGE=dashboard.html TARGET=upgrade DIRECT=1 PAID=paid`: 14px
+    under the header for both kinds of visitor). **Not checked: a real signed-in account (made-up sessions), a real phone.**
+    Website commit `e6e1fd3a`; to go back, `git revert` it and upload the three files. **The other window deployed the
+    last four screeners while this was staged, which changed `dashboard.html`: the fingerprint check would have stopped
+    the stale copy; it was staged again on the new file.**
   - **Two more screeners: Italy FTSE MIB (40) and Spain IBEX 35 (35)**, live 11:47 UTC, 13 Oct 2026, by the same steps and
     again **data only on the page** (two entries in `screeners.js`, two buttons). 8 workers created
     (`stockiq-europe-4-5-worker-1..4`, `stockiq-europe-4-6-worker-1..4`); coordinator `8QIBorce…` (rollback zip

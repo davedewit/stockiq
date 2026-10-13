@@ -364,3 +364,12 @@ where the header has slid away, as on a phone scrolling down, within 60px of the
 only read go through, everything else is answered locally. `SIZE=390x844` a phone's size; `DIRECT=1` opens
 `index.html#pricing` as a link from another page does; `PAID=paid|unpaid` a signed-in visitor (a made-up address);
 `WEB=<folder>` a staged or local copy served from this machine; `WAIT=<ms>` when the click comes; `SHOT=<file.png>`.
+`PAGE=dashboard.html TARGET=upgrade DIRECT=1 PAID=paid` measures another page's section the same way.
+
+## Does a page start the same distance under the header with or without the strip?
+
+`node header_room_check.js [pages]` opens every page that has the header (and one stock page) as an anonymous visitor,
+a signed-in one without a plan and one with the paid note, at desktop and phone size, and prints where the strip and
+the menu bar sit and how far under the header the first heading starts. FAIL when the bar is not flush or when one
+kind of visitor sees the content at a different distance than another. Pages are served from this machine
+(`WEB=<folder>` for a staged copy), every other request is answered locally; `SHOTS=<folder>` keeps a picture of each top.

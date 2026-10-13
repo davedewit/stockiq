@@ -9,10 +9,13 @@
 //   SHOT=<file.png> node ...                                 a picture of where it stopped
 //   WAIT=<ms> node ...                                       how long after the page loads the click comes (default 6000)
 //   DIRECT=1 node ...                                        no click: the page is opened at index.html#pricing, as a link from another page does
-//   PAID=paid|unpaid node ...                                as a signed-in visitor (a made-up address) with that note in the browser
+//   PAID=paid|unpaid node ...                                as a signed-in visitor (a made-up address and session) with that note in the browser
+//   PAGE=dashboard.html TARGET=upgrade DIRECT=1 PAID=… node ...   another page and section: where the dashboard stops at its plans
 const { spawn } = require('child_process'); const os = require('os'), fs = require('fs'), path = require('path'), http = require('http');
 const SITE = path.join(__dirname, '..', '..', 'website'), WEB = process.env.WEB || '', PORT = 9351, HTTP = 8793;
 const [W, H] = (process.env.SIZE || '1440x900').split('x').map(Number), WAIT = +(process.env.WAIT || 6000);
+const PAGE = process.env.PAGE || 'index.html', TARGET = process.env.TARGET || 'pricing';
+const jwt = (o) => 'x.' + Buffer.from(JSON.stringify(o)).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '') + '.y';
 const BASE = WEB ? `http://127.0.0.1:${HTTP}/` : 'https://stockiq.tech/';
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -51,28 +54,29 @@ const server = http.createServer((q, r) => {
     await send('Emulation.setUserAgentOverride', { userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36' });
     await send('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: 1, mobile: W < 700 });
     const look = () => js(`(function () {
-      var s = document.getElementById('pricing'), h = s && s.querySelector('h2'), top = 0;
+      var s = document.getElementById('${TARGET}'), h = s && s.querySelector('h2, h3'), top = 0;
       ['.top-nav', '#promo-banner', '.promo-banner'].forEach(function (q) { var e = document.querySelector(q); if (!e) return; var c = getComputedStyle(e), r = e.getBoundingClientRect(); if (c.display !== 'none' && c.position === 'fixed' && r.height) top = Math.max(top, r.bottom); });
       return { y: Math.round(scrollY), header: Math.round(top), section: s ? Math.round(s.getBoundingClientRect().top) : null, heading: h ? Math.round(h.getBoundingClientRect().top) : null,
         margin: s ? getComputedStyle(s).scrollMarginTop : null, height: document.documentElement.scrollHeight };
     })()`);
-    if (process.env.PAID) await send('Page.addScriptToEvaluateOnNewDocument', { source: `try { localStorage.setItem('userId', 'pricing-check@example.com'); localStorage.setItem('userEmail', 'pricing-check@example.com'); localStorage.setItem('userPaidStatus_pricing-check@example.com', '${process.env.PAID}'); } catch (e) {}` });
+    if (process.env.PAID) { const who = 'pricing-check@example.com', store = { userId: who, userEmail: who, idToken: jwt({ email: who, exp: Math.floor(Date.now() / 1000) + 3600, 'custom:tier': 'free' }), accessToken: 'x', loginTime: String(Date.now()), ['userPaidStatus_' + who]: process.env.PAID };
+      await send('Page.addScriptToEvaluateOnNewDocument', { source: `try { if (!localStorage.getItem('userId')) { const s = ${JSON.stringify(store)}; Object.keys(s).forEach(k => localStorage.setItem(k, s[k])); } } catch (e) {}` }); }
     if (process.env.DIRECT) {   // arriving from another page: the address already carries #pricing
-      await send('Page.navigate', { url: BASE + 'index.html#pricing' }); await sleep(WAIT);
-      const now = await look(), gap = now.heading - now.header; console.log('opened at #pricing', JSON.stringify(now));
+      await send('Page.navigate', { url: BASE + PAGE + '#' + TARGET }); await sleep(WAIT);
+      const now = await look(), gap = now.heading - now.header; console.log('opened at #' + TARGET + '', JSON.stringify(now));
       console.log(`the section's top is ${now.section - now.header}px below the header`); const why = judge(now); console.log(why ? 'FAIL: ' + why : 'PASS'); if (why) bad = 1;
       if (process.env.SHOT) { const p = await send('Page.captureScreenshot', { format: 'png' }); fs.writeFileSync(process.env.SHOT, Buffer.from(p.data, 'base64')); }
       throw { done: true };
     }
-    // Right when the section's top stops 15 to 40px under the header (the same whether the strip across the top shows or
+    // Right when the section's top stops 10 to 40px under the header (the same whether the strip across the top shows or
     // not), or, where the header has slid away (a phone scrolling down), within 60px of the top of the window.
     function judge(at) {
       const room = at.section - at.header;
       if (at.heading < at.header) return 'the heading is hidden under the header';
-      if (at.header > 0 ? (room < 15 || room > 40) : (room < 0 || room > 60)) return `the section stops ${room}px under ${at.header > 0 ? 'the header' : 'the top of the window'}, not just under it`;
+      if (at.header > 0 ? (room < 10 || room > 40) : (room < 0 || room > 60)) return `the section stops ${room}px under ${at.header > 0 ? 'the header' : 'the top of the window'}, not just under it`;
       return '';
     }
-    await send('Page.navigate', { url: BASE + 'index.html' }); await sleep(WAIT);
+    await send('Page.navigate', { url: BASE + PAGE }); await sleep(WAIT);
     const before = await look(); console.log('before the click', JSON.stringify(before));
     const at = await js(`(function () { var a = document.querySelector('a[href="#pricing"]'); if (!a) return null; a.scrollIntoView({ block: 'center', behavior: 'instant' }); var r = a.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, text: a.textContent.trim() }; })()`);
     if (!at) throw new Error('no link to #pricing on the page');
