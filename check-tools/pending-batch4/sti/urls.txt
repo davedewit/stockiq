@@ -1,0 +1,3 @@
+https://n4htemmu2fi4aysqdl7rwqmpju0nibtz.lambda-url.us-east-1.on.aws/
+https://fexjjml7pdytbj7fl7prbno5fa0azrao.lambda-url.us-east-1.on.aws/
+https://5ueaypamz64ayeqmcra7wjfxmu0pvcen.lambda-url.us-east-1.on.aws/
