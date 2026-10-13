@@ -9,7 +9,7 @@
 - ✅ Trial system: 15 analyses over 3 days. Plans: Starter $4.99, Pro $14.99, Elite $49.99
 - ✅ AI Stock Chat (GPT-4o-mini; home page, blog, dashboard and stock pages; on the dashboard it knows the user's own practice portfolio and autopilot)
 - ✅ SEO: ~957 large-cap pages indexed (≥$10B, moves a little each day), WebPage + Corporation schema, GA4
-- ✅ Screeners: US (S&P, Russell, NASDAQ, Dow), ASX 50/100/200/300, UK FTSE 100, Germany DAX 40, France CAC 40, Netherlands AEX, Canada TSX 60, Italy FTSE MIB, Spain IBEX 35, Hong Kong Hang Seng, Singapore STI (all eight 13 Oct 2026), Japan Nikkei 225, crypto (540 coins)
+- ✅ Screeners: US (S&P, Russell, NASDAQ, Dow), ASX 50/100/200/300, UK FTSE 100, Germany DAX 40, France CAC 40, Netherlands AEX, Canada TSX 60, Italy FTSE MIB, Spain IBEX 35, Switzerland SMI, Hong Kong Hang Seng, Singapore STI, India Sensex, South Korea KOSPI 200, Brazil Bovespa (all twelve 13 Oct 2026), Japan Nikkei 225, crypto (540 coins)
 - ✅ Bot/subnet protection on anonymous usage tracker
 - ✅ Oct 2026 full check and repair: every screener and analysis button tested end to end; index lists
   rebuilt from current members; crypto coin list and matching replaced; neutral "describe, don't advise"
@@ -29,8 +29,8 @@ new features and growth work.
 DynamoDB `stockiq-price-alerts`, Lambda checker (EventBridge hourly), email via Cognito.
 Uses existing email infrastructure, cost $0/month. See old roadmap for full spec.
 
-### 2. Screeners — India BSE Sensex, South Korea KOSPI (MEDIUM)
-See `add-new-screener.md` for complete process. Four buttons are still "Coming Soon" (India, Switzerland, Brazil, South Korea); each needs a small code change as well as data: `site-overview.md` section 13, the last screener entry of 13 Oct 2026.
+### 2. Screeners (DONE 13 Oct 2026)
+All twelve "Coming Soon" screeners are live (27 screeners in all). A further market is the steps of `add-new-screener.md`. Not done: the autopilot buys from none of the twelve.
 
 ### 3. Backlinks (ONGOING)
 4-5 backlinks as of March 2026 (X, StockTwits, TradingView, Medium). See `backlinks-progress.md`.

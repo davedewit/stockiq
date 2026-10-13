@@ -4,6 +4,14 @@ How to add a share screener for another market, written so that a new session ca
 The worked example is **Germany (DAX 40)**; India (BSE Sensex) and South Korea (KOSPI) follow the same steps with the
 differences listed in step 1.
 
+**All twelve "Coming Soon" screeners were built from this guide on 13 Oct 2026** (the table at the end; their stories, with
+where each list came from, are in `site-overview.md` section 13). The step 1 table's India and Korea columns are what was
+planned; what was built differs (India on `.NS`, Korea as the KOSPI 200, groups `5-6` and `5-7`). Three things that
+run taught beyond the DAX: **a price at the proxy does not prove the worker can score a share** (run
+`workers/stock_worker.py` on a few symbols before choosing between two suffixes); **a currency without a sign in the
+money rule prints as "CHF 77.30"**, which the tracker reads since that day; and **a symbol may hold an "&"**, which the
+report writers and the tracker now handle.
+
 **The DAX 40 was built from this guide on 13 Oct 2026 and is live**, so the example below is also the record of a
 real one (its story: `site-overview.md` section 13). What that run changed in the guide: `workers/create_group.py` has
 now created functions for real and worked as written; on the page a new market needs **no formatter and no lookups**,
@@ -235,9 +243,10 @@ Search for `japan_screener` and `Japan Nikkei`; add the German line beside each:
   `'analysis.html?option=5&subOption=dax40&autorun=true'` (Japan has both names)
 - `processAnalysisGroup()` ("Run in Background"): `} else if (analysisType === 'germany_screener') { endpoint = coordinatorUrl; payload = { option: '5', subOption: 'dax40', userId }; }`
 - `TOP10_BENCHMARKS`: `[/DAX/i, '^GDAXI', 'DAX 40 index'],` (the index the Top 10 popup compares with)
-- **The tracker's money signs.** The two patterns in `parseScreenerTop10` accept `$ £ € ¥ ₹ ₩` before the number, or a
-  number followed by `p` (pence). Any other sign must be added to **both** patterns and to the copy in
-  `check-tools/page_run.js`.
+- **The tracker's money signs.** The two patterns in `parseScreenerTop10` accept `$ £ € ¥ ₹ ₩` before the number, a
+  number followed by `p` (pence), or a three-letter currency code, a space and a number with two decimals ("CHF 77.30":
+  what the money rule writes for a currency it has no sign for). So a new currency needs nothing here; a new *sign*
+  must be added to **both** patterns and to the copy in `check-tools/page_run.js`.
 
 The page has inline scripts: after editing, check each `<script>` block still parses (`node --check`), section 8c.
 
@@ -339,7 +348,10 @@ notification), and a real phone.
 | Spain IBEX 35 (13 Oct 2026) | `5, 'ibex35'` | `5-ibex35` | `stockiq-europe-4-6-worker` | 4 | 35 | `.MC` | EUR |
 | Hong Kong Hang Seng (13 Oct 2026) | `5, 'hangseng'` | `5-hangseng` | `stockiq-asia-5-8-worker` | 10 | 95 | `.HK` (the code as four digits: `0005.HK`) | HKD |
 | Singapore STI (13 Oct 2026) | `5, 'sti'` | `5-sti` | `stockiq-asia-5-9-worker` | 3 | 30 | `.SI` | SGD (three members in USD) |
-| India BSE Sensex | `5, 'sensex'` | `5-sensex` | `stockiq-asia-5-6-worker` | 3 | 30 | `.BO` or `.NS` | INR |
+| Switzerland SMI (13 Oct 2026) | `5, 'smi'` | `5-smi` | `stockiq-europe-4-7-worker` | 2 | 20 | `.SW` | CHF (printed "CHF 77.30": no sign) |
+| India Sensex (13 Oct 2026) | `5, 'sensex'` | `5-sensex` | `stockiq-asia-5-6-worker` | 3 | 30 | `.NS` (the NSE listing: `.BO` data is too patchy for the worker); one symbol holds an "&", `M&M.NS` | INR |
+| South Korea KOSPI 200 (13 Oct 2026) | `5, 'kospi200'` | `5-kospi200` | `stockiq-asia-5-7-worker` | 21 | 200 | `.KS` (six characters, letters possible) | KRW |
+| Brazil Bovespa (13 Oct 2026) | `5, 'bovespa'` | `5-bovespa` | `stockiq-americas-6-2-worker` | 8 | 76 | `.SA` | BRL (printed "BRL 56.86": no sign) |
 | Crypto | `7, 'coinspot'` | `7-1` | orchestrator + 54 `stockiq-option-7-1-worker` in single-coin mode | 54 | 540 coins | `-USD`, sometimes a numbered ticker | USD |
 
 The Russell 1000 / 2000 page runs send a worker number and no stocks; those workers take their ten from `lists.txt` in

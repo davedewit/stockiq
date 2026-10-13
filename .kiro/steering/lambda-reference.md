@@ -1,7 +1,7 @@
 # Lambda Reference
 
 ## Overview
-- 1,022 functions (1,007 with Function URLs; 984 / 969 before the 38 workers of the eight screeners added on 13 Oct 2026): ~50 named functions, ~650 stock screener workers, 54 crypto workers, plus old/unused ones
+- 1,056 functions (1,041 with Function URLs; 984 / 969 before the 72 workers of the twelve screeners added on 13 Oct 2026): ~50 named functions, ~650 stock screener workers, 54 crypto workers, plus old/unused ones
 - **The share-screener workers' code is in git: `stockiq/workers/`** (one file, `stock_worker.py`, for all 669 workers in 13 groups since 11 Oct 2026; build, proof and deploy tools beside it; `site-overview.md` section 8b, "The worker groups"). Change it there, never in the console or in `lambda-sync/`.
 - **Other Lambda code is not in git, and the daily backup leaves `lambda-sync/` out** (`site-overview.md` section 3). A full copy of all 984 functions as they were on 11 Oct 2026 (12:20 UTC) is in `~/VSCODE/backup/lambda_full_20261011_before_one_worker_code/`.
 - **Other Lambda code is not in git.** `lambda-sync/` is a gitignored mirror that keeps one copy per worker group. Before changing a Lambda, download the live code, diff it with the mirror, and keep the old zip in `~/VSCODE/backup/`
@@ -77,6 +77,10 @@ more if the list is long) and returns 48 data fields per stock: no report text. 
 | `stockiq-europe-4-6-worker-1..4` | 4 | **Spain IBEX 35** (13 Oct 2026) | 35 |
 | `stockiq-asia-5-8-worker-1..10` | 10 | **Hong Kong Hang Seng** (13 Oct 2026) | 95 |
 | `stockiq-asia-5-9-worker-1..3` | 3 | **Singapore STI** (13 Oct 2026) | 30 |
+| `stockiq-europe-4-7-worker-1..2` | 2 | **Switzerland SMI** (13 Oct 2026) | 20 |
+| `stockiq-asia-5-6-worker-1..3` | 3 | **India Sensex** (13 Oct 2026; NSE listings) | 30 |
+| `stockiq-asia-5-7-worker-1..21` | 21 | **South Korea KOSPI 200** (13 Oct 2026) | 200 |
+| `stockiq-americas-6-2-worker-1..8` | 8 | **Brazil Bovespa** (13 Oct 2026) | 76 |
 | `stockiq-option-3-1-worker` (10), `3-2` (100), `3-4` (150), `3-5` (100), `3-6` (200), `3-7` (10), `3-8` (3) | ~570 | S&P 100, S&P 400+600, S&P 1500, Russell 1000 (its first 50 also serve S&P 500), Russell 2000, NASDAQ 100, Dow 30 | see `site-overview.md` 8b |
 | `stockiq-option-7-1-worker-1..54` | 54 | Crypto (since 11 Oct 2026 each asks for 90 days of prices so that MACD can be worked out: `site-overview.md` 8b). Takes `{"coin_list": [...]}` (ten coins a call from the orchestrator) or `{"single_coin": "..."}`; with neither it answers that there is nothing to analyse (the old built-in list is gone). | 540 coins |
 | `stockiq-option-7-2-worker-1` | 1 | **Unused since 12 Oct 2026**: single-coin analysis now comes from `stockiq-option-1-1-custom-analysis` (`"asset": "crypto"`) | – |

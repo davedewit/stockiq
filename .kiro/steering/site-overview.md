@@ -48,7 +48,7 @@ changing what it buys from, or stopping, instead of tuning without end.
 ```
 Browser ──> CloudFront (EHXV50CPHY07R, www→apex redirect function)
               └─> S3 bucket stockiq-final-websitebucket-vqekic7enf9h (static files)
-Browser ──> Lambda function URLs directly (no API Gateway; 1,022 functions, 1,007 with URLs, ~680 are screener workers)
+Browser ──> Lambda function URLs directly (no API Gateway; 1,056 functions, 1,041 with URLs, ~715 are screener workers)
               ├─ analysis-functions.js: single-stock report, signals, screener workers, charts
               ├─ index/dashboard/sidebar: market data, gainers/losers/trending, email capture
               └─ auth.js: usage/trial trackers
@@ -705,6 +705,10 @@ crypto orchestrator or any worker.
 | **Spain IBEX 35** (since 13 Oct 2026) | `5, 'ibex35'` | `5-ibex35` | `stockiq-europe-4-6-worker-N` (4) | 35 | The Madrid exchange's own list of main-market companies (read 13 Oct 2026) |
 | **Hong Kong Hang Seng** (since 13 Oct 2026) | `5, 'hangseng'` | `5-hangseng` | `stockiq-asia-5-8-worker-N` (10) | 95 | Chinese Wikipedia (composition of 7 September 2026; the English page still had the 88 of January) |
 | **Singapore STI** (since 13 Oct 2026) | `5, 'sti'` | `5-sti` | `stockiq-asia-5-9-worker-N` (3) | 30 | Wikipedia (2 May 2026; FTSE Russell's June and September 2026 reviews changed no member) |
+| **Switzerland SMI** (since 13 Oct 2026) | `5, 'smi'` | `5-smi` | `stockiq-europe-4-7-worker-N` (2) | 20 | German Wikipedia (13 Oct 2025) with the changes of 21 Sept 2026 (Galderma and Sandoz in, Swisscom and Kühne+Nagel out). Roche is `RO.SW` (its bearer share): the index holds the Genussschein, `ROG.SW`, which the price source did not answer for |
+| **India Sensex** (since 13 Oct 2026) | `5, 'sensex'` | `5-sensex` | `stockiq-asia-5-6-worker-N` (3) | 30 | Wikipedia's list of Sensex companies (latest change Dec 2025; the June 2026 review changed nothing). **Priced by the NSE listings (`.NS`)**: with `.BO` the worker got no usable history for some members (RELIANCE.BO, M&M.BO) |
+| **South Korea KOSPI 200** (since 13 Oct 2026) | `5, 'kospi200'` | `5-kospi200` | `stockiq-asia-5-7-worker-N` (21) | 200 | The holdings of the KODEX 200 index fund on 13 Oct 2026 (the exchange's own lists need a login now). One holding left out: `0220W0.KS`, a new spin-off with too little history to score |
+| **Brazil Bovespa** (since 13 Oct 2026) | `5, 'bovespa'` | `5-bovespa` | `stockiq-americas-6-2-worker-N` (8) | 76 | The São Paulo exchange's own portfolio of the Ibovespa, 13 Oct 2026 |
 | Crypto universe | `7, 'coinspot'` | `7-1` | orchestrator + 54 `stockiq-option-7-1-worker-N` | 540 coins | CoinGecko top by market cap, price-checked |
 | Single coin | `72, 'single'` | – | the single-stock report function, `"asset": "crypto"` (since 12 Oct 2026; section 7) | – | – |
 
@@ -791,7 +795,7 @@ its worker addresses written inside it.
 ### The worker groups: one file for every share screener (done 11 Oct 2026)
 
 The owner asked whether the screeners "all share the same function", and for it to be made simpler to manage. They did
-not; now they do. **All 707 share-screener workers (21 groups: 669 in 13 until 13 Oct 2026, when eight screeners were added: DAX 40 four workers, CAC 40 four, AEX three, TSX 60 six, FTSE MIB four, IBEX 35 four, Hang Seng ten, STI three) run the same package, built from `stockiq/workers/` in git.**
+not; now they do. **All 741 share-screener workers (25 groups: 669 in 13 until 13 Oct 2026, when twelve screeners were added: DAX 40 four workers, CAC 40 four, AEX three, TSX 60 six, FTSE MIB four, IBEX 35 four, Hang Seng ten, STI three, SMI two, Sensex three, KOSPI 200 twenty-one, Bovespa eight) run the same package, built from `stockiq/workers/` in git.**
 Checked at the end by downloading every package: one set of four files in all 669, byte for byte the files in git.
 
 | In `stockiq/workers/` | What it is |
@@ -813,7 +817,7 @@ run that group's button through the page and the coordinator (end of this sectio
 remove the folder. `python3 check-tools/workers.py` must show "one" for the 13 groups and the same code across them
 (`--contents` downloads and compares, the honest count).
 
-- **966 worker functions in 26 groups; 761 are called by the site** (707 share workers, 54 crypto workers; 928 / 18 / 723 before the eight screeners of 13 Oct 2026). **205 are not
+- **1,000 worker functions in 30 groups; 795 are called by the site** (741 share workers, 54 crypto workers; 928 / 18 / 723 before the twelve screeners of 13 Oct 2026). **205 are not
   called by the site now** (the single-coin worker since 12 Oct 2026, and `stockiq-option-3-3-worker` 60, `stockiq-option-7-4-worker` 139,
   `stockiq-option-3-worker` 5). They cost nothing idle, were not touched and hold old code. **"Not called by the site" is
   not "never used"**: counted on 12 Oct, the 3-3 group was the S&P 500 path until 11 Sep 2026; only the 7-4 group has no
@@ -990,7 +994,7 @@ The owner asked for the "junky" items to be looked at: "Choose from presets" and
   price at the start of each numbered line. Do not change that part of a line.
 - Stock pattern: `N. SYMBOL <up to 40 chars> PRICE`, symbols 1–10 characters with an optional `.XX` or `-X`
   suffix. **The price is either a currency sign and a number, or a number of pence** (since 11 Oct 2026): `$118.39`,
-  `A$8.43`, `¥5,613.00`, `€48.76`, `503.80p`; thousands commas are allowed; signs read: `$ £ € ¥ ₹ ₩`. The older forms in
+  `A$8.43`, `¥5,613.00`, `€48.76`, `503.80p`; thousands commas are allowed; signs read: `$ £ € ¥ ₹ ₩`. **Since 13 Oct 2026 also a currency code and a number, "CHF 77.30", "BRL 56.86"** (three capitals, a space, a number with two decimals: what the money rule writes for a currency it has no sign for), **and a symbol may hold an "&"** (`M&M.NS`; in the report it is written `M&amp;M.NS`, and the parser turns `&amp;` back into "&" before it clears other entities). Check for both parsers at once: the old and the new read every saved report in `check-tools/` alike. The older forms in
   saved reports are still read (`£2614.00`, which always meant pence, `$AUD8.43`, and a background ASX symbol cut to
   `AGL.A`). `check-tools/page_run.js` has a copy of this pattern for its own count: change the two together.
 - **One money rule in three places that must stay alike:** `screenerMoney(stock, value, fallback)` in
@@ -2565,15 +2569,15 @@ preview from Kiro): ask early when a change "does not show" (section 9).
 
 **What is live, and how to confirm nothing has moved since** (all compared with the local copies on 12 Oct, 10:17 UTC):
 - `stockiq-ai-trader` `0tynNBjnvnTkUmLZGPBc+v6CGxabNKGgNCaQE95YYUE=` (3,079 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC, a holding's own stop kept with the buy 16:51 UTC, the build-up that leaves out what is invested 17:25 UTC); `stockiq-ai-chat`
-  `Ogr84Q5NISc0OBpyR+I9rOLafnozV9VZRechmUvIoaw=` (since 13 Oct 2026, 10:43 UTC); `stockiq-price-proxy` `lzqBC+6a/h51byePPZpa+e29ACnMZGPQp+TEt2SQJ8g=`; `stockiq-screener-coordinator` `UXE1lzC4BhuDBHm+4Fbo0jq9h8PX33ywmHCv8hpRnyE=` (since 13 Oct 2026, 15:40 UTC, with the eight screeners added that day);
+  `Ogr84Q5NISc0OBpyR+I9rOLafnozV9VZRechmUvIoaw=` (since 13 Oct 2026, 10:43 UTC); `stockiq-price-proxy` `lzqBC+6a/h51byePPZpa+e29ACnMZGPQp+TEt2SQJ8g=`; `stockiq-screener-coordinator` `979X4yAm37f76T4RQfYT8ClqaR9P8NO0r+5LeqgDK7A=` (since 13 Oct 2026, 16:11 UTC, with the twelve screeners added that day);
   `stockiq-option-1-1-custom-analysis` `I84SxSgLYNt7…`; `stockiq-chart-generator` `OIDrZ2W9G3lJ…`; `stockiq-paper-portfolio`
   `s6IR+/80N/3k…`; the two signals functions `6nVDLm4/8G6K…`; the crypto orchestrator `yvmucU37gHJH…` and its 54 workers
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
 - Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=35` (`77079a71f71a`),
-  `dashboard.html` (`68a16ffb0d2d`), `index.html` (`54bf634024cc`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`19b6b70ca45e`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
-  `analysis-functions.js` (`9ed44ac08e95`), `screeners.js` (`c7baf843bc3b`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
+  `dashboard.html` (`72cb5b0dd16c`), `index.html` (`d494290d2ba9`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`195cd61666ca`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
+  `analysis-functions.js` (`0207a09e771b`), `screeners.js` (`4512115ab389`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
 - Tests on the live files: 442 function, 210 panel, 130 portfolio, 22 chat (13 Oct 2026, after the fund's line; they were 118 and 21) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
@@ -3044,15 +3048,15 @@ Needs the owner's decision or more work (nothing here is fixed):
 - **Email signup:** the endpoint is public (a bot could flood signups and notification emails),
   the Lambda has no CloudWatch log group, and nothing is sent to subscribers yet.
 - **The site's wording (rewritten 13 Oct 2026; section 13): what it now says, so that it stays true.** The numbers on the
-  home page are each checkable and must be changed with what they count: **23** screeners (15 until 13 Oct 2026, when the DAX 40, CAC 40, AEX, TSX 60, FTSE MIB, IBEX 35, Hang Seng and STI were added; the table in section 8b),
+  home page are each checkable and must be changed with what they count: **27** screeners (15 until 13 Oct 2026, when twelve were added and the last "Coming Soon" button went; the table in section 8b),
   **1,800+** stocks in the largest (Russell 2000: 1,829), **540** coins, **$100,000** practice money; the FAQ says "more
   than 700 small programs working side by side" (723 worker functions are called by the site). The home page's cards
   and the About page list what the site does: add a card and a line when something is added. Gone, and not to come
   back: "institutional-grade", "professional-grade", "real-time", "2000+ stocks in seconds", "15+ indicators",
   "AI-generated signals", "pattern recognition", any table against named competitors. The FAQ's first two answers
   are also in its structured data (`FAQPage`), and `investment-research-tools.html` has four such pairs: **change the
-  visible answer and the structured one together.** Still as they were: `analysis.html` shows 12 "Coming Soon"
-  screener buttons; the guides' own body text (general education, not claims about StockIQ).
+  visible answer and the structured one together.** Still as they were: the guides' own body text (general education, not
+  claims about StockIQ). `analysis.html` has had no "Coming Soon" screener button since 13 Oct 2026 (there were 12).
 - Guides are ~800 words of definitions with no worked examples.
 - `uniqueSymbolsCount` constants in `saveAnalysisToHistory` (`analysis-functions.js`) still use
   the old list sizes (bookkeeping only).
@@ -3913,3 +3917,44 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     4. **South Korea (KOSPI):** the button says "KOSPI", which has about 900 members: decide the list first (KOSPI 50 or
        KOSPI 200; 200 would be 20 workers).
     The autopilot buys from none of the eight screeners added on 13 Oct.
+  - **The last four screeners: Switzerland SMI (20), India Sensex (30), South Korea KOSPI 200 (200), Brazil Bovespa (76)**,
+    live 16:11 UTC, 13 Oct 2026, at the owner's word ("please resume and complete all the screeners"). **No button says
+    "Coming Soon" any more: 27 screeners** (26 share screeners and crypto). 34 workers created
+    (`stockiq-europe-4-7-worker-1..2`, `stockiq-asia-5-6-worker-1..3`, `stockiq-asia-5-7-worker-1..21`,
+    `stockiq-americas-6-2-worker-1..8`); coordinator `979X4yAm…` (rollback zip `…_before_batch5_20261013.zip`);
+    website commit `25729035`. Unlike the eight before, these needed code:
+    - **A symbol with an "&"** (India's `M&M.NS`). Reports are put on the page as HTML and the dashboard's tracker clears
+      everything from an "&" to the next ";". Now `formatMarketResult` writes a symbol through `reportText` (three
+      lines), the coordinator writes `&amp;` in its two report lines, and `parseScreenerTop10` reads `&amp;` as "&" and
+      allows it in a symbol. Price requests were already encoded (`encodeURIComponent`), except one in
+      `trackPerformance`, which is now. **The old parser read that line as "M" (another company).**
+    - **Francs and reais.** The money rule has no sign for them and writes "CHF 77.30" / "BRL 56.86" (page,
+      coordinator and single-stock report alike, untouched). The tracker now reads that form (section 8b, "Dashboard
+      performance tracker"). **A sign for reais ("R$") would be one entry in each of the three money tables**; left
+      for a time when the report function is being changed anyway (it holds a key in its code).
+    - **Proved not to disturb what exists:** the old and the new parser run on the 52 saved reports of every existing
+      screener in `check-tools/` (read the same), and on a made-up report with every price form (pence, A$, HK$, C$,
+      €, ₹, ₩, CHF, BRL, a signals line with "AT&T"); seven existing screeners through the old and the new page script
+      (`screener_equiv.js`: the same requests, reports and CSV). `page_run.js` carries the new pattern.
+    - **The lists, and what they taught.** *SMI:* the newest full list was a year old; SIX's review of September 2026
+      was found by a search and applied (two in, two out). Roche's Genussschein `ROG.SW` did not answer at the price
+      source, so the list has the bearer share `RO.SW`: the same company, another share class; put `ROG.SW` back if it
+      answers again. *Sensex:* **Yahoo's Bombay data is too patchy for the worker** (it returned nothing for
+      RELIANCE.BO and M&M.BO while the price proxy answered for both: **a price at the proxy does not prove the worker
+      can score a share; run `workers/stock_worker.py` on a few before choosing a suffix**); the NSE listings work for
+      all 30. *KOSPI:* the button said "KOSPI" (about 900 shares); the exchange's lists need a login since some time in
+      2026 and Wikipedia's KOSPI 50 is of 2022, so the list is **the KOSPI 200 as an index fund holds it today**
+      (`https://www.samsungfund.com/api/v1/kodex/product-pdf/2ETF01.do?gijunYMD=<yyyymmdd>`: the KODEX 200's holdings,
+      `itmNo` is the six-character code; add `.KS`). Codes can hold letters now (`0126Z0.KS`). *Bovespa:* the exchange's
+      own portfolio (`sistemaswebb3-listados.b3.com.br/indexProxy/indexCall/GetPortfolioDay/<base64 of
+      {"language":"en-us","pageNumber":1,"pageSize":120,"index":"IBOV","segment":"1"}>`): codes with `.SA`.
+      Korean and Brazilian company names were made from the price source's names by a rule (legal forms off, plain
+      ASCII, 22 characters) with about forty put right by hand.
+    - **Checked live:** the four buttons through the deployed page code (20, 30, 200, 76 results; every worker
+      answering) and six older ones (DAX 40, Nikkei 225, Dow 30, FTSE 100, ASX 200, S&P 500); the live coordinator for
+      the four and three older ones; the tracker on the page's and the coordinator's report of each of the four (10
+      shares and the index: `^SSMI`, `^BSESN`, `^KS200`, `^BVSP`). **Not seen: `M&M.NS` in a real top 10** (it was not
+      among the day's ten; the path was tested with a made-up line), **a signed-in browser, a phone.**
+    - The home page says 27 screeners and "the Americas"; the sentences that list regions add "Brazilian"; About and
+      the FAQ name the four. The autopilot buys from none of the twelve screeners added on 13 Oct.
+      `lambda-url-mapping.json` regenerated once more afterwards (1,056 functions).

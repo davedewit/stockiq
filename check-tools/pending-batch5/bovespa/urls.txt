@@ -1,8 +1,0 @@
-https://t2gy3do4krb6rnnkznsyni446m0nniro.lambda-url.us-east-1.on.aws/
-https://zgbfibyqx4h7xb4pa3ofvybbpy0rqugi.lambda-url.us-east-1.on.aws/
-https://mq44o7m7j3jrb2yy3sklko7tvm0ocfsi.lambda-url.us-east-1.on.aws/
-https://hd3br4noxdeu6htscj2pkrcxrq0kjdfy.lambda-url.us-east-1.on.aws/
-https://3357om2nwbyrjyl5gemta74g6m0bggze.lambda-url.us-east-1.on.aws/
-https://kzzk65lilfwt27enovj4kd3cbi0ksymw.lambda-url.us-east-1.on.aws/
-https://2tkfru2vdr3fr2jkx3hp22dtna0xtspb.lambda-url.us-east-1.on.aws/
-https://24qotm2ljdd356cl3ofjnr4eai0djxmc.lambda-url.us-east-1.on.aws/
