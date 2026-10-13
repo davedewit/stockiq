@@ -20,6 +20,8 @@ GROUPS = {
     'stockiq-europe-4-3-worker': ('France CAC 40', 4, 'paris'),
     'stockiq-europe-4-4-worker': ('Netherlands AEX', 3, 'amsterdam'),
     'stockiq-americas-6-1-worker': ('Canada TSX 60', 6, 'toronto'),
+    'stockiq-europe-4-5-worker': ('Italy FTSE MIB', 4, 'milan'),
+    'stockiq-europe-4-6-worker': ('Spain IBEX 35', 4, 'madrid'),
 }
 
 # market: the currency Yahoo quotes it in (London is pence), three symbols a freshly deployed worker is tried with, and the
@@ -33,6 +35,8 @@ MARKETS = {
     'paris': dict(currency='EUR', try_with=['MC.PA', 'OR.PA', 'TTE.PA'], sample='MC.PA OR.PA TTE.PA SAN.PA AI.PA SU.PA BNP.PA CS.PA DG.PA SAF.PA EL.PA KER.PA'.split()),
     'amsterdam': dict(currency='EUR', try_with=['ASML.AS', 'INGA.AS', 'HEIA.AS'], sample='ASML.AS INGA.AS HEIA.AS AD.AS PHIA.AS UNA.AS WKL.AS PRX.AS ADYEN.AS KPN.AS AKZA.AS NN.AS'.split()),
     'toronto': dict(currency='CAD', try_with=['RY.TO', 'TD.TO', 'ENB.TO'], sample='RY.TO TD.TO ENB.TO CNR.TO SHOP.TO BNS.TO BMO.TO CP.TO SU.TO TRP.TO MFC.TO BCE.TO'.split()),
+    'milan': dict(currency='EUR', try_with=['ENEL.MI', 'ISP.MI', 'ENI.MI'], sample='ENEL.MI ISP.MI ENI.MI UCG.MI RACE.MI G.MI STLAM.MI PRY.MI LDO.MI TRN.MI SRG.MI MONC.MI'.split()),
+    'madrid': dict(currency='EUR', try_with=['ITX.MC', 'SAN.MC', 'IBE.MC'], sample='ITX.MC SAN.MC IBE.MC BBVA.MC CABK.MC TEF.MC REP.MC AENA.MC FER.MC AMS.MC ELE.MC ACS.MC'.split()),
 }
 
 # The groups the page calls with a worker number and no stocks (group: the coordinator's key for its list). Their lists are
