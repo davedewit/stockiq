@@ -572,32 +572,48 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   "See the plans", "Your plan"). On a desktop it sits at the right-hand end of the bar, on a phone between the bell and
   the name; in a crowded bar it uses a shorter wording ("3/5", "Expired"), and with no room at all it drops just under
   the bar (`fit`, `under`).
-  - **It changes how the count is shown, not how it is worked out.** The pages still work it out as before
-    (`getStockAnalysisStatus` in `auth.js` and the copies in `index.html`, `analysis-functions.js`, `dashboard.html`)
-    and still write it into their floating badge, `#trial-status-display`. **`theme.js` hides that badge before it is
-    drawn and loads `website/visitor-bar.js`** (`?h=<the hour>`, no version to raise), which reads the badge's text
-    whenever it changes (`read`: every text the badge can hold is listed at the top of the script; an unknown one is
-    shown as it is; "Status unavailable" shows nothing) and shows it in the bar. `window.visitorBar`: `version, read,
-    state, refresh`. **So a change to the badge's wording in any of those four places must be taught to `read`.**
-  - The same block of `theme.js` puts the round "Start 3-Day Free Trial" / "Upgrade Plan" buttons bottom left on every
-    page (they were left on one page and right on another). The home page's yellow "LIMITED TIME" bar is gone: it
+  - **One place works the count out, one place writes it, one place shows it** (since the clean-up of 13 Oct 2026):
+    `authManager.getStockAnalysisStatus` (`auth.js`) works it out; `displayTrialStatus()` in `auth.js` writes it into
+    a badge, `#trial-status-display`, on every page when the page loads; **`theme.js` hides that badge before it is
+    drawn and loads `website/visitor-bar.js`** (`?h=<the hour>`, no version to raise; `window.visitorBar`: `version`
+    (2), `read, state, refresh`), which reads the badge's text whenever it changes and shows it in the bar. The hidden
+    badge is only the channel between the two. On the analysis page `refreshUsageCount()` (`analysis-functions.js`)
+    writes the new count into it after each use (three calls inside `runAnalysis`), and the chip pulses once when the
+    number goes down. **The texts the badge can hold are listed at the top of `visitor-bar.js` (`read`): a change to
+    their wording in `auth.js` must be taught to `read`** (an unknown text is shown as it is; "Status unavailable"
+    shows nothing).
+  - **The dashboard keeps a `displayTrialStatus` of its own, on purpose:** the same answer from the trial function also
+    fills in its plan section (current plan, renewal date, the cancel button, the upgrade buttons' wording) and is
+    kept as `userTrialStatus_<address>`. It writes the same texts into the same badge, so the chip follows it too. It
+    is not a duplicate that can simply go; taking it apart needs a real paying account to check against.
+  - **The one round button** ("🚀 Start 3-Day Free Trial" for an anonymous visitor whose free analysis is used, or who
+    chose "Maybe Later" in the pop-up; "🚀 Upgrade Plan" for a signed-in visitor with nothing left or whose trial is
+    over) is drawn by `visitor-bar.js` (`pill`, `#vb-pill`), bottom left, on the home page and the analysis page only,
+    as before. `showStickyRegisterButton()` / `showStickyUpgradeButton()` in `analysis-functions.js` are two-line
+    stand-ins that the pop-up and the access check still call. The home page's yellow "LIMITED TIME" bar is gone: it
     repeated the strip above it and the offer is not limited in time.
-  - **THE WAY BACK, kept on purpose: `bash /Users/dave/VSCODE/stockiq/check-tools/pending-banners-undo/deploy.sh`**
-    (`DRY_RUN=true` first). It takes the switch out of `theme.js` (the lines between `VISITOR_BAR_START` and
-    `VISITOR_BAR_END`) and puts the yellow bar back, in the files as they are that day, uploads the two and commits.
-    Proved before the deploy to give back the earlier files byte for byte. **Do not delete that folder or those two
-    marker lines while the chip is live.**
-  - Test: `node check-tools/visitor_bar_check.js` (about six minutes): seven kinds of visitor (anonymous with a free
+  - **What went in the clean-up** (the home page and the analysis script): the second badge each made at page load,
+    five copies of the round-button code, three identical blocks and an unused function (`updateRemainingToday`) that
+    animated the old badge, the scroll code that moved or faded it. `analysis-functions.js` lost 188 lines, and a page
+    load makes one request fewer to the trial function. `auth.js` and `dashboard.html` were not touched.
+  - **THE WAY BACK, in two steps, both kept on purpose** (`DRY_RUN=true` in front of either to preview):
+    1. `bash /Users/dave/VSCODE/stockiq/check-tools/pending-cleanup-undo/deploy.sh` undoes the clean-up: it reverts
+       the one commit in `website/` and uploads the four files; the chip stays. It tries the revert on a copy first
+       and stops if a later change collides.
+    2. then `bash /Users/dave/VSCODE/stockiq/check-tools/pending-banners-undo/deploy.sh` undoes the chip itself: it
+       takes the switch out of `theme.js` (the lines between `VISITOR_BAR_START` and `VISITOR_BAR_END`) and puts the
+       yellow bar back. It refuses to run before step 1.
+    **Do not delete those two folders or the two marker lines while the chip is live.**
+  - Test: `node check-tools/visitor_bar_check.js` (about seven minutes): seven kinds of visitor (anonymous with a free
     analysis left and without; on the trial with some left and with none; trial over; a paid plan with a daily count;
-    no limit) x five pages x four widths (1500, 1024, 390, 320): 1,612 checks, and `SHOTS=<folder>` for pictures. A
-    "signed-in" visitor there is a made-up address with a made-up session (`idToken` = any text whose middle part is
-    base64 JSON with `email`, `exp`, `custom:tier`; `loginTime`; `userId`), and what the trial function would answer
-    is supplied per visitor. **The site takes headless Chrome for a crawler and skips its sign-in check ("Bot
-    detected"): a test must give the browser an ordinary name** (`Emulation.setUserAgentOverride`).
-  - **Not done, on purpose, until the owner has seen it on his own phone and account:** the old copies of the badge
-    and button code are still in the pages (hidden, and feeding the chip). Taking them out, so that the count is
-    worked out in one place, is the second half; after it the way back above no longer applies. **Not checked: a
-    real phone, a real signed-in account, a real paying account** (all three were made-up sessions).
+    no limit) x five pages x four widths (1500, 1024, 390, 320): 1,746 checks (the chip, its card, the round button,
+    the count after a use, "Maybe Later"), and `SHOTS=<folder>` for pictures. A "signed-in" visitor there is a made-up
+    address with a made-up session (`idToken` = any text whose middle part is base64 JSON with `email`, `exp`,
+    `custom:tier`; `loginTime`; `userId`), and what the trial function would answer is supplied per visitor. **The
+    site takes headless Chrome for a crawler and skips its sign-in check ("Bot detected"): a test must give the
+    browser an ordinary name** (`Emulation.setUserAgentOverride`). After any change to `analysis-functions.js` also
+    run `anon_run.js` and `trial_run.js` (they take `FUNCS=<file>`): same results and redirects as before.
+  - **Not checked: a real phone, a real signed-in account, a real paying account** (all were made-up sessions).
 - **The two panels that slide in on a phone** (up to 768px wide): the **market-data sidebar on the right** (home page and
   dashboard only; the green round button, or a swipe to the left) and the **menu on the left** (the ☰ button on the
   eight kinds of page that have it: home, analysis, dashboard, blog, news, sign in, sign up, stock pages; a swipe to
@@ -2443,12 +2459,12 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
 - Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=33` (`9e0b1dd9aa63`),
-  `dashboard.html` (`5f9b9b27945b`), `index.html` (`281616ebd393`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` (`f2ee45c47d72`), `analysis.html` (`1e8e226ceaa9`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`3f2f0f83e142`), `autopilot-bell.js` version 8 (`88119f40c022`),
-  `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
+  `dashboard.html` (`5f9b9b27945b`), `index.html` (`daeec05a2810`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`042cf9d0dd43`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`3f2f0f83e142`), `autopilot-bell.js` version 8 (`88119f40c022`),
+  `analysis-functions.js` (`2ef8631a9e8f`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
 - Tests on the live files: 442 function, 210 panel, 118 portfolio, 21 chat (13 Oct 2026; they were 110 and 20) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
-- Both repos pushed; **the only `check-tools/pending-*` folder left is `pending-banners-undo`, kept on purpose** (the way back from the header chip). `website/` carries the daily job's own three files
+- Both repos pushed; **the only `check-tools/pending-*` folders left are `pending-cleanup-undo` and `pending-banners-undo`, kept on purpose** (the two steps back from the header chip). `website/` carries the daily job's own three files
   uncommitted (news.html, news.js, sitemap.xml) until its next push.
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
@@ -2894,9 +2910,15 @@ Needs the owner's decision or more work (nothing here is fixed):
     file of a public repository.
   - **Done the same day at his word ("if you want to improve the whole thing go ahead. but make it easy so we can revert
     back"):** the badge is a chip in the header bar, the round buttons sit in one corner, the yellow bar is gone
-    (section 8, "The visitor's usage count is a chip inside the header bar", with the way back). **Still open:** the
-    duplicated code behind it (second half, after he has tried it); the top strip's five copies and its two wordings;
-    the three floating round things on a phone; the red underlined button on the home page; his address in `auth.js`.
+    (section 8, "The visitor's usage count is a chip inside the header bar", with the way back), and after he had
+    looked at it ("the updates so far look great… then fix it up please") the duplicate code behind it went too.
+    **What is still built more than once, and why it was left:** the dashboard's own `displayTrialStatus` (it also
+    fills in the plan section: needs a real paying account to check); the top strip's code in four pages and the
+    stock template (it has to run before the page is drawn, so it cannot move into a late script; its two wordings
+    are his to decide); the anonymous pop-up, which exists in both `auth.js` and `analysis-functions.js`; a few lines
+    in `blog.html`, `news.html` and the stock pages that fade the old badge on scroll (they find nothing and do
+    nothing). **Also open:** the three floating round things on a phone; the red underlined button on the home page;
+    his address in `auth.js`.
 - **Mobile:** the owner reports the page zooms when tapping the AI chat input. The input is
   already 16px; cause not found. Need the phone model and browser to chase it. One candidate is
   the fixed 500px window height when the keyboard opens.
@@ -3568,3 +3590,14 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     `theme.js`, `index.html`. **Lessons:** the site skips its sign-in check for headless Chrome, so a test of a
     signed-in view needs an ordinary browser name; and an element measured while it is still in a flex row pushes the
     others aside (the chip first measured its own effect and found no room on a phone).
+  - **The duplicate code behind the usage chip taken out** (section 8, same part), at the owner's word once he had seen the
+    chip ("the updates so far look great… duplicate? then fix it up please!"). The home page and the analysis script
+    no longer make a badge or round buttons of their own; `visitor-bar.js` (version 2) draws the one round button;
+    `analysis-functions.js` is 188 lines shorter. **Checked:** the visitor test on the staged and the deployed files
+    (1,746 checks); `anon_run.js` and `trial_run.js` on the old and the new analysis script side by side (the same
+    results and redirects for an anonymous visitor and a trial user, with one request fewer); a screener and a
+    single-stock report through the page code; the sliding-panel test; the live site as an anonymous visitor.
+    **Left on purpose:** `auth.js` untouched; the dashboard's own copy (it also draws the plan section). Website
+    commit `5b2a68d5`; its way back is `check-tools/pending-cleanup-undo/deploy.sh` (a `git revert` tried on a copy
+    first). **Lesson: before calling a copy a duplicate, read to the end of it.** The dashboard's "badge function" turned
+    out to be the function that draws a paying member's plan.

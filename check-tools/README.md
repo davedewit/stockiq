@@ -214,7 +214,7 @@ with "Inspected target navigated": that is the bell working.
 ## visitor_bar_check.js (the usage chip in the header bar, as every kind of visitor) and pending-banners-undo/
 
 ```bash
-node check-tools/visitor_bar_check.js                                  # seven kinds of visitor x five pages x four widths (about six minutes)
+node check-tools/visitor_bar_check.js                                  # seven kinds of visitor x five pages x four widths (about seven minutes, 1,746 checks)
 ONLY=trial3,expired node check-tools/visitor_bar_check.js index.html   # some of them
 WEB=check-tools/pending-<name>/web SHOTS=/tmp/vb node check-tools/visitor_bar_check.js   # a staged copy, with pictures
 ```
@@ -225,9 +225,12 @@ a click opens the right sentence and the right thing to do next. Signed-in visit
 function would answer is supplied per visitor; every other request gets an empty reply; nothing is written anywhere.
 The browser is given an ordinary name, because the site takes headless Chrome for a crawler and skips its sign-in check.
 
-**`pending-banners-undo/` is not a leftover: it is the way back** from the header chip
-(`bash /Users/dave/VSCODE/stockiq/check-tools/pending-banners-undo/deploy.sh`, `DRY_RUN=true` first). Keep it while
-`theme.js` has the lines between `VISITOR_BAR_START` and `VISITOR_BAR_END`.
+**`pending-cleanup-undo/` and `pending-banners-undo/` are not leftovers: they are the two steps back** from the header
+chip, in that order (`bash /Users/dave/VSCODE/stockiq/check-tools/pending-cleanup-undo/deploy.sh`, then
+`…/pending-banners-undo/deploy.sh`; `DRY_RUN=true` in front of either first). The first undoes the clean-up of the
+duplicate code and keeps the chip; the second takes the chip away. Keep both while `theme.js` has the lines between
+`VISITOR_BAR_START` and `VISITOR_BAR_END`. `anon_run.js` and `trial_run.js` take `FUNCS=<file>` (a staged
+`analysis-functions.js`), as `page_run.js` does: run them old against new after any change to that file.
 
 ## mobile_sidebar_check.js (the two panels that slide in on a phone, tried with a finger)
 

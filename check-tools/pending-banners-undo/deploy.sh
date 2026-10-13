@@ -16,6 +16,8 @@ say()  { printf '\n== %s\n' "$*"; }
 stop() { printf '\nSTOPPED: %s\nNothing further was changed.\n' "$*"; exit 1; }
 if pgrep -x "deploy-to-s3.sh" >/dev/null || pgrep -f "bash .*/deploy-to-s3\.sh" >/dev/null; then stop "the daily deploy is running; try again when it has finished"; fi
 [ "$DRY" = "true" ] && echo "DRY RUN: nothing will be changed"
+# Since the clean-up of 13 Oct the round buttons are drawn by visitor-bar.js alone: going back to before the chip needs the clean-up undone first.
+grep -q "sticky-register-btn" "$WEB/index.html" || stop "the clean-up is still in place: run check-tools/pending-cleanup-undo/deploy.sh first, then this one"
 
 say "what it would do"
 cp "$WEB/theme.js" "$WEB/index.html" "$TMP/"
