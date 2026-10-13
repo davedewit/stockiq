@@ -1,4 +1,0 @@
-https://mpfgcyebtjyqkjlc6fvew4e5ye0ecjtd.lambda-url.us-east-1.on.aws/
-https://7lzrzp7haa7fbnfcxnumc75ybe0gwnvz.lambda-url.us-east-1.on.aws/
-https://qho4zg6v3fotbj5czmylxsr4ru0pxxpb.lambda-url.us-east-1.on.aws/
-https://7q2pei47vfanbmma7dzq765kle0sbtwi.lambda-url.us-east-1.on.aws/

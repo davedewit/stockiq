@@ -69,6 +69,10 @@ dashboard "Run in Background"
   inconsistent (ASX is page option 5 but coordinator `4-…`; FTSE the reverse): do not copy them, copy Nikkei.
 - Worker group names follow `stockiq-<region>-<n>-<m>-worker`: `stockiq-europe-4-1-worker` is FTSE, so the next European
   group is `4-2`; `stockiq-asia-5-5-worker` is Nikkei, so the next Asian group is `5-6`. The name is only a label.
+- **When Wikipedia is out of date in every language, ask the exchange.** For the IBEX 35 (13 Oct 2026) the Madrid exchange's own
+  data gave the members: `https://apiweb.bolsasymercados.es/Market/v1/EQ/ListedCompanies?tradingSystem=SIBE&page=0&pageSize=50`
+  (three pages; each row's `indices` names the indexes the share is in). Look in an exchange page's scripts for the
+  address its table is loaded from.
 - **Check how old the list is, and look at the page in the market's own language.** On 13 Oct 2026 the English Wikipedia page
   for the AEX still listed 25 members "as of 31 December 2024"; the Dutch page had the 30 of June 2026. A page states its
   date above its table.
@@ -329,6 +333,8 @@ notification), and a real phone.
 | France CAC 40 (13 Oct 2026) | `5, 'cac40'` | `5-cac40` | `stockiq-europe-4-3-worker` | 4 | 40 | `.PA` (one member `.AS`) | EUR |
 | Netherlands AEX (13 Oct 2026) | `5, 'aex'` | `5-aex` | `stockiq-europe-4-4-worker` | 3 | 30 | `.AS` (one member `.BR`) | EUR |
 | Canada TSX 60 (13 Oct 2026) | `5, 'tsx60'` | `5-tsx60` | `stockiq-americas-6-1-worker` | 6 | 60 | `.TO` (a share class takes a dash: `RCI-B.TO`) | CAD |
+| Italy FTSE MIB (13 Oct 2026) | `5, 'ftsemib'` | `5-ftsemib` | `stockiq-europe-4-5-worker` | 4 | 40 | `.MI` | EUR |
+| Spain IBEX 35 (13 Oct 2026) | `5, 'ibex35'` | `5-ibex35` | `stockiq-europe-4-6-worker` | 4 | 35 | `.MC` | EUR |
 | India BSE Sensex | `5, 'sensex'` | `5-sensex` | `stockiq-asia-5-6-worker` | 3 | 30 | `.BO` or `.NS` | INR |
 | Crypto | `7, 'coinspot'` | `7-1` | orchestrator + 54 `stockiq-option-7-1-worker` in single-coin mode | 54 | 540 coins | `-USD`, sometimes a numbered ticker | USD |
 
