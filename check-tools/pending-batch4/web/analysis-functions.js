@@ -814,7 +814,7 @@ Analysis Date: ${new Date().toLocaleString()}
             output += `${(i+1).toString().padStart(2)}. ${symbol} ${price} | Score: ${score} | RSI: ${rsi} | YTD: ${ytd}, Vol: ${vol}\n`;
         });
         
-        output += '\n</pre><div style="margin: 20px 0; padding: 15px; background: var(--card-bg); border-radius: 8px; text-align: center; font-size: 1rem;">📊 Showing top 10 results. For the complete screener report, download from your <a href="dashboard.html" style="color: #007bff; text-decoration: underline; cursor: pointer;">dashboard</a>.</div><pre style="white-space: pre-wrap; font-family: monospace;">\n🎯 TOP 3 DETAILED ANALYSIS:\n';
+        output += '\n</pre><div style="margin: 20px 0; padding: 15px; background: var(--card-bg); border-radius: 8px; text-align: center; font-size: 1rem;">📊 Showing top 10 results. For the complete screener report, download from your <a href="dashboard.html#reports" style="color: #007bff; text-decoration: underline; cursor: pointer;">dashboard</a>.</div><pre style="white-space: pre-wrap; font-family: monospace;">\n🎯 TOP 3 DETAILED ANALYSIS:\n';
         output += '================================================================\n';
         allResults.slice(0, 3).forEach((stock, i) => {
             output += `${i+1}. ${stock.symbol}: ${screenerMoney(stock, stock.price, 'GBp')} | ${signalLabel(stock.recommendation)} | Score: ${(stock.total_score || stock.score || 0) >= 0 ? '+' : ''}${(stock.total_score || stock.score || 0).toFixed(1)}\n`;
@@ -1401,7 +1401,7 @@ function displayResults(result) {
         const dashboardMsg = document.createElement('div');
         dashboardMsg.id = 'crypto-dashboard-msg';
         dashboardMsg.style.cssText = 'margin: 20px 0; padding: 15px; background: var(--card-bg); border-radius: 8px; text-align: center; font-size: 1rem;';
-        dashboardMsg.innerHTML = '📊 Showing top 10 results. For the complete screener report, download from your <a href="dashboard.html" style="color: #007bff; text-decoration: underline; cursor: pointer;">dashboard</a>.';
+        dashboardMsg.innerHTML = '📊 Showing top 10 results. For the complete screener report, download from your <a href="dashboard.html#reports" style="color: #007bff; text-decoration: underline; cursor: pointer;">dashboard</a>.';
         resultsContent.appendChild(dashboardMsg);
     }
     
@@ -1945,7 +1945,7 @@ Analysis Date: ${new Date().toLocaleString()}
             output += `${(i+1).toString().padStart(2)}. ${symbol} ${price} | Score: ${score} | RSI: ${rsi} | YTD: ${ytd}, Vol: ${vol}\n`;
         });
         
-        output += '</table><div style="margin: 20px 0; padding: 15px; background: var(--card-bg); border-radius: 8px; text-align: center; font-size: 1rem;">📊 Showing top 10 results. For the complete screener report, download from your <a href="dashboard.html" style="color: #007bff; text-decoration: underline; cursor: pointer;">dashboard</a>.</div><table class="results-table">\n';
+        output += '</table><div style="margin: 20px 0; padding: 15px; background: var(--card-bg); border-radius: 8px; text-align: center; font-size: 1rem;">📊 Showing top 10 results. For the complete screener report, download from your <a href="dashboard.html#reports" style="color: #007bff; text-decoration: underline; cursor: pointer;">dashboard</a>.</div><table class="results-table">\n';
         
         if (subOption === '3' || subOption === '2' || subOption === '4' || subOption === '5' || subOption === '6' || subOption === '7' || subOption === '8' || subOption === '100') {
             output += '\n🎯 TOP 3 DETAILED ANALYSIS:\n';
@@ -2240,7 +2240,7 @@ Analysis Date: ${new Date().toLocaleString()}
             output += `${(i+1).toString().padStart(2)}. ${symbol} ${price} | Score: ${score} | RSI: ${rsi} | YTD: ${ytd}, Vol: ${vol}\n`;
         });
         
-        output += '</table><div style="margin: 20px 0; padding: 15px; background: var(--card-bg); border-radius: 8px; text-align: center; font-size: 1rem;">📊 Showing top 10 results. For the complete screener report, download from your <a href="dashboard.html" style="color: #007bff; text-decoration: underline; cursor: pointer;">dashboard</a>.</div><table class="results-table">\n';
+        output += '</table><div style="margin: 20px 0; padding: 15px; background: var(--card-bg); border-radius: 8px; text-align: center; font-size: 1rem;">📊 Showing top 10 results. For the complete screener report, download from your <a href="dashboard.html#reports" style="color: #007bff; text-decoration: underline; cursor: pointer;">dashboard</a>.</div><table class="results-table">\n';
         
         // Add detailed analysis for top 3 stocks
         output += '\n🎯 TOP 3 DETAILED ANALYSIS:\n';
@@ -3230,7 +3230,7 @@ Analysis Date: ${new Date().toLocaleString()}
             const vol = `${(stock.volume_ratio || 1).toFixed(1)}x`;
             output += `${(i+1).toString().padStart(2)}. ${symbol} ${name.slice(0, 22).padEnd(22)} ${price} | Score: ${score} | RSI: ${rsi} | YTD: ${ytd}, Vol: ${vol}\n`;
         });
-        output += '\n</pre><div style="margin: 20px 0; padding: 15px; background: var(--card-bg); border-radius: 8px; text-align: center; font-size: 1rem;">📊 Showing top 10 results. For the complete screener report, download from your <a href="dashboard.html" style="color: #007bff; text-decoration: underline; cursor: pointer;">dashboard</a>.</div><pre style="white-space: pre-wrap; font-family: monospace;">\n🎯 TOP 3 DETAILED ANALYSIS:\n';
+        output += '\n</pre><div style="margin: 20px 0; padding: 15px; background: var(--card-bg); border-radius: 8px; text-align: center; font-size: 1rem;">📊 Showing top 10 results. For the complete screener report, download from your <a href="dashboard.html#reports" style="color: #007bff; text-decoration: underline; cursor: pointer;">dashboard</a>.</div><pre style="white-space: pre-wrap; font-family: monospace;">\n🎯 TOP 3 DETAILED ANALYSIS:\n';
         output += '================================================================\n';
         sortedResults.slice(0, 3).forEach((stock, i) => {
             const priceVal = stock.price || 0;
