@@ -7,7 +7,7 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"; WEB=/Users/dave/VSCODE/website; AWS=(aws --profile default --region us-east-1)
 BUCKET=stockiq-final-websitebucket-vqekic7enf9h; DIST=EHXV50CPHY07R; DRY="${DRY_RUN:-false}"; TMP="$(mktemp -d)"
 FILES=(
- "practice-autopilot.js:f3fee809abcdf59d8d9e1890857b1b2b30c563bd737bf2be4367cc5e108a6343:fa93a15fdb0d74c4e61d40fed045d5766cc09860e91ec91f656ca2660421275e:application/javascript:public, max-age=300, s-maxage=86400"
+ "practice-autopilot.js:f3fee809abcdf59d8d9e1890857b1b2b30c563bd737bf2be4367cc5e108a6343:15e2d0d78a1fc36bd90dce843d4502281e4c0a0f245272595c5332dd26b430f5:application/javascript:public, max-age=300, s-maxage=86400"
  "dashboard.html:7bc4f2a11c7030d12971f97a79cd3d821ce7a7553db1b852c07b2286ae829fc0:c50823acc18d52ef1c96752d0fd4ca0a8722c22fcdd390edbfd5f5a354e2e7c8:text/html; charset=utf-8:public, max-age=0, s-maxage=3600, must-revalidate"
 )
 stop() { printf '\nSTOPPED: %s\nNothing further was changed.\n' "$*"; exit 1; }
