@@ -1190,7 +1190,10 @@ shown at a time; the choice is remembered in the browser (`localStorage` key
 `stockiqDashboardTab`) and kept in the address (`dashboard.html#practice`, `#autopilot`), so a
 refresh or a link lands on the same tab; any other address (`#upgrade`) opens Reports. Every signed-in account has all three tabs; without a paid plan the AI autopilot tab shows what it is and a button to the plans (its tab carries a 🔒). The markup is `data-dash-tab` buttons and `data-dash-panel` blocks, with a small inline
 script between the `DASH_TABS_SCRIPT_START/END` comments in `dashboard.html`
-(`window.dashboardTabs.show(name)` switches from code). Report code keeps working while its panel
+(`window.dashboardTabs.show(name)` switches from code). **A link that must land on Reports whatever tab was open last
+says so: `dashboard.html#reports`** (the link under a screener's results, "download from your dashboard", since 13 Oct
+2026). The tab script opens Reports for it and does not change the remembered tab, so a plain visit still returns to
+where the visitor left off. Report code keeps working while its panel
 is hidden. **Keep the Reports panel first in the page**: one report routine finds "Recent Reports"
 with `document.querySelector('h3')`.
 
@@ -2568,7 +2571,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
 - Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=35` (`77079a71f71a`),
   `dashboard.html` (`9ff7238097a9`), `index.html` (`4aa7a6bfa052`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`49e14dabdc19`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
-  `analysis-functions.js` (`317e4e43fc49`), `screeners.js` (`580aa752a9ab`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
+  `analysis-functions.js` (`9ed44ac08e95`), `screeners.js` (`580aa752a9ab`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
 - Tests on the live files: 442 function, 210 panel, 130 portfolio, 22 chat (13 Oct 2026, after the fund's line; they were 118 and 21) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
@@ -3854,3 +3857,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     read: add a sign to the three money tables and to both tracker patterns, section 8b); Hong Kong symbols are numbers
     (`0700.HK`); "KOSPI" has about 900 members, so the button needs a decision on which list (KOSPI 50 or 200); India's
     shares are at two exchanges (`.BO` / `.NS`). `lambda-url-mapping.json` was regenerated after this batch.
+  - **"Download from your dashboard" under a screener's results opens the Reports tab** (15:38 UTC), at the owner's word:
+    the link went to `dashboard.html`, which opens the tab that was open last (he likes that for "View Dashboard"), so
+    after a look at the practice portfolio the download was a tab away. The five links in `analysis-functions.js` now
+    say `dashboard.html#reports`; the dashboard already opened Reports for that address without touching the
+    remembered tab, so nothing changed there. Checked: the dashboard's own tab script run with a stand-in page (six
+    cases: `#reports` with each other tab remembered opens Reports and the remembered tab stays; a plain visit opens
+    the remembered tab); four kinds of screener through the changed script (reports as before); the live file has the
+    five links. Website commit `b2740f4f`. **Not checked: the click itself in a signed-in browser.**
