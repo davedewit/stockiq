@@ -9,7 +9,7 @@ It starts with two holdings bought by hand and one by the autopilot, then perfor
           chart (the graph of the account over time: its size, what it reads, the pointer; chart:ai or chart:own presses that
           button and says what the two lists under it then show; open the page with ?chart=1 for an account with a few weeks of history),
           trial (a trial of its own rules starts), off (the autopilot is switched off), open (unfolds the details),
-          preset (presses the "Quick coin trading" set-up), sellall (presses "Sell everything it holds" and says yes),
+          preset or undo (the shortcuts in "Screeners it buys from", a click on a market's name, the Undo), sellall (presses "Sell everything it holds" and says yes),
           limits (types your own loss limit), split (prints the line that says whose result is whose),
           cards (prints the summary cards and every account value shown since the page opened: there should be one),
           pace (hands the three pace settings to the risk level, moves the slider, sets one by hand, moves it again),
@@ -159,15 +159,18 @@ const cellText = (label) => { const row = Array.from(document.querySelectorAll('
       await window.practiceAutopilot.refresh(false); await wait(500);
       out('a trial started: ' + Array.from(document.querySelectorAll('#practice-autopilot .ap-section')).find(x => x.textContent.includes('Improving its own rules')).textContent.replace(/\\s+/g, ' ').trim().slice(0, 900));
     }
-    if (step === 'undo') {                                  // the Undo that a quick set-up offers
+    if (step === 'preset' || step === 'undo') {              // the shortcuts in "Screeners it buys from", a market's name, and the Undo
       const ticked = () => Array.from(document.querySelectorAll('[data-ap-screener]')).filter(c => c.checked).map(c => c.getAttribute('data-ap-screener')).join(',');
-      const before = ticked(); q('[data-ap-preset="shares"]').click(); await wait(900); const after = ticked(), link = q('[data-ap="undopreset"]');
-      out('quick set-up pressed: ticked before [' + before + '], after [' + after + '], Undo offered: ' + !!link + ', scrolled to top: ' + (window.scrollY === 0 && document.documentElement.scrollHeight > innerHeight * 2 ? 'check by eye' : 'no'));
-      if (link) { link.click(); await wait(900); out('  after Undo: ticked [' + ticked() + '], same as before: ' + (ticked() === before) + ', notice: ' + ((q('#ap-notice') || {}).textContent || '').slice(0, 90) + ', Undo still offered: ' + !!q('[data-ap="undopreset"]')); }
+      const pace = () => 'level=' + q('#ap-risk').value + ' days=' + q('#ap-period').value + ' checks=' + q('#ap-every').value + ' keeps=' + q('#ap-hold').value;
+      const before = ticked(), paceBefore = pace(), y = window.scrollY;
+      out('old quick set-ups on the page: ' + document.querySelectorAll('[data-ap-preset]').length + ' | shortcuts: ' + Array.from(document.querySelectorAll('[data-ap-pick]')).map(x => x.textContent).join(' / '));
+      q('[data-ap-group="US markets"]').click(); await wait(900); out('click on "US markets": ticked [' + ticked() + '] | notice: ' + (q('#ap-notice').textContent || '').slice(0, 60));
+      q('[data-ap-group="US markets"]').click(); await wait(900); out('second click: ticked [' + ticked() + ']');
+      q('[data-ap-pick="main"]').click(); await wait(900); out('"Main index of every country": ticked [' + ticked() + '] | notice: ' + (q('#ap-notice').textContent || '').slice(0, 110));
+      out('  pace unchanged by all of that: ' + (pace() === paceBefore) + ' (' + pace() + '), page did not jump: ' + (window.scrollY === y));
+      const link = q('[data-ap="undopreset"]'); out('  Undo offered: ' + !!link);
+      if (link) { link.click(); await wait(900); out('  after Undo: ticked [' + ticked() + '], same as before the first click: ' + (ticked() === before) + ', notice: ' + (q('#ap-notice').textContent || '').slice(0, 60) + ', Undo still offered: ' + !!q('[data-ap="undopreset"]')); }
     }
-    if (step === 'preset') { q('[data-ap-preset="coins"]').click(); await wait(900);
-      out('pressed "Quick coin trading": level=' + q('#ap-risk').value + ' days=' + q('#ap-period').value + ' checks=' + q('#ap-every').selectedOptions[0].textContent + ' keeps=' + q('#ap-hold').selectedOptions[0].textContent + ' ticked=' + Array.from(document.querySelectorAll('[data-ap-screener]')).filter(c => c.checked).map(c => c.getAttribute('data-ap-screener')).join(',') + ' | saved: ' + JSON.stringify(auto.settings));
-      out('  it says: ' + q('#ap-plan').textContent + ' || notice: ' + q('#ap-notice').textContent); }
     if (step === 'sellall') { window.confirm = (m) => { out('asked: ' + m.split(String.fromCharCode(10)).filter(Boolean).join(' / ')); return true; }; const b = q('#ap-sellall'); out('button: "' + b.textContent + '" disabled=' + b.disabled); b.click(); await wait(1200);
       out('  after: notice="' + q('#ap-notice').textContent + '" | button "' + q('#ap-sellall').textContent + '" disabled=' + q('#ap-sellall').disabled + ' | WEMIX still held in the table: ' + (cellText('WEMIX') !== '(no row)' && !!Array.from(document.querySelectorAll('#practice-portfolio button[data-pp="sell"]')).find(x => x.closest('tr').textContent.includes('WEMIX'))) + ' | calls: ' + calls.slice(-3).join(', ')); }
     if (step === 'limits') { const a = q('#ap-stop'); out('your own limits: fields empty, greyed hints "' + a.placeholder + '" and "' + q('#ap-take').placeholder + '"'); a.focus(); a.value = '6'; a.dispatchEvent(new Event('input', { bubbles: true })); await wait(200);

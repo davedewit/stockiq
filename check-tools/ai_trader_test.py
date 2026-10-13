@@ -1317,4 +1317,25 @@ if hasattr(m, 'keep_diary'):
     was = diary.puts; m.save_item('_brain', {'settings': {}, 'state': {}, 'log': [note('2026-10-12T00:10:00Z', 'x')], 'history': []}) if False else m.keep_diary('_brain', {'settings': {}, 'state': {}, 'log': [note('2026-10-12T00:10:00Z', 'x')], 'history': []})
     check('the shared record and the stored screener results are no account: nothing of theirs goes in', diary.puts == was)
     code_, b = call(action='get', userId=U); check('the page still gets its activity list as before', code_ == 200 and isinstance(b.get('log'), list))
+
+# --- a scheduled check-in waits until the settings have been left alone for SETTLE_MINUTES (13 Oct 2026): the dashboard
+# saves every click, and a check-in once traded on a quick set-up the owner was in the middle of clicking through
+D.t.clear(); m._BRAIN.clear(); m.PLAN_CACHE.clear(); PRICES.clear(); MODEL['answer'] = None; SNAP.clear(); SNAP.update({'7-1': rows('crypto', '7-1')})
+ts = dt.datetime(2026, 10, 14, 12, 40, 0)
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=0.5, maxHoldDays=5, screeners=['7-1'], selfTune=False, aiSell=False, auto=[])
+rec['state']['startedAt'] = m.iso(ts - dt.timedelta(days=2)); rec['state']['savedAt'] = m.iso(ts - dt.timedelta(minutes=3)); rec['state']['visit'] = m.iso(ts); m.save_item(U, rec)
+check('settings changed 3 minutes ago are still settling; 10 minutes ago, before they were saved, or never saved, they are not',
+      m.settling(rec, ts) and not m.settling(rec, ts + dt.timedelta(minutes=7)) and not m.settling(rec, ts - dt.timedelta(minutes=5)) and not m.settling({'state': {}}, ts), rec['state']['savedAt'])
+held_n = lambda: len((portfolio() or {}).get('holdings', []))
+before = m.datetime; m.datetime = at(ts); r1 = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); held1 = held_n()
+nxt = m.next_check(m.load_item(U), ts - dt.timedelta(minutes=2))
+code_, b = call(action='run', userId=U); held_by_hand = held_n()
+check('a scheduled check-in leaves such an account alone, and the page is told the check-in after it', r1['ran'] == [] and held1 == 0 and nxt and nxt['at'] == m.iso(ts + dt.timedelta(minutes=30)), [r1, held1, nxt])
+check('"Check in now" does not wait: it is a request to act on the settings as they are', code_ == 200 and held_by_hand > 0, [code_, held_by_hand, (b.get('summary') or {}).get('why')])
+D.t.clear(); m._BRAIN.clear(); PRICES.clear()
+rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=0.5, maxHoldDays=5, screeners=['7-1'], selfTune=False, aiSell=False, auto=[])
+rec['state']['startedAt'] = m.iso(ts - dt.timedelta(days=2)); rec['state']['savedAt'] = m.iso(ts - dt.timedelta(minutes=3)); rec['state']['visit'] = m.iso(ts); m.save_item(U, rec)
+m.datetime = at(ts); ra = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body'])
+m.datetime = at(ts + dt.timedelta(minutes=30)); rb = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); m.datetime = before
+check('half an hour later, the settings left alone, the schedule checks in as usual', ra['ran'] == [] and len(rb['ran']) == 1 and rb['ran'][0]['bought'] > 0 and held_n() > 0, [ra, rb])
 print('ALL PASS' if ok else 'SOME FAILED')
