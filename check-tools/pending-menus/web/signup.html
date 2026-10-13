@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://www.googletagmanager.com https://connect.facebook.net https://js.stripe.com https://*.lambda-url.us-east-1.on.aws; script-src-elem 'self' 'unsafe-inline' https://accounts.google.com https://www.googletagmanager.com https://connect.facebook.net https://js.stripe.com https://*.lambda-url.us-east-1.on.aws; style-src 'self' 'unsafe-inline' https://accounts.google.com; style-src-elem 'self' 'unsafe-inline' https://accounts.google.com; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://www.facebook.com https://graph.facebook.com https://*.facebook.com https://js.stripe.com https://api.stripe.com https://cognito-idp.us-east-1.amazonaws.com https://*.lambda-url.us-east-1.on.aws https://api.ipify.org; frame-src 'self' https://accounts.google.com https://www.facebook.com https://staticxx.facebook.com https://js.stripe.com https://hooks.stripe.com;">
+    <link rel="canonical" href="https://stockiq.tech/signup.html">
+    <meta name="robots" content="index, follow">    <title>Sign Up - StockIQ</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="stockiq-logo.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="stockiq-logo.png?v=2">
+    <link rel="shortcut icon" href="favicon.ico?v=2">
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WVETNMPF8V"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-WVETNMPF8V');
+    </script>
+    <style>
+        /* Prevent white flash during page load */
+        html, body { background: #0f0f0f !important; transition: none !important; }
+        [data-theme="light"] html, [data-theme="light"] body { background: #ffffff !important; }
+        
+        /* Banner spacing */
+        .top-nav { top: var(--nav-top, 41px) !important; }
+        body { padding-top: var(--body-padding, 105px) !important; }
+        .mobile-menu { top: var(--mobile-menu-top, 105px) !important; height: var(--mobile-menu-height, calc(100vh - 105px)) !important; }
+        #trial-status-display { display: none !important; }
+    </style>
+    <script>
+        // Apply theme immediately before any rendering
+        const savedTheme = localStorage.getItem('theme');
+        const manualOverride = localStorage.getItem('manualOverride');
+        const hour = new Date().getHours();
+        const autoTheme = (hour >= 18 || hour < 6) ? 'dark' : 'light';
+        const theme = (manualOverride === 'true' && savedTheme) ? savedTheme : autoTheme;
+        document.documentElement.setAttribute('data-theme', theme);
+    </script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="theme.js"></script>
+    <script src="auth.js?v=20241201"></script>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        .signup-container {
+            max-width: 400px;
+            margin: 80px auto;
+            padding: 40px 30px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .signup-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .signup-header h1 {
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 1.8rem;
+        }
+        
+        .signup-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        .social-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 12px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .social-btn:hover {
+            border-color: #007bff;
+            background: var(--bg-secondary);
+            transform: translateY(-1px);
+        }
+        
+        .facebook-btn {
+            border-color: #1877f2;
+        }
+        
+        .facebook-btn:hover {
+            border-color: #166fe5;
+            background: rgba(24, 119, 242, 0.05);
+        }
+        
+        .google-btn {
+            border-color: #34a853;
+        }
+        
+        .google-btn:hover {
+            border-color: #2d8f47;
+            background: rgba(52, 168, 83, 0.05);
+        }
+        
+
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+        
+        .divider span {
+            padding: 0 15px;
+        }
+        
+        .signup-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            color: var(--text-primary);
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input {
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        
+        .signup-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .signup-btn:hover:not(:disabled) {
+            background: #0056b3;
+        }
+        
+        .signup-btn:disabled {
+            background: #4a5568;
+            cursor: not-allowed;
+            transform: translateY(1px);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .login-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .terms-text {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 15px;
+            line-height: 1.4;
+        }
+        
+        .terms-text a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        .terms-text a:hover {
+            text-decoration: underline;
+        }
+        
+        .already-have-account {
+            position: absolute;
+            top: 141px;
+            right: 40px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .signup-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+            
+            .already-have-account {
+                position: static !important;
+                text-align: center;
+                margin: 15px 0 !important;
+                padding: 0;
+            }
+            
+            .already-have-account a {
+                display: inline !important;
+                padding: 0 !important;
+                border: none !important;
+                border-radius: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Promotional Banner -->
+    <div id="promo-banner" class="promo-banner" onclick="viewPricingPlans()" style="background: var(--card-bg); color: var(--text-primary); text-align: center; padding: 10px 20px; font-weight: 500; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); position: fixed; top: 0; left: 0; right: 0; z-index: 9999; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='var(--card-bg)'">
+        Plans from <strong style="color: #22c55e;">$4.99/month</strong>: more analyses a day, and the AI autopilot (Beta) for your practice portfolio
+    </div>
+    <script>
+        // Update banner content and hide for paid users
+        (function() {
+            const userId = localStorage.getItem('userId') || 'anonymous';
+            const cacheKey = `userPaidStatus_${userId}`;
+            const cachedPaidStatus = localStorage.getItem(cacheKey);
+            const banner = document.getElementById('promo-banner');
+            
+            if (cachedPaidStatus === 'paid' && banner) {
+                banner.style.display = 'none';
+                if (window.innerWidth > 768) {   // no strip: the bar at the top and the page under it (a phone never has the strip)
+                    document.documentElement.style.setProperty('--nav-top', '0');
+                    document.documentElement.style.setProperty('--body-padding', '64px');
+                }
+            } else if (userId === 'anonymous' && banner) {
+                banner.innerHTML = 'Free 3-day trial: <strong style="color: #22c55e;">15 analyses</strong>, no credit card needed';
+            }
+        })();
+    </script>
+    <nav class="top-nav" style="top: var(--nav-top, 41px);">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="index.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit;">
+                    <img src="stockiq-logo.png" alt="StockIQ" class="brand-logo" style="width: 24px; height: 24px;">
+                    <span class="brand-text">StockIQ</span>
+                </a>
+            </div>
+            
+            <!-- Desktop Navigation -->
+            <div class="desktop-nav">
+                <a href="index.html" class="nav-item home-link" style="text-decoration: none !important; color: inherit; display: flex; align-items: center;">
+                    Home
+                </a>
+                <div class="nav-item dropdown" onclick="showDropdown('analysis-dropdown', event)">
+                    Analysis <span class="dropdown-arrow">▼</span>
+                    <div class="dropdown-menu" id="analysis-dropdown">
+                        <a href="analysis.html?option=1">Stock & ETF Analysis</a>
+                        <a href="analysis.html?option=2">Trading Signals</a>
+                    </div>
+                </div>
+                <div class="nav-item dropdown" onclick="showDropdown('screeners-dropdown', event)">
+                    Screeners <span class="dropdown-arrow">▼</span>
+                    <div class="dropdown-menu" id="screeners-dropdown">
+                        <a href="analysis.html?option=3">🇺🇸 US Markets</a>
+                        <a href="analysis.html?option=4">🇪🇺 Europe Markets</a>
+                        <a href="analysis.html?option=5">🌏 Asia-Pacific Markets</a>
+                        <a href="analysis.html?option=6">🌎 Americas Markets</a>
+                    </div>
+                </div>
+                <div class="nav-item dropdown" onclick="showDropdown('crypto-dropdown', event)">
+                    Crypto <span class="dropdown-arrow">▼</span>
+                    <div class="dropdown-menu" id="crypto-dropdown">
+                        <a href="analysis.html?option=7">Crypto Universe Screener</a>
+                    </div>
+                </div>
+                <div class="nav-item dropdown" onclick="showDropdown('account-dropdown', event)" style="margin-left: auto;">
+                    Account <span class="dropdown-arrow">▼</span>
+                    <div class="dropdown-menu" id="account-dropdown">
+                        <a href="signup.html">Register</a>
+                        <a href="#" onclick="showLoginModal()">Login</a>
+                    </div>
+                </div>
+                <div style="width: 20px; margin-right: 10px; visibility: hidden;"></div>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+            
+            <!-- Mobile Hamburger -->
+            <div class="mobile-nav">
+                <button class="hamburger-btn" onclick="toggleMobileMenu()">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
+    
+    <!-- Mobile Side Menu -->
+    <div class="mobile-menu" id="mobile-menu">
+        <div class="mobile-menu-header">
+            <span class="mobile-brand"><img src="stockiq-logo.png" alt="StockIQ" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">StockIQ</span>
+            <div class="mobile-header-controls">
+                <button class="close-btn" onclick="closeMobileMenu()">×</button>
+            </div>
+        </div>
+        <div class="mobile-menu-content">
+            <div class="mobile-section">
+                <a href="index.html">🏠 Home</a>
+            </div>
+            <div class="mobile-section">
+                <div class="mobile-section-title">Analysis</div>
+                <a href="analysis.html?option=1">Stock & ETF Analysis</a>
+                <a href="analysis.html?option=2">Trading Signals</a>
+            </div>
+            <div class="mobile-section">
+                <div class="mobile-section-title">Screeners</div>
+                <a href="analysis.html?option=3">🇺🇸 US Markets</a>
+                <a href="analysis.html?option=4">🇪🇺 Europe Markets</a>
+                <a href="analysis.html?option=5">🌏 Asia-Pacific Markets</a>
+                <a href="analysis.html?option=6">🌎 Americas Markets</a>
+            </div>
+            <div class="mobile-section">
+                <div class="mobile-section-title">Crypto</div>
+                <a href="analysis.html?option=7">Crypto Universe Screener</a>
+            </div>
+            <div class="mobile-section">
+                <div class="mobile-section-title">Account</div>
+                <a href="signup.html">Register</a>
+                <a href="#" onclick="showLoginModal()">Login</a>
+            </div>
+            <div class="mobile-section">
+                <div class="mobile-section-title">Theme</div>
+                <a href="#" onclick="toggleTheme()" id="mobile-theme-toggle">🌙 Dark Mode</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="signup-container">
+        <div class="signup-header">
+            <h1>Create Your Account</h1>
+            <p style="margin: 0;"><span style="color: #22c55e;">✓</span> 15 free analyses/screeners</p>
+            <p style="margin: 5px 0 0 0;"><span style="color: #22c55e;">✓</span> No credit card required</p>
+            <p style="margin: 5px 0 0 0;"><span style="color: #22c55e;">✓</span> 3-day free trial</p>
+        </div>
+
+        <form class="signup-form" onsubmit="handleEmailSignup(event)" action="https://stockiq.tech/signup.html" method="post">
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" name="fullName" required autocomplete="name">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required autocomplete="email">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required minlength="8" autocomplete="new-password">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required minlength="8" autocomplete="new-password" oninput="checkPasswordMatch()">
+                <div id="passwordMatch" style="font-size: 0.85rem; margin-top: 5px;"></div>
+            </div>
+            
+            <button type="submit" class="signup-btn" id="signup-btn">
+                <div class="loading-spinner" id="loading-spinner"></div>
+                <span id="btn-text">Create Account</span>
+            </button>
+        </form>
+
+        <div class="already-have-account">
+            Already have an account? <a href="login.html" style="display: inline-block; padding: 6px 16px; border: 2px solid #007bff; border-radius: 20px; color: #007bff; text-decoration: none; transition: all 0.3s ease;" onmouseover="this.style.background='#007bff'; this.style.color='white';" onmouseout="this.style.background='transparent'; this.style.color='#007bff';">Sign in</a>
+        </div>
+
+        <div class="divider">
+            <span>or continue with</span>
+        </div>
+
+        <div class="social-buttons">
+            <button class="social-btn google-btn" onclick="signUpWithGoogle()">
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Continue with Google
+            </button>
+            
+            <button class="social-btn facebook-btn" onclick="signUpWithFacebook()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877f2">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                Continue with Facebook
+            </button>
+        </div>
+
+        <div class="terms-text">
+            By creating an account, you agree to our <a href="terms.html" target="_blank" rel="noopener">Terms of Service</a> and <a href="privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>
+        </div>
+    </div>
+
+
+
+    <footer class="footer">
+        <p>&copy; 2026 StockIQ - Professional Investment Research Platform</p>
+        <p>Powered by AI • Market Data • Comprehensive Analysis</p>
+        <p>
+            <a href="terms.html" style="color: #007bff; text-decoration: none;">Terms of Service</a> • 
+            <a href="privacy-policy.html" style="color: #007bff; text-decoration: none;">Privacy Policy</a> • 
+            <a href="refunds.html" style="color: #007bff; text-decoration: none;">Refund Policy</a> • 
+            <a href="support.html" style="color: #007bff; text-decoration: none;">Support</a> • 
+            <a href="contact.html" style="color: #007bff; text-decoration: none;">Contact</a> • 
+            <a href="data-deletion.html" style="color: #007bff; text-decoration: none;">Data Deletion</a> • 
+            <a href="news.html" style="color: #007bff; text-decoration: none;">News</a> • 
+            <a href="blog.html" style="color: #007bff; text-decoration: none;">Blog</a> • 
+            <a href="faq.html" style="color: #007bff; text-decoration: none;">FAQ</a>
+        </p>
+        <p style="margin-top: 15px;">
+            <a href="https://instagram.com/stockiq.tech" target="_blank" rel="noopener noreferrer" style="color: #E4405F; text-decoration: none; font-size: 24px;" title="Follow us on Instagram">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+            </a>
+        </p>
+    </footer>
+
+    <script>
+        let activeDropdown = null;
+        
+        function showDropdown(dropdownId, event) {
+            // Prevent dropdown from opening if clicking on home link
+            if (event && event.target.closest('.home-link')) {
+                return;
+            }
+            
+            if (activeDropdown && activeDropdown !== dropdownId) {
+                document.getElementById(activeDropdown).classList.remove('show');
+            }
+            
+            const dropdown = document.getElementById(dropdownId);
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+                activeDropdown = dropdown.classList.contains('show') ? dropdownId : null;
+            }
+        }
+        
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const hamburger = document.querySelector('.hamburger-btn');
+            
+            if (menu) menu.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('show');
+            if (hamburger) hamburger.classList.toggle('active');
+            document.body.classList.toggle('menu-open');
+        }
+        
+        function closeMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const hamburger = document.querySelector('.hamburger-btn');
+            
+            if (menu) menu.classList.remove('open');
+            if (overlay) overlay.classList.remove('show');
+            if (hamburger) hamburger.classList.remove('active');
+            document.body.classList.remove('menu-open');
+        }
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.dropdown')) {
+                if (activeDropdown) {
+                    const dropdown = document.getElementById(activeDropdown);
+                    if (dropdown) {
+                        dropdown.classList.remove('show');
+                    }
+                    activeDropdown = null;
+                }
+            }
+        });
+
+        // Initialize Facebook SDK
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId: '1125324569571529',
+                cookie: true,
+                xfbml: true,
+                status: true,
+                version: 'v18.0'
+            });
+        };
+
+        // Facebook Sign Up
+        function signUpWithFacebook() {
+            FB.login(function(response) {
+                if (response.authResponse) {
+                    FB.api('/me', {fields: 'name,email'}, function(userInfo) {
+                        console.log('Facebook user:', userInfo);
+                        handleFacebookSignup(response.authResponse.accessToken, userInfo);
+                    });
+                } else {
+                    console.log('User cancelled login or did not fully authorize.');
+                }
+            });
+        }
+
+        async function handleFacebookSignup(accessToken, userInfo) {
+            const facebookUser = {
+                email: userInfo.email || userInfo.id + '@facebook.com',
+                name: userInfo.name,
+                loginTime: Date.now().toString(),
+                provider: 'facebook'
+            };
+            
+            // Store in localStorage like AWS Cognito does
+            localStorage.setItem('accessToken', 'facebook_' + accessToken);
+            localStorage.setItem('idToken', 'facebook_token');
+            localStorage.setItem('loginTime', facebookUser.loginTime);
+            localStorage.setItem('userId', facebookUser.email);
+            
+            // Register user in DynamoDB trial system with proper trial setup
+            if (typeof authManager !== 'undefined') {
+                try {
+                    const ip = await authManager.getUserIP();
+                    await fetch('https://32p2mynai46u36ppmaxleahpbe0fzfdz.lambda-url.us-east-1.on.aws/', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            action: 'register',
+                            email: facebookUser.email,
+                            name: facebookUser.name,
+                            provider: 'facebook',
+                            userAgent: navigator.userAgent,
+                            ipAddress: ip,
+                            screenResolution: `${screen.width}x${screen.height}`,
+                            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                            language: navigator.language
+                        })
+                    });
+                    console.log('✅ Facebook user registered in trial system');
+                } catch (error) {
+                    console.warn('Failed to register Facebook user:', error);
+                }
+                authManager.checkAuthStatus();
+            }
+            
+            // Redirect to dashboard
+            window.location.href = 'dashboard.html';
+        }
+
+        // Initialize Google Sign In
+        let googleInitialized = false;
+        
+        function initializeGoogle() {
+            console.log('🔵 Initializing Google Sign-In...');
+            if (typeof google !== 'undefined' && !googleInitialized) {
+                try {
+                    google.accounts.id.initialize({
+                        client_id: '851713356105-bm61s5e7qf0tkn5ll8jvslhg98ce6pe9.apps.googleusercontent.com',
+                        callback: handleGoogleSignup,
+                        auto_select: false,
+                        cancel_on_tap_outside: false
+                    });
+                    googleInitialized = true;
+                    console.log('✅ Google Sign-In initialized successfully');
+                } catch (error) {
+                    console.error('🔴 Google initialization error:', error);
+                }
+            } else {
+                console.log('🔴 Google SDK not available or already initialized');
+            }
+        }
+        
+        // Google Sign Up
+        function signUpWithGoogle() {
+            console.log('🔵 Google Sign-Up button clicked');
+            
+            if (typeof google !== 'undefined') {
+                console.log('🔵 Google SDK loaded, initializing...');
+                initializeGoogle();
+                
+                // Create a temporary button element for Google to render
+                const tempDiv = document.createElement('div');
+                tempDiv.style.position = 'absolute';
+                tempDiv.style.top = '-9999px';
+                document.body.appendChild(tempDiv);
+                
+                try {
+                    console.log('🔵 Rendering Google button...');
+                    google.accounts.id.renderButton(tempDiv, {
+                        theme: 'outline',
+                        size: 'large',
+                        width: 250
+                    });
+                    
+                    // Simulate click on the rendered button
+                    setTimeout(() => {
+                        const googleBtn = tempDiv.querySelector('div[role="button"]');
+                        if (googleBtn) {
+                            console.log('🔵 Clicking Google button...');
+                            googleBtn.click();
+                        } else {
+                            console.log('🔵 Google button not found, trying prompt...');
+                            google.accounts.id.prompt();
+                        }
+                        document.body.removeChild(tempDiv);
+                    }, 100);
+                } catch (error) {
+                    console.error('🔴 Google button render error:', error);
+                    document.body.removeChild(tempDiv);
+                    // Manual fallback
+                    const clientId = '851713356105-bm61s5e7qf0tkn5ll8jvslhg98ce6pe9.apps.googleusercontent.com';
+                    const redirectUri = encodeURIComponent(window.location.origin + '/signup.html');
+                    const scope = encodeURIComponent('openid email profile');
+                    const googleAuthUrl = `https://accounts.google.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code&access_type=offline`;
+                    console.log('🔵 Redirecting to Google OAuth:', googleAuthUrl);
+                    window.location.href = googleAuthUrl;
+                }
+            } else {
+                console.log('🔴 Google SDK not loaded, using fallback redirect');
+                // Fallback: redirect to Google OAuth
+                const clientId = '851713356105-bm61s5e7qf0tkn5ll8jvslhg98ce6pe9.apps.googleusercontent.com';
+                const redirectUri = encodeURIComponent(window.location.origin + '/signup.html');
+                const scope = encodeURIComponent('openid email profile');
+                const googleAuthUrl = `https://accounts.google.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code&access_type=offline`;
+                console.log('🔵 Redirecting to Google OAuth:', googleAuthUrl);
+                window.location.href = googleAuthUrl;
+            }
+        }
+        
+        async function handleGoogleSignup(response) {
+            console.log('🔵 Google signup callback triggered:', response);
+            try {
+                if (!response || !response.credential) {
+                    throw new Error('No credential received from Google');
+                }
+                
+                console.log('🔵 Decoding JWT token...');
+                // Decode the JWT token to get user info
+                const payload = JSON.parse(atob(response.credential.split('.')[1]));
+                console.log('🔵 JWT payload:', payload);
+                
+                const googleUser = {
+                    email: payload.email,
+                    name: payload.name,
+                    loginTime: Date.now().toString(),
+                    provider: 'google'
+                };
+                
+                console.log('🔵 Storing user data in localStorage...');
+                // Store in localStorage like AWS Cognito does
+                localStorage.setItem('accessToken', 'google_' + response.credential);
+                localStorage.setItem('idToken', 'google_token');
+                localStorage.setItem('loginTime', googleUser.loginTime);
+                localStorage.setItem('userId', googleUser.email);
+                
+                console.log('🔵 Registering user in DynamoDB...');
+                // Register user in DynamoDB trial system with proper trial setup
+                if (typeof authManager !== 'undefined') {
+                    try {
+                        const ip = await authManager.getUserIP();
+                        await fetch('https://32p2mynai46u36ppmaxleahpbe0fzfdz.lambda-url.us-east-1.on.aws/', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                action: 'register',
+                                email: googleUser.email,
+                                name: googleUser.name,
+                                provider: 'google',
+                                userAgent: navigator.userAgent,
+                                ipAddress: ip,
+                                screenResolution: `${screen.width}x${screen.height}`,
+                                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                                language: navigator.language
+                            })
+                        });
+                        console.log('✅ Google user registered in trial system');
+                    } catch (error) {
+                        console.warn('Failed to register Google user:', error);
+                    }
+                    authManager.checkAuthStatus();
+                }
+                
+                console.log('✅ Google user signed up successfully:', googleUser);
+                
+                // Redirect to dashboard
+                console.log('🔵 Redirecting to dashboard...');
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                console.error('🔴 Google signup error:', error);
+                alert('Google signup failed: ' + error.message);
+            }
+        }
+
+
+
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const matchDiv = document.getElementById('passwordMatch');
+            
+            if (confirmPassword.length === 0) {
+                matchDiv.textContent = '';
+                return;
+            }
+            
+            if (password === confirmPassword) {
+                matchDiv.textContent = '✓ Passwords match';
+                matchDiv.style.color = '#22c55e';
+            } else {
+                matchDiv.textContent = '✗ Passwords do not match';
+                matchDiv.style.color = '#dc3545';
+            }
+        }
+
+        // Email Sign Up
+        async function handleEmailSignup(event) {
+            event.preventDefault();
+            
+            const btn = document.getElementById('signup-btn');
+            const spinner = document.getElementById('loading-spinner');
+            const btnText = document.getElementById('btn-text');
+            
+            // Show loading state
+            btn.disabled = true;
+            spinner.style.display = 'block';
+            btnText.textContent = 'Creating Account...';
+            
+            const formData = new FormData(event.target);
+            const userData = {
+                fullName: formData.get('fullName'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                confirmPassword: formData.get('confirmPassword')
+            };
+            
+            if (userData.password !== userData.confirmPassword) {
+                // Reset button state
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = 'Create Account';
+                alert('Passwords do not match. Please try again.');
+                return;
+            }
+            
+            try {
+                // Use your existing signUp API
+                if (typeof authManager !== 'undefined' && authManager.signUp) {
+                    const result = await authManager.signUp(userData.email, userData.password, userData.fullName);
+                    if (result.success) {
+                        alert('Registration successful! Please check your email for verification.');
+                        // Show verification modal or redirect
+                        showVerificationModal(userData.email);
+                    } else {
+                        // Reset button state on error
+                        btn.disabled = false;
+                        spinner.style.display = 'none';
+                        btnText.textContent = 'Create Account';
+                        
+                        // Check if user already exists and redirect to login
+                        if (result.error && result.error.includes('You have already registered')) {
+                            alert('Registration failed: ' + (result.error || 'Unknown error'));
+                            window.location.href = 'login.html?email=' + encodeURIComponent(userData.email);
+                        } else {
+                            alert('Registration failed: ' + (result.error || 'Unknown error'));
+                        }
+                    }
+                } else {
+                    // Reset button state on error
+                    btn.disabled = false;
+                    spinner.style.display = 'none';
+                    btnText.textContent = 'Create Account';
+                    alert('Registration system not available');
+                }
+            } catch (error) {
+                // Reset button state on error
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = 'Create Account';
+                console.error('Registration error:', error);
+                alert('Registration failed: ' + error.message);
+            }
+        }
+
+        // Placeholder functions for terms and privacy
+        function showTerms() {
+            window.open('terms.html', '_blank');
+        }
+
+        function showPrivacy() {
+            window.open('privacy-policy.html', '_blank');
+        }
+
+        // Redirect to login page
+        function showLoginModal() {
+            window.location.href = 'login.html';
+        }
+        
+        function showVerificationModal(email) {
+            const modal = document.createElement('div');
+            modal.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: var(--card-bg); padding: 30px; border-radius: 12px; max-width: 400px; width: 90%; position: relative;">
+                        <h2 style="margin-bottom: 20px; color: var(--text-primary);">Verify Your Email</h2>
+                        <p style="margin-bottom: 20px; color: var(--text-secondary);">We've sent a verification code to <strong>${email}</strong></p>
+                        <form id="verifyForm">
+                            <input type="text" id="verifyCode" placeholder="Enter verification code" required style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary);">
+                            <button type="submit" style="width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Verify Account</button>
+                        </form>
+                        <button onclick="this.closest('div').remove()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-primary);">×</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const code = document.getElementById('verifyCode').value;
+                
+                const result = await authManager.confirmSignUp(email, code);
+                if (result.success) {
+                    modal.remove();
+                    alert('Account verified successfully! You will now be redirected to login.');
+                    window.location.href = `login.html?email=${encodeURIComponent(email)}&pwd=clear`;
+                } else {
+                    alert('Verification failed: ' + result.error);
+                }
+            });
+        }
+        
+        // Initialize Google Sign-In when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for activation link
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('activate') === 'true') {
+                const code = urlParams.get('code');
+                const email = urlParams.get('email');
+                if (code && email) {
+                    // Wait for authManager to load
+                    const checkAuth = setInterval(() => {
+                        if (typeof authManager !== 'undefined') {
+                            clearInterval(checkAuth);
+                            activateAccount(email, code);
+                        }
+                    }, 100);
+                } else if (code) {
+                    showActivationModal(code);
+                }
+            }
+            
+            // Test Google SDK loading
+            console.log('🔵 Page loaded, checking Google SDK...');
+            console.log('🔵 Google object exists:', typeof google !== 'undefined');
+            console.log('🔵 Current domain:', window.location.origin);
+            
+            // Initialize Google Sign-In when page loads
+            setTimeout(() => {
+                console.log('🔵 Attempting to initialize Google after 1 second...');
+                initializeGoogle();
+            }, 1000);
+        });
+        
+        function showActivationModal(code) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const email = urlParams.get('email');
+            
+            // If email is in URL, auto-activate
+            if (email && code) {
+                activateAccount(email, code);
+                return;
+            }
+            
+            // Otherwise show modal to enter email
+            const modal = document.createElement('div');
+            modal.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: var(--card-bg); padding: 30px; border-radius: 12px; max-width: 400px; width: 90%; position: relative;">
+                        <h2 style="margin-bottom: 20px; color: var(--text-primary);">Activate Your Account</h2>
+                        <p style="margin-bottom: 20px; color: var(--text-secondary);">Enter your email address to complete activation</p>
+                        <form id="activateForm">
+                            <input type="email" id="activateEmail" placeholder="your@email.com" required autofocus style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary);">
+                            <button type="submit" style="width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Activate Account</button>
+                        </form>
+                        <button onclick="this.closest('div').remove(); window.history.replaceState({}, '', 'signup.html');" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-primary);">×</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            document.getElementById('activateForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('activateEmail').value;
+                activateAccount(email, code);
+            });
+        }
+        
+        async function activateAccount(email, code) {
+            const result = await authManager.confirmSignUp(email, code);
+            if (result.success) {
+                window.history.replaceState({}, '', 'signup.html');
+                alert('Account activated successfully! You can now log in.');
+                window.location.href = `login.html?email=${encodeURIComponent(email)}&pwd=clear`;
+            } else {
+                // Check if error is because user is already confirmed
+                if (result.error && (result.error.includes('already confirmed') || result.error.includes('Invalid code'))) {
+                    window.history.replaceState({}, '', 'signup.html');
+                    alert('This account is already activated. Please log in.');
+                    window.location.href = `login.html?email=${encodeURIComponent(email)}&pwd=clear`;
+                } else {
+                    alert('Activation failed: ' + result.error);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

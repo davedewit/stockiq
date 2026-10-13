@@ -240,8 +240,8 @@ if (hasPaid) {{
                     <div class="dropdown-menu" id="screeners-dropdown">
                         <a href="../analysis.html?option=3">🇺🇸 US Markets</a>
                         <a href="../analysis.html?option=4">🇪🇺 Europe Markets</a>
-                        <a href="../analysis.html?option=5">🌏 Asia Markets</a>
-                        <a href="../analysis.html?option=6">🌏 Other Markets</a>
+                        <a href="../analysis.html?option=5">🌏 Asia-Pacific Markets</a>
+                        <a href="../analysis.html?option=6">🌎 Americas Markets</a>
                     </div>
                 </div>
                 <div class="nav-item dropdown" onclick="showDropdown('crypto-dropdown', event)">
@@ -303,8 +303,8 @@ if (hasPaid) {{
                 <div class="mobile-section-title">Screeners</div>
                 <a href="../analysis.html?option=3">🇺🇸 US Markets</a>
                 <a href="../analysis.html?option=4">🇪🇺 Europe Markets</a>
-                <a href="../analysis.html?option=5">🌏 Asia Markets</a>
-                <a href="../analysis.html?option=6">🌏 Other Markets</a>
+                <a href="../analysis.html?option=5">🌏 Asia-Pacific Markets</a>
+                <a href="../analysis.html?option=6">🌎 Americas Markets</a>
             </div>
             <div class="mobile-section">
                 <div class="mobile-section-title">Crypto</div>
