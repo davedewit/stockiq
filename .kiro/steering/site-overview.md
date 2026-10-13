@@ -1097,7 +1097,16 @@ with `document.querySelector('h3')`.
   since it began against a dashed line at the $100,000 it started with. Buttons switch the line to "Your own buys" or
   "🤖 AI autopilot" (that part's gain or loss against zero; shown once the autopilot has traded) and, once the account is
   old enough, to the last week or month. The pointer (or a finger) reads off the moment and the figure; "Show the
-  figures" unfolds a line a day. Remembered in the browser: `stockiqPracticeChartKey`, `stockiqPracticeChartRange`.
+  figures" unfolds a line a day. Remembered in the browser: `stockiqPracticeChartRange` (how far back) only.
+  - **The same three buttons choose whose holdings are listed** (13 Oct 2026, the owner's idea; he wanted no second row of
+    buttons): with "Your own buys" or "AI autopilot" pressed, the Holding table and the Sold list show only that party's
+    (`partOf(list, key)`, exported for tests), the headings count "Holding (11 of 12)" / "Sold (3 of 4)", and a line above
+    the table says "Showing the 🤖 AI autopilot's: 11 of 12 holdings. Show all" (`#pp-part`; "Show all" is the Account
+    button as a link). The three figures at the top and the breakdown are always the whole account. **The choice is kept
+    while the page is open (a refresh of prices and the minute-by-minute redraws leave it) and is not remembered:** a
+    page opened afresh shows everything (`stockiqPracticeChartKey` is no longer written, and an old one is removed).
+    While only a part is listed, "Clear sold list" is not offered (it empties the whole list). The buttons exist only
+    once the autopilot has bought something; before that there is nothing to choose.
   - **Worked out in the browser, nothing stored and nothing extra fetched** (`valueSeries`, `seriesOf`, `chartSvg` in
     `practice-portfolio.js`): the price source answers every quote with a month of daily prices, which the page used to
     throw away. A holding still held is valued at those daily prices and at its latest price now. **A holding that was
@@ -1269,7 +1278,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=32` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Portfolio section | `website/practice-portfolio.js` (`?v=33` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=45`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
@@ -2381,16 +2390,16 @@ preview from Kiro): ask early when a change "does not show" (section 9).
 
 **What is live, and how to confirm nothing has moved since** (all compared with the local copies on 12 Oct, 10:17 UTC):
 - `stockiq-ai-trader` `0tynNBjnvnTkUmLZGPBc+v6CGxabNKGgNCaQE95YYUE=` (3,079 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC, a holding's own stop kept with the buy 16:51 UTC, the build-up that leaves out what is invested 17:25 UTC); `stockiq-ai-chat`
-  `rs1M0DqaxL5DCY08qCQTWpudd7QqpvRvrg2IwaGRi/c=`; `stockiq-screener-coordinator` `pUBd8qCLYGjtVSoYQObSV8YVygyP8mBSfdCxxJ+ho9Y=`;
+  `cQHzRlpev41uioqwNkos3CtAPA3oGOyOV2nsSn1BYU0=` (since 13 Oct 2026); `stockiq-screener-coordinator` `pUBd8qCLYGjtVSoYQObSV8YVygyP8mBSfdCxxJ+ho9Y=`;
   `stockiq-option-1-1-custom-analysis` `I84SxSgLYNt7…`; `stockiq-chart-generator` `OIDrZ2W9G3lJ…`; `stockiq-paper-portfolio`
   `s6IR+/80N/3k…`; the two signals functions `6nVDLm4/8G6K…`; the crypto orchestrator `yvmucU37gHJH…` and its 54 workers
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
-- Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=32` (`0a1f709f6dbb`),
-  `dashboard.html` (`48444abcb5c4`), `index.html` (`6f251b365a40`), `mobile-sidebar.js?v=1` (`28652e48d856`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
+- Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=33` (`9e0b1dd9aa63`),
+  `dashboard.html` (`b2b7a5019289`), `index.html` (`6f251b365a40`), `mobile-sidebar.js?v=1` (`28652e48d856`), `autopilot-bell.js` version 8 (`88119f40c022`), `theme.js` (`66da2c7c26a1`),
   `analysis-functions.js` (`96dbcb721ec1`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
-- Tests on the live files: 442 function, 210 panel, 110 portfolio (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
+- Tests on the live files: 442 function, 210 panel, 118 portfolio, 21 chat (13 Oct 2026; they were 110 and 20) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
 - Both repos pushed; **no `check-tools/pending-*` folder is left**. `website/` carries the daily job's own three files
@@ -2399,7 +2408,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
   trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell,
   takeover, report`, `stockiq-ai-trader_before_sweep_20261011.zip`, `…_costs_…`; 12 Oct `fresh, due, holdings, journal,
-  notes, heads, junk, patient, rows, buildup`. `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `…_{guide, guide2, guide3}_20261012.zip`.
+  notes, heads, junk, patient, rows, buildup`. `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `…_{guide, guide2, guide3}_20261012.zip`, `…_before_filter_20261013.zip`.
 
 **Improvements to come: one list. Take an item out when it is done; add ideas as the data suggests them.**
 *Waiting on finished trades (each has its trigger; nothing is adopted from hindsight, a trading idea goes live as a trial):*
@@ -3445,3 +3454,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     indexable, nothing de-indexed (section 9). Nothing in this session asked Yahoo for prices in bulk. Its other steps
     were clean and both repos were pushed. If the data dates on stock pages look a day old: `python3
     update_stock_analysis.py` later, then a deploy.
+  - **The graph's three buttons also choose whose holdings are listed** (section 8c, "What the owner sees", under the graph):
+    the owner's idea, offered two ways; built the way that adds no second row of buttons. `practice-portfolio.js?v=33`,
+    `dashboard.html` (the version number), and one sentence in the AI chat's guide (`stockiq-ai-chat` `cQHzRlpe…`; rollback
+    zip `…_before_filter_20261013.zip`). Tests: 118 portfolio checks (8 new: the three views, a refresh keeps the choice,
+    not remembered), 21 chat checks, the stand-in page's `chart:ai` step now reports the lists; looked at in a headless
+    browser, desktop and phone width, dark. The chat was asked a real question after the deploy and pointed to "Account"
+    or "Show all". **Not checked: the logged-in dashboard itself.**

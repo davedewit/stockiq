@@ -111,7 +111,7 @@ New screeners: use `5-<subOption>`.
 | `stockiq-dynamic-stock-lists` | Dynamic stock list API |
 | `stockiq-stock-list-api` | Stock list API |
 | `stockiq-email-capture` | Home page email list: saves to `stockiq-email-subscribers`, emails the owner (SES, from and to `noreply@stockiq.tech`) on each new signup. Handler file is `email-capture-with-count.py`; role `mylambdafunction-role-haabf70x`; **no CloudWatch log group exists**, so errors are not logged |
-| `stockiq-ai-chat` | GPT-4o-mini chat (128MB, 30s, 300 tokens; 400 on the dashboard, where it is also given `DASHBOARD_GUIDE` and the user's own dashboard summary from `pageContext.dashboard`; the guide was brought up to date on 12 Oct 2026). Test: `check-tools/ai_chat_test.py` (19 checks) |
+| `stockiq-ai-chat` | GPT-4o-mini chat (128MB, 30s, 300 tokens; 400 on the dashboard, where it is also given `DASHBOARD_GUIDE` and the user's own dashboard summary from `pageContext.dashboard`; the guide was brought up to date on 12 Oct 2026). Test: `check-tools/ai_chat_test.py` (21 checks) |
 | `stockiq-ai-chat-reporter` | Daily AI usage email at 5pm UTC |
 
 ### NO_URL (event-driven, no public URL)
