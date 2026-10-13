@@ -135,7 +135,7 @@
 
         if (!drag.mode) {
             if (Math.abs(dx) < SLOP && Math.abs(dy) < SLOP) return;
-            var sideways = Math.abs(dx) > Math.abs(dy) * 1.2;
+            var sideways = Math.abs(dx) > Math.abs(dy) * 1.5;   // clearly across, not a slanted scroll
             if (!sideways) {
                 drag.mode = 'scroll';
             } else if (drag.wasOut) {

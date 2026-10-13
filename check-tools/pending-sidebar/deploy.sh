@@ -15,7 +15,7 @@ DRY="${DRY_RUN:-false}"; TMP="$(mktemp -d)"
 # file : what it was (- for a file that is new) : what it becomes : type : how long a copy may be kept
 # The script goes up first: a page that asks for it must find it.
 FILES=(
- "mobile-sidebar.js:-:c0b34a034eeaacf18d029d61b66b373d632816b39a348abc0e72bfee0d94c0db:application/javascript:public, max-age=300, s-maxage=86400"
+ "mobile-sidebar.js:-:28652e48d85653907e8cc2602e2e83431ebf2460f3fc9d230834cc4409477697:application/javascript:public, max-age=300, s-maxage=86400"
  "index.html:220bfa35e7b65f1c83d8e8f5166bb7e2169b12c837b38e413fd670910da5f3e5:6f251b365a40dad0271b9abdeb9caa33926c369b9a2331e6630049831e977e3c:text/html; charset=utf-8:public, max-age=0, s-maxage=3600, must-revalidate"
  "dashboard.html:7513f0cf1622d4821dc083224212a3f29f67aa0569bc03021c342440ae5562d4:48444abcb5c4ed8a372246722796dc45441b49ce25b7258ad4dcb09980d25c51:text/html; charset=utf-8:public, max-age=0, s-maxage=3600, must-revalidate"
 )

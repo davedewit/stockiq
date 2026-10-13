@@ -211,6 +211,21 @@ serves it (`cd ~/VSCODE && python3 -m http.server 8765 --bind 127.0.0.1` first, 
 that the bell's script was asked for at the top of the address and so never loaded anywhere but on stockiq.tech. A page whose bell goes to the dashboard ends
 with "Inspected target navigated": that is the bell working.
 
+## mobile_sidebar_check.js (the market-data sidebar on a phone, tried with a finger)
+
+```bash
+node check-tools/mobile_sidebar_check.js index.html dashboard.html           # the pages in ../website
+WEB=check-tools/pending-<name>/web node check-tools/mobile_sidebar_check.js index.html dashboard.html   # a staged copy first
+SHOT=/tmp/quarter.png node check-tools/mobile_sidebar_check.js dashboard.html   # a picture with the sidebar a quarter out
+```
+Opens each page in headless Chrome at phone size with touch on, scrolls down 1,200px and drags: a quarter out and back in
+one touch, a quarter and let go (it goes back), 60% and let go (it comes out), up and down on the dark part, pushed back a
+little and a lot, quick flicks, the buttons, an ordinary scroll, and a swipe the other way (the menu). After every step it
+checks **that the page behind has not moved** and that the body was not given `position: fixed` (27 checks a page). The
+pages come from a server it starts itself; every other request a page makes is answered locally with an empty reply, and
+the "visitor" is a made-up address, so the dashboard draws without a login and nothing is written anywhere. It fails on
+the pages as they were before 13 Oct 2026 (the page jumped to the top). **Headless Chrome only: not an iPhone, not Safari.**
+
 ## news_sidebar_test.js (the home page's Market News list)
 
 ```bash
