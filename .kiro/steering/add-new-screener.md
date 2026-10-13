@@ -204,7 +204,9 @@ once, at its top.
 
 **4b. The names** (`report.names`): a short name a symbol, 22 characters at most, plain ASCII. **Never one word in
 capitals** ("SAP", "BASF", "BMW", "RWE", "DHL"): the dashboard's Top 10 tracker then reads the line as a coin. Write
-"SAP SE", "BMW AG". `tracker_run.js` (step 8) shows it at once: it looks up `SAP-USD` and finds nothing.
+"SAP SE", "BMW AG". `tracker_run.js` (step 8) shows it at once: it looks up `SAP-USD` and finds nothing. **And no "&" in a name**
+("J and T Global Express"): the report is HTML, and the tracker loses a line with an "&" in it. A *symbol* with an "&"
+(India's `M&M.BO`) needs code first: `site-overview.md` section 13, the entry on the Hang Seng and the STI.
 
 **4c. The output rules** are kept by `formatMarketResult` (section 8b): every code goes through `signalLabel()` /
 `horizonLabel()`, prices through `screenerMoney(stock, value, report.currency)` (the sign comes from the `currency` each
@@ -335,6 +337,8 @@ notification), and a real phone.
 | Canada TSX 60 (13 Oct 2026) | `5, 'tsx60'` | `5-tsx60` | `stockiq-americas-6-1-worker` | 6 | 60 | `.TO` (a share class takes a dash: `RCI-B.TO`) | CAD |
 | Italy FTSE MIB (13 Oct 2026) | `5, 'ftsemib'` | `5-ftsemib` | `stockiq-europe-4-5-worker` | 4 | 40 | `.MI` | EUR |
 | Spain IBEX 35 (13 Oct 2026) | `5, 'ibex35'` | `5-ibex35` | `stockiq-europe-4-6-worker` | 4 | 35 | `.MC` | EUR |
+| Hong Kong Hang Seng (13 Oct 2026) | `5, 'hangseng'` | `5-hangseng` | `stockiq-asia-5-8-worker` | 10 | 95 | `.HK` (the code as four digits: `0005.HK`) | HKD |
+| Singapore STI (13 Oct 2026) | `5, 'sti'` | `5-sti` | `stockiq-asia-5-9-worker` | 3 | 30 | `.SI` | SGD (three members in USD) |
 | India BSE Sensex | `5, 'sensex'` | `5-sensex` | `stockiq-asia-5-6-worker` | 3 | 30 | `.BO` or `.NS` | INR |
 | Crypto | `7, 'coinspot'` | `7-1` | orchestrator + 54 `stockiq-option-7-1-worker` in single-coin mode | 54 | 540 coins | `-USD`, sometimes a numbered ticker | USD |
 
