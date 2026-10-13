@@ -1261,8 +1261,11 @@ with `document.querySelector('h3')`.
     - **The one line under the three figures now says the same thing as the graph** ("Against the same $100,000 in an S&P 500
       fund since the start: behind by $1,476.36"). It used to give the breakdown card's figure (only what is still held,
       against the same dollars in the fund on the days they were put in, in percent): two different "behind the fund"
-      figures on one screen would have been read as a contradiction. The card in the breakdown is unchanged and says
-      whose figure it is. Without the fund's prices back to the start, the old wording stands.
+      figures on one screen would have been read as a contradiction. **The card in the breakdown still gives that other
+      sum, and can point the other way**: on the owner's figures the day it went live it read "ahead of the fund by 0.27%"
+      beside "behind by $1,557.97". So the card says which it is: "the money in what is still held, in an S&P 500 index
+      fund instead… Only what is still held is counted here, not what was sold: the graph compares the whole account"
+      (`versusFund`). Without the fund's prices back to the start, the one line keeps its old wording.
     - **Colours:** the account `--pp-line` blue, the fund `--pp-fund` `#c98500` (gold) in both themes; the pair was run
       through the dataviz skill's validator on the light and the dark background (colour-blind separation, contrast).
       Never green or red for a line.
@@ -1272,6 +1275,10 @@ with `document.querySelector('h3')`.
       remembered in the browser (`stockiqPracticeFundRange_<address>`) so the first request of a visit is already the
       right one. **This path has not been seen live yet: the owner's account is 3 days old. Look at the graph after
       about 4 Nov 2026** (the fund's line must still start at $100,000 on 10 Oct). Past five years there is no line.
+    - **Between two closes both lines are straight** (a holding's and the fund's alike, on purpose: built the same way, the
+      gap between them is not distorted). So a figure for a moment in a weekend or a night is an in-between value: "Show
+      the figures" gave the fund $99,992 for the Saturday the account began, when it was really still $100,000 until
+      Monday's session. Exact at each close and now.
     - Limits: daily closes, so the fund's line is straight within a day; the two lines share one axis, so a large move
       of the fund flattens the look of the account's line; a "Reset fake money" starts both again.
   - Not built: an hourly line (the price source would need an `interval` setting).
@@ -1434,7 +1441,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=34` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Portfolio section | `website/practice-portfolio.js` (`?v=35` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=45`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
@@ -2518,7 +2525,12 @@ same market looked at again half an hour later; the first small buys at 50 holdi
 `heads` on the remembered buy; a FTSE run on a morning after a London session showing that session's prices; the
 (the company figures published by the daily run itself: **seen on 13 Oct 2026**, "Company figures published for the
 single-stock report", 3,332 stocks); a "tighten" answer; the larger model in a review; a coin held back until it has stayed; any trial of a rule; the
-first progress report and its email; whether the test email reached the owner's inbox. **Never opened by a session: the logged-in dashboard and a real phone. The owner sent a screenshot of the Practice
+first progress report and its email; whether the test email reached the owner's inbox. **Opened by a session for the first time on 13 Oct 2026, read-only: the Practice portfolio tab as the owner's account**
+(`REAL_USER=<address> node check-tools/live_practice_check.js`, with `WIDTH=390` for a phone's width, `SHOT=<file.png>` for a
+picture, `LOCAL_PP=<file>` to try a staged script on the live page; only the portfolio's own "get" and the price
+function's GETs reach the site, everything else is answered locally, so nothing is written and it is not a visit; the
+autopilot's answer is withheld, so holdings carry no plan lines there). **Still never opened: the autopilot tab with real
+data, the Reports tab, and a real phone. The owner sent a screenshot of the Practice
 portfolio tab on 12 Oct (desktop, dark): heading with the two tools beside it, the four cards, the "whose result" row and
 the sidebar all as intended; the usage badge still sits over the top right corner (section 11).**
 **Seen for real at 17:40 UTC on 12 Oct (the first scheduled check-in on the day's last code):** the build-up fix let it buy at
@@ -2552,8 +2564,8 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   `DaTSp0Aqxq7x…`; all 669 share-screener workers `q9ZX/UvTBcsz…` (`workers/live.txt`; `python3 check-tools/workers.py`
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
-- Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=34` (`4f100feea69d`),
-  `dashboard.html` (`6ef370d9ca03`), `index.html` (`b67e8d1c2f92`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`d35dd08a8f28`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
+- Website (sha256 starts): `practice-autopilot.js?v=45` (`9b4aff9affda`), `practice-portfolio.js?v=35` (`77079a71f71a`),
+  `dashboard.html` (`9b3f65008a59`), `index.html` (`b67e8d1c2f92`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`d35dd08a8f28`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
   `analysis-functions.js` (`317e4e43fc49`), `screeners.js` (`7f131afab142`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
 - Tests on the live files: 442 function, 210 panel, 130 portfolio, 22 chat (13 Oct 2026, after the fund's line; they were 118 and 21) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
@@ -3788,3 +3800,15 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     only the new workers' addresses (as was done here).
     **Still "Coming Soon":** Switzerland (SMI), Italy (FTSE MIB), Spain (IBEX 35), India (BSE Sensex), South Korea
     (KOSPI), Hong Kong (Hang Seng), Singapore (STI), Brazil (Bovespa). The autopilot buys from none of the four new ones.
+  - **The S&P 500 line reviewed at the owner's word ("looks good review it make sure its ok").** Opened the live Practice
+    portfolio tab as his account, read-only, at desktop and phone width (new tool `check-tools/live_practice_check.js`,
+    kept): the line, the two key lines, the one line, the figures table, the three views, the chat summary all right on
+    his real figures; no script error; nothing sticking out; the fund's prices asked for with no range, as they should
+    be for an account three days old. **One thing found and fixed:** the breakdown's fund card read "ahead of the fund"
+    while the graph read "behind it" (different sums, both true); the card now says it counts only what is still held
+    (`practice-portfolio.js?v=35`, words only). Written down as a limit, not changed: between two closes both lines are
+    straight, so a weekend figure is an in-between value. Seen and left (older than this change): the date labels under
+    the graph repeat a day when the account is three to five days old ("11 Oct, 11 Oct"). **A slip in the session's own
+    bookkeeping:** a notes edit stopped on a line the other session had changed, and the commands after it still ran, so
+    commit `4e4556b` says "Notes" and holds none; they are in the commit after it. Put `set -e` or `&&` between a
+    notes edit and the commit that depends on it.

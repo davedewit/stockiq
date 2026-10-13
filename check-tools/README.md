@@ -348,3 +348,9 @@ answers for ten coins (`recorded.txt`); `crypto/patch_worker_2026-10-11.py` is t
 unzip -o -q ~/VSCODE/backup/stockiq-option-7-1-worker_before_clean_20261011.zip -d /tmp/worker-before-clean
 python3 check-tools/crypto/worker_test.py /tmp/worker-before-clean/lambda_function.py lambda-sync/stockiq-option-7-1-worker-*/lambda_function.py check-tools/crypto/recorded.txt
 ```
+
+**The live Practice portfolio tab as a real account, read-only:** `REAL_USER=<address> node check-tools/live_practice_check.js`
+(`WIDTH=390` a phone's width, `SHOT=<file.png>` a picture, `LOCAL_PP=<file>` a staged `practice-portfolio.js` tried on the
+live page). Only the portfolio's "get" and the price function's GETs reach the site; every other call is answered
+locally, so nothing is written. It prints the three figures, the one line, the graph's key lines, whether the S&P 500
+fund's line is drawn, the figures table, the three views, the chat summary and any script error.
