@@ -354,3 +354,12 @@ python3 check-tools/crypto/worker_test.py /tmp/worker-before-clean/lambda_functi
 live page). Only the portfolio's "get" and the price function's GETs reach the site; every other call is answered
 locally, so nothing is written. It prints the three figures, the one line, the graph's key lines, whether the S&P 500
 fund's line is drawn, the figures table, the three views, the chat summary and any script error.
+
+## Where the home page's "View Pricing Plans" stops
+
+`node pricing_link_check.js` opens the live home page in headless Chrome under an ordinary browser name, clicks the
+link to `#pricing` with a real mouse click and prints where the pricing section and its heading stop against the bottom
+of the fixed header (PASS when the heading is in view below it). Read-only: GETs and the market-data functions that
+only read go through, everything else is answered locally. `SIZE=390x844` a phone's size; `DIRECT=1` opens
+`index.html#pricing` as a link from another page does; `PAID=paid|unpaid` a signed-in visitor (a made-up address);
+`WEB=<folder>` a staged or local copy served from this machine; `WAIT=<ms>` when the click comes; `SHOT=<file.png>`.

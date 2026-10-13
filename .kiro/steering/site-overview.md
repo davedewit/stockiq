@@ -3817,5 +3817,14 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     the fixed trial banner and menu (41px + 64px = `--body-padding` 105px; 64px on a paid account): the heading and the
     first lines were hidden. One style on the section in `index.html`: `scroll-margin-top: 130px`. Live file equals the
     local one. **Not seen in a browser:** the home page comes out blank in headless Chrome here (served locally and
-    live), so the landing place is by the arithmetic, not by a picture; the owner's own click is the check. Any other
-    in-page link to a section of a page with this header needs the same style.
+    live), so the landing place was first by the arithmetic only. **The owner then said it still went past the heading, so
+    it was measured in a real browser** (new tool, kept: `node check-tools/pricing_link_check.js`; it opens the live home
+    page under an ordinary browser name, clicks the link with a real mouse click and says where the heading stops against
+    the header; `SIZE=390x844`, `DIRECT=1` (arriving at `index.html#pricing` from another page), `PAID=paid|unpaid`,
+    `WEB=<folder>` for a staged or local copy, `WAIT=<ms>`, `SHOT=<file>`). On the live site the section stops 24px
+    below the header and its heading 65px below, clicked 0.8 to 8 seconds after the page opens, at 1440 and 1100 wide,
+    at phone size, opened directly at `#pricing`, signed in with and without the paid note, and from the local folder;
+    the page as it was before the fix fails the same check with the heading 65px under the header (his picture). **Not
+    reproduced: what he saw after the fix; he was asked to reload and, if it persists, to say which browser and whether
+    it is stockiq.tech or a local preview** (section 9). Any other in-page link to a section of a page with this header
+    needs the same style.
