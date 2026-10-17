@@ -29,8 +29,8 @@ CURRENCY = {}
 
 # Which score the workers give (17 Oct 2026). 1: the original 12-factor score. 2: the trend score, built from what the score
 # studies found on 1,750 shares in nine markets it was never tuned on (check-tools/scoring/: the original score's top 10 lost
-# to its own list in 17 of 18 half-periods; a trend score's won 12). A test of the old score sets
-# STOCKIQ_SCORE=2. Switched on by default on 17 Oct 2026 at the owner's yes; STOCKIQ_SCORE=1 (or '1' below) gives the old score.
+# to its own list in 17 of 18 half-periods; a trend score's won 12). Version 2 by default since 17 Oct 2026, at the owner's
+# yes. STOCKIQ_SCORE=1 gives the old score (a test of it, or the way back: '1' below and a worker deploy).
 SCORE_VERSION = int(os.environ.get('STOCKIQ_SCORE', '2'))
 # Where the labels change: HOLD above the first, MODERATE_SELL down to the second, SELL down to the third, STRONG_SELL below.
 # Version 1 keeps its old numbers exactly (with them MODERATE_SELL is only given at exactly -0.8, as it always was); version 2
