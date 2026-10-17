@@ -9,7 +9,7 @@
 - ✅ Trial system: 15 analyses over 3 days. Plans: Starter $4.99, Pro $14.99, Elite $49.99
 - ✅ AI Stock Chat (GPT-4o-mini; home page, blog, dashboard and stock pages; on the dashboard it knows the user's own practice portfolio and autopilot)
 - ✅ SEO: ~957 large-cap pages indexed (≥$10B, moves a little each day), WebPage + Corporation schema, GA4
-- ✅ Screeners: US (S&P, Russell, NASDAQ, Dow), ASX 50/100/200/300, UK FTSE 100, Germany DAX 40, France CAC 40, Netherlands AEX, Canada TSX 60, Italy FTSE MIB, Spain IBEX 35, Switzerland SMI, Hong Kong Hang Seng, Singapore STI, India Sensex, South Korea KOSPI 200, Brazil Bovespa (all twelve 13 Oct 2026), Japan Nikkei 225, crypto (540 coins)
+- ✅ Screeners: US (S&P, Russell, NASDAQ, Dow), ASX 50/100/200/300, UK FTSE 100, Germany DAX 40, France CAC 40, Netherlands AEX, Canada TSX 60, Italy FTSE MIB, Spain IBEX 35, Switzerland SMI, Hong Kong Hang Seng, Singapore STI, India Sensex, South Korea KOSPI 200, Brazil Bovespa (all twelve 13 Oct 2026), Japan Nikkei 225, Euro Stoxx 50, Sweden OMX 30, China CSI 300, Taiwan 50, New Zealand NZX 50 (17 Oct 2026), crypto (540 coins); Mexico IPC still Coming Soon
 - ✅ Bot/subnet protection on anonymous usage tracker
 - ✅ Oct 2026 full check and repair: every screener and analysis button tested end to end; index lists
   rebuilt from current members; crypto coin list and matching replaced; neutral "describe, don't advise"

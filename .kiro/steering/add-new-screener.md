@@ -354,6 +354,11 @@ notification), and a real phone.
 | India Sensex (13 Oct 2026) | `5, 'sensex'` | `5-sensex` | `stockiq-asia-5-6-worker` | 3 | 30 | `.NS` (the NSE listing: `.BO` data is too patchy for the worker); one symbol holds an "&", `M&M.NS` | INR |
 | South Korea KOSPI 200 (13 Oct 2026) | `5, 'kospi200'` | `5-kospi200` | `stockiq-asia-5-7-worker` | 21 | 200 | `.KS` (six characters, letters possible) | KRW |
 | Brazil Bovespa (13 Oct 2026) | `5, 'bovespa'` | `5-bovespa` | `stockiq-americas-6-2-worker` | 8 | 76 | `.SA` | BRL (printed "BRL 56.86": no sign) |
+| Euro Stoxx 50 (17 Oct 2026) | `5, 'sx5e'` | `5-sx5e` | `stockiq-europe-4-8-worker` | 5 | 50 | home exchanges (`.DE .PA .AS .MI .MC .BR .HE`) | EUR |
+| Sweden OMX Stockholm 30 (17 Oct 2026) | `5, 'omx30'` | `5-omx30` | `stockiq-europe-4-9-worker` | 3 | 30 | `.ST` (a class with a dash: `ATCO-A.ST`) | SEK |
+| China CSI 300 (17 Oct 2026) | `5, 'csi300'` | `5-csi300` | `stockiq-asia-5-10-worker` | 30 | 300 | `.SS` Shanghai, `.SZ` Shenzhen | CNY |
+| Taiwan 50 (17 Oct 2026) | `5, 'tw50'` | `5-tw50` | `stockiq-asia-5-11-worker` | 5 | 50 | `.TW` | TWD |
+| New Zealand NZX 50 (17 Oct 2026) | `5, 'nzx50'` | `5-nzx50` | `stockiq-asia-5-12-worker` | 5 | 47 | `.NZ` | NZD |
 | Crypto | `7, 'coinspot'` | `7-1` | orchestrator + 54 `stockiq-option-7-1-worker` in single-coin mode | 54 | 540 coins | `-USD`, sometimes a numbered ticker | USD |
 
 The Russell 1000 / 2000 page runs send a worker number and no stocks; those workers take their ten from `lists.txt` in
@@ -365,6 +370,8 @@ the package (`site-overview.md` section 8b). A new screener sends its batches li
 
 | Problem | Cause | What to do |
 |---|---|---|
+| The 🎯 tracker reads only some symbols of a report | A symbol with two suffixes (`SWED-A.ST`) | Allowed since 17 Oct 2026 (`(?:[.-][A-Z]+){0,2}` in both patterns and in `page_run.js`); test with `tracker_run.js` |
+| The index's members cannot be found in a current list | English Wikipedia is often a year or more behind | The market's own language, the exchange's or index provider's own data (Nasdaq's index API, csindex's file), or an index fund's holdings; with none, leave the button "Coming Soon" (Mexico, 17 Oct 2026) |
 | A worker's address answers 403 | The public permission is missing | `create_group.py` adds it; run it again (it passes over what exists) |
 | "Unknown screener" (400) from the coordinator | The key is not in `WORKER_URLS` | Add it and deploy the coordinator |
 | The list comes back short | A symbol Yahoo does not know is dropped without a word | Check every symbol through the price proxy first; `analyse.py -v` lists what is missing |

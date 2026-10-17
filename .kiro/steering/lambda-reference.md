@@ -81,6 +81,11 @@ more if the list is long) and returns 48 data fields per stock: no report text. 
 | `stockiq-asia-5-6-worker-1..3` | 3 | **India Sensex** (13 Oct 2026; NSE listings) | 30 |
 | `stockiq-asia-5-7-worker-1..21` | 21 | **South Korea KOSPI 200** (13 Oct 2026) | 200 |
 | `stockiq-americas-6-2-worker-1..8` | 8 | **Brazil Bovespa** (13 Oct 2026) | 76 |
+| `stockiq-europe-4-8-worker-1..5` | 5 | **Euro Stoxx 50** (17 Oct 2026) | 50 |
+| `stockiq-europe-4-9-worker-1..3` | 3 | **Sweden OMX Stockholm 30** (17 Oct 2026) | 30 |
+| `stockiq-asia-5-10-worker-1..30` | 30 | **China CSI 300** (17 Oct 2026) | 300 |
+| `stockiq-asia-5-11-worker-1..5` | 5 | **Taiwan 50** (17 Oct 2026) | 50 |
+| `stockiq-asia-5-12-worker-1..5` | 5 | **New Zealand NZX 50** (17 Oct 2026) | 47 |
 | `stockiq-option-3-1-worker` (10), `3-2` (100), `3-4` (150), `3-5` (100), `3-6` (200), `3-7` (10), `3-8` (3) | ~570 | S&P 100, S&P 400+600, S&P 1500, Russell 1000 (its first 50 also serve S&P 500), Russell 2000, NASDAQ 100, Dow 30 | see `site-overview.md` 8b |
 | `stockiq-option-7-1-worker-1..54` | 54 | Crypto (since 11 Oct 2026 each asks for 90 days of prices so that MACD can be worked out: `site-overview.md` 8b). Takes `{"coin_list": [...]}` (ten coins a call from the orchestrator) or `{"single_coin": "..."}`; with neither it answers that there is nothing to analyse (the old built-in list is gone). | 540 coins |
 | `stockiq-option-7-2-worker-1` | 1 | **Unused since 12 Oct 2026**: single-coin analysis now comes from `stockiq-option-1-1-custom-analysis` (`"asset": "crypto"`) | – |
