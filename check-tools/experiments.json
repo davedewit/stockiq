@@ -7,7 +7,9 @@
    "measure": "the autopilot's share trades bought from 17 Oct against those before, after costs, each against an S&P 500 fund; the score study rerun on new prices; 30 trades a side",
    "status": "running",
    "started": "2026-10-17",
-   "decide": "2026-11-14"
+   "decide": "2026-11-14",
+   "public": true,
+   "publicText": "The screeners rank shares by a new trend score (how far a share is above its 52-week low, its rise over the year, its long-term averages). On four years of prices in nine markets it did clearly better than the old score. Its trades are being compared with those bought before."
   },
   {
    "id": "ai-review-off",
@@ -18,7 +20,9 @@
    "started": "2026-10-17",
    "decide": "2026-11-14",
    "decided": "2026-10-17",
-   "result": "Taken out: 31 trades, -1.46% a trade, against -0.62% for every other kind of sale; the shares it sold early mostly went on rising. It can only return as a trial with a newer model."
+   "result": "Taken out: 31 trades, -1.46% a trade, against -0.62% for every other kind of sale; the shares it sold early mostly went on rising. It can only return as a trial with a newer model.",
+   "public": true,
+   "publicText": "The AI model no longer sells holdings early: those sales lost money (31 trades, -1.46% a trade, against -0.62% for the other sales). The fixed rules sell."
   },
   {
    "id": "patient-shares",
@@ -27,7 +31,9 @@
    "measure": "patient against ordinary shares, sold and still held, 30 finished each way",
    "status": "running",
    "started": "2026-10-12",
-   "decide": "2026-11-12"
+   "decide": "2026-11-12",
+   "public": true,
+   "publicText": "Every second pair of shares is \"patient\": sold only by its limits or its time, not when the screener signal turns. The two kinds are being compared."
   },
   {
    "id": "headlines",
@@ -36,7 +42,9 @@
    "measure": "buys with headlines against without (heads), 30 each",
    "status": "running",
    "started": "2026-10-12",
-   "decide": "2026-11-12"
+   "decide": "2026-11-12",
+   "public": true,
+   "publicText": "Whether the news headlines it reads when choosing a buy help: buys with headlines are compared with buys without."
   },
   {
    "id": "polling-cut",
@@ -53,7 +61,9 @@
    "angle": "profit",
    "measure": "trial_figures, 10 finished each way, then 30",
    "status": "idea",
-   "order": 1
+   "order": 1,
+   "public": true,
+   "publicText": "Next: a trial of holding shares longer, beside the current holding time."
   },
   {
    "id": "company-figures",
@@ -69,7 +79,9 @@
    "angle": "profit",
    "measure": "replay first (the four tests), then a live trial",
    "status": "idea",
-   "order": 3
+   "order": 3,
+   "public": true,
+   "publicText": "Later: holding fewer shares while the S&P 500 is below its long-term average, if it passes a test on past prices first."
   },
   {
    "id": "newer-model",
@@ -102,7 +114,9 @@
    "measure": "",
    "status": "kept",
    "decided": "2026-10-17",
-   "result": "Kept: the old score lost to its own list in 17 of 18 half-periods; the study led to the trend score (now being tested live)"
+   "result": "Kept: the old score lost to its own list in 17 of 18 half-periods; the study led to the trend score (now being tested live)",
+   "public": true,
+   "publicText": "The screeners' old score was tested on 1,750 shares in nine markets: its top 10 did worse than simply holding the whole list, which led to the new trend score."
   },
   {
    "id": "admin-value",
@@ -156,7 +170,9 @@
    "measure": "",
    "status": "kept",
    "decided": "2026-10-17",
-   "result": "Kept: 33 screeners, none Coming Soon; all in the autopilot"
+   "result": "Kept: 33 screeners, none Coming Soon; all in the autopilot",
+   "public": true,
+   "publicText": "It can buy from six more markets: Euro Stoxx 50, Sweden, China, Taiwan, New Zealand and Mexico (33 screeners in all)."
   },
   {
    "id": "two-suffix-tracker",

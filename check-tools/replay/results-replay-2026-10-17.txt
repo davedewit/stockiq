@@ -1,0 +1,79 @@
+The autopilot's rules replayed on the S&P 100 list: 101 stocks, 999 trading days (2022-10-17 to 2026-10-09), $10,000, 0.1% taken off each buy and each sale.
+Decisions once a day at the close, traded at the next open; buys by rank (the AI model is not replayed); today's index members; no dividends.
+
+1. The five levels as they are, over the whole period
+   Cautious, held up to 20 days                     534 trades,  57% ended up,  +1.33% a trade after costs,  +0.76 against the fund (t +2.61); account   +59.0% (the fund +107.5%), worst fall   -7.0%, held 8 days
+   Careful, held up to 10 days                      915 trades,  57% ended up,  +1.41% a trade after costs,  +0.78 against the fund (t +3.34); account  +129.2% (the fund +107.5%), worst fall  -14.6%, held 8 days
+   Balanced, held up to 5 days                     1516 trades,  56% ended up,  +0.69% a trade after costs,  +0.30 against the fund (t +2.10); account  +130.9% (the fund +107.5%), worst fall  -15.2%, held 5 days
+   Bold, held up to 2 days                         2910 trades,  51% ended up,  +0.20% a trade after costs,  +0.05 against the fund (t +0.69); account   +99.0% (the fund +107.5%), worst fall  -22.8%, held 2 days
+   Adventurous, held up to 1 days                  2727 trades,  48% ended up,  -0.05% a trade after costs,  -0.13 against the fund (t -2.56); account   -34.0% (the fund +107.5%), worst fall  -49.7%, held 1 days
+
+2. Looking for something better, honestly: found on the first 599 days (2022-10-17 to 2025-03-07), judged on the last 400 (2025-03-10 to 2026-10-09)
+   240 variants of the rules tried on the first part. The five that looked best there (by how clearly they beat the fund per trade), and what each then did on the part it had not seen:
+   found: Bold, held up to 60 days, furthest above its 52-week low first    98 trades,  65% ended up,  +7.53% a trade after costs,  +4.80 against the fund (t +3.20); account  +123.0% (the fund  +53.5%), worst fall  -10.8%, held 37 days
+   then:                                                    95 trades,  65% ended up,  +6.74% a trade after costs,  +4.58 against the fund (t +2.78); account  +106.7% (the fund  +39.2%), worst fall  -16.8%, held 25 days
+   found: Bold, held up to 60 days, furthest above its 52-week low first, no sale on the signal    98 trades,  65% ended up,  +7.53% a trade after costs,  +4.80 against the fund (t +3.20); account  +123.0% (the fund  +53.5%), worst fall  -10.8%, held 37 days
+   then:                                                    95 trades,  65% ended up,  +6.74% a trade after costs,  +4.58 against the fund (t +2.78); account  +106.7% (the fund  +39.2%), worst fall  -16.8%, held 25 days
+   found: Bold, held up to 20 days, furthest above its 52-week low first   198 trades,  64% ended up,  +3.27% a trade after costs,  +1.93 against the fund (t +2.56); account  +108.0% (the fund  +53.5%), worst fall  -12.1%, held 18 days
+   then:                                                   149 trades,  63% ended up,  +5.00% a trade after costs,  +3.61 against the fund (t +3.21); account  +124.3% (the fund  +39.2%), worst fall  -14.0%, held 16 days
+   found: Bold, held up to 20 days, furthest above its 52-week low first, no sale on the signal   198 trades,  64% ended up,  +3.27% a trade after costs,  +1.93 against the fund (t +2.56); account  +108.0% (the fund  +53.5%), worst fall  -12.1%, held 18 days
+   then:                                                   149 trades,  63% ended up,  +5.00% a trade after costs,  +3.61 against the fund (t +3.21); account  +124.3% (the fund  +39.2%), worst fall  -14.0%, held 16 days
+   found: Careful, held up to 60 days, furthest above its 52-week low first, no stop that keeps a gain   245 trades,  55% ended up,  +3.38% a trade after costs,  +1.65 against the fund (t +2.46); account   +82.7% (the fund  +53.5%), worst fall  -12.6%, held 22 days
+   then:                                                   225 trades,  49% ended up,  +2.55% a trade after costs,  +1.24 against the fund (t +1.71); account   +57.5% (the fund  +39.2%), worst fall  -12.6%, held 15 days
+   Of all 240 variants with 40 or more trades: 218 were ahead of the fund per trade on the first part; on the second part 232 were, and 169 clearly so (t of 2 or more). The link between how a variant did on the first part and on the second: +0.83 (1 = what worked kept working, 0 = no link).
+
+3. Against luck: the best-looking variant's rules, buying stocks at random instead, 200 times, on the second part
+   the variant: account +106.7%, +4.58 against the fund a trade. Random buying under the same rules: account +24.2% on average, and 0% of the random runs did better than the variant.
+   the Balanced level as it is: account +75.3%; random buying under its rules +17.6% on average, 0% of the random runs did better.
+
+4. The variants that were ahead on BOTH parts (the only ones worth a second look), each checked against luck and without the seven chip / AI names
+   Bold, held up to 60 days, furthest above its 52-week low first
+      first part +4.80 a trade against the fund (t +3.20), second part +4.58 (t +2.78), account on the second part +106.7% (the fund +39.2%)
+      random buying under the same rules did better in 0% of 200 runs; without the seven chip / AI names: +3.36 a trade against the fund (t +1.86), account +77.8%
+   Bold, held up to 60 days, furthest above its 52-week low first, no sale on the signal
+      first part +4.80 a trade against the fund (t +3.20), second part +4.58 (t +2.78), account on the second part +106.7% (the fund +39.2%)
+      random buying under the same rules did better in 0% of 200 runs; without the seven chip / AI names: +3.36 a trade against the fund (t +1.86), account +77.8%
+   Bold, held up to 20 days, furthest above its 52-week low first
+      first part +1.93 a trade against the fund (t +2.56), second part +3.61 (t +3.21), account on the second part +124.3% (the fund +39.2%)
+      random buying under the same rules did better in 0% of 200 runs; without the seven chip / AI names: +1.98 a trade against the fund (t +2.03), account +76.9%
+   Bold, held up to 20 days, furthest above its 52-week low first, no sale on the signal
+      first part +1.93 a trade against the fund (t +2.56), second part +3.61 (t +3.21), account on the second part +124.3% (the fund +39.2%)
+      random buying under the same rules did better in 0% of 200 runs; without the seven chip / AI names: +1.98 a trade against the fund (t +2.03), account +76.9%
+
+5. How long it holds, everything else as the Balanced level has it (whole period)
+   held up to 1 days                               2953 trades,  48% ended up,  -0.04% a trade after costs,  -0.12 against the fund (t -2.62); account   -15.8% (the fund +107.5%), worst fall  -23.3%, held 1 days
+   held up to 2 days                               2534 trades,  51% ended up,  +0.17% a trade after costs,  +0.02 against the fund (t +0.21); account   +54.8% (the fund +107.5%), worst fall  -19.1%, held 2 days
+   held up to 5 days                               1516 trades,  56% ended up,  +0.69% a trade after costs,  +0.30 against the fund (t +2.10); account  +130.9% (the fund +107.5%), worst fall  -15.2%, held 5 days
+   held up to 10 days                               859 trades,  57% ended up,  +1.31% a trade after costs,  +0.58 against the fund (t +2.19); account  +140.4% (the fund +107.5%), worst fall  -17.3%, held 9 days
+   held up to 20 days                               531 trades,  56% ended up,  +2.01% a trade after costs,  +0.84 against the fund (t +1.97); account  +133.5% (the fund +107.5%), worst fall  -20.2%, held 15 days
+   held up to 40 days                               393 trades,  58% ended up,  +2.59% a trade after costs,  +1.02 against the fund (t +1.76); account  +127.0% (the fund +107.5%), worst fall  -17.7%, held 20 days
+   held up to 60 days                               364 trades,  61% ended up,  +3.17% a trade after costs,  +1.49 against the fund (t +2.49); account  +144.3% (the fund +107.5%), worst fall  -16.0%, held 22 days
+   and without selling on the screener's signal:
+   held up to 5 days, no sale on the signal        1516 trades,  56% ended up,  +0.69% a trade after costs,  +0.30 against the fund (t +2.10); account  +130.9% (the fund +107.5%), worst fall  -15.2%, held 5 days
+   held up to 20 days, no sale on the signal        516 trades,  55% ended up,  +1.90% a trade after costs,  +0.70 against the fund (t +1.61); account  +122.7% (the fund +107.5%), worst fall  -20.9%, held 15 days
+   held up to 60 days, no sale on the signal        358 trades,  61% ended up,  +3.12% a trade after costs,  +1.42 against the fund (t +2.36); account  +139.8% (the fund +107.5%), worst fall  -17.2%, held 22 days
+
+6. Better inputs? The same rules (Balanced: 8 holdings from the top 10, sold at -10%, +18% or the time limit, never on the signal), ranking the list by something else than the screener's score
+   kept up to 20 days:   [first part -> second part: against the fund per trade (t); account against the fund's; share of 200 random runs that did better on the second part]
+   the screener's score (as now)            +0.87 (t +1.52) -> +1.17 (t +1.49);  account  +74.7% vs +53.5% ->  +62.1% vs +39.2%;  luck better in   0%
+   furthest above its 52-week low           +1.95 (t +3.27) -> +2.83 (t +3.32);  account +116.7% vs +53.5% -> +114.1% vs +39.2%;  luck better in   0%
+   biggest rise over a year                 +0.60 (t +1.02) -> +2.46 (t +2.92);  account  +65.6% vs +53.5% -> +104.0% vs +39.2%;  luck better in   0%
+   biggest rise over 90 days                +0.80 (t +1.42) -> +3.50 (t +3.90);  account  +72.1% vs +53.5% -> +131.1% vs +39.2%;  luck better in   0%
+   biggest rise over 30 days                +0.79 (t +1.53) -> +1.85 (t +2.21);  account  +70.9% vs +53.5% ->  +81.9% vs +39.2%;  luck better in   0%
+   biggest fall over 30 days (a rebound)    +0.51 (t +0.95) -> +0.74 (t +0.96);  account  +62.0% vs +53.5% ->  +48.9% vs +39.2%;  luck better in   7%
+   calmest (smallest daily range)           -0.52 (t -1.58) -> -1.76 (t -3.38);  account  +27.7% vs +53.5% ->   -2.5% vs +39.2%;  luck better in  98%
+   jumpiest (largest daily range)           +1.58 (t +2.51) -> +3.15 (t +3.56);  account +107.0% vs +53.5% -> +129.0% vs +39.2%;  luck better in   0%
+   lowest RSI                               -0.13 (t -0.31) -> -0.90 (t -1.28);  account  +40.3% vs +53.5% ->  +11.9% vs +39.2%;  luck better in  89%
+   kept up to 60 days:   [first part -> second part: against the fund per trade (t); account against the fund's; share of 200 random runs that did better on the second part]
+   the screener's score (as now)            +2.13 (t +1.98) -> +2.73 (t +2.20);  account  +82.7% vs +53.5% ->  +80.9% vs +39.2%;  luck better in   0%
+   furthest above its 52-week low           +2.43 (t +2.38) -> +4.97 (t +3.83);  account  +92.5% vs +53.5% -> +130.0% vs +39.2%;  luck better in   0%
+   biggest rise over a year                 +1.16 (t +1.09) -> +5.09 (t +4.06);  account  +66.4% vs +53.5% -> +130.3% vs +39.2%;  luck better in   0%
+   biggest rise over 90 days                +1.77 (t +1.65) -> +3.23 (t +2.39);  account  +79.8% vs +53.5% ->  +90.9% vs +39.2%;  luck better in   0%
+   biggest rise over 30 days                +1.92 (t +1.70) -> +0.60 (t +0.43);  account  +77.7% vs +53.5% ->  +41.5% vs +39.2%;  luck better in   4%
+   biggest fall over 30 days (a rebound)    +2.67 (t +2.46) -> +2.62 (t +2.06);  account  +89.7% vs +53.5% ->  +71.1% vs +39.2%;  luck better in   0%
+   calmest (smallest daily range)           -1.38 (t -1.48) -> -3.66 (t -3.04);  account  +28.8% vs +53.5% ->   +3.6% vs +39.2%;  luck better in  88%
+   jumpiest (largest daily range)           +2.75 (t +2.59) -> +4.66 (t +4.05);  account +102.7% vs +53.5% -> +142.1% vs +39.2%;  luck better in   0%
+   lowest RSI                               +0.66 (t +0.64) -> -0.28 (t -0.20);  account  +53.7% vs +53.5% ->  +28.6% vs +39.2%;  luck better in  26%
+   None of these uses anything about the company itself (profit, debt, growth): there are no past figures of that kind on this machine to replay, and the screeners have none either.
+
+How to read it: a variant is worth a trial with the fake money only if it was ahead on BOTH parts and random buying rarely beat it. Past results; they promise nothing.

@@ -5,7 +5,13 @@ const vm = require('vm'), fs = require('fs');
 let ok = true; const check = (name, cond, info) => { console.log((cond ? 'PASS ' : 'FAIL ') + name + (cond ? '' : '  ' + JSON.stringify(info))); if (!cond) ok = false; };
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const ADMIN = { usage: { at: new Date().toISOString(), cost: 0.56, calls: 451952, yesterday: 5182, free: 1000000, forecast: 853432 }, goal: { name: 'Month 1: in profit', due: '2026-11-12', daysLeft: 26, trades: 51, tradesGoal: 100, avg: -1.19, se: 0.42, n: 47, avgGoal: 0, value: 99334, valueGoal: 100000, met: false },
-  review: { at: '2026-10-17T05:10:00Z', lines: ['Last 7 days: 39 trades finished.', 'Clearly losing: sales by the AI review, 31 trades.'] }, nextReview: '2026-10-24T05:10:00Z',
+  review: { at: '2026-10-17T05:10:00Z', lines: ['Last 7 days: 39 trades finished.', 'Clearly losing: sales by the AI review, 31 trades.'] }, nextReview: '2026-10-24T05:10:00Z', plan: { at: '2026-10-17T06:00:00Z', parts: 44, reviewed: 3, reviews: [{ part: 'The bell', at: '2026-10-17', found: 'Polls less often.' }], items: [
+    { id: 'trend', what: 'Trend score for every screener', angle: 'profit', measure: 'Top 10 against the list', status: 'running', started: '2026-10-15', decide: '2026-11-12', public: true },
+    { id: 'mood', what: 'Hold fewer when the index is weak', angle: 'profit', measure: 'replay', status: 'idea', order: 1 },
+    { id: 'ais', what: 'AI review early sales', angle: 'profit', measure: 'after', status: 'removed', decided: '2026-10-17', result: 'Lost money.', public: true },
+    { id: 'old1', what: 'Old one A', angle: 'cost', measure: 'x', status: 'kept', decided: '2026-10-12', result: 'ok' },
+    { id: 'old2', what: 'Old one B', angle: 'cost', measure: 'x', status: 'kept', decided: '2026-10-11', result: 'ok' },
+    { id: 'old3', what: 'Old one C', angle: 'cost', measure: 'x', status: 'kept', decided: '2026-10-10', result: 'ok' }] },
   health: { at: new Date().toISOString(), ran: 1, on: 1, accounts: 2, paused: 0, waiting: 0, failed: 0 },
   open: [{ id: 3, key: 'aiSell-off', title: 'Switch off "Sell early on the AI model\'s review"', why: 'Its sales lose money.', kind: 'setting', status: 'open' }, { id: 4, key: 'goal-x', title: 'Month 1 at risk', why: 'Look at it.', kind: 'session', status: 'open' }],
   answered: [], settings: { enabled: true, risk: 3, holdings: 50, budgetUsd: 92786, everyHours: 3, maxHoldDays: 10, aiSell: true, selfTune: true }, screeners: ['S&P 500', 'ASX 200'] };
@@ -41,6 +47,12 @@ async function page(status, uid) {
   check('"Not now" is sent as no', p.sent.at(-1).answer === 'no' && /Left as it is/.test(p.panel.innerHTML));
   await p.click({ 'data-ad': 'review' });
   check('"Write it now" asks for a review', p.sent.at(-1).op === 'review' && /The review is written from the latest figures/.test(p.panel.innerHTML));
+  { const q = await page(200, 'dave@x.com'); const pl = () => q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    check('the Overview has a short Improvements card: the counts, what is tested, the latest three done, and a way to the full list', /1 being tested · 1 next · 3 kept · 1 taken out/.test(pl()) && /Testing: Trend score/.test(pl()) && /Taken out: AI review early sales/.test(pl()) && /Old one B/.test(pl()) && !/Old one C/.test(pl()) && !/Hold fewer/.test(pl()) && /See every improvement/.test(pl()), pl().slice(0, 400));
+    await q.click({ 'data-ad-view': 'improvements' });
+    check('the Improvements view has the whole list: next, every one done, the parts reviewed, and which users see', /Next, in order/.test(pl()) && /Hold fewer/.test(pl()) && /Old one C/.test(pl()) && /Parts of the site reviewed lately/.test(pl()) && /users see it/.test(pl()) && !/Needs your yes/.test(pl()));
+    await q.click({ 'data-ad-view': 'overview' });
+    check('and back to the Overview', /Needs your yes/.test(pl()) && !/Next, in order/.test(pl())); }
   p = await page(200, 'dave@x.com');
   const plain = () => p.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
   check('before the Practice portfolio has its prices the account is the function\'s estimate, and says so', /\$99,334/.test(plain()) && /an estimate until the prices are in/.test(plain()));

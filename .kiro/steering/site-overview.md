@@ -1523,8 +1523,17 @@ show. Settings holds the first five items below, Activity the last five:
   against the 20 before, and what it did about it), newest first, the batch still filling on top;
   what stood out in the last complete batch can be unfolded. Before the first 20 it says when the
   first report comes and what happens then.
-- **Improving its own rules**: the rules in force, which are set by the owner, which it changed
-  itself ("put it back"), the running trial ("Stop this trial") and earlier trials.
+- **How it is improving** (since 17 Oct 2026; it was "Improving its own rules"): a short list for every user, in three parts:
+  **being tested now** (its own running trial of a rule, the patient-shares trial, and the site's changes marked public that are
+  still being measured, each with its start and the day it is decided), **improvements made** (✓ kept / ✗ not kept or taken out,
+  with the date: its own past trials, the ended buying-order trial, the public site changes decided; five shown, the rest folded)
+  and **coming next** (public ideas). The rules in force, which are set by the owner, which it changed itself ("put it back"),
+  the running trial in full ("Stop this trial") and earlier trials are folded under "The details". The site's items come from
+  `check-tools/experiments.json`: an entry with `public: true` and a `publicText` (plain words, nothing private) is shown; the
+  function sends them as `improvements` (`public_improvements`, kept 15 minutes in the warm function; copied there by
+  `admin.py sync`). **The owner's full list, with everything private and the parts of the site reviewed, is on the Admin
+  page's Improvements view** ("The owner's Admin page"): the user's version is the light one on purpose ("one is for everyone
+  the other is just for me").
 - **What it has done**: every buy, sell and check-in note, newest first; "Why, and the details" /
   "The plan for it" folded under each trade; "Refresh now"; a switch "Buys and sells only".
 
@@ -1592,7 +1601,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=38` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=53`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=54`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -2312,7 +2321,7 @@ He asked for "an admin account… so i can see status", with items to action, ad
 unless you need me to make a big decision. i'd prefer it all run without me". Built lean, as decided by the session:
 - **Where:** a "🛠 Admin" tab on the dashboard and an "Admin" link at the top of the dashboard's Account menu, shown only
   when the autopilot's function answers action `admin` for the account (`listed`: the site's own accounts, env
-  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=6`), the tab,
+  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=7`), the tab,
   panel and `NAMES` entry in `dashboard.html`. The link is on the dashboard only, not yet on the other pages.
 - **What it shows:** the month's goal, each figure against its target (`goal_standing`; the same numbers as `GOALS` in
   `check-tools/autopilot_review.py`: change the two together); **"Needs your yes"**: proposals with "Yes" / "Not now"; the
@@ -2328,6 +2337,12 @@ unless you need me to make a big decision. i'd prefer it all run without me". Bu
   marked red for "clearly down / clearly losing", green for "clearly up", and signed dollars and percentages coloured as they
   point (a zero, a target, is left plain); the settings are chips, the screeners folded. Colour tokens are on `#admin-panel`
   with pale backgrounds that read in both themes.
+  **Two views since 17 Oct 2026, evening** (`admin-panel.js?v=7`; the owner: "maybe make it a tab within admin page for the
+  improvements? or have a minimal part of it there then a tab for older stuff"): **Overview** (the tiles, Needs your yes, a
+  short Improvements card: the counts, up to three being tested with the days left, the last three decided, and a button to
+  the full list; then the goal, the review, how it is running, the settings) and **🧭 Improvements** (the whole card below,
+  every decided item, not folded; each item that users also see is tagged "👥 users see it"). The view is remembered in the
+  browser (`stockiqAdminView`). Tests: `admin_panel_test.js` (14).
   **The Improvements card** (since 17 Oct 2026, the owner: "put the list of future improvements to track them so i know which was
   run which is next ... easily see if something was improved in the past"): being tested now (each with a bar to its decision
   day and how it is measured), next in order, and done (✓ kept / ✗ taken out, with the result), and the parts of the site
@@ -4389,6 +4404,15 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     (top of this file, "THE COST RULE"); the AI chat knows the trend score (asked live, it described it rightly). Rollback zips
     `stockiq-ai-trader_before_autopilot_{plan,costs2,usage,adminvalue}_20261017.zip`, `stockiq-ai-chat_before_{plan,chatscore}_20261017.zip`,
     `stockiq-screener-coordinator_before_{summary,mexico,newmarkets}_20261017.zip`.
+  - **Improvements in two places, each for its reader** (the owner: "does this overlap with Improving its own rules … one is for
+    everyone the other is just for me so perhaps the one for everyone a lighter version showing improvements only?"). It did
+    overlap, and neither was complete: the autopilot tab showed only its own rule trials, in detail; the Admin card showed the
+    site's register and not those trials. Now the autopilot tab's section is "How it is improving" (tested now, made, next; the
+    detail folded) and includes the register's public items; the Admin page has an Overview and an Improvements view. The chat's
+    guide has the new name, and no longer says the buying-order trial is running (it ended on 17 Oct, not kept). Found on the
+    way: the panel's refresh only redrew when its fingerprint of the answer changed, and that fingerprint did not include the new
+    list (fixed: `stamp`). Tests: 473 function, 218 panel, 14 Admin page, 23 chat. Rollback zips
+    `stockiq-ai-trader_before_autopilot_improve_20261017.zip`, `stockiq-ai-chat_before_improve_20261017.zip`.
   - **Five more screeners, the "Coming Soon" ones that had current lists** (the owner: "set those up and make sure they are
     adding to the autopilot etc so its like other screeners"): Euro Stoxx 50, Sweden OMX Stockholm 30, China CSI 300, Taiwan 50,
     New Zealand NZX 50 (the table in section 8b). 48 workers by `workers/create_group.py`; the coordinator, the page's entries and
