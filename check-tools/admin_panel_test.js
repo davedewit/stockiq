@@ -32,7 +32,7 @@ async function page(status, uid) {
   check('for the owner the tab and the "Admin" link in the Account menu appear', p.tab.hidden === false && p.menu.children.length === 1 && p.menu.children[0].href === 'dashboard.html#admin');
   check('it shows the month\'s goal with each figure against its target', /Month 1: in profit/.test(text) && /Finished trades in all 51/.test(text) && /target 100/.test(text) && /-1\.19%/.test(text) && /\$99,334/.test(text) && /not forecasts/.test(text));
   check('what needs a yes: each proposal with its reason, what a yes does, and the two buttons', /Needs your yes/.test(text) && /applied the moment you say yes/.test(text) && /done in your next session/.test(text) && (h.match(/data-ad-answer="yes"/g) || []).length === 2 && (h.match(/data-ad-answer="no"/g) || []).length === 2);
-  check('the weekly review and how it is running', /Weekly review/.test(text) && /Clearly losing: sales by the AI review/.test(text) && /Write it now/.test(text) && /No errors\./.test(text) && /daily usage email/.test(text));
+  check('the weekly review and how it is running', /Weekly review/.test(text) && /Clearly losing: sales by the AI review/.test(text) && /Write a fresh one now/.test(text) && /You never need to press this/.test(text) && /No errors\./.test(text) && /daily usage email/.test(text));
   await p.click({ 'data-ad-answer': 'yes', 'data-ad-id': '3' });
   check('"Yes" to a setting sends the answer, says it is done, and the autopilot panel is reloaded', p.sent.at(-1).op === 'answer' && p.sent.at(-1).id === 3 && p.sent.at(-1).answer === 'yes' && /Done: Switch off/.test(p.panel.innerHTML) && p.shown.includes('reloaded'), p.sent.at(-1));
   await p.click({ 'data-ad-answer': 'yes', 'data-ad-id': '4' });
@@ -40,6 +40,6 @@ async function page(status, uid) {
   await p.click({ 'data-ad-answer': 'no', 'data-ad-id': '3' });
   check('"Not now" is sent as no', p.sent.at(-1).answer === 'no' && /Left as it is/.test(p.panel.innerHTML));
   await p.click({ 'data-ad': 'review' });
-  check('"Write it now" asks for a review', p.sent.at(-1).op === 'review' && /The review is written\./.test(p.panel.innerHTML));
+  check('"Write it now" asks for a review', p.sent.at(-1).op === 'review' && /The review is written from the latest figures/.test(p.panel.innerHTML));
   console.log(ok ? 'ALL PASS' : 'SOME FAILED'); process.exit(ok ? 0 : 1);
 })();
