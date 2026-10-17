@@ -2361,7 +2361,7 @@ He asked for "an admin account… so i can see status", with items to action, ad
 unless you need me to make a big decision. i'd prefer it all run without me". Built lean, as decided by the session:
 - **Where:** a "🛠 Admin" tab on the dashboard and an "Admin" link at the top of the dashboard's Account menu, shown only
   when the autopilot's function answers action `admin` for the account (`listed`: the site's own accounts, env
-  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=9`), the tab,
+  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=10`), the tab,
   panel and `NAMES` entry in `dashboard.html`. The link is on the dashboard only, not yet on the other pages.
 - **What it shows:** the month's goal, each figure against its target (`goal_standing`; the same numbers as `GOALS` in
   `check-tools/autopilot_review.py`: change the two together); **"Decisions for you"** (it was "Needs your yes" until 17 Oct 2026): proposals with "Yes" / "Not now"; the
@@ -2389,6 +2389,12 @@ unless you need me to make a big decision. i'd prefer it all run without me". Bu
   reviewed lately. It is `check-tools/experiments.json` and `site_parts.json`, copied into `_admin['plan']` by
   `python3 check-tools/admin.py sync` (experiments.py and site_parts.py run it after every change; one small write). **The
   bill's colours:** green under $1, amber to $1.50, red beyond (the owner's warning and limit).
+  **How often the AWS figures are read, and "↻ Refresh now"** (17 Oct 2026, the owner: "how often does this update and give me a
+  manual refresh button"): by itself the scheduled run reads the Lambda calls about once a day (`USAGE_EVERY_HOURS` 20, CloudWatch,
+  free) and the bill every 3 days (`COST_EVERY_HOURS` 72, Cost Explorer, $0.01 a reading). The button (admin `op: 'usage'`) reads
+  the calls at once and the bill only when its last reading is over 6 hours old (`COST_MANUAL_HOURS`): AWS itself updates the
+  bill a few times a day, so pressing more often would pay a cent for the same figure. The card gives each figure its own age
+  ("calls read 2 h ago · bill read 2 days ago"); it showed one age, the calls', while the bill could be three days older.
   **The account value on it is the Practice portfolio tab's own** (17 Oct 2026, `admin-panel.js?v=4`; the owner saw $99,411 on
   the Admin page beside $99,643.23 on the tab): the portfolio script hands its live sum over (`practicePortfolio.figures()`, and
   an event `practice-portfolio:figures` at each redraw), and until it has its prices the Admin page shows the function's
@@ -4482,6 +4488,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     choices for a market's share; "Level 3" for Balanced and a chip for a switch that is always off. All put right (section
     8c). **And the routine that missed them is mended**: `check-tools/clarity_check.py`, run by session_start every session
     (top of this file); on the live site after the deploy it reads clean. Tests: 475 function, 222 panel, 15 Admin page.
+  - **"↻ Refresh now" for the Admin page's AWS figures, and each figure's own age** (16:52 UTC; `stockiq-ai-trader` op `usage`,
+    rollback zip `…_before_autopilot_usage2_20261017.zip`; `admin-panel.js?v=10`, `dashboard.html`): section 8c, "The owner's
+    Admin page". Pressed once live: the bill read again, $0.59 (it had read $0.56 earlier that day), 465,897 calls. Tests: 478
+    function, 17 Admin page. **The slip of 13 and 17 Oct once more:** the notes edit missed its anchor and the commit after it
+    ran anyway; the notes went in a commit of their own. Chain a notes edit and its commit with `&&`, always.
   - **Five more screeners, the "Coming Soon" ones that had current lists** (the owner: "set those up and make sure they are
     adding to the autopilot etc so its like other screeners"): Euro Stoxx 50, Sweden OMX Stockholm 30, China CSI 300, Taiwan 50,
     New Zealand NZX 50 (the table in section 8b). 48 workers by `workers/create_group.py`; the coordinator, the page's entries and
