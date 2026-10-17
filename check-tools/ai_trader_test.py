@@ -1338,4 +1338,29 @@ rec['state']['startedAt'] = m.iso(ts - dt.timedelta(days=2)); rec['state']['save
 m.datetime = at(ts); ra = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body'])
 m.datetime = at(ts + dt.timedelta(minutes=30)); rb = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); m.datetime = before
 check('half an hour later, the settings left alone, the schedule checks in as usual', ra['ran'] == [] and len(rb['ran']) == 1 and rb['ran'][0]['bought'] > 0 and held_n() > 0, [ra, rb])
+
+# --- the owner's Admin page (17 Oct 2026): the site's own accounts only; a weekly review written by the function; proposals
+D.t.clear(); m._BRAIN.clear(); m.PLAN_CACHE.clear(); PRICES.clear(); MODEL['answer'] = None
+ta = dt.datetime(2026, 10, 17, 9, 0, 0); before = m.datetime; m.datetime = at(ta)
+code_, b = call(action='admin', userId='someone@else.com')
+check('the Admin page is refused to an account that is not one of the site\'s own', code_ == 403 and not b['success'])
+code_, b = call(action='admin', userId=U)
+check('for the site\'s own account it answers with the goal, no review yet and nothing to answer', code_ == 200 and b['admin']['goal']['name'] == 'Month 1: in profit' and b['admin']['goal']['tradesGoal'] == 100 and b['admin']['review'] is None and b['admin']['open'] == [], b.get('admin', {}).get('goal'))
+rec = m.load_item(U); rec['settings'].update(enabled=True, aiSell=True, screeners=['3-100', '5-dax40'])
+rec['history'] = [dict(pct=-1.5 + (i % 3) * 0.1, usd=-15.0, exit='ai', screener='3-100', sold=m.iso(ta - dt.timedelta(days=1 + i % 6)), c=1) for i in range(32)] + [dict(pct=1.0, usd=10.0, exit='trail', screener='5-dax40', sold=m.iso(ta - dt.timedelta(days=2)), c=1) for i in range(5)]
+rec['state']['closedCount'] = 37; m.save_item(U, rec)
+code_, b = call(action='admin', userId=U, op='review'); adm = b['admin']; opens = {p['key']: p for p in adm['open']}
+check('a review written on request names the losing groups and proposes switching off the AI review\'s sales and unticking the losing screener', code_ == 200 and adm['review'] and any('Clearly losing: sales by the AI review, 32 trades' in l for l in adm['review']['lines']) and 'aiSell-off' in opens and opens['aiSell-off']['kind'] == 'setting' and 'untick-3-100' in opens and 'untick-5-dax40' not in opens, [adm['review']['lines'] if adm.get('review') else None, list(opens)])
+code_, b = call(action='admin', userId=U, op='review')
+check('writing the review again does not propose the same thing twice', len([p for p in b['admin']['open'] if p['key'] == 'aiSell-off']) == 1)
+code_, b = call(action='admin', userId=U, op='answer', id=opens['aiSell-off']['id'], answer='yes'); rec = m.load_item(U)
+check('"Yes" to a setting applies it at once, notes it in the activity list and says it was done', code_ == 200 and rec['settings']['aiSell'] is False and any('Changed from the Admin page' in e['text'] for e in rec['log']) and any(p['key'] == 'aiSell-off' and p['status'] == 'done' for p in b['admin']['answered']) and m.settling(rec, ta), rec['settings'].get('aiSell'))
+code_, b = call(action='admin', userId=U, op='answer', id=opens['untick-3-100']['id'], answer='no'); rec = m.load_item(U)
+check('"Not now" changes nothing and is kept as answered', code_ == 200 and '3-100' in rec['settings']['screeners'] and any(p['key'] == 'untick-3-100' and p['status'] == 'no' for p in b['admin']['answered']))
+code_, b = call(action='admin', userId=U, op='answer', id=opens['untick-3-100']['id'], answer='yes')
+check('a proposal already answered cannot be answered again', code_ == 400)
+m.save_admin(dict(m.load_admin(), review=None)); rec = m.load_item(U); rec['state']['savedAt'] = m.iso(ta - dt.timedelta(hours=2)); rec['state']['visit'] = m.iso(ta); m.save_item(U, rec)
+m.datetime = at(ta + dt.timedelta(minutes=10)); m.lambda_handler({'source': 'aws.events'}, None); adm1 = m.load_admin()
+m.datetime = at(ta + dt.timedelta(minutes=40)); m.lambda_handler({'source': 'aws.events'}, None); adm2 = m.load_admin(); m.datetime = before
+check('the scheduled run records how it went every time and writes the review itself once a week', adm1['health'] and adm1['health']['on'] >= 1 and adm1['review'] and adm2['review']['at'] == adm1['review']['at'] and adm2['health']['at'] > adm1['health']['at'], [adm1.get('health'), (adm1.get('review') or {}).get('at'), (adm2.get('review') or {}).get('at')])
 print('ALL PASS' if ok else 'SOME FAILED')
