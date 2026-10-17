@@ -15,11 +15,14 @@ The list is research-data-free and in git (check-tools/site_parts.json): add a p
 """
 import os, sys, json, datetime
 HERE = os.path.dirname(os.path.abspath(__file__)); FILE = os.path.join(HERE, 'site_parts.json')
-LENSES = ['Could a first-time visitor understand it without help? Is any figure unexplained, any word jargon?',
-          'Is anything wrong: a figure that does not add up, two places that disagree, a stale count or date, a broken link?',
-          'Does it look right on a phone and in dark mode?',
-          'Does it help the account beat an S&P 500 fund, or the site win paying users? What would?',
-          'Is there a simpler way: fewer clicks, fewer words, one place instead of two?']
+LENSES = ['Ease of use and understanding: could a first-time visitor use it without help? Any figure unexplained, any jargon?',
+          'Faults: a figure that does not add up, two places that disagree, a stale count or date, a broken link, an error in a log?',
+          'Visual appearance: does it look clean, professional and calm, on a phone and in dark mode? Is the important part the first thing seen?',
+          'Profit: does it help the account beat an S&P 500 fund (what it buys, when it sells, how much it trades), or the site win paying users?',
+          'Analysis of information: is the data behind it right, current and enough? Is there a better source or a better measure?',
+          'AI use: would the AI model (ChatGPT) do this part better with a better prompt, more context, or a newer model version? Test it, do not assume',
+          'Comparison over time: can it be tried as an experiment beside what is there now and kept only if it measurably helps? (experiments.py)',
+          'New ideas: what would a smart competitor add here? Write the idea down as an experiment even if it waits']
 
 def load():
     return json.load(open(FILE))

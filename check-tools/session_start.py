@@ -151,6 +151,14 @@ r = subprocess.run([sys.executable, os.path.join(HERE, 'site_parts.py'), 'next',
 for l in r.stdout.splitlines()[:3]:
     print('  ' + l); finding('REVIEW without being asked: ' + l.split(' (where')[0] + ' (then: python3 check-tools/site_parts.py done <id> "<what was found>")')
 
+# 6d. experiments whose day has come (experiments.py: keep or remove on the figures; the owner, 17 Oct 2026)
+head('6d. Experiments')
+r = subprocess.run([sys.executable, os.path.join(HERE, 'experiments.py'), 'due'], capture_output=True, text=True)
+due_now = [l for l in r.stdout.splitlines() if l.strip()]
+print(f"  due for a decision: {len(due_now)}" + ''.join('\n    ' + l for l in due_now))
+for l in due_now: finding('DECIDE an experiment (keep or remove, on the figures): ' + l.split(' (started')[0])
+finding('every session: add at least one new idea of your own to check-tools/experiments.py (any angle: profit, ease of use, appearance, analysis, AI use, cost)')
+
 # 7. the improvements list
 head('7. What the notes say is due')
 notes = open(os.path.join(ROOT, '.kiro', 'steering', 'site-overview.md'), encoding='utf-8').read()

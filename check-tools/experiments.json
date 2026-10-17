@@ -1,0 +1,91 @@
+{
+ "experiments": [
+  {
+   "id": "trend-score",
+   "what": "The screeners' trend score in place of the 12-factor score (live 17 Oct 2026)",
+   "angle": "profit, analysis",
+   "measure": "the autopilot's share trades bought from 17 Oct against those before, after costs, each against an S&P 500 fund; the score study rerun on new prices; 30 trades a side",
+   "status": "running",
+   "started": "2026-10-17",
+   "decide": "2026-11-14"
+  },
+  {
+   "id": "ai-review-off",
+   "what": "The AI review's early sales switched off (17 Oct 2026, at the owner's yes)",
+   "angle": "profit, AI use",
+   "measure": "the average trade after it against before, by kind of sale; what the fixed rules' sales do",
+   "status": "running",
+   "started": "2026-10-17",
+   "decide": "2026-11-14"
+  },
+  {
+   "id": "patient-shares",
+   "what": "Patient shares: every second pair not sold on the signal nor by the AI review (since 12 Oct 2026)",
+   "angle": "profit",
+   "measure": "patient against ordinary shares, sold and still held, 30 finished each way",
+   "status": "running",
+   "started": "2026-10-12",
+   "decide": "2026-11-12"
+  },
+  {
+   "id": "headlines",
+   "what": "Headlines shown to the AI model when it chooses (measured since 12 Oct 2026)",
+   "angle": "AI use, analysis",
+   "measure": "buys with headlines against without (heads), 30 each",
+   "status": "running",
+   "started": "2026-10-12",
+   "decide": "2026-11-12"
+  },
+  {
+   "id": "polling-cut",
+   "what": "The pages ask for market data once a minute, not once a second (17 Oct 2026)",
+   "angle": "cost",
+   "measure": "Lambda calls a day on the Admin page: about 66,000 before, 5,182 the first day after",
+   "status": "running",
+   "started": "2026-10-17",
+   "decide": "2026-10-31"
+  },
+  {
+   "id": "longer-holds",
+   "what": "A longer holding time for shares, beside the current one, as a trial in the autopilot",
+   "angle": "profit",
+   "measure": "trial_figures, 10 finished each way, then 30",
+   "status": "idea"
+  },
+  {
+   "id": "company-figures",
+   "what": "Record profit margin, debt and growth with every share bought, then split the record by them",
+   "angle": "analysis, profit",
+   "measure": "the review split by each figure, 30 trades a band",
+   "status": "idea"
+  },
+  {
+   "id": "market-mood",
+   "what": "Hold fewer shares, or none, while the S&P 500 is below its 200-day average",
+   "angle": "profit",
+   "measure": "replay first (the four tests), then a live trial",
+   "status": "idea"
+  },
+  {
+   "id": "newer-model",
+   "what": "A newer, stronger OpenAI model for the autopilot's choice of what to buy, beside gpt-4o-mini",
+   "angle": "AI use, profit",
+   "measure": "every second choice by the newer model, the record split by model, the cost a month stated (under $1)",
+   "status": "idea"
+  },
+  {
+   "id": "chat-model",
+   "what": "The AI chat on a newer model, if it answers the dashboard questions better at the same cost",
+   "angle": "AI use, ease of use",
+   "measure": "the same 20 real questions to both, read side by side; the cost a month",
+   "status": "idea"
+  },
+  {
+   "id": "weekly-email",
+   "what": "A short weekly email to the owner: the account against the fund, the trades, what was changed",
+   "angle": "ease of use",
+   "measure": "does he read and act on it (ask him after a month)",
+   "status": "idea"
+  }
+ ]
+}
