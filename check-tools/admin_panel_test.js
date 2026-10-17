@@ -58,5 +58,7 @@ async function page(status, uid) {
   check('before the Practice portfolio has its prices the account is the function\'s estimate, and says so', /\$99,334/.test(plain()) && /an estimate until the prices are in/.test(plain()));
   p.ctx.window.practicePortfolio = { figures: () => ({ accountValue: 99643.23, gainUsd: -356.77, gainPct: -0.36, startingCash: 100000 }) }; p.fire('practice-portfolio:figures');
   check('once it has them the Admin page shows the very figure the Practice portfolio tab shows, at the latest prices', /\$99,643/.test(plain()) && !/\$99,334/.test(plain()) && /▼ \$357 since the start/.test(plain()) && /The practice account, at the latest prices/.test(plain()) && !/an estimate/.test(plain()), plain().slice(0, 300));
+  { const q = await page(200, 'dave@x.com'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    check('the settings chips name the level in words and leave out the AI review switch (always off now)', !/Level \d/.test(pl) && !/AI review's early sales/.test(pl) && /(Cautious|Careful|Balanced|Bold|Adventurous) level/.test(pl), pl.slice(pl.indexOf('Autopilot on'), pl.indexOf('Autopilot on') + 200)); }
   console.log(ok ? 'ALL PASS' : 'SOME FAILED'); process.exit(ok ? 0 : 1);
 })();

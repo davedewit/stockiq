@@ -43,6 +43,14 @@ For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-s
 | `workers/create_group.py` | Creates the workers of a new screener (`add-new-screener.md`) |
 | `check-tools/workers.py` | Read-only: which group runs what (`--contents` compares the files inside every package) |
 
+## Session checks (`check-tools/`, read-only)
+
+| Script | What it does |
+|---|---|
+| `session_start.py` | The first command of every session: the account, the bill, logs, live code against the mirrors, the registers, and a numbered list of findings |
+| `clarity_check.py` | Draws the AI autopilot tab and the Admin page with the account's real answers and flags what reads badly (near-identical lines, "A and B and C", a switched-off feature still described, huge menus, "undefined"). `CLARITY_WEB=<staging>/web` for staged files, `--keep` for the text. Run by `session_start.py` |
+| `autopilot_review.py` | The weekly review of the autopilot's record |
+
 ## Deploy Scripts
 
 **`deploy.sh`** — Full deploy: asks about news update, then calls deploy-to-s3.sh. Use when you want news updated too. Costs ~$1-2 (OpenAI).

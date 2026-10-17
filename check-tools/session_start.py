@@ -159,6 +159,20 @@ print(f"  due for a decision: {len(due_now)}" + ''.join('\n    ' + l for l in du
 for l in due_now: finding('DECIDE an experiment (keep or remove, on the figures): ' + l.split(' (started')[0])
 finding('every session: add at least one new idea of your own to check-tools/experiments.py (any angle: profit, ease of use, appearance, analysis, AI use, cost)')
 
+# 6e. the page as the owner reads it (clarity_check.py; the owner, 17 Oct 2026: "anything else confusing you want to optimise?
+#     and i'm tired of asking this!"): near-identical lines, "A and B and C", a switched-off feature still described, huge menus
+head('6e. The dashboard as the owner reads it')
+try:
+    r = subprocess.run([sys.executable, os.path.join(HERE, 'clarity_check.py')], capture_output=True, text=True, timeout=400)
+    out = [l for l in r.stdout.splitlines() if l.strip()]
+    for l in out: print('  ' + l)
+    for l in out:
+        if l.startswith('FLAG '): finding('CLARITY (fix it, or teach clarity_check.py that it is fine): ' + l[5:])
+    if not out: finding('clarity_check.py printed nothing: ' + (r.stderr.strip().splitlines() or ['no error'])[-1][:150])
+except Exception as e:
+    finding(f'clarity_check.py did not run: {type(e).__name__}: {e}')
+finding('every session: read at least one tab of the dashboard as the owner would (clarity_check.py --keep gives its text) and fix whatever reads confusingly, without being asked')
+
 # 7. the improvements list
 head('7. What the notes say is due')
 notes = open(os.path.join(ROOT, '.kiro', 'steering', 'site-overview.md'), encoding='utf-8').read()

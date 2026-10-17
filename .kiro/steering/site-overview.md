@@ -38,6 +38,15 @@ bill every 3 days). About $0.09 a month is the owner's other projects' buckets (
 when it helps the learning (the record, the diary, the shared record, the coin entry log, the research prices on this Mac);
 delete only with his yes to an exact list, and only when it costs something.
 
+**THE PAGE IS READ AS THE OWNER READS IT, EVERY SESSION: `python3 check-tools/clarity_check.py`** (session_start runs it; built 17
+Oct 2026 after the owner, having pointed at one confusing thing after another himself: "anything else confusing you want to
+optimise? and i'm tired of asking this!"). It draws the AI autopilot tab and the Admin page from the site's own scripts with the
+account's real answers and flags, in what is on show before anything is opened: lists of near-identical lines, "A and B and C",
+"1 such moves", a switched-off feature still described as working, menus of more than 20 choices, a phrase twice in one line,
+"undefined"/"NaN". `CLARITY_WEB=<staging folder>/web` reads staged files first (run it before a deploy), `--keep` saves the text.
+**It is a floor, not the job:** each session also reads at least one tab in full (`--keep`) and fixes whatever confuses, then
+teaches the script any new kind of fault it found. When the owner says "this is confusing" again, that is a fault in this routine.
+
 **Two registers keep the improving going without the owner having to ask (17 Oct 2026, his ideas):**
 - **`check-tools/site_parts.py`** lists every part of the site (44) with when a session last looked at it. Each session reviews the
   three looked at longest ago (session_start prints them), through every angle in its LENSES (ease of use, faults, appearance,
@@ -1523,14 +1532,23 @@ show. Settings holds the first five items below, Activity the last five:
   of the budget, the first check-in after each closed market opens, the latest each holding is
   kept; then what goes by the number of finished trades (its own review, the AI model's notes).
   A sentence under it says that reviews and trials happen by themselves and nothing has to be pushed.
+  **Since 17 Oct 2026 the holdings' last days are one row** ("39 holdings reach the end of their holding time between Thu 22 Oct
+  and Tue 27 Oct …", each of them folded under it; `comingRows`), and a release of the budget at the same minute as a check-in
+  is left out (that check-in's row already says what it may buy). On the owner's real list it had been 51 rows, 39 of them
+  "X is sold at the latest". Market names read "A, B and C" (`words_and` in the function, `andList` in the panel).
 - **How it is doing** (**"Holding now" is a row a holding since 12 Oct 2026**, newest first: bought, sold by, its limits, and small tags for what is particular to it (market closed until…, where its stop stands, a patient share, the AI review's last word), with the full sentence of its plan folded under it; eight rows on show, the older ones folded away (`heldRow`, `heldPlan`, the `.ap-held` styles). **Tidied the same evening from a picture of his panel:** a row is now the symbol, the company and why it was bought (`boughtFor`, from the buy's line in the activity list), a tag only for what is particular to it (market closed, a gain already protected, a patient share, a review that said tighten or sell), and a fixed "its plan ▸" on the right that opens the rest in place; the dates, limits and the ordinary stop that every row repeated are in the plan only. Ten holdings had been one paragraph nobody could read, and there can be fifty. Its folded "Breakdown" table was laid out afresh on 11 Oct after the owner could not tell a group heading from the rows under it: each heading is a band of its own (`ap-bd-head`), its rows are indented, and the "Against an index fund" column is shown only when it differs from the average for some group; styles are the `.ap-bd` rules): what it holds now and when each will be sold, with the AI model's latest
   review of it; the last 30 days in dollars and as a share of the budget; finished trades (up /
-  down, average); a folded breakdown; notes the AI model wrote from the record.
+  down, average); a folded breakdown. (**The AI model's notes are no longer shown there** since 17 Oct 2026: they restated the
+  breakdown in words with the counts of the day they were written, so the page showed two different counts for the same
+  group. The model still reads them when it chooses.)
 - **Progress, 20 finished trades at a time** (added 11 Oct): a table with a row per batch of 20
   (trades, dates, how many ended up, average a trade, dollars, "better / worse / about the same"
   against the 20 before, and what it did about it), newest first, the batch still filling on top;
   what stood out in the last complete batch can be unfolded. Before the first 20 it says when the
   first report comes and what happens then.
+- (Each line of "Improvements made" below says in a word what became of it: **Kept** (green), **Not kept**, **Taken out**
+  (grey). It was ✓ / ✗, and the ✗ beside "The AI model no longer sells holdings early" read as a failure when it was a change
+  for the better. The Admin page's list says the same words.)
 - **How it is improving** (since 17 Oct 2026; it was "Improving its own rules"): a short list for every user, in three parts:
   **being tested now** (its own running trial of a rule, the patient-shares trial, and the site's changes marked public that are
   still being measured, each with its start and the day it is decided), **improvements made** (✓ kept / ✗ not kept or taken out,
@@ -1623,7 +1641,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=40` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=55`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=56`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -2343,7 +2361,7 @@ He asked for "an admin account… so i can see status", with items to action, ad
 unless you need me to make a big decision. i'd prefer it all run without me". Built lean, as decided by the session:
 - **Where:** a "🛠 Admin" tab on the dashboard and an "Admin" link at the top of the dashboard's Account menu, shown only
   when the autopilot's function answers action `admin` for the account (`listed`: the site's own accounts, env
-  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=8`), the tab,
+  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=9`), the tab,
   panel and `NAMES` entry in `dashboard.html`. The link is on the dashboard only, not yet on the other pages.
 - **What it shows:** the month's goal, each figure against its target (`goal_standing`; the same numbers as `GOALS` in
   `check-tools/autopilot_review.py`: change the two together); **"Decisions for you"** (it was "Needs your yes" until 17 Oct 2026): proposals with "Yes" / "Not now"; the
@@ -4451,6 +4469,19 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     checks; the live tab opened as his account, read-only, at 390px: "Holding (39)", 10 rows, "Show all 39 (29 more)",
     "▲ $1,610.28 (1.61%)", nothing broken. `live_practice_check.js` now reports the rows shown and the link. **Not checked:**
     a signed-in browser for the Admin page's new wording.
+  - **The autopilot tab and the Admin page read as the owner reads them, and what confused fixed** (15:54 UTC; `stockiq-ai-trader`
+    `UCQwgKlM…`, rollback zip `…_before_autopilot_clarity2_20261017.zip`; `practice-autopilot.js?v=56`, `admin-panel.js?v=9`,
+    `dashboard.html`). The owner: "anything else confusing you want to optimise? and i'm tired of asking this!" Both pages were
+    drawn from the site's own scripts with his real answers and read line by line. **Wrong:** the selling description still said
+    the AI model reviews each holding and may sell it (switched off that morning); 26 holding plans still showed the review's
+    old verdict ("AI review: keep"); a check-in note said "every screener you chose is resting" when only the coin screener
+    was, on a Saturday with only coins open; the weekly review listed the AI sales as clearly losing with no word that they
+    were already switched off. **Confusing:** "What happens next" had 51 rows, 39 of them alike; a release of the budget
+    repeated its check-in; "Australian and Japanese and Korean and New Zealand"; "1 such moves"; the AI model's notes beside
+    the breakdown with older counts (11 of 24 against 9 of 24); ✗ for a good change; "Not kept … Not kept"; menus of 51
+    choices for a market's share; "Level 3" for Balanced and a chip for a switch that is always off. All put right (section
+    8c). **And the routine that missed them is mended**: `check-tools/clarity_check.py`, run by session_start every session
+    (top of this file); on the live site after the deploy it reads clean. Tests: 475 function, 222 panel, 15 Admin page.
   - **Five more screeners, the "Coming Soon" ones that had current lists** (the owner: "set those up and make sure they are
     adding to the autopilot etc so its like other screeners"): Euro Stoxx 50, Sweden OMX Stockholm 30, China CSI 300, Taiwan 50,
     New Zealand NZX 50 (the table in section 8b). 48 workers by `workers/create_group.py`; the coordinator, the page's entries and

@@ -1418,4 +1418,7 @@ if HAS_AI_SELL:
     m.AI_SELL = False
     check('with AI_SELL off the setting is always off, also when a page sends it on', m.clean_settings({'aiSell': True, 'enabled': True}, 'x@y.z')['aiSell'] is False and m.clean_settings({}, 'x@y.z')['aiSell'] is False)
     m.AI_SELL = True
+if hasattr(m, 'words_and'):
+    check('several names read "A, B and C"', (m.words_and(['A']), m.words_and(['A', 'B']), m.words_and(['A', 'B', 'C']), m.words_and([])) == ('A', 'A and B', 'A, B and C', ''))
+    check('the AI review\'s old verdicts are not sent with the holdings while it is switched off', "'view': (facts or {}).get('view') if AI_SELL else None" in open(sys.argv[1]).read())
 print('ALL PASS' if ok else 'SOME FAILED')
