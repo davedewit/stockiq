@@ -143,7 +143,13 @@
    "id": "pp-top",
    "part": "Practice portfolio: the three figures, the line under them, the breakdown",
    "where": "practice-portfolio.js",
-   "last": null
+   "last": "2026-10-17",
+   "log": [
+    {
+     "at": "2026-10-17",
+     "found": "Gap to the S&P 500 fund in percent too (it is the difference between the two returns)"
+    }
+   ]
   },
   {
    "id": "pp-graph",
@@ -155,19 +161,37 @@
    "id": "pp-holdings",
    "part": "Practice portfolio: holdings table, plans, sold list, the buy row",
    "where": "practice-portfolio.js",
-   "last": null
+   "last": "2026-10-17",
+   "log": [
+    {
+     "at": "2026-10-17",
+     "found": "Latest 10 holdings with Show all"
+    }
+   ]
   },
   {
    "id": "ap-status",
    "part": "Autopilot: switch, status, countdown, Needs you, Check in now",
    "where": "practice-autopilot.js top",
-   "last": null
+   "last": "2026-10-17",
+   "log": [
+    {
+     "at": "2026-10-17",
+     "found": "'Nothing needs you' says only what it covers; distinct from the Admin page's Decisions for you"
+    }
+   ]
   },
   {
    "id": "ap-settings",
    "part": "Autopilot: level, own limits, budget, pace, number of holdings",
    "where": "practice-autopilot.js Settings",
-   "last": null
+   "last": "2026-10-17",
+   "log": [
+    {
+     "at": "2026-10-17",
+     "found": "The selling description no longer says the AI model reviews and may sell (off since 17 Oct); share menus about ten steps, not 51"
+    }
+   ]
   },
   {
    "id": "ap-screeners",
@@ -191,13 +215,25 @@
    "id": "ap-activity",
    "part": "Autopilot: What happens next, Holding now, What it has done",
    "where": "practice-autopilot.js Activity",
-   "last": null
+   "last": "2026-10-17",
+   "log": [
+    {
+     "at": "2026-10-17",
+     "found": "What happens next: 39 alike sell rows made one; a release row that repeated its check-in dropped; 'A, B and C' names. clarity_check.py now reads it"
+    }
+   ]
   },
   {
    "id": "ap-doing",
    "part": "Autopilot: How it is doing, breakdown, progress, improving its rules",
    "where": "practice-autopilot.js Activity",
-   "last": null
+   "last": "2026-10-17",
+   "log": [
+    {
+     "at": "2026-10-17",
+     "found": "AI notes that restated the breakdown with older counts taken off; Kept/Not kept/Taken out in words; How it is improving restructured"
+    }
+   ]
   },
   {
    "id": "ap-buying",
@@ -221,7 +257,13 @@
    "id": "admin",
    "part": "The Admin page",
    "where": "admin-panel.js; stockiq-ai-trader admin",
-   "last": "2026-10-17"
+   "last": "2026-10-17",
+   "log": [
+    {
+     "at": "2026-10-17",
+     "found": "Decisions for you (was Needs your yes); level by name; no chip for the always-off review; Overview and Improvements views"
+    }
+   ]
   },
   {
    "id": "bell",
