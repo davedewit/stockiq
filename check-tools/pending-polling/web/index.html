@@ -1,0 +1,3657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockIQ - AI Stock Analysis & Screening Platform</title>
+<meta name="description" content="AI-assisted stock, ETF and crypto research: explained 0-100 scores, index screeners, an AI chat and a practice portfolio with fake money. Free 3-day trial.">
+<meta name="author" content="StockIQ">
+<meta property="og:title" content="StockIQ - AI Stock Analysis Platform">
+<meta property="og:description" content="Explained scores for stocks, ETFs and crypto, index screeners, an AI chat and a practice portfolio with fake money.">
+<link rel="canonical" href="https://stockiq.tech/">
+<meta property="og:url" content="https://stockiq.tech/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://stockiq.tech/stockiq-logo.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:image" content="https://stockiq.tech/stockiq-logo.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="StockIQ - AI Stock Analysis Platform">
+<meta name="twitter:description" content="Explained scores for stocks, ETFs and crypto, index screeners, an AI chat and a practice portfolio with fake money.">
+<meta name="robots" content="index, follow">
+<meta name="language" content="en-US">
+<meta name="geo.region" content="US">
+<meta name="revisit-after" content="1 day">
+<link rel="icon" type="image/png" sizes="32x32" href="stockiq-logo.png?v=2">
+<link rel="icon" type="image/png" sizes="16x16" href="stockiq-logo.png?v=2">
+<link rel="shortcut icon" href="favicon.ico?v=2">
+<link rel="apple-touch-icon" href="stockiq-logo.png?v=2">
+
+<!-- Schema.org JSON-LD -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "StockIQ",
+    "description": "Professional stock analysis platform with AI-powered insights and market data.",
+    "url": "https://stockiq.tech",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web Browser",
+    "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock"
+    },
+    "author": {
+        "@type": "Organization",
+        "name": "StockIQ",
+        "url": "https://stockiq.tech",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://stockiq.tech/stockiq-logo.png",
+            "width": 1200,
+            "height": 630
+        }
+    },
+    "featureList": [
+        "Stock analysis",
+        "AI-powered trading signals",
+        "Technical indicators",
+        "Market screening",
+        "Portfolio analysis"
+    ]
+}
+</script>
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WVETNMPF8V"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+
+gtag('config', 'G-WVETNMPF8V');
+</script>
+<style>
+/* Prevent white flash during page load */
+html, body { background: #0f0f0f !important; transition: none !important; }
+[data-theme="light"] html, [data-theme="light"] body { background: #ffffff !important; }
+
+/* Prevent layout shift animation on mobile */
+.top-nav, .mobile-menu { transition: none !important; }
+
+/* Mobile paid user adjustments */
+@media (max-width: 768px) {
+html.paid-user #market-overview-section { margin-top: 40px; }
+}
+
+/* Set default CSS variables for paid users to prevent flicker */
+:root {
+--nav-top: 0;
+--body-padding: 64px;
+--mobile-menu-top: 64px;
+--mobile-menu-height: calc(100vh - 64px);
+}
+
+/* A link to #pricing ("View Pricing Plans") stops with the section just under the fixed header, whatever the header's
+   height: 105px with the strip across the top, 64px without it (--body-padding is set to match, above and in the head's
+   script). On a phone the header slides away while the page scrolls down, so only a little room is left. */
+#pricing { scroll-margin-top: calc(var(--body-padding, 105px) + 24px); }
+@media (max-width: 768px) { #pricing { scroll-margin-top: 20px; } }
+
+/* Price flash animations */
+@keyframes priceFlashGreen {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(34, 197, 94, 0.4); }
+}
+@keyframes priceFlashRed {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(239, 68, 68, 0.4); }
+}
+.price-updated-green {
+    animation: priceFlashGreen 1s ease-in-out;
+}
+.price-updated-red {
+    animation: priceFlashRed 1s ease-in-out;
+}
+
+/* Notification dropdown hover styles */
+#notification-dropdown > div[onclick]:hover {
+background-color: var(--hover-bg) !important;
+}
+
+/* Always show notification bells */
+#notification-bell,
+#mobile-notification-bell {
+    display: block !important;
+}
+
+</style>
+<script>
+// Apply theme immediately before any rendering
+const savedTheme = localStorage.getItem('theme');
+const manualOverride = localStorage.getItem('manualOverride');
+const hour = new Date().getHours();
+const autoTheme = (hour >= 18 || hour < 6) ? 'dark' : 'light';
+const theme = (manualOverride === 'true' && savedTheme) ? savedTheme : autoTheme;
+document.documentElement.setAttribute('data-theme', theme);
+
+// Disable browser scroll restoration for F5 refresh
+if ('scrollRestoration' in history) {
+history.scrollRestoration = 'manual';
+}
+
+// Set banner visibility based on cached status
+const userId = localStorage.getItem('userId') || 'anonymous';
+const cacheKey = `userPaidStatus_${userId}`;
+const cachedPaidStatus = localStorage.getItem(cacheKey);
+
+if (cachedPaidStatus === 'paid') {
+document.documentElement.classList.add('paid-user');
+document.documentElement.style.setProperty('--nav-top', '0');
+document.documentElement.style.setProperty('--body-padding', '64px');
+document.documentElement.style.setProperty('--mobile-menu-top', '64px');
+document.documentElement.style.setProperty('--mobile-menu-height', 'calc(100vh - 64px)');
+document.documentElement.style.setProperty('--quick-panel-top', '94px');
+document.documentElement.style.setProperty('--news-panel-top', '179px');
+} else if (userId !== 'anonymous') {
+document.documentElement.style.setProperty('--nav-top', '41px');
+document.documentElement.style.setProperty('--body-padding', '105px');
+document.documentElement.style.setProperty('--mobile-menu-top', '105px');
+document.documentElement.style.setProperty('--mobile-menu-height', 'calc(100vh - 105px)');
+document.documentElement.style.setProperty('--quick-panel-top', '135px');
+document.documentElement.style.setProperty('--news-panel-top', '220px');
+} else {
+// Anonymous users - show signup banner
+document.documentElement.style.setProperty('--nav-top', '41px');
+document.documentElement.style.setProperty('--body-padding', '105px');
+document.documentElement.style.setProperty('--mobile-menu-top', '105px');
+document.documentElement.style.setProperty('--mobile-menu-height', 'calc(100vh - 105px)');
+document.documentElement.style.setProperty('--quick-panel-top', '135px');
+document.documentElement.style.setProperty('--news-panel-top', '220px');
+}
+
+// Reset function for double-click
+function resetToAutoTheme() {
+localStorage.removeItem('manualOverride');
+localStorage.removeItem('theme');
+const hour = new Date().getHours();
+const autoTheme = (hour >= 18 || hour < 6) ? 'dark' : 'light';
+document.documentElement.setAttribute('data-theme', autoTheme);
+localStorage.setItem('theme', autoTheme);
+const icon = document.querySelector('.theme-icon');
+if (icon) {
+icon.textContent = autoTheme === 'dark' ? '☀️' : '🌙';
+}
+alert('Theme reset to automatic scheduling');
+}
+</script>
+<link rel="stylesheet" href="styles.css?v=1760537999">
+<script src="theme.js" defer></script>
+<!-- AUTOPILOT_BELL_START: the AI autopilot's practice buys and sells in the notification bell, for signed-in visitors only --><script>(function(){try{var u=localStorage.getItem('userId');if(u&&u!=='anonymous'&&!window.autopilotBell){var s=document.createElement('script');s.src='autopilot-bell.js?h='+Math.floor(Date.now()/36e5);s.async=true;document.head.appendChild(s);}}catch(e){}})();</script><!-- AUTOPILOT_BELL_END -->
+<script src="auth.js?v=20260102"></script>
+<script>
+// Moves the page's two panels into the phone sidebar (mobile-sidebar.js calls it before the sidebar shows)
+function fillMobileSidebar() {
+const overlay = document.getElementById('mobile-sidebar-overlay');
+const modal = document.getElementById('mobile-sidebar-modal');
+const content = document.getElementById('mobile-sidebar-content');
+const quickPanel = document.getElementById('quick-analysis-panel');
+const newsPanel = document.getElementById('news-panel');
+
+if (content.children.length === 0) {
+// Move original panels into modal instead of cloning
+content.appendChild(quickPanel);
+content.appendChild(newsPanel);
+quickPanel.style.cssText = 'position: static; width: 100%; margin-bottom: 20px; display: block;';
+newsPanel.style.cssText = 'position: static; width: 100%; display: block;';
+}
+
+setTimeout(() => {
+const clonedTabs = content.querySelectorAll(".market-tab-sidebar");
+clonedTabs.forEach(tab => {
+tab.onclick = function() {
+clonedTabs.forEach(t => t.classList.remove("active"));
+this.classList.add("active");
+currentTabSidebar = this.dataset.tab;
+currentTabIndex = tabOrder.indexOf(this.dataset.tab);
+this.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+renderMarketDataSidebar(currentTabSidebar);
+};
+});
+
+// Re-attach onclick for nav buttons
+const navLeft = content.querySelector('#nav-left-sidebar');
+const navRight = content.querySelector('#nav-right-sidebar');
+if (navLeft) {
+navLeft.onclick = () => {
+currentTabIndex = (currentTabIndex - 1 + tabOrder.length) % tabOrder.length;
+const newTab = tabOrder[currentTabIndex];
+currentTabSidebar = newTab;
+clonedTabs.forEach(t => {
+if (t.dataset.tab === newTab) {
+t.classList.add('active');
+t.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+} else {
+t.classList.remove('active');
+}
+});
+renderMarketDataSidebar(newTab);
+};
+}
+if (navRight) {
+navRight.onclick = () => {
+currentTabIndex = (currentTabIndex + 1) % tabOrder.length;
+const newTab = tabOrder[currentTabIndex];
+currentTabSidebar = newTab;
+clonedTabs.forEach(t => {
+if (t.dataset.tab === newTab) {
+t.classList.add('active');
+t.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+} else {
+t.classList.remove('active');
+}
+});
+renderMarketDataSidebar(newTab);
+};
+}
+
+// Re-render tickers in cloned containers to populate data
+const todayTickers = JSON.parse(localStorage.getItem('trendingTickersList') || '[]').slice(0, 5) || ['NVDA', 'TSLA', 'AAPL', 'MSFT', 'GOOGL'];
+const todayGainers = JSON.parse(localStorage.getItem('gainersTickersList') || '[]').slice(0, 5) || ['NVDA', 'TSLA', 'AAPL', 'MSFT', 'GOOGL'];
+const todayLosers = JSON.parse(localStorage.getItem('losersTickersList') || '[]').slice(0, 5) || ['NKLA', 'WISH', 'CLOV', 'SPCE', 'HOOD'];
+const todayActive = JSON.parse(localStorage.getItem('activeTickersList') || '[]').slice(0, 5);
+
+const trendingContainer = content.querySelector('#trending-tickers-container');
+if (trendingContainer && todayTickers.length) {
+trendingContainer.innerHTML = '';
+todayTickers.forEach((ticker, idx) => {
+const div = document.createElement('div');
+div.style.cssText = `display: flex; justify-content: space-between; align-items: flex-start; padding: 5px 0; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background 0.2s;`;
+if (idx === todayTickers.length - 1) div.style.borderBottom = 'none';
+div.innerHTML = `
+<div style="flex: 1;"><div style="color: #007bff; font-size: 0.75rem; font-weight: 600;">${ticker}</div><div id="trend-name-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="color: var(--text-secondary); font-size: 0.65rem;">${ticker}</div></div>
+<div style="text-align: right;"><div id="trend-price-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="color: var(--text-primary); font-size: 0.75rem; font-weight: 600;">--</div><div id="trend-change-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="font-size: 0.65rem;">--</div></div>`;
+div.onmouseover = () => div.style.background = 'var(--hover-bg)';
+div.onmouseout = () => div.style.background = 'transparent';
+div.onclick = () => window.location.href = `analysis.html?symbol=${ticker}&option=1&subOption=custom`;
+trendingContainer.appendChild(div);
+});
+// Load cached prices
+const cachedPrices = localStorage.getItem('trendingTickerPrices');
+if (cachedPrices) {
+const prices = JSON.parse(cachedPrices);
+Object.keys(prices).forEach(ticker => {
+const d = prices[ticker];
+const id = ticker.toLowerCase().replace(/[^a-z0-9]/g, '');
+const priceEl = content.querySelector(`#trend-price-${id}`);
+const changeEl = content.querySelector(`#trend-change-${id}`);
+if (priceEl) priceEl.textContent = typeof d.price === 'number' ? d.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : d.price;
+if (changeEl) { changeEl.textContent = `${d.changePercent >= 0 ? '+' : ''}${d.change.toFixed(2)} (${d.changePercent >= 0 ? '+' : ''}${d.changePercent.toFixed(2)}%)`; changeEl.style.color = d.changePercent >= 0 ? '#22c55e' : '#ef4444'; }
+});
+}
+}
+
+const gainersContainer = content.querySelector('#gainers-tickers-container');
+if (gainersContainer && todayGainers.length) {
+gainersContainer.innerHTML = '';
+todayGainers.forEach((ticker, idx) => {
+const div = document.createElement('div');
+div.style.cssText = `display: flex; justify-content: space-between; align-items: flex-start; padding: 5px 0; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background 0.2s;`;
+if (idx === todayGainers.length - 1) div.style.borderBottom = 'none';
+div.innerHTML = `
+<div style="flex: 1;"><div style="color: #22c55e; font-size: 0.75rem; font-weight: 600;">${ticker}</div><div id="gainer-name-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="color: var(--text-secondary); font-size: 0.65rem;">${ticker}</div></div>
+<div style="text-align: right;"><div id="gainer-price-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="color: var(--text-primary); font-size: 0.75rem; font-weight: 600;">--</div><div id="gainer-change-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="font-size: 0.65rem; color: #22c55e;">--</div></div>`;
+div.onmouseover = () => div.style.background = 'var(--hover-bg)';
+div.onmouseout = () => div.style.background = 'transparent';
+div.onclick = () => window.location.href = `analysis.html?symbol=${ticker}&option=1&subOption=custom`;
+gainersContainer.appendChild(div);
+});
+const cachedGainerPrices = localStorage.getItem('gainersTickerPrices');
+if (cachedGainerPrices) {
+const prices = JSON.parse(cachedGainerPrices);
+Object.keys(prices).forEach(ticker => {
+const d = prices[ticker];
+const id = ticker.toLowerCase().replace(/[^a-z0-9]/g, '');
+const priceEl = content.querySelector(`#gainer-price-${id}`);
+const changeEl = content.querySelector(`#gainer-change-${id}`);
+if (priceEl) priceEl.textContent = typeof d.price === 'number' ? d.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : d.price;
+if (changeEl) { changeEl.textContent = `${d.changePercent >= 0 ? '+' : ''}${d.change.toFixed(2)} (${d.changePercent >= 0 ? '+' : ''}${d.changePercent.toFixed(2)}%)`; changeEl.style.color = '#22c55e'; }
+});
+}
+}
+
+const losersContainer = content.querySelector('#losers-tickers-container');
+if (losersContainer && todayLosers.length) {
+losersContainer.innerHTML = '';
+todayLosers.forEach((ticker, idx) => {
+const div = document.createElement('div');
+div.style.cssText = `display: flex; justify-content: space-between; align-items: flex-start; padding: 5px 0; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background 0.2s;`;
+if (idx === todayLosers.length - 1) div.style.borderBottom = 'none';
+div.innerHTML = `
+<div style="flex: 1;"><div style="color: #ef4444; font-size: 0.75rem; font-weight: 600;">${ticker}</div><div id="loser-name-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="color: var(--text-secondary); font-size: 0.65rem;">${ticker}</div></div>
+<div style="text-align: right;"><div id="loser-price-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="color: var(--text-primary); font-size: 0.75rem; font-weight: 600;">--</div><div id="loser-change-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="font-size: 0.65rem; color: #ef4444;">--</div></div>`;
+div.onmouseover = () => div.style.background = 'var(--hover-bg)';
+div.onmouseout = () => div.style.background = 'transparent';
+div.onclick = () => window.location.href = `analysis.html?symbol=${ticker}&option=1&subOption=custom`;
+losersContainer.appendChild(div);
+});
+const cachedLoserPrices = localStorage.getItem('losersTickerPrices');
+if (cachedLoserPrices) {
+const prices = JSON.parse(cachedLoserPrices);
+Object.keys(prices).forEach(ticker => {
+const d = prices[ticker];
+const id = ticker.toLowerCase().replace(/[^a-z0-9]/g, '');
+const priceEl = content.querySelector(`#loser-price-${id}`);
+const changeEl = content.querySelector(`#loser-change-${id}`);
+if (priceEl) priceEl.textContent = typeof d.price === 'number' ? d.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : d.price;
+if (changeEl) { changeEl.textContent = `${d.changePercent >= 0 ? '+' : ''}${d.change.toFixed(2)} (${d.changePercent >= 0 ? '+' : ''}${d.changePercent.toFixed(2)}%)`; changeEl.style.color = '#ef4444'; }
+});
+}
+}
+
+// Re-attach onclick for most active
+const activeContainer = content.querySelector('#active-tickers-container');
+if (activeContainer) {
+Array.from(activeContainer.children).forEach(div => {
+const ticker = div.querySelector('[style*="color: #3b82f6"]')?.textContent;
+if (ticker) {
+div.onclick = () => window.location.href = `analysis.html?symbol=${ticker}&option=1&subOption=custom`;
+}
+});
+}
+}, 0);
+
+}
+
+// Moves the panels back to the page (mobile-sidebar.js calls it once the sidebar is hidden)
+function emptyMobileSidebar() {
+const overlay = document.getElementById('mobile-sidebar-overlay');
+const modal = document.getElementById('mobile-sidebar-modal');
+const content = document.getElementById('mobile-sidebar-content');
+const quickPanel = document.getElementById('quick-analysis-panel');
+const newsPanel = document.getElementById('news-panel');
+
+// Move panels back
+if (quickPanel && quickPanel.parentElement === content) {
+document.body.insertBefore(quickPanel, modal);
+quickPanel.style.cssText = 'position: fixed; right: 20px; top: var(--quick-panel-top, 135px); width: 330px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 100;';
+}
+if (newsPanel && newsPanel.parentElement === content) {
+document.body.insertBefore(newsPanel, modal);
+newsPanel.style.cssText = 'position: absolute; right: 20px; top: var(--news-panel-top, 220px); width: 330px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 99; pointer-events: auto;';
+}
+}
+
+// Showing, hiding and dragging the sidebar is mobile-sidebar.js's job: it replaces the two functions below, which only
+// serve a page on which that script did not load. Neither may give the body position: fixed: that was the old way
+// of stopping the page scrolling behind the sidebar, and it threw the page to the top.
+function toggleMobileSidebar() {
+const overlay = document.getElementById('mobile-sidebar-overlay');
+const modal = document.getElementById('mobile-sidebar-modal');
+fillMobileSidebar();
+overlay.style.display = 'block';
+modal.style.display = 'block';
+requestAnimationFrame(() => { overlay.style.opacity = '1'; modal.style.right = '0'; });
+}
+
+function closeMobileSidebar() {
+const overlay = document.getElementById('mobile-sidebar-overlay');
+const modal = document.getElementById('mobile-sidebar-modal');
+overlay.style.opacity = '0';
+modal.style.right = '-100%';
+setTimeout(() => { overlay.style.display = 'none'; modal.style.display = 'none'; emptyMobileSidebar(); }, 300);
+}
+</script>
+<!-- Swipes on a phone (the menu from the left, the market-data sidebar from the right) are handled by mobile-sidebar.js -->
+<script>
+// Hide LIMITED TIME banner immediately for logged-in users to prevent flicker
+(function() {
+const userId = localStorage.getItem('userId');
+if (userId && userId !== 'anonymous') {
+document.documentElement.style.setProperty('--limited-banner-display', 'none');
+}
+})();
+</script>
+<style>
+/* Disable tap highlight on mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Desktop hover for clickable items */
+@media (hover: hover) {
+  .market-item-sidebar:hover,
+  .news-item:hover,
+  .ticker-item:hover {
+    background: var(--hover-bg) !important;
+    transition: background 0.2s;
+  }
+}
+</style>
+</head>
+<body>
+<div id="promo-banner" class="promo-banner" onclick="viewPricingPlans()" style="background: var(--card-bg); color: var(--text-primary); text-align: center; padding: 10px 20px; font-weight: 500; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); position: fixed; top: 0; left: 0; right: 0; z-index: 9999; cursor: pointer; transition: background 0.2s; display: none;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='var(--card-bg)'">
+Plans from <strong style="color: #22c55e;">$4.99/month</strong>: more analyses a day, and the AI autopilot (Beta) for your practice portfolio
+</div>
+<script>
+// Update banner content and show for non-paid users
+(function() {
+const userId = localStorage.getItem('userId') || 'anonymous';
+const cacheKey = `userPaidStatus_${userId}`;
+const cachedPaidStatus = localStorage.getItem(cacheKey);
+const banner = document.getElementById('promo-banner');
+
+if (cachedPaidStatus !== 'paid' && banner) {
+banner.style.display = 'block';
+if (userId === 'anonymous') {
+banner.innerHTML = 'Free 3-day trial: <strong style="color: #22c55e;">15 analyses</strong>, no credit card needed';
+}
+}
+})();
+</script>
+<nav class="top-nav" style="top: var(--nav-top, 41px);">
+<div class="nav-container">
+<div class="nav-brand">
+<a href="index.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit;">
+<img src="stockiq-logo.png" alt="StockIQ Logo" class="brand-logo" style="width: 24px; height: 24px;" width="24" height="24" loading="eager">
+<span class="brand-text">StockIQ</span>
+</a>
+</div>
+
+<div class="desktop-nav">
+<a href="index.html" class="nav-item home-link" style="text-decoration: none !important; color: inherit; display: flex; align-items: center;">
+Home
+</a>
+<div class="nav-item dropdown" onclick="showDropdown('analysis-dropdown', event)">
+Analysis <span class="dropdown-arrow">▼</span>
+<div class="dropdown-menu" id="analysis-dropdown">
+<a href="analysis.html?option=1">Stock & ETF Analysis</a>
+<a href="analysis.html?option=2">Trading Signals</a>
+</div>
+</div>
+<div class="nav-item dropdown" onclick="showDropdown('screeners-dropdown', event)">
+Screeners <span class="dropdown-arrow">▼</span>
+<div class="dropdown-menu" id="screeners-dropdown">
+<a href="analysis.html?option=3">🇺🇸 US Markets</a>
+<a href="analysis.html?option=4">🇪🇺 Europe Markets</a>
+<a href="analysis.html?option=5">🌏 Asia-Pacific Markets</a>
+<a href="analysis.html?option=6">🌎 Americas Markets</a>
+</div>
+</div>
+<div class="nav-item dropdown" onclick="showDropdown('crypto-dropdown', event)">
+Crypto <span class="dropdown-arrow">▼</span>
+<div class="dropdown-menu" id="crypto-dropdown">
+<a href="analysis.html?option=7">Crypto Universe Screener</a>
+</div>
+</div>
+<div class="nav-item dropdown" onclick="showDropdown('account-dropdown', event)" style="margin-left: auto;">
+Account <span class="dropdown-arrow">▼</span>
+<div class="dropdown-menu" id="account-dropdown">
+<a href="signup.html">Register</a>
+<a href="login.html">Login</a>
+</div>
+</div>
+<button class="notification-bell" id="notification-bell" onclick="goToNotifications()" title="Notifications" aria-label="View notifications" style="display: none; position: relative; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-primary); margin-right: 10px;">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+<path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+</svg>
+<span class="notification-badge" id="notification-badge" style="position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; font-weight: bold; display: none; align-items: center; justify-content: center;"></span>
+</button>
+<button class="theme-toggle" onclick="toggleTheme()" title="Click: Toggle theme | Double-click: Reset to auto" aria-label="Toggle dark mode">
+<span class="theme-icon" aria-hidden="true">🌙</span>
+</button>
+</div>
+
+<div class="mobile-nav">
+<button class="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Open menu" aria-expanded="false">
+<span class="hamburger-line"></span>
+<span class="hamburger-line"></span>
+<span class="hamburger-line"></span>
+</button>
+<button class="notification-bell" id="mobile-notification-bell" onclick="goToNotifications(event)" title="Notifications" aria-label="View notifications" style="display: none; position: relative; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-primary); margin-left: 10px;">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+<path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+</svg>
+<span class="notification-badge" id="mobile-notification-badge" style="position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; font-weight: bold; display: none; align-items: center; justify-content: center;"></span>
+</button>
+</div>
+</div>
+</nav>
+
+<div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
+
+<div class="mobile-menu" id="mobile-menu" style="top: var(--mobile-menu-top, 105px); height: var(--mobile-menu-height, calc(100vh - 105px));">
+<div class="mobile-menu-header">
+<span class="mobile-brand"><img src="stockiq-logo.png" alt="StockIQ" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;" width="20" height="20" loading="lazy">StockIQ.tech</span>
+<div class="mobile-header-controls">
+<button class="close-btn" onclick="closeMobileMenu()" aria-label="Close menu">×</button>
+</div>
+</div>
+<div class="mobile-menu-content">
+<div class="mobile-section">
+<a href="index.html">🏠 Home</a>
+</div>
+<div class="mobile-section" id="mobile-dashboard-section" style="display: none;">
+<a href="dashboard.html">📊 Dashboard</a>
+</div>
+<div class="mobile-section">
+<div class="mobile-section-title">Analysis</div>
+<a href="analysis.html?option=1">Stock & ETF Analysis</a>
+<a href="analysis.html?option=2">Trading Signals</a>
+</div>
+<div class="mobile-section">
+<div class="mobile-section-title">Screeners</div>
+<a href="analysis.html?option=3">🇺🇸 US Markets</a>
+<a href="analysis.html?option=4">🇪🇺 Europe Markets</a>
+<a href="analysis.html?option=5">🌏 Asia-Pacific Markets</a>
+<a href="analysis.html?option=6">🌎 Americas Markets</a>
+</div>
+<div class="mobile-section">
+<div class="mobile-section-title">Crypto</div>
+<a href="analysis.html?option=7">Crypto Universe Screener</a>
+</div>
+<div class="mobile-section">
+<div class="mobile-section-title">Account</div>
+<a href="signup.html">Register</a>
+<a href="login.html">Login</a>
+</div>
+<div class="mobile-section">
+<div class="mobile-section-title">Theme</div>
+<a href="#" onclick="toggleTheme()" id="mobile-theme-toggle">🌙 Dark Mode</a>
+</div>
+</div>
+</div>
+
+<div id="quick-analysis-panel" style="position: fixed; right: 20px; top: var(--quick-panel-top, 135px); width: 330px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 100; display: none;">
+<div style="display: flex; gap: 6px; position: relative;">
+<div style="position: relative; flex: 1; display: flex;">
+<input type="text" id="side-stock-search" placeholder="Search tickers or companies" style="flex: 1; padding: 8px 30px 8px 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; background: var(--card-bg); color: var(--text-primary);">
+<span id="side-search-clear" onclick="document.getElementById('side-stock-search').value=''; this.style.display='none'; document.getElementById('side-symbol-suggestions').style.display='none';" style="display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-secondary); font-size: 18px; padding: 0 3px;">&times;</span>
+<div id="side-symbol-suggestions" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; margin-top: 4px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>
+</div>
+<button id="side-search-btn" onclick="sideSearchStock()" style="background: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; white-space: nowrap; transition: background 0.2s; touch-action: manipulation;" onmouseover="this.style.background='#0056b3'" onmouseout="this.style.background='#007bff'">🚀 Analyze</button>
+</div>
+<script>
+function sideSearchStock() {
+const input = document.getElementById('side-stock-search');
+const symbol = input.value.trim().toUpperCase();
+if (!symbol) {
+alert('Please enter a stock symbol');
+return;
+}
+window.location.href = `analysis.html?symbol=${encodeURIComponent(symbol)}&option=1&subOption=custom`;
+}
+document.getElementById('side-stock-search').addEventListener('keypress', function(e) {
+if (e.key === 'Enter') sideSearchStock();
+});
+
+// Update button text based on login status
+document.addEventListener('DOMContentLoaded', function() {
+const userId = localStorage.getItem('userId');
+const btn = document.getElementById('side-search-btn');
+if (btn && userId && userId !== 'anonymous') {
+btn.textContent = '🚀 Analyze';
+}
+if (userId && userId !== 'anonymous') {
+const mobileDashboardSection = document.getElementById('mobile-dashboard-section');
+if (mobileDashboardSection) {
+mobileDashboardSection.style.display = 'block';
+}
+}
+});
+</script>
+</div>
+
+<div id="news-panel" style="position: absolute; right: 20px; top: var(--news-panel-top, 220px); width: 330px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 99; pointer-events: auto; display: none;">
+
+<div style="border-radius: 8px; padding: 8px 4px; margin-bottom: 20px;">
+<div style="text-align: center; padding: 8px; background: #000; border-radius: 6px; margin-bottom: 10px;">
+<span style="color: #4ade80; font-size: 12px;"><span id="market-status-sidebar">● U.S. markets open in</span> <span id="market-countdown-sidebar">--</span></span>
+</div>
+
+<div id="market-tabs-sidebar" style="display: flex; gap: 5px; margin-bottom: 10px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; scrollbar-width: thin; padding-right: 40px;">
+<button class="market-tab-sidebar active" data-tab="us">US</button>
+<button class="market-tab-sidebar" data-tab="europe">Europe</button>
+<button class="market-tab-sidebar" data-tab="asia">Asia</button>
+<button class="market-tab-sidebar" data-tab="cryptocurrencies">Crypto</button>
+<button class="market-tab-sidebar" data-tab="rates">Rates</button>
+<button class="market-tab-sidebar" data-tab="commodities">Commodities</button>
+<button class="market-tab-sidebar" data-tab="currencies">Currencies</button>
+</div>
+
+<div id="market-data-sidebar-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; max-width: 100%;">
+</div>
+
+<div style="display: flex; justify-content: center; gap: 10px; margin-top: 10px;">
+<button id="nav-left-sidebar" style="background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; touch-action: manipulation;">‹</button>
+<button id="nav-right-sidebar" style="background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; touch-action: manipulation;">›</button>
+</div>
+
+<div id="loading-sidebar" style="text-align: center; padding: 20px; color: var(--text-secondary); font-size: 12px;">
+Loading...
+</div>
+</div>
+
+<style>
+#market-tabs-sidebar {
+scrollbar-width: none !important;
+-ms-overflow-style: none !important;
+mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%);
+-webkit-mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%);
+}
+
+#market-tabs-sidebar::-webkit-scrollbar {
+display: none !important;
+width: 0 !important;
+height: 0 !important;
+}
+
+.market-tab-sidebar {
+padding: 4px 10px;
+background: transparent;
+border: 1px solid var(--border-color);
+color: var(--text-secondary);
+cursor: pointer;
+border-radius: 4px;
+font-size: 11px;
+white-space: nowrap;
+transition: all 0.2s;
+}
+
+.market-tab-sidebar:hover {
+background: rgba(255,255,255,0.05);
+}
+
+.market-tab-sidebar.active {
+background: #3b82f6;
+color: white;
+border-color: #3b82f6;
+}
+
+.market-item-sidebar {
+padding: 6px 4px;
+background: rgba(255,255,255,0.02);
+border: 1px solid var(--border-color);
+border-radius: 6px;
+display: flex;
+flex-direction: column;
+min-width: 0;
+transition: background 0.2s;
+}
+
+.market-item-sidebar:hover {
+background: var(--hover-bg);
+}
+
+.market-item-sidebar-name {
+font-size: 10px;
+color: var(--text-secondary);
+margin-bottom: 2px;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+.market-item-sidebar-value {
+font-size: 14px;
+font-weight: 600;
+color: var(--text-primary);
+margin-bottom: 2px;
+}
+
+.market-item-sidebar-chart {
+height: 24px;
+margin: 2px 0;
+width: 100%;
+}
+
+.market-item-sidebar-change {
+font-size: 10px;
+font-weight: 500;
+white-space: nowrap;
+overflow: hidden;
+}
+
+.market-item-sidebar-change.positive {
+color: #22c55e;
+}
+
+.market-item-sidebar-change.negative {
+color: #ef4444;
+}
+</style>
+
+<script>
+const LAMBDA_URLS = {
+us: 'https://xqma6tuoaeb5nd32gpdyk5uonm0yvgiy.lambda-url.us-east-1.on.aws/',
+europe: 'https://2azr7bjzjfvkadj2hzztk5icia0xnnoa.lambda-url.us-east-1.on.aws/',
+asia: 'https://kzspffs5uombzw73vudd3p57x40agikm.lambda-url.us-east-1.on.aws/',
+cryptocurrencies: 'https://x5xnafkpdtym4i7vezbhjaizry0leaxk.lambda-url.us-east-1.on.aws/',
+rates: 'https://ewowkcosbyc5rkk2b6ypvlx6la0pzfww.lambda-url.us-east-1.on.aws/',
+commodities: 'https://4ynwdgbmuf7jvxxxckmvu7plwa0gxnby.lambda-url.us-east-1.on.aws/',
+currencies: 'https://xdqiva3aoe4e4esa3cwdrkyt7i0izcvr.lambda-url.us-east-1.on.aws/'
+};
+let marketDataSidebar = {};
+let currentTabSidebar = 'us';
+
+async function fetchMarketDataSidebar() {
+console.log('🔄 Fetching market data sidebar...');
+
+const cachedData = localStorage.getItem('marketDataSidebar');
+let oldData = {};
+if (cachedData) {
+try {
+oldData = JSON.parse(cachedData);
+marketDataSidebar = oldData;
+document.getElementById('loading-sidebar').style.display = 'none';
+renderMarketDataSidebar(currentTabSidebar);
+console.log('📦 Displayed cached market data');
+} catch (e) {
+console.error('Error displaying cached market data:', e);
+}
+}
+
+if (document.hidden) {
+console.log('⏸️ Page hidden, skipping API call');
+return;
+}
+
+try {
+const timestamp = Date.now();
+console.log(`🌐 Fetching fresh data with timestamp: ${timestamp}`);
+
+const promises = Object.entries(LAMBDA_URLS).map(async ([category, url]) => {
+try {
+const response = await fetch(`${url}?t=${timestamp}`);
+const data = await response.json();
+return { category, data: data[category] || {} };
+} catch (error) {
+console.error(`❌ Error fetching ${category}:`, error);
+return { category, data: {} };
+}
+});
+
+const results = await Promise.all(promises);
+
+const newData = { timestamp: new Date().toISOString() };
+results.forEach(({ category, data }) => {
+newData[category] = data;
+});
+
+
+
+// Only update if we have valid data with actual content
+if (Object.keys(newData).length > 1 && newData[currentTabSidebar] && Object.keys(newData[currentTabSidebar]).length > 0) {
+marketDataSidebar = newData;
+localStorage.setItem('marketDataSidebar', JSON.stringify(marketDataSidebar));
+document.getElementById('loading-sidebar').style.display = 'none';
+// Don't re-render - sparklines already displayed from cache
+} else if (!cachedData) {
+// If no cached data and fetch failed/empty, still try to render what we have
+renderMarketDataSidebar(currentTabSidebar);
+}
+
+// Update top 4 cards with fresh US data for consistency
+if (marketDataSidebar.us && typeof updateTopCardsFromData === 'function') {
+updateTopCardsFromData(marketDataSidebar.us);
+}
+
+console.log('✅ Market data updated successfully');
+} catch (error) {
+console.error('❌ Error fetching market data:', error);
+if (!cachedData) {
+document.getElementById('loading-sidebar').innerHTML = 'Failed to load';
+}
+}
+}
+
+function renderMarketDataSidebar(tab) {
+console.log('🎨 renderMarketDataSidebar called with tab:', tab);
+console.log('📦 marketDataSidebar keys:', Object.keys(marketDataSidebar));
+console.log('📦 Data for tab:', marketDataSidebar[tab]);
+
+const modal = document.getElementById('mobile-sidebar-modal');
+const isModalOpen = modal && modal.style.display === 'block';
+const container = isModalOpen ? modal.querySelector('#market-data-sidebar-container') : document.getElementById('market-data-sidebar-container');
+const data = marketDataSidebar[tab];
+
+if (!data) {
+console.error('❌ No data found for tab:', tab);
+return;
+}
+
+console.log('🧹 Clearing container...');
+container.innerHTML = '';
+container.style.display = 'grid';
+
+const newsPanel = document.getElementById('news-panel');
+if (newsPanel) {
+newsPanel.scrollTop = 0;
+}
+console.log('✅ Container cleared and scrolled');
+
+const entries = Object.entries(data).slice(0, 6);
+console.log('📋 Rendering', entries.length, 'items for tab:', tab);
+
+entries.forEach(([name, info]) => {
+console.log('  - Rendering item:', name, info);
+if (info.error) return;
+
+const isPositive = info.change >= 0;
+const changeClass = isPositive ? 'positive' : 'negative';
+const changeSymbol = isPositive ? '+' : '';
+const chartColor = isPositive ? '#22c55e' : '#ef4444';
+const symbol = info.symbol || name;
+
+const item = document.createElement('div');
+item.className = 'market-item-sidebar';
+item.style.cursor = 'pointer';
+item.title = 'Run Analysis';
+item.onclick = () => window.location.href = `analysis.html?symbol=${encodeURIComponent(symbol)}&option=1&subOption=custom`;
+item.innerHTML = `
+<div class="market-item-sidebar-name">${name}</div>
+<div class="market-item-sidebar-value">${formatValueSidebar(info.value, tab)}</div>
+<svg class="market-item-sidebar-chart" width="100%" height="30" viewBox="0 0 100 30" preserveAspectRatio="none">
+<polyline points="${generateSparkline(isPositive)}" stroke="${chartColor}" stroke-width="1.5" fill="none" opacity="0.8"/>
+</svg>
+<div class="market-item-sidebar-change ${changeClass}">${changeSymbol}${info.change.toFixed(2)} (${changeSymbol}${info.changePercent.toFixed(2)}%)</div>
+`;
+container.appendChild(item);
+});
+console.log('✅ Render complete for tab:', tab);
+}
+
+function generateSparkline(isPositive) {
+const points = [];
+const segments = 20;
+const baseY = 15;
+const amplitude = 8;
+
+for (let i = 0; i <= segments; i++) {
+const x = (i / segments) * 100;
+const randomVariation = (Math.random() - 0.5) * amplitude;
+const trend = isPositive ? -i * 0.3 : i * 0.3;
+const y = baseY + randomVariation + trend;
+points.push(`${x},${Math.max(2, Math.min(28, y))}`);
+}
+
+return points.join(' ');
+}
+
+function formatValueSidebar(value, category) {
+if (category === 'cryptocurrencies') {
+return value >= 1000 ? value.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : value.toFixed(4);
+}
+return value.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+function attachMarketTabListeners() {
+console.log('🔗 Attaching market tab listeners...');
+document.querySelectorAll('.market-tab-sidebar').forEach(tab => {
+tab.onclick = function(e) {
+console.log('📌 Tab clicked:', this.dataset.tab);
+const tabName = this.dataset.tab;
+console.log('🎯 Switching to tab:', tabName);
+
+document.querySelectorAll('.market-tab-sidebar').forEach(t => {
+t.classList.remove('active');
+});
+
+this.classList.add('active');
+currentTabSidebar = tabName;
+window.marketDataCurrentTabIndex = tabOrder.indexOf(tabName);
+window.marketDataCurrentTab = tabName;
+this.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+console.log('📊 Calling renderMarketDataSidebar with:', tabName);
+renderMarketDataSidebar(tabName);
+console.log('✅ Render complete');
+};
+});
+console.log('✅ Attached listeners to', document.querySelectorAll('.market-tab-sidebar').length, 'tabs');
+}
+
+attachMarketTabListeners();
+
+function switchToTab(tabName) {
+    currentTabSidebar = tabName;
+    currentTabIndex = tabOrder.indexOf(tabName);
+    document.querySelectorAll('.market-tab-sidebar').forEach(t => {
+        if (t.dataset.tab === tabName) {
+            t.classList.add('active');
+            t.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        } else {
+            t.classList.remove('active');
+        }
+    });
+    renderMarketDataSidebar(tabName);
+}
+
+function updateMarketCountdownSidebar() {
+const now = new Date();
+const ny = new Date(now.toLocaleString('en-US', {timeZone: 'America/New_York'}));
+const hours = ny.getHours();
+const minutes = ny.getMinutes();
+const day = ny.getDay();
+
+const isWeekday = day >= 1 && day <= 5;
+const currentMinutes = hours * 60 + minutes;
+const marketOpen = 9 * 60 + 30; // 9:30 AM
+const marketClose = 16 * 60; // 4:00 PM
+const isOpen = isWeekday && currentMinutes >= marketOpen && currentMinutes < marketClose;
+
+const statusEl = document.getElementById('market-status-sidebar');
+const countdownEl = document.getElementById('market-countdown-sidebar');
+
+if (isOpen) {
+statusEl.textContent = '● U.S. markets close in';
+const close = new Date(ny);
+close.setHours(16, 0, 0, 0);
+const diff = close - ny;
+const h = Math.floor(diff / 3600000);
+const m = Math.floor((diff % 3600000) / 60000);
+countdownEl.textContent = `${h}h ${m}m`;
+} else {
+statusEl.textContent = '● U.S. markets open in';
+// Calculate time until next open
+let nextOpen = new Date(ny);
+nextOpen.setHours(9, 30, 0, 0);
+
+// If it's past market close today or weekend, move to next weekday
+if (currentMinutes >= marketClose || day === 0 || day === 6) {
+nextOpen.setDate(nextOpen.getDate() + 1);
+while (nextOpen.getDay() === 0 || nextOpen.getDay() === 6) {
+nextOpen.setDate(nextOpen.getDate() + 1);
+}
+nextOpen.setHours(9, 30, 0, 0);
+}
+
+const diff = nextOpen - ny;
+const h = Math.floor(diff / 3600000);
+const m = Math.floor((diff % 3600000) / 60000);
+countdownEl.textContent = `${h}h ${m}m`;
+}
+}
+
+const tabOrder = ['us', 'europe', 'asia', 'cryptocurrencies', 'rates', 'commodities', 'currencies'];
+let currentTabIndex = 0; // Start with US
+
+function switchToTab(tabName) {
+document.querySelectorAll('.market-tab-sidebar').forEach(t => t.classList.remove('active'));
+const targetTab = document.querySelector(`[data-tab="${tabName}"]`);
+if (targetTab) {
+targetTab.classList.add('active');
+targetTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+currentTabSidebar = tabName;
+currentTabIndex = tabOrder.indexOf(tabName);
+renderMarketDataSidebar(tabName);
+}
+
+// Idle detection - track user activity
+let lastActivity = Date.now();
+document.addEventListener('mousemove', () => lastActivity = Date.now());
+document.addEventListener('keypress', () => lastActivity = Date.now());
+document.addEventListener('click', () => lastActivity = Date.now());
+document.addEventListener('scroll', () => lastActivity = Date.now());
+
+fetchMarketDataSidebar();
+updateMarketCountdownSidebar();
+setInterval(updateMarketCountdownSidebar, 60000);
+
+// Refresh market data once a minute, only while the page is visible and someone has used it in the last 10 minutes
+setInterval(() => {
+const idleTime = Date.now() - lastActivity;
+const maxIdle = 10 * 60 * 1000;
+
+if (!document.hidden && idleTime < maxIdle) {
+fetchMarketDataSidebar();
+}
+}, 60 * 1000);
+
+// Refresh immediately when user returns to tab (if not idle)
+document.addEventListener('visibilitychange', () => {
+const idleTime = Date.now() - lastActivity;
+const maxIdle = 10 * 60 * 1000;
+
+if (!document.hidden && idleTime < maxIdle) {
+fetchMarketDataSidebar();
+}
+});
+
+window.addEventListener('storage', (e) => {
+if (e.key === 'marketDataSidebar' && e.newValue) {
+marketDataSidebar = JSON.parse(e.newValue);
+renderMarketDataSidebar(currentTabSidebar);
+}
+});
+</script>
+
+
+<div style="border-radius: 8px; padding: 8px; margin-bottom: 20px;">
+<h4 style="color: var(--text-primary); margin: 0 0 6px 0; font-size: 0.8rem;">🔥 Trending Tickers</h4>
+<div id="trending-tickers-container" style="pointer-events: auto; position: relative; z-index: 100;"></div>
+</div>
+<script>
+window.renderTrendingTickers = function(tickers) {
+console.log('🎨 renderTrendingTickers called with:', tickers);
+const container = document.getElementById('trending-tickers-container');
+if (!container) return;
+const cachedPrices = JSON.parse(localStorage.getItem('trendingTickerPrices') || '{}');
+container.innerHTML = '';
+console.log('📦 Container cleared, adding', tickers.length, 'items');
+tickers.forEach((ticker, idx) => {
+const div = document.createElement('div');
+div.style.cssText = `display: flex; justify-content: space-between; align-items: flex-start; padding: 5px 0; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background 0.2s; pointer-events: auto; position: relative; z-index: 10;`;
+if (idx === tickers.length - 1) div.style.borderBottom = 'none';
+div.title = 'Run Analysis';
+div.innerHTML = `
+<div style="flex: 1; pointer-events: none;">
+<div style="color: #007bff; font-size: 0.75rem; font-weight: 600; margin-bottom: 1px;">${ticker}</div>
+<div id="trend-name-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="color: var(--text-secondary); font-size: 0.65rem;">${cachedPrices[ticker]?.name || ticker}</div>
+</div>
+<div style="text-align: right; pointer-events: none;">
+<div id="trend-price-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="color: var(--text-primary); font-size: 0.75rem; font-weight: 600; margin-bottom: 1px;">${cachedPrices[ticker]?.price ? (typeof cachedPrices[ticker].price === 'number' ? cachedPrices[ticker].price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : cachedPrices[ticker].price) : '--'}</div>
+<div id="trend-change-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="font-size: 0.65rem; color: ${cachedPrices[ticker]?.changePercent !== undefined ? (cachedPrices[ticker].changePercent >= 0 ? '#22c55e' : '#ef4444') : 'var(--text-secondary)'}">${cachedPrices[ticker]?.changePercent !== undefined ? `${cachedPrices[ticker].changePercent >= 0 ? '+' : ''}${cachedPrices[ticker].change.toFixed(2)} (${cachedPrices[ticker].changePercent >= 0 ? '+' : ''}${cachedPrices[ticker].changePercent.toFixed(2)}%)` : '--'}</div>
+</div>
+`;
+div.onmouseover = () => div.style.background = 'var(--hover-bg)';
+div.onmouseout = () => div.style.background = 'transparent';
+div.onclick = (e) => {
+console.log('✅ Clicked ticker:', ticker);
+window.location.href = `analysis.html?symbol=${ticker}&option=1&subOption=custom`;
+};
+console.log('➕ Added ticker div for:', ticker, 'with onclick');
+container.appendChild(div);
+});
+};
+
+let todayTickers = JSON.parse(localStorage.getItem('trendingTickersList') || '[]').slice(0, 5);
+const hasCachedPrices = localStorage.getItem('trendingTickerPrices');
+
+if (!todayTickers.length) todayTickers = ['NVDA', 'TSLA', 'AAPL', 'MSFT', 'GOOGL'];
+console.log('Initial render with tickers:', todayTickers);
+
+// Only render immediately if we have cached prices, otherwise wait for fetch
+if (hasCachedPrices) {
+window.renderTrendingTickers(todayTickers);
+}
+
+// Load cached prices immediately - CRITICAL: Never show "--"
+(function() {
+const cached = localStorage.getItem('trendingTickerPrices');
+if (!cached) return;
+try {
+const prices = JSON.parse(cached);
+Object.keys(prices).forEach(ticker => {
+const d = prices[ticker];
+const id = ticker.toLowerCase().replace(/[^a-z0-9]/g, '');
+const name = document.getElementById(`trend-name-${id}`);
+const price = document.getElementById(`trend-price-${id}`);
+const change = document.getElementById(`trend-change-${id}`);
+if (name) name.textContent = d.name || ticker;
+if (price) price.textContent = typeof d.price === 'number' ? d.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : d.price;
+if (change) {
+const sign = d.changePercent >= 0 ? '+' : '';
+change.textContent = `${sign}${d.change.toFixed(2)} (${sign}${d.changePercent.toFixed(2)}%)`;
+change.style.color = d.changePercent >= 0 ? '#22c55e' : '#ef4444';
+}
+});
+} catch (e) {}
+})();
+</script>
+
+<div id="signin-section" style="margin-bottom: 14px; border-top: 2px solid var(--border-color); padding-top: 14px; text-align: center; display: none;">
+<div style="color: var(--text-primary); margin: 0 0 8px 0; font-size: 0.85rem; white-space: nowrap;">Sign in to access your dashboard</div>
+<button onclick="window.location.href='login.html'" style="background: transparent; color: var(--text-primary); border: 2px solid var(--border-color); padding: 8px 20px; border-radius: 25px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'">Sign in</button>
+</div>
+<script>
+// Show sign in section only for anonymous users
+(function() {
+const userId = localStorage.getItem('userId');
+const signinSection = document.getElementById('signin-section');
+if (signinSection && (!userId || userId === 'anonymous')) {
+signinSection.style.display = 'block';
+}
+})();
+</script>
+
+<div style="border-radius: 8px; padding: 8px; margin-bottom: 20px; border-top: 2px solid var(--border-color); padding-top: 20px;">
+<h4 style="color: var(--text-primary); margin: 0 0 6px 0; font-size: 0.8rem;">🚀 Top Gainers</h4>
+<div id="gainers-tickers-container"></div>
+</div>
+<script>
+window.renderGainersTickers = function(tickers) {
+const container = document.getElementById('gainers-tickers-container');
+const cachedPrices = JSON.parse(localStorage.getItem('gainersTickerPrices') || '{}');
+container.innerHTML = '';
+tickers.forEach((ticker, idx) => {
+const div = document.createElement('div');
+div.style.cssText = `display: flex; justify-content: space-between; align-items: flex-start; padding: 5px 0; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background 0.2s;`;
+if (idx === tickers.length - 1) div.style.borderBottom = 'none';
+div.onmouseover = () => div.style.background = 'var(--hover-bg)';
+div.onmouseout = () => div.style.background = 'transparent';
+div.title = 'Run Analysis';
+div.onclick = () => window.location.href = `analysis.html?symbol=${ticker}&option=1&subOption=custom`;
+div.innerHTML = `
+<div style="flex: 1;">
+<div style="color: #22c55e; font-size: 0.75rem; font-weight: 600; margin-bottom: 1px;">${ticker}</div>
+<div id="gainer-name-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="color: var(--text-secondary); font-size: 0.65rem;">${cachedPrices[ticker]?.name || ticker}</div>
+</div>
+<div style="text-align: right;">
+<div id="gainer-price-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="color: var(--text-primary); font-size: 0.75rem; font-weight: 600; margin-bottom: 1px;">${cachedPrices[ticker]?.price ? (typeof cachedPrices[ticker].price === 'number' ? cachedPrices[ticker].price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : cachedPrices[ticker].price) : '--'}</div>
+<div id="gainer-change-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="font-size: 0.65rem; color: #22c55e;">${cachedPrices[ticker]?.changePercent !== undefined ? `${cachedPrices[ticker].changePercent >= 0 ? '+' : ''}${cachedPrices[ticker].change.toFixed(2)} (${cachedPrices[ticker].changePercent >= 0 ? '+' : ''}${cachedPrices[ticker].changePercent.toFixed(2)}%)` : '--'}</div>
+</div>
+`;
+container.appendChild(div);
+});
+};
+
+let todayGainers = JSON.parse(localStorage.getItem('gainersTickersList') || '[]').slice(0, 5);
+const hasGainersPrices = localStorage.getItem('gainersTickerPrices');
+
+if (!todayGainers.length) todayGainers = ['NVDA', 'TSLA', 'AAPL', 'MSFT', 'GOOGL'];
+console.log('Initial render with gainers:', todayGainers);
+window.renderGainersTickers(todayGainers);
+
+// Load cached prices immediately - CRITICAL: Never show "--"
+(function() {
+const cached = localStorage.getItem('gainersTickerPrices');
+if (!cached) return;
+try {
+const prices = JSON.parse(cached);
+Object.keys(prices).forEach(ticker => {
+const d = prices[ticker];
+const id = ticker.toLowerCase().replace(/[^a-z0-9]/g, '');
+const name = document.getElementById(`gainer-name-${id}`);
+const price = document.getElementById(`gainer-price-${id}`);
+const change = document.getElementById(`gainer-change-${id}`);
+if (name) name.textContent = d.name || ticker;
+if (price) price.textContent = typeof d.price === 'number' ? d.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : d.price;
+if (change) {
+const sign = d.changePercent >= 0 ? '+' : '';
+change.textContent = `${sign}${d.change.toFixed(2)} (${sign}${d.changePercent.toFixed(2)}%)`;
+change.style.color = '#22c55e';
+}
+});
+} catch (e) {}
+})();
+</script>
+
+<div style="border-radius: 8px; padding: 8px; margin-bottom: 20px; border-top: 2px solid var(--border-color); padding-top: 20px;">
+<h4 style="color: var(--text-primary); margin: 0 0 6px 0; font-size: 0.8rem;">📉 Top Losers</h4>
+<div id="losers-tickers-container"></div>
+</div>
+
+<div style="border-radius: 8px; padding: 8px; margin-bottom: 20px;">
+<h4 style="color: var(--text-primary); margin: 0 0 6px 0; font-size: 0.8rem;">🔥 Most Active</h4>
+<div id="active-tickers-container"></div>
+</div>
+<script>
+window.renderLosersTickers = function(tickers) {
+const container = document.getElementById('losers-tickers-container');
+const cachedPrices = JSON.parse(localStorage.getItem('losersTickerPrices') || '{}');
+container.innerHTML = '';
+tickers.forEach((ticker, idx) => {
+const div = document.createElement('div');
+div.style.cssText = `display: flex; justify-content: space-between; align-items: flex-start; padding: 5px 0; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background 0.2s;`;
+if (idx === tickers.length - 1) div.style.borderBottom = 'none';
+div.onmouseover = () => div.style.background = 'var(--hover-bg)';
+div.onmouseout = () => div.style.background = 'transparent';
+div.title = 'Run Analysis';
+div.onclick = () => window.location.href = `analysis.html?symbol=${ticker}&option=1&subOption=custom`;
+div.innerHTML = `
+<div style="flex: 1;">
+<div style="color: #ef4444; font-size: 0.75rem; font-weight: 600; margin-bottom: 1px;">${ticker}</div>
+<div id="loser-name-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="color: var(--text-secondary); font-size: 0.65rem;">${cachedPrices[ticker]?.name || ticker}</div>
+</div>
+<div style="text-align: right;">
+<div id="loser-price-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="color: var(--text-primary); font-size: 0.75rem; font-weight: 600; margin-bottom: 1px;">${cachedPrices[ticker]?.price ? (typeof cachedPrices[ticker].price === 'number' ? cachedPrices[ticker].price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : cachedPrices[ticker].price) : '--'}</div>
+<div id="loser-change-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="font-size: 0.65rem; color: #ef4444;">${cachedPrices[ticker]?.changePercent !== undefined ? `${cachedPrices[ticker].changePercent >= 0 ? '+' : ''}${cachedPrices[ticker].change.toFixed(2)} (${cachedPrices[ticker].changePercent >= 0 ? '+' : ''}${cachedPrices[ticker].changePercent.toFixed(2)}%)` : '--'}</div>
+</div>
+`;
+container.appendChild(div);
+});
+};
+
+window.renderActiveTickers = function(tickers) {
+const container = document.getElementById('active-tickers-container');
+const cachedPrices = JSON.parse(localStorage.getItem('activeTickerPrices') || '{}');
+container.innerHTML = '';
+tickers.forEach((ticker, idx) => {
+const div = document.createElement('div');
+div.style.cssText = `display: flex; justify-content: space-between; align-items: flex-start; padding: 5px 0; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background 0.2s;`;
+if (idx === tickers.length - 1) div.style.borderBottom = 'none';
+div.onmouseover = () => div.style.background = 'var(--hover-bg)';
+div.onmouseout = () => div.style.background = 'transparent';
+div.title = 'Run Analysis';
+div.onclick = () => window.location.href = `analysis.html?symbol=${ticker}&option=1&subOption=custom`;
+div.innerHTML = `
+<div style="flex: 1;">
+<div style="color: #3b82f6; font-size: 0.75rem; font-weight: 600; margin-bottom: 1px;">${ticker}</div>
+<div id="active-name-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="color: var(--text-secondary); font-size: 0.65rem;">${cachedPrices[ticker]?.name || ticker}</div>
+</div>
+<div style="text-align: right;">
+<div id="active-price-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="color: var(--text-primary); font-size: 0.75rem; font-weight: 600; margin-bottom: 1px;">${cachedPrices[ticker]?.price ? (typeof cachedPrices[ticker].price === 'number' ? cachedPrices[ticker].price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : cachedPrices[ticker].price) : '--'}</div>
+<div id="active-change-${ticker.toLowerCase().replace(/[^a-z0-9]/g, '')}" style="font-size: 0.65rem; color: #3b82f6;">${cachedPrices[ticker]?.changePercent !== undefined ? `${cachedPrices[ticker].changePercent >= 0 ? '+' : ''}${cachedPrices[ticker].change.toFixed(2)} (${cachedPrices[ticker].changePercent >= 0 ? '+' : ''}${cachedPrices[ticker].changePercent.toFixed(2)}%)` : '--'}</div>
+</div>
+`;
+container.appendChild(div);
+});
+};
+
+let todayActive = JSON.parse(localStorage.getItem('activeTickersList') || '[]').slice(0, 5);
+const hasActivePrices = localStorage.getItem('activeTickerPrices');
+
+if (!todayActive.length) todayActive = ['AAPL', 'TSLA', 'NVDA', 'AMD', 'PLTR'];
+window.renderActiveTickers(todayActive);
+
+// Load cached prices immediately - CRITICAL: Never show "--"
+(function() {
+const cached = localStorage.getItem('activeTickerPrices');
+if (!cached) return;
+try {
+const prices = JSON.parse(cached);
+Object.keys(prices).forEach(ticker => {
+const d = prices[ticker];
+const id = ticker.toLowerCase().replace(/[^a-z0-9]/g, '');
+const name = document.getElementById(`active-name-${id}`);
+const price = document.getElementById(`active-price-${id}`);
+const change = document.getElementById(`active-change-${id}`);
+if (name) name.textContent = d.name || ticker;
+if (price) price.textContent = typeof d.price === 'number' ? d.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : d.price;
+if (change) {
+const sign = d.changePercent >= 0 ? '+' : '';
+const color = d.changePercent >= 0 ? '#22c55e' : '#ef4444';
+change.textContent = `${sign}${d.change.toFixed(2)} (${sign}${d.changePercent.toFixed(2)}%)`;
+change.style.color = color;
+}
+});
+} catch (e) {}
+})();
+
+let todayLosers = JSON.parse(localStorage.getItem('losersTickersList') || '[]').slice(0, 5);
+const hasLosersPrices = localStorage.getItem('losersTickerPrices');
+
+if (!todayLosers.length) todayLosers = ['NKLA', 'WISH', 'CLOV', 'SPCE', 'HOOD'];
+console.log('Initial render with losers:', todayLosers);
+window.renderLosersTickers(todayLosers);
+
+// Load cached prices immediately - CRITICAL: Never show "--"
+(function() {
+const cached = localStorage.getItem('losersTickerPrices');
+if (!cached) return;
+try {
+const prices = JSON.parse(cached);
+Object.keys(prices).forEach(ticker => {
+const d = prices[ticker];
+const id = ticker.toLowerCase().replace(/[^a-z0-9]/g, '');
+const name = document.getElementById(`loser-name-${id}`);
+const price = document.getElementById(`loser-price-${id}`);
+const change = document.getElementById(`loser-change-${id}`);
+if (name) name.textContent = d.name || ticker;
+if (price) price.textContent = typeof d.price === 'number' ? d.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : d.price;
+if (change) {
+const sign = d.changePercent >= 0 ? '+' : '';
+change.textContent = `${sign}${d.change.toFixed(2)} (${sign}${d.changePercent.toFixed(2)}%)`;
+change.style.color = '#ef4444';
+}
+});
+} catch (e) {}
+})();
+</script>
+
+<div style="border-top: 2px solid var(--border-color); padding-top: 20px; margin-top: 20px;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+<h3 style="color: var(--text-primary); margin: 0; font-size: 1rem;">📰 Market News</h3>
+<a href="news.html" style="color: #007bff; text-decoration: none; font-size: 0.85rem;">View All →</a>
+</div>
+<div id="news-ticker" style="max-height: 375px; overflow-y: auto; position: relative; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch;">
+<style>
+#news-ticker::-webkit-scrollbar { display: none; }
+@media (max-width: 768px) {
+  #news-ticker { max-height: none !important; overflow-y: visible !important; }
+}
+</style>
+<div id="news-items" style="padding-bottom: 40px;">
+</div>
+</div>
+</div>
+</div>
+<style>
+@media (max-width: 768px) {
+#mobile-sidebar-toggle { display: flex !important; bottom: 90px; }
+body.no-cta-button #mobile-sidebar-toggle { bottom: 90px; }
+}
+@media (min-width: 769px) {
+#mobile-sidebar-toggle { display: none !important; }
+}
+</style>
+<script>
+// Set button position immediately based on userId to prevent flash
+(function() {
+const userId = localStorage.getItem('userId');
+if (userId && userId !== 'anonymous') {
+document.body.classList.add('no-cta-button');
+}
+})();
+</script>
+<button id="mobile-sidebar-toggle" onclick="toggleMobileSidebar()" style="position: fixed; right: 20px; background: #22c55e; color: white; border: none; border-radius: 50%; width: 56px; height: 56px; box-shadow: 0 4px 12px rgba(34,197,94,0.4); z-index: 9999; cursor: pointer; transition: bottom 0s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 16px rgba(34,197,94,0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(34,197,94,0.4)'">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<line x1="18" y1="20" x2="18" y2="10"></line>
+<line x1="12" y1="20" x2="12" y2="4"></line>
+<line x1="6" y1="20" x2="6" y2="14"></line>
+</svg>
+</button>
+
+<div id="mobile-sidebar-overlay" onclick="closeMobileSidebar()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; opacity: 0; transition: opacity 0.3s ease;"></div>
+
+<div id="mobile-sidebar-modal" style="display: none; position: fixed; top: 0; right: -100%; width: 90%; max-width: 400px; height: 100%; background: var(--card-bg); z-index: 10001; overflow-y: auto; -webkit-overflow-scrolling: touch; transition: right 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.3);">
+<div style="position: sticky; top: 0; background: var(--card-bg); padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; z-index: 1;">
+<h3 style="margin: 0; color: var(--text-primary);">Market Data</h3>
+<button onclick="closeMobileSidebar()" style="background: none; border: none; font-size: 28px; cursor: pointer; color: var(--text-primary);">×</button>
+</div>
+<div id="mobile-sidebar-content" style="padding: 15px;"></div>
+</div>
+<script src="mobile-sidebar.js?v=2"></script>
+
+<style>
+@media (max-width: 768px) {
+#quick-analysis-panel, #news-panel { display: none !important; }
+#mobile-sidebar-toggle { display: flex !important; bottom: 90px; }
+body.no-cta-button #mobile-sidebar-toggle { bottom: 90px; }
+}
+@media (min-width: 769px) {
+#mobile-sidebar-toggle { display: none !important; }
+}
+@media (max-width: 1400px) {
+#quick-analysis-panel, #news-panel { display: none; }
+}
+@media (min-width: 1401px) {
+body { padding-right: 350px; }
+#quick-analysis-panel, #news-panel { display: block !important; }
+}
+/* Make cloned content visible in modal */
+#mobile-sidebar-content #quick-analysis-panel,
+#mobile-sidebar-content #news-panel {
+display: block !important;
+position: static !important;
+width: 100% !important;
+}
+</style>
+<script>
+</script>
+<script>
+const newsTicker = document.getElementById('news-ticker');
+let isHovering = false;
+let scrollAmount = 0;
+const targetScroll = 90;
+const duration = 5000;
+const step = targetScroll / (duration / 50);
+
+function continuousScroll() {
+if (!isHovering && newsTicker) {
+scrollAmount += step;
+newsTicker.scrollTop += step;
+
+if (scrollAmount >= targetScroll) {
+scrollAmount = 0;
+}
+
+// Loop back to top when reaching bottom (with 5px threshold)
+if (newsTicker.scrollTop + newsTicker.clientHeight >= newsTicker.scrollHeight - 5) {
+newsTicker.scrollTop = 0;
+scrollAmount = 0;
+}
+}
+}
+
+if (newsTicker) {
+newsTicker.addEventListener('mouseenter', () => { isHovering = true; });
+newsTicker.addEventListener('mouseleave', () => { isHovering = false; });
+setInterval(continuousScroll, 50);
+}
+</script>
+
+<section class="market-overview-top" id="market-overview-section">
+<div class="indexes-grid">
+<div class="index-card" onclick="window.location.href='analysis.html?option=3&subOption=3&autorun=true'" style="cursor: pointer;" title="Run Screener">
+<div class="index-info">
+<h3>S&P 500</h3>
+<div class="index-value" id="sp500-value">Loading...</div>
+<div class="index-change" id="sp500-change">Loading...</div>
+<div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px; opacity: 0.8;">🔍 Run Screener</div>
+</div>
+<div class="index-chart">
+<svg width="60" height="30" viewBox="0 0 60 30" id="sp500-chart">
+<polyline points="0,15 8,12 16,18 24,20 32,22 40,24 48,26 56,28" stroke="#ef4444" stroke-width="2" fill="none"/>
+</svg>
+</div>
+</div>
+
+<div class="index-card" onclick="window.location.href='analysis.html?option=3&subOption=8&autorun=true'" style="cursor: pointer;" title="Run Screener">
+<div class="index-info">
+<h3>Dow Jones</h3>
+<div class="index-value" id="dow-value">Loading...</div>
+<div class="index-change" id="dow-change">Loading...</div>
+<div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px; opacity: 0.8;">🔍 Run Screener</div>
+</div>
+<div class="index-chart">
+<svg width="60" height="30" viewBox="0 0 60 30" id="dow-chart">
+<polyline points="0,15 8,12 16,18 24,20 32,22 40,24 48,26 56,28" stroke="#ef4444" stroke-width="2" fill="none"/>
+</svg>
+</div>
+</div>
+
+<div class="index-card" onclick="window.location.href='analysis.html?option=3&subOption=7&autorun=true'" style="cursor: pointer;" title="Run Screener">
+<div class="index-info">
+<h3>Nasdaq</h3>
+<div class="index-value" id="nasdaq-value">Loading...</div>
+<div class="index-change" id="nasdaq-change">Loading...</div>
+<div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px; opacity: 0.8;">🔍 Run Screener</div>
+</div>
+<div class="index-chart">
+<svg width="60" height="30" viewBox="0 0 60 30" id="nasdaq-chart">
+<polyline points="0,15 8,12 16,18 24,20 32,22 40,24 48,26 56,28" stroke="#ef4444" stroke-width="2" fill="none"/>
+</svg>
+</div>
+</div>
+
+<div class="index-card" onclick="window.location.href='analysis.html?option=3&subOption=6&autorun=true'" style="cursor: pointer;" title="Run Screener">
+<div class="index-info">
+<h3>Russell 2000</h3>
+<div class="index-value" id="russell-value">Loading...</div>
+<div class="index-change" id="russell-change">Loading...</div>
+<div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px; opacity: 0.8;">🔍 Run Screener</div>
+</div>
+<div class="index-chart">
+<svg width="60" height="30" viewBox="0 0 60 30" id="russell-chart">
+<polyline points="0,15 8,12 16,18 24,20 32,22 40,24 48,26 56,28" stroke="#ef4444" stroke-width="2" fill="none"/>
+</svg>
+</div>
+</div>
+</div>
+</section>
+
+
+
+
+<main>
+<div class="container" style="padding-top: 0px; margin-right: auto; margin-left: auto; margin-top: -15px;">
+<section class="search-section-main" style="margin-top: 20px;">
+<style>
+@media (max-width: 768px) {
+.search-section-main { margin-top: 0px !important; }
+}
+</style>
+<h1>AI-Powered Stock Market Analysis</h1>
+<div class="search-container">
+<div style="position: relative; flex: 1; display: flex;">
+<input type="text" id="stock-search" placeholder="Search for tickers or companies" class="search-input" aria-label="Enter stock symbol" style="flex: 1; padding-right: 35px;">
+<span id="stock-search-clear" onclick="document.getElementById('stock-search').value=''; this.style.display='none'; document.getElementById('home-symbol-suggestions').style.display='none';" style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-secondary); font-size: 20px; padding: 0 5px;">&times;</span>
+<div id="home-symbol-suggestions" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; margin-top: 4px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>
+</div>
+<button onclick="searchStock()" class="search-btn" id="search-btn"><script>document.write((localStorage.getItem('userId') && localStorage.getItem('userId') !== 'anonymous') ? 'Analyze Stock' : 'Run Free Analysis Now');</script></button>
+</div>
+
+</section>
+
+<section class="hero-section">
+<div class="hero-content">
+<p class="hero-title" style="font-size: 2rem; font-weight: 700; margin-bottom: 1rem;">Research tools for individual investors</p>
+<p class="hero-subtitle">Score a stock, ETF or coin and see every point behind the score. Rank a whole index in one run. Ask the AI chat what the data shows. Then try it out with $100,000 of practice money, by hand or with the AI autopilot (Beta). Free for 3 days, then from $4.99 a month.</p>
+<div class="hero-buttons">
+<a href="analysis.html?option=1" class="cta-primary">📊 Analyze a stock or ETF</a>
+<a href="analysis.html?option=3" class="cta-secondary">🇺🇸 US Stock Screener</a>
+<a href="#pricing" class="cta-secondary">View Pricing Plans</a>
+</div>
+</div>
+<div class="hero-stats">
+<div class="stat-item">
+<div class="stat-number">27</div>
+<div class="stat-label">Screeners: the Americas, Europe, Asia, Australia, crypto</div>
+</div>
+<div class="stat-item">
+<div class="stat-number">1,800+</div>
+<div class="stat-label">Stocks ranked in one run of the largest screener</div>
+</div>
+<div class="stat-item">
+<div class="stat-number">540</div>
+<div class="stat-label">Coins in the crypto screener</div>
+</div>
+<div class="stat-item">
+<div class="stat-number">$100,000</div>
+<div class="stat-label">Practice money (fake) with every account</div>
+</div>
+</div>
+</section>
+
+<section style="background: var(--bg-secondary); padding: 50px 30px; border-radius: 12px; margin: 40px 0;">
+<h2 style="text-align: center; color: var(--text-primary); margin-bottom: 30px; font-size: 1.8rem;">📚 Free Investment Guides</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+<a href="stock-analysis-guide.html" style="background: var(--card-bg); padding: 25px; border-radius: 8px; text-decoration: none; border: 1px solid var(--border-color); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+<div style="font-size: 2rem; margin-bottom: 10px;">📊</div>
+<h3 style="color: var(--text-primary); margin-bottom: 10px; font-size: 1.1rem;">Stock Analysis Guide</h3>
+<p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">Master fundamental and technical analysis techniques</p>
+</a>
+<a href="stock-screener-guide.html" style="background: var(--card-bg); padding: 25px; border-radius: 8px; text-decoration: none; border: 1px solid var(--border-color); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+<div style="font-size: 2rem; margin-bottom: 10px;">🔍</div>
+<h3 style="color: var(--text-primary); margin-bottom: 10px; font-size: 1.1rem;">Stock Screener Guide</h3>
+<p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">Filter and rank stocks with a transparent score</p>
+</a>
+<a href="technical-analysis-guide.html" style="background: var(--card-bg); padding: 25px; border-radius: 8px; text-decoration: none; border: 1px solid var(--border-color); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+<div style="font-size: 2rem; margin-bottom: 10px;">📈</div>
+<h3 style="color: var(--text-primary); margin-bottom: 10px; font-size: 1.1rem;">Technical Analysis Guide</h3>
+<p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">Read charts and identify trading signals</p>
+</a>
+<a href="investment-research-tools.html" style="background: var(--card-bg); padding: 25px; border-radius: 8px; text-decoration: none; border: 1px solid var(--border-color); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+<div style="font-size: 2rem; margin-bottom: 10px;">🛠️</div>
+<h3 style="color: var(--text-primary); margin-bottom: 10px; font-size: 1.1rem;">Investment Tools Guide</h3>
+<p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">Essential tools for serious investors</p>
+</a>
+</div>
+</section>
+
+<section class="social-proof-section" style="background: var(--bg-secondary); padding: 40px 30px; border-radius: 12px; margin: 40px 0; text-align: center;">
+<h2 style="color: var(--text-primary); margin-bottom: 30px; font-size: 1.8rem;">How StockIQ Works</h2>
+<div class="testimonials-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 30px;">
+<div class="testimonial" style="background: var(--card-bg); padding: 20px; border-radius: 8px; border-left: 4px solid #22c55e;">
+<div style="color: var(--text-primary); font-weight: 600; margin-bottom: 10px;">1. Enter a ticker or run a screener</div>
+<p style="color: var(--text-secondary); margin: 0;">Stocks, ETFs and coins. Single reports cover most major exchanges; screeners cover US, Canadian, Brazilian, UK, European, Asian and Australian indexes and 540 coins.</p>
+</div>
+<div class="testimonial" style="background: var(--card-bg); padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+<div style="color: var(--text-primary); font-weight: 600; margin-bottom: 10px;">2. Get a score that shows its working</div>
+<p style="color: var(--text-secondary); margin: 0;">A report scores a stock from 0 to 100 and lists every point added or taken off: trend, RSI, MACD, valuation, growth, debt and more. A screener ranks a whole list by 12 weighted price, momentum and volume factors.</p>
+</div>
+<div class="testimonial" style="background: var(--card-bg); padding: 20px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+<div style="color: var(--text-primary); font-weight: 600; margin-bottom: 10px;">3. Read it, ask about it, practise with it</div>
+<p style="color: var(--text-secondary); margin: 0;">A plain-English report says what is behind the score, the AI chat answers questions about the data, and the practice portfolio lets you try it with fake money. <a href="about.html" style="color: #007bff;">See how it works</a>.</p>
+</div>
+</div>
+<div class="trust-indicators" style="display: flex; justify-content: center; align-items: center; gap: 30px; flex-wrap: wrap; margin-top: 20px;">
+<div style="color: var(--text-secondary); font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+<span style="color: #22c55e; font-size: 1.2rem;">🔒</span>
+<span>Sign-in by AWS Cognito, payments by Stripe</span>
+</div>
+<div style="color: var(--text-secondary); font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+<span style="color: #3b82f6; font-size: 1.2rem;">📊</span>
+<span>Prices from Yahoo Finance and Finnhub (may be delayed)</span>
+</div>
+<div style="color: var(--text-secondary); font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+<span style="color: #f59e0b; font-size: 1.2rem;">🧾</span>
+<span>General information only, not financial advice</span>
+</div>
+</div>
+</section>
+
+<section id="features" style="margin: 40px 0;">
+<h2 style="text-align: center; color: var(--text-primary); margin-bottom: 10px; font-size: 1.8rem;">What you can do with StockIQ</h2>
+<p style="text-align: center; color: var(--text-secondary); margin: 0 auto 30px; font-size: 1.1rem; max-width: 760px;">Everything here describes what the data shows. Nothing here tells you what to buy or sell.</p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px;">
+<div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; text-align: left;">
+<div style="color: var(--text-primary); font-weight: 600; font-size: 1.05rem; margin-bottom: 8px;">🔍 A report on one stock, ETF or coin</div>
+<p style="color: var(--text-secondary); margin: 0; line-height: 1.55;">A score from 0 to 100 with every point explained, a price chart with its moving averages, support and resistance, company figures and the latest news, in the share&rsquo;s own currency.</p>
+</div>
+<div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; text-align: left;">
+<div style="color: var(--text-primary); font-weight: 600; font-size: 1.05rem; margin-bottom: 8px;">📋 Index screeners</div>
+<p style="color: var(--text-secondary); margin: 0; line-height: 1.55;">Rank a whole index in one run: Dow 30, S&amp;P 100, 500 and 1500, NASDAQ 100, Russell 1000 and 2000, TSX 60, ASX 50 to 300, FTSE 100, DAX 40, CAC 40, AEX, FTSE MIB, IBEX 35, SMI, Nikkei 225, Hang Seng, STI, Sensex, KOSPI 200 and Bovespa. Take the result away as a CSV file.</p>
+</div>
+<div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; text-align: left;">
+<div style="color: var(--text-primary); font-weight: 600; font-size: 1.05rem; margin-bottom: 8px;">📈 Trading signals</div>
+<p style="color: var(--text-secondary); margin: 0; line-height: 1.55;">A short-term technical reading (RSI, MACD, Bollinger bands) for up to 10 symbols, or the five strongest readings across the S&amp;P 100, each with its reasons.</p>
+</div>
+<div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; text-align: left;">
+<div style="color: var(--text-primary); font-weight: 600; font-size: 1.05rem; margin-bottom: 8px;">🪙 Crypto screener</div>
+<p style="color: var(--text-secondary); margin: 0; line-height: 1.55;">540 coins ranked by score, with how long each has been in the top 10 and what its price has done since.</p>
+</div>
+<div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; text-align: left;">
+<div style="color: var(--text-primary); font-weight: 600; font-size: 1.05rem; margin-bottom: 8px;">💬 AI chat</div>
+<p style="color: var(--text-secondary); margin: 0; line-height: 1.55;">Ask what the data shows for a stock, or how your own dashboard is doing. It explains and points you to the right place; it does not tell you what to buy or sell.</p>
+</div>
+<div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; text-align: left;">
+<div style="color: var(--text-primary); font-weight: 600; font-size: 1.05rem; margin-bottom: 8px;">💵 Practice portfolio</div>
+<p style="color: var(--text-secondary); margin: 0; line-height: 1.55;">Buy and sell with $100,000 of fake money, see today&rsquo;s change and a graph of the account, and compare it with an S&amp;P 500 index fund. Free with every account.</p>
+</div>
+<div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; text-align: left;">
+<div style="color: var(--text-primary); font-weight: 600; font-size: 1.05rem; margin-bottom: 8px;">🤖 AI autopilot (Beta)</div>
+<p style="color: var(--text-secondary); margin: 0; line-height: 1.55;">In every paid plan: it runs your practice portfolio from the screeners&rsquo; results by itself, says why it bought and sold each holding, and tests changes to its own rules. Fake money only.</p>
+</div>
+<div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; text-align: left;">
+<div style="color: var(--text-primary); font-weight: 600; font-size: 1.05rem; margin-bottom: 8px;">📁 Your dashboard</div>
+<p style="color: var(--text-secondary); margin: 0; line-height: 1.55;">Report history and favourites, background runs of the big screeners, and a bell that tells you when a report or a practice trade is in.</p>
+</div>
+</div>
+</section>
+
+<section id="pricing" style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 40px 30px; border-radius: 12px; margin: 40px 0; text-align: center;">
+<h2 style="margin-bottom: 10px; color: var(--text-primary);">Pricing</h2>
+<p style="margin: 0 auto 30px auto; max-width: 640px; color: var(--text-secondary);">Start with a free 3-day trial: 15 analyses, no credit card. After that, choose a monthly plan by how many analyses and screeners you run per day. Every account gets a practice portfolio: buy and sell with $100,000 of fake money and see how it goes. Paid plans add the AI autopilot (Beta), which runs that practice portfolio from the screeners' results by itself.</p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 20px; max-width: 860px; margin: 0 auto;">
+<div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 25px 20px;">
+<h3 style="margin: 0 0 8px 0; color: var(--text-primary);">Starter</h3>
+<div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);">$4.99<span style="font-size: 0.9rem; font-weight: 400; color: var(--text-secondary);"> / month</span></div>
+<p style="margin: 12px 0 0 0; color: var(--text-secondary);">15 analyses or screeners per day</p>
+<p style="margin: 8px 0 0 0; color: var(--text-secondary);">AI autopilot (Beta) for a practice portfolio (fake money)</p>
+</div>
+<div style="background: var(--bg-secondary); border: 2px solid #007bff; border-radius: 10px; padding: 25px 20px;">
+<h3 style="margin: 0 0 8px 0; color: var(--text-primary);">Pro</h3>
+<div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);">$14.99<span style="font-size: 0.9rem; font-weight: 400; color: var(--text-secondary);"> / month</span></div>
+<p style="margin: 12px 0 0 0; color: var(--text-secondary);">50 analyses or screeners per day</p>
+<p style="margin: 8px 0 0 0; color: var(--text-secondary);">AI autopilot (Beta) for a practice portfolio (fake money)</p>
+</div>
+<div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 25px 20px;">
+<h3 style="margin: 0 0 8px 0; color: var(--text-primary);">Elite</h3>
+<div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);">$49.99<span style="font-size: 0.9rem; font-weight: 400; color: var(--text-secondary);"> / month</span></div>
+<p style="margin: 12px 0 0 0; color: var(--text-secondary);">Unlimited analyses and screeners</p>
+<p style="margin: 8px 0 0 0; color: var(--text-secondary);">AI autopilot (Beta) for a practice portfolio (fake money)</p>
+</div>
+</div>
+<p style="margin: 25px 0 20px 0; font-size: 0.9rem; color: var(--text-secondary);">Prices in US dollars (USD), billed monthly through Stripe. Cancel anytime from your dashboard. The practice portfolio and the AI autopilot use fake money only: no real trade is placed, and nothing they show is financial advice. The AI autopilot is in beta: new, and still being tested and changed.</p>
+<a href="signup.html" style="display: inline-block; background: #007bff; color: white; padding: 12px 26px; border-radius: 6px; font-weight: 600; text-decoration: none;">Start Free Trial</a>
+</section>
+
+<section class="email-capture-section" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-left: 4px solid #3b82f6; border-right: 4px solid #3b82f6; padding: 40px 30px; border-radius: 12px; margin: 40px 0; text-align: center;">
+<h3 style="margin-bottom: 15px; font-size: 1.6rem; color: var(--text-primary);">📧 Get Screener Highlights by Email</h3>
+<p style="margin-bottom: 20px; font-size: 1.1rem; color: var(--text-secondary);">We're planning an email showing which stocks rank highest on our screeners. Join the early list and we'll send it to you when it starts.</p>
+
+<div style="display: flex; gap: 10px; max-width: 400px; margin: 0 auto; flex-wrap: wrap;">
+<input type="email" id="email-capture" placeholder="Enter your email address" style="flex: 1; min-width: 250px; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; background: var(--card-bg); color: var(--text-primary);">
+<button onclick="captureEmail()" style="background: #22c55e; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; white-space: nowrap;">Join the List</button>
+</div>
+<p style="margin-top: 15px; font-size: 0.85rem; color: var(--text-secondary);">No spam • Unsubscribe anytime • General information only, not financial advice</p>
+</section>
+
+<section style="margin: 40px 0;">
+<div style="text-align: center; padding: 30px; background: var(--bg-secondary); border-radius: 12px;">
+<h3 style="color: var(--text-primary); margin-bottom: 15px;">What StockIQ is, and what it is not</h3>
+<p style="color: var(--text-secondary); font-size: 1.05rem; line-height: 1.6; max-width: 820px; margin: 0 auto;">
+StockIQ works out scores, signals and rankings from prices, volume and published company figures, and <strong style="color: var(--text-primary);">shows its working</strong> in every report. It is general information, not financial advice, and StockIQ holds no financial services licence. Prices come from Yahoo Finance and Finnhub and can be delayed. A high score is not a forecast: past screener results have not shown a reliable edge over the market, and past performance does not indicate future results. <a href="about.html" style="color: #007bff;">How the scores are calculated</a>.
+</p>
+</div>
+</section>
+
+
+
+
+</div>
+</main>
+
+<footer class="footer">
+<p>&copy; 2026 StockIQ - Professional Investment Research Platform</p>
+<p style="font-size:0.8rem;opacity:0.8;max-width:800px;margin:8px auto 0;line-height:1.5;">General information only, not financial advice. Scores and signals are automated model outputs that do not take your personal circumstances into account, and past performance does not indicate future results. Market data comes from third parties (Yahoo Finance, Finnhub) and may be delayed or inaccurate.</p>
+<p>Powered by AI • Market Data • Comprehensive Analysis</p>
+<p>
+<a href="terms.html" style="color: #007bff; text-decoration: none;">Terms of Service</a> • 
+<a href="privacy-policy.html" style="color: #007bff; text-decoration: none;">Privacy Policy</a> • 
+<a href="refunds.html" style="color: #007bff; text-decoration: none;">Refund Policy</a> • 
+<a href="support.html" style="color: #007bff; text-decoration: none;">Support</a> • 
+<a href="contact.html" style="color: #007bff; text-decoration: none;">Contact</a> • 
+<a href="data-deletion.html" style="color: #007bff; text-decoration: none;">Data Deletion</a> • 
+<a href="news.html" style="color: #007bff; text-decoration: none;">News</a> • 
+            <a href="blog.html" style="color: #007bff; text-decoration: none;">Blog</a> • 
+<a href="about.html" style="color: #007bff; text-decoration: none;">About</a> • <a href="faq.html" style="color: #007bff; text-decoration: none;">FAQ</a>
+</p>
+<p style="margin-top: 15px;">
+<a href="https://instagram.com/stockiq.tech" target="_blank" rel="noopener noreferrer" style="color: #E4405F; text-decoration: none; font-size: 24px;" title="Follow us on Instagram">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+<path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+</svg>
+</a>
+</p>
+<div id="usage-counter" class="usage-counter">
+</div>
+</footer>
+
+<script>
+let activeDropdown = null;
+
+// Update top 4 cards from data
+function updateTopCardsFromData(usData) {
+const mapping = {
+'S&P 500': 'sp500',
+'Dow Jones': 'dow',
+'Nasdaq': 'nasdaq',
+'Russell 2000': 'russell'
+};
+
+Object.entries(mapping).forEach(([name, id]) => {
+const indexData = usData[name];
+if (!indexData) return;
+
+const valueText = indexData.value.toLocaleString('en-US', {
+minimumFractionDigits: 2,
+maximumFractionDigits: 2
+});
+document.getElementById(`${id}-value`).textContent = valueText;
+
+const changeEl = document.getElementById(`${id}-change`);
+const changeText = `${indexData.change >= 0 ? '+' : ''}${indexData.change.toFixed(2)} (${indexData.changePercent >= 0 ? '+' : ''}${indexData.changePercent.toFixed(2)}%)`;
+const className = `index-change ${indexData.change >= 0 ? 'positive' : 'negative'}`;
+changeEl.textContent = changeText;
+changeEl.className = className;
+
+if (!window.marketDataCache) window.marketDataCache = {};
+window.marketDataCache[id] = { value: valueText, change: changeText, className: className };
+
+const chart = document.getElementById(`${id}-chart`);
+const polyline = chart.querySelector('polyline');
+if (indexData.change >= 0) {
+polyline.setAttribute('stroke', '#22c55e');
+polyline.setAttribute('points', '0,28 8,26 16,24 24,20 32,18 40,15 48,12 56,8');
+} else {
+polyline.setAttribute('stroke', '#ef4444');
+polyline.setAttribute('points', '0,8 8,12 16,15 24,18 32,20 40,24 48,26 56,28');
+}
+polyline.style.display = 'block';
+});
+
+// Save cached data to localStorage
+if (window.marketDataCache) {
+localStorage.setItem('marketData', JSON.stringify(window.marketDataCache));
+}
+}
+
+// Fetch live market data
+async function fetchMarketData() {
+['sp500', 'dow', 'nasdaq', 'russell'].forEach(id => {
+const chart = document.getElementById(`${id}-chart`);
+const polyline = chart.querySelector('polyline');
+polyline.style.display = 'none';
+});
+
+// First try to use sidebar's cached data for consistency
+const sidebarData = localStorage.getItem('marketDataSidebar');
+if (sidebarData) {
+try {
+const parsed = JSON.parse(sidebarData);
+if (parsed.us) {
+updateTopCardsFromData(parsed.us);
+return; // Use sidebar data and exit
+}
+} catch (e) {}
+}
+
+try {
+const response = await fetch('https://xqma6tuoaeb5nd32gpdyk5uonm0yvgiy.lambda-url.us-east-1.on.aws/');
+const result = await response.json();
+
+if (result.us) {
+updateTopCardsFromData(result.us);
+} else {
+console.error('Market data API failed:', result.error);
+// Show text data but keep charts hidden
+const fallbackData = {
+sp500: { price: 4783.45, change: 12.34, changePercent: 0.26 },
+dow: { price: 37863.80, change: 156.89, changePercent: 0.42 },
+nasdaq: { price: 15310.97, change: -45.12, changePercent: -0.29 },
+russell: { price: 2089.17, change: 8.45, changePercent: 0.41 }
+};
+
+Object.keys(fallbackData).forEach(id => {
+const data = fallbackData[id];
+document.getElementById(`${id}-value`).textContent = data.price.toLocaleString('en-US', {
+minimumFractionDigits: 2,
+maximumFractionDigits: 2
+});
+const changeEl = document.getElementById(`${id}-change`);
+const changeText = `${data.change >= 0 ? '+' : ''}${data.change} (${data.changePercent >= 0 ? '+' : ''}${data.changePercent}%)`;
+changeEl.textContent = changeText;
+changeEl.className = `index-change ${data.change >= 0 ? 'positive' : 'negative'}`;
+// Charts remain hidden for fallback data
+});
+}
+} catch (error) {
+console.error('Market data fetch failed:', error);
+// Show text data but keep charts hidden
+const fallbackData = {
+sp500: { price: 4783.45, change: 12.34, changePercent: 0.26 },
+dow: { price: 37863.80, change: 156.89, changePercent: 0.42 },
+nasdaq: { price: 15310.97, change: -45.12, changePercent: -0.29 },
+russell: { price: 2089.17, change: 8.45, changePercent: 0.41 }
+};
+
+Object.keys(fallbackData).forEach(id => {
+const data = fallbackData[id];
+document.getElementById(`${id}-value`).textContent = data.price.toLocaleString('en-US', {
+minimumFractionDigits: 2,
+maximumFractionDigits: 2
+});
+const changeEl = document.getElementById(`${id}-change`);
+const changeText = `${data.change >= 0 ? '+' : ''}${data.change} (${data.changePercent >= 0 ? '+' : ''}${data.changePercent}%)`;
+changeEl.textContent = changeText;
+changeEl.className = `index-change ${data.change >= 0 ? 'positive' : 'negative'}`;
+// Charts remain hidden for fallback data
+});
+}
+}
+
+async function fetchTrendingTickers(forceRefresh = false) {
+console.log('🔄 fetchTrendingTickers called, forceRefresh:', forceRefresh);
+const lastFetch = localStorage.getItem('trendingTickersLastFetchTime');
+const now = Date.now();
+const shouldFetch = forceRefresh || !lastFetch || (now - parseInt(lastFetch)) >= 10 * 1000;
+console.log('⏱️ shouldFetch:', shouldFetch, 'lastFetch:', lastFetch ? new Date(parseInt(lastFetch)).toLocaleTimeString() : 'never');
+
+let todayTickers = JSON.parse(localStorage.getItem('trendingTickersList') || '[]').slice(0, 5);
+if (!todayTickers.length) todayTickers = ['NVDA', 'TSLA', 'AAPL', 'MSFT', 'GOOGL'];
+
+// ALWAYS load cache first
+const cachedPrices = localStorage.getItem('trendingTickerPrices');
+if (cachedPrices) {
+console.log('📦 Loading cached trending prices');
+try {
+const priceData = JSON.parse(cachedPrices);
+Object.keys(priceData).forEach(ticker => {
+const data = priceData[ticker];
+const tickerId = ticker.toLowerCase().replace(/[^a-z0-9]/g, '');
+const nameElem = document.getElementById(`trend-name-${tickerId}`);
+const priceElem = document.getElementById(`trend-price-${tickerId}`);
+const changeElem = document.getElementById(`trend-change-${tickerId}`);
+if (nameElem) nameElem.textContent = data.name || ticker;
+if (priceElem) priceElem.textContent = typeof data.price === 'number' ? data.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : data.price;
+if (changeElem) {
+const changeSign = data.changePercent >= 0 ? '+' : '';
+changeElem.textContent = `${changeSign}${data.change.toFixed(2)} (${changeSign}${data.changePercent.toFixed(2)}%)`;
+changeElem.style.color = data.changePercent >= 0 ? '#22c55e' : '#ef4444';
+}
+});
+} catch (e) {}
+}
+
+if (document.hidden) {
+console.log('⏸️ Page hidden, skipping fetch');
+return;
+}
+if (!shouldFetch) {
+console.log('⏭️ Skipping fetch (recent data)');
+return;
+}
+
+console.log('🌐 Fetching fresh trending data...');
+localStorage.setItem('trendingTickersLastFetchTime', Date.now().toString());
+
+// Always check for new ticker list (lightweight call)
+try {
+const trendResponse = await fetch('https://iz6jpzev3ty4q37anieqnckkxa0skisc.lambda-url.us-east-1.on.aws/?t=' + Date.now());
+const trendResult = await trendResponse.json();
+if (trendResult.success && trendResult.tickers) {
+const newTickers = trendResult.tickers.slice(0, 5);
+if (JSON.stringify(newTickers) !== JSON.stringify(todayTickers)) {
+console.log('Ticker list changed! Fetching prices first:', newTickers);
+// Fetch prices FIRST before updating DOM
+const priceResponse = await fetch('https://2vl4la6od3vfgbkv6ycbj7ewry0yxvck.lambda-url.us-east-1.on.aws/', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({tickers: newTickers})
+});
+const priceResult = await priceResponse.json();
+if (priceResult.success && priceResult.data) {
+// Cache prices BEFORE updating ticker list
+const priceCache = {};
+Object.keys(priceResult.data).forEach(ticker => {
+const data = priceResult.data[ticker];
+if (!data.error) {
+priceCache[ticker] = {name: data.name || ticker, price: data.price, change: data.change, changePercent: data.changePercent};
+}
+});
+localStorage.setItem('trendingTickerPrices', JSON.stringify(priceCache));
+}
+// NOW update ticker list and re-render with cached prices
+todayTickers = newTickers;
+localStorage.setItem('trendingTickersList', JSON.stringify(trendResult.tickers));
+localStorage.setItem('tickerPricesLastFetchTime', Date.now().toString());
+if (window.renderTrendingTickers) window.renderTrendingTickers(todayTickers);
+}
+}
+} catch (e) {
+console.error('Failed to fetch trending ticker list:', e);
+}
+
+// Fetch fresh prices using POST to support futures symbols
+if (todayTickers.length === 0) return;
+
+try {
+const response = await fetch('https://2vl4la6od3vfgbkv6ycbj7ewry0yxvck.lambda-url.us-east-1.on.aws/', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({tickers: todayTickers})
+});
+const result = await response.json();
+
+if (result.success && result.data) {
+const priceCache = {};
+Object.keys(result.data).forEach(ticker => {
+const data = result.data[ticker];
+if (!data.error) {
+const randomDelay = (0 + Math.random() * 20) * 1000;
+setTimeout(() => {
+// Read cache inside setTimeout to get most recent values
+const oldCache = JSON.parse(localStorage.getItem('trendingTickerPrices') || '{}');
+const changeSign = data.changePercent >= 0 ? '+' : '';
+const color = data.changePercent >= 0 ? '#22c55e' : '#ef4444';
+const tickerId = ticker.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+const nameElem = document.getElementById(`trend-name-${tickerId}`);
+const priceElem = document.getElementById(`trend-price-${tickerId}`);
+const changeElem = document.getElementById(`trend-change-${tickerId}`);
+
+const oldPrice = oldCache[ticker]?.price;
+const newPrice = data.price;
+const priceChanged = oldPrice && oldPrice !== newPrice;
+
+if (nameElem) nameElem.textContent = data.name || ticker;
+if (priceElem) {
+priceElem.textContent = data.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+if (priceChanged) {
+const flashClass = newPrice > oldPrice ? 'price-updated-green' : 'price-updated-red';
+priceElem.classList.remove('price-updated-green', 'price-updated-red');
+void priceElem.offsetWidth;
+priceElem.classList.add(flashClass);
+if (changeElem) {
+changeElem.classList.remove('price-updated-green', 'price-updated-red');
+void changeElem.offsetWidth;
+changeElem.classList.add(flashClass);
+}
+}
+}
+if (changeElem) {
+changeElem.textContent = `${changeSign}${data.change.toFixed(2)} (${changeSign}${data.changePercent.toFixed(2)}%)`;
+changeElem.style.color = color;
+}
+// Update cache after DOM update
+oldCache[ticker] = {name: data.name || ticker, price: data.price, change: data.change, changePercent: data.changePercent};
+localStorage.setItem('trendingTickerPrices', JSON.stringify(oldCache));
+}, randomDelay);
+}
+});
+// Update last fetch time after scheduling all updates
+localStorage.setItem('trendingTickersLastFetchTime', Date.now().toString());
+}
+} catch (error) {
+console.error('Failed to fetch trending tickers:', error);
+}
+}
+
+async function fetchTopGainers(forceRefresh = false) {
+const isFirstFetch = !window.gainersFirstFetch;
+if (isFirstFetch) window.gainersFirstFetch = true;
+
+console.log('🔄 fetchTopGainers called, forceRefresh:', forceRefresh);
+const lastFetch = localStorage.getItem('gainersLastFetchTime');
+const now = Date.now();
+const shouldFetch = forceRefresh || !lastFetch || (now - parseInt(lastFetch)) >= 10 * 1000;
+console.log('⏱️ shouldFetch:', shouldFetch, 'lastFetch:', lastFetch ? new Date(parseInt(lastFetch)).toLocaleTimeString() : 'never');
+
+let todayGainers = JSON.parse(localStorage.getItem('gainersTickersList') || '[]').slice(0, 5);
+if (!todayGainers.length) todayGainers = ['NVDA', 'TSLA', 'AAPL', 'MSFT', 'GOOGL'];
+
+// ALWAYS load cache first
+const cachedPrices = localStorage.getItem('gainersTickerPrices');
+if (cachedPrices) {
+console.log('📦 Loading cached gainers prices');
+try {
+const priceData = JSON.parse(cachedPrices);
+Object.keys(priceData).forEach(ticker => {
+const data = priceData[ticker];
+const tickerId = ticker.toLowerCase().replace(/[^a-z0-9]/g, '');
+const nameElem = document.getElementById(`gainer-name-${tickerId}`);
+const priceElem = document.getElementById(`gainer-price-${tickerId}`);
+const changeElem = document.getElementById(`gainer-change-${tickerId}`);
+if (nameElem) nameElem.textContent = data.name || ticker;
+if (priceElem) priceElem.textContent = typeof data.price === 'number' ? data.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : data.price;
+if (changeElem) {
+const changeSign = data.changePercent >= 0 ? '+' : '';
+changeElem.textContent = `${changeSign}${data.change.toFixed(2)} (${changeSign}${data.changePercent.toFixed(2)}%)`;
+changeElem.style.color = '#22c55e';
+}
+});
+} catch (e) {}
+}
+
+if (document.hidden) return;
+if (!shouldFetch) return;
+
+// Always check for new gainer list (lightweight call)
+try {
+const gainerResponse = await fetch('https://hfya2wu77mjszyffeeqzvzhjh40iywvz.lambda-url.us-east-1.on.aws/?t=' + Date.now());
+const gainerResult = await gainerResponse.json();
+if (gainerResult.success && gainerResult.tickers) {
+const newGainers = gainerResult.tickers.slice(0, 5);
+if (JSON.stringify(newGainers) !== JSON.stringify(todayGainers)) {
+console.log('Gainers list changed! Fetching prices first:', newGainers);
+// Fetch prices FIRST before updating DOM
+const priceResponse = await fetch('https://2vl4la6od3vfgbkv6ycbj7ewry0yxvck.lambda-url.us-east-1.on.aws/', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({tickers: newGainers})
+});
+const priceResult = await priceResponse.json();
+if (priceResult.success && priceResult.data) {
+// Cache prices BEFORE updating ticker list
+const priceCache = {};
+Object.keys(priceResult.data).forEach(ticker => {
+const data = priceResult.data[ticker];
+if (!data.error) {
+priceCache[ticker] = {name: data.name || ticker, price: data.price, change: data.change, changePercent: data.changePercent};
+}
+});
+localStorage.setItem('gainersTickerPrices', JSON.stringify(priceCache));
+}
+// NOW update ticker list and re-render with cached prices
+todayGainers = newGainers;
+localStorage.setItem('gainersTickersList', JSON.stringify(gainerResult.tickers));
+localStorage.setItem('gainersLastFetchTime', Date.now().toString());
+if (window.renderGainersTickers) window.renderGainersTickers(todayGainers);
+}
+}
+} catch (e) {
+console.error('Failed to fetch top gainers list:', e);
+}
+
+// Always fetch fresh prices on page load
+
+// Fetch fresh prices using existing ticker-data-fetcher Lambda
+if (todayGainers.length === 0) return;
+
+try {
+const response = await fetch('https://2vl4la6od3vfgbkv6ycbj7ewry0yxvck.lambda-url.us-east-1.on.aws/', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({tickers: todayGainers})
+});
+const result = await response.json();
+
+if (result.success && result.data) {
+const priceCache = {};
+Object.keys(result.data).forEach(ticker => {
+const data = result.data[ticker];
+if (!data.error) {
+const randomDelay = (0 + Math.random() * 20) * 1000;
+setTimeout(() => {
+// Read cache inside setTimeout to get most recent values
+const oldCache = JSON.parse(localStorage.getItem('gainersTickerPrices') || '{}');
+const changeSign = data.changePercent >= 0 ? '+' : '';
+const color = data.changePercent >= 0 ? '#22c55e' : '#ef4444';
+const tickerId = ticker.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+const nameElem = document.getElementById(`gainer-name-${tickerId}`);
+const priceElem = document.getElementById(`gainer-price-${tickerId}`);
+const changeElem = document.getElementById(`gainer-change-${tickerId}`);
+
+const oldPrice = oldCache[ticker]?.price;
+const newPrice = data.price;
+const priceChanged = oldPrice && oldPrice !== newPrice;
+
+if (nameElem) nameElem.textContent = data.name || ticker;
+if (priceElem) {
+priceElem.textContent = data.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+if (priceChanged) {
+const flashClass = newPrice > oldPrice ? 'price-updated-green' : 'price-updated-red';
+priceElem.classList.remove('price-updated-green', 'price-updated-red');
+void priceElem.offsetWidth;
+priceElem.classList.add(flashClass);
+if (changeElem) {
+changeElem.classList.remove('price-updated-green', 'price-updated-red');
+void changeElem.offsetWidth;
+changeElem.classList.add(flashClass);
+}
+}
+}
+if (changeElem) {
+changeElem.textContent = `${changeSign}${data.change.toFixed(2)} (${changeSign}${data.changePercent.toFixed(2)}%)`;
+changeElem.style.color = color;
+}
+// Update cache after DOM update
+oldCache[ticker] = {name: data.name || ticker, price: data.price, change: data.change, changePercent: data.changePercent};
+localStorage.setItem('gainersTickerPrices', JSON.stringify(oldCache));
+}, randomDelay);
+}
+});
+// Update last fetch time after scheduling all updates
+localStorage.setItem('gainersLastFetchTime', Date.now().toString());
+}
+} catch (error) {
+console.error('Failed to fetch top gainers prices:', error);
+}
+}
+
+async function fetchTopLosers(forceRefresh = false) {
+const isFirstFetch = !window.losersFirstFetch;
+if (isFirstFetch) window.losersFirstFetch = true;
+
+console.log('🔄 fetchTopLosers called, forceRefresh:', forceRefresh);
+const lastFetch = localStorage.getItem('losersLastFetchTime');
+const now = Date.now();
+const shouldFetch = forceRefresh || !lastFetch || (now - parseInt(lastFetch)) >= 10 * 1000;
+console.log('⏱️ shouldFetch:', shouldFetch, 'lastFetch:', lastFetch ? new Date(parseInt(lastFetch)).toLocaleTimeString() : 'never');
+
+let todayLosers = JSON.parse(localStorage.getItem('losersTickersList') || '[]').slice(0, 5);
+if (!todayLosers.length) todayLosers = ['NKLA', 'WISH', 'CLOV', 'SPCE', 'HOOD'];
+
+// ALWAYS load cache first
+const cachedPrices = localStorage.getItem('losersTickerPrices');
+if (cachedPrices) {
+console.log('📦 Loading cached losers prices');
+try {
+const priceData = JSON.parse(cachedPrices);
+Object.keys(priceData).forEach(ticker => {
+const data = priceData[ticker];
+const tickerId = ticker.toLowerCase().replace(/[^a-z0-9]/g, '');
+const nameElem = document.getElementById(`loser-name-${tickerId}`);
+const priceElem = document.getElementById(`loser-price-${tickerId}`);
+const changeElem = document.getElementById(`loser-change-${tickerId}`);
+if (nameElem) nameElem.textContent = data.name || ticker;
+if (priceElem) priceElem.textContent = typeof data.price === 'number' ? data.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : data.price;
+if (changeElem) {
+const changeSign = data.changePercent >= 0 ? '+' : '';
+changeElem.textContent = `${changeSign}${data.change.toFixed(2)} (${changeSign}${data.changePercent.toFixed(2)}%)`;
+changeElem.style.color = '#ef4444';
+}
+});
+} catch (e) {}
+}
+
+if (document.hidden) return;
+if (!shouldFetch) return;
+
+try {
+const loserResponse = await fetch('https://dzzudu2sf6b2yh7j4utknjn33i0mhahj.lambda-url.us-east-1.on.aws/?t=' + Date.now());
+const loserResult = await loserResponse.json();
+if (loserResult.success && loserResult.tickers) {
+const newLosers = loserResult.tickers.slice(0, 5);
+if (JSON.stringify(newLosers) !== JSON.stringify(todayLosers)) {
+console.log('Losers list changed! Fetching prices first:', newLosers);
+// Fetch prices FIRST before updating DOM
+const priceResponse = await fetch('https://2vl4la6od3vfgbkv6ycbj7ewry0yxvck.lambda-url.us-east-1.on.aws/', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({tickers: newLosers})
+});
+const priceResult = await priceResponse.json();
+if (priceResult.success && priceResult.data) {
+// Cache prices BEFORE updating ticker list
+const priceCache = {};
+Object.keys(priceResult.data).forEach(ticker => {
+const data = priceResult.data[ticker];
+if (!data.error) {
+priceCache[ticker] = {name: data.name || ticker, price: data.price, change: data.change, changePercent: data.changePercent};
+}
+});
+localStorage.setItem('losersTickerPrices', JSON.stringify(priceCache));
+}
+// NOW update ticker list and re-render with cached prices
+todayLosers = newLosers;
+localStorage.setItem('losersTickersList', JSON.stringify(loserResult.tickers));
+localStorage.setItem('losersLastFetchTime', Date.now().toString());
+if (window.renderLosersTickers) window.renderLosersTickers(todayLosers);
+}
+}
+} catch (e) {
+console.error('Failed to fetch top losers list:', e);
+}
+
+// Always fetch fresh prices on page load
+
+if (todayLosers.length === 0) return;
+
+try {
+const response = await fetch('https://2vl4la6od3vfgbkv6ycbj7ewry0yxvck.lambda-url.us-east-1.on.aws/', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({tickers: todayLosers})
+});
+const result = await response.json();
+
+if (result.success && result.data) {
+const priceCache = {};
+Object.keys(result.data).forEach(ticker => {
+const data = result.data[ticker];
+if (!data.error) {
+const randomDelay = (0 + Math.random() * 20) * 1000;
+setTimeout(() => {
+// Read cache inside setTimeout to get most recent values
+const oldCache = JSON.parse(localStorage.getItem('losersTickerPrices') || '{}');
+const changeSign = data.changePercent >= 0 ? '+' : '';
+const color = data.changePercent >= 0 ? '#22c55e' : '#ef4444';
+const tickerId = ticker.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+const nameElem = document.getElementById(`loser-name-${tickerId}`);
+const priceElem = document.getElementById(`loser-price-${tickerId}`);
+const changeElem = document.getElementById(`loser-change-${tickerId}`);
+
+const oldPrice = oldCache[ticker]?.price;
+const newPrice = data.price;
+const priceChanged = oldPrice && oldPrice !== newPrice;
+
+if (nameElem) nameElem.textContent = data.name || ticker;
+if (priceElem) {
+priceElem.textContent = data.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+if (priceChanged) {
+const flashClass = newPrice > oldPrice ? 'price-updated-green' : 'price-updated-red';
+priceElem.classList.remove('price-updated-green', 'price-updated-red');
+void priceElem.offsetWidth;
+priceElem.classList.add(flashClass);
+if (changeElem) {
+changeElem.classList.remove('price-updated-green', 'price-updated-red');
+void changeElem.offsetWidth;
+changeElem.classList.add(flashClass);
+}
+}
+}
+if (changeElem) {
+changeElem.textContent = `${changeSign}${data.change.toFixed(2)} (${changeSign}${data.changePercent.toFixed(2)}%)`;
+changeElem.style.color = color;
+}
+// Update cache after DOM update
+oldCache[ticker] = {name: data.name || ticker, price: data.price, change: data.change, changePercent: data.changePercent};
+localStorage.setItem('losersTickerPrices', JSON.stringify(oldCache));
+}, randomDelay);
+}
+});
+// Update last fetch time after scheduling all updates
+localStorage.setItem('losersLastFetchTime', Date.now().toString());
+}
+} catch (error) {
+console.error('Failed to fetch top losers prices:', error);
+}
+}
+
+async function fetchMostActive(forceRefresh = false) {
+console.log('🔄 fetchMostActive called, forceRefresh:', forceRefresh);
+const lastFetch = localStorage.getItem('activeLastFetchTime');
+const now = Date.now();
+const shouldFetch = forceRefresh || !lastFetch || (now - parseInt(lastFetch)) >= 10 * 1000;
+console.log('⏱️ shouldFetch:', shouldFetch, 'lastFetch:', lastFetch ? new Date(parseInt(lastFetch)).toLocaleTimeString() : 'never');
+
+let todayActive = JSON.parse(localStorage.getItem('activeTickersList') || '[]').slice(0, 5);
+if (!todayActive.length) todayActive = ['AAPL', 'TSLA', 'NVDA', 'AMD', 'PLTR'];
+
+// ALWAYS load cache first
+const cachedPrices = localStorage.getItem('activeTickerPrices');
+if (cachedPrices) {
+console.log('📦 Loading cached active prices');
+try {
+const priceData = JSON.parse(cachedPrices);
+Object.keys(priceData).forEach(ticker => {
+const data = priceData[ticker];
+const tickerId = ticker.toLowerCase().replace(/[^a-z0-9]/g, '');
+const nameElem = document.getElementById(`active-name-${tickerId}`);
+const priceElem = document.getElementById(`active-price-${tickerId}`);
+const changeElem = document.getElementById(`active-change-${tickerId}`);
+if (nameElem) nameElem.textContent = data.name || ticker;
+if (priceElem) priceElem.textContent = typeof data.price === 'number' ? data.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : data.price;
+if (changeElem) {
+const changeSign = data.changePercent >= 0 ? '+' : '';
+const color = data.changePercent >= 0 ? '#22c55e' : '#ef4444';
+changeElem.textContent = `${changeSign}${data.change.toFixed(2)} (${changeSign}${data.changePercent.toFixed(2)}%)`;
+changeElem.style.color = color;
+}
+});
+} catch (e) {}
+}
+
+if (document.hidden) return;
+if (!shouldFetch) return;
+
+try {
+const activeResponse = await fetch('https://hd5z2yzvrksub43ihitf7ea3bq0opwxa.lambda-url.us-east-1.on.aws/?t=' + Date.now());
+const activeResult = await activeResponse.json();
+if (activeResult.success && activeResult.tickers) {
+const newActive = activeResult.tickers.slice(0, 5);
+if (JSON.stringify(newActive) !== JSON.stringify(todayActive)) {
+console.log('Active list changed! Fetching prices first:', newActive);
+// Fetch prices FIRST before updating DOM
+const priceResponse = await fetch('https://2vl4la6od3vfgbkv6ycbj7ewry0yxvck.lambda-url.us-east-1.on.aws/', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({tickers: newActive})
+});
+const priceResult = await priceResponse.json();
+if (priceResult.success && priceResult.data) {
+// Cache prices BEFORE updating ticker list
+const priceCache = {};
+Object.keys(priceResult.data).forEach(ticker => {
+const data = priceResult.data[ticker];
+if (!data.error) {
+priceCache[ticker] = {name: data.name || ticker, price: data.price, change: data.change, changePercent: data.changePercent};
+}
+});
+localStorage.setItem('activeTickerPrices', JSON.stringify(priceCache));
+}
+// NOW update ticker list and re-render with cached prices
+todayActive = newActive;
+localStorage.setItem('activeTickersList', JSON.stringify(activeResult.tickers));
+localStorage.setItem('activeLastFetchTime', Date.now().toString());
+if (window.renderActiveTickers) window.renderActiveTickers(todayActive, false);
+}
+}
+} catch (e) {}
+
+if (todayActive.length === 0) return;
+
+try {
+const response = await fetch('https://2vl4la6od3vfgbkv6ycbj7ewry0yxvck.lambda-url.us-east-1.on.aws/', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({tickers: todayActive})
+});
+const result = await response.json();
+if (result.success && result.data) {
+const priceCache = {};
+Object.keys(result.data).forEach(ticker => {
+const data = result.data[ticker];
+if (!data.error) {
+const oldCache = JSON.parse(localStorage.getItem('activeTickerPrices') || '{}');
+const hasCache = oldCache[ticker]?.price !== undefined;
+const randomDelay = hasCache ? (0 + Math.random() * 20) * 1000 : 0;
+setTimeout(() => {
+const changeSign = data.changePercent >= 0 ? '+' : '';
+const color = data.changePercent >= 0 ? '#22c55e' : '#ef4444';
+const tickerId = ticker.toLowerCase().replace(/[^a-z0-9]/g, '');
+const nameElem = document.getElementById(`active-name-${tickerId}`);
+const priceElem = document.getElementById(`active-price-${tickerId}`);
+const changeElem = document.getElementById(`active-change-${tickerId}`);
+
+const oldPrice = oldCache[ticker]?.price;
+const newPrice = data.price;
+const priceChanged = oldPrice && oldPrice !== newPrice;
+
+if (nameElem) nameElem.textContent = data.name || ticker;
+if (priceElem) {
+priceElem.textContent = data.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+if (priceChanged) {
+const flashClass = newPrice > oldPrice ? 'price-updated-green' : 'price-updated-red';
+priceElem.classList.remove('price-updated-green', 'price-updated-red');
+void priceElem.offsetWidth;
+priceElem.classList.add(flashClass);
+if (changeElem) {
+changeElem.classList.remove('price-updated-green', 'price-updated-red');
+void changeElem.offsetWidth;
+changeElem.classList.add(flashClass);
+}
+}
+}
+if (changeElem) {
+changeElem.textContent = `${changeSign}${data.change.toFixed(2)} (${changeSign}${data.changePercent.toFixed(2)}%)`;
+changeElem.style.color = color;
+}
+// Update cache after DOM update
+oldCache[ticker] = {name: data.name || ticker, price: data.price, change: data.change, changePercent: data.changePercent};
+localStorage.setItem('activeTickerPrices', JSON.stringify(oldCache));
+}, randomDelay);
+}
+});
+// Update last fetch time after scheduling all updates
+localStorage.setItem('activeLastFetchTime', Date.now().toString());
+}
+} catch (error) {}
+}
+
+// Add refresh functionality
+function refreshMarketData() {
+fetchMarketData();
+}
+
+// Load market data when page loads
+document.addEventListener('DOMContentLoaded', function() {
+// Load from sidebar cache first
+const sidebarCache = localStorage.getItem('marketDataSidebar');
+if (sidebarCache) {
+try {
+const parsed = JSON.parse(sidebarCache);
+if (parsed.us) {
+updateTopCardsFromData(parsed.us);
+}
+} catch (e) {}
+}
+// Then fetch fresh data
+fetchMarketData();
+// Load cached data immediately, then fetch fresh data
+fetchTrendingTickers(true);
+fetchTopGainers(true);
+fetchTopLosers(true);
+fetchMostActive(true);
+
+// Force auth check and UI update on page load
+if (typeof authManager !== 'undefined') {
+authManager.checkAuthStatus();
+}
+
+// Add refresh button click handler if it exists
+const refreshBtn = document.querySelector('.refresh-btn');
+if (refreshBtn) {
+refreshBtn.addEventListener('click', refreshMarketData);
+}
+
+// Auto-refresh each ticker section independently with staggered start times
+setTimeout(() => {
+setInterval(() => {
+const idleTime = Date.now() - lastActivity;
+const maxIdle = 10 * 60 * 1000;
+if (!document.hidden && idleTime < maxIdle) fetchTrendingTickers(false);
+}, 60 * 1000);   // once a minute (it was every second: about 14,000 calls an hour from one open tab)
+}, Math.random() * 10000);
+
+setTimeout(() => {
+setInterval(() => {
+const idleTime = Date.now() - lastActivity;
+const maxIdle = 10 * 60 * 1000;
+if (!document.hidden && idleTime < maxIdle) fetchTopGainers(false);
+}, 60 * 1000);   // once a minute (it was every second: about 14,000 calls an hour from one open tab)
+}, Math.random() * 10000);
+
+setTimeout(() => {
+setInterval(() => {
+const idleTime = Date.now() - lastActivity;
+const maxIdle = 10 * 60 * 1000;
+if (!document.hidden && idleTime < maxIdle) fetchTopLosers(false);
+}, 60 * 1000);   // once a minute (it was every second: about 14,000 calls an hour from one open tab)
+}, Math.random() * 10000);
+
+setTimeout(() => {
+setInterval(() => {
+const idleTime = Date.now() - lastActivity;
+const maxIdle = 10 * 60 * 1000;
+if (!document.hidden && idleTime < maxIdle) fetchMostActive(false);
+}, 60 * 1000);   // once a minute (it was every second: about 14,000 calls an hour from one open tab)
+}, Math.random() * 10000);
+
+
+});
+
+
+
+function showDropdown(dropdownId, event) {
+// Prevent dropdown from opening if clicking on home link
+if (event && event.target.closest('.home-link')) {
+return;
+}
+
+if (activeDropdown && activeDropdown !== dropdownId) {
+document.getElementById(activeDropdown).classList.remove('show');
+}
+
+const dropdown = document.getElementById(dropdownId);
+if (dropdown) {
+dropdown.classList.toggle('show');
+activeDropdown = dropdown.classList.contains('show') ? dropdownId : null;
+}
+}
+
+function toggleMobileMenu() {
+const menu = document.getElementById('mobile-menu');
+const overlay = document.getElementById('mobile-menu-overlay');
+const hamburger = document.querySelector('.hamburger-btn');
+
+menu.classList.toggle('open');
+overlay.classList.toggle('show');
+hamburger.classList.toggle('active');
+
+// Check if menu is now open after toggle
+if (menu.classList.contains('open')) {
+document.body.classList.add('menu-open');
+document.body.style.overflow = 'hidden';
+document.body.style.position = 'fixed';
+document.body.style.width = '100%';
+} else {
+document.body.classList.remove('menu-open');
+document.body.style.overflow = '';
+document.body.style.position = '';
+document.body.style.width = '';
+}
+}
+
+function closeMobileMenu() {
+document.getElementById('mobile-menu').classList.remove('open');
+document.getElementById('mobile-menu-overlay').classList.remove('show');
+document.querySelector('.hamburger-btn').classList.remove('active');
+document.body.classList.remove('menu-open');
+document.body.style.overflow = '';
+document.body.style.position = '';
+document.body.style.width = '';
+}
+
+function showLoginModal() {
+window.location.href = 'login.html';
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+if (!event.target.closest('.dropdown')) {
+if (activeDropdown) {
+const dropdown = document.getElementById(activeDropdown);
+if (dropdown) {
+dropdown.classList.remove('show');
+}
+activeDropdown = null;
+}
+}
+});
+
+function searchStock() {
+// Skip redirects for bots/crawlers
+if (typeof authManager !== 'undefined' && authManager.isBotOrCrawler()) {
+return;
+}
+
+const searchInput = document.getElementById('stock-search');
+const symbol = searchInput.value.trim().toUpperCase();
+
+if (!symbol) {
+alert('Please enter a stock symbol or company name');
+return;
+}
+
+window.location.href = `analysis.html?symbol=${encodeURIComponent(symbol)}&option=1&subOption=custom`;
+}
+
+async function runASXScreener() {
+const button = event.target;
+const originalText = button.textContent;
+
+try {
+button.textContent = '🔄 Running ASX Screener...';
+button.disabled = true;
+
+const response = await fetch('https://your-lambda-url.lambda-url.us-east-1.on.aws/', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify({
+universe_size: 'small' // Top 30 ASX stocks
+})
+});
+
+if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
+
+const data = await response.json();
+
+if (data.success) {
+displayASXResults(data.data);
+} else {
+throw new Error(data.error || 'Unknown error');
+}
+
+} catch (error) {
+console.error('ASX Screener error:', error);
+alert('ASX Screener failed: ' + error.message);
+} finally {
+button.textContent = originalText;
+button.disabled = false;
+}
+}
+
+function displayASXResults(data) {
+// Create results modal
+const modal = document.createElement('div');
+modal.style.cssText = `
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.8);
+z-index: 10000;
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 20px;
+`;
+
+const content = document.createElement('div');
+content.style.cssText = `
+background: white;
+border-radius: 10px;
+padding: 30px;
+max-width: 800px;
+max-height: 80vh;
+overflow-y: auto;
+position: relative;
+`;
+
+let html = `
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+<h2>🇦🇺 ASX Stock Screener Results</h2>
+<button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+</div>
+
+<div style="margin-bottom: 20px; padding: 15px; background: #f0f9ff; border-radius: 8px;">
+<h3>📊 Summary</h3>
+<p><strong>Universe:</strong> ${data.universe_name}</p>
+<p><strong>Stocks Analyzed:</strong> ${data.successful_analysis}/${data.total_stocks}</p>
+<p><strong>Processing Time:</strong> ${data.processing_time}s</p>
+<p><strong>Market Sentiment:</strong> ${data.summary.market_sentiment}</p>
+</div>
+
+<div style="margin-bottom: 20px;">
+<h3>🟢 Top Buy Opportunities</h3>
+<div style="overflow-x: auto;">
+<table style="width: 100%; border-collapse: collapse;">
+<thead>
+<tr style="background: #f8f9fa;">
+<th style="padding: 8px; border: 1px solid #ddd;">Symbol</th>
+<th style="padding: 8px; border: 1px solid #ddd;">Price</th>
+<th style="padding: 8px; border: 1px solid #ddd;">Daily %</th>
+<th style="padding: 8px; border: 1px solid #ddd;">YTD %</th>
+<th style="padding: 8px; border: 1px solid #ddd;">Score</th>
+<th style="padding: 8px; border: 1px solid #ddd;">RSI</th>
+</tr>
+</thead>
+<tbody>
+`;
+
+data.top_buys.forEach(stock => {
+const changeColor = stock.change_pct >= 0 ? '#22c55e' : '#ef4444';
+const ytdColor = stock.ytd_change >= 0 ? '#22c55e' : '#ef4444';
+
+html += `
+<tr>
+<td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">${stock.symbol}</td>
+<td style="padding: 8px; border: 1px solid #ddd;">$${stock.price}</td>
+<td style="padding: 8px; border: 1px solid #ddd; color: ${changeColor};">${stock.change_pct > 0 ? '+' : ''}${stock.change_pct}%</td>
+<td style="padding: 8px; border: 1px solid #ddd; color: ${ytdColor};">${stock.ytd_change > 0 ? '+' : ''}${stock.ytd_change}%</td>
+<td style="padding: 8px; border: 1px solid #ddd;">${stock.technical_score}</td>
+<td style="padding: 8px; border: 1px solid #ddd;">${stock.rsi || 'N/A'}</td>
+</tr>
+`;
+});
+
+html += `
+</tbody>
+</table>
+</div>
+</div>
+`;
+
+if (data.top_sells && data.top_sells.length > 0) {
+html += `
+<div>
+<h3>🔴 Stocks to Avoid</h3>
+<div style="overflow-x: auto;">
+<table style="width: 100%; border-collapse: collapse;">
+<thead>
+<tr style="background: #f8f9fa;">
+<th style="padding: 8px; border: 1px solid #ddd;">Symbol</th>
+<th style="padding: 8px; border: 1px solid #ddd;">Price</th>
+<th style="padding: 8px; border: 1px solid #ddd;">Daily %</th>
+<th style="padding: 8px; border: 1px solid #ddd;">YTD %</th>
+<th style="padding: 8px; border: 1px solid #ddd;">Score</th>
+</tr>
+</thead>
+<tbody>
+`;
+
+data.top_sells.forEach(stock => {
+const changeColor = stock.change_pct >= 0 ? '#22c55e' : '#ef4444';
+const ytdColor = stock.ytd_change >= 0 ? '#22c55e' : '#ef4444';
+
+html += `
+<tr>
+<td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">${stock.symbol}</td>
+<td style="padding: 8px; border: 1px solid #ddd;">$${stock.price}</td>
+<td style="padding: 8px; border: 1px solid #ddd; color: ${changeColor};">${stock.change_pct > 0 ? '+' : ''}${stock.change_pct}%</td>
+<td style="padding: 8px; border: 1px solid #ddd; color: ${ytdColor};">${stock.ytd_change > 0 ? '+' : ''}${stock.ytd_change}%</td>
+<td style="padding: 8px; border: 1px solid #ddd;">${stock.technical_score}</td>
+</tr>
+`;
+});
+
+html += `
+</tbody>
+</table>
+</div>
+</div>
+`;
+}
+
+content.innerHTML = html;
+modal.appendChild(content);
+modal.className = 'modal';
+document.body.appendChild(modal);
+
+// Close modal when clicking outside
+modal.addEventListener('click', (e) => {
+if (e.target === modal) {
+modal.remove();
+}
+});
+}
+
+// Usage counter functions
+async function getAnalysisCounter() {
+try {
+const response = await fetch('https://nwdlozuwzebth3lxjjd3tik62a0pebhw.lambda-url.us-east-1.on.aws/', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({action: 'get'})
+});
+
+if (response.ok) {
+const data = await response.json();
+return data.count || 0;
+}
+} catch (error) {
+console.warn('Failed to get analysis counter:', error);
+}
+return 0;
+}
+
+function updateCounterDisplay() {
+const counterElement = document.getElementById('usage-counter');
+if (counterElement) {
+getAnalysisCounter().then(count => {
+counterElement.textContent = `Analysis Executions: ${count}`;
+counterElement.classList.add('loaded');
+});
+}
+}
+
+function viewPricingPlans() {
+// Skip redirects for bots/crawlers
+if (typeof authManager !== 'undefined' && authManager.isBotOrCrawler()) {
+return;
+}
+
+const userId = localStorage.getItem('userId');
+if (userId && userId !== 'anonymous') {
+// Logged in user - redirect to dashboard and scroll to upgrade
+window.location.href = 'dashboard.html#upgrade';
+} else {
+// Not logged in - redirect to register page
+window.location.href = 'signup.html';
+}
+}
+
+// Email capture function
+function captureEmail() {
+const emailInput = document.getElementById('email-capture');
+const email = emailInput.value.trim();
+
+if (!email) {
+alert('Please enter your email address');
+return;
+}
+
+if (!isValidEmail(email)) {
+alert('Please enter a valid email address');
+return;
+}
+
+// Store email for later processing
+localStorage.setItem('marketAlertsEmail', email);
+
+// Show success message
+const button = event.target;
+const originalText = button.textContent;
+button.textContent = '✅ Subscribed!';
+button.style.background = '#22c55e';
+
+// Reset after 3 seconds
+setTimeout(() => {
+button.textContent = originalText;
+button.style.background = '#22c55e';
+emailInput.value = '';
+}, 3000);
+
+// Track the email capture event
+if (typeof gtag !== 'undefined') {
+gtag('event', 'email_capture', {
+'method': 'daily_alerts',
+'source': 'homepage'
+});
+}
+
+console.log('Email captured:', email);
+}
+
+// Email validation helper
+function isValidEmail(email) {
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+return emailRegex.test(email);
+}
+
+// Preloaded notification content
+let preloadedNotificationContent = '';
+let analysisHistory = [];
+
+// Set default content for logged-out users immediately
+if (!localStorage.getItem('userId') || localStorage.getItem('userId') === 'anonymous') {
+preloadedNotificationContent = `
+<div onclick="window.location.href='login.html'" style="padding: 15px; text-align: center; color: var(--text-secondary); cursor: pointer;">
+<p style="margin: 0 0 10px 0; font-size: 14px;">Please log in to view notifications</p>
+<a href="login.html" style="color: #007bff; text-decoration: none; font-size: 15px; font-weight: 600;">Login</a>
+</div>
+`;
+}
+
+async function preloadNotifications() {
+try {
+const userId = localStorage.getItem('userId') || 'anonymous';
+// Check cache first
+const cached = localStorage.getItem(`dashboardHistoryCache_${userId}`);
+const cacheInvalidated = localStorage.getItem('dashboardCacheInvalidated');
+const CACHE_DURATION = Infinity; // Cache indefinitely until invalidated
+
+if (cacheInvalidated) {
+// Cache was invalidated, fetch fresh and clear flag
+localStorage.removeItem('dashboardCacheInvalidated');
+localStorage.removeItem(`dashboardHistoryCache_${userId}`);
+await fetchNotifications();
+} else if (cached) {
+const parsedCache = JSON.parse(cached);
+if (Date.now() - parsedCache.timestamp < CACHE_DURATION) {
+analysisHistory = parsedCache.data.history || [];
+console.log('📊 Using cached notification data');
+} else {
+// Cache expired, fetch fresh
+await fetchNotifications();
+}
+} else {
+// No cache, fetch fresh
+await fetchNotifications();
+}
+
+async function fetchNotifications() {
+const userId = localStorage.getItem('userId') || 'anonymous';
+const response = await fetch('https://nwdjnlcbtj34ywy6sgawmwhcx40ologt.lambda-url.us-east-1.on.aws/?v=' + Date.now(), {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({
+action: 'get_history',
+userId: userId,
+showDeleted: false,
+limit: 50,
+offset: 0
+})
+});
+
+if (response.ok) {
+const data = await response.json();
+analysisHistory = data.history || [];
+console.log('📊 Fetched fresh notification data');
+}
+}
+
+// Generate preloaded content
+const unreadReports = JSON.parse(localStorage.getItem(`unreadReports_${localStorage.getItem('userId')}`) || '[]');
+const recentAnalyses = analysisHistory.slice(0, 10);
+
+let dropdownContent = `
+<div style="padding: 15px; border-bottom: 1px solid var(--border-color); background: var(--bg-secondary);">
+<h4 style="margin: 0; color: var(--text-primary); font-size: 14px;">📊 Recent Analysis Reports</h4>
+<p style="margin: 5px 0 0 0; color: var(--text-secondary); font-size: 12px;">${unreadReports.length} unread</p>
+</div>
+<div>
+`;
+
+if (recentAnalyses.length === 0) {
+dropdownContent += `
+<div style="padding: 20px; text-align: center; color: var(--text-secondary);">
+<p>No analysis reports yet</p>
+<a href="analysis.html" style="color: #007bff; text-decoration: none;">Start your first analysis</a>
+</div>
+`;
+} else {
+recentAnalyses.forEach(item => {
+const isUnread = unreadReports.includes(item.analysisId);
+const isDeleted = item.deleted;
+const bgColor = isUnread && !isDeleted ? 'var(--bg-secondary)' : 'var(--card-bg)';
+const hoverHandlers = isDeleted ? '' : `onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='${bgColor}'"`;                    
+
+dropdownContent += `
+<div onclick="${isDeleted ? '' : `viewAnalysisFromNotification('${item.analysisId}')`}" style="
+padding: 12px 15px;
+border-bottom: 1px solid var(--border-color);
+cursor: ${isDeleted ? 'default' : 'pointer'};
+background: ${bgColor};
+${isUnread && !isDeleted ? 'border-left: 3px solid #007bff;' : ''}
+" ${hoverHandlers}>
+<div style="display: flex; align-items: center; gap: 10px;">
+${isUnread && !isDeleted ? '<div style="width: 8px; height: 8px; background: #007bff; border-radius: 50%; flex-shrink: 0;"></div>' : '<div style="width: 8px;"></div>'}
+<div style="flex: 1; min-width: 0;">
+<div style="font-weight: ${isUnread && !isDeleted ? 'bold' : '500'}; color: var(--text-primary); font-size: 13px; margin-bottom: 2px;">
+${(item.companyName && item.companyName !== 'undefined') ? item.companyName : item.symbol} ${isDeleted ? '(Deleted)' : ''}
+</div>
+<div style="color: var(--text-secondary); font-size: 11px;">
+${formatDate(item.timestamp)}
+</div>
+</div>
+${!isDeleted ? `<button onclick="event.stopPropagation(); rerunFromNotification('${item.analysisId}')" style="background: none; border: 1px solid var(--border-color); border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 14px;" title="Rerun analysis">🔄</button>` : ''}
+</div>
+</div>
+`;
+});
+
+dropdownContent += `
+</div>
+<a href="dashboard.html" style="position: sticky; bottom: 0; padding: 15px; text-align: center; border-top: 1px solid var(--border-color); background: var(--bg-secondary); z-index: 10; display: block; color: #007bff; text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='var(--bg-secondary)'">View Dashboard</a>
+`;
+}
+
+preloadedNotificationContent = dropdownContent;
+
+// Update any open dropdown with new content
+const openDropdown = document.getElementById('notification-dropdown');
+if (openDropdown) {
+const scrollTop = openDropdown.scrollTop;
+openDropdown.innerHTML = preloadedNotificationContent;
+openDropdown.scrollTop = scrollTop;
+}
+} catch (error) {
+console.error('Failed to preload notifications:', error);
+preloadedNotificationContent = `
+<div style="padding: 20px; text-align: center; color: var(--text-secondary);">
+<p>Failed to load notifications</p>
+<a href="dashboard.html" style="color: #007bff; text-decoration: none;">View Dashboard</a>
+</div>
+`;
+}
+}
+
+function goToNotifications(event) {
+// Close any existing notification dropdown
+const existingDropdown = document.getElementById('notification-dropdown');
+if (existingDropdown) {
+existingDropdown.remove();
+return;
+}
+
+// Mark all current unread reports as seen by adding them to seenReports
+const unreadReports = JSON.parse(localStorage.getItem(`unreadReports_${localStorage.getItem('userId')}`) || '[]');
+const seenReports = JSON.parse(localStorage.getItem(`seenReports_${localStorage.getItem('userId')}`) || '[]');
+unreadReports.forEach(id => {
+if (!seenReports.includes(id)) seenReports.push(id);
+});
+localStorage.setItem(`seenReports_${localStorage.getItem('userId')}`, JSON.stringify(seenReports));
+updateNotificationBell();
+
+// Create notification dropdown
+const dropdown = document.createElement('div');
+dropdown.id = 'notification-dropdown';
+const isMobileBell = event?.currentTarget?.id === 'mobile-notification-bell';
+const isMobile = window.innerWidth <= 768;
+const userId = localStorage.getItem('userId');
+const isLoggedOut = !userId || userId === 'anonymous';
+
+dropdown.style.cssText = `
+position: ${isMobileBell ? 'fixed' : 'absolute'};
+top: ${isMobileBell ? '60px' : '100%'};
+${isMobileBell ? 'left: 50%; transform: translateX(-50%);' : 'right: 0;'}
+width: ${isMobile ? 'calc(100vw - 40px)' : (isLoggedOut ? '240px' : '350px')};
+max-width: ${isLoggedOut ? '240px' : '350px'};
+max-height: 400px;
+background: var(--card-bg);
+border: 1px solid var(--border-color);
+border-radius: 8px;
+box-shadow: 0 4px 20px #cccccc;
+z-index: 10000;
+overflow-y: auto;
+margin-top: 5px;
+`;
+
+// Use preloaded content or show loading spinner
+dropdown.innerHTML = preloadedNotificationContent || `
+<div style="padding: 40px; text-align: center; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; gap: 10px;">
+<div style="width: 30px; height: 30px; border: 3px solid var(--border-color); border-top-color: #007bff; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+</div>
+<style>
+@keyframes spin {
+to { transform: rotate(360deg); }
+}
+</style>
+`;
+
+// Invalidate cache and refresh notifications (only if logged in)
+if (userId && userId !== 'anonymous') {
+localStorage.setItem('dashboardCacheInvalidated', 'true');
+preloadNotifications();
+}
+
+// Position dropdown relative to bell (works for both desktop and mobile)
+const bell = event?.currentTarget || document.getElementById('notification-bell') || document.getElementById('mobile-notification-bell');
+if (bell) {
+if (isMobileBell) {
+document.body.appendChild(dropdown);
+} else {
+bell.style.position = 'relative';
+bell.appendChild(dropdown);
+}
+}
+
+// Close dropdown when clicking outside
+setTimeout(() => {
+document.addEventListener('click', function closeOnClickOutside(e) {
+if (!bell.contains(e.target)) {
+dropdown.remove();
+document.removeEventListener('click', closeOnClickOutside);
+}
+});
+}, 100);
+}
+
+function renderNotificationDropdown(dropdown, analysisHistory) {
+const unreadReports = JSON.parse(localStorage.getItem(`unreadReports_${localStorage.getItem('userId')}`) || '[]');
+const recentAnalyses = analysisHistory.slice(0, 10);
+
+let dropdownContent = `
+<div style="padding: 15px; border-bottom: 1px solid var(--border-color); background: var(--bg-secondary);">
+<h4 style="margin: 0; color: var(--text-primary); font-size: 14px;">📊 Recent Analysis Reports</h4>
+<p style="margin: 5px 0 0 0; color: var(--text-secondary); font-size: 12px;">${unreadReports.length} unread</p>
+</div>
+`;
+
+if (recentAnalyses.length === 0) {
+dropdownContent += `
+<div style="padding: 20px; text-align: center; color: var(--text-secondary);">
+<p>No analysis reports yet</p>
+<a href="analysis.html" style="color: #007bff; text-decoration: none;">Start your first analysis</a>
+</div>
+`;
+} else {
+recentAnalyses.forEach(item => {
+const isUnread = unreadReports.includes(item.analysisId);
+const isDeleted = item.deleted;
+
+const bgColor2 = isUnread && !isDeleted ? '#e3f2fd' : 'white';
+const hoverHandlers2 = isDeleted ? '' : `onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='${bgColor2}'"`;            
+
+dropdownContent += `
+<div onclick="${isDeleted ? '' : `viewAnalysisFromNotification('${item.analysisId}')`}" style="
+padding: 12px 15px;
+border-bottom: 1px solid var(--border-color);
+cursor: ${isDeleted ? 'default' : 'pointer'};
+background: ${bgColor2};
+" ${hoverHandlers2}>
+<div style="display: flex; align-items: center; gap: 10px;">
+${isUnread && !isDeleted ? '<div style="width: 8px; height: 8px; background: #007bff; border-radius: 50%; flex-shrink: 0;"></div>' : '<div style="width: 8px;"></div>'}
+<div style="flex: 1; min-width: 0;">
+<div style="font-weight: ${isUnread && !isDeleted ? '600' : '500'}; color: var(--text-primary); font-size: 13px; margin-bottom: 2px;">
+${(item.companyName && item.companyName !== 'undefined') ? item.companyName : item.symbol} ${isDeleted ? '(Deleted)' : ''}
+</div>
+<div style="color: var(--text-secondary); font-size: 11px;">
+${formatDate(item.timestamp)}
+</div>
+</div>
+${!isDeleted ? '<div style="color: var(--text-secondary); font-size: 11px;">👁️</div>' : ''}
+</div>
+</div>
+`;
+});
+
+dropdownContent += `
+<div style="padding: 12px 15px; text-align: center; border-top: 1px solid var(--border-color); background: var(--bg-secondary);">
+<a href="dashboard.html" style="color: #007bff; text-decoration: none; font-size: 12px;">View All Report History</a>
+</div>
+`;
+}
+
+dropdown.innerHTML = dropdownContent;
+}
+
+function updateNotificationBell() {
+const userId = localStorage.getItem('userId');
+if (!userId || userId === 'anonymous') return;
+
+let unreadReports = JSON.parse(localStorage.getItem(`unreadReports_${localStorage.getItem('userId')}`) || '[]');
+
+// Remove duplicates
+unreadReports = [...new Set(unreadReports)];
+localStorage.setItem(`unreadReports_${localStorage.getItem('userId')}`, JSON.stringify(unreadReports));
+
+const seenReports = JSON.parse(localStorage.getItem(`seenReports_${localStorage.getItem('userId')}`) || '[]');
+const bell = document.getElementById('notification-bell');
+const badge = document.getElementById('notification-badge');
+const mobileBell = document.getElementById('mobile-notification-bell');
+const mobileBadge = document.getElementById('mobile-notification-badge');
+
+const unseenCount = unreadReports.filter(id => !seenReports.includes(id)).length;
+
+if (bell) {
+bell.style.display = 'block';
+if (badge) {
+if (unseenCount > 0) {
+badge.style.display = 'flex';
+badge.textContent = unseenCount > 9 ? '9+' : unseenCount;
+} else {
+badge.style.display = 'none';
+}
+}
+}
+
+if (mobileBell) {
+mobileBell.style.display = 'block';
+if (mobileBadge) {
+if (unseenCount > 0) {
+mobileBadge.style.display = 'flex';
+mobileBadge.textContent = unseenCount > 9 ? '9+' : unseenCount;
+} else {
+mobileBadge.style.display = 'none';
+}
+}
+}
+}
+
+function formatDate(timestamp) {
+// Ensure timestamp is treated as UTC if no timezone specified
+let dateStr = timestamp;
+if (!timestamp.includes('Z') && !timestamp.includes('+') && !timestamp.includes('-', 10)) {
+dateStr = timestamp + 'Z';  // Add UTC indicator
+}
+return new Date(dateStr).toLocaleString(undefined, {
+year: 'numeric',
+month: 'short',
+day: 'numeric',
+hour: '2-digit',
+minute: '2-digit',
+hour12: true
+});
+}
+
+async function viewAnalysisFromNotification(analysisId) {
+// Prevent event from bubbling up and closing dropdown
+if (event) {
+event.stopPropagation();
+event.preventDefault();
+}
+
+// Mark as read immediately
+const unreadReports = JSON.parse(localStorage.getItem(`unreadReports_${localStorage.getItem('userId')}`) || '[]');
+if (unreadReports.includes(analysisId)) {
+const updatedUnread = unreadReports.filter(id => id !== analysisId);
+localStorage.setItem(`unreadReports_${localStorage.getItem('userId')}`, JSON.stringify(updatedUnread));
+
+// Add to seenReports to prevent re-marking as unread
+const seenReports = JSON.parse(localStorage.getItem(`seenReports_${localStorage.getItem('userId')}`) || '[]');
+if (!seenReports.includes(analysisId)) {
+seenReports.push(analysisId);
+localStorage.setItem(`seenReports_${localStorage.getItem('userId')}`, JSON.stringify(seenReports));
+}
+
+// Invalidate dashboard cache so it reflects the read status
+const userId = localStorage.getItem('userId');
+if (userId) {
+localStorage.removeItem(`dashboardCache_${userId}`);
+localStorage.removeItem(`dashboardCacheTimestamp_${userId}`);
+localStorage.removeItem(`notificationCache_${userId}`);
+localStorage.removeItem(`notificationCacheTimestamp_${userId}`);
+}
+
+// Reset bellSeen if all items are now read
+if (updatedUnread.length === 0) {
+localStorage.removeItem('bellSeen');
+}
+
+// Immediate visual update
+const clickedItem = event?.target?.closest('div[onclick*="viewAnalysisFromNotification"]');
+if (clickedItem) {
+clickedItem.style.background = 'var(--card-bg)';
+clickedItem.style.borderLeft = 'none';
+const blueDot = clickedItem.querySelector('div[style*="background: #007bff"]');
+if (blueDot) blueDot.style.display = 'none';
+const symbolText = clickedItem.querySelector('div[style*="font-weight"]');
+if (symbolText) symbolText.style.fontWeight = '500';
+}
+
+// Update notification bell badge count
+updateNotificationBell();
+preloadNotifications();
+}
+
+// Fetch and show analysis in modal
+try {
+const userId = localStorage.getItem('userId') || 'anonymous';
+const response = await fetch('https://nwdjnlcbtj34ywy6sgawmwhcx40ologt.lambda-url.us-east-1.on.aws/?v=' + Date.now(), {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({
+action: 'get_analysis',
+analysisId: analysisId,
+userId: userId
+})
+});
+
+if (response.ok) {
+const data = await response.json();
+showAnalysisModal(data.analysis);
+} else {
+alert('Analysis report not found or no longer available.');
+}
+} catch (error) {
+console.error('Error loading analysis:', error);
+alert('Error loading analysis report.');
+}
+}
+
+function showAnalysisModal(analysis) {
+const modal = document.createElement('div');
+modal.style.cssText = `
+position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+background: rgba(0,0,0,0.8); z-index: 10000; display: flex;
+align-items: center; justify-content: center; padding: 20px;
+overflow-x: hidden;
+`;
+
+const content = document.createElement('div');
+content.style.cssText = `
+background: var(--card-bg); border-radius: 10px; padding: 30px;
+max-width: 800px; max-height: 80vh; overflow-y: auto; overflow-x: hidden; position: relative;
+`;
+
+content.innerHTML = `
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+<h2 style="color: var(--text-primary);">${analysis.symbol} Analysis Report</h2>
+<button onclick="this.closest('.modal').remove(); document.body.classList.remove('menu-open'); document.body.style.overflow = ''; document.body.style.position = ''; document.body.style.width = ''; document.body.style.height = '';" 
+style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-primary);">×</button>
+</div>
+<div style="white-space: pre-wrap; font-family: monospace; font-size: 14px; color: var(--text-primary); word-wrap: break-word; overflow-wrap: break-word; max-width: 100%;">
+${analysis.report}
+</div>
+`;
+
+modal.appendChild(content);
+modal.className = 'modal';
+document.body.appendChild(modal);
+
+// Lock body scroll
+document.body.classList.add('menu-open');
+document.body.style.overflow = 'hidden';
+document.body.style.position = 'fixed';
+document.body.style.width = '100%';
+document.body.style.height = '100vh';
+
+modal.addEventListener('click', (e) => {
+if (e.target === modal) {
+modal.remove();
+document.body.classList.remove('menu-open');
+document.body.style.overflow = '';
+document.body.style.position = '';
+document.body.style.width = '';
+document.body.style.height = '';
+}
+});
+}
+
+function getRerunUrl(item, timestamp) {
+const companyName = item.companyName || '';
+const symbol = item.symbol || '';
+
+if (symbol === 'COINSPOT_SCREENER' || symbol.includes('COINSPOT')) {
+return `analysis.html?option=7&subOption=1&autorun=true&refresh=true&t=${timestamp}`;
+}
+
+const screenerMappings = {
+'S&P 100 (LargeCap)': 'analysis.html?option=3&subOption=100&autorun=true',
+'S&P 400+600 (Mid+SmallCap)': 'analysis.html?option=3&subOption=2&autorun=true',
+'S&P 500 Complete Analysis': 'analysis.html?option=3&subOption=3&autorun=true',
+'S&P Composite 1500': 'analysis.html?option=3&subOption=4&autorun=true',
+'Russell 1000 Large-Cap Analysis': 'analysis.html?option=3&subOption=5&autorun=true',
+'Russell 2000 Small-Cap Analysis': 'analysis.html?option=3&subOption=6&autorun=true',
+'NASDAQ 100 Tech Analysis': 'analysis.html?option=3&subOption=7&autorun=true',
+'Dow Jones 30 Blue Chip Analysis': 'analysis.html?option=3&subOption=8&autorun=true',
+'ASX 50 Analysis': 'analysis.html?option=5&subOption=50&autorun=true',
+'ASX 100 Analysis': 'analysis.html?option=5&subOption=100&autorun=true',
+'ASX 200 Analysis': 'analysis.html?option=5&subOption=200&autorun=true',
+'ASX 300 Analysis': 'analysis.html?option=5&subOption=300&autorun=true',
+'UK FTSE 100 Analysis': 'analysis.html?option=4&subOption=ftse100&autorun=true',
+'UK FTSE 100 Screener': 'analysis.html?option=4&subOption=ftse100&autorun=true',
+'Crypto Screener (Coinspot)': 'analysis.html?option=7&subOption=1&autorun=true'
+};
+
+if (screenerMappings[companyName]) {
+return `${screenerMappings[companyName]}&refresh=true&t=${timestamp}`;
+}
+
+if (companyName.includes('Crypto') || companyName.includes('CoinSpot') || companyName.includes('coinspot')) {
+return `analysis.html?option=7&subOption=1&autorun=true&refresh=true&t=${timestamp}`;
+}
+
+return `analysis.html?symbol=${encodeURIComponent(symbol)}&option=1&subOption=custom&autorun=true&refresh=true&t=${timestamp}`;
+}
+
+function rerunFromNotification(analysisId) {
+const item = analysisHistory.find(analysis => analysis.analysisId === analysisId);
+if (!item) return;
+
+const timestamp = Date.now();
+const url = getRerunUrl(item, timestamp);
+window.location.href = url;
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+// Shared variables for market data sidebar navigation
+const tabOrder = ['us', 'europe', 'asia', 'cryptocurrencies', 'rates', 'commodities', 'currencies'];
+window.marketDataCurrentTabIndex = 0;
+window.marketDataCurrentTab = 'us';
+
+// Attach desktop navigation handlers for market data sidebar
+const desktopNavLeft = document.getElementById('nav-left-sidebar');
+const desktopNavRight = document.getElementById('nav-right-sidebar');
+
+if (desktopNavLeft) {
+    desktopNavLeft.onclick = () => {
+        window.marketDataCurrentTabIndex = (window.marketDataCurrentTabIndex - 1 + tabOrder.length) % tabOrder.length;
+        window.marketDataCurrentTab = tabOrder[window.marketDataCurrentTabIndex];
+        // Update tab highlighting and scroll
+        document.querySelectorAll('.market-tab-sidebar').forEach(tab => {
+            if (tab.dataset.tab === window.marketDataCurrentTab) {
+                tab.classList.add('active');
+                tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            } else {
+                tab.classList.remove('active');
+            }
+        });
+        renderMarketDataSidebar(window.marketDataCurrentTab);
+    };
+}
+
+if (desktopNavRight) {
+    desktopNavRight.onclick = () => {
+        window.marketDataCurrentTabIndex = (window.marketDataCurrentTabIndex + 1) % tabOrder.length;
+        window.marketDataCurrentTab = tabOrder[window.marketDataCurrentTabIndex];
+        // Update tab highlighting and scroll
+        document.querySelectorAll('.market-tab-sidebar').forEach(tab => {
+            if (tab.dataset.tab === window.marketDataCurrentTab) {
+                tab.classList.add('active');
+                tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            } else {
+                tab.classList.remove('active');
+            }
+        });
+        renderMarketDataSidebar(window.marketDataCurrentTab);
+    };
+}
+
+// Hide limited time banner for logged-in users
+const limitedTimeBanner = document.getElementById('limited-time-banner');
+if (limitedTimeBanner && userId && userId !== 'anonymous') {
+limitedTimeBanner.style.display = 'none';
+}
+
+// Mobile-specific: Add margin to market overview for paid users
+updateCounterDisplay();
+updateNotificationBell();
+
+// Preload notifications if user is logged in
+if (userId && userId !== 'anonymous') {
+preloadNotifications();
+}
+
+// Preload notifications immediately on page load
+if (userId && userId !== 'anonymous') {
+const bell = document.getElementById('notification-bell');
+if (bell) bell.style.display = 'block';
+const mobileBell = document.getElementById('mobile-notification-bell');
+if (mobileBell) mobileBell.style.display = 'block';
+preloadNotifications();
+} else {
+preloadedNotificationContent = `
+<div onclick="window.location.href='login.html'" style="padding: 15px; text-align: center; color: var(--text-secondary); cursor: pointer;">
+<p style="margin: 0 0 10px 0; font-size: 14px;">Please log in to view notifications</p>
+<a href="login.html" style="color: #007bff; text-decoration: none; font-size: 15px; font-weight: 600;">Login</a>
+</div>
+`;
+}
+
+const searchInput = document.getElementById('stock-search');
+if (searchInput) {
+searchInput.addEventListener('keypress', function(e) {
+if (e.key === 'Enter') {
+searchStock();
+}
+});
+}
+
+// Hide nav on scroll down (mobile only)
+if (window.innerWidth <= 768) {
+let lastScroll = 0;
+window.addEventListener('scroll', function() {
+const currentScroll = window.pageYOffset;
+const nav = document.querySelector('.top-nav');
+if (currentScroll > lastScroll && currentScroll > 100) {
+nav.style.transform = 'translateY(-100%)';
+} else {
+nav.style.transform = 'translateY(0)';
+}
+lastScroll = currentScroll;
+});
+}
+});
+
+// The round "Start 3-Day Free Trial" / "Upgrade Plan" button is drawn by visitor-bar.js, from the visitor's count.
+
+
+// Email capture functionality
+async function captureEmail() {
+const emailInput = document.getElementById('email-capture');
+const email = emailInput.value.trim();
+const button = event.target;
+
+if (!email) {
+alert('Please enter your email address');
+return;
+}
+
+// Basic email validation
+if (!email.includes('@') || !email.includes('.')) {
+alert('Please enter a valid email address');
+return;
+}
+
+// Show loading state
+const originalText = button.textContent;
+button.textContent = 'Subscribing...';
+button.disabled = true;
+
+try {
+// Get user IP for tracking
+let userIP = '';
+try {
+const ipResponse = await fetch('https://api.ipify.org?format=json');
+const ipData = await ipResponse.json();
+userIP = ipData.ip;
+} catch (e) {
+console.warn('Could not get IP address:', e);
+}
+
+// Call email capture Lambda function
+const response = await fetch('https://r5aierjvyfe2kdjoql5p23jmuy0rtisk.lambda-url.us-east-1.on.aws/', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify({
+action: 'subscribe',
+email: email,
+source: 'homepage',
+ipAddress: userIP,
+userAgent: navigator.userAgent
+})
+});
+
+const result = await response.json();
+
+if (result.success) {
+// Success - show confirmation
+emailInput.value = '';
+button.textContent = '✅ Subscribed!';
+button.style.background = '#22c55e';
+
+// Show success message
+alert(result.message || "You're on the list!");
+
+// Reset button after 3 seconds
+setTimeout(() => {
+button.textContent = originalText;
+button.disabled = false;
+button.style.background = '#22c55e';
+}, 3000);
+
+} else {
+throw new Error(result.error || 'Subscription failed');
+}
+
+} catch (error) {
+console.error('Email capture error:', error);
+alert(error.message || 'Failed to subscribe. Please try again later.');
+
+// Reset button
+button.textContent = originalText;
+button.disabled = false;
+}
+}
+</script>
+<script>
+if (window.location.hash === '#focus-search') {
+setTimeout(() => {
+const searchInput = document.getElementById('stock-search');
+if (searchInput) {
+searchInput.focus();
+searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+}, 100);
+}
+</script>
+<script src="news.js"></script>
+<script src="js/timezone-converter.js"></script>
+<script src="ai-chat.js"></script>
+</body>
+<script>
+// Home page symbol suggestions
+const homeStockInput = document.getElementById('stock-search');
+const homeSuggestionsDiv = document.getElementById('home-symbol-suggestions');
+
+if (homeStockInput && homeSuggestionsDiv) {
+    let debounceTimer;
+    
+    homeStockInput.addEventListener('input', function(e) {
+        clearTimeout(debounceTimer);
+        const value = e.target.value.trim().toUpperCase();
+        
+        // Show/hide clear button
+        const clearBtn = document.getElementById('stock-search-clear');
+        if (clearBtn) clearBtn.style.display = e.target.value ? 'block' : 'none';
+        
+        if (!value || value.includes(',')) {
+            homeSuggestionsDiv.style.display = 'none';
+            return;
+        }
+        
+        debounceTimer = setTimeout(async () => {
+            if (value.includes('.')) {
+                homeSuggestionsDiv.style.display = 'none';
+                return;
+            }
+            
+            homeSuggestionsDiv.innerHTML = '<div style="padding: 10px; color: var(--text-secondary);">Checking exchanges...</div>';
+            homeSuggestionsDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch('https://3oaokynmssanpzz7bwomt7ft6i0qrwhk.lambda-url.us-east-1.on.aws/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symbol: value })
+                });
+                
+                const data = await response.json();
+                const validSymbols = data.suggestions || [];
+                
+                if (validSymbols.length > 0) {
+                    homeSuggestionsDiv.innerHTML = validSymbols.map(s => 
+                        `<div style="padding: 10px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background 0.2s;" 
+                              onmouseover="this.style.background='rgba(0, 123, 255, 0.25)'" 
+                              onmouseout="this.style.background='transparent'"
+                              onclick="document.getElementById('stock-search').value='${s.symbol}'; document.getElementById('home-symbol-suggestions').style.display='none';">
+                            <strong>${s.symbol}</strong> - ${s.name}
+                        </div>`
+                    ).join('');
+                } else {
+                    homeSuggestionsDiv.innerHTML = '<div style="padding: 10px; color: var(--text-secondary);">No matches found</div>';
+                }
+            } catch (error) {
+                homeSuggestionsDiv.innerHTML = '<div style="padding: 10px; color: var(--text-secondary);">Error checking symbol</div>';
+            }
+        }, 500);
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!homeStockInput.contains(e.target) && !homeSuggestionsDiv.contains(e.target)) {
+            homeSuggestionsDiv.style.display = 'none';
+        }
+    });
+}
+
+// Side panel symbol suggestions
+const sideStockInput = document.getElementById('side-stock-search');
+const sideSuggestionsDiv = document.getElementById('side-symbol-suggestions');
+
+if (sideStockInput && sideSuggestionsDiv) {
+    let debounceTimer;
+    
+    sideStockInput.addEventListener('input', function(e) {
+        clearTimeout(debounceTimer);
+        const value = e.target.value.trim().toUpperCase();
+        
+        // Show/hide clear button
+        const clearBtn = document.getElementById('side-search-clear');
+        if (clearBtn) clearBtn.style.display = e.target.value ? 'block' : 'none';
+        
+        if (!value || value.includes(',')) {
+            sideSuggestionsDiv.style.display = 'none';
+            return;
+        }
+        
+        debounceTimer = setTimeout(async () => {
+            if (value.includes('.')) {
+                sideSuggestionsDiv.style.display = 'none';
+                return;
+            }
+            
+            sideSuggestionsDiv.innerHTML = '<div style="padding: 10px; color: var(--text-secondary);">Checking exchanges...</div>';
+            sideSuggestionsDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch('https://3oaokynmssanpzz7bwomt7ft6i0qrwhk.lambda-url.us-east-1.on.aws/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symbol: value })
+                });
+                
+                const data = await response.json();
+                const validSymbols = data.suggestions || [];
+                
+                if (validSymbols.length > 0) {
+                    sideSuggestionsDiv.innerHTML = validSymbols.map(s => 
+                        `<div style="padding: 10px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background 0.2s;" 
+                              onmouseover="this.style.background='rgba(0, 123, 255, 0.25)'" 
+                              onmouseout="this.style.background='transparent'"
+                              onclick="document.getElementById('side-stock-search').value='${s.symbol}'; document.getElementById('side-symbol-suggestions').style.display='none';">
+                            <strong>${s.symbol}</strong> - ${s.name}
+                        </div>`
+                    ).join('');
+                } else {
+                    sideSuggestionsDiv.innerHTML = '<div style="padding: 10px; color: var(--text-secondary);">No matches found</div>';
+                }
+            } catch (error) {
+                sideSuggestionsDiv.innerHTML = '<div style="padding: 10px; color: var(--text-secondary);">Error checking symbol</div>';
+            }
+        }, 500);
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!sideStockInput.contains(e.target) && !sideSuggestionsDiv.contains(e.target)) {
+            sideSuggestionsDiv.style.display = 'none';
+        }
+    });
+}
+
+</script>
+</html>
