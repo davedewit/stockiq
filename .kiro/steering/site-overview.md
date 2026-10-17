@@ -547,7 +547,7 @@ the same money spread over the whole list, in 18 half-periods (9 lists x 2 halve
 - **Limits:** today's members (flatters buying what rose, most for small companies); a mostly rising period 2022-2026; a
   top 10 of momentum shares is jumpier than the list (drawdowns not yet measured); the live 10-a-side trial of "furthest
   above the low" lost (-2.64% against -0.68%: too few trades to read, but not to be forgotten).
-- **Built and tested the same day, NOT live: the trend score (version 2)** in `workers/stock_worker.py` behind a switch,
+- **LIVE SINCE 10:55 UTC ON 17 OCT 2026 on all 25 share-screener groups, at the owner's yes: the trend score (version 2)** in `workers/stock_worker.py` behind a switch,
   `SCORE_VERSION` (1 unless `STOCKIQ_SCORE=2` is set; the Lambda has no such setting, so live stays 1). `trend_score()` is the
   study's "trend" exactly: up to +2 for how far above the 52-week low (full at 100%), the year's rise without the last month
   (+-1.5, full at 60%), +-0.5 for the price against its 200-day average, +-0.5 for the 50-day against the 200-day, -0.5 when
@@ -565,7 +565,13 @@ the same money spread over the whole list, in 18 half-periods (9 lists x 2 halve
   (-50%), against the fund's +107.5%; per trade against the fund Careful +0.78 (t 3.3), Balanced +0.30 (t 2.1), where the old
   score gave +0.02 and +0.03; worst falls about the same (Careful -14% against -17%, Balanced -17% against -15%). The replay
   is the S&P 100, where the 52-week-low idea was first found: in-sample, so the wide study is the stronger evidence.
-- **To go live (his yes first; every ranking and label on the site moves on the day):** `SCORE_VERSION` to 2 by default,
+- **How it went live:** `SCORE_VERSION` 2 by default (fingerprint `7W1kLqzu…`, `workers/live.txt`); Dow 30 first, its page and background runs read, then
+  every group (all 741 functions, each group tried for real); eight buttons through the page code and five through the
+  coordinator afterwards: every worker answered, the tracker read 10 symbols each time. The six public pages that described
+  the 12 factors now describe the trend score. **The autopilot's trades from about 11:00 UTC on 17 Oct 2026 are bought from the
+  new rankings: a review compares them with the trades before, never pools them.** Way back: `ROLLBACK=true bash
+  check-tools/pending-trendscore/deploy.sh` is gone with the folder; instead set `SCORE_VERSION` to '1', build and deploy with
+  `workers/deploy.py` (groups.txt `all`); the old package is `~/VSCODE/backup/workers_package_q9ZXUvTBcszKxRPR.zip`. Was the plan:
   `python3 workers/prove.py` again, a `check-tools/pending-<name>/` with `deploy.py` (Dow 30 first, then `all`), the 14+
   buttons through the page and the coordinator, `workers/live.txt`; `about.html` and the FAQ, which describe the 12 factors,
   rewritten for the trend score (its structured data with it); the AI chat's prompt if it names factors. The autopilot's trades
@@ -2839,6 +2845,8 @@ buying-order trial finished and was not kept; the AI review's early sales switch
 12. The report function holds the Finnhub key in its code: move it to the function's settings so the code can go into git.
 13. The record's size (the review tool warns above 300 KB of the 400 KB a row can hold): drop `path` from finished
     trades kept in `history`, or store the record compressed.
+13b. The screeners' top-10 lines still call the one-year change "YTD" (four writers in `analysis-functions.js`, one in the
+    coordinator; the CSV column `YTD_Change_%` too): "1 yr". Words only; do it with the next change to those files.
 14. Both GitHub repositories are public (section 11). The personal file in one is the owner's own business ("that youtube
     stuff is mine only focus on the repo for stockiq", 12 Oct): leave it alone and out of these lists.
 15. Ideas offered and not built are in the next part ("Ideas offered and not built"); section 11 has the rest of the site.
@@ -4326,5 +4334,14 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     fresh one now", v2). Tests: 9 Admin page, 137 portfolio, 22 chat. Looked at in a headless browser with the live Admin
     answer (light and dark) and on the live Practice portfolio tab as his account, read-only (account $99,643.23, ▲ $1,610.94
     against the S&P 500 fund's $98,032.29). **Not checked:** a signed-in browser, a phone width for the Admin tiles.
+  - **THE SCREENERS' SCORE REPLACED** (the owner: "go ahead and look into improving it", then "my answer as almost always its a
+    yes"). The study that found the old score worse than its own list, the trend score built and proved (section 7b), live on
+    all 741 share-screener workers at 10:55 UTC and the six public pages reworded. Same day: the Admin page shows this month's
+    AWS bill and Lambda calls (a read-only role policy `stockiq-usage-read` for Cost Explorer and CloudWatch; one Cost
+    Explorer question a day, $0.01) and the margin of error in plain words ("the real average is probably between -1.93% and
+    -0.37% a trade"); `check-tools/session_start.py`, the first command of every session (top of this file). The owner, on
+    being asked things a session should have found: "You aren't smart or a good AI if i have to manually find problems or
+    think of improvements" (the instruction at the top of this file). Bill on 17 Oct: $0.56 this month; Lambda calls 451,952,
+    5,182 the day before (the polling cut: about 66,000 a day before it).
     **The slip of 13 Oct again:** a notes edit stopped on a line that did not match and the commit after it still ran, so
     commit `99b495d` says "Notes" and holds none; they are in the commit after it.
