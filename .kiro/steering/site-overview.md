@@ -1206,8 +1206,12 @@ is hidden. **Keep the Reports panel first in the page**: one report routine find
 with `document.querySelector('h3')`.
 
 **Practice portfolio** (its own tab, container `#practice-portfolio`):
-- **The top is three figures since 13 Oct 2026**: Account value, Today, Since the start (`.pp-top`), then one line (cash, in
-  holdings, ahead of or behind the same $100,000 in an S&P 500 fund since the start, in dollars: `.pp-facts`), then **"The breakdown" folded**
+- **The top is three figures** (`.pp-top`): **since 17 Oct 2026 Account value (with its change since the start under it, "▼ $356.77
+  (0.36%) since the start"), Today, and Against the S&P 500** (the account against the same $100,000 put into an S&P 500 fund
+  when it began, in dollars, with what the fund would be worth now: `fundCard`; without the fund's prices back to the start,
+  what is still held against the fund over the same days). It was Account value, Today, Since the start, with the fund in the
+  one line below, until the owner suggested folding "since the start" into the first card. Then one line (cash and in
+  holdings: `.pp-facts`), then **"The breakdown" folded**
   (`#pp-more`, kept open across redraws by `moreOpen`). **Since 17 Oct 2026 the breakdown is one profit-and-loss table**
   (`breakdownHtml`, class `pp-stack pp-pl`): rows "Sold" (made or lost for good), "Still held" (on paper, at the latest
   prices), "Since the start" (the two together, in bold); columns "Your own buys", "🤖 AI autopilot", "Together" (one column
@@ -1486,7 +1490,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=37` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Portfolio section | `website/practice-portfolio.js` (`?v=38` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=48`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
@@ -2207,7 +2211,7 @@ He asked for "an admin account… so i can see status", with items to action, ad
 unless you need me to make a big decision. i'd prefer it all run without me". Built lean, as decided by the session:
 - **Where:** a "🛠 Admin" tab on the dashboard and an "Admin" link at the top of the dashboard's Account menu, shown only
   when the autopilot's function answers action `admin` for the account (`listed`: the site's own accounts, env
-  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=2`), the tab,
+  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=3`), the tab,
   panel and `NAMES` entry in `dashboard.html`. The link is on the dashboard only, not yet on the other pages.
 - **What it shows:** the month's goal, each figure against its target (`goal_standing`; the same numbers as `GOALS` in
   `check-tools/autopilot_review.py`: change the two together); **"Needs your yes"**: proposals with "Yes" / "Not now"; the
@@ -2215,7 +2219,14 @@ unless you need me to make a big decision. i'd prefer it all run without me". Bu
   with "Write it now"; **how it is running** (`health`, written by every scheduled run: when, how many checked in, paused,
   waiting, stopped on an error); the settings in force; answered proposals. The review's button reads "Write a fresh one now" and says under it that it is never needed, buys, sells and
   changes nothing, may add a proposal, and moves the next automatic review to 7 days after the press (`admin-panel.js?v=2`,
-  17 Oct 2026, after the owner asked what the point of it was). AWS usage is not on it: the function's role
+  17 Oct 2026, after the owner asked what the point of it was).
+  **Since 17 Oct 2026 it is drawn in colour** (`admin-panel.js?v=3`; the owner: "just looks like alot of black text and my eyes
+  don't target anything"): four tiles at the top (Practice account, the month's goal as "N of 3 met", Needs your yes, Running),
+  each green, amber or red by its state; each card has a coloured left edge (purple goal, amber when something needs his yes,
+  green or red for how it is running); the goal's rows have a progress bar and a pill "target …"; the review's lines are
+  marked red for "clearly down / clearly losing", green for "clearly up", and signed dollars and percentages coloured as they
+  point (a zero, a target, is left plain); the settings are chips, the screeners folded. Colour tokens are on `#admin-panel`
+  with pale backgrounds that read in both themes. AWS usage is not on it: the function's role
   can read no CloudWatch figures (it has DynamoDB, SES and logging only); that would be the next step, through the daily
   usage report's own function.
 - **Proposals** (`admin_propose`; item `_admin` in `stockiq-ai-trader`, the last 60 kept): the weekly review proposes, from
@@ -4224,3 +4235,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     `hGAVqC3Y…`, rollback zip `…_before_closed_20261017.zip`), at the owner's word after he sold TLS.AX on the Saturday
     (section 8c, "What the owner sees"). Seen live on his account the same morning: all 39 holdings' buttons read "Market
     closed". 137 portfolio checks, 22 chat. **Not checked:** a signed-in browser, a phone, the 🎯 popup's button for real.
+  - **The Admin page in colour, and the portfolio's top reworked** (05:49 UTC; `admin-panel.js?v=3`, `practice-portfolio.js?v=38`,
+    `dashboard.html`, `stockiq-ai-chat` `p33YPRp7…`, rollback zip `…_before_adminlook_20261017.zip`), at the owner's word (section 8c,
+    "The owner's Admin page" and "What the owner sees"). The review's button had been explained the same morning ("Write a
+    fresh one now", v2). Tests: 9 Admin page, 137 portfolio, 22 chat. Looked at in a headless browser with the live Admin
+    answer (light and dark) and on the live Practice portfolio tab as his account, read-only (account $99,643.23, ▲ $1,610.94
+    against the S&P 500 fund's $98,032.29). **Not checked:** a signed-in browser, a phone width for the Admin tiles.
+    **The slip of 13 Oct again:** a notes edit stopped on a line that did not match and the commit after it still ran, so
+    commit `99b495d` says "Notes" and holds none; they are in the commit after it.
