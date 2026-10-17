@@ -29,6 +29,7 @@ SHARED = m.CENTRAL; m.CENTRAL = False
 NOTES = getattr(m, 'LESSONS_MIN', 0); m.LESSONS_MIN = 5
 # And every share is sold by the ordinary rules here; the trial in which some are "patient" is tested on its own (PATIENT).
 PATIENT_ON = getattr(m, 'PATIENT', False); m.PATIENT = False
+HAS_AI_SELL = hasattr(m, 'AI_SELL'); m.AI_SELL = True      # the AI review is off on the site (17 Oct 2026); its code is still tested
 # And no trading cost is taken off here, so that the amounts in the older checks stay round; the cost is tested on its own (COSTS).
 COSTS = getattr(m, 'TRADE_COST', 0); m.TRADE_COST = 0
 D = DB(); m._db = D
@@ -1411,4 +1412,10 @@ wk = dt.datetime(2026, 10, 14)      # a Wednesday
 check('China, Taiwan and New Zealand are open in their sessions and shut outside them', all(m.market_open(mk, wk.replace(hour=h, minute=mi)) for mk, h, mi in (('cn', 2, 0), ('cn', 6, 30), ('tw', 3, 0), ('nz', 1, 0))) and not any(m.market_open(mk, wk.replace(hour=h, minute=mi)) for mk, h, mi in (('cn', 8, 0), ('tw', 6, 0), ('nz', 5, 0))) and not m.market_open('nz', dt.datetime(2026, 10, 17, 1, 0)))
 check('the Euro Stoxx 50 and Stockholm keep the European hours, the three others draw on Asia-Pacific', m.SCREENERS['5-sx5e'][4] == 'eu' and m.SCREENERS['5-omx30'][4] == 'eu' and {m.SCREENERS[k][5] for k in ('5-csi300', '5-tw50', '5-nzx50')} == {'Asia-Pacific markets'})
 check('Mexico trades 13:35-19:55 UTC on weekdays, in the Americas share', m.market_open('mx', dt.datetime(2026, 10, 14, 14, 0)) and not m.market_open('mx', dt.datetime(2026, 10, 14, 20, 30)) and m.SCREENERS['5-ipc'][5] == 'Americas markets')
+
+# --- 17 Oct 2026: the AI review's early sales are off for every account while AI_SELL is False, whatever a page sends
+if HAS_AI_SELL:
+    m.AI_SELL = False
+    check('with AI_SELL off the setting is always off, also when a page sends it on', m.clean_settings({'aiSell': True, 'enabled': True}, 'x@y.z')['aiSell'] is False and m.clean_settings({}, 'x@y.z')['aiSell'] is False)
+    m.AI_SELL = True
 print('ALL PASS' if ok else 'SOME FAILED')

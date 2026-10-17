@@ -10,7 +10,7 @@ keeps its proposals in item `_admin` of table stockiq-ai-trader. A session start
 A "setting" proposal is applied by the function itself the moment the owner presses "Yes"; a "session" one waits for a
 session. Nothing here prints an account's address.
 """
-import json, sys
+import json, sys, os
 from datetime import datetime, timezone
 import boto3
 
@@ -43,6 +43,18 @@ if not args:
         print(f"  #{p['id']} [{p['kind']}] {p['title']}")
     r, h = admin.get('review') or {}, admin.get('health') or {}
     print(f"last weekly review: {r.get('at', 'none')}; last scheduled run: {h.get('at', 'none')} ({h.get('ran', 0)} of {h.get('on', 0)} checked in, {h.get('failed', 0)} failed)")
+elif args[0] == 'sync':
+    # The improvements, as the Admin page lists them (17 Oct 2026: the owner asked to see what was run, what is next and what was
+    # improved): check-tools/experiments.json and the last reviews of check-tools/site_parts.json. One small write.
+    here = os.path.dirname(os.path.abspath(__file__))
+    ex = json.load(open(os.path.join(here, 'experiments.json')))['experiments']
+    parts = json.load(open(os.path.join(here, 'site_parts.json')))['parts']
+    reviews = sorted(({'part': p['part'], 'at': l['at'], 'found': l['found']} for p in parts for l in p.get('log', [])), key=lambda x: x['at'], reverse=True)[:8]
+    keep = ('id', 'what', 'angle', 'measure', 'status', 'started', 'decide', 'decided', 'result', 'order')
+    admin['plan'] = {'at': now(), 'items': [{k: e[k] for k in keep if k in e} for e in ex], 'reviews': reviews,
+                     'parts': len(parts), 'reviewed': sum(1 for p in parts if p.get('last'))}
+    save(admin)
+    print(f"the Admin page's improvements: {len(ex)} items, {len(reviews)} recent reviews")
 elif args[0] == 'done' and len(args) >= 3:
     p = next((x for x in admin['proposals'] if str(x['id']) == args[1]), None)
     if not p:

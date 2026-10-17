@@ -29,6 +29,10 @@ def load():
 
 def save(d):
     json.dump(d, open(FILE, 'w'), indent=1, ensure_ascii=False)
+    try:                     # the Admin page shows the last reviews (admin.py sync)
+        import subprocess; subprocess.run([sys.executable, os.path.join(HERE, 'admin.py'), 'sync'], capture_output=True, timeout=60)
+    except Exception:
+        pass
 
 def oldest(d, n=3):
     """The parts looked at longest ago; among equally old ones a different shuffle each day (the owner asked for random ones)."""

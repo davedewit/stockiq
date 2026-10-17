@@ -21,7 +21,12 @@ FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'experiments.jso
 today = datetime.date.today()
 
 def load(): return json.load(open(FILE)) if os.path.exists(FILE) else {'experiments': []}
-def save(d): json.dump(d, open(FILE, 'w'), indent=1, ensure_ascii=False)
+def save(d):
+    json.dump(d, open(FILE, 'w'), indent=1, ensure_ascii=False)
+    try:                     # the Admin page shows the improvements (admin.py sync): keep it current
+        import subprocess; subprocess.run([sys.executable, os.path.join(os.path.dirname(FILE), 'admin.py'), 'sync'], capture_output=True, timeout=60)
+    except Exception:
+        pass
 def due(d): return [e for e in d['experiments'] if e['status'] == 'running' and e.get('decide') and e['decide'] <= today.isoformat()]
 
 if __name__ == '__main__':

@@ -11,12 +11,14 @@
   },
   {
    "id": "ai-review-off",
-   "what": "The AI review's early sales switched off (17 Oct 2026, at the owner's yes)",
+   "what": "The AI model's early sales (selling before the fixed rules)",
    "angle": "profit, AI use",
    "measure": "the average trade after it against before, by kind of sale; what the fixed rules' sales do",
-   "status": "running",
+   "status": "removed",
    "started": "2026-10-17",
-   "decide": "2026-11-14"
+   "decide": "2026-11-14",
+   "decided": "2026-10-17",
+   "result": "Taken out: 31 trades, -1.46% a trade, against -0.62% for every other kind of sale; the shares it sold early mostly went on rising. It can only return as a trial with a newer model."
   },
   {
    "id": "patient-shares",
@@ -50,42 +52,129 @@
    "what": "A longer holding time for shares, beside the current one, as a trial in the autopilot",
    "angle": "profit",
    "measure": "trial_figures, 10 finished each way, then 30",
-   "status": "idea"
+   "status": "idea",
+   "order": 1
   },
   {
    "id": "company-figures",
    "what": "Record profit margin, debt and growth with every share bought, then split the record by them",
    "angle": "analysis, profit",
    "measure": "the review split by each figure, 30 trades a band",
-   "status": "idea"
+   "status": "idea",
+   "order": 2
   },
   {
    "id": "market-mood",
    "what": "Hold fewer shares, or none, while the S&P 500 is below its 200-day average",
    "angle": "profit",
    "measure": "replay first (the four tests), then a live trial",
-   "status": "idea"
+   "status": "idea",
+   "order": 3
   },
   {
    "id": "newer-model",
    "what": "A newer, stronger OpenAI model for the autopilot's choice of what to buy, beside gpt-4o-mini",
    "angle": "AI use, profit",
    "measure": "every second choice by the newer model, the record split by model, the cost a month stated (under $1)",
-   "status": "idea"
+   "status": "idea",
+   "order": 4
   },
   {
    "id": "chat-model",
    "what": "The AI chat on a newer model, if it answers the dashboard questions better at the same cost",
    "angle": "AI use, ease of use",
    "measure": "the same 20 real questions to both, read side by side; the cost a month",
-   "status": "idea"
+   "status": "idea",
+   "order": 5
   },
   {
    "id": "weekly-email",
    "what": "A short weekly email to the owner: the account against the fund, the trades, what was changed",
    "angle": "ease of use",
    "measure": "does he read and act on it (ask him after a month)",
-   "status": "idea"
+   "status": "idea",
+   "order": 6
+  },
+  {
+   "id": "trend-score-study",
+   "what": "Test whether the screeners' score predicts anything, on 1,750 shares in 9 markets",
+   "angle": "analysis, profit",
+   "measure": "",
+   "status": "kept",
+   "decided": "2026-10-17",
+   "result": "Kept: the old score lost to its own list in 17 of 18 half-periods; the study led to the trend score (now being tested live)"
+  },
+  {
+   "id": "admin-value",
+   "what": "The Admin page's account value at the latest prices, as the Practice portfolio shows it",
+   "angle": "faults",
+   "measure": "",
+   "status": "kept",
+   "decided": "2026-10-17",
+   "result": "Kept: $99,643.23 on both, where the Admin page had said $99,411"
+  },
+  {
+   "id": "fund-line",
+   "what": "The weekly review says how the account stands against the same $100,000 in an S&P 500 fund",
+   "angle": "ease of use",
+   "measure": "",
+   "status": "kept",
+   "decided": "2026-10-17",
+   "result": "Kept"
+  },
+  {
+   "id": "aws-on-admin",
+   "what": "This month's AWS bill and Lambda calls on the Admin page, and a budget alert at $1 and $1.50",
+   "angle": "cost",
+   "measure": "",
+   "status": "kept",
+   "decided": "2026-10-17",
+   "result": "Kept: $0.56 so far; the bill read every 3 days ($0.10 a month)"
+  },
+  {
+   "id": "plain-summary",
+   "what": "A screener report's average score and scored count in plain words",
+   "angle": "ease of use",
+   "measure": "",
+   "status": "kept",
+   "decided": "2026-10-17",
+   "result": "Kept: \"+0.7 on a scale of about -3 to +3 (Slightly positive on average)\""
+  },
+  {
+   "id": "lists-check",
+   "what": "A check of every screener's stock list: page and background alike, no duplicates, prices, members against the index's own source",
+   "angle": "faults, analysis",
+   "measure": "",
+   "status": "kept",
+   "decided": "2026-10-17",
+   "result": "Kept: clean on 17 Oct; the Nikkei report said 210 for 225 (fixed)"
+  },
+  {
+   "id": "six-markets",
+   "what": "Six more screeners: Euro Stoxx 50, Sweden OMX 30, China CSI 300, Taiwan 50, NZX 50, Mexico IPC",
+   "angle": "analysis, profit",
+   "measure": "",
+   "status": "kept",
+   "decided": "2026-10-17",
+   "result": "Kept: 33 screeners, none Coming Soon; all in the autopilot"
+  },
+  {
+   "id": "two-suffix-tracker",
+   "what": "The 🎯 tracker reads a symbol with two suffixes (SWED-A.ST)",
+   "angle": "faults",
+   "measure": "",
+   "status": "kept",
+   "decided": "2026-10-17",
+   "result": "Kept: Sweden's top 10 read in full, the 47 saved reports as before"
+  },
+  {
+   "id": "session-start",
+   "what": "A check at the start of every session that finds problems before the owner does",
+   "angle": "faults",
+   "measure": "",
+   "status": "kept",
+   "decided": "2026-10-17",
+   "result": "Kept"
   }
  ]
 }
