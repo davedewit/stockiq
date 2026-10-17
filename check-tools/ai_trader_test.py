@@ -1382,4 +1382,26 @@ m.save_admin(dict(m.load_admin(), review=None)); rec = m.load_item(U); rec['stat
 m.datetime = at(ta + dt.timedelta(minutes=10)); m.lambda_handler({'source': 'aws.events'}, None); adm1 = m.load_admin()
 m.datetime = at(ta + dt.timedelta(minutes=40)); m.lambda_handler({'source': 'aws.events'}, None); adm2 = m.load_admin(); m.datetime = before
 check('the scheduled run records how it went every time and writes the review itself once a week', adm1['health'] and adm1['health']['on'] >= 1 and adm1['review'] and adm2['review']['at'] == adm1['review']['at'] and adm2['health']['at'] > adm1['health']['at'], [adm1.get('health'), (adm1.get('review') or {}).get('at'), (adm2.get('review') or {}).get('at')])
+
+# --- 17 Oct 2026: the Admin page's account value at the latest prices, and the S&P 500 fund since the start in the review
+pf = {'cash': 1000.0, 'startingCash': 100000, 'createdAt': '2026-10-10T09:18:42Z', 'holdings': [
+    {'id': 'a', 'symbol': 'AAA', 'currency': 'USD', 'qty': 10, 'costUsd': 500.0},
+    {'id': 'b', 'symbol': 'TSCO.L', 'currency': 'GBp', 'qty': 100, 'costUsd': 600.0},
+    {'id': 'c', 'symbol': 'NOPRICE', 'currency': 'USD', 'qty': 1, 'costUsd': 300.0}]}
+rec_v = {'state': {'open': {'c': {'path': [[1, 10.0]]}}}}
+quotes_v = {'AAA': {'price': 60.0, 'currency': 'USD'}, 'TSCO.L': {'price': 500.0, 'currency': 'GBp'}, 'GBPUSD=X': {'price': 1.30, 'currency': 'USD'}}
+v_live = m.account_value(pf, rec_v, lambda sym: quotes_v.get(sym))
+check('the account value with prices: each holding at its latest price in dollars (pence and the pound rate too), one with no price at its estimate', abs(v_live - (1000 + 600 + 100 * 500 / 100 * 1.30 + 330)) < 0.01, v_live)
+check('the account value without prices: the old estimate, as before', abs(m.account_value(pf, rec_v) - (1000 + 500 + 600 + 330)) < 0.01, m.account_value(pf, rec_v))
+t0 = (dt.datetime(2026, 10, 9, 20) - dt.datetime(1970, 1, 1)).total_seconds()
+old_http = m.http_json
+m.http_json = lambda url, payload=None, timeout=120: {'chart': {'result': [{'meta': {'regularMarketPrice': 763.25}, 'timestamp': [t0 - 86400, t0, t0 + 3 * 86400], 'indicators': {'quote': [{'close': [770.0, 778.57, 760.0]}]}}]}}
+fs = m.fund_since_start(pf, 99643.23, dt.datetime(2026, 10, 17, 6))
+check('the fund since the start: the starting cash in SPY from the last close at or before the account began, and the account less it', fs and abs(fs[0] - 100000 * 763.25 / 778.57) < 0.01 and abs(fs[1] - (99643.23 - fs[0])) < 0.01, fs)
+adm_t = {'proposals': [], 'review': None, 'health': None, 'seq': 0}
+rec_t = m.load_item(U); m.write_review(adm_t, rec_t, pf, dt.datetime(2026, 10, 17, 6), quote=lambda sym: quotes_v.get(sym))
+check('the weekly review says how the account stands against the same money in an S&P 500 fund since it began', any(l.startswith('Against the same $100,000 in an S&P 500 fund since the account began: the fund would be $98,032, so the account is') for l in adm_t['review']['lines']), adm_t['review']['lines'][-2:])
+adm_t2 = {'proposals': [], 'review': None, 'health': None, 'seq': 0}; m.write_review(adm_t2, rec_t, pf, dt.datetime(2026, 10, 17, 6))
+check('without a price lookup (a test, or off the function) no prices are asked for and the line is left out', not any('S&P 500 fund since' in l for l in adm_t2['review']['lines']))
+m.http_json = old_http
 print('ALL PASS' if ok else 'SOME FAILED')
