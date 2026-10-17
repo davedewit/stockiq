@@ -33,6 +33,7 @@ GROUPS = {
     'stockiq-asia-5-10-worker': ('China CSI 300', 30, 'china'),
     'stockiq-asia-5-11-worker': ('Taiwan 50', 5, 'taipei'),
     'stockiq-asia-5-12-worker': ('New Zealand NZX 50', 5, 'wellington'),
+    'stockiq-americas-6-3-worker': ('Mexico IPC', 4, 'mexico'),
 }
 
 # market: the currency Yahoo quotes it in (London is pence), three symbols a freshly deployed worker is tried with, and the
@@ -55,6 +56,7 @@ MARKETS = {
     'stockholm': dict(currency='SEK', try_with=['ATCO-A.ST', 'INVE-B.ST', 'VOLV-B.ST'], sample='ATCO-A.ST INVE-B.ST VOLV-B.ST ABB.ST AZN.ST ERIC-B.ST HM-B.ST SEB-A.ST SAND.ST HEXA-B.ST ASSA-B.ST EQT.ST'.split()),
     'china': dict(currency='CNY', try_with=['600519.SS', '300750.SZ', '601318.SS'], sample='600519.SS 300750.SZ 601318.SS 600036.SS 000858.SZ 601166.SS 000333.SZ 600900.SS 601899.SS 002594.SZ 600030.SS 000001.SZ'.split()),
     'taipei': dict(currency='TWD', try_with=['2330.TW', '2317.TW', '2454.TW'], sample='2330.TW 2317.TW 2454.TW 2308.TW 2382.TW 2881.TW 2882.TW 2891.TW 3711.TW 2303.TW 2412.TW 1216.TW'.split()),
+    'mexico': dict(currency='MXN', try_with=['GMEXICOB.MX', 'WALMEX.MX', 'AMXB.MX'], sample='GMEXICOB.MX GFNORTEO.MX FEMSAUBD.MX AMXB.MX WALMEX.MX CEMEXCPO.MX GAPB.MX AC.MX ASURB.MX BIMBOA.MX GRUMAB.MX KOFUBL.MX'.split()),
     'wellington': dict(currency='NZD', try_with=['FPH.NZ', 'AIA.NZ', 'IFT.NZ'], sample='FPH.NZ AIA.NZ IFT.NZ MEL.NZ CEN.NZ SPK.NZ ATM.NZ EBO.NZ MFT.NZ FBU.NZ AIR.NZ CNU.NZ'.split()),
     'mumbai': dict(currency='INR', try_with=['RELIANCE.NS', 'TCS.NS', 'M&M.NS'], sample='RELIANCE.NS TCS.NS HDFCBANK.NS INFY.NS ICICIBANK.NS ITC.NS LT.NS SBIN.NS BHARTIARTL.NS M&M.NS MARUTI.NS TITAN.NS'.split()),
     'seoul': dict(currency='KRW', try_with=['005930.KS', '000660.KS', '005380.KS'], sample='005930.KS 000660.KS 005380.KS 035420.KS 051910.KS 068270.KS 105560.KS 000270.KS 012330.KS 055550.KS 066570.KS 035720.KS'.split()),
