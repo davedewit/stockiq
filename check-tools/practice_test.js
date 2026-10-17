@@ -118,8 +118,18 @@ const els = {}; const handlers = {};
 const mkEl = id => ({ id, value: '', innerHTML: '', style: {}, textContent: '', disabled: false });
 const container = mkEl('practice-portfolio');
 const document = { readyState: 'complete', getElementById: id => id === 'practice-portfolio' ? container : (els[id] || (els[id] = mkEl(id))), addEventListener: (t, f) => { (handlers[t] = handlers[t] || []).push(f); }, querySelector: () => null };
+// The tests trade on any day: a real price's last-trade time is set to now (since 17 Oct 2026 a share whose price is older
+// than three hours cannot be bought or sold by hand). SHUT.AX is made up: its market is open or shut as shutHours says.
+let shutHours = 0;
 async function fakeFetch(url, opts = {}) {
   const u = String(url);
+  if (/[?&]symbol=SHUT\.AX/.test(u)) { const t = Math.floor(Date.now() / 1000 - shutHours * 3600);
+    return { ok: true, status: 200, json: async () => ({ chart: { result: [{ meta: { regularMarketPrice: 10, currency: 'AUD', longName: 'Shut Test Ltd', regularMarketTime: t }, timestamp: [t - 86400], indicators: { quote: [{ close: [9.9] }] } }] } }) }; }
+  if (/lambda-url/.test(u) && /[?&]symbol=/.test(u) && !u.includes('__PRACTICE_API_URL__')) {
+    const r = await fetch(url, opts), body = await r.json().catch(() => null), meta = body && body.chart && body.chart.result && body.chart.result[0] && body.chart.result[0].meta;
+    if (meta && meta.regularMarketTime) meta.regularMarketTime = Math.floor(Date.now() / 1000);
+    return { ok: r.ok, status: r.status, json: async () => body };
+  }
   if (u.includes('__PRACTICE_API_URL__')) {
     const b = JSON.parse(opts.body); apiCalls.push(b.action);
     const json = (status, o) => ({ ok: status === 200, status, json: async () => o });
@@ -293,6 +303,22 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
     check('and the phone rules are in the script: cards under 640px, a full-width Sell button, a buy row that fits', /@media \(max-width: 640px\)/.test(src) && /table\.pp-stack tr\.pp-head \{ display: none !important; \}/.test(src) && /td\[data-label\]::before \{ content: attr\(data-label\)/.test(src) && /#pp-note \{ flex: 1 1 100% !important/.test(src) && ['Held', 'Price', 'Value', 'Result'].every(l => src.includes('<td data-label="' + l + '"')), ''); }
   check('no S&P columns or verdicts in the tables; one comparison figure in the summary', !/S&P 500 since|S&P 500 same time|ahead of what|did better than the S&P/.test(text()) && (/Against an S&P 500 index fund: The whole account: [^.]*\.[^]*What is still held:/.test(text()) || /For comparison/.test(text()) && /the same money in an S&P 500 index fund instead/.test(text())), text().slice(0, 300));
   // another window changed it
+  if (pure.closedFor) {      // a share is bought or sold by hand only at a price that has traded in the last three hours (17 Oct 2026)
+    const now = Date.UTC(2026, 9, 17, 5, 0, 0), q = (h) => ({ price: 10, time: (now - h * 3600000) / 1000 });
+    check('closed or open is told by the age of the last price: over three hours is closed; a coin, a currency or a quote with no time never is', pure.closedFor('TLS.AX', q(19), now) && Math.round(pure.closedFor('TLS.AX', q(19), now).hours) === 19 && pure.closedFor('TLS.AX', q(2.9), now) === null
+          && pure.closedFor('BTC-USD', q(50), now) === null && pure.closedFor('AUDUSD=X', q(50), now) === null && pure.closedFor('TLS.AX', { price: 10 }, now) === null && pure.FRESH_HOURS === 3);
+    check('it says why, when the share last traded, and what to do', /^TLS\.AX cannot be sold now: its market is closed\. Its last price is from .+ \(19 hours ago\)\. A practice sale is made only at a price that has traded in the last 3 hours, as the autopilot's are, .* Try again once its market is open\.$/.test(pure.closedText('TLS.AX', pure.closedFor('TLS.AX', q(19), now), 'sold')) && /\(3 days ago\)/.test(pure.closedText('X', pure.closedFor('X', q(70), now), 'bought')), pure.closedText('TLS.AX', pure.closedFor('TLS.AX', q(19), now), 'sold'));
+    shutHours = 20; const before = JSON.parse(store['tester@example.com'].data).holdings.length;
+    await buy('SHUT.AX', 100); check('a share whose market is closed is not bought, and the page says so', /SHUT\.AX cannot be bought now: its market is closed/.test(text()) && JSON.parse(store['tester@example.com'].data).holdings.length === before, (text().match(/SHUT[^.]*\./) || [''])[0]);
+    shutHours = 0; await buy('SHUT.AX', 100); const shut = JSON.parse(store['tester@example.com'].data).holdings.find(h => h.symbol === 'SHUT.AX');
+    check('with its market open it is bought as before', !!shut && /Practice buy recorded: \$100\.00 of SHUT\.AX/.test(text()), (text().match(/Practice buy recorded[^.]*\./) || [''])[0]);
+    shutHours = 20; click('refresh'); await sleep(50); await waitIdle();
+    check('once its market has closed, its Sell button reads "Market closed" and cannot be pressed', /<button class="pp-btn ghost" disabled title="SHUT\.AX cannot be sold now: its market is closed[^"]*">Market closed<\/button>/.test(container.innerHTML) && (container.innerHTML.match(/>Market closed</g) || []).length === 1, (container.innerHTML.match(/.{80}Market closed.{20}/) || [''])[0]);
+    click('sell', { 'data-id': shut.id }); await sleep(50); await waitIdle();
+    check('and a sale asked for anyway is refused with the reason, the holding kept', /SHUT\.AX cannot be sold now: its market is closed/.test(text()) && JSON.parse(store['tester@example.com'].data).holdings.some(h => h.id === shut.id), (text().match(/SHUT\.AX cannot[^.]*\./) || [''])[0]);
+    shutHours = 0; click('refresh'); await sleep(50); await waitIdle(); click('sell', { 'data-id': shut.id }); await sleep(50); await waitIdle();
+    check('when it opens again it is sold as before', !JSON.parse(store['tester@example.com'].data).holdings.some(h => h.id === shut.id) && /Sold SHUT\.AX for/.test(text()), (text().match(/Sold SHUT[^.]*\./) || [''])[0]);
+  }
   store['tester@example.com'].version += 1; await buy('KO', 100); check('change from another window is caught, not overwritten', /changed in another window/i.test(text()), (text().match(/This portfolio[^.]*\./) || [''])[0]);
   await buy('KO', 100); check('and works after the reload', /Practice buy recorded: \$100\.00 of KO/.test(text()));
   click('reset'); await sleep(50); await waitIdle(); check('reset', !store['tester@example.com'] && /Account value \$100,000\.00/.test(text()) && /Practice portfolio reset/.test(text()));
