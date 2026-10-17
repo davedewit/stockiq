@@ -20,6 +20,14 @@ Detailed references: `stockiq.md` (AWS resources, Cognito, Lambdas, AI chat),
 `script-reference.md` (every script), `add-new-stocks.md`, `stock-matching-system.md`,
 `stocks-txt-csv-format.md`, `roadmap-to-9.md`, `backlinks-progress.md`, `future-work.md`.
 
+**THE FIRST COMMAND OF EVERY SESSION: `python3 check-tools/session_start.py`** (read-only, about a minute; built 17 Oct 2026 after
+the owner had found problems himself that a session should have found: "You aren't smart or a good AI if i have to manually
+find problems or think of improvements"). It prints the account against an S&P 500 fund and the month's goal, the Admin
+page's answers, the AWS bill, whether the weekly review is due, error lines in the functions' logs, live code against the
+mirrors, the site's key files against the local ones, both repositories, and ends with a numbered list of FINDINGS. **Act on
+every finding** before or alongside whatever the owner asks; add a check to the script whenever a problem is found that it
+missed.
+
 **EVERY SESSION, WITHOUT BEING ASKED (the owner's instruction, 12 Oct 2026):** open with what has happened since the last
 session, and **if the newest file in `stockiq/check-tools/reviews/` is seven or more days old, run the full review** (section
 8c, "The diary, and the review every week or two") before anything else. **And read the Admin page's answers:
