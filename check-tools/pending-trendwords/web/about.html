@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About StockIQ - How Our Stock Analysis Works</title>
+    <meta name="description" content="What StockIQ is, how its stock scores are calculated, where the data comes from, and what the analysis can and cannot tell you.">
+
+    <link rel="canonical" href="https://stockiq.tech/about.html">
+    <link rel="icon" type="image/png" sizes="32x32" href="stockiq-logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="stockiq-logo.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    
+    
+    <!-- Schema.org AboutPage markup -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "AboutPage",
+        "name": "About StockIQ",
+        "url": "https://stockiq.tech/about.html",
+        "mainEntity": {
+            "@type": "Organization",
+            "name": "StockIQ",
+            "url": "https://stockiq.tech",
+            "logo": "https://stockiq.tech/stockiq-logo.png",
+            "sameAs": ["https://instagram.com/stockiq.tech"]
+        }
+    }
+    </script>
+
+    
+    <style>
+        html, body { background: #0f0f0f !important; transition: none !important; }
+        [data-theme="light"] html, [data-theme="light"] body { background: #ffffff !important; }
+    </style>
+    <script>
+        const savedTheme = localStorage.getItem('theme');
+        const manualOverride = localStorage.getItem('manualOverride');
+        const hour = new Date().getHours();
+        const autoTheme = (hour >= 18 || hour < 6) ? 'dark' : 'light';
+        const theme = (manualOverride === 'true' && savedTheme) ? savedTheme : autoTheme;
+        document.documentElement.setAttribute('data-theme', theme);
+    </script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="theme.js"></script>
+<!-- AUTOPILOT_BELL_START: the AI autopilot's practice buys and sells in the notification bell, for signed-in visitors only --><script>(function(){try{var u=localStorage.getItem('userId');if(u&&u!=='anonymous'&&!window.autopilotBell){var s=document.createElement('script');s.src='autopilot-bell.js?h='+Math.floor(Date.now()/36e5);s.async=true;document.head.appendChild(s);}}catch(e){}})();</script><!-- AUTOPILOT_BELL_END -->
+    
+    <style>
+        .top-nav { top: 0 !important; }
+        body { padding-top: 64px !important; }
+        .mobile-menu { top: 64px !important; height: calc(100vh - 64px) !important; }
+        #trial-status-display { top: 60px !important; }
+        
+        .about-container {
+            max-width: 800px;
+            margin: 80px auto;
+            padding: 40px 30px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        .about-container h2 {
+            color: var(--text-primary);
+            margin: 35px 0 12px;
+            font-size: 1.4rem;
+        }
+
+        .about-container ul {
+            padding-left: 22px;
+        }
+
+        .about-container li {
+            margin-bottom: 6px;
+        }
+
+        .weights-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        .weights-table td {
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .weights-table td:last-child {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .about-note {
+            background: var(--bg-secondary);
+            border-left: 4px solid #f59e0b;
+            padding: 15px 20px;
+            border-radius: 6px;
+        }
+
+        @media (max-width: 768px) {
+            .about-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+        }
+    </style>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WVETNMPF8V"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+
+gtag('config', 'G-WVETNMPF8V');
+</script>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="index.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit;">
+                    <img src="stockiq-logo.png" alt="StockIQ" class="brand-logo" style="width: 24px; height: 24px;">
+                    <span class="brand-text">StockIQ</span>
+                </a>
+            </div>
+            
+            <div class="desktop-nav">
+                <a href="index.html" class="nav-item home-link" style="text-decoration: none !important; color: inherit; display: flex; align-items: center;">
+                    Home
+                </a>
+                <div class="nav-item dropdown" onclick="showDropdown('analysis-dropdown', event)">
+                    Analysis <span class="dropdown-arrow">▼</span>
+                    <div class="dropdown-menu" id="analysis-dropdown">
+                        <a href="analysis.html?option=1">Stock & ETF Analysis</a>
+                        <a href="analysis.html?option=2">Trading Signals</a>
+                    </div>
+                </div>
+                <div class="nav-item dropdown" onclick="showDropdown('screeners-dropdown', event)">
+                    Screeners <span class="dropdown-arrow">▼</span>
+                    <div class="dropdown-menu" id="screeners-dropdown">
+                        <a href="analysis.html?option=3">🇺🇸 US Markets</a>
+                        <a href="analysis.html?option=4">🇪🇺 Europe Markets</a>
+                        <a href="analysis.html?option=5">🌏 Asia-Pacific Markets</a>
+                        <a href="analysis.html?option=6">🌎 Americas Markets</a>
+                    </div>
+                </div>
+                <div class="nav-item dropdown" onclick="showDropdown('crypto-dropdown', event)">
+                    Crypto <span class="dropdown-arrow">▼</span>
+                    <div class="dropdown-menu" id="crypto-dropdown">
+                        <a href="analysis.html?option=7">Crypto Universe Screener</a>
+                    </div>
+                </div>
+                <div class="nav-item dropdown" onclick="showDropdown('account-dropdown', event)" style="margin-left: auto;">
+                    Account <span class="dropdown-arrow">▼</span>
+                    <div class="dropdown-menu" id="account-dropdown">
+                        <a href="signup.html">Register</a>
+                        <a href="login.html">Login</a>
+                    </div>
+                </div>
+                <button class="notification-bell" id="notification-bell" onclick="goToNotifications()" title="Notifications" aria-label="View notifications" style="display: none; position: relative; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-primary); margin-right: 10px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span class="notification-badge" id="notification-badge" style="position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; font-weight: bold; display: none; align-items: center; justify-content: center;"></span>
+                </button>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Click: Toggle theme | Double-click: Reset to auto" aria-label="Toggle dark mode">
+                    <span class="theme-icon" aria-hidden="true">🌙</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+
+    <div class="about-container">
+        <h1 style="text-align: center; color: var(--text-primary); margin-bottom: 30px;">About StockIQ</h1>
+
+        <p>StockIQ is a stock and crypto research tool for individual investors. You enter a ticker or run a screener, and StockIQ pulls market data, calculates technical and fundamental indicators, and produces a report with a single weighted score and a plain-English explanation of what is driving it.</p>
+
+        <h2>How the score is calculated</h2>
+        <p>StockIQ uses two scoring methods, and every report shows the full breakdown behind its score.</p>
+        <h3>Single-stock analysis: 0&ndash;100 investment score</h3>
+        <p>When you analyse one stock or ETF, the score starts at a neutral 50. Points are then added or taken away for:</p>
+        <ul>
+            <li><strong>Technical signals:</strong> RSI, MACD, and price against its 20-, 50- and 200-day moving averages</li>
+            <li><strong>Fundamentals:</strong> P/E, price-to-book, revenue growth, profit margin, debt, liquidity and return on equity</li>
+            <li><strong>Momentum:</strong> recent price moves and volume, with a penalty for overextended moves</li>
+        </ul>
+        <p>The score is limited to 0&ndash;100. Higher scores mean more positive signals.</p>
+        <h3>Screeners: the trend score</h3>
+        <p>The market screeners rank many stocks at once by a trend score built from four parts:</p>
+        <table class="weights-table">
+            <tr><td>How far the price stands above its 52-week low</td><td>0 to +2 (in full at 100% above)</td></tr>
+            <tr><td>The rise over the past year, leaving out the latest month</td><td>&minus;1.5 to +1.5 (in full at 60%)</td></tr>
+            <tr><td>The price above or below its 200-day average</td><td>+0.5 or &minus;0.5</td></tr>
+            <tr><td>The 50-day average above or below the 200-day</td><td>+0.5 or &minus;0.5</td></tr>
+            <tr><td>RSI over 80 (overheated)</td><td>&minus;0.5</td></tr>
+        </table>
+        <p>A positive total is multiplied by 0.6, so that the signal labels, from Strongly positive to Strongly negative, span about the same range as before. Every screener result lists these parts for each stock.</p>
+        <p>Why this score: in October 2026 the screeners&rsquo; earlier 12-factor score (RSI, MACD, short-term momentum, volume and others) was tested on about 1,750 shares in nine markets over four years. Its top 10, changed weekly, did worse than simply holding its whole list in 17 of 18 periods. A trend score&rsquo;s top 10 did better in 13 of 18, with bigger swings on the way. These are past results on today&rsquo;s index members in a mostly rising period; they promise nothing.</p>
+        <p>The screeners work from prices only and do not use company financials. The score is a measure of trend over months and says nothing about valuation. For company fundamentals, run a single-stock report, which does fetch them.</p>
+
+        <h2>Where the data comes from</h2>
+        <ul>
+            <li>Price, volume and company data from Yahoo Finance and Finnhub</li>
+            <li>News summaries generated with AI from published financial news</li>
+            <li>Analysis runs on AWS, with screeners processing large batches of stocks in parallel</li>
+        </ul>
+
+        <h2>What you can analyse</h2>
+        <ul>
+            <li>Individual stocks, ETFs and coins, with a 0&ndash;100 score that lists every point behind it</li>
+            <li>Trading signals: a short-term technical reading for up to 10 symbols, or the five strongest across the S&amp;P 100</li>
+            <li>Screeners for US indexes (Dow 30, S&amp;P 100, 500 and 1500, NASDAQ 100, Russell 1000 and 2000), the ASX 50 to 300, Canada&rsquo;s TSX 60, the UK FTSE 100, Germany&rsquo;s DAX 40, France&rsquo;s CAC 40, the Netherlands&rsquo; AEX, Italy&rsquo;s FTSE MIB, Spain&rsquo;s IBEX 35, Switzerland&rsquo;s SMI, Japan&rsquo;s Nikkei 225, Hong Kong&rsquo;s Hang Seng, Singapore&rsquo;s STI, India&rsquo;s Sensex, South Korea&rsquo;s KOSPI 200 and Brazil&rsquo;s Bovespa</li>
+            <li>A crypto screener of 540 coins</li>
+        </ul>
+
+        <h2>What else is in it</h2>
+        <ul>
+            <li>An AI chat that explains what the data shows for a stock, or how your own dashboard is doing. It does not tell you what to buy or sell.</li>
+            <li>A practice portfolio: $100,000 of fake money to buy and sell with, free with every account. No real trade is placed.</li>
+            <li>The AI autopilot (Beta), in every paid plan: it runs the practice portfolio from the screeners&rsquo; results by itself and says why it bought and sold. Past screener results have not shown a reliable edge over the market.</li>
+            <li>A dashboard with your report history, CSV exports and background runs of the larger screeners.</li>
+        </ul>
+
+        <h2>Pricing</h2>
+        <p>New users get 15 free analyses over a 3-day trial, with no credit card required. After that, plans are Starter ($4.99/month), Pro ($14.99/month) and Elite ($49.99/month), charged in US dollars. See the <a href="refunds.html" style="color: #007bff;">refund policy</a> for cancellations.</p>
+
+        <h2>Important: this is not financial advice</h2>
+        <div class="about-note">
+            <p style="margin: 0 0 10px;">StockIQ provides general information and automated analysis only. It does not take into account your objectives, financial situation or needs, and it is not a recommendation to buy or sell any security. StockIQ does not hold an Australian Financial Services Licence (AFSL) or any other financial services licence, and is not a licensed financial adviser, broker or dealer.</p>
+            <p style="margin: 0;">Scores and signals are calculated from historical and current data and can be wrong. Past performance is not a reliable indicator of future results. Consider seeking advice from a licensed financial adviser before making investment decisions.</p>
+        </div>
+
+        <h2>Contact</h2>
+        <p>Questions, bug reports or feedback are welcome through the <a href="contact.html" style="color: #007bff;">contact page</a> or on <a href="https://instagram.com/stockiq.tech" target="_blank" style="color: #007bff;">Instagram</a>.</p>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 StockIQ - Professional Investment Research Platform</p>
+        <p>Powered by AI • Market Data • Comprehensive Analysis</p>
+        <p>
+            <a href="terms.html" style="color: #007bff; text-decoration: none;">Terms of Service</a> • 
+            <a href="privacy-policy.html" style="color: #007bff; text-decoration: none;">Privacy Policy</a> • 
+            <a href="refunds.html" style="color: #007bff; text-decoration: none;">Refund Policy</a> • 
+            <a href="support.html" style="color: #007bff; text-decoration: none;">Support</a> • 
+            <a href="contact.html" style="color: #007bff; text-decoration: none;">Contact</a> • 
+            <a href="data-deletion.html" style="color: #007bff; text-decoration: none;">Data Deletion</a> • 
+            <a href="news.html" style="color: #007bff; text-decoration: none;">Blog</a> • 
+            <a href="about.html" style="color: #007bff; text-decoration: none;">About</a> • <a href="faq.html" style="color: #007bff; text-decoration: none;">FAQ</a>
+        </p>
+        <p style="margin-top: 15px;">
+            <a href="https://instagram.com/stockiq.tech" target="_blank" style="color: #E4405F; text-decoration: none; font-size: 24px;" title="Follow us on Instagram">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+            </a>
+        </p>
+    </footer>
+
+    <script>
+        let activeDropdown = null;
+
+        function showDropdown(dropdownId, event) {
+            if (event && event.target.closest('.home-link')) {
+                return;
+            }
+            if (activeDropdown && activeDropdown !== dropdownId) {
+                document.getElementById(activeDropdown).classList.remove('show');
+            }
+            const dropdown = document.getElementById(dropdownId);
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+                activeDropdown = dropdown.classList.contains('show') ? dropdownId : null;
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.dropdown')) {
+                if (activeDropdown) {
+                    const dropdown = document.getElementById(activeDropdown);
+                    if (dropdown) {
+                        dropdown.classList.remove('show');
+                    }
+                    activeDropdown = null;
+                }
+            }
+        });
+
+        const userId = localStorage.getItem('userId');
+        if (userId && userId !== 'anonymous') {
+            const bell = document.getElementById('notification-bell');
+            if (bell) bell.style.display = 'block';
+            
+            const accountDropdown = document.getElementById('account-dropdown');
+            if (accountDropdown) {
+                accountDropdown.innerHTML = `
+                    <a href="dashboard.html">Dashboard</a>
+                    <a href="#" onclick="event.preventDefault(); localStorage.clear(); window.location.href='index.html';">Logout</a>
+                `;
+            }
+        }
+
+        function goToNotifications() {
+            window.location.href = 'dashboard.html';
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            localStorage.setItem('manualOverride', 'true');
+            const icon = document.querySelector('.theme-icon');
+            if (icon) {
+                icon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            }
+        }
+    </script>
+</body>
+</html>
