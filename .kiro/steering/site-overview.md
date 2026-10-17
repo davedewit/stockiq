@@ -1502,8 +1502,11 @@ show. Settings holds the first five items below, Activity the last five:
   rule; the chat's own test refuses the word). The card also says that overlapping lists do no harm. Under each market with a ticked screener: a
   menu "Share of the budget" (automatic, or a step picked by hand), and under the card one line in
   words on how the budget is spread.
-- **What it may do by itself**: three switches (sell early on the AI model's review, try changes
-  to its own rules, email me its reviews). Under the email switch: what became of the last email
+- **What it may do by itself**: two switches (try changes to its own rules, email me its reviews). **"Sell early on the AI
+  model's review" was taken out on 17 Oct 2026**: 31 trades at -1.46% a trade against -0.62% for every other kind of sale, and
+  the shares it sold early mostly went on rising. `AI_SELL = False` in the function makes the setting off for every account
+  whatever a page sends; the panel says why in one line; the review's code stays, tested (`ai_trader_test.py` sets `AI_SELL`
+  on), so that it can only return as a trial with a newer model (`experiments.json`, "ai-review-off" and "newer-model"). Under the email switch: what became of the last email
   ("accepted by the mail service", or "could not be sent" and why) and "Send me a test email".
 - (At the top, beside the buttons: a line saying "Saving…" / "✓ Saved." / "Not saved: reason".
   There is no save button: every change saves itself.)
@@ -1589,7 +1592,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=38` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=48`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=53`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -1650,7 +1653,7 @@ sends. The autopilot acts for accounts on a paid plan and for the accounts liste
 | `maxHoldDays` | 0.5 h … 60 days, stored in days | The longest it keeps a holding |
 | `auto` | any of `periodDays`, `everyHours`, `maxHoldDays` | **Which of those three are left to the risk level.** For a listed one `clean_settings` puts in the level's own value (`PACE`) every time, so the rest of the code only ever sees numbers. A new user leaves all three; settings saved before 10 Oct evening have none (all set by hand) |
 | `screeners` | any of the 27 keys (default none) | Coordinator keys, every screener of the site since 13 Oct 2026: `3-8 3-100 3-7 3-3 3-2 3-4 3-5 3-6` (US), `5-ftse100 5-dax40 5-cac40 5-smi 5-aex 5-ftsemib 5-ibex35` (Europe), `4-50 4-100 4-200 4-300 5-nikkei225 5-hangseng 5-sensex 5-kospi200 5-sti` (Asia-Pacific), `5-tsx60 5-bovespa` (Americas), `7-1` (coins) |
-| `aiSell`, `selfTune`, `emails` | on unless switched off | "What it may do by itself" |
+| `aiSell`, `selfTune`, `emails` | on unless switched off | "What it may do by itself". **`aiSell` is always off since 17 Oct 2026** (`AI_SELL = False`, above) |
 | `holdings` | empty, or 2–50 | **The number of equal holdings the budget is spread over** (12 Oct 2026). Empty: the risk level's own (12 / 10 / 8 / 6 / 4). With a number: each holding is the budget over it (`holdings_of`); it buys up to a fifth of them at a check-in instead of 3 (`buys_per_check`: 3 could never fill 50); it looks at least that far down each ranking, up to 30 (`rules_for` widens `top`); the shares of the budget per market are counted in that number (`market_slots`); never so many that one is under the $25 smallest buy. The panel: a field beside the budget, the level's number in grey, tagged automatic / set by you, with a line saying what the number means (`holdingsHint`; `positionsOf`, `buysPerCheck`, `withHoldings` are the panel's copies of the sums: `autopilot_plan_check.py` compares them). **A matter of how bumpy the ride is, not of profit** ("Ideas offered", the replay). Holdings bought at an earlier size stay their size until sold, so after a change the budget holds a mix |
 | `stopPct`, `takePct` | empty, or 1.5–30 and 2–80 | The owner's own loss limit and gain mark, as sizes in percent |
 | `shares` | `{market: percent}`, only for markets set by hand (default none) | A market's share of the budget. Markets are the groups of `SCREENERS` (`GROUPS`, since 13 Oct 2026 the regions of the site's Screeners menu: **US markets, Europe markets, Asia-Pacific markets, Americas markets, Coins**; until then one a country: US shares, Australian shares, UK shares, Japanese shares, Coins. A share saved under an old name is carried to its region, `OLD_GROUPS`). A market left out is automatic. Together at most 100 (`clean_settings` takes the excess off the later ones). See "How the budget is spread" below |
@@ -1813,7 +1816,7 @@ sends. The autopilot acts for accounts on a paid plan and for the accounts liste
      `gain_floor`: protection from half the gain mark at 20 days down to 1% at 6 hours; a small gain
      may give back half, one near the mark a quarter). The tuner's hindsight estimate for `trail`
      still uses that simpler rule.
-4. **The AI model's review** (`ai_review`, if `aiSell` is on and not paused): for each holding the
+4. **The AI model's review** (`ai_review`, if `aiSell` is on and not paused; **off for everyone since 17 Oct 2026**, `AI_SELL`): for each holding the
    rules are keeping it is given what it was bought on, the screener's figures now, how it has
    moved, **its path since buying**, what is protected, when the rules will sell it, and up to three
    recent headlines that name it. It is asked whether a rise is still building or has stalled or
@@ -2309,7 +2312,7 @@ He asked for "an admin account… so i can see status", with items to action, ad
 unless you need me to make a big decision. i'd prefer it all run without me". Built lean, as decided by the session:
 - **Where:** a "🛠 Admin" tab on the dashboard and an "Admin" link at the top of the dashboard's Account menu, shown only
   when the autopilot's function answers action `admin` for the account (`listed`: the site's own accounts, env
-  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=3`), the tab,
+  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=6`), the tab,
   panel and `NAMES` entry in `dashboard.html`. The link is on the dashboard only, not yet on the other pages.
 - **What it shows:** the month's goal, each figure against its target (`goal_standing`; the same numbers as `GOALS` in
   `check-tools/autopilot_review.py`: change the two together); **"Needs your yes"**: proposals with "Yes" / "Not now"; the
@@ -2325,6 +2328,12 @@ unless you need me to make a big decision. i'd prefer it all run without me". Bu
   marked red for "clearly down / clearly losing", green for "clearly up", and signed dollars and percentages coloured as they
   point (a zero, a target, is left plain); the settings are chips, the screeners folded. Colour tokens are on `#admin-panel`
   with pale backgrounds that read in both themes.
+  **The Improvements card** (since 17 Oct 2026, the owner: "put the list of future improvements to track them so i know which was
+  run which is next ... easily see if something was improved in the past"): being tested now (each with a bar to its decision
+  day and how it is measured), next in order, and done (✓ kept / ✗ taken out, with the result), and the parts of the site
+  reviewed lately. It is `check-tools/experiments.json` and `site_parts.json`, copied into `_admin['plan']` by
+  `python3 check-tools/admin.py sync` (experiments.py and site_parts.py run it after every change; one small write). **The
+  bill's colours:** green under $1, amber to $1.50, red beyond (the owner's warning and limit).
   **The account value on it is the Practice portfolio tab's own** (17 Oct 2026, `admin-panel.js?v=4`; the owner saw $99,411 on
   the Admin page beside $99,643.23 on the tab): the portfolio script hands its live sum over (`practicePortfolio.figures()`, and
   an event `practice-portfolio:figures` at each redraw), and until it has its prices the Admin page shows the function's
@@ -4370,6 +4379,16 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     being asked things a session should have found: "You aren't smart or a good AI if i have to manually find problems or
     think of improvements" (the instruction at the top of this file). Bill on 17 Oct: $0.56 this month; Lambda calls 451,952,
     5,182 the day before (the polling cut: about 66,000 a day before it).
+  - **Later the same evening:** the AI model's early sales taken out (section 8c, "What the owner sees"); the Admin page's
+    Improvements card and its cost colours; `check-tools/lists_check.py` (every screener's list: page and coordinator alike, no
+    duplicates; monthly, every symbol's prices and the members against the index's own source where a script can read it:
+    Nasdaq for Stockholm, BlackRock's NAFTRAC holdings for Mexico, the KODEX 200 fund for Korea, B3 for Brazil, the Madrid
+    exchange for Spain; first full run clean); the screener summaries in plain words ("Average score: +0.7 on a scale of about
+    -3 to +3 (Slightly positive on average)", "Scored: 76 of the 76 stocks in the list (100%)"; the Nikkei report said 210 for
+    225); the registers `site_parts.py` and `experiments.py` (top of this file); the cost cuts and the budget `stockiq-monthly`
+    (top of this file, "THE COST RULE"); the AI chat knows the trend score (asked live, it described it rightly). Rollback zips
+    `stockiq-ai-trader_before_autopilot_{plan,costs2,usage,adminvalue}_20261017.zip`, `stockiq-ai-chat_before_{plan,chatscore}_20261017.zip`,
+    `stockiq-screener-coordinator_before_{summary,mexico,newmarkets}_20261017.zip`.
   - **Five more screeners, the "Coming Soon" ones that had current lists** (the owner: "set those up and make sure they are
     adding to the autopilot etc so its like other screeners"): Euro Stoxx 50, Sweden OMX Stockholm 30, China CSI 300, Taiwan 50,
     New Zealand NZX 50 (the table in section 8b). 48 workers by `workers/create_group.py`; the coordinator, the page's entries and
