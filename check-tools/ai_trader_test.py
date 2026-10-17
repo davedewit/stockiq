@@ -149,7 +149,7 @@ rec['settings']['screeners'] = ['7-1']; check('due: coins any time', m.due(rec, 
 rec['settings']['enabled'] = False; check('due: never when off', not m.due(rec, dt.datetime(2026, 10, 14, 15, 0)))
 # --- every screener, other markets and currencies
 s, b = call(action='get', userId=U)
-check('all 27 screeners are offered, in groups', len(b['options']['screeners']) == 27 and b['options']['screeners']['4-200'] == {'name': 'ASX 200', 'kind': 'stock', 'group': 'Asia-Pacific markets'} and {v['group'] for v in b['options']['screeners'].values()} == {'US markets', 'Europe markets', 'Asia-Pacific markets', 'Americas markets', 'Coins'}, b['options']['screeners'])
+check('all 32 screeners are offered, in groups', len(b['options']['screeners']) == 32 and b['options']['screeners']['4-200'] == {'name': 'ASX 200', 'kind': 'stock', 'group': 'Asia-Pacific markets'} and {v['group'] for v in b['options']['screeners'].values()} == {'US markets', 'Europe markets', 'Asia-Pacific markets', 'Americas markets', 'Coins'}, b['options']['screeners'])
 check('settings accept the new screeners', m.clean_settings({'screeners': ['4-200', '5-ftse100', '3-6', 'nope']}, U)['screeners'] == ['3-6', '4-200', '5-ftse100'])
 mon = lambda h, mi=40, day=12: dt.datetime(2026, 10, day, h, mi)                      # 12 Oct 2026 is a Monday
 check('market hours: Sydney, Tokyo, London, New York, coins', m.market_open('au', mon(1)) and not m.market_open('au', mon(6)) and m.market_open('jp', mon(5)) and m.market_open('uk', mon(9)) and not m.market_open('uk', mon(16))
@@ -1404,4 +1404,10 @@ check('the weekly review says how the account stands against the same money in a
 adm_t2 = {'proposals': [], 'review': None, 'health': None, 'seq': 0}; m.write_review(adm_t2, rec_t, pf, dt.datetime(2026, 10, 17, 6))
 check('without a price lookup (a test, or off the function) no prices are asked for and the line is left out', not any('S&P 500 fund since' in l for l in adm_t2['review']['lines']))
 m.http_json = old_http
+
+# --- 17 Oct 2026: five more screeners; three new markets with their own hours (UTC, Monday to Friday)
+def open_at(mk, when): return m.market_open(mk, when) if hasattr(m, 'market_open') else None
+wk = dt.datetime(2026, 10, 14)      # a Wednesday
+check('China, Taiwan and New Zealand are open in their sessions and shut outside them', all(m.market_open(mk, wk.replace(hour=h, minute=mi)) for mk, h, mi in (('cn', 2, 0), ('cn', 6, 30), ('tw', 3, 0), ('nz', 1, 0))) and not any(m.market_open(mk, wk.replace(hour=h, minute=mi)) for mk, h, mi in (('cn', 8, 0), ('tw', 6, 0), ('nz', 5, 0))) and not m.market_open('nz', dt.datetime(2026, 10, 17, 1, 0)))
+check('the Euro Stoxx 50 and Stockholm keep the European hours, the three others draw on Asia-Pacific', m.SCREENERS['5-sx5e'][4] == 'eu' and m.SCREENERS['5-omx30'][4] == 'eu' and {m.SCREENERS[k][5] for k in ('5-csi300', '5-tw50', '5-nzx50')} == {'Asia-Pacific markets'})
 print('ALL PASS' if ok else 'SOME FAILED')
