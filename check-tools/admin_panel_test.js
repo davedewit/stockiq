@@ -37,7 +37,7 @@ async function page(status, uid) {
   const h = p.panel.innerHTML, text = h.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
   check('for the owner the tab and the "Admin" link in the Account menu appear', p.tab.hidden === false && p.menu.children.length === 1 && p.menu.children[0].href === 'dashboard.html#admin');
   check('it shows the month\'s goal with each figure against its target', /Month 1: in profit/.test(text) && /Finished trades in all 51/.test(text) && /target 100/.test(text) && /-1\.19%/.test(text) && /\$99,334/.test(text) && /not forecasts/.test(text));
-  check('what needs a yes: each proposal with its reason, what a yes does, and the two buttons', /Needs your yes/.test(text) && /applied the moment you say yes/.test(text) && /done in your next session/.test(text) && (h.match(/data-ad-answer="yes"/g) || []).length === 2 && (h.match(/data-ad-answer="no"/g) || []).length === 2);
+  check('what needs a yes: each proposal with its reason, what a yes does, and the two buttons', /Decisions for you/.test(text) && !/Needs your yes/.test(text) && /applied the moment you say yes/.test(text) && /done in your next session/.test(text) && (h.match(/data-ad-answer="yes"/g) || []).length === 2 && (h.match(/data-ad-answer="no"/g) || []).length === 2);
   check('the weekly review and how it is running', /Weekly review/.test(text) && /Clearly losing: sales by the AI review/.test(text) && /Write a fresh one now/.test(text) && /You never need to press this/.test(text) && /No errors\./.test(text) && /AWS bill this month so far: \$0\.56/.test(text) && /Lambda calls: 451,952 of 1,000,000 free \(45%\)/.test(text) && /on course for about 853k this month/.test(text) && /Show the 2 screeners it buys from/.test(text) && /probably between -2\.03% and -0\.35%/.test(text));
   await p.click({ 'data-ad-answer': 'yes', 'data-ad-id': '3' });
   check('"Yes" to a setting sends the answer, says it is done, and the autopilot panel is reloaded', p.sent.at(-1).op === 'answer' && p.sent.at(-1).id === 3 && p.sent.at(-1).answer === 'yes' && /Done: Switch off/.test(p.panel.innerHTML) && p.shown.includes('reloaded'), p.sent.at(-1));
@@ -52,7 +52,7 @@ async function page(status, uid) {
     await q.click({ 'data-ad-view': 'improvements' });
     check('the Improvements view has the whole list: next, every one done, the parts reviewed, and which users see', /Next, in order/.test(pl()) && /Hold fewer/.test(pl()) && /Old one C/.test(pl()) && /Parts of the site reviewed lately/.test(pl()) && /users see it/.test(pl()) && !/Needs your yes/.test(pl()));
     await q.click({ 'data-ad-view': 'overview' });
-    check('and back to the Overview', /Needs your yes/.test(pl()) && !/Next, in order/.test(pl())); }
+    check('and back to the Overview', /Decisions for you/.test(pl()) && !/Next, in order/.test(pl())); }
   p = await page(200, 'dave@x.com');
   const plain = () => p.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
   check('before the Practice portfolio has its prices the account is the function\'s estimate, and says so', /\$99,334/.test(plain()) && /an estimate until the prices are in/.test(plain()));

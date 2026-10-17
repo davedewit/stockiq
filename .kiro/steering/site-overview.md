@@ -1465,6 +1465,14 @@ with `document.querySelector('h3')`.
   stays open across redraws, `openPlans`; the owner wanted the row down to the name, the company and why it was bought), when it will sell at the latest, at what loss or gain sooner, how the stop that
   follows it works, and, while its market is closed, that nothing happens to it until the market
   opens, with the time.
+- **Only the latest 10 holdings are listed** (17 Oct 2026, the owner, at 39 holdings: "make it so this list only shows the most
+  recent 10 ... then has option to show all"), newest first, then "Show all 39 (29 more)", which turns into "Show only the latest
+  10" (`HELD_SHOWN`, `allHeld`, `#pp-held-more`; kept while the page is open, not remembered, as "What it has done" on the
+  autopilot tab does with its 8). The heading still counts them all ("Holding (39)").
+- **The gap to the S&P 500 fund is given in percent as well as dollars** ("▲ $1,610.28 (1.61%)", on the third figure at the top,
+  in the breakdown's "The whole account" and above the graph; the owner asked whether a percent made sense, 17 Oct 2026). It
+  does: both started with the same money, so the dollars over the starting amount are exactly the difference between the
+  two returns (the account -0.36%, the fund -1.97%: 1.61%).
 - "Sold (N)" folded list with a summary, "Clear sold list" and an × per line (clearing only tidies
   the list: what a sale brought in is already in the cash). "Refresh prices", "Reset fake money".
 
@@ -1537,6 +1545,20 @@ show. Settings holds the first five items below, Activity the last five:
 - **What it has done**: every buy, sell and check-in note, newest first; "Why, and the details" /
   "The plan for it" folded under each trade; "Refresh now"; a switch "Buys and sells only".
 
+### Two boxes that look alike, and are not the same (17 Oct 2026)
+
+The owner asked whether these were duplicates. They are not, and each now says what it is for:
+- **"Needs you"** on the AI autopilot tab (every user who has the autopilot): what only the user can put right about their own
+  autopilot: switched off while holding something, no screener ticked, every screener resting, too little practice cash, a
+  check-in that failed or did not happen, a refused email (`needs()` in the function). Empty: "✓ Nothing needs you right now:
+  its settings, cash and screeners are all in order, and it runs by itself." It used to add "nothing has to be approved or
+  pushed", which was true for a user and read wrong beside the Admin page, where the owner does approve things.
+- **"Decisions for you"** on the Admin page (the owner only): proposals to change the site or its settings that the weekly
+  review or a session puts to him for a yes or no (`admin_propose`). Empty: "✓ No decisions waiting", and a line saying that
+  anything wrong with the autopilot itself shows on its own tab, as for every user.
+- So a problem with the autopilot appears in the first; a choice about how the site should change appears in the second.
+  Never put the same item in both.
+
 ### The notification bell (one list, on every page)
 
 Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story of the rounds is in section 9.
@@ -1600,8 +1622,8 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=38` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=54`) | Controls and reports only; decisions are made by the Lambda |
+| Portfolio section | `website/practice-portfolio.js` (`?v=40` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=55`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -2321,24 +2343,24 @@ He asked for "an admin account… so i can see status", with items to action, ad
 unless you need me to make a big decision. i'd prefer it all run without me". Built lean, as decided by the session:
 - **Where:** a "🛠 Admin" tab on the dashboard and an "Admin" link at the top of the dashboard's Account menu, shown only
   when the autopilot's function answers action `admin` for the account (`listed`: the site's own accounts, env
-  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=7`), the tab,
+  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=8`), the tab,
   panel and `NAMES` entry in `dashboard.html`. The link is on the dashboard only, not yet on the other pages.
 - **What it shows:** the month's goal, each figure against its target (`goal_standing`; the same numbers as `GOALS` in
-  `check-tools/autopilot_review.py`: change the two together); **"Needs your yes"**: proposals with "Yes" / "Not now"; the
+  `check-tools/autopilot_review.py`: change the two together); **"Decisions for you"** (it was "Needs your yes" until 17 Oct 2026): proposals with "Yes" / "Not now"; the
   **weekly review**, which the scheduled run writes by itself every 7 days (`write_review`, `ADMIN_REVIEW_DAYS`), or at once
   with "Write it now"; **how it is running** (`health`, written by every scheduled run: when, how many checked in, paused,
   waiting, stopped on an error); the settings in force; answered proposals. The review's button reads "Write a fresh one now" and says under it that it is never needed, buys, sells and
   changes nothing, may add a proposal, and moves the next automatic review to 7 days after the press (`admin-panel.js?v=2`,
   17 Oct 2026, after the owner asked what the point of it was).
   **Since 17 Oct 2026 it is drawn in colour** (`admin-panel.js?v=3`; the owner: "just looks like alot of black text and my eyes
-  don't target anything"): four tiles at the top (Practice account, the month's goal as "N of 3 met", Needs your yes, Running),
+  don't target anything"): four tiles at the top (Practice account, the month's goal as "N of 3 met", Decisions for you, Running),
   each green, amber or red by its state; each card has a coloured left edge (purple goal, amber when something needs his yes,
   green or red for how it is running); the goal's rows have a progress bar and a pill "target …"; the review's lines are
   marked red for "clearly down / clearly losing", green for "clearly up", and signed dollars and percentages coloured as they
   point (a zero, a target, is left plain); the settings are chips, the screeners folded. Colour tokens are on `#admin-panel`
   with pale backgrounds that read in both themes.
   **Two views since 17 Oct 2026, evening** (`admin-panel.js?v=7`; the owner: "maybe make it a tab within admin page for the
-  improvements? or have a minimal part of it there then a tab for older stuff"): **Overview** (the tiles, Needs your yes, a
+  improvements? or have a minimal part of it there then a tab for older stuff"): **Overview** (the tiles, Decisions for you, a
   short Improvements card: the counts, up to three being tested with the days left, the last three decided, and a button to
   the full list; then the goal, the review, how it is running, the settings) and **🧭 Improvements** (the whole card below,
   every decided item, not folded; each item that users also see is tagged "👥 users see it"). The view is remembered in the
@@ -3087,6 +3109,12 @@ more finished trades than there are, and would chase noise before then.
 
 - The owner (Dave) built this with AI help, works in **Kiro**, and is not going to read code.
   Explain in plain terms what will change and what you found. Lead with the result.
+- **Correct the owner when he is wrong, and say so plainly** (his standing instruction, 17 Oct 2026: "ignore me if it makes
+  no sense and is fine as is. same for everything i ask your in control here to make a good site and correct me when wrong
+  ... no issue with hearing i'm wrong and you suggesting another option or skipping it completely"). For every request:
+  is it a good idea? If not, say why and do the better thing, or skip it and say that it was skipped. When he points at two
+  things that look alike, check whether they are a real duplicate or two different things, and if they are different,
+  make the difference plain on the page (the two "needs" boxes, section 8c, "Two boxes that look alike").
 - **Verify, don't assume, and don't trust these docs blindly.** On 9 Oct 2026 the docs said
   `DRY_RUN=true` worked; the script had lost it and a "dry run" deployed for real. Before relying
   on a script feature or a claim here, check the code. When something is fixed, say how it was
@@ -4413,6 +4441,16 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     way: the panel's refresh only redrew when its fingerprint of the answer changed, and that fingerprint did not include the new
     list (fixed: `stamp`). Tests: 473 function, 218 panel, 14 Admin page, 23 chat. Rollback zips
     `stockiq-ai-trader_before_autopilot_improve_20261017.zip`, `stockiq-ai-chat_before_improve_20261017.zip`.
+  - **Two boxes made plainly different, the holdings list shortened, the gap to the fund in percent** (15:25 UTC; website only:
+    `practice-portfolio.js?v=40`, `practice-autopilot.js?v=55`, `admin-panel.js?v=8`, `dashboard.html`). The owner asked whether
+    the autopilot tab's "Nothing needs you right now" and the Admin page's "Needs your yes" were duplicates: they are not
+    (section 8c, "Two boxes that look alike"), so the Admin one is "Decisions for you" and each says what it covers. He also
+    asked whether the "ahead by $1,610.28" needed a percent: it makes sense (the difference between the two returns, since
+    both started with $100,000), so it has one. And he asked for the holdings to show the latest 10 with a way to the rest.
+    His standing instruction to be corrected when wrong is in section 10. Checked: 141 portfolio, 218 panel, 14 Admin page
+    checks; the live tab opened as his account, read-only, at 390px: "Holding (39)", 10 rows, "Show all 39 (29 more)",
+    "▲ $1,610.28 (1.61%)", nothing broken. `live_practice_check.js` now reports the rows shown and the link. **Not checked:**
+    a signed-in browser for the Admin page's new wording.
   - **Five more screeners, the "Coming Soon" ones that had current lists** (the owner: "set those up and make sure they are
     adding to the autopilot etc so its like other screeners"): Euro Stoxx 50, Sweden OMX Stockholm 30, China CSI 300, Taiwan 50,
     New Zealand NZX 50 (the table in section 8b). 48 workers by `workers/create_group.py`; the coordinator, the page's entries and
