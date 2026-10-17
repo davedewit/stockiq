@@ -1421,4 +1421,18 @@ if HAS_AI_SELL:
 if hasattr(m, 'words_and'):
     check('several names read "A, B and C"', (m.words_and(['A']), m.words_and(['A', 'B']), m.words_and(['A', 'B', 'C']), m.words_and([])) == ('A', 'A and B', 'A, B and C', ''))
     check('the AI review\'s old verdicts are not sent with the holdings while it is switched off', "'view': (facts or {}).get('view') if AI_SELL else None" in open(sys.argv[1]).read())
+if hasattr(m, 'COST_MANUAL_HOURS'):
+    class _Fake:
+        def __init__(self, kind): self.kind = kind
+        def get_cost_and_usage(self, **k): _asked.append('ce'); return {'ResultsByTime': [{'Total': {'UnblendedCost': {'Amount': '0.61'}}}]}
+        def get_metric_statistics(self, **k): _asked.append('cw'); return {'Datapoints': [{'Timestamp': dt.datetime(2026, 10, 16), 'Sum': 5000.0}, {'Timestamp': dt.datetime(2026, 10, 17), 'Sum': 3000.0}]}
+    _real = m.boto3.client; m.boto3.client = lambda kind, **k: _Fake(kind)
+    now = dt.datetime(2026, 10, 17, 16, 0)
+    _asked = []; u = m.aws_usage(now, {'cost': 0.56, 'costAt': '2026-10-17T12:00:00Z'}, manual=True)
+    check('"Refresh now" reads the calls at once and leaves a bill read 4 hours ago (each reading costs $0.01)', _asked == ['cw'] and u['cost'] == 0.56 and u['calls'] == 8000, _asked)
+    _asked = []; u = m.aws_usage(now, {'cost': 0.56, 'costAt': '2026-10-17T08:00:00Z'}, manual=True)
+    check('and reads the bill again when it is more than 6 hours old', _asked == ['ce', 'cw'] and u['cost'] == 0.61, _asked)
+    _asked = []; u = m.aws_usage(now, {'cost': 0.56, 'costAt': '2026-10-17T08:00:00Z'})
+    check('the scheduled reading still leaves the bill for 3 days', _asked == ['cw'] and u['cost'] == 0.56, _asked)
+    m.boto3.client = _real
 print('ALL PASS' if ok else 'SOME FAILED')
