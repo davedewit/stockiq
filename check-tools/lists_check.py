@@ -26,7 +26,7 @@ findings = []
 def page_lists():
     js = ("const vm=require('vm'),fs=require('fs');const c={window:{}};c.window=c;vm.createContext(c);"
           "vm.runInContext(fs.readFileSync(process.argv[1],'utf8')+';this.__S=SHARE_SCREENERS;',c);"
-          "const o={};for(const[k,v]of Object.entries(c.__S))o[k]={name:v.name,size:v.size,list:v.list};console.log(JSON.stringify(o));")
+          "const o={};for(const[k,v]of Object.entries(c.__S))o[k]={name:v.name,size:v.size,list:v.list,names:(v.report||{}).names||null};console.log(JSON.stringify(o));")
     return json.loads(subprocess.run(['node', '-e', js, os.path.join(WEB, 'screeners.js')], capture_output=True, text=True, check=True).stdout)
 
 def coord():
@@ -74,8 +74,11 @@ def get(url, data=None):
 
 # Each index's own members, from the sources that worked on 17 Oct 2026 (site-overview.md section 8b, the table)
 def src_omx30():
-    d = json.loads(get('https://indexes.nasdaqomx.com/Index/WeightingData', f"id=OMXS30&tradeDate={datetime.date.today()}T00:00:00.000&timeOfDay=SOD".encode()))
-    return {x['Symbol'].replace(' ', '-') + '.ST' for x in d['aaData']}
+    for back in range(7):            # the last trading day (a weekend or holiday answers with nothing)
+        day = datetime.date.today() - datetime.timedelta(days=back)
+        d = json.loads(get('https://indexes.nasdaqomx.com/Index/WeightingData', f"id=OMXS30&tradeDate={day}T00:00:00.000&timeOfDay=SOD".encode()))
+        if d.get('aaData'): return {x['Symbol'].replace(' ', '-') + '.ST' for x in d['aaData']}
+    raise RuntimeError('no trading day found in a week')
 def src_ipc():
     rows = list(csv.reader(io.StringIO(get('https://www.blackrock.com/mx/intermediarios/productos/251895/ishares-naftrac-fund/1501904811835.ajax?fileType=csv&fileName=NAFTRAC_holdings&dataType=fund').decode('utf-8-sig'))))
     fix = {'LIVEPOLC.1': 'LIVEPOLC-1'}
@@ -95,29 +98,36 @@ def src_bovespa():
     q = base64.b64encode(json.dumps({'language': 'en-us', 'pageNumber': 1, 'pageSize': 120, 'index': 'IBOV', 'segment': '1'}).encode()).decode()
     d = json.loads(get('https://sistemaswebb3-listados.b3.com.br/indexProxy/indexCall/GetPortfolioDay/' + q))
     return {x['cod'].strip() + '.SA' for x in d['results']}
+IBEX_NAMES = {"ACCIONA,S.A.": "ANA.MC", "ACERINOX, S.A.": "ACX.MC", "ACS,ACTIVIDADES DE CONST.Y SERVICIOS S.A": "ACS.MC", "AENA, S.M.E., S.A.": "AENA.MC", "AMADEUS IT GROUP, S.A.": "AMS.MC", "ARCELORMITTAL, S.A.": "MTS.MC", "BANCO BILBAO VIZCAYA ARGENTARIA, S.A.": "BBVA.MC", "BANCO DE SABADELL, S.A.": "SAB.MC", "BANCO SANTANDER, S.A.": "SAN.MC", "BANKINTER,S.A.": "BKT.MC", "CAIXABANK, S.A.": "CABK.MC", "CELLNEX TELECOM, S.A.": "CLNX.MC", "CIA. DE DIST. INTEG. LOGISTA HOLDINGS": "LOG.MC", "COLONIAL SFL, SOCIMI, S.A.": "COL.MC", "CORP.  ACCIONA ENERGÍAS RENOVABLES, S.A.": "ANE.MC", "ENAGAS, S.A.": "ENG.MC", "ENDESA, SOCIEDAD ANONIMA": "ELE.MC", "FERROVIAL N.V.": "FER.MC", "FLUIDRA, S.A.": "FDR.MC", "GRIFOLS, S.A.": "GRF.MC", "IBERDROLA, S.A.": "IBE.MC", "INDRA SISTEMAS, S.A., SERIE A": "IDR.MC", "INDUSTRIA DE DISEÑO TEXTIL, SA \"INDITEX\"": "ITX.MC", "INTERNATIONAL CONSOLIDAT. AIRLINES GROUP": "IAG.MC", "LABORATORIOS FARMACEUTICOS ROVI, S.A.": "ROVI.MC", "MAPFRE, S.A.": "MAP.MC", "MERLIN PROPERTIES, SOCIMI, S.A.": "MRL.MC", "NATURGY ENERGY GROUP, S.A.": "NTGY.MC", "PUIG BRANDS, S.A. CLASE B": "PUIG.MC", "REDEIA CORPORACION, S.A.": "RED.MC", "REPSOL, S.A.": "REP.MC", "SACYR, S.A.": "SCYR.MC", "SOLARIA ENERGIA Y MEDIO AMBIENTE, S.A.": "SLR.MC", "TELEFONICA, S.A.": "TEF.MC", "UNICAJA BANCO, S.A.": "UNI.MC"}      # the exchange's company name -> our symbol (17 Oct 2026)
+
 def src_ibex35():
+    """The exchange gives names, not tickers: a name in IBEX_NAMES is its symbol; a new name shows as "new: <name>"."""
     out = set()
     for page in range(4):
         d = json.loads(get(f'https://apiweb.bolsasymercados.es/Market/v1/EQ/ListedCompanies?tradingSystem=SIBE&page={page}&pageSize=50'))
-        rows = d.get('data') or d.get('Data') or d if isinstance(d, list) else d.get('data', [])
-        for r in rows if isinstance(rows, list) else []:
-            if 'IBEX 35' in str(r.get('indices') or r.get('Indices') or ''):
-                out.add(str(r.get('ticker') or r.get('Ticker')).strip() + '.MC')
+        for r in d.get('data', []):
+            if 'IBEX 35' in str(r.get('indices') or ''):
+                n = (r.get('name') or '').strip(); out.add(IBEX_NAMES.get(n) or 'new: ' + n)
+        if not d.get('hasMoreResults'): break
     if len(out) < 30: raise RuntimeError(f'only {len(out)} read')
     return out
+
+KNOWN_LEFT_OUT = {'5-kospi200': {'0220W0.KS'}}     # left out on purpose: a new spin-off with too little history to score (13 Oct 2026)
 SOURCES = {'5-omx30': src_omx30, '5-ipc': src_ipc, '5-kospi200': src_kospi200, '5-bovespa': src_bovespa, '5-ibex35': src_ibex35}
 
 def full(P, C):
     syms = sorted({s for v in P.values() if v['list'] for s in v['list']})
     with ThreadPoolExecutor(10) as pool: got = dict(pool.map(price_check, syms))
-    dead = [s for s, n in got.items() if n < 200]
+    dead = [s for s, n in got.items() if n < 50]                 # the worker needs 50 days; a new listing with 50 to 250 is scored
+    young = sorted(s for s, n in got.items() if 50 <= n < 200)
     owners = {s: [v['name'] for v in P.values() if v['list'] and s in v['list']] for s in dead}
     for s in dead: findings.append(f"{s} ({', '.join(owners[s])}): {'no prices at all' if got[s] == 0 else f'only {got[s]} days of prices'} (left the index, renamed, or the price source lost it)")
-    print(f'prices: {len(syms)} symbols, {len(dead)} without a year of prices')
+    print(f'prices: {len(syms)} symbols, {len(dead)} that cannot be scored; new listings with under a year (scored, fine): {", ".join(young) or "none"}')
     for k, fn in SOURCES.items():
         mine = set(C.STOCK_UNIVERSES.get(k) or [])
         try:
             now = fn()
+            now -= KNOWN_LEFT_OUT.get(k, set())
         except Exception as e:
             findings.append(f"{k}: its members could not be read from the source this time ({type(e).__name__}): check by hand"); continue
         joined, left = sorted(now - mine), sorted(mine - now)
@@ -128,7 +138,7 @@ if __name__ == '__main__':
     P, C = quick()
     if '--full' in sys.argv: full(P, C)
     prev = json.load(open(OUT)) if os.path.exists(OUT) else {}
-    rec = {'quick': datetime.datetime.utcnow().isoformat(timespec='seconds') + 'Z', 'full': prev.get('full'), 'findings': findings}
+    rec = {'quick': datetime.datetime.now(datetime.UTC).strftime('%Y-%m-%dT%H:%M:%SZ'), 'full': prev.get('full'), 'findings': findings}
     if '--full' in sys.argv: rec['full'] = rec['quick']
     os.makedirs(os.path.dirname(OUT), exist_ok=True); json.dump(rec, open(OUT, 'w'), indent=1)
     print('\nFINDINGS' + (':' if findings else ': none'))
