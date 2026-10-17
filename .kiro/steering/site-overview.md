@@ -28,6 +28,16 @@ mirrors, the site's key files against the local ones, both repositories, and end
 every finding** before or alongside whatever the owner asks; add a check to the script whenever a problem is found that it
 missed.
 
+**THE COST RULE (the owner, 17 Oct 2026): AWS under $1 a month, $1.50 at most in a heavy month.** An AWS budget, `stockiq-monthly`
+($1.50), emails him at $1 spent, at $1.50 spent and when $1.50 is forecast; the Admin page shows the bill. What costs is not stored
+data (every StockIQ table together was about 7 MB on 17 Oct, far inside the free 25 GB) but **requests**: database reads ($0.19 of
+$0.56 that month, mostly the autopilot panel re-reading the record every minute while the dashboard was open: now every 5
+minutes, the bell every 10), S3 requests from the daily deploy, and each Cost Explorer question ($0.01: the Admin page reads the
+bill every 3 days). About $0.09 a month is the owner's other projects' buckets (Sydney region): not StockIQ's, leave them.
+**Before adding anything that runs on a timer or on every page view, work out its requests a month and its cost.** Data is kept
+when it helps the learning (the record, the diary, the shared record, the coin entry log, the research prices on this Mac);
+delete only with his yes to an exact list, and only when it costs something.
+
 **Two registers keep the improving going without the owner having to ask (17 Oct 2026, his ideas):**
 - **`check-tools/site_parts.py`** lists every part of the site (44) with when a session last looked at it. Each session reviews the
   three looked at longest ago (session_start prints them), through every angle in its LENSES (ease of use, faults, appearance,
