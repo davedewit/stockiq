@@ -2711,6 +2711,10 @@ preview from Kiro): ask early when a change "does not show" (section 9).
    price of that moment, which has moved. Cosmetic; the fix is to buy the quantity asked for at the price of the buy.
    The same thing makes the check "buying by quantity buys exactly that many" fail on and off during US hours.
 9. (Done 17 Oct 2026: the pages' polling. See the change log of that day; measure the effect in his usage report.)
+9b. **The weekly review (Admin page) should say how the account stands against the same $100,000 in an S&P 500 fund since it
+    began** (17 Oct 2026: the owner judges it that way, and rightly; that day the account was about $99,411 against the
+    fund's $98,032). `write_review` in `stockiq-ai-trader`: one line, the fund from SPY at `createdAt` (the price proxy's
+    `range` reaches back past a month). Do it with the next change to that function; not worth a deploy of its own.
 10. **Unused functions: nothing was deleted, and nothing is to be deleted without the owner seeing the exact list and saying
     yes to it.** On 12 Oct he first said to go ahead "if you are 100% never used", then stopped the dry run ("i don't
     think its right to delete workers. they must be used via the screeners?!"). What a check of every call in the 455
