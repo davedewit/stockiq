@@ -782,6 +782,12 @@ crypto orchestrator or any worker.
 | **India Sensex** (since 13 Oct 2026) | `5, 'sensex'` | `5-sensex` | `stockiq-asia-5-6-worker-N` (3) | 30 | Wikipedia's list of Sensex companies (latest change Dec 2025; the June 2026 review changed nothing). **Priced by the NSE listings (`.NS`)**: with `.BO` the worker got no usable history for some members (RELIANCE.BO, M&M.BO) |
 | **South Korea KOSPI 200** (since 13 Oct 2026) | `5, 'kospi200'` | `5-kospi200` | `stockiq-asia-5-7-worker-N` (21) | 200 | The holdings of the KODEX 200 index fund on 13 Oct 2026 (the exchange's own lists need a login now). One holding left out: `0220W0.KS`, a new spin-off with too little history to score |
 | **Brazil Bovespa** (since 13 Oct 2026) | `5, 'bovespa'` | `5-bovespa` | `stockiq-americas-6-2-worker-N` (8) | 76 | The São Paulo exchange's own portfolio of the Ibovespa, 13 Oct 2026 |
+| **Euro Stoxx 50** (since 17 Oct 2026) | `5, 'sx5e'` | `5-sx5e` | `stockiq-europe-4-8-worker-N` (5) | 50 | German Wikipedia's Euro Stoxx 50 page (as of September 2026); symbols on the home exchanges (`.DE .PA .AS .MI .MC .BR`, Nordea `NDA-FI.HE`) |
+| **Sweden OMX Stockholm 30** (since 17 Oct 2026) | `5, 'omx30'` | `5-omx30` | `stockiq-europe-4-9-worker-N` (3) | 30 | Nasdaq's own index data for 16 Oct 2026 (`indexes.nasdaqomx.com/Index/WeightingData`, id OMXS30); `.ST`, share classes with a dash (`ATCO-A.ST`) |
+| **China CSI 300** (since 17 Oct 2026) | `5, 'csi300'` | `5-csi300` | `stockiq-asia-5-10-worker-N` (30) | 300 | The index provider's own file for 16 Oct 2026 (`oss-ch.csindex.com.cn/.../cons/000300cons.xls`); Shanghai `.SS`, Shenzhen `.SZ`. One share returns no data on a run (299 of 300) |
+| **Taiwan 50** (since 17 Oct 2026) | `5, 'tw50'` | `5-tw50` | `stockiq-asia-5-11-worker-N` (5) | 50 | Chinese Wikipedia (members of 30 Sep 2025 with every change through the review of September 2026 applied); `.TW`. Its Top 10 comparison uses the TAIEX (`^TWII`): the Taiwan 50 index has no symbol at the price source |
+| **New Zealand NZX 50** (since 17 Oct 2026) | `5, 'nzx50'` | `5-nzx50` | `stockiq-asia-5-12-worker-N` (5) | 47 | English Wikipedia's S&P/NZX 50 table (undated; S&P's announcements show no change in June or September 2026); three members no longer have prices (Arvida and Manawa Energy taken over, Goodman Property Trust not at the price source) and their replacements are not in the list |
+| Mexico IPC | (still "Coming Soon") | – | – | – | **No current list could be read**: S&P and the exchange refuse scripts, the newest public copy is of 2021. Needs the 35 members from S&P's latest rebalancing notice (September 2026: Alpek in, Televisa out) typed in from the PDF |
 | Crypto universe | `7, 'coinspot'` | `7-1` | orchestrator + 54 `stockiq-option-7-1-worker-N` | 540 coins | CoinGecko top by market cap, price-checked |
 | Single coin | `72, 'single'` | – | the single-stock report function, `"asset": "crypto"` (since 12 Oct 2026; section 7) | – | – |
 
@@ -868,7 +874,7 @@ its worker addresses written inside it.
 ### The worker groups: one file for every share screener (done 11 Oct 2026)
 
 The owner asked whether the screeners "all share the same function", and for it to be made simpler to manage. They did
-not; now they do. **All 741 share-screener workers (25 groups: 669 in 13 until 13 Oct 2026, when twelve screeners were added: DAX 40 four workers, CAC 40 four, AEX three, TSX 60 six, FTSE MIB four, IBEX 35 four, Hang Seng ten, STI three, SMI two, Sensex three, KOSPI 200 twenty-one, Bovespa eight) run the same package, built from `stockiq/workers/` in git.**
+not; now they do. **All 789 share-screener workers (30 groups since 17 Oct 2026, when the Euro Stoxx 50, OMX Stockholm 30, CSI 300, Taiwan 50 and NZX 50 added 48; before that 741 in 25 groups: 669 in 13 until 13 Oct 2026, when twelve screeners were added: DAX 40 four workers, CAC 40 four, AEX three, TSX 60 six, FTSE MIB four, IBEX 35 four, Hang Seng ten, STI three, SMI two, Sensex three, KOSPI 200 twenty-one, Bovespa eight) run the same package, built from `stockiq/workers/` in git.**
 Checked at the end by downloading every package: one set of four files in all 669, byte for byte the files in git.
 
 | In `stockiq/workers/` | What it is |
@@ -4343,5 +4349,16 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     being asked things a session should have found: "You aren't smart or a good AI if i have to manually find problems or
     think of improvements" (the instruction at the top of this file). Bill on 17 Oct: $0.56 this month; Lambda calls 451,952,
     5,182 the day before (the polling cut: about 66,000 a day before it).
+  - **Five more screeners, the "Coming Soon" ones that had current lists** (the owner: "set those up and make sure they are
+    adding to the autopilot etc so its like other screeners"): Euro Stoxx 50, Sweden OMX Stockholm 30, China CSI 300, Taiwan 50,
+    New Zealand NZX 50 (the table in section 8b). 48 workers by `workers/create_group.py`; the coordinator, the page's entries and
+    buttons, the dashboard's five lines each (the Top 10 comparison: `^STOXX50E`, `^OMX`, `000300.SS`, `^TWII`, `^NZ50`), the
+    autopilot (Euro Stoxx and Stockholm on the European hours; China 01:35-06:55 UTC, Taiwan 01:05-05:25, New Zealand
+    00:05-03:40, the part of its day after midnight UTC in summer and winter; the currencies needed nothing), the panel's
+    "Main index of every country" (four of them; the Euro Stoxx 50 is not a country's), the AI chat's list, and the site's
+    count (32) and lists. **The dashboard's tracker reads a symbol with two suffixes now** (`SWED-A.ST`: it read 3 of the
+    Swedish top 10); the 47 saved reports read the same as before. Checked live: each button through the page code and the
+    coordinator (every worker answering, the tracker 10 symbols each). Mexico stays "Coming Soon" (the table). Rollback zips
+    `…_before_newmarkets_20261017.zip` for the coordinator, the autopilot and the chat.
     **The slip of 13 Oct again:** a notes edit stopped on a line that did not match and the commit after it still ran, so
     commit `99b495d` says "Notes" and holds none; they are in the commit after it.
