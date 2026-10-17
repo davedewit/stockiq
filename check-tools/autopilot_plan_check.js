@@ -10,7 +10,7 @@ if (process.argv[4] === 'slots') {
   globalThis.data = { options: cases.options };
   const part = src.slice(src.indexOf('    // MARKET_SPLIT_START'), src.indexOf('    // MARKET_SPLIT_END'));
   eval(part.replace('function marketSplit', 'globalThis.marketSplit = function').replace('function marketSlots', 'globalThis.marketSlots = function'));
-  console.log(JSON.stringify(cases.cases.map(c => marketSlots(c))));
+  console.log(JSON.stringify(cases.cases.map(c => { data.resting = c.resting || {}; return marketSlots(c); })));
 } else console.log(JSON.stringify(cases.map(c => buildUp(c, { positions: c.positions }, c.limit))));
 // With "slots" as a fourth argument the cases are {options, cases: [{risk, screeners, shares}]} instead, and what is printed is
 // marketSlots() for each: how the panel spreads the budget over the markets ticked (the Lambda's market_slots()).

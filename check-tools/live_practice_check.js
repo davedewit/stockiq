@@ -5,7 +5,7 @@
 // reports, usage, Cognito) is answered here with an empty reply, so nothing is written and it does not count as a visit.
 // Without the autopilot's answer the holdings carry no plan lines and the autopilot tab is empty: that is this tool, not a fault.
 //   REAL_USER=<address> node check-tools/live_practice_check.js            (the address is never printed)
-//   WIDTH=390 ...      a phone's width            SHOT=<file.png> ...   a picture of the tab
+//   WIDTH=390 ...      a phone's width            SHOT=<file.png> ...   a picture of the tab (OPEN_MORE=1: with the breakdown unfolded)
 //   LOCAL_PP=<file> ... the page is given that file as practice-portfolio.js: a staged copy tried on the live page before deploying
 const { spawn } = require('child_process'); const os = require('os'), fs = require('fs'), path = require('path');
 const REAL = process.env.REAL_USER || '', PORT = 9338, WIDTH = parseInt(process.env.WIDTH || '1400', 10);
@@ -56,7 +56,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
         svg.dispatchEvent(new MouseEvent('mouseout', { bubbles: true, relatedTarget: document.body })); out.afterLeaving = t(q('#pp-chart-read')) === out.above; }
       out.note = t(q('.pp-chart-note'));
       const fig = q('.pp-chart details'); if (fig) { fig.open = true; out.figuresTable = Array.from(fig.querySelectorAll('tr')).slice(0, 5).map(tr => Array.from(tr.children).filter(c => getComputedStyle(c).display !== 'none').map(t).join(' | ')); out.tableScrolls = fig.querySelector('div').scrollWidth > fig.querySelector('div').clientWidth + 1; fig.open = false; }
-      const more = q('#pp-more'); if (more) { more.open = true; out.breakdownCard = Array.from(more.querySelectorAll('.pp-card')).map(t).find(x => /For comparison/.test(x)); more.open = false; }
+      const more = q('#pp-more'); if (more) { more.open = true; out.breakdownCard = Array.from(more.querySelectorAll('.pp-card')).map(t).find(x => /For comparison/.test(x)); out.breakdown = Array.from(more.querySelectorAll('tr, .pp-pl-line')).map(t); more.open = false; }
       out.holdings = (t(Array.from(box.querySelectorAll('th')).find(th => /^Holding/.test(th.textContent))) || ''); out.sold = t(q('#pp-sold summary'));
       out.bad = (box.innerHTML.match(/NaN|undefined|Infinity/g) || []).length; out.sticksOut = document.documentElement.scrollWidth > window.innerWidth + 1;
       for (const key of ['own', 'ai', 'value']) { const b = Array.from(box.querySelectorAll('.pp-chart-tabs button')).find(x => x.getAttribute('data-id') === key); if (!b) continue; b.click(); await new Promise(r => setTimeout(r, 250)); out['view_' + key] = { title: t(q('.pp-chart-title')), above: t(q('#pp-chart-read')), fundLine: !!q('#pp-chart-svg .pp-fund'), oneLine: t(q('.pp-facts')).replace(/^.*In holdings \\S+ · /, '') }; }
@@ -69,7 +69,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     console.log('range asked for the fund: ' + (passed.filter(p => /SPY/.test(p)).join(' , ') || 'SPY not seen in the shortened addresses'));
     console.log('answered here, never reached the site: ' + answered.length + ' (' + [...new Set(answered.map(a => a.split(' ')[0]))].join(', ') + ')');
     if (process.env.SHOT) {
-      await run(`(() => { const c = document.querySelector('#practice-portfolio'); c.scrollIntoView(); window.scrollBy(0, -80); return 1; })()`); await sleep(400);
+      await run(`(() => { const c = document.querySelector('#practice-portfolio'); if (${process.env.OPEN_MORE ? 1 : 0}) { const m = document.querySelector('#pp-more'); if (m) m.open = true; } c.scrollIntoView(); window.scrollBy(0, -80); return 1; })()`); await sleep(400);
       const rect = JSON.parse(await run(`(() => { const r = document.querySelector('#practice-portfolio').getBoundingClientRect(); return JSON.stringify({ x: 0, y: Math.max(0, r.top + window.scrollY - 70), width: window.innerWidth, height: Math.min(1500, r.height + 90) }); })()`));
       const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip: Object.assign(rect, { scale: 1 }) });
       if (shot && shot.data) { fs.writeFileSync(process.env.SHOT, Buffer.from(shot.data, 'base64')); console.log('picture: ' + process.env.SHOT); }

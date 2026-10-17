@@ -1339,6 +1339,25 @@ m.datetime = at(ts); ra = json.loads(m.lambda_handler({'source': 'aws.events'}, 
 m.datetime = at(ts + dt.timedelta(minutes=30)); rb = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); m.datetime = before
 check('half an hour later, the settings left alone, the schedule checks in as usual', ra['ran'] == [] and len(rb['ran']) == 1 and rb['ran'][0]['bought'] > 0 and held_n() > 0, [ra, rb])
 
+# --- a market whose every ticked screener is resting gets no share of the budget (17 Oct 2026: the rested coin screener had held a fifth back as cash)
+import inspect
+if 'resting' in inspect.signature(m.market_slots).parameters:
+    D.t.clear(); m._BRAIN.clear(); m.PLAN_CACHE.clear(); PRICES.clear(); MODEL['answer'] = None; SNAP.clear(); SNAP.update({'3-100': rows(n=40)})
+    before, central = m.datetime, m.CENTRAL; m.datetime = at(t0); m.CENTRAL = False      # the account's own rests (with shared learning they come from the shared record)
+    base = dict(m.DEFAULTS, enabled=True, risk=3, budgetUsd=4000.0, periodDays=1, everyHours=24, maxHoldDays=5, screeners=['3-100', '7-1'], selfTune=False, aiSell=False, auto=[], holdings=4)
+    check('with nothing resting, coins keep their part (1 of 4 holdings at Balanced); with the coin screener resting the shares get all four',
+          m.market_slots(base) == {'US markets': 3, 'Coins': 1} and m.market_slots(base, {'7-1': '2026-10-29T00:00:00Z'}) == {'US markets': 4}
+          and m.coin_share(base, {'7-1': 'x'}) == 0 and m.market_slots(base, {'3-100': 'x', '7-1': 'x'}) == {}, [m.market_slots(base), m.market_slots(base, {'7-1': 'x'})])
+    check('a market with one of two screeners resting keeps its share', m.market_slots(dict(base, screeners=['3-100', '3-3', '7-1']), {'3-100': 'x'}) == {'US markets': 3, 'Coins': 1})
+    rec = m.load_item(U); rec['settings'].update(base); rec['state']['startedAt'] = m.iso(t0 - dt.timedelta(days=2)); rec['state']['rest'] = {'7-1': m.iso(t0 + dt.timedelta(days=12))}; m.save_item(U, rec)
+    s1, rec = run(t0); s2, rec = run(t0 + dt.timedelta(days=1)); held4 = portfolio()['holdings']
+    check('two check-ins with the coin screener resting fill all four holdings with shares, none kept back for coins', len(held4) == 4 and all(not h['symbol'].endswith('-USD') for h in held4), [s1.get('bought'), s2.get('bought'), [h['symbol'] for h in held4]])
+    code_, b = call(action='get', userId=U)
+    check('the page is told the split without the resting market', code_ == 200 and [x['group'] for x in b['split']] == ['US markets'] and b['split'][0]['holdings'] == 4, b.get('split'))
+    words = m.resting_words(base, {'7-1': m.iso(t0 + dt.timedelta(days=12))})
+    check('the check-in note says that the resting market gets no share for now, and until when', 'Coins get no share for now: its screener is resting until 24 Oct' in words, words)
+    m.datetime, m.CENTRAL = before, central
+
 # --- the owner's Admin page (17 Oct 2026): the site's own accounts only; a weekly review written by the function; proposals
 D.t.clear(); m._BRAIN.clear(); m.PLAN_CACHE.clear(); PRICES.clear(); MODEL['answer'] = None
 ta = dt.datetime(2026, 10, 17, 9, 0, 0); before = m.datetime; m.datetime = at(ta)

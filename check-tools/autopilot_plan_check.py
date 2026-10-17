@@ -79,10 +79,15 @@ if hasattr(m, 'market_slots'):
     split = [dict(risk=r, screeners=sorted(one[g] for g in groups), shares=sh) for r in m.RISK for groups in subsets for sh in by_hand(groups, m.RISK[r]['positions'])]
     if hasattr(m, 'holdings_of'):                       # the user's own number of holdings (12 Oct 2026): the same markets and shares with 3, 20 and 50 holdings
         split += [dict(c, holdings=n) for n in (3, 20, 50) for c in split[::7]]
+    import inspect
+    if 'resting' in inspect.signature(m.market_slots).parameters:   # a market whose every ticked screener is resting gets no share (17 Oct 2026)
+        split += [dict(c, resting={c['screeners'][0]: '2026-10-29T00:00:00Z'}) for c in split[::5] if len(c['screeners']) > 1]
+        split += [dict(c, resting={k: '2026-10-29T00:00:00Z' for k in c['screeners']}) for c in split[::40]]
     opts = {'groups': list(m.GROUPS), 'screeners': {k: {'group': v[5]} for k, v in m.SCREENERS.items()}, 'risk': {str(k): {'positions': v['positions'], 'crypto': v['crypto']} for k, v in m.RISK.items()}}
     with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False) as f: json.dump({'options': opts, 'cases': split}, f)
     theirs = json.loads(subprocess.run(['node', HERE + 'autopilot_plan_check.js', sys.argv[2], f.name, 'slots'], capture_output=True, text=True, check=True).stdout); os.unlink(f.name)
-    bad = [(c, a, b) for c, a, b in ((c, a, m.market_slots(dict(m.DEFAULTS, **c))) for c, a in zip(split, theirs)) if a != b]
+    slots_of = lambda c: m.market_slots(dict(m.DEFAULTS, **{k: v for k, v in c.items() if k != 'resting'}), c['resting']) if 'resting' in c else m.market_slots(dict(m.DEFAULTS, **c))
+    bad = [(c, a, b) for c, a, b in ((c, a, slots_of(c)) for c, a in zip(split, theirs)) if a != b]
     print('spread of the budget over the markets ticked, for', len(split), 'combinations of level, markets and shares set by hand | panel differs from the function in:', len(bad))
     for c, a, b in bad[:6]: print('  ', c, '\n     panel', a, '\n     function', b)
 k = int(sys.argv[3]) if len(sys.argv) > 3 else 0
