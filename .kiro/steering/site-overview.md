@@ -22,7 +22,9 @@ Detailed references: `stockiq.md` (AWS resources, Cognito, Lambdas, AI chat),
 
 **EVERY SESSION, WITHOUT BEING ASKED (the owner's instruction, 12 Oct 2026):** open with what has happened since the last
 session, and **if the newest file in `stockiq/check-tools/reviews/` is seven or more days old, run the full review** (section
-8c, "The diary, and the review every week or two") before anything else. Then give him, in plain words: the result in
+8c, "The diary, and the review every week or two") before anything else. **And read the Admin page's answers:
+`python3 check-tools/admin.py`** (section 8c, "The owner's Admin page"): do what he said "Yes" to that needs a session, then
+mark it done. Then give him, in plain words: the result in
 dollars **and against the month's goal** (section 8c, "The goals, month by month"); **a numbered list of the improvements
 found**, for profit first and for anything else on the site; and the question whether to go ahead with them. Change nothing on that list until he says yes. His words: "i jump on after 8 days
 and it says oh we have these improvements to make, it lists them then asks if i want to continue and make the changes…
@@ -2169,6 +2171,34 @@ narrow screen (nothing changes at desktop width):
 - `panel_page.py` is the older browser page for the autopilot panel alone; `dashboard_page.py`
   (both sections together) is the one to use.
 
+### The owner's Admin page (17 Oct 2026)
+
+He asked for "an admin account… so i can see status", with items to action, adding "i'd rather not do anything manual
+unless you need me to make a big decision. i'd prefer it all run without me". Built lean, as decided by the session:
+- **Where:** a "🛠 Admin" tab on the dashboard and an "Admin" link at the top of the dashboard's Account menu, shown only
+  when the autopilot's function answers action `admin` for the account (`listed`: the site's own accounts, env
+  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=1`), the tab,
+  panel and `NAMES` entry in `dashboard.html`. The link is on the dashboard only, not yet on the other pages.
+- **What it shows:** the month's goal, each figure against its target (`goal_standing`; the same numbers as `GOALS` in
+  `check-tools/autopilot_review.py`: change the two together); **"Needs your yes"**: proposals with "Yes" / "Not now"; the
+  **weekly review**, which the scheduled run writes by itself every 7 days (`write_review`, `ADMIN_REVIEW_DAYS`), or at once
+  with "Write it now"; **how it is running** (`health`, written by every scheduled run: when, how many checked in, paused,
+  waiting, stopped on an error); the settings in force; answered proposals. AWS usage is not on it: the function's role
+  can read no CloudWatch figures (it has DynamoDB, SES and logging only); that would be the next step, through the daily
+  usage report's own function.
+- **Proposals** (`admin_propose`; item `_admin` in `stockiq-ai-trader`, the last 60 kept): the weekly review proposes, from
+  the account's own finished trades, switching off the AI review's early sales when they are clearly losing (30 or more
+  trades, beyond twice the margin of error) and unticking a screener that is; and, ten days before a month's goal is
+  due and not met, a session to look at it. **A proposal of kind `setting` is applied by the function the moment "Yes" is
+  pressed** (`answer_proposal`: through `clean_settings`, noted in the activity list "Changed from the Admin page: …", and it
+  counts as a change for the waiting rule); **one of kind `session` waits for a session**: `python3 check-tools/admin.py`
+  lists what he said yes to; `admin.py done <id> "<what>"` marks it done; `admin.py add session|setting …` puts a question to
+  him. The same proposal is not made again while open or for 30 days after an answer.
+- **Deliberately not built:** anything that changes code by itself. Code changes only in a session.
+- Tests: 8 in `ai_trader_test.py` (403 for others, the review and its proposals, yes and not now, no second answer, the
+  scheduled run writing health every time and the review once a week); `check-tools/admin_panel_test.js` (9). Looked at
+  in a headless browser with a stand-in answer.
+
 ### The diary, and the review every week or two (12 Oct 2026)
 
 The owner asked how losses should be logged and how the autopilot will improve from here: "small changes could be
@@ -4126,3 +4156,14 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     place in the ranking when bought" is "By place in the screener ranking when bought"; a line under the breakdown says
     it counts only the autopilot's finished trades and where his own are. 216 panel checks. The chat's guide uses none
     of those words and needed no change. **The session ended here.**
+
+- **17 Oct 2026** (a session opened four days later):
+  - **The update given:** account about $99,334; 51 finished trades, 15 made money, average -1.13% a trade (± 0.40, clearly
+    down); month 1 goal: trades on course (51 of 100), the average and the account not yet. No faults in four days. By
+    itself it rested the crypto screener until 29 Oct (21 coin trades, -$1,819) and ended the buying-order trial without
+    keeping it (furthest above the 52-week low -1.81% against -0.54% as ranked). The one group of 30 or more clearly down:
+    sales by the AI review (31, -1.46%; the four looked at afterwards went on rising about 7%).
+  - **At the owner's yes ("sure go ahead") to the four improvements offered:** (1) "Sell early on the AI model's review"
+    switched off and (2) the coin screener unticked (his settings, through the function's save, at 04:31 UTC; the budget
+    now goes over the four share regions, 13 / 13 / 12 / 12 holdings); (3) the pages' polling cut (the next entry); (4) the
+    Admin page (section 8c, "The owner's Admin page").
