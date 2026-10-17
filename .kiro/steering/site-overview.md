@@ -2637,7 +2637,7 @@ are titles only, and most candidates have none. **Not known:** how the owner loo
 preview from Kiro): ask early when a change "does not show" (section 9).
 
 **What is live, and how to confirm nothing has moved since** (all compared with the local copies on 12 Oct, 10:17 UTC):
-- `stockiq-ai-trader` `wLHHlexHRLeH+FsB0KOIGgV0QaYzKgLxM6mftirUpBI=` (since 16:59 UTC, 13 Oct 2026: the waiting rule; `i9WtL7oP…` from 16:32 that day: 27 screeners in five regions; before that `0tynNBjn…`, 3,079 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC, a holding's own stop kept with the buy 16:51 UTC, the build-up that leaves out what is invested 17:25 UTC); `stockiq-ai-chat`
+- `stockiq-ai-trader` `vSGWQgIB+lN7FUeW1WzrdslLoIz3KiY4aoeKPzxjYrM=` (since 04:54 UTC, 17 Oct 2026: the Admin page; `wLHHlexH…` from 16:59 UTC on 13 Oct: the waiting rule; `i9WtL7oP…` from 16:32 that day: 27 screeners in five regions; before that `0tynNBjn…`, 3,079 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC, a holding's own stop kept with the buy 16:51 UTC, the build-up that leaves out what is invested 17:25 UTC); `stockiq-ai-chat`
   `9K5HRpizpV9lHdwP8eOwKpB00IGaNRgUz2qQEQRi6rs=` (since 13 Oct 2026, 17:00 UTC); `stockiq-price-proxy` `lzqBC+6a/h51byePPZpa+e29ACnMZGPQp+TEt2SQJ8g=`; `stockiq-screener-coordinator` `979X4yAm37f76T4RQfYT8ClqaR9P8NO0r+5LeqgDK7A=` (since 13 Oct 2026, 16:11 UTC, with the twelve screeners added that day);
   `stockiq-option-1-1-custom-analysis` `I84SxSgLYNt7…`; `stockiq-chart-generator` `OIDrZ2W9G3lJ…`; `stockiq-paper-portfolio`
   `s6IR+/80N/3k…`; the two signals functions `6nVDLm4/8G6K…`; the crypto orchestrator `yvmucU37gHJH…` and its 54 workers
@@ -2645,7 +2645,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   shows "one" for the 13 groups). Each equals its mirror in `lambda-sync/`.
 - Tables made on 12 Oct: `stockiq-ai-trader-journal` (the diary).
 - Website (sha256 starts): `practice-autopilot.js?v=47` (`15e2d0d78a1f`), `practice-portfolio.js?v=35` (`77079a71f71a`),
-  `dashboard.html` (`c50823acc18d`), `index.html` (`5fcb3652b459`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`f214d39b01ed`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
+  `dashboard.html` (`5ee05cf4abf4`), `index.html` (`9451afe87859`), `theme.js` (`bb9a94a7e6c2`, with the switch for the header chip), `visitor-bar.js` version 2 (`dcabd7523aa2`), `analysis.html` (`f214d39b01ed`), `mobile-sidebar.js?v=2` (`19512615d3e8`), `styles.css` (`d6493ce17b8d`), `autopilot-bell.js` version 8 (`88119f40c022`),
   `analysis-functions.js` (`0207a09e771b`), `screeners.js` (`4512115ab389`), `ai-chat.js?v=2` (`87eaadf52197`). Live equals local for each.
 - Tests on the live files: 451 function, 216 panel (13 Oct 2026, with the regions, the shortcuts and the waiting rule; they were 442 and 210), 130 portfolio, 22 chat (13 Oct 2026, after the fund's line; they were 118 and 21) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
@@ -2656,7 +2656,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
   trail, now, news`; 11 Oct `clear, hours, next, budget, shares, low52, progress, order, idle, paid, central, release, bell,
   takeover, report`, `stockiq-ai-trader_before_sweep_20261011.zip`, `…_costs_…`; 12 Oct `fresh, due, holdings, journal,
-  notes, heads, junk, patient, rows, buildup`; 13 Oct `regions, settle`. `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `…_{guide, guide2, guide3}_20261012.zip`, `…_before_filter_20261013.zip`, `…_before_fund_20261013.zip`; `stockiq-price-proxy_before_fund_20261013.zip`.
+  notes, heads, junk, patient, rows, buildup`; 13 Oct `regions, settle`; 17 Oct `admin`. `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `…_{guide, guide2, guide3}_20261012.zip`, `…_before_filter_20261013.zip`, `…_before_fund_20261013.zip`; `stockiq-price-proxy_before_fund_20261013.zip`.
 
 **Improvements to come: one list. Take an item out when it is done; add ideas as the data suggests them.**
 *Waiting on finished trades (each has its trigger; nothing is adopted from hindsight, a trading idea goes live as a trial):*
@@ -2690,18 +2690,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
    3 shares asked for, 3.00006 bought). The page turns the quantity into dollars at the price it has, then buys at the
    price of that moment, which has moved. Cosmetic; the fix is to buy the quantity asked for at the price of the buy.
    The same thing makes the check "buying by quantity buys exactly that many" fail on and off during US hours.
-9. **Calls made by open browser tabs: the next job the owner asked for (13 Oct 2026, "add this to the to do list").** His
-    daily usage report for the 24 hours to 17:03 UTC on 13 Oct: 66,033 Lambda calls, and 418,875 of the free million used
-    by day 13 (41.9%: on course to end the month close to the limit). About 54,000 of the day's calls were pages polling
-    while a tab was open: `ticker-data-fetcher` 19,578, the four movers lists about 18,200, the seven market widgets
-    about 7,800, `stockiq-price-proxy` 5,743, the usage tracker about 3,000. The autopilot was 400 and the crypto history
-    about 3,200. (That day was heavy: his dashboard was open most of it and a session ran many screener tests.) Past
-    the free million a call costs 20 cents a million, so the money is cents; he wants to stay under it all the same.
-    **To do, biggest saving first:** (1) stop all polling while the tab is hidden (`script.js`, the home page widgets,
-    does not; `sidebar.js` does); (2) slow the ticker and the movers lists to every 30 to 60 seconds; (3) one call for
-    the four movers lists and one for the seven market widgets, in place of eleven; (4) one price call for the whole
-    practice portfolio in place of one a holding. (1) and (2) are small front-end changes and should about halve the
-    daily calls. Measure before and after with his report, or `aws cloudwatch get-metric-statistics` (section 11).
+9. (Done 17 Oct 2026: the pages' polling. See the change log of that day; measure the effect in his usage report.)
 10. **Unused functions: nothing was deleted, and nothing is to be deleted without the owner seeing the exact list and saying
     yes to it.** On 12 Oct he first said to go ahead "if you are 100% never used", then stopped the dry run ("i don't
     think its right to delete workers. they must be used via the screeners?!"). What a check of every call in the 455
@@ -4167,3 +4156,17 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     switched off and (2) the coin screener unticked (his settings, through the function's save, at 04:31 UTC; the budget
     now goes over the four share regions, 13 / 13 / 12 / 12 holdings); (3) the pages' polling cut (the next entry); (4) the
     Admin page (section 8c, "The owner's Admin page").
+  - **The pages ask for market data far less often** (04:53 UTC; `index.html`, `dashboard.html`). The home page fetched each of
+    its four movers lists **every second** while a tab was open and in use (`setInterval(…, 1000)`: about 14,400 calls an
+    hour from one tab) and its market widgets every 10 seconds; the dashboard fetched its ticker every 10 seconds, twice
+    over (two timers). Now once a minute, and not while the tab is hidden (the home page's checks were kept; the dashboard
+    gained one). `sidebar.js` (other pages, every 5 minutes) and `stock-prices.js` (stock pages, every 5 seconds, paused
+    when hidden; few calls) were left. The phone-sidebar browser test passed on both pages (102 checks). **To see:** the
+    owner's daily usage report over the next days (`ticker-data-fetcher` was 19,578 a day, the movers about 18,200).
+  - **The Admin page is live** (04:54 UTC; `stockiq-ai-trader` `vSGWQgIB…`, rollback zip `…_before_autopilot_admin_20261017.zip`;
+    `admin-panel.js?v=1`, `dashboard.html`). Checked live: another account gets 403; the owner's first weekly review was
+    written through it (51 trades, -$2,268.78, clearly down; the AI review's sales the one clearly losing group; no
+    proposal, as that switch was already off). 459 function checks, 9 page checks. **Not checked:** the signed-in
+    dashboard itself (the tab appears only for his account); the health line, which the next scheduled run writes.
+  - The daily deploy of that morning met Yahoo's limit again ("No price data: 2179, kept yesterday's snapshot: 774"); nothing
+    was de-indexed (958 indexable).
