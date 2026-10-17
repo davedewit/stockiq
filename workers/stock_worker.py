@@ -27,6 +27,43 @@ import math
 # The currency Yahoo quotes each symbol in ('USD', 'AUD', 'JPY', 'GBp' = pence), filled as prices are fetched
 CURRENCY = {}
 
+# Which score the workers give (17 Oct 2026). 1: the original 12-factor score. 2: the trend score, built from what the score
+# studies found on 1,750 shares in nine markets it was never tuned on (check-tools/scoring/: the original score's top 10 lost
+# to its own list in 17 of 18 half-periods; a trend score's won 12). Left at 1 until the owner says yes; a test sets
+# STOCKIQ_SCORE=2. Turning it back is this one line.
+SCORE_VERSION = int(os.environ.get('STOCKIQ_SCORE', '1'))
+# Where the labels change: HOLD above the first, MODERATE_SELL down to the second, SELL down to the third, STRONG_SELL below.
+# Version 1 keeps its old numbers exactly (with them MODERATE_SELL is only given at exactly -0.8, as it always was); version 2
+# has even steps, so that "Slightly negative" is given.
+SELL_BANDS = {1: (-0.8, -0.8, -1.3), 2: (-0.5, -1.0, -1.5)}[SCORE_VERSION]
+# The trend score runs higher on the positive side than the old one (its 91st percentile 4.0 against 2.4 on the S&P 100 over
+# four years), which would call 30% of shares "Strongly positive". Its positive side is shrunk by this factor so that the
+# labels are spread about as before (about 9%); the order of every ranking is unchanged.
+TREND_POSITIVE_SCALE = 0.6
+
+
+def trend_score(change_1yr, change_30d, distance_from_low, price, ma50, ma200, rsi):
+    """The trend score (version 2), exactly as written down before the wide study's result was seen
+    (check-tools/scoring/wide_study.py, "trend"): how far above its 52-week low (up to +2 at 100% above), the year's rise
+    without the last month (up to +-1.5 at 60%), the price against its 200-day average (+-0.5), the 50-day average against the
+    200-day (+-0.5), and -0.5 when RSI is over 80. Returns (score, the lines that explain it)."""
+    mom = ((1 + change_1yr / 100) / (1 + change_30d / 100) - 1) * 100 if change_30d > -100 else 0
+    a = min(2.0, max(0.0, distance_from_low) / 50)
+    b = max(-1.5, min(1.5, mom / 40))
+    c = 0.5 if price > ma200 else -0.5
+    d = 0.5 if ma50 > ma200 else -0.5
+    e = -0.5 if rsi > 80 else 0.0
+    lines = [f"Above its 52-week low ({distance_from_low:.1f}%): +{a:.2f}",
+             f"Rise over the year without the last month ({mom:+.1f}%): {b:+.2f}",
+             f"Price {'above' if c > 0 else 'below'} its 200-day average: {c:+.2f}",
+             f"50-day average {'above' if d > 0 else 'below'} the 200-day: {d:+.2f}"]
+    if e:
+        lines.append(f"RSI over 80, overheated ({rsi:.1f}): {e:+.2f}")
+    raw = a + b + c + d + e
+    score = raw * TREND_POSITIVE_SCALE if raw > 0 else raw
+    lines.append(f"TREND SCORE: {raw:.2f}" + (f" x {TREND_POSITIVE_SCALE} = {score:.1f}" if raw > 0 else ""))
+    return score, lines
+
 def lambda_handler(event, context):
     """AWS Lambda entry point"""
     try:
@@ -815,6 +852,9 @@ def analyze_stock_advanced(symbol, market=None):
         score_breakdown.append(f"MA Trend: {ma_score:.1f} × 1% = {ma_score * 0.01:.2f}")
         score_breakdown.append(f"PRE-SCALE TOTAL: {technical_score:.2f}")
         
+        if SCORE_VERSION == 2:          # the trend score replaces the 12-factor one; every other figure stays as it is
+            technical_score, score_breakdown = trend_score(change_1yr, change_30d, distance_from_low, current_price, ma50, ma200, rsi)
+
         # Use rounded score for thresholds to match user display
         rounded_score = round(technical_score, 1)
         
@@ -834,17 +874,17 @@ def analyze_stock_advanced(symbol, market=None):
             timeframe = "3-6 months"
             strategy_type = "MEDIUM_TERM"
             hold_days = "90-180 days"
-        elif rounded_score > -0.8:
+        elif rounded_score > SELL_BANDS[0]:
             recommendation = "HOLD"
             timeframe = "6-12 months"
             strategy_type = "LONG_TERM"
             hold_days = "180-365 days"
-        elif rounded_score >= -0.8:
+        elif rounded_score >= SELL_BANDS[1]:
             recommendation = "MODERATE_SELL"
             timeframe = "1-3 months"
             strategy_type = "SHORT_TERM"
             hold_days = "30-90 days"
-        elif rounded_score >= -1.3:
+        elif rounded_score >= SELL_BANDS[2]:
             recommendation = "SELL"
             timeframe = "0-1 months"
             strategy_type = "SHORT_TERM"

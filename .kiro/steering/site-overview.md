@@ -539,8 +539,31 @@ the same money spread over the whole list, in 18 half-periods (9 lists x 2 halve
 - **Limits:** today's members (flatters buying what rose, most for small companies); a mostly rising period 2022-2026; a
   top 10 of momentum shares is jumpier than the list (drawdowns not yet measured); the live 10-a-side trial of "furthest
   above the low" lost (-2.64% against -0.68%: too few trades to read, but not to be forgotten).
-- **Next (offered to the owner the same day):** a new share score built on these measures, kept in the workers' fields and
-  labels, run through `workers/prove.py` and the autopilot replay, with drawdowns, before his yes; Dow 30 first.
+- **Built and tested the same day, NOT live: the trend score (version 2)** in `workers/stock_worker.py` behind a switch,
+  `SCORE_VERSION` (1 unless `STOCKIQ_SCORE=2` is set; the Lambda has no such setting, so live stays 1). `trend_score()` is the
+  study's "trend" exactly: up to +2 for how far above the 52-week low (full at 100%), the year's rise without the last month
+  (+-1.5, full at 60%), +-0.5 for the price against its 200-day average, +-0.5 for the 50-day against the 200-day, -0.5 when
+  RSI is over 80; its positive side x 0.6 (`TREND_POSITIVE_SCALE`) so that the labels spread as before, and even steps for
+  the negative labels (`SELL_BANDS`). Every other figure the workers return is unchanged. **Tests:** with the switch off
+  `workers/prove.py` finds every figure identical on all 24,718 stock-days (so the file in git can be deployed as it is
+  without changing anything); with it on, the wide study gives the worker's own score 13 of 18 half-periods ahead of its
+  list (+17.6% a half-period; the written-down "trend" 12 of 18: the worker computes what was tested), but **a deeper worst
+  fall than the list in 15 of 18** (typically -15 to -20% against -8 to -15%): a bumpier ride; the label spread on the S&P 100
+  over four years: Strongly positive 8% (9% before), Positive 22%, Slightly positive 31%, Mixed 15%, Slightly negative 11%
+  (2% before: the old bands hardly gave it), Negative 10%, Strongly negative 3%; on a live run AAPL +1.5 and BHP.AX +1.8.
+  **What it changes for users:** about 82% of signal labels and on average 8 of each day's top 10 (prove.py). **The
+  autopilot's rules replayed with it** (`replay/results-replay-2026-10-17-trend.txt` against `…-original.txt`, the same
+  tool and rules): Cautious +59% (was +48%), Careful +129% (+78%), Balanced +131% (+83%), Bold +99% (+12%), Adventurous -34%
+  (-50%), against the fund's +107.5%; per trade against the fund Careful +0.78 (t 3.3), Balanced +0.30 (t 2.1), where the old
+  score gave +0.02 and +0.03; worst falls about the same (Careful -14% against -17%, Balanced -17% against -15%). The replay
+  is the S&P 100, where the 52-week-low idea was first found: in-sample, so the wide study is the stronger evidence.
+- **To go live (his yes first; every ranking and label on the site moves on the day):** `SCORE_VERSION` to 2 by default,
+  `python3 workers/prove.py` again, a `check-tools/pending-<name>/` with `deploy.py` (Dow 30 first, then `all`), the 14+
+  buttons through the page and the coordinator, `workers/live.txt`; `about.html` and the FAQ, which describe the 12 factors,
+  rewritten for the trend score (its structured data with it); the AI chat's prompt if it names factors. The autopilot's trades
+  before and after are different experiments. Also left as they are under version 2: `confidence` and the "model probability"
+  still come from the old factors' sums (labels and ranks do not use them). Fixed on the way: `replay.py` part 4 dropped four
+  figures when it ranked again without the chip names, and failed.
 
 **The autopilot's own rules, replayed (11 Oct 2026, evening).** The owner asked, honestly, whether this will ever make
 more than it loses, and whether it could "run on some kind of rapid speed to learn faster". It can: `check-tools/replay/

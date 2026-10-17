@@ -1,0 +1,131 @@
+== aex: 26 shares, 204 weeks from 2022-10-19 to 2026-10-09
+  live     top tenth vs the list: 5d first: -0.07 (t -0.2); 5d second: +0.50 (t +1.6); 20d first: +0.78 (t +0.7); 20d second: +1.21 (t +0.9)
+           top 10 changed weekly, after costs: first half $132,074 vs the list $151,471; second half $143,188 vs $110,734
+           worst fall from a peak: first half -9.2% vs the list -10.2%; second half -18.8% vs -17.4%
+  low52    top tenth vs the list: 5d first: -0.05 (t -0.1); 5d second: +0.19 (t +0.6); 20d first: +1.13 (t +0.7); 20d second: +0.41 (t +0.2)
+           top 10 changed weekly, after costs: first half $140,394 vs the list $151,471; second half $160,811 vs $110,734
+           worst fall from a peak: first half -11.0% vs the list -10.2%; second half -19.2% vs -17.4%
+  mom12_1  top tenth vs the list: 5d first: -0.08 (t -0.3); 5d second: +0.09 (t +0.3); 20d first: +1.46 (t +1.1); 20d second: +0.35 (t +0.2)
+           top 10 changed weekly, after costs: first half $127,004 vs the list $151,471; second half $141,124 vs $110,734
+           worst fall from a peak: first half -11.1% vs the list -10.2%; second half -16.2% vs -17.4%
+  trend    top tenth vs the list: 5d first: -0.05 (t -0.2); 5d second: +0.29 (t +1.0); 20d first: +0.78 (t +0.7); 20d second: +1.46 (t +1.1)
+           top 10 changed weekly, after costs: first half $131,411 vs the list $151,471; second half $145,299 vs $110,734
+           worst fall from a peak: first half -8.8% vs the list -10.2%; second half -18.8% vs -17.4%
+
+== asx200: 185 shares, 202 weeks from 2022-10-27 to 2026-10-16
+  live     top tenth vs the list: 5d first: +0.39 (t +2.2); 5d second: +0.54 (t +2.0); 20d first: +1.35 (t +1.8); 20d second: +2.30 (t +1.8)
+           top 10 changed weekly, after costs: first half $167,837 vs the list $139,970; second half $213,818 vs $130,509
+           worst fall from a peak: first half -13.0% vs the list -5.2%; second half -19.4% vs -9.9%
+  low52    top tenth vs the list: 5d first: +0.48 (t +2.4); 5d second: +0.56 (t +1.9); 20d first: +1.53 (t +1.9); 20d second: +2.83 (t +1.7)
+           top 10 changed weekly, after costs: first half $217,330 vs the list $139,970; second half $191,147 vs $130,509
+           worst fall from a peak: first half -15.3% vs the list -5.2%; second half -28.3% vs -9.9%
+  mom12_1  top tenth vs the list: 5d first: +0.29 (t +1.6); 5d second: +0.49 (t +1.7); 20d first: +1.57 (t +2.4); 20d second: +1.89 (t +1.3)
+           top 10 changed weekly, after costs: first half $185,844 vs the list $139,970; second half $202,240 vs $130,509
+           worst fall from a peak: first half -18.4% vs the list -5.2%; second half -22.6% vs -9.9%
+  trend    top tenth vs the list: 5d first: +0.38 (t +2.2); 5d second: +0.59 (t +2.2); 20d first: +1.36 (t +1.9); 20d second: +2.23 (t +1.7)
+           top 10 changed weekly, after costs: first half $176,995 vs the list $139,970; second half $207,625 vs $130,509
+           worst fall from a peak: first half -12.3% vs the list -5.2%; second half -18.8% vs -9.9%
+
+== cac40: 39 shares, 204 weeks from 2022-10-19 to 2026-10-09
+  live     top tenth vs the list: 5d first: -0.02 (t -0.1); 5d second: +0.36 (t +1.9); 20d first: -0.03 (t -0.1); 20d second: +1.26 (t +1.4)
+           top 10 changed weekly, after costs: first half $122,702 vs the list $133,871; second half $109,006 vs $104,368
+           worst fall from a peak: first half -12.9% vs the list -12.4%; second half -16.3% vs -14.7%
+  low52    top tenth vs the list: 5d first: -0.01 (t -0.1); 5d second: +0.31 (t +1.5); 20d first: +0.15 (t +0.3); 20d second: +1.48 (t +1.6)
+           top 10 changed weekly, after costs: first half $124,193 vs the list $133,871; second half $116,336 vs $104,368
+           worst fall from a peak: first half -13.8% vs the list -12.4%; second half -15.1% vs -14.7%
+  mom12_1  top tenth vs the list: 5d first: -0.03 (t -0.2); 5d second: +0.22 (t +1.4); 20d first: +0.36 (t +0.7); 20d second: +0.76 (t +1.2)
+           top 10 changed weekly, after costs: first half $131,870 vs the list $133,871; second half $122,005 vs $104,368
+           worst fall from a peak: first half -12.7% vs the list -12.4%; second half -16.6% vs -14.7%
+  trend    top tenth vs the list: 5d first: +0.01 (t +0.1); 5d second: +0.29 (t +1.6); 20d first: +0.02 (t +0.0); 20d second: +1.27 (t +1.4)
+           top 10 changed weekly, after costs: first half $120,587 vs the list $133,871; second half $110,012 vs $104,368
+           worst fall from a peak: first half -12.6% vs the list -12.4%; second half -16.1% vs -14.7%
+
+== dax40: 40 shares, 203 weeks from 2022-10-21 to 2026-10-12
+  live     top tenth vs the list: 5d first: +0.12 (t +0.5); 5d second: +0.73 (t +2.3); 20d first: +0.73 (t +0.9); 20d second: +4.39 (t +2.8)
+           top 10 changed weekly, after costs: first half $147,194 vs the list $148,362; second half $194,909 vs $130,239
+           worst fall from a peak: first half -14.4% vs the list -10.3%; second half -12.3% vs -10.5%
+  low52    top tenth vs the list: 5d first: +0.21 (t +0.9); 5d second: +0.93 (t +2.8); 20d first: +1.50 (t +1.7); 20d second: +4.53 (t +2.8)
+           top 10 changed weekly, after costs: first half $180,066 vs the list $148,362; second half $189,959 vs $130,239
+           worst fall from a peak: first half -15.5% vs the list -10.3%; second half -11.7% vs -10.5%
+  mom12_1  top tenth vs the list: 5d first: +0.27 (t +1.2); 5d second: +0.83 (t +2.8); 20d first: +1.31 (t +1.6); 20d second: +3.75 (t +2.8)
+           top 10 changed weekly, after costs: first half $153,782 vs the list $148,362; second half $220,333 vs $130,239
+           worst fall from a peak: first half -13.8% vs the list -10.3%; second half -10.1% vs -10.5%
+  trend    top tenth vs the list: 5d first: +0.14 (t +0.7); 5d second: +0.79 (t +2.5); 20d first: +0.54 (t +0.7); 20d second: +4.53 (t +2.9)
+           top 10 changed weekly, after costs: first half $146,555 vs the list $148,362; second half $197,891 vs $130,239
+           worst fall from a peak: first half -14.5% vs the list -10.3%; second half -11.5% vs -10.5%
+
+== ftse100: 98 shares, 201 weeks from 2022-10-31 to 2026-10-15
+  live     top tenth vs the list: 5d first: +0.13 (t +0.7); 5d second: +0.22 (t +0.9); 20d first: +0.54 (t +0.7); 20d second: +1.42 (t +2.0)
+           top 10 changed weekly, after costs: first half $124,978 vs the list $118,059; second half $156,572 vs $136,170
+           worst fall from a peak: first half -12.5% vs the list -8.4%; second half -22.0% vs -13.0%
+  low52    top tenth vs the list: 5d first: +0.17 (t +1.0); 5d second: +0.33 (t +1.4); 20d first: +0.76 (t +1.2); 20d second: +1.48 (t +2.0)
+           top 10 changed weekly, after costs: first half $128,488 vs the list $118,059; second half $172,955 vs $136,170
+           worst fall from a peak: first half -11.5% vs the list -8.4%; second half -17.8% vs -13.0%
+  mom12_1  top tenth vs the list: 5d first: +0.07 (t +0.4); 5d second: +0.36 (t +1.4); 20d first: +0.75 (t +1.1); 20d second: +1.39 (t +2.0)
+           top 10 changed weekly, after costs: first half $124,275 vs the list $118,059; second half $173,722 vs $136,170
+           worst fall from a peak: first half -12.3% vs the list -8.4%; second half -17.9% vs -13.0%
+  trend    top tenth vs the list: 5d first: +0.11 (t +0.6); 5d second: +0.24 (t +1.0); 20d first: +0.62 (t +0.8); 20d second: +1.46 (t +1.9)
+           top 10 changed weekly, after costs: first half $123,863 vs the list $118,059; second half $159,464 vs $136,170
+           worst fall from a peak: first half -12.5% vs the list -8.4%; second half -20.9% vs -13.0%
+
+== nikkei225: 222 shares, 193 weeks from 2022-11-10 to 2026-10-16
+  live     top tenth vs the list: 5d first: +0.10 (t +0.5); 5d second: +0.45 (t +1.4); 20d first: +0.25 (t +0.4); 20d second: +2.14 (t +1.8)
+           top 10 changed weekly, after costs: first half $126,882 vs the list $124,465; second half $276,884 vs $157,297
+           worst fall from a peak: first half -23.5% vs the list -11.9%; second half -13.6% vs -14.9%
+  low52    top tenth vs the list: 5d first: +0.19 (t +1.0); 5d second: +0.67 (t +1.9); 20d first: +0.54 (t +0.8); 20d second: +2.04 (t +1.3)
+           top 10 changed weekly, after costs: first half $151,021 vs the list $124,465; second half $418,575 vs $157,297
+           worst fall from a peak: first half -23.3% vs the list -11.9%; second half -35.2% vs -14.9%
+  mom12_1  top tenth vs the list: 5d first: +0.03 (t +0.1); 5d second: +0.26 (t +0.8); 20d first: +0.23 (t +0.4); 20d second: +0.77 (t +0.6)
+           top 10 changed weekly, after costs: first half $114,033 vs the list $124,465; second half $252,272 vs $157,297
+           worst fall from a peak: first half -23.3% vs the list -11.9%; second half -31.3% vs -14.9%
+  trend    top tenth vs the list: 5d first: +0.10 (t +0.6); 5d second: +0.43 (t +1.4); 20d first: +0.41 (t +0.7); 20d second: +2.22 (t +1.8)
+           top 10 changed weekly, after costs: first half $122,514 vs the list $124,465; second half $279,114 vs $157,297
+           worst fall from a peak: first half -24.6% vs the list -11.9%; second half -16.4% vs -14.9%
+
+== smi: 17 shares, 200 weeks from 2022-10-26 to 2026-10-15
+  live     top tenth vs the list: 5d first: +0.00 (t +0.0); 5d second: +0.31 (t +0.9); 20d first: +0.00 (t +0.0); 20d second: +1.21 (t +1.2)
+           top 10 changed weekly, after costs: first half $100,000 vs the list $100,000; second half $103,134 vs $100,126
+           worst fall from a peak: first half 0.0% vs the list 0.0%; second half -12.0% vs -10.9%
+  low52    top tenth vs the list: 5d first: +0.00 (t +0.0); 5d second: -0.01 (t -0.0); 20d first: +0.00 (t +0.0); 20d second: +0.81 (t +0.7)
+           top 10 changed weekly, after costs: first half $100,000 vs the list $100,000; second half $108,068 vs $100,126
+           worst fall from a peak: first half 0.0% vs the list 0.0%; second half -10.7% vs -10.9%
+  mom12_1  top tenth vs the list: 5d first: +0.00 (t +0.0); 5d second: +0.18 (t +0.5); 20d first: +0.00 (t +0.0); 20d second: +0.48 (t +0.5)
+           top 10 changed weekly, after costs: first half $100,000 vs the list $100,000; second half $108,337 vs $100,126
+           worst fall from a peak: first half 0.0% vs the list 0.0%; second half -10.0% vs -10.9%
+  trend    top tenth vs the list: 5d first: +0.00 (t +0.0); 5d second: +0.28 (t +0.8); 20d first: +0.00 (t +0.0); 20d second: +1.21 (t +1.2)
+           top 10 changed weekly, after costs: first half $100,000 vs the list $100,000; second half $102,584 vs $100,126
+           worst fall from a peak: first half 0.0% vs the list 0.0%; second half -11.5% vs -10.9%
+
+== sp400_600: 955 shares, 199 weeks from 2022-10-28 to 2026-10-12
+  live     top tenth vs the list: 5d first: +0.00 (t +0.0); 5d second: +0.20 (t +0.9); 20d first: +0.02 (t +0.0); 20d second: +0.85 (t +0.9)
+           top 10 changed weekly, after costs: first half $154,520 vs the list $138,603; second half $170,987 vs $113,041
+           worst fall from a peak: first half -15.6% vs the list -15.0%; second half -20.8% vs -19.9%
+  low52    top tenth vs the list: 5d first: +0.09 (t +0.6); 5d second: +0.33 (t +1.5); 20d first: +0.53 (t +1.0); 20d second: +1.27 (t +1.3)
+           top 10 changed weekly, after costs: first half $188,827 vs the list $138,603; second half $140,866 vs $113,041
+           worst fall from a peak: first half -24.7% vs the list -15.0%; second half -31.5% vs -19.9%
+  mom12_1  top tenth vs the list: 5d first: -0.01 (t -0.1); 5d second: +0.21 (t +1.0); 20d first: +0.06 (t +0.1); 20d second: +0.88 (t +1.0)
+           top 10 changed weekly, after costs: first half $134,839 vs the list $138,603; second half $206,020 vs $113,041
+           worst fall from a peak: first half -21.2% vs the list -15.0%; second half -23.5% vs -19.9%
+  trend    top tenth vs the list: 5d first: -0.01 (t -0.0); 5d second: +0.20 (t +0.9); 20d first: +0.07 (t +0.1); 20d second: +0.91 (t +1.0)
+           top 10 changed weekly, after costs: first half $151,418 vs the list $138,603; second half $186,778 vs $113,041
+           worst fall from a peak: first half -15.6% vs the list -15.0%; second half -20.9% vs -19.9%
+
+== tsx60: 59 shares, 199 weeks from 2022-10-31 to 2026-10-09
+  live     top tenth vs the list: 5d first: +0.02 (t +0.1); 5d second: +0.36 (t +1.0); 20d first: +1.10 (t +1.4); 20d second: +3.65 (t +3.0)
+           top 10 changed weekly, after costs: first half $124,793 vs the list $137,426; second half $168,155 vs $145,174
+           worst fall from a peak: first half -15.8% vs the list -7.5%; second half -18.5% vs -8.0%
+  low52    top tenth vs the list: 5d first: +0.05 (t +0.2); 5d second: +0.46 (t +1.3); 20d first: +0.93 (t +1.0); 20d second: +2.83 (t +2.7)
+           top 10 changed weekly, after costs: first half $132,292 vs the list $137,426; second half $183,221 vs $145,174
+           worst fall from a peak: first half -17.4% vs the list -7.5%; second half -18.6% vs -8.0%
+  mom12_1  top tenth vs the list: 5d first: +0.08 (t +0.4); 5d second: +0.62 (t +1.8); 20d first: +1.05 (t +1.3); 20d second: +3.66 (t +2.9)
+           top 10 changed weekly, after costs: first half $126,053 vs the list $137,426; second half $200,372 vs $145,174
+           worst fall from a peak: first half -12.6% vs the list -7.5%; second half -18.9% vs -8.0%
+  trend    top tenth vs the list: 5d first: +0.01 (t +0.1); 5d second: +0.31 (t +0.9); 20d first: +1.41 (t +1.8); 20d second: +3.41 (t +2.9)
+           top 10 changed weekly, after costs: first half $118,400 vs the list $137,426; second half $169,598 vs $145,174
+           worst fall from a peak: first half -17.3% vs the list -7.5%; second half -17.7% vs -8.0%
+
+== how often each score beat its own list (top 10, after costs), out of 18 half-periods
+  live     13 of 18; average lead +17.6% a half-period; a deeper worst fall than the list in 15 of 18
+  low52    14 of 18; average lead +29.2% a half-period; a deeper worst fall than the list in 16 of 18
+  mom12_1  12 of 18; average lead +21.6% a half-period; a deeper worst fall than the list in 14 of 18
+  trend    12 of 18; average lead +18.2% a half-period; a deeper worst fall than the list in 16 of 18

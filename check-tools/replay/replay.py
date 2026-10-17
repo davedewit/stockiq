@@ -209,7 +209,7 @@ for _, r, f, g in both:
     luck = [figures(*run(r, test, random.Random(seed)), test) for seed in range(200)]
     panel = {d: {s: v for s, v in rows.items() if s not in CHIPS} for d, rows in whole.items()}
     for d in panel:                                        # rank again without them
-        for k, s_ in enumerate(sorted(panel[d], key=lambda x: -panel[d][x][0])): panel[d][s_] = panel[d][s_][:5] + [k + 1]
+        for k, s_ in enumerate(sorted(panel[d], key=lambda x: -panel[d][x][0])): panel[d][s_] = panel[d][s_][:5] + [k + 1] + panel[d][s_][6:]     # keep the figures after the rank (they were dropped: 17 Oct 2026)
     without = figures(*run(r, test), test); panel = whole
     say(f"   {name(r)}")
     say(f"      first part {f['vs']:+.2f} a trade against the fund (t {f['t']:+.2f}), second part {g['vs']:+.2f} (t {g['t']:+.2f}), account on the second part {g['total']:+.1f}% (the fund {g['spy']:+.1f}%)")

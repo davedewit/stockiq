@@ -12,6 +12,8 @@ What is measured, each list on its own and all together, on the first half of th
   each week (every 5th trading day), the top tenth by the score against the whole list over the next 5 and 20 trading days
   (bought at the next day's open); and $100,000 in the top 10 of each list, changed weekly, 0.1% off each buy and sale,
   against the same money spread over the whole list.
+With STOCKIQ_SCORE=2 the "live" column is the trend score as the workers would give it (workers/stock_worker.py), which must
+equal the "trend" column: a check that the worker computes what was tested.
 Limits: today's members (flatters buying what rose, more so for small companies); no company figures over time.
   python3 check-tools/scoring/wide_study.py
 """
@@ -84,7 +86,7 @@ def summary(name, rows, fwd, test_days, keys=('live', 'low52', 'mom12_1', 'trend
                     ex.append(statistics.mean(top) - statistics.mean(x[2] for x in sc))
                 res[k][(h, part)] = (statistics.mean(ex) if ex else 0, tstat(ex), len(ex))
         for part, span in (('first', test_days[:half]), ('second', test_days[half:])):
-            val, ref, held = 100000.0, 100000.0, set()
+            val, ref, held = 100000.0, 100000.0, set(); peak_v, peak_r, fall_v, fall_r = val, ref, 0.0, 0.0
             for d in span:
                 sc = [(s, v[k], fwd(s, d, 5)) for s, v in rows[d].items()]; sc = [x for x in sc if x[2] is not None]
                 if len(sc) < 20: continue
@@ -92,7 +94,10 @@ def summary(name, rows, fwd, test_days, keys=('live', 'low52', 'mom12_1', 'trend
                 turn = len(new - held) / 10 if held else 1.0
                 val *= (1 - 2 * 0.001 * turn) * (1 + statistics.mean(x[2] for x in top) / 100)
                 ref *= 1 + statistics.mean(x[2] for x in sc) / 100; held = new
+                peak_v, peak_r = max(peak_v, val), max(peak_r, ref)
+                fall_v, fall_r = min(fall_v, val / peak_v - 1), min(fall_r, ref / peak_r - 1)
             res[k][('money', part)] = (val, ref)
+            res[k][('fall', part)] = (fall_v * 100, fall_r * 100)
     return res
 
 if __name__ == '__main__':
@@ -106,10 +111,13 @@ if __name__ == '__main__':
         for k in r:
             cells = '; '.join(f'{h}d {p}: {r[k][(h, p)][0]:+.2f} (t {r[k][(h, p)][1]:+.1f})' for h in (5, 20) for p in ('first', 'second'))
             m = r[k][('money', 'first')], r[k][('money', 'second')]
-            print(f'  {k:8s} top tenth vs the list: {cells}\n           top 10 changed weekly, after costs: first half ${m[0][0]:,.0f} vs the list ${m[0][1]:,.0f}; second half ${m[1][0]:,.0f} vs ${m[1][1]:,.0f}')
+            fl = r[k][('fall', 'first')], r[k][('fall', 'second')]
+            print(f'  {k:8s} top tenth vs the list: {cells}\n           top 10 changed weekly, after costs: first half ${m[0][0]:,.0f} vs the list ${m[0][1]:,.0f}; second half ${m[1][0]:,.0f} vs ${m[1][1]:,.0f}'
+                  f'\n           worst fall from a peak: first half {fl[0][0]:.1f}% vs the list {fl[0][1]:.1f}%; second half {fl[1][0]:.1f}% vs {fl[1][1]:.1f}%')
         print(flush=True)
     print('== how often each score beat its own list (top 10, after costs), out of', 2 * len(allres), 'half-periods')
     for k in ('live', 'low52', 'mom12_1', 'trend'):
         wins = sum(1 for r in allres.values() for p in ('first', 'second') if r[k][('money', p)][0] > r[k][('money', p)][1])
         lead = statistics.mean((r[k][('money', p)][0] / r[k][('money', p)][1] - 1) * 100 for r in allres.values() for p in ('first', 'second'))
-        print(f'  {k:8s} {wins} of {2 * len(allres)}; average lead {lead:+.1f}% a half-period')
+        worse = sum(1 for r in allres.values() for p in ('first', 'second') if r[k][('fall', p)][0] < r[k][('fall', p)][1])
+        print(f'  {k:8s} {wins} of {2 * len(allres)}; average lead {lead:+.1f}% a half-period; a deeper worst fall than the list in {worse} of {2 * len(allres)}')
