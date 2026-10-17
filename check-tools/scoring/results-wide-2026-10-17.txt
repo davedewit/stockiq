@@ -1,0 +1,95 @@
+== aex: 26 shares, 204 weeks from 2022-10-19 to 2026-10-09
+  live     top tenth vs the list: 5d first: +0.03 (t +0.1); 5d second: -0.07 (t -0.3); 20d first: +2.06 (t +1.4); 20d second: -0.04 (t -0.0)
+           top 10 changed weekly, after costs: first half $136,572 vs the list $151,471; second half $94,114 vs $110,734
+  low52    top tenth vs the list: 5d first: -0.05 (t -0.1); 5d second: +0.19 (t +0.6); 20d first: +1.13 (t +0.7); 20d second: +0.41 (t +0.2)
+           top 10 changed weekly, after costs: first half $140,394 vs the list $151,471; second half $160,811 vs $110,734
+  mom12_1  top tenth vs the list: 5d first: -0.08 (t -0.3); 5d second: +0.09 (t +0.3); 20d first: +1.46 (t +1.1); 20d second: +0.35 (t +0.2)
+           top 10 changed weekly, after costs: first half $127,004 vs the list $151,471; second half $141,124 vs $110,734
+  trend    top tenth vs the list: 5d first: -0.05 (t -0.2); 5d second: +0.29 (t +1.0); 20d first: +0.78 (t +0.7); 20d second: +1.46 (t +1.1)
+           top 10 changed weekly, after costs: first half $131,411 vs the list $151,471; second half $145,299 vs $110,734
+
+== asx200: 185 shares, 202 weeks from 2022-10-27 to 2026-10-16
+  live     top tenth vs the list: 5d first: +0.00 (t +0.0); 5d second: +0.19 (t +1.0); 20d first: +1.14 (t +2.7); 20d second: +1.94 (t +1.7)
+           top 10 changed weekly, after costs: first half $120,634 vs the list $139,970; second half $135,245 vs $130,509
+  low52    top tenth vs the list: 5d first: +0.48 (t +2.4); 5d second: +0.56 (t +1.9); 20d first: +1.53 (t +1.9); 20d second: +2.83 (t +1.7)
+           top 10 changed weekly, after costs: first half $217,330 vs the list $139,970; second half $191,147 vs $130,509
+  mom12_1  top tenth vs the list: 5d first: +0.29 (t +1.6); 5d second: +0.49 (t +1.7); 20d first: +1.57 (t +2.4); 20d second: +1.89 (t +1.3)
+           top 10 changed weekly, after costs: first half $185,844 vs the list $139,970; second half $202,240 vs $130,509
+  trend    top tenth vs the list: 5d first: +0.38 (t +2.2); 5d second: +0.59 (t +2.2); 20d first: +1.36 (t +1.9); 20d second: +2.23 (t +1.7)
+           top 10 changed weekly, after costs: first half $176,995 vs the list $139,970; second half $207,625 vs $130,509
+
+== cac40: 39 shares, 204 weeks from 2022-10-19 to 2026-10-09
+  live     top tenth vs the list: 5d first: -0.07 (t -0.5); 5d second: +0.09 (t +0.6); 20d first: -0.60 (t -0.8); 20d second: +0.61 (t +1.1)
+           top 10 changed weekly, after costs: first half $118,385 vs the list $133,871; second half $99,476 vs $104,368
+  low52    top tenth vs the list: 5d first: -0.01 (t -0.1); 5d second: +0.31 (t +1.5); 20d first: +0.15 (t +0.3); 20d second: +1.48 (t +1.6)
+           top 10 changed weekly, after costs: first half $124,193 vs the list $133,871; second half $116,336 vs $104,368
+  mom12_1  top tenth vs the list: 5d first: -0.03 (t -0.2); 5d second: +0.22 (t +1.4); 20d first: +0.36 (t +0.7); 20d second: +0.76 (t +1.2)
+           top 10 changed weekly, after costs: first half $131,870 vs the list $133,871; second half $122,005 vs $104,368
+  trend    top tenth vs the list: 5d first: +0.01 (t +0.1); 5d second: +0.29 (t +1.6); 20d first: +0.02 (t +0.0); 20d second: +1.27 (t +1.4)
+           top 10 changed weekly, after costs: first half $120,587 vs the list $133,871; second half $110,012 vs $104,368
+
+== dax40: 40 shares, 203 weeks from 2022-10-21 to 2026-10-12
+  live     top tenth vs the list: 5d first: -0.09 (t -0.5); 5d second: +0.16 (t +0.8); 20d first: -0.27 (t -0.4); 20d second: -0.01 (t -0.0)
+           top 10 changed weekly, after costs: first half $130,107 vs the list $148,362; second half $126,276 vs $130,239
+  low52    top tenth vs the list: 5d first: +0.21 (t +0.9); 5d second: +0.93 (t +2.8); 20d first: +1.50 (t +1.7); 20d second: +4.53 (t +2.8)
+           top 10 changed weekly, after costs: first half $180,066 vs the list $148,362; second half $189,959 vs $130,239
+  mom12_1  top tenth vs the list: 5d first: +0.27 (t +1.2); 5d second: +0.83 (t +2.8); 20d first: +1.31 (t +1.6); 20d second: +3.75 (t +2.8)
+           top 10 changed weekly, after costs: first half $153,782 vs the list $148,362; second half $220,333 vs $130,239
+  trend    top tenth vs the list: 5d first: +0.14 (t +0.7); 5d second: +0.79 (t +2.5); 20d first: +0.54 (t +0.7); 20d second: +4.53 (t +2.9)
+           top 10 changed weekly, after costs: first half $146,555 vs the list $148,362; second half $197,891 vs $130,239
+
+== ftse100: 98 shares, 201 weeks from 2022-10-31 to 2026-10-15
+  live     top tenth vs the list: 5d first: -0.20 (t -1.8); 5d second: -0.18 (t -1.2); 20d first: -0.06 (t -0.1); 20d second: +0.72 (t +1.2)
+           top 10 changed weekly, after costs: first half $88,317 vs the list $118,059; second half $98,347 vs $136,170
+  low52    top tenth vs the list: 5d first: +0.17 (t +1.0); 5d second: +0.33 (t +1.4); 20d first: +0.76 (t +1.2); 20d second: +1.48 (t +2.0)
+           top 10 changed weekly, after costs: first half $128,488 vs the list $118,059; second half $172,955 vs $136,170
+  mom12_1  top tenth vs the list: 5d first: +0.07 (t +0.4); 5d second: +0.36 (t +1.4); 20d first: +0.75 (t +1.1); 20d second: +1.39 (t +2.0)
+           top 10 changed weekly, after costs: first half $124,275 vs the list $118,059; second half $173,722 vs $136,170
+  trend    top tenth vs the list: 5d first: +0.11 (t +0.6); 5d second: +0.24 (t +1.0); 20d first: +0.62 (t +0.8); 20d second: +1.46 (t +1.9)
+           top 10 changed weekly, after costs: first half $123,863 vs the list $118,059; second half $159,464 vs $136,170
+
+== nikkei225: 222 shares, 193 weeks from 2022-11-10 to 2026-10-16
+  live     top tenth vs the list: 5d first: -0.36 (t -3.4); 5d second: -0.09 (t -0.5); 20d first: +0.18 (t +0.6); 20d second: -0.79 (t -0.9)
+           top 10 changed weekly, after costs: first half $64,680 vs the list $124,465; second half $112,290 vs $157,297
+  low52    top tenth vs the list: 5d first: +0.19 (t +1.0); 5d second: +0.67 (t +1.9); 20d first: +0.54 (t +0.8); 20d second: +2.04 (t +1.3)
+           top 10 changed weekly, after costs: first half $151,021 vs the list $124,465; second half $418,575 vs $157,297
+  mom12_1  top tenth vs the list: 5d first: +0.03 (t +0.1); 5d second: +0.26 (t +0.8); 20d first: +0.23 (t +0.4); 20d second: +0.77 (t +0.6)
+           top 10 changed weekly, after costs: first half $114,033 vs the list $124,465; second half $252,272 vs $157,297
+  trend    top tenth vs the list: 5d first: +0.10 (t +0.6); 5d second: +0.43 (t +1.4); 20d first: +0.41 (t +0.7); 20d second: +2.22 (t +1.8)
+           top 10 changed weekly, after costs: first half $122,514 vs the list $124,465; second half $279,114 vs $157,297
+
+== smi: 17 shares, 200 weeks from 2022-10-26 to 2026-10-15
+  live     top tenth vs the list: 5d first: +0.00 (t +0.0); 5d second: -0.31 (t -1.2); 20d first: +0.00 (t +0.0); 20d second: -3.01 (t -1.9)
+           top 10 changed weekly, after costs: first half $100,000 vs the list $100,000; second half $94,800 vs $100,126
+  low52    top tenth vs the list: 5d first: +0.00 (t +0.0); 5d second: -0.01 (t -0.0); 20d first: +0.00 (t +0.0); 20d second: +0.81 (t +0.7)
+           top 10 changed weekly, after costs: first half $100,000 vs the list $100,000; second half $108,068 vs $100,126
+  mom12_1  top tenth vs the list: 5d first: +0.00 (t +0.0); 5d second: +0.18 (t +0.5); 20d first: +0.00 (t +0.0); 20d second: +0.48 (t +0.5)
+           top 10 changed weekly, after costs: first half $100,000 vs the list $100,000; second half $108,337 vs $100,126
+  trend    top tenth vs the list: 5d first: +0.00 (t +0.0); 5d second: +0.28 (t +0.8); 20d first: +0.00 (t +0.0); 20d second: +1.21 (t +1.2)
+           top 10 changed weekly, after costs: first half $100,000 vs the list $100,000; second half $102,584 vs $100,126
+
+== sp400_600: 955 shares, 199 weeks from 2022-10-28 to 2026-10-12
+  live     top tenth vs the list: 5d first: -0.22 (t -2.8); 5d second: +0.07 (t +0.7); 20d first: +0.09 (t +0.3); 20d second: +0.38 (t +1.0)
+           top 10 changed weekly, after costs: first half $74,063 vs the list $138,603; second half $100,916 vs $113,041
+  low52    top tenth vs the list: 5d first: +0.09 (t +0.6); 5d second: +0.33 (t +1.5); 20d first: +0.53 (t +1.0); 20d second: +1.27 (t +1.3)
+           top 10 changed weekly, after costs: first half $188,827 vs the list $138,603; second half $140,866 vs $113,041
+  mom12_1  top tenth vs the list: 5d first: -0.01 (t -0.1); 5d second: +0.21 (t +1.0); 20d first: +0.06 (t +0.1); 20d second: +0.88 (t +1.0)
+           top 10 changed weekly, after costs: first half $134,839 vs the list $138,603; second half $206,020 vs $113,041
+  trend    top tenth vs the list: 5d first: -0.01 (t -0.0); 5d second: +0.20 (t +0.9); 20d first: +0.07 (t +0.1); 20d second: +0.91 (t +1.0)
+           top 10 changed weekly, after costs: first half $151,418 vs the list $138,603; second half $186,778 vs $113,041
+
+== tsx60: 59 shares, 199 weeks from 2022-10-31 to 2026-10-09
+  live     top tenth vs the list: 5d first: +0.09 (t +0.5); 5d second: -0.24 (t -1.1); 20d first: +0.88 (t +1.1); 20d second: +0.30 (t +0.4)
+           top 10 changed weekly, after costs: first half $110,289 vs the list $137,426; second half $117,511 vs $145,174
+  low52    top tenth vs the list: 5d first: +0.05 (t +0.2); 5d second: +0.46 (t +1.3); 20d first: +0.93 (t +1.0); 20d second: +2.83 (t +2.7)
+           top 10 changed weekly, after costs: first half $132,292 vs the list $137,426; second half $183,221 vs $145,174
+  mom12_1  top tenth vs the list: 5d first: +0.08 (t +0.4); 5d second: +0.62 (t +1.8); 20d first: +1.05 (t +1.3); 20d second: +3.66 (t +2.9)
+           top 10 changed weekly, after costs: first half $126,053 vs the list $137,426; second half $200,372 vs $145,174
+  trend    top tenth vs the list: 5d first: +0.01 (t +0.1); 5d second: +0.31 (t +0.9); 20d first: +1.41 (t +1.8); 20d second: +3.41 (t +2.9)
+           top 10 changed weekly, after costs: first half $118,400 vs the list $137,426; second half $169,598 vs $145,174
+
+== how often each score beat its own list (top 10, after costs), out of 18 half-periods
+  live     1 of 18; average lead -16.5% a half-period
+  low52    14 of 18; average lead +29.2% a half-period
+  mom12_1  12 of 18; average lead +21.6% a half-period
+  trend    12 of 18; average lead +18.2% a half-period

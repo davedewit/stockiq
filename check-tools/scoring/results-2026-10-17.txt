@@ -1,0 +1,98 @@
+999 trading days, 2022-10-17 to 2026-10-09; first part to 2025-03-10, then the part that was not looked at first
+
+Top fifth minus bottom fifth (and minus the whole list), average per period in percentage points, t in brackets
+(t of 2 or more both times, same sign: worth taking seriously; under 1: nothing)
+
+== all 101 shares
+live score (as it is)
+    (the baseline)
+     5 days: first: +0.15 (t +0.9), vs list +0.08 | last : +0.24 (t +0.7), vs list +0.14
+    20 days: first: +1.03 (t +1.4), vs list +0.53 | last : +1.22 (t +1.1), vs list +1.08
+
+one-year rise without the last month
+    (momentum over 6-12 months is the best-documented price effect in shares (Jegadeesh and Titman 1993))
+     5 days: first: +0.01 (t +0.0), vs list +0.10 | last : +0.63 (t +1.5), vs list +0.61
+    20 days: first: +0.03 (t +0.0), vs list +0.41 | last : +1.51 (t +0.8), vs list +1.78
+
+close to the 52-week high
+    (shares near their year high keep rising (George and Hwang 2004); found pointing the right way in the factor study)
+     5 days: first: -0.15 (t -0.5), vs list -0.08 | last : -0.35 (t -0.9), vs list -0.15
+    20 days: first: -0.14 (t -0.1), vs list -0.09 | last : -2.31 (t -1.6), vs list -1.41
+
+far above the 52-week low
+    (pointed the right way in both halves of the factor study (11 Oct 2026); lost in a 10-a-side live trial)
+     5 days: first: +0.41 (t +1.3), vs list +0.30 | last : +1.02 (t +2.4), vs list +0.77
+    20 days: first: +1.49 (t +1.4), vs list +1.24 | last : +3.80 (t +1.9), vs list +3.03
+
+90-day rise
+    (medium-term momentum; looked good in the replay on the second half)
+     5 days: first: -0.01 (t -0.0), vs list +0.10 | last : +0.53 (t +1.2), vs list +0.58
+    20 days: first: +0.53 (t +0.5), vs list +0.66 | last : +1.15 (t +0.5), vs list +1.43
+
+one-year rise without the last month, per unit of jumpiness
+    (momentum per unit of risk, so that it does not simply buy the jumpiest shares)
+     5 days: first: +0.10 (t +0.4), vs list +0.02 | last : +0.39 (t +1.0), vs list +0.36
+    20 days: first: +0.66 (t +0.7), vs list +0.35 | last : +0.85 (t +0.5), vs list +0.95
+
+blend: 12-1 rise + near the year high, ranked
+    (two documented momentum measures together, each as a rank so neither swamps the other)
+     5 days: first: -0.11 (t -0.4), vs list -0.02 | last : -0.01 (t -0.0), vs list -0.03
+    20 days: first: +0.09 (t +0.1), vs list +0.31 | last : -0.54 (t -0.3), vs list -0.26
+
+blend: live score + 12-1 rise, ranked
+    (keep the live score and give momentum over months its due)
+     5 days: first: +0.16 (t +0.7), vs list +0.21 | last : +0.42 (t +1.2), vs list +0.28
+    20 days: first: +0.91 (t +1.0), vs list +0.65 | last : +1.63 (t +1.0), vs list +1.04
+
+== without the seven chip / AI names
+live score (as it is)
+    (the baseline)
+     5 days: first: +0.10 (t +0.6), vs list +0.08 | last : +0.20 (t +0.7), vs list +0.10
+    20 days: first: +0.33 (t +0.5), vs list +0.11 | last : +0.04 (t +0.0), vs list +0.35
+
+one-year rise without the last month
+    (momentum over 6-12 months is the best-documented price effect in shares (Jegadeesh and Titman 1993))
+     5 days: first: -0.12 (t -0.4), vs list -0.02 | last : +0.37 (t +1.1), vs list +0.30
+    20 days: first: -0.38 (t -0.4), vs list +0.04 | last : +0.71 (t +0.4), vs list +0.79
+
+close to the 52-week high
+    (shares near their year high keep rising (George and Hwang 2004); found pointing the right way in the factor study)
+     5 days: first: -0.10 (t -0.4), vs list -0.03 | last : -0.21 (t -0.6), vs list -0.12
+    20 days: first: -0.14 (t -0.2), vs list +0.10 | last : -1.83 (t -1.3), vs list -1.26
+
+far above the 52-week low
+    (pointed the right way in both halves of the factor study (11 Oct 2026); lost in a 10-a-side live trial)
+     5 days: first: +0.24 (t +0.9), vs list +0.19 | last : +0.50 (t +1.5), vs list +0.38
+    20 days: first: +0.83 (t +1.0), vs list +0.68 | last : +1.36 (t +0.9), vs list +1.29
+
+90-day rise
+    (medium-term momentum; looked good in the replay on the second half)
+     5 days: first: -0.17 (t -0.7), vs list -0.04 | last : +0.01 (t +0.0), vs list +0.08
+    20 days: first: -0.43 (t -0.4), vs list -0.01 | last : -0.42 (t -0.2), vs list -0.09
+
+one-year rise without the last month, per unit of jumpiness
+    (momentum per unit of risk, so that it does not simply buy the jumpiest shares)
+     5 days: first: -0.06 (t -0.3), vs list -0.06 | last : +0.26 (t +0.8), vs list +0.21
+    20 days: first: +0.16 (t +0.2), vs list +0.06 | last : -0.02 (t -0.0), vs list +0.19
+
+blend: 12-1 rise + near the year high, ranked
+    (two documented momentum measures together, each as a rank so neither swamps the other)
+     5 days: first: -0.12 (t -0.5), vs list -0.04 | last : -0.11 (t -0.3), vs list -0.05
+    20 days: first: -0.12 (t -0.1), vs list +0.18 | last : -0.44 (t -0.3), vs list -0.04
+
+blend: live score + 12-1 rise, ranked
+    (keep the live score and give momentum over months its due)
+     5 days: first: +0.01 (t +0.0), vs list +0.10 | last : +0.16 (t +0.5), vs list +0.15
+    20 days: first: +0.30 (t +0.4), vs list +0.17 | last : +0.24 (t +0.2), vs list +0.28
+
+== $100,000 in the top 10, changed weekly, 0.1% a trade (first part | last part)
+  first part 2022-10-17 to 2025-03-10: S&P 500 fund $149,436; an equal amount in every share $173,531
+  last  part 2025-03-10 to 2026-10-09: S&P 500 fund $139,179; an equal amount in every share $158,004
+  live score (as it is): $136,870 / without chips $125,861 | $135,322 / without chips $105,601
+  one-year rise without the last month: $182,474 / without chips $155,129 | $274,813 / without chips $187,261
+  close to the 52-week high: $119,152 / without chips $117,611 | $102,773 / without chips $99,563
+  far above the 52-week low: $226,722 / without chips $185,827 | $388,862 / without chips $172,490
+  90-day rise: $181,356 / without chips $136,164 | $340,740 / without chips $140,784
+  one-year rise without the last month, per unit of jumpiness: $164,983 / without chips $148,142 | $207,622 / without chips $142,110
+  blend: 12-1 rise + near the year high, ranked: $144,578 / without chips $142,823 | $124,703 / without chips $103,884
+  blend: live score + 12-1 rise, ranked: $177,986 / without chips $153,236 | $146,605 / without chips $116,297

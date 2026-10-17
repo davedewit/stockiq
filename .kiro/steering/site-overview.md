@@ -520,6 +520,28 @@ the last 40%:
   autopilot (every second coin with limits scaled to its own movement, kept only if clearly better), through its trial
   mechanism. Offered to the owner on 12 Oct; not built.
 
+**The screener score against momentum scores, on markets it was never tuned on (17 Oct 2026; the owner: "go ahead and look into
+improving it").** `check-tools/scoring/score_study.py` (the S&P 100, from the replay's panel) and `wide_study.py` (five years of
+daily prices for 1,750 shares fetched through the price function on AWS, `fetch_wide.py` → `research-data/prices/`, not in
+git: S&P 400 + 600, FTSE 100, DAX 40, CAC 40, AEX, SMI, Nikkei 225, ASX 200, TSX 60). The candidates were written down before
+the wide result was seen; the live score is the workers' own code run on each week's prices. Results:
+`results-2026-10-17.txt`, `results-wide-2026-10-17.txt`. **$100,000 in the top 10, changed weekly, 0.1% off each trade, against
+the same money spread over the whole list, in 18 half-periods (9 lists x 2 halves):**
+- **The live score beat its own list once in 18, an average of 16.5% behind it a half-period** (Nikkei first half $64,680
+  against $124,465; S&P 400+600 $74,063 against $138,603). Its top tenth did no better over 5 or 20 days, and in three
+  lists clearly worse. On the S&P 100 it was behind an S&P 500 fund in both halves. **It is not neutral: it is worse than
+  picking the whole list.** The likeliest reason, from its code: half its weight rewards shares that have just fallen (RSI
+  oversold +, near the lower Bollinger band +, "contrarian opportunity" +), the opposite of what the data rewards.
+- **Far above the 52-week low: 14 of 18, +29% a half-period; the year's rise without the last month: 12 of 18, +22%; the
+  "trend" mix (both, plus the 200-day average, less when RSI is over 80): 12 of 18, +18%.** Their top tenth was ahead over
+  20 days in nearly every list and half, several with t near 2 to 3 (DAX, TSX, ASX).
+- "Close to the 52-week high" did worse on the S&P 100 (not tried wider).
+- **Limits:** today's members (flatters buying what rose, most for small companies); a mostly rising period 2022-2026; a
+  top 10 of momentum shares is jumpier than the list (drawdowns not yet measured); the live 10-a-side trial of "furthest
+  above the low" lost (-2.64% against -0.68%: too few trades to read, but not to be forgotten).
+- **Next (offered to the owner the same day):** a new share score built on these measures, kept in the workers' fields and
+  labels, run through `workers/prove.py` and the autopilot replay, with drawdowns, before his yes; Dow 30 first.
+
 **The autopilot's own rules, replayed (11 Oct 2026, evening).** The owner asked, honestly, whether this will ever make
 more than it loses, and whether it could "run on some kind of rapid speed to learn faster". It can: `check-tools/replay/
 replay.py` runs the autopilot's rules (imported from the deployed function) over the same four years of S&P 100 prices
