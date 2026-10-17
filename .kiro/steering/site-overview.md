@@ -2260,7 +2260,16 @@ unless you need me to make a big decision. i'd prefer it all run without me". Bu
   green or red for how it is running); the goal's rows have a progress bar and a pill "target …"; the review's lines are
   marked red for "clearly down / clearly losing", green for "clearly up", and signed dollars and percentages coloured as they
   point (a zero, a target, is left plain); the settings are chips, the screeners folded. Colour tokens are on `#admin-panel`
-  with pale backgrounds that read in both themes. AWS usage is not on it: the function's role
+  with pale backgrounds that read in both themes.
+  **The account value on it is the Practice portfolio tab's own** (17 Oct 2026, `admin-panel.js?v=4`; the owner saw $99,411 on
+  the Admin page beside $99,643.23 on the tab): the portfolio script hands its live sum over (`practicePortfolio.figures()`, and
+  an event `practice-portfolio:figures` at each redraw), and until it has its prices the Admin page shows the function's
+  figure marked "an estimate until the prices are in". The function's `account_value(portfolio, record, quote)` values each
+  holding at its latest price when given a price lookup (the weekly review does, running as the function) and keeps the old
+  estimate otherwise (the autopilot's at its last check-in change, the owner's at cost). **The weekly review also says how the
+  account stands against the same $100,000 in an S&P 500 fund since it began** (`fund_since_start`, the graph's rule: the last
+  close at or before the start). Checked on his real account: $99,643.23, the fund $98,032.29, ahead by $1,610.94, the same
+  as the tab. Rollback zip `stockiq-ai-trader_before_autopilot_adminvalue_20261017.zip`. AWS usage is not on it: the function's role
   can read no CloudWatch figures (it has DynamoDB, SES and logging only); that would be the next step, through the daily
   usage report's own function.
 - **Proposals** (`admin_propose`; item `_admin` in `stockiq-ai-trader`, the last 60 kept): the weekly review proposes, from
@@ -2743,7 +2752,7 @@ buying-order trial finished and was not kept; the AI review's early sales switch
 - **At the first weekly review (on or after 19 Oct 2026), build: (A)** the trial queue, starting with **a longer holding
   time for shares** (question 6; the replay's clearest finding); **(B)** company figures (profit margin, debt, revenue
   growth) **recorded with every share bought** and the record split by them, from `site-data/company_figures.json` (3,333
-  shares; question 18); **(C)** item 9b below (the account against the fund in the weekly review).
+  shares; question 18); **(C)** item 9b below (done the same day).
 - **Prepare as tested options for his decision: (D)** a market-mood rule: hold fewer shares, or none, while the S&P 500 is
   below its 200-day average (question 9; replay first, the four tests of "THE MANDATE"); **(E)** the screeners' own scoring:
   the three factors that use no real data replaced by company figures, and momentum over months given its due (the part
@@ -2782,10 +2791,7 @@ buying-order trial finished and was not kept; the AI review's early sales switch
    price of that moment, which has moved. Cosmetic; the fix is to buy the quantity asked for at the price of the buy.
    The same thing makes the check "buying by quantity buys exactly that many" fail on and off during US hours.
 9. (Done 17 Oct 2026: the pages' polling. See the change log of that day; measure the effect in his usage report.)
-9b. **The weekly review (Admin page) should say how the account stands against the same $100,000 in an S&P 500 fund since it
-    began** (17 Oct 2026: the owner judges it that way, and rightly; that day the account was about $99,411 against the
-    fund's $98,032). `write_review` in `stockiq-ai-trader`: one line, the fund from SPY at `createdAt` (the price proxy's
-    `range` reaches back past a month). Do it with the next change to that function; not worth a deploy of its own.
+9b. (Done 17 Oct 2026: the weekly review's line against an S&P 500 fund since the start, `fund_since_start`.)
 10. **Unused functions: nothing was deleted, and nothing is to be deleted without the owner seeing the exact list and saying
     yes to it.** On 12 Oct he first said to go ahead "if you are 100% never used", then stopped the dry run ("i don't
     think its right to delete workers. they must be used via the screeners?!"). What a check of every call in the 455
