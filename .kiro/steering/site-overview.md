@@ -1338,6 +1338,16 @@ with `document.querySelector('h3')`.
   sidebar's own (`#market-countdown-sidebar`, read by `marketWait`) when that is on the page, so the two cannot disagree;
   without the sidebar the script works it out by the same rule (`usOpensIn`: 9:30 to 16:00 New York time, weekdays, no
   public holidays in either). It used to say "it is closed at weekends", which was wrong on a Monday morning.
+- **A share is bought or sold by hand only while its market is open** (17 Oct 2026; the owner sold TLS.AX on a Saturday, at
+  Friday's close, and asked for it to wait for the market): the same rule as the autopilot's, a price that has traded in the
+  last 3 hours (`FRESH_HOURS` here and in `stockiq-ai-trader`: keep the two the same; `closedFor`, `closedText`). Coins and
+  a quote that gives no time are never held back. A closed share's Sell button reads "Market closed" (greyed, the reason
+  in its tooltip); a buy or a sale asked for anyway (the buy row, the 🎯 popup's "Practice buy") is refused with "<code>
+  cannot be bought now: its market is closed. Its last price is from <time> (N hours ago)… Try again once its market is
+  open."; picking a closed share in the search says so in red under the row. It does not know a market's opening time,
+  only that the last trade is old. In the first minutes of a Sydney or Tokyo session (the price source is about 20 minutes
+  behind there) a share also waits, as the autopilot's do. `practice_test.js`'s stand-in treats every real price as fresh,
+  so the tests trade on any day; its made-up `SHUT.AX` opens and shuts on demand (7 checks).
 - **What is typed in the buy row survives a refresh of prices** (it was wiped: only a completed buy or a reset clears it now).
 - The cards have small capital labels and a green or red top edge on Account value; table headings are small capitals,
   rows highlight under the pointer, figures use tabular numerals.
@@ -1476,7 +1486,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=36` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Portfolio section | `website/practice-portfolio.js` (`?v=37` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=48`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
@@ -4208,3 +4218,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     splits). Tried on the live page as his account before the deploy (`live_practice_check.js LOCAL_PP=… OPEN_MORE=1`, new),
     desktop and 390px. **Lesson: two windows staged the same function an hour apart; the second rebuilt its change as a
     patch script and applied it to the first one's live code, so neither undid the other.**
+  - **Hand buys and sales wait for the share's market to open** (05:20 UTC; `practice-portfolio.js?v=37`, `stockiq-ai-chat`
+    `hGAVqC3Y…`, rollback zip `…_before_closed_20261017.zip`), at the owner's word after he sold TLS.AX on the Saturday
+    (section 8c, "What the owner sees"). Seen live on his account the same morning: all 39 holdings' buttons read "Market
+    closed". 137 portfolio checks, 22 chat. **Not checked:** a signed-in browser, a phone, the 🎯 popup's button for real.
