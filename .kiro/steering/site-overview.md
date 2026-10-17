@@ -32,6 +32,18 @@ any improvement it found for the site in any way really but especially in making
 run if its not making profit. well over 100,000." If the reviews keep showing no edge, say that plainly and recommend
 changing what it buys from, or stopping, instead of tuning without end.
 
+**THE SEARCH FOR IMPROVEMENTS NEVER ENDS (the owner, 17 Oct 2026): "this needs to be continual never ending new ways to
+improve, espeically as your AI gets smarter!"** Every session, not only the weekly review:
+- Read "Improvements to come" (section 8c, the end of "Start here when resuming") and `check-tools/reviews/questions.md`:
+  do what is due, close what the data now answers, and **add new ideas of your own every time** (at least five questions
+  at a weekly review). An empty list is a failure of the session, not a sign that nothing is left.
+- **Look again at what earlier sessions judged impossible or not worth it**, with fresh eyes: a newer, stronger model may see
+  a better way, a better data source, or a flaw in an old conclusion. Say so when an earlier conclusion was wrong.
+- **As AI models improve, retest the AI's own parts**: whether a stronger model chooses buys or reviews holdings better
+  (question 24 in `questions.md`), and what it is told (`choose`, `ai_review`, `write_lessons` prompts).
+- The test is always the same and does not soften: dollars, the average a trade after costs against an S&P 500 fund,
+  30 trades a group, an idea replayed on past prices first and put live only as a trial beside the current rule.
+
 ---
 
 ## 1. What the site is
@@ -2701,11 +2713,25 @@ preview from Kiro): ask early when a change "does not show" (section 9).
   takeover, report`, `stockiq-ai-trader_before_sweep_20261011.zip`, `…_costs_…`; 12 Oct `fresh, due, holdings, journal,
   notes, heads, junk, patient, rows, buildup`; 13 Oct `regions, settle`; 17 Oct `admin`. `stockiq-ai-chat_before_{dashboard, wording, levels, sweep, costs}_20261011.zip`, `…_{guide, guide2, guide3}_20261012.zip`, `…_before_filter_20261013.zip`, `…_before_fund_20261013.zip`; `stockiq-price-proxy_before_fund_20261013.zip`.
 
-**Improvements to come: one list. Take an item out when it is done; add ideas as the data suggests them.**
+**Improvements to come: one list. Take an item out when it is done; add ideas as the data suggests them, and new ones of
+your own every session (the instruction at the top of this file).**
+*Agreed with the owner on 17 Oct 2026 (state that day: 51 finished trades, -1.15% a trade after costs, clearly down; the whole
+account ahead of the same $100,000 in an S&P 500 fund by about $1,600 after one week in which the fund fell 2%; the
+buying-order trial finished and was not kept; the AI review's early sales switched off and coins unticked at his yes):*
+- **At the first weekly review (on or after 19 Oct 2026), build: (A)** the trial queue, starting with **a longer holding
+  time for shares** (question 6; the replay's clearest finding); **(B)** company figures (profit margin, debt, revenue
+  growth) **recorded with every share bought** and the record split by them, from `site-data/company_figures.json` (3,333
+  shares; question 18); **(C)** item 9b below (the account against the fund in the weekly review).
+- **Prepare as tested options for his decision: (D)** a market-mood rule: hold fewer shares, or none, while the S&P 500 is
+  below its 200-day average (question 9; replay first, the four tests of "THE MANDATE"); **(E)** the screeners' own scoring:
+  the three factors that use no real data replaced by company figures, and momentum over months given its due (the part
+  "EXPECT THIS AT THE NEXT SESSION" above). (E) changes every ranking on the site: his yes, after the evidence.
+- **Watch, do not act yet:** shares bought at rank 1 to 3 did better (-0.6% a trade, 24 trades) than at rank 4 to 10 (-1.8%,
+  10); with 50 holdings it buys further down each ranking (question 20).
 *Waiting on finished trades (each has its trigger; nothing is adopted from hindsight, a trading idea goes live as a trial):*
-1. **The buying-order trial's verdict** (10 finished share trades each way). Whichever way it goes, next in line, one at a
-   time: a longer holding time for shares, then not selling a share on the screener's signal alone (the two other ideas
-   that held up in the replay, section 7b).
+1. (Done 15 Oct 2026: **the buying-order trial ended, not kept**: furthest above the 52-week low -2.64% a trade against -0.68%
+   as ranked, 10 each way. Next in line: a longer holding time for shares, the plan above; not selling on the signal alone is
+   the patient-shares trial, running.)
 2. **Do headlines earn their place?** At 30 trades with and 30 without (`heads`; the review tool's split). If buys with
    headlines do no better: stop fetching them for candidates (fewer calls, shorter prompts). If better: widen them (the
    feed's summary text as well as the title; a feed that covers Sydney, Tokyo and London shares, which get none now).
