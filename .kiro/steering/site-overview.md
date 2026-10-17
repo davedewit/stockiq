@@ -28,6 +28,17 @@ mirrors, the site's key files against the local ones, both repositories, and end
 every finding** before or alongside whatever the owner asks; add a check to the script whenever a problem is found that it
 missed.
 
+**Two registers keep the improving going without the owner having to ask (17 Oct 2026, his ideas):**
+- **`check-tools/site_parts.py`** lists every part of the site (44) with when a session last looked at it. Each session reviews the
+  three looked at longest ago (session_start prints them), through every angle in its LENSES (ease of use, faults, appearance,
+  profit, the analysis behind it, AI use and newer model versions, comparison over time, new ideas), fixes what is plainly
+  wrong and brings the rest to the owner as numbered improvements; then `site_parts.py done <id> "<what was found>"`. His words:
+  "pick a few random ones to think about improvements or fault finding. as thats literally what i do with you".
+- **`check-tools/experiments.py`** holds every change whose worth is not certain as an experiment: what, which angle, how it is
+  measured, the day it is decided. session_start lists those due; the session decides KEEP or REMOVE on the figures (or extends
+  once, with a reason). At least one new idea of the session's own goes in every session. His words: "think of new ideas and
+  add to it test over a period of time then keep it or remove it based on whether it improves".
+
 **EVERY SESSION, WITHOUT BEING ASKED (the owner's instruction, 12 Oct 2026):** open with what has happened since the last
 session, and **if the newest file in `stockiq/check-tools/reviews/` is seven or more days old, run the full review** (section
 8c, "The diary, and the review every week or two") before anything else. **And read the Admin page's answers:
