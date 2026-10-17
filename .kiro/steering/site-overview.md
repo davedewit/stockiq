@@ -787,7 +787,7 @@ crypto orchestrator or any worker.
 | **China CSI 300** (since 17 Oct 2026) | `5, 'csi300'` | `5-csi300` | `stockiq-asia-5-10-worker-N` (30) | 300 | The index provider's own file for 16 Oct 2026 (`oss-ch.csindex.com.cn/.../cons/000300cons.xls`); Shanghai `.SS`, Shenzhen `.SZ`. One share returns no data on a run (299 of 300) |
 | **Taiwan 50** (since 17 Oct 2026) | `5, 'tw50'` | `5-tw50` | `stockiq-asia-5-11-worker-N` (5) | 50 | Chinese Wikipedia (members of 30 Sep 2025 with every change through the review of September 2026 applied); `.TW`. Its Top 10 comparison uses the TAIEX (`^TWII`): the Taiwan 50 index has no symbol at the price source |
 | **New Zealand NZX 50** (since 17 Oct 2026) | `5, 'nzx50'` | `5-nzx50` | `stockiq-asia-5-12-worker-N` (5) | 47 | English Wikipedia's S&P/NZX 50 table (undated; S&P's announcements show no change in June or September 2026); three members no longer have prices (Arvida and Manawa Energy taken over, Goodman Property Trust not at the price source) and their replacements are not in the list |
-| Mexico IPC | (still "Coming Soon") | – | – | – | **No current list could be read**: S&P and the exchange refuse scripts, the newest public copy is of 2021. Needs the 35 members from S&P's latest rebalancing notice (September 2026: Alpek in, Televisa out) typed in from the PDF |
+| **Mexico IPC** (since 17 Oct 2026) | `5, 'ipc'` | `5-ipc` | `stockiq-americas-6-3-worker-N` (4) | 35 | **The holdings of BlackRock's NAFTRAC fund, which follows the index** (15 Oct 2026; `blackrock.com/mx/intermediarios/productos/251895/ishares-naftrac-fund/1501904811835.ajax?fileType=csv&fileName=NAFTRAC_holdings&dataType=fund`): S&P and the exchange refuse scripts. Symbols are the exchange's tickers with `.MX` (asterisk dropped; `PE&OLES.MX`, Liverpool `LIVEPOLC-1.MX`). **The exchange trades 13:30-20:00 UTC**, with New York; its daily close is an auction price, a little off the last quote |
 | Crypto universe | `7, 'coinspot'` | `7-1` | orchestrator + 54 `stockiq-option-7-1-worker-N` | 540 coins | CoinGecko top by market cap, price-checked |
 | Single coin | `72, 'single'` | – | the single-stock report function, `"asset": "crypto"` (since 12 Oct 2026; section 7) | – | – |
 
@@ -4358,7 +4358,8 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     "Main index of every country" (four of them; the Euro Stoxx 50 is not a country's), the AI chat's list, and the site's
     count (32) and lists. **The dashboard's tracker reads a symbol with two suffixes now** (`SWED-A.ST`: it read 3 of the
     Swedish top 10); the 47 saved reports read the same as before. Checked live: each button through the page code and the
-    coordinator (every worker answering, the tracker 10 symbols each). Mexico stays "Coming Soon" (the table). Rollback zips
+    coordinator (every worker answering, the tracker 10 symbols each). **Mexico IPC followed the same hour** (the table): its list
+    from the holdings of the NAFTRAC fund, after S&P and the exchange refused; **no screener is "Coming Soon" any more: 33 in all.** Rollback zips
     `…_before_newmarkets_20261017.zip` for the coordinator, the autopilot and the chat.
     **The slip of 13 Oct again:** a notes edit stopped on a line that did not match and the commit after it still ran, so
     commit `99b495d` says "Notes" and holds none; they are in the commit after it.
