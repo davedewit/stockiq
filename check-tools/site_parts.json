@@ -1,0 +1,299 @@
+{
+ "about": "Every part of the site and when a session last looked at it for improvements: check-tools/site_parts.py",
+ "parts": [
+  {
+   "id": "home-hero",
+   "part": "Home page: the top, its four numbers, the two buttons",
+   "where": "index.html, top",
+   "last": null
+  },
+  {
+   "id": "home-features",
+   "part": "Home page: \"What you can do with StockIQ\" cards, \"What StockIQ is and is not\"",
+   "where": "index.html #features",
+   "last": null
+  },
+  {
+   "id": "home-pricing",
+   "part": "Home page: pricing and the plans",
+   "where": "index.html #pricing",
+   "last": null
+  },
+  {
+   "id": "home-widgets",
+   "part": "Home page: market widgets, movers lists, news panel",
+   "where": "index.html, the widgets and the right-hand panel",
+   "last": null
+  },
+  {
+   "id": "home-email",
+   "part": "Home page: the email signup",
+   "where": "index.html, \"Get Screener Highlights by Email\"",
+   "last": null
+  },
+  {
+   "id": "report",
+   "part": "The single-stock report and its chart",
+   "where": "analysis.html option 1; stockiq-option-1-1-custom-analysis, stockiq-chart-generator",
+   "last": null
+  },
+  {
+   "id": "signals",
+   "part": "Trading signals: live signals and auto-detect",
+   "where": "analysis.html option 2; signals/",
+   "last": null
+  },
+  {
+   "id": "presets",
+   "part": "Choose from presets",
+   "where": "analysis.html #presets",
+   "last": null
+  },
+  {
+   "id": "screeners-us",
+   "part": "US screeners: reports, CSV, labels",
+   "where": "analysis.html US markets; screeners.js; the coordinator",
+   "last": "2026-10-17",
+   "log": [
+    {
+     "at": "2026-10-17",
+     "found": "Summary: the average score and the scored count in plain words; Nikkei size 210 -> 225; lists_check.py built."
+    }
+   ]
+  },
+  {
+   "id": "screeners-europe",
+   "part": "Europe screeners",
+   "where": "analysis.html Europe markets",
+   "last": "2026-10-17",
+   "log": [
+    {
+     "at": "2026-10-17",
+     "found": "Summary: the average score and the scored count in plain words; Nikkei size 210 -> 225; lists_check.py built."
+    }
+   ]
+  },
+  {
+   "id": "screeners-apac",
+   "part": "Asia-Pacific screeners",
+   "where": "analysis.html Asia-Pacific markets",
+   "last": "2026-10-17",
+   "log": [
+    {
+     "at": "2026-10-17",
+     "found": "Summary: the average score and the scored count in plain words; Nikkei size 210 -> 225; lists_check.py built."
+    }
+   ]
+  },
+  {
+   "id": "screeners-americas",
+   "part": "Americas screeners (Canada, Brazil, Mexico)",
+   "where": "analysis.html Americas markets",
+   "last": "2026-10-17",
+   "log": [
+    {
+     "at": "2026-10-17",
+     "found": "Summary: the average score and the scored count in plain words; Nikkei size 210 -> 225; lists_check.py built."
+    }
+   ]
+  },
+  {
+   "id": "screener-score",
+   "part": "The screeners' trend score itself: does it still beat its lists?",
+   "where": "workers/stock_worker.py; check-tools/scoring/",
+   "last": "2026-10-17"
+  },
+  {
+   "id": "crypto",
+   "part": "The crypto screener and single coin",
+   "where": "analysis.html option 7; the orchestrator",
+   "last": null
+  },
+  {
+   "id": "usage-chip",
+   "part": "The usage chip, trial, sign-up prompts and round buttons",
+   "where": "visitor-bar.js, auth.js",
+   "last": null
+  },
+  {
+   "id": "signup-login",
+   "part": "Sign up, log in, activation",
+   "where": "signup.html, login.html",
+   "last": null
+  },
+  {
+   "id": "plans",
+   "part": "Plans, upgrade and manage subscription",
+   "where": "dashboard.html plan sections, Stripe",
+   "last": null
+  },
+  {
+   "id": "reports-tab",
+   "part": "Dashboard Reports tab: history, re-run, background run, auto-delete",
+   "where": "dashboard.html Reports",
+   "last": null
+  },
+  {
+   "id": "tracker",
+   "part": "The 🎯 Top 10 performance popup and badges",
+   "where": "dashboard.html parseScreenerTop10",
+   "last": null
+  },
+  {
+   "id": "pp-top",
+   "part": "Practice portfolio: the three figures, the line under them, the breakdown",
+   "where": "practice-portfolio.js",
+   "last": null
+  },
+  {
+   "id": "pp-graph",
+   "part": "Practice portfolio: the graph and the S&P 500 line",
+   "where": "practice-portfolio.js chartSvg",
+   "last": null
+  },
+  {
+   "id": "pp-holdings",
+   "part": "Practice portfolio: holdings table, plans, sold list, the buy row",
+   "where": "practice-portfolio.js",
+   "last": null
+  },
+  {
+   "id": "ap-status",
+   "part": "Autopilot: switch, status, countdown, Needs you, Check in now",
+   "where": "practice-autopilot.js top",
+   "last": null
+  },
+  {
+   "id": "ap-settings",
+   "part": "Autopilot: level, own limits, budget, pace, number of holdings",
+   "where": "practice-autopilot.js Settings",
+   "last": null
+  },
+  {
+   "id": "ap-screeners",
+   "part": "Autopilot: screeners card, shortcuts, the spread over markets",
+   "where": "practice-autopilot.js Settings",
+   "last": null
+  },
+  {
+   "id": "ap-switches",
+   "part": "Autopilot: \"What it may do by itself\" switches and emails",
+   "where": "practice-autopilot.js Settings",
+   "last": "2026-10-17",
+   "log": [
+    {
+     "at": "2026-10-17",
+     "found": "The AI review's early sales were switched off at the owner's yes and the panel did not say why: its record (31 trades, -1.46% a trade, against -0.47% for every other kind of sale) is now shown under the switch."
+    }
+   ]
+  },
+  {
+   "id": "ap-activity",
+   "part": "Autopilot: What happens next, Holding now, What it has done",
+   "where": "practice-autopilot.js Activity",
+   "last": null
+  },
+  {
+   "id": "ap-doing",
+   "part": "Autopilot: How it is doing, breakdown, progress, improving its rules",
+   "where": "practice-autopilot.js Activity",
+   "last": null
+  },
+  {
+   "id": "ap-buying",
+   "part": "Autopilot engine: what it buys (shortlist, the AI choice, headlines)",
+   "where": "stockiq-ai-trader shortlist, choose",
+   "last": null
+  },
+  {
+   "id": "ap-selling",
+   "part": "Autopilot engine: how it sells (limits, stops, time, trials)",
+   "where": "stockiq-ai-trader review_sells",
+   "last": null
+  },
+  {
+   "id": "ap-learning",
+   "part": "Autopilot engine: shared learning, trials, notes, emails",
+   "where": "stockiq-ai-trader think, review_tuning",
+   "last": null
+  },
+  {
+   "id": "admin",
+   "part": "The Admin page",
+   "where": "admin-panel.js; stockiq-ai-trader admin",
+   "last": "2026-10-17"
+  },
+  {
+   "id": "bell",
+   "part": "The notification bell",
+   "where": "autopilot-bell.js",
+   "last": null
+  },
+  {
+   "id": "chat",
+   "part": "The AI chat (everywhere and on the dashboard)",
+   "where": "ai-chat.js; stockiq-ai-chat",
+   "last": null
+  },
+  {
+   "id": "stock-pages",
+   "part": "Stock pages: snapshot, news, people also watch, SEO",
+   "where": "stocks/*.html; generate-stock-pages.py",
+   "last": null
+  },
+  {
+   "id": "news",
+   "part": "News page and the news sidebar",
+   "where": "news.html, news.js",
+   "last": null
+  },
+  {
+   "id": "guides",
+   "part": "The guides",
+   "where": "*-guide.html, investment-research-tools.html",
+   "last": null
+  },
+  {
+   "id": "about-faq",
+   "part": "About and FAQ (are they still true?)",
+   "where": "about.html, faq.html",
+   "last": null
+  },
+  {
+   "id": "legal",
+   "part": "Terms, privacy, disclaimers, the no-advice wording",
+   "where": "terms.html, privacy.html, footers",
+   "last": null
+  },
+  {
+   "id": "phone",
+   "part": "The site on a phone: menus, sidebars, the dashboard",
+   "where": "mobile-sidebar.js, styles.css",
+   "last": null
+  },
+  {
+   "id": "daily-run",
+   "part": "The daily run: news, snapshots, sitemap, deploy, push",
+   "where": "~/stockiq-daily.log, deploy-to-s3.sh",
+   "last": null
+  },
+  {
+   "id": "costs",
+   "part": "AWS and OpenAI costs, calls against the free allowance",
+   "where": "the Admin page, session_start.py",
+   "last": null
+  },
+  {
+   "id": "seo",
+   "part": "Search: indexed pages, sitemap, titles, descriptions",
+   "where": "sitemap.xml, update_stock_analysis.py; Search Console (owner)",
+   "last": null
+  },
+  {
+   "id": "stock-lists",
+   "part": "The screeners' stock lists against each index",
+   "where": "check-tools/lists_check.py --full",
+   "last": "2026-10-17"
+  }
+ ]
+}

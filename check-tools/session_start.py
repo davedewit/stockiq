@@ -131,6 +131,26 @@ left = [os.path.basename(d) for d in glob.glob(os.path.join(HERE, 'pending-*')) 
 if left: finding(f"staging folders left over: {', '.join(left)} (a deploy not finished, or another session's)")
 print(f"  staging folders: {', '.join(sorted(kept & set(os.listdir(HERE))))} (kept on purpose)" + (f"; others: {', '.join(left)}" if left else ''))
 
+# 6b. the screeners' stock lists (lists_check.py: page and coordinator alike, no duplicates; the full check monthly)
+head('6b. The screeners\' stock lists')
+r = subprocess.run([sys.executable, os.path.join(HERE, 'lists_check.py')], capture_output=True, text=True)
+got = [l.strip()[3:] if l.strip()[:3].rstrip('.').isdigit() else l.strip() for l in r.stdout.splitlines() if re.match(r'\s+\d+\. ', l)]
+print('  ' + (r.stdout.strip().splitlines()[0] if r.stdout.strip() else 'not run: ' + r.stderr.strip()[:200]))
+for g in got: finding('stock list: ' + re.sub(r'^\d+\.\s*', '', g))
+try:
+    last = json.load(open(os.path.join(ROOT, 'research-data', 'lists_check.json'))).get('full')
+except Exception:
+    last = None
+age_days = (now - datetime.datetime.strptime(last[:19], '%Y-%m-%dT%H:%M:%S')).days if last else 99
+print(f'  the full check (prices of every symbol, members against each index\'s own source): {last or "never"}')
+if age_days >= 30: finding(f"the screeners' full list check is {'never run' if not last else str(age_days) + ' days old'}: python3 check-tools/lists_check.py --full (about 15 minutes), then update what it finds")
+
+# 6c. parts of the site to review today, without being asked (site_parts.py; the owner's idea, 17 Oct 2026)
+head('6c. Parts of the site to look at this session')
+r = subprocess.run([sys.executable, os.path.join(HERE, 'site_parts.py'), 'next', '3'], capture_output=True, text=True)
+for l in r.stdout.splitlines()[:3]:
+    print('  ' + l); finding('REVIEW without being asked: ' + l.split(' (where')[0] + ' (then: python3 check-tools/site_parts.py done <id> "<what was found>")')
+
 # 7. the improvements list
 head('7. What the notes say is due')
 notes = open(os.path.join(ROOT, '.kiro', 'steering', 'site-overview.md'), encoding='utf-8').read()
