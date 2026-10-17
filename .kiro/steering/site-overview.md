@@ -1208,8 +1208,18 @@ with `document.querySelector('h3')`.
 **Practice portfolio** (its own tab, container `#practice-portfolio`):
 - **The top is three figures since 13 Oct 2026**: Account value, Today, Since the start (`.pp-top`), then one line (cash, in
   holdings, ahead of or behind the same $100,000 in an S&P 500 fund since the start, in dollars: `.pp-facts`), then **"The breakdown" folded**
-  (`#pp-more`, kept open across redraws by `moreOpen`), which holds the four cards and the "whose result is whose" row
-  described below, unchanged. The owner, from a picture: "this is honestly confusing… its just too much": about seventeen
+  (`#pp-more`, kept open across redraws by `moreOpen`). **Since 17 Oct 2026 the breakdown is one profit-and-loss table**
+  (`breakdownHtml`, class `pp-stack pp-pl`): rows "Sold" (made or lost for good), "Still held" (on paper, at the latest
+  prices), "Since the start" (the two together, in bold); columns "Your own buys", "🤖 AI autopilot", "Together" (one column
+  "Result" until the autopilot has bought anything; `splitGain` gives the figures, and every row and column adds up). Under
+  it one line, "Where the money is" (cash, in holdings, what was put in, together the account value), and two lines against
+  an S&P 500 index fund: "The whole account" (as the graph: the starting $100,000 in the fund since the start, ahead or
+  behind in dollars) and "What is still held" (since bought, against the same dollars in the fund on the same days,
+  `versusFund`, which says that what was sold is not in it). On a phone each row is a card with the three columns labelled.
+  It replaced the four cards and the "whose result is whose" row described below: the same "Today" stood there twice with
+  two percentages (1.02% of the account on top, 1.29% of the holdings in a card), which the owner took for a fault. **The
+  "Today" figure now has one percentage, of the account, at the top only.** The bullets below on the cards and the row are
+  history. The owner, from a picture: "this is honestly confusing… its just too much": about seventeen
   figures had stood there at once, several of them twice. **When adding a figure to this tab, put it in the breakdown
   unless it answers "what is it worth, how is today, how is it overall".**
 - Four cards: Account value (the cash plus every holding at its latest price; under it the change
@@ -1466,8 +1476,8 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=35` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=47`) | Controls and reports only; decisions are made by the Lambda |
+| Portfolio section | `website/practice-portfolio.js` (`?v=36` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=48`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -1565,6 +1575,16 @@ sends. The autopilot acts for accounts on a paid plan and for the accounts liste
     rank, and no buy is larger than its market's room. Holdings from a market that is no longer
     ticked stay until sold and still count against the budget, not against any market.
   - `coin_share(settings)` is now the coin market's holdings over all (it was the level's figure).
+  - **A market whose every ticked screener is resting gets no share** (17 Oct 2026; `market_split(settings, resting)`,
+    `market_slots`, `coin_share` take `state['rest']` at every call; the panel's `marketSplit` reads `data.resting`;
+    `autopilot_plan_check.py` compares the two with resting cases too). From 15 to 17 Oct the coin screener rested (its
+    trades had lagged) while still ticked, and coins kept 10 of the owner's 50 holdings: about $18,500 sat as cash and 38
+    check-ins said "markets already hold their share… The rest is for Coins, bought when that market is open", which could
+    never happen. Now the other markets share that part until the rest ends; the check-in note says "Coins get no share
+    for now: its screener is resting until 29 Oct, so that part of the budget goes to the other markets" (`resting_words`),
+    and the panel shows it in the market's box and in the line under the screeners (`restedUntil`). A market with one of
+    several ticked screeners resting keeps its share. When the rest ends the market's share comes back and the others,
+    then over their share, simply stop buying until holdings are sold.
   - **Layout of the card (redone 11 Oct, v34):** the owner "didn't even see the dropdown boxes for
     a while", and took the absence of a menu under UK and Japan (nothing ticked there) for a fault.
     Now: one line saying what to do; a coloured bar (`splitBar`, `#ap-splitbar`) with one part per
@@ -4170,3 +4190,17 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     dashboard itself (the tab appears only for his account); the health line, which the next scheduled run writes.
   - The daily deploy of that morning met Yahoo's limit again ("No price data: 2179, kept yesterday's snapshot: 774"); nothing
     was de-indexed (958 indexable).
+  - **A second window, the same morning: "something is off" on the Practice portfolio, and clearer profit and loss.** The owner
+    pasted the top of the tab. Every figure was checked against his record and live prices: all correct (the S&P 500 fund
+    $98,032.29 is SPY's close of 9 Oct, $778.57, to 16 Oct, $763.25; "Today" +$1,005.52 is the sum of the 40 holdings' own
+    day moves, each equal to the price source's day change, mostly 6532.T +17.25% at Tokyo's ¥1,500 daily limit and oil
+    shares). What looked off: the same "Today" with two percentages (of the account and of the holdings), and the fund at
+    -1.97% and -1.42% (the whole account since the start, and only what is still held). Found on the way, a real fault: a
+    resting screener's market kept its share of the budget (section 8c, "How the budget is spread"). At his word ("go
+    ahead with what makes sense… if that dashboard… can be more clear do that too"), live at 05:14 UTC (`stockiq-ai-trader` `6gcerpj3…`, rollback zip `…_before_autopilot_clarity_20261017.zip`; `stockiq-ai-chat` `pCq5uR9L…`, `…_before_clarity_20261017.zip`; the live answer for his account: 13 / 13 / 12 / 12, no error in the log): the budget
+    fix (`stockiq-ai-trader`, built as `pending-clarity/patch_lambda.py` on the Admin version), the breakdown as one
+    profit-and-loss table (`practice-portfolio.js?v=36`), the panel's copy of the split (`practice-autopilot.js?v=48`), the
+    chat's guide (`stockiq-ai-chat`). Tests: 464 function, 217 panel, 130 portfolio, 22 chat, the comparison clean (5,077
+    splits). Tried on the live page as his account before the deploy (`live_practice_check.js LOCAL_PP=… OPEN_MORE=1`, new),
+    desktop and 390px. **Lesson: two windows staged the same function an hour apart; the second rebuilt its change as a
+    patch script and applied it to the first one's live code, so neither undid the other.**
