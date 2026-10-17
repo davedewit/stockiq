@@ -2207,13 +2207,15 @@ He asked for "an admin account… so i can see status", with items to action, ad
 unless you need me to make a big decision. i'd prefer it all run without me". Built lean, as decided by the session:
 - **Where:** a "🛠 Admin" tab on the dashboard and an "Admin" link at the top of the dashboard's Account menu, shown only
   when the autopilot's function answers action `admin` for the account (`listed`: the site's own accounts, env
-  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=1`), the tab,
+  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=2`), the tab,
   panel and `NAMES` entry in `dashboard.html`. The link is on the dashboard only, not yet on the other pages.
 - **What it shows:** the month's goal, each figure against its target (`goal_standing`; the same numbers as `GOALS` in
   `check-tools/autopilot_review.py`: change the two together); **"Needs your yes"**: proposals with "Yes" / "Not now"; the
   **weekly review**, which the scheduled run writes by itself every 7 days (`write_review`, `ADMIN_REVIEW_DAYS`), or at once
   with "Write it now"; **how it is running** (`health`, written by every scheduled run: when, how many checked in, paused,
-  waiting, stopped on an error); the settings in force; answered proposals. AWS usage is not on it: the function's role
+  waiting, stopped on an error); the settings in force; answered proposals. The review's button reads "Write a fresh one now" and says under it that it is never needed, buys, sells and
+  changes nothing, may add a proposal, and moves the next automatic review to 7 days after the press (`admin-panel.js?v=2`,
+  17 Oct 2026, after the owner asked what the point of it was). AWS usage is not on it: the function's role
   can read no CloudWatch figures (it has DynamoDB, SES and logging only); that would be the next step, through the daily
   usage report's own function.
 - **Proposals** (`admin_propose`; item `_admin` in `stockiq-ai-trader`, the last 60 kept): the weekly review proposes, from
