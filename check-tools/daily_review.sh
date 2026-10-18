@@ -3,6 +3,9 @@
 # (~/Library/LaunchAgents/com.stockiq.review.plist); it runs the review once a day, after the daily deploy, and never changes
 # the live site: the session may only read, run the read-only checks, write its report (check-tools/reviews/daily/) and add
 # proposals to the Admin page. Everything else is refused without asking (--permission-mode dontAsk with a list of allowed tools).
+# Its report is allowed as Edit(check-tools/reviews/daily/**): Claude Code's file rules count writing a new file as an edit, so a
+# Write(...) rule never matched, and a blocked "Edit" refused the report too (first run, 18 Oct 2026). Edits anywhere else are
+# refused because nothing allows them.
 #
 #   bash check-tools/daily_review.sh --now    run it now, whatever the time (still once a day)
 #   log: ~/stockiq-review.log    switch off: launchctl unload ~/Library/LaunchAgents/com.stockiq.review.plist
@@ -40,8 +43,8 @@ mkdir -p "$ROOT/check-tools/reviews/daily"
       "Bash(python3 check-tools/autopilot_review.py:*)" "Bash(python3 check-tools/site_parts.py:*)" \
       "Bash(python3 check-tools/admin.py add session:*)" \
       "Bash(git log:*)" "Bash(git diff:*)" "Bash(git status:*)" \
-      "Write(check-tools/reviews/daily/**)" \
-    --disallowedTools "Edit" "NotebookEdit" "Bash(bash:*)" "Bash(sh:*)" "Bash(aws:*)" "Bash(git push:*)" "Bash(git commit:*)" "Bash(rm:*)" &
+      "Edit(check-tools/reviews/daily/**)" \
+    --disallowedTools "NotebookEdit" "Bash(bash:*)" "Bash(sh:*)" "Bash(aws:*)" "Bash(git push:*)" "Bash(git commit:*)" "Bash(rm:*)" &
   PID=$!
   ( sleep 3000; kill "$PID" 2>/dev/null && echo "$(date): stopped at its 50-minute limit" ) &
   WATCH=$!
