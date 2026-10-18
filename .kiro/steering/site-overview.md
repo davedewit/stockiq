@@ -1648,7 +1648,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=41` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=58`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=59`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -4606,3 +4606,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     says what share of the budget it takes and links to it under Activity. The shortcut leaves the Euro Stoxx 50 out on
     purpose (it is not one country's index, and 47 of its 50 shares are already in the DAX, CAC, AEX, FTSE MIB and IBEX
     lists; it adds only AB InBev, argenx and Nordea), and now says so beside the button. 229 panel checks.
+  - **The market shares say what they are a share of** (03:55 UTC, `practice-autopilot.js?v=59`). The owner: "is it taking 20%?
+    hows that work when screeners say they are taking 100%". It does take 20%: while the themes part runs, the markets' shares
+    are of the budget less that 20% (`share_part` in the function, `sharePart` in the panel), so 30 / 30 / 30 / 10% of $78,080,
+    and the funds $19,520: together the $97,600. The card called them "Share of the budget", which read as 120%. Now "Share of
+    the $78,080 for shares", "How the $78,080 for shares is spread", and the themes line says it is the other 20% of the whole
+    budget (`ofWhat`). Found on the way: the new label applied the 80% twice ($6,400 for $8,000 in the test); `sharePart` is
+    now safe to repeat (`partOfShares`). 230 panel checks.
