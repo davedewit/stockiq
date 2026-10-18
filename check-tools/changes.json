@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-18",
+   "what": "A daily review by Claude now runs by itself every afternoon after the daily update: it checks the site and puts what it finds under Decisions for you; the next session acts on it."
+  },
+  {
+   "at": "2026-10-18",
    "what": "The 'Answered' list now sits right under 'Decisions for you'; the contact page says StockIQ is a sole trader (it said Pty Ltd)."
   },
   {

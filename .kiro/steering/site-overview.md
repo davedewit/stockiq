@@ -58,7 +58,7 @@ check for that kind of fault**; something accepted on purpose goes into its `KNO
 **A daily review by Claude** (`check-tools/daily_review.sh`, instructions in `daily_review_prompt.md`): once a day after the
 deploy, refused anything but reading, the read-only checks, its report (`check-tools/reviews/daily/`) and up to three proposals on
 the Admin page; 50 minutes at most; a trial that ends by itself on 1 Nov 2026 unless `reviews/daily/KEEP` exists (experiments
-`daily-review`). Only the owner can install its schedule (a session may not set up an unattended agent).
+`daily-review`). Installed by the owner on 18 Oct 2026; a session reads its reports in `check-tools/reviews/daily/` and acts on them.
 
 **THE PAGE IS READ AS THE OWNER READS IT, EVERY SESSION: `python3 check-tools/clarity_check.py`** (session_start runs it; built 17
 Oct 2026 after the owner, having pointed at one confusing thing after another himself: "anything else confusing you want to
@@ -103,8 +103,8 @@ improvements and wait for his yes. The routine, every session:
 tables, users' data, the autopilot's records: those need his yes to an exact list); writing his autopilot settings while he is on
 the page. His requests are judged, not obeyed word for word: say when an idea is wrong and do the better thing.
 **The daily review by Claude** (`check-tools/daily_review.sh`) finds and proposes; it does not deploy. The owner ran it once by hand
-on 18 Oct 2026 (its report: `check-tools/reviews/daily/2026-10-18.md`); its schedule is installed only when he installs it (the
-plist is in the change log of 18 Oct). Its proposals land under "Decisions for you"; a session acts on them without waiting.
+on 18 Oct 2026 (its report: `check-tools/reviews/daily/2026-10-18.md`), and **installed its schedule the same evening**
+(`~/Library/LaunchAgents/com.stockiq.review.plist`, every 30 minutes, once a day after the daily deploy; log `~/stockiq-review.log`). Its proposals land under "Decisions for you"; a session acts on them without waiting.
 
 **THE SEARCH FOR IMPROVEMENTS NEVER ENDS (the owner, 17 Oct 2026): "this needs to be continual never ending new ways to
 improve, espeically as your AI gets smarter!"** Every session, not only the weekly review:
