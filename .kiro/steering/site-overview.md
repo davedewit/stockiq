@@ -980,9 +980,8 @@ its worker addresses written inside it.
 - The files were **built by a script from the live code** (`make.py`, in git history with the staging folder: commit
   `7ea216d`): every list and address was copied as text and each branch checked against the pattern, so nothing was
   typed again.
-- **The way back:** `bash /Users/dave/VSCODE/stockiq/check-tools/pending-screeners-undo/deploy.sh` (`DRY_RUN=true`
-  first) reverts website commit `e0d47f15` and uploads the two files. **Once a screener has been added to
-  `screeners.js`, that way back needs the new screener put into the old code by hand: decide before adding.**
+- **There is no way back to the 14 copies** (its folder, `pending-screeners-undo`, was removed on 18 Oct 2026: with 19 screeners
+  added since, it could not run; it is in git history).
 - **To add a screener now:** an entry in `screeners.js` (list, workers, the fields above) with `format: 'market'` and a
   `report` block (the words of its report, its name and symbol in the history, short company names), a button in
   `analysis.html`, and the rest of `add-new-screener.md` (workers, coordinator, dashboard). **No formatter and no
@@ -994,8 +993,7 @@ its worker addresses written inside it.
   "2. SAP.DE  SAP  €195.14" matches it, so the whole report was read as coins (it looked up `SAP-USD`). Write "SAP SE",
   "BMW AG". Found by `tracker_run.js` on the page's DAX report before anything was live: **run it on the page's report
   and on the coordinator's for every new screener.** (`page_run.js`'s own "tracker symbols" count has the same quirk.)
-- **The way back to the 14 copies no longer applies by itself:** with the DAX 40 in `screeners.js`,
-  `pending-screeners-undo` stops at its trial revert ("needs a session"), as its notes said it would. `page_run.js`, `anon_run.js` and `trial_run.js` load `screeners.js` when it lies beside
+- `page_run.js`, `anon_run.js` and `trial_run.js` load `screeners.js` when it lies beside
   the page code they are given.
 - Not done: the coordinator still has its own copy of the lists (a Lambda cannot read the site's file); the page's
   four formatters are still four; `saveAnalysisToHistory` (374 lines) and the notification code in the same script
@@ -3041,7 +3039,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
 - Tests on the live files: 451 function, 216 panel (13 Oct 2026, with the regions, the shortcuts and the waiting rule; they were 442 and 210), 130 portfolio, 22 chat (13 Oct 2026, after the fund's line; they were 118 and 21) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
-- Both repos pushed; **the only `check-tools/pending-*` folders left are the three ways back, kept on purpose:** `pending-screeners-undo` (the analysis page's one screener routine), then `pending-cleanup-undo` and `pending-banners-undo` (the two steps back from the header chip). Run them in that order if more than one is wanted: the first two touch the same script. `website/` carries the daily job's own three files
+- Both repos pushed; **the only `check-tools/pending-*` folders left are the ways back, kept on purpose:** `pending-cleanup-undo` then `pending-banners-undo` (the two steps back from the header chip, in that order), `pending-panel-undo` (the shared market panel) and `pending-simple-undo` (the shorter Activity part), both of 18 Oct 2026. `website/` carries the daily job's own three files
   uncommitted (news.html, news.js, sitemap.xml) until its next push.
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
