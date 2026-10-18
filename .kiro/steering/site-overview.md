@@ -1648,7 +1648,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=41` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=57`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=58`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -4600,3 +4600,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     the funds it has a view on and may use 900. Tests: 499 function, 227 panel, the portfolio's, 24 chat; the panel-versus-function
     comparison clean with the trial off; the clarity check clean on the staged and the live page. **Not checked:** the first real
     buys (Monday 14:35 UTC), a signed-in browser, a phone.
+  - **The screeners card points to the themes part, and the first shortcut explains the Euro Stoxx 50** (03:45 UTC,
+    `practice-autopilot.js?v=58`, `dashboard.html`). The owner looked for the themes part under "Screeners it buys from" and
+    expected "Main index of every country" to tick the Euro Stoxx 50. The themes part is not a screener, so the card now
+    says what share of the budget it takes and links to it under Activity. The shortcut leaves the Euro Stoxx 50 out on
+    purpose (it is not one country's index, and 47 of its 50 shares are already in the DAX, CAC, AEX, FTSE MIB and IBEX
+    lists; it adds only AB InBev, argenx and Nordea), and now says so beside the button. 229 panel checks.
