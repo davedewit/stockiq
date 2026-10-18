@@ -3478,7 +3478,6 @@ Ideas:
 - Backlinks remain the biggest lever (see `backlinks-progress.md`).
 - Link to indexed stock pages from index.html, the guides and analysis results (internal links).
 - Home page market widgets are filled in by JavaScript; crawlers see "Loading...".
-- news.html `<title>` still says "Free Stock Analysis Guide & Investment Blog". Rename it.
 - "People also watch" Fix 1 in `future-work.md`. India (BSE Sensex) is the next screener
   (`add-new-screener.md`). Price alerts are not built (`roadmap-to-9.md`).
 - `fix_amazonq_chat.sh` is obsolete (Amazon Q is not used).
@@ -4670,3 +4669,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     Settings (about 8,800) was not touched. **Found on the way:** `clarity_check.py` counted the text of a fold inside a closed
     fold as on show (the 34 older holdings), so earlier totals were too high; fixed. **The way back:**
     `check-tools/pending-simple-undo/deploy.sh`, dry run tried. 235 panel checks.
+  - **Three parts of the site reviewed, two small fixes** (`site_parts.py`: presets, the portfolio graph, search). The sitemap
+    was written with an `ns0:` prefix on every tag (valid XML, not the usual form search engines are written for):
+    `update_sitemap.py` and `generate_sitemap.py` now write plain tags (the reader takes both; `generate_sitemap.py` follows
+    whichever form the file has); checked twice locally, 975 entries; live at the next daily run. **A count of the live
+    sitemap must use `grep -c '<loc>\|:loc>'`** until then. The news page's title and description said "Free Stock Analysis
+    Guide & Investment Blog"; now "Market and Stock News" (published by the next daily run). The AWS budget read $2.10 this
+    month: the 253 Cost Explorer questions of 17 Oct (the session's fault, stopped); since then only the owner's own billing
+    pages have asked (CloudTrail: "AWS Internal", free).

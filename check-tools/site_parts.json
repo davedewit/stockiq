@@ -47,7 +47,13 @@
    "id": "presets",
    "part": "Choose from presets",
    "where": "analysis.html #presets",
-   "last": null
+   "last": "2026-10-18",
+   "log": [
+    {
+     "at": "2026-10-18",
+     "found": "Checked 18 Oct 2026: the four presets match the notes (Magnificent 7 and Popular ETFs through the single report, Dow 30 and S&P 500 through the screeners); nothing to fix"
+    }
+   ]
   },
   {
    "id": "screeners-us",
@@ -155,7 +161,13 @@
    "id": "pp-graph",
    "part": "Practice portfolio: the graph and the S&P 500 line",
    "where": "practice-portfolio.js chartSvg",
-   "last": null
+   "last": "2026-10-18",
+   "log": [
+    {
+     "at": "2026-10-18",
+     "found": "Looked at on the owner's live account 18 Oct 2026: account $99,641.54, the fund line $98,032.29, ahead by $1,609.25 (1.61%), no errors. Still to see: the fund's longer price range after about 4 Nov 2026; the funds of the themes part count in the AI autopilot view from Monday"
+    }
+   ]
   },
   {
    "id": "pp-holdings",
@@ -329,7 +341,13 @@
    "id": "seo",
    "part": "Search: indexed pages, sitemap, titles, descriptions",
    "where": "sitemap.xml, update_stock_analysis.py; Search Console (owner)",
-   "last": null
+   "last": "2026-10-18",
+   "log": [
+    {
+     "at": "2026-10-18",
+     "found": "18 Oct 2026: 958 indexed stock pages, the sitemap 975 entries; it was written with an ns0: prefix on every tag (valid, not the usual form): update_sitemap.py and generate_sitemap.py now write plain tags (live at the next daily run); news.html's title and description said 'Free Stock Analysis Guide & Investment Blog', now 'Market and Stock News'. Search Console review still due about 6 Nov"
+    }
+   ]
   },
   {
    "id": "stock-lists",

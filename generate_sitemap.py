@@ -45,15 +45,19 @@ print(f"📝 Adding {len(missing)} missing pages to sitemap...")
 today = datetime.now().strftime('%Y-%m-%d')
 new_urls = []
 for symbol in missing:
-    new_urls.append(f"""  <ns0:url>
-    <ns0:loc>https://stockiq.tech/stocks/{symbol}.html</ns0:loc>
-    <ns0:lastmod>{today}</ns0:lastmod>
-    <ns0:changefreq>weekly</ns0:changefreq>
-    <ns0:priority>0.6</ns0:priority>
-  </ns0:url>""")
+    new_urls.append(f"""  <url>
+    <loc>https://stockiq.tech/stocks/{symbol}.html</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>""")
 
-# Insert before closing </ns0:urlset>
-sitemap = sitemap.replace('</ns0:urlset>', '\n'.join(new_urls) + '\n</ns0:urlset>')
+# Insert before the closing tag (plain since 18 Oct 2026; an older file has the ns0: prefix, whose rows must carry it too)
+if '</ns0:urlset>' in sitemap:
+    new_urls = [u.replace('<', '<ns0:').replace('<ns0:/', '</ns0:') for u in new_urls]
+    sitemap = sitemap.replace('</ns0:urlset>', '\n'.join(new_urls) + '\n</ns0:urlset>')
+else:
+    sitemap = sitemap.replace('</urlset>', '\n'.join(new_urls) + '\n</urlset>')
 
 # Write back
 with open(SITEMAP_PATH, 'w') as f:

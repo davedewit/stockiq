@@ -100,33 +100,33 @@ for match in re.finditer(r'<(?:ns0:)?url>.*?</(?:ns0:)?url>', existing, re.DOTAL
 
 # --- Build new sitemap ---
 today = datetime.now().strftime('%Y-%m-%d')
-lines = ['<?xml version=\'1.0\' encoding=\'utf-8\'?>']
-lines.append('<ns0:urlset xmlns:ns0="http://www.sitemaps.org/schemas/sitemap/0.9">')
+lines = ['<?xml version=\'1.0\' encoding=\'utf-8\'?>']   # plain tags (18 Oct 2026; it wrote an ns0: prefix, valid but not the usual form)
+lines.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
 
 # Site pages first (with updated lastmod)
 for url in site_page_blocks:
     lastmod = get_site_page_lastmod(url) or today
     priority = '1.0' if url == 'https://stockiq.tech/' else '0.9' if 'analysis' in url else '0.8'
     changefreq = 'daily' if url == 'https://stockiq.tech/' else 'weekly'
-    lines.append(f'  <ns0:url>')
-    lines.append(f'    <ns0:loc>{url}</ns0:loc>')
-    lines.append(f'    <ns0:lastmod>{lastmod}</ns0:lastmod>')
-    lines.append(f'    <ns0:changefreq>{changefreq}</ns0:changefreq>')
-    lines.append(f'    <ns0:priority>{priority}</ns0:priority>')
-    lines.append(f'  </ns0:url>')
+    lines.append(f'  <url>')
+    lines.append(f'    <loc>{url}</loc>')
+    lines.append(f'    <lastmod>{lastmod}</lastmod>')
+    lines.append(f'    <changefreq>{changefreq}</changefreq>')
+    lines.append(f'    <priority>{priority}</priority>')
+    lines.append(f'  </url>')
 
 # Stock pages (only indexable ones)
 for symbol in indexable:
     url = f'https://stockiq.tech/stocks/{symbol}.html'
     lastmod = get_lastmod(symbol)
-    lines.append(f'  <ns0:url>')
-    lines.append(f'    <ns0:loc>{url}</ns0:loc>')
-    lines.append(f'    <ns0:lastmod>{lastmod}</ns0:lastmod>')
-    lines.append(f'    <ns0:changefreq>daily</ns0:changefreq>')
-    lines.append(f'    <ns0:priority>0.7</ns0:priority>')
-    lines.append(f'  </ns0:url>')
+    lines.append(f'  <url>')
+    lines.append(f'    <loc>{url}</loc>')
+    lines.append(f'    <lastmod>{lastmod}</lastmod>')
+    lines.append(f'    <changefreq>daily</changefreq>')
+    lines.append(f'    <priority>0.7</priority>')
+    lines.append(f'  </url>')
 
-lines.append('</ns0:urlset>')
+lines.append('</urlset>')
 
 with open(SITEMAP_PATH, 'w') as f:
     f.write('\n'.join(lines) + '\n')
