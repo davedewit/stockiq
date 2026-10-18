@@ -4597,6 +4597,6 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     `practice-autopilot.js?v=57`, `practice-portfolio.js?v=41`, `dashboard.html`): section 8c, "THE THEMES PART". Tried before the
     deploy on a read-only copy of the owner's record with live prices and the real AI model, the clock set to Monday's US open.
     Found on the way: the model's answers are capped at 500 tokens, too few for a call on each of 14 funds; this read asks only for
-    the funds it has a view on and may use 900. Tests: 499 function, 228 panel, the portfolio's, 24 chat; the panel-versus-function
+    the funds it has a view on and may use 900. Tests: 499 function, 227 panel, the portfolio's, 24 chat; the panel-versus-function
     comparison clean with the trial off; the clarity check clean on the staged and the live page. **Not checked:** the first real
     buys (Monday 14:35 UTC), a signed-in browser, a phone.
