@@ -1984,6 +1984,13 @@ same code; read "its record" below as the shared record, or the shared record at
   the same days for a share and zero for a coin.** It is measured on the shared record (every account). At the sweep: 4
   of 300, averaging -0.68 against the yardstick. Until it is cleared no result here is evidence of anything, and it must
   be cleared before real money is even discussed (and then discussed with a licensed adviser: section 11, "Legal").
+  **The owner's own bar for real money is higher (18 Oct 2026): the account clearly ahead of an S&P 500 fund for more than a
+  year, by at least 5% a year** ("it would have to beat it by atleast 5% as s&p also has dividends"; he thinks it unlikely,
+  and says so). Clearing the 300-trade bar is only the start of that year. **Dividends:** the fund's line and the yardstick
+  count price only (section 8c, "What the owner sees", the graph); an S&P 500 fund also pays about 1.2 to 1.5% a year, so a
+  lead of under about that much is no lead at all. The practice holdings get no dividends either, but momentum shares
+  usually pay less than the index, so price against price flatters the account a little. Say this whenever the account is
+  said to be "ahead of the fund".
 - **Notes** (`write_lessons`): after every 5 more finished trades the model writes up to four short
   notes on what the record shows, **but never from fewer than 30 finished trades** (`LESSONS_MIN`, 12 Oct 2026): notes that
   rest on fewer are dropped, and are shown neither to the model (`memory_text`, which now says how many trades a note rests
@@ -3005,6 +3012,14 @@ far from met; offering it to paying users for their own money would need a finan
 for his own account only, with his own broker, the trades are his own (and taxable). **The sensible order, if he ever wants
 it:** the bar cleared first; then a broker's paper account (real order handling, no money) beside the practice portfolio;
 then a small amount, his account only. Until then the rule at the top of this section stands: nothing here touches real money.
+**How to build until then (the owner, 18 Oct 2026: "i wouldn't want to be building the site just for testing and never live.
+obviously for testing is in the small chance you do well and then go live"):** build so that a good practice result would
+hold with real money, and build nothing that only real money needs. So: costs, fills, trading hours and holidays, prices that
+have really traded, the size of holdings against what a market can take, all as real as they can be made (the 0.1% cost, the
+3-hour price rule and the market hours are this; a trade must never be counted at a price nobody could have traded at); keep
+the deciding apart from the recording of a trade, so that a broker could one day take the recording's place; judge by his bar
+above, never by something easier. Not until the bar is cleared: a broker connection, keys, real orders, anything a user
+could mistake for real trading.
 
 **The number of holdings as a setting of its own (thought through on 12 Oct 2026 at the owner's question, and built the same day at his word: the settings table in "The autopilot: settings").** He saw
 that it buys "say 10 stocks max across the 100,000", that the less risk he picks the more holdings it has, and wondered
