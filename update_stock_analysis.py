@@ -65,6 +65,11 @@ DEFAULT_MAX_INFO = 600          # fundamentals refreshes per daily run (~2s each
 MIN_PRICE_ROWS = 50             # need enough history for 50-day average and MACD
 STALE_BLOCK_DAYS = 10           # drop a snapshot whose data is older than this
 PRICE_BATCH = 150
+# The site's own price function on AWS (stockiq-price-proxy): Yahoo answers it where it refuses this Mac (HTTP 429 after a few
+# hundred requests). Used for the shares the batch download did not return that could be indexed, and for exchange rates
+# (18 Oct 2026: 596 of 958 indexed pages still showed 8 or 9 Oct data, and would have been dropped after STALE_BLOCK_DAYS).
+PROXY = 'https://dohdeb4vpu67fa2tq3ax56ls4i0rshvm.lambda-url.us-east-1.on.aws/'
+PROXY_THREADS = 6
 
 # Yahoo quotes some markets in minor units; prices are divided by 100 for display
 # and market cap. Yahoo's marketCap itself is already in the major unit.
@@ -235,6 +240,37 @@ def download_prices(symbols):
     return out
 
 
+def proxy_bars(symbol, rng='1y'):
+    """(last date, closes, highs, lows, volumes) of daily bars through the price function on AWS, or None."""
+    import urllib.request, urllib.parse
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(f"{PROXY}?symbol={urllib.parse.quote(symbol)}&range={rng}", timeout=30) as r:
+                d = json.load(r)['chart']['result'][0]
+            q, off = d['indicators']['quote'][0], int((d.get('meta') or {}).get('gmtoffset') or 0)
+            rows = [(ts, q['close'][i], q['high'][i], q['low'][i], q['volume'][i]) for i, ts in enumerate(d.get('timestamp') or [])]
+            rows = [r_ for r_ in rows if None not in r_[1:4]]
+            if len(rows) < (MIN_PRICE_ROWS if rng == '1y' else 1):
+                return None
+            last = datetime.fromtimestamp(rows[-1][0] + off, tz=timezone.utc).date()
+            return (last, [float(r_[1]) for r_ in rows], [float(r_[2]) for r_ in rows], [float(r_[3]) for r_ in rows],
+                    [float(r_[4] or 0) for r_ in rows])
+        except Exception:
+            time.sleep(2 + 3 * attempt)
+    return None
+
+
+def proxy_prices(symbols):
+    """{symbol: bars} for the symbols the price function on AWS could answer."""
+    out = {}
+    with ThreadPoolExecutor(max_workers=PROXY_THREADS) as pool:
+        for sym, bars in zip(symbols, pool.map(proxy_bars, symbols)):
+            if bars:
+                out[sym] = bars
+    print(f"   Prices through the price function on AWS: {len(out)} of {len(symbols)} asked for")
+    return out
+
+
 def load_fx(currencies):
     """Return {currency: USD rate} for major-unit currencies, cached per day."""
     today = datetime.now().strftime('%Y-%m-%d')
@@ -251,7 +287,13 @@ def load_fx(currencies):
             if len(closes):
                 rates[c] = float(closes.iloc[-1].iloc[0] if hasattr(closes.iloc[-1], 'iloc') else closes.iloc[-1])
         except Exception as e:
-            print(f"⚠️  FX rate for {c} unavailable: {str(e)[:60]}")
+            print(f"⚠️  FX rate for {c} unavailable from Yahoo here: {str(e)[:60]}")
+        if c not in rates:                         # through the price function on AWS instead
+            bars = proxy_bars(f"{c}USD=X", '5d')
+            if bars:
+                rates[c] = bars[1][-1]
+            else:
+                print(f"⚠️  FX rate for {c} unavailable")
     with open(path, 'w') as f:
         json.dump({k: v for k, v in rates.items() if k != 'USD'}, f)
     for old in os.listdir(CACHE_DIR):
@@ -409,6 +451,7 @@ def main():
     parser.add_argument('--dry-run', action='store_true')
     parser.add_argument('--pages-dir', default=STOCKS_DIR, help='stock pages folder (for testing on a copy)')
     parser.add_argument('--indexable-file', default=INDEXABLE_FILE)
+    parser.add_argument('--aws-prices', action='store_true', help='skip the download from this Mac: every price through the price function on AWS')
     args = parser.parse_args()
 
     os.makedirs(INFO_DIR, exist_ok=True)
@@ -423,8 +466,17 @@ def main():
     print(f"📊 Stock analysis for {len(symbols)} symbol(s)")
 
     refresh_info(symbols, args.max_info)
-    prices = download_prices(symbols)
     infos = {s: read_info(s) for s in symbols}
+    prices = {} if args.aws_prices else download_prices(symbols)
+    # What the download did not return, for a share that could be indexed: through AWS
+    was_indexed = set()
+    if os.path.exists(args.indexable_file):
+        with open(args.indexable_file) as f:
+            was_indexed = {line.strip() for line in f if line.strip()}
+    near = lambda s: s in was_indexed or ((infos.get(s) or {}).get('last_mcap_usd') or 0) >= NEAR_THRESHOLD_USD
+    missing = [s for s in symbols if s not in prices and (args.aws_prices or near(s))]
+    if missing:
+        prices.update(proxy_prices(missing))
     rates = load_fx({MINOR_UNITS.get(e['currency'], e['currency']) for e in infos.values() if e and e.get('currency')})
 
     indexable = set()
