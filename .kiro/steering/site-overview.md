@@ -55,11 +55,10 @@ data is more than 4 days behind (`stale-stock-pages`), scripts no page loads or 
 titles / descriptions / canonicals, the sitemap, JSON-LD, console noise. **Each time a fault is found by hand, give this script a
 check for that kind of fault**; something accepted on purpose goes into its `KNOWN` with the reason. Before a deploy,
 `AUDIT_WEB=<staging folder>/web python3 check-tools/site_audit.py` reads the staged files first and saves nothing.
-**A daily review by Claude, unattended, is built and NOT installed** (`check-tools/daily_review.sh`, instructions in
-`daily_review_prompt.md`): once a day after the deploy, refused anything but reading, the read-only checks, its report
-(`check-tools/reviews/daily/`) and up to three proposals on the Admin page; 50 minutes at most; a trial that ends by itself on
-1 Nov 2026 unless `reviews/daily/KEEP` exists (experiments `daily-review`). Claude Code's safety check refused to set up its
-launchd job from a session ("Create Unsafe Agents"), so only the owner can install it (the plist is in the change log of 18 Oct).
+**A daily review by Claude** (`check-tools/daily_review.sh`, instructions in `daily_review_prompt.md`): once a day after the
+deploy, refused anything but reading, the read-only checks, its report (`check-tools/reviews/daily/`) and up to three proposals on
+the Admin page; 50 minutes at most; a trial that ends by itself on 1 Nov 2026 unless `reviews/daily/KEEP` exists (experiments
+`daily-review`). Only the owner can install its schedule (a session may not set up an unattended agent).
 
 **THE PAGE IS READ AS THE OWNER READS IT, EVERY SESSION: `python3 check-tools/clarity_check.py`** (session_start runs it; built 17
 Oct 2026 after the owner, having pointed at one confusing thing after another himself: "anything else confusing you want to
@@ -81,17 +80,31 @@ teaches the script any new kind of fault it found. When the owner says "this is 
   once, with a reason). At least one new idea of the session's own goes in every session. His words: "think of new ideas and
   add to it test over a period of time then keep it or remove it based on whether it improves".
 
-**EVERY SESSION, WITHOUT BEING ASKED (the owner's instruction, 12 Oct 2026):** open with what has happened since the last
-session, and **if the newest file in `stockiq/check-tools/reviews/` is seven or more days old, run the full review** (section
-8c, "The diary, and the review every week or two") before anything else. **And read the Admin page's answers:
-`python3 check-tools/admin.py`** (section 8c, "The owner's Admin page"): do what he said "Yes" to that needs a session, then
-mark it done. Then give him, in plain words: the result in
-dollars **and against the month's goal** (section 8c, "The goals, month by month"); **a numbered list of the improvements
-found**, for profit first and for anything else on the site; and the question whether to go ahead with them. Change nothing on that list until he says yes. His words: "i jump on after 8 days
-and it says oh we have these improvements to make, it lists them then asks if i want to continue and make the changes…
-any improvement it found for the site in any way really but especially in making profit. There is no point having this
-run if its not making profit. well over 100,000." If the reviews keep showing no edge, say that plainly and recommend
-changing what it buys from, or stopping, instead of tuning without end.
+**WHEN THE OWNER SAYS "HI": TAKE CARE OF THE SITE. NO PERMISSION NEEDED (the standing mandate, 18 Oct 2026).** His words: "i don't
+think you need to ask me permission i just want you actively making this site profitable ... when i say hi here you take care of the
+site make sure its doing well and getting better everyday. it shouldn't just keep building shit making it more confusing either which
+is why i say cleanup old crap ... its YOU to make decisions ... profit is the number 1 priority." It replaces the older rule to list
+improvements and wait for his yes. The routine, every session:
+1. `python3 check-tools/session_start.py`, and act on every finding (faults first, whatever the sample size).
+2. If the newest file in `check-tools/reviews/` is a week old or more, the full review (section 8c, "The diary, and the review
+   every week or two"); `python3 check-tools/admin.py` and do what is open there, then `admin.py done <id> "<what>"`.
+3. Improve, in this order: what loses visitors or money now (a fault, a stale or untrue page, a broken path to sign up or pay);
+   then what brings visitors (search: indexed pages that are fresh, linked and described), sign-ups and paying plans; then the
+   autopilot's result against an S&P 500 fund (replayed first, live only as a trial). Decide, test, stage, deploy through a
+   `pending-*/deploy.sh` with its dry run, verify live. Do not ask for a yes.
+4. **Clean up in the same session**: whatever a change replaces goes (old code, a card that now repeats another, a superseded
+   note, the `pending-*` folder once deployed, a script nothing loads). The site and these notes must get simpler, not longer:
+   when a part of this file is out of date, rewrite it rather than add a correction under it.
+5. **One plain line on the Admin page for each change**: `python3 check-tools/admin.py change "<what, in his words>"` ("What
+   changed lately"; `check-tools/changes.json`). That list is how he sees what happened without asking.
+6. End with a short report: the account in dollars against the month's goal and against an S&P 500 fund, what was changed, what
+   comes next. If the reviews keep showing no edge, say so plainly and change what it buys from, or recommend stopping it.
+**Still never, even now:** anything with real money; costs above the cost rule; deleting what cannot be restored (Lambda functions,
+tables, users' data, the autopilot's records: those need his yes to an exact list); writing his autopilot settings while he is on
+the page. His requests are judged, not obeyed word for word: say when an idea is wrong and do the better thing.
+**The daily review by Claude** (`check-tools/daily_review.sh`) finds and proposes; it does not deploy. The owner ran it once by hand
+on 18 Oct 2026 (its report: `check-tools/reviews/daily/2026-10-18.md`); its schedule is installed only when he installs it (the
+plist is in the change log of 18 Oct). Its proposals land under "Decisions for you"; a session acts on them without waiting.
 
 **THE SEARCH FOR IMPROVEMENTS NEVER ENDS (the owner, 17 Oct 2026): "this needs to be continual never ending new ways to
 improve, espeically as your AI gets smarter!"** Every session, not only the weekly review:
@@ -326,7 +339,7 @@ git pull --rebase && git push
   Australia 4 each, Europe 6, India 2; one share a company), rewritten daily by `update_home_stock_links.py` (it refuses with
   fewer than 20 links and leaves the page as it was). On the home page a share in the four market lists links to its stock page
   (`market-panel.js`, from `stock-pages.js`); on the dashboard the click runs the analysis as before. Not done: links from the
-  guides; real figures in place of the home page's nine "Loading..." placeholders; Google Analytics events.
+  Google Analytics events. (Done 18 Oct 2026: links from the four guides, eight stock pages each; the home page's "Loading..." placeholders.)
 - `robots.txt` allows all and points to the sitemap. Canonicals are set on all pages.
 - Bot checks in `auth.js` / `js/analysis-core.js` only skip login redirects and auto-run for
   crawlers; they do not hide content.
@@ -2695,9 +2708,8 @@ weekdays and fails at the weekend.
 - **Still to be seen for real:** "settings just changed, left for the next run" in the function's log; `M&M.NS` in a top
   10; the stock pages' menu (old two labels until regenerated); a signed-in browser and a phone for all of the day's work.
 
-**FIRST THING IN EVERY SESSION: tell the owner, in plain words and before anything else, what has happened since the last
-one, and when the last review is a week or more old run the review and bring him the list of improvements to say yes or
-no to (the instruction at the top of this file).** (His words on 11 Oct: "next time i open a session… update me on how monday went and anything else"; Monday 12 Oct
+**FIRST THING IN EVERY SESSION: the routine "WHEN THE OWNER SAYS HI" at the top of this file** (since 18 Oct 2026 improvements
+are made, not put to him for a yes; each goes onto the Admin page's "What changed lately"). (His words on 11 Oct: "next time i open a session… update me on how monday went and anything else"; Monday 12 Oct
 was reported to him through that day.) Lead with dollars. All read-only:
 1. `python3 check-tools/autopilot_review.py --days <since the last session>`: the result, the losses, faults, the trials.
 2. `grep -a -E "Pages written|Indexable|No price data|Company figures|Sync complete|pushed|could not|failed|All done|Skipping git" ~/stockiq-daily.log`
@@ -2796,8 +2808,8 @@ to a file and committed), never a deploy, with a limit on how long it runs; chan
 company figures once a week (`publish_company_figures.py` → `research-data/company-figures/`, not in git); next, slowly,
 prices for more shares the same way.
 
-**Still needs his yes, always:** deleting anything; his own settings; what the public site says or how the screeners
-score; anything that costs more than cents; anything near real money (never). **What "go play" cannot be:** running with
+**Still needs his yes (narrowed by the mandate of 18 Oct 2026, top of this file):** deleting what cannot be restored; his own settings
+while he is on the page; anything that breaks the cost rule; anything near real money (never). **What "go play" cannot be:** running with
 no session open. Something that searches by itself between sessions (the test bench on a nightly schedule, feeding the
 queue) is a possible later step once the bench has proved itself in sessions; say so if he asks, with its cost.
 
@@ -3409,7 +3421,7 @@ Needs the owner's decision or more work (nothing here is fixed):
   prices). The terms, About page, pricing section and FAQ say all of this, and the product
   wording was neutralised (section 8b). Whether issuing automated signals to paying users
   without a licence is acceptable under Australian law is a question for a lawyer; the owner
-  knows and has not had it reviewed. The owner trades as an individual (no company structure).
+  knows and has not had it reviewed. The owner trades as a sole trader with an ABN (no company; the contact page says so since 18 Oct 2026).
 - **Screener reports, small things left after the currency fix of 11 Oct 2026** (section 8b, "Dashboard performance tracker"):
   the page pads a FTSE price to 8 characters, so a four-figure pence price ("1,835.00p") sits one place to the right of the
   others; equal scores are ordered differently by the page and by the coordinator, so the two top 10s can differ in a
@@ -4793,6 +4805,19 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     writes `~/Library/LaunchAgents/com.stockiq.review.plist` (Label `com.stockiq.review`, ProgramArguments `/bin/bash
     /Users/dave/VSCODE/stockiq/check-tools/daily_review.sh`, StartInterval 1800) and runs `launchctl load` on it; to try it once,
     `bash /Users/dave/VSCODE/stockiq/check-tools/daily_review.sh --now`. Never run by a session.
+  - **The standing mandate** (the owner, late on 18 Oct: "i don't think you need to ask me permission"): the routine "WHEN THE
+    OWNER SAYS HI" at the top of this file, and "What changed lately" on the Admin page (`admin-panel.js?v=15`; `admin.py change`,
+    `check-tools/changes.json`), with "Answered" moved straight under "Decisions for you" (v14). Done the same hour without
+    asking: **the stale stock pages** (596 of 958 indexed pages at 8 or 9 Oct data, and `STALE_BLOCK_DAYS` would have taken them
+    out of the index from about 19 Oct): `update_stock_analysis.py` now fetches, through the price function on AWS, every share
+    the batch download from this Mac did not return that could be indexed, and any exchange rate (`proxy_bars`, `proxy_prices`;
+    `--aws-prices` to use AWS for all); identical prices and scores to Yahoo's on a check; all 596 refreshed (950 indexed after,
+    8 now under $10B), uploaded by the next daily run, the sitemap rebuilt (966). **"Real-time" taken off every report**
+    ("(LATEST AVAILABLE PRICES)", and no "Real-time … complete!": `analysis-functions.js`, the coordinator `…_before_wording(2)_
+    20261018.zip`, the report function `…_before_wording_20261018.zip`); the old CoinSpot report writer, called by nothing,
+    removed (11.5 KB); `script.js` removed from the site and git (404 now). The contact page says "StockIQ (sole trader)" (it said
+    Pty Ltd; the owner has an ABN as a sole trader). The review's proposals #1 and #3 marked done; #2 (test the stock-page score)
+    is next.
   - **The site check's findings fixed** (the owner: "sure fix the issues"; live 11:52 UTC, 18 Oct 2026, website only, through
     `check-tools/pending-fixes/deploy.sh`): a description for search results on the nine pages without one, and
     `unsubscribe.html` kept out of search (noindex) with its canonical address; **the home page's four index cards drew one fixed
