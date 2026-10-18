@@ -9,7 +9,7 @@ BUCKET=stockiq-final-websitebucket-vqekic7enf9h; DIST=EHXV50CPHY07R; DRY="${DRY_
 FUNCS=()
 # file : what it was : what it becomes : type : how long a copy may be kept
 FILES=(
- "index.html:fe989736221763e1f28711b4a504a9bc0043e8faaa39724fb73efaf606e7b624:6ffaf6a1d6d6fefaad5ebe8053ee7b7a90b0757823b38e1c3965bb2005ef1088:text/html; charset=utf-8:public, max-age=0, s-maxage=3600, must-revalidate"
+ "index.html:4a2db5f3a67a11e58a94b0d68ae34e36285748c9cebae34c3e712f239669cf85:6ffaf6a1d6d6fefaad5ebe8053ee7b7a90b0757823b38e1c3965bb2005ef1088:text/html; charset=utf-8:public, max-age=0, s-maxage=3600, must-revalidate"
  "dashboard.html:68aaa2a81ab74b1cabdfb548a1f1bca4a88e40e126fedd51f2a601dc133de63b:2aab536c91d30d64eb8d35ab46109db6b06eecf838f959d725cd148f4a545891:text/html; charset=utf-8:public, max-age=0, s-maxage=3600, must-revalidate"
 )
 say()  { printf '\n== %s\n' "$*"; }

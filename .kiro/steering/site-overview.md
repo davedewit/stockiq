@@ -779,8 +779,10 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   dashboard) and opens the analysis page otherwise. Every 5 minutes while the page is in use; live-market.js keeps the figures
   on show moving. The phone sidebar (`fillMobileSidebar` / `emptyMobileSidebar` on each page) moves the panel and calls
   `marketPanel.refresh()`; the panel is put back with the style it had at load (`data-desk-style`; both pages put it back
-  as `position: absolute` before). **The home page's panel is laid out as the dashboard's now** (fixed, scrolling inside
-  itself, the arrow and fade at its foot). About 60,000 characters of the home page and 46,000 of the dashboard went.
+  as `position: absolute` before). **The layout is each page's own, on purpose:** on the home page the panel scrolls with the page
+  (the owner: it gives a visitor more reason to scroll down the page), on the dashboard it stays in view and scrolls inside
+  itself, with the arrow and fade at its foot (you look at it and at your portfolio together). It was made the same for an
+  hour on 18 Oct 2026 and put back. About 60,000 characters of the home page and 46,000 of the dashboard went.
   **`sidebar.js` is a third copy, loaded by the stock pages and the analysis page, which have no panel: it does nothing
   there** (left in place). **The way back, one command:** `bash /Users/dave/VSCODE/stockiq/check-tools/pending-panel-undo/deploy.sh`
   (keep that folder). Tests: `live_market_check.js` (the tabs, the arrows, the four lists, the countdown, the layout, 32
