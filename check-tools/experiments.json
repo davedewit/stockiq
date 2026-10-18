@@ -194,10 +194,14 @@
   },
   {
    "id": "theme-sleeve",
-   "what": "A themes part of the budget (about 20%): the 3 strongest of 14 sector and theme funds by their 12-month trend (without the last month), changed monthly; optionally a weekly AI read of the market's headlines that may hold back one fund, its calls measured separately",
+   "what": "A themes part of the budget (20%): the 3 strongest of 14 sector and theme funds by their 12-month trend (without the last month), changed every 28 days; and a weekly AI read of the market's headlines whose calls on the funds are recorded and scored a week later, never acted on",
    "angle": "profit, analysis, AI use",
-   "measure": "against an S&P 500 fund over the same days, for over a year (the owner's bar); the AI's calls against the plain rule. Replay 18 Oct 2026: ahead of the S&P 500 in both halves (+7.0% and +45.4%) but mostly from the chip fund SMH; without it behind in 3 of 4 half-periods",
-   "status": "idea"
+   "measure": "the part's result against an S&P 500 fund over the same days, for over a year (the owner's bar: at least 5% a year ahead); the AI's calls: right more often than chance from 30 scored calls before it may act. Replay 18 Oct 2026: ahead in both halves (+7.0% and +45.4%) but mostly from the chip fund SMH; without it behind in 3 of 4 half-periods. First buys at the US open on 19 Oct 2026",
+   "status": "running",
+   "started": "2026-10-18",
+   "decide": "2027-10-19",
+   "public": true,
+   "publicText": "A themes part (since 18 Oct 2026): a fifth of the budget is held in the three strongest of 14 sector and theme funds, changed once a month, and compared with an S&P 500 fund. Once a week the AI model also reads the market's headlines and makes calls on the funds, which are scored but not acted on."
   }
  ]
 }

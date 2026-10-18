@@ -1647,8 +1647,8 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=40` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=56`) | Controls and reports only; decisions are made by the Lambda |
+| Portfolio section | `website/practice-portfolio.js` (`?v=41` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=57`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -2743,6 +2743,46 @@ the account at about $98,600.
 - These numbers are what would count as progress, chosen before the results are in so that nobody argues with them
   afterwards. Section 7b gives no reason to expect them to be met; they are the test.
 
+**THE THEMES PART, a trial live since 03:19 UTC on 18 Oct 2026** (the owner, asking whether it could invest by what is in the news,
+"AI is taking off or debt problems or inflation problems or oil crisis… or just that way as a % of portfolio", then: "do what you
+think is best i'd like to get as much data i suppose as i'd be running this a year and hopefully within a few months we have enough
+to optimise and see profit month on month").
+- **Why this form:** a theme in the news shows up first as a whole sector moving, so it is traded through 14 US-listed sector and
+  theme funds (`THEME_FUNDS`: XLK technology, XLE energy, XLF banks, XLV health care, XLI industry, XLY and XLP consumer, XLU
+  utilities, XLB materials, XLRE property, XLC communication, SMH chip makers, GLD gold, TLT long-dated US government bonds), not
+  single shares picked from headlines. Replayed first (`check-tools/replay/sector_study.py`, `results-sectors-2026-10-18.txt`): the
+  3 strongest by their past year without the last month, changed monthly, were ahead of an S&P 500 fund in both halves of five
+  years (+7.0% and +45.4%), **mostly through SMH; without it behind in 3 of 4 half-periods**. A lead, which is why it is a trial.
+- **What it does** (`run_themes`, at a check-in while the US market is open; `themes_on`: "Try changes to its own rules" on and a
+  share screener ticked): **20% of the budget** (`THEME_SHARE`; the shares get the rest, `share_part`) is held in the **3**
+  strongest funds by `trend` (252 days less the last 21, `theme_ranking`, prices through the price proxy with `range=2y`); every
+  **28 days** (`THEME_EVERY_DAYS`) the ones that dropped out are sold and the newcomers bought with equal parts of the room. A price
+  must be fresh, as for any share. The funds are autopilot holdings (`by: 'ai'`, screener `themes`, `is_theme`), but are not in
+  `state.open`: not sold by the shares' rules or time limit, not in "Holding now", not in the share budget's sums (`ai_holdings`
+  leaves them out unless asked). A sale goes into `state.themes.trades` and `realizedUsd` (`theme_sold`); "Sell everything it holds"
+  sells them too.
+- **The AI model's weekly read** (`theme_read`, every 7 days, only when headlines were found: `market_headlines`, Google News, only
+  when deployed): it is given the 14 funds with their trends and the market's headlines (untrusted text, the prompt says so) and
+  names the funds it expects to do better or worse than an S&P 500 fund over the next week (up to 900 tokens, `prompt['tokens']`).
+  **Recorded, never acted on**: `score_theme_calls` scores each call a week later (`rel`, the fund against SPY in percent, `right`).
+  It may be allowed to act only after 30 or more scored calls are right clearly more often than chance; that would be a trial of
+  its own. First read, on a copy of the owner's record on 18 Oct: "Concerns about a potential stock market crash and volatility in
+  tech stocks", XLE better, SMH and XLK worse.
+- **What the page shows:** a "Themes part" section under Activity (`themesHtml`: what it holds, the next monthly change, results
+  against the fund, the AI's last read and its scored calls, the 14 funds as last ranked, folded); the descriptions say the shares
+  get 80%; the portfolio's plan line for a fund ("themes part (a trial)… kept until the monthly change around…"); a row in "What
+  happens next"; the chat's guide; `public()` sends `themes` (`theme_view`).
+- **How it is judged:** the part's result against an S&P 500 fund over the same days, **for over a year** (the owner's bar for real
+  money: at least 5% a year ahead), in the experiments register as `theme-sleeve` (decide by 19 Oct 2027; public). A monthly
+  change is one data point a month: there will be about 12 changes and 36 fund holdings in a year, which is little, so read the
+  weekly AI calls (about 50 a month) as the faster evidence, and the part only as a whole.
+- **First buys: the first check-in after the US open on Monday 19 Oct 2026** (14:35 UTC); on the owner's record that day it would
+  buy SMH, XLE and XLK for about $6,500 each, mostly from cash not yet invested. The shares then have $78,080 of the $97,600 budget
+  and held $72,469, so they buy little until holdings are sold.
+- To switch it off: `THEMES = False` in the function (the funds bought stay until sold by hand or by "Sell everything").
+  Tests: 21 in `ai_trader_test.py` (the older tests set `THEMES` off at the top), a block in `autopilot_test.js`, one in
+  `practice_test.js`, one in `ai_chat_test.py` (`TRADER=<staged function>` to compare with a staged copy).
+
 **THE PATIENT-SHARES TRIAL, live since 13:47 UTC on 12 Oct 2026** (the owner the same day: "getting as optimal as possible now…
 actively do things try things"). The replay's clearest lesson for shares, put to the test with the fake money:
 - **What it does:** while "Try changes to its own rules" is on, shares are tagged in pairs as they are bought (`pt` on the
@@ -2871,7 +2911,7 @@ are titles only, and most candidates have none. **Not known:** how the owner loo
 preview from Kiro): ask early when a change "does not show" (section 9).
 
 **What is live, and how to confirm nothing has moved since** (all compared with the local copies on 12 Oct, 10:17 UTC):
-- `stockiq-ai-trader` `vSGWQgIB+lN7FUeW1WzrdslLoIz3KiY4aoeKPzxjYrM=` (since 04:54 UTC, 17 Oct 2026: the Admin page; `wLHHlexH…` from 16:59 UTC on 13 Oct: the waiting rule; `i9WtL7oP…` from 16:32 that day: 27 screeners in five regions; before that `0tynNBjn…`, 3,079 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC, a holding's own stop kept with the buy 16:51 UTC, the build-up that leaves out what is invested 17:25 UTC); `stockiq-ai-chat`
+- `stockiq-ai-trader` `K5Sj58IvkSa7DcNcSVsfZeidlJEimX8XnuA/6o/eQnU=` (since 03:19 UTC, 18 Oct 2026: the themes part; `stockiq-ai-chat` `snC0Sn/V…` the same minute; earlier `15k0lkcP…` 17:00 UTC, 17 Oct, the free bill; `vSGWQgIB…` from 04:54 UTC that day: the Admin page; `wLHHlexH…` from 16:59 UTC on 13 Oct: the waiting rule; `i9WtL7oP…` from 16:32 that day: 27 screeners in five regions; before that `0tynNBjn…`, 3,079 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC, a holding's own stop kept with the buy 16:51 UTC, the build-up that leaves out what is invested 17:25 UTC); `stockiq-ai-chat`
   `9K5HRpizpV9lHdwP8eOwKpB00IGaNRgUz2qQEQRi6rs=` (since 13 Oct 2026, 17:00 UTC); `stockiq-price-proxy` `lzqBC+6a/h51byePPZpa+e29ACnMZGPQp+TEt2SQJ8g=`; `stockiq-screener-coordinator` `979X4yAm37f76T4RQfYT8ClqaR9P8NO0r+5LeqgDK7A=` (since 13 Oct 2026, 16:11 UTC, with the twelve screeners added that day);
   `stockiq-option-1-1-custom-analysis` `I84SxSgLYNt7…`; `stockiq-chart-generator` `OIDrZ2W9G3lJ…`; `stockiq-paper-portfolio`
   `s6IR+/80N/3k…`; the two signals functions `6nVDLm4/8G6K…`; the crypto orchestrator `yvmucU37gHJH…` and its 54 workers
@@ -4548,3 +4588,15 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     `…_before_newmarkets_20261017.zip` for the coordinator, the autopilot and the chat.
     **The slip of 13 Oct again:** a notes edit stopped on a line that did not match and the commit after it still ran, so
     commit `99b495d` says "Notes" and holds none; they are in the commit after it.
+
+- **18 Oct 2026** (the same session, after midnight UTC):
+  - **The owner's bar for real money and how to build until then** written down (section 8c, the part on real trades): ahead of an
+    S&P 500 fund for more than a year by at least 5% a year; build as if it might go live, with no real-money parts until then.
+  - **The themes part of the AI autopilot, a trial** (03:19 UTC; `stockiq-ai-trader` `K5Sj58Iv…`, `stockiq-ai-chat` `snC0Sn/V…`,
+    rollback zips `…_before_autopilot_themes_20261018.zip` and `stockiq-ai-chat_before_themes_20261018.zip`;
+    `practice-autopilot.js?v=57`, `practice-portfolio.js?v=41`, `dashboard.html`): section 8c, "THE THEMES PART". Tried before the
+    deploy on a read-only copy of the owner's record with live prices and the real AI model, the clock set to Monday's US open.
+    Found on the way: the model's answers are capped at 500 tokens, too few for a call on each of 14 funds; this read asks only for
+    the funds it has a view on and may use 900. Tests: 499 function, 228 panel, the portfolio's, 24 chat; the panel-versus-function
+    comparison clean with the trial off; the clarity check clean on the staged and the live page. **Not checked:** the first real
+    buys (Monday 14:35 UTC), a signed-in browser, a phone.
