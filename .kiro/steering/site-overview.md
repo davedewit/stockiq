@@ -771,7 +771,11 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   anonymous visitor). It keeps the names the pages' other code calls (`renderMarketDataSidebar`, `fetchMarketDataSidebar`,
   `switchToTab`, `updateMarketCountdownSidebar`, `render<Trending|Gainers|Losers|Active>Tickers`, `fetchSidebarTickers`, and the
   globals `marketDataSidebar`, `currentTabSidebar`, `tabOrder`, `currentTabIndex`); `window.marketPanel`: `version, refresh,
-  renderLists, deskStyle`. A row's click runs the analysis in the background where the page can (`runSidebarAnalysis`, the
+  renderLists, deskStyle, openTab`. **It opens on the tab of the market trading now** (`openTab`, version 2, 18 Oct 2026: the
+  owner asked whether the items could rotate as Yahoo's do; Yahoo's summary is a fixed list a country, `v6/finance/quote/marketSummary`,
+  so the items stayed and the opening tab follows the clock instead): weekdays the US (9:30-16:00 New York), else Europe
+  (8:00-16:30 London), else Asia (Tokyo, Hong Kong, Sydney or Mumbai in session), each on its own clock; at a weekend Crypto;
+  when nothing trades, the US. A tab picked later stays for the visit. A row's click runs the analysis in the background where the page can (`runSidebarAnalysis`, the
   dashboard) and opens the analysis page otherwise. Every 5 minutes while the page is in use; live-market.js keeps the figures
   on show moving. The phone sidebar (`fillMobileSidebar` / `emptyMobileSidebar` on each page) moves the panel and calls
   `marketPanel.refresh()`; the panel is put back with the style it had at load (`data-desk-style`; both pages put it back
