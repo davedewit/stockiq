@@ -32,8 +32,15 @@ missed.
 ($1.50), emails him at $1 spent, at $1.50 spent and when $1.50 is forecast; the Admin page shows the bill. What costs is not stored
 data (every StockIQ table together was about 7 MB on 17 Oct, far inside the free 25 GB) but **requests**: database reads ($0.19 of
 $0.56 that month, mostly the autopilot panel re-reading the record every minute while the dashboard was open: now every 5
-minutes, the bell every 10), S3 requests from the daily deploy, and each Cost Explorer question ($0.01: the Admin page reads the
-bill every 3 days). About $0.09 a month is the owner's other projects' buckets (Sydney region): not StockIQ's, leave them.
+minutes, the bell every 10), S3 requests from the daily deploy, and Cost Explorer questions ($0.01 each). **NEVER ASK COST
+EXPLORER, FROM ANYTHING** (the owner, 17 Oct 2026: "i do not want to pay 1c just to check usage!"): on 17 Oct the autopilot's test
+suite, run on this Mac, asked it 253 times through the function's own bill-reading code (about $2.53, the session's fault; found
+in CloudTrail's free event history). The bill is read from the AWS budget instead, free: `aws budgets describe-budget
+--account-id 114366766218 --budget-name stockiq-monthly` (spend so far and AWS's forecast); calls from CloudWatch (free). The
+function's role has no Cost Explorer permission any more, and `ai_trader_test.py` refuses it. **A test must never reach a paid
+AWS service: stand it in.** To see who asked Cost Explorer: `aws cloudtrail lookup-events --lookup-attributes
+AttributeKey=EventSource,AttributeValue=ce.amazonaws.com` (free; the AWS website's own billing pages show as "AWS Internal"
+or the console, and are free). About $0.09 a month is the owner's other projects' buckets (Sydney region): not StockIQ's, leave them.
 **Before adding anything that runs on a timer or on every page view, work out its requests a month and its cost.** Data is kept
 when it helps the learning (the record, the diary, the shared record, the coin entry log, the research prices on this Mac);
 delete only with his yes to an exact list, and only when it costs something.
@@ -2361,7 +2368,7 @@ He asked for "an admin account… so i can see status", with items to action, ad
 unless you need me to make a big decision. i'd prefer it all run without me". Built lean, as decided by the session:
 - **Where:** a "🛠 Admin" tab on the dashboard and an "Admin" link at the top of the dashboard's Account menu, shown only
   when the autopilot's function answers action `admin` for the account (`listed`: the site's own accounts, env
-  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=10`), the tab,
+  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=11`), the tab,
   panel and `NAMES` entry in `dashboard.html`. The link is on the dashboard only, not yet on the other pages.
 - **What it shows:** the month's goal, each figure against its target (`goal_standing`; the same numbers as `GOALS` in
   `check-tools/autopilot_review.py`: change the two together); **"Decisions for you"** (it was "Needs your yes" until 17 Oct 2026): proposals with "Yes" / "Not now"; the
@@ -2391,10 +2398,10 @@ unless you need me to make a big decision. i'd prefer it all run without me". Bu
   bill's colours:** green under $1, amber to $1.50, red beyond (the owner's warning and limit).
   **How often the AWS figures are read, and "↻ Refresh now"** (17 Oct 2026, the owner: "how often does this update and give me a
   manual refresh button"): by itself the scheduled run reads the Lambda calls about once a day (`USAGE_EVERY_HOURS` 20, CloudWatch,
-  free) and the bill every 3 days (`COST_EVERY_HOURS` 72, Cost Explorer, $0.01 a reading). The button (admin `op: 'usage'`) reads
-  the calls at once and the bill only when its last reading is over 6 hours old (`COST_MANUAL_HOURS`): AWS itself updates the
-  bill a few times a day, so pressing more often would pay a cent for the same figure. The card gives each figure its own age
-  ("calls read 2 h ago · bill read 2 days ago"); it showed one age, the calls', while the bill could be three days older.
+  free) and the bill as often, **from the AWS budget `stockiq-monthly` (`BUDGET_NAME`), free**, with AWS's own forecast for the
+  month. The button (admin `op: 'usage'`) reads both at once. Until the evening of 17 Oct 2026 the bill came from Cost Explorer
+  ($0.01 a reading) every 3 days or on a press; the owner: "i do not want to pay 1c just to check usage!" The card gives each
+  figure its own age ("calls read 2 h ago · bill as AWS last updated it, 3 h ago"; AWS updates the budget a few times a day).
   **The account value on it is the Practice portfolio tab's own** (17 Oct 2026, `admin-panel.js?v=4`; the owner saw $99,411 on
   the Admin page beside $99,643.23 on the tab): the portfolio script hands its live sum over (`practicePortfolio.figures()`, and
   an event `practice-portfolio:figures` at each redraw), and until it has its prices the Admin page shows the function's
@@ -3227,9 +3234,9 @@ Needs the owner's decision or more work (nothing here is fixed):
   30 minutes (real work only when an account is due), the daily deploy from the owner's Mac. Raising a function's
   memory does not raise its cost when the work is processor work (it finishes proportionally sooner): the signals
   functions went from 128 to 512 and 1024 MB for that reason. Not on the AWS bill: OpenAI (the daily news summaries, the
-  chat, the autopilot's calls: at most about $2 a month for a heavy autopilot user). **To check:** `aws ce
-  get-cost-and-usage --time-period Start=<first of month>,End=<today> --granularity DAILY --metrics UnblendedCost
-  --group-by Type=DIMENSION,Key=SERVICE` (one cent a lookup), and `aws cloudwatch get-metric-statistics --namespace
+  chat, the autopilot's calls: at most about $2 a month for a heavy autopilot user). **To check:** `aws budgets
+  describe-budget --account-id 114366766218 --budget-name stockiq-monthly` (free; never `aws ce`, which charges $0.01 a
+  question: top of this file), and `aws cloudwatch get-metric-statistics --namespace
   AWS/Lambda --metric-name Invocations --period 86400 --statistics Sum …` for calls a day (free). If the calls ever
   near a million a month again: the crypto history could run hourly (the schedule, plus the 65- and 100-minute limits in
   the orchestrator).
@@ -4493,6 +4500,12 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     Admin page". Pressed once live: the bill read again, $0.59 (it had read $0.56 earlier that day), 465,897 calls. Tests: 478
     function, 17 Admin page. **The slip of 13 and 17 Oct once more:** the notes edit missed its anchor and the commit after it
     ran anyway; the notes went in a commit of their own. Chain a notes edit and its commit with `&&`, always.
+  - **The bill read for free, and Cost Explorer stopped** (17:00 UTC; `stockiq-ai-trader` `15k0lkcP…`, rollback zip
+    `…_before_autopilot_freebill_20261017.zip`, the role's old policy beside it; `admin-panel.js?v=11`). The owner, seeing Cost
+    Explorer on his bill: "confirm this has stopped". CloudTrail's free history: 253 questions on 17 Oct from Python on this
+    Mac, every one from `ai_trader_test.py` running the function's Admin code with real credentials (about $2.53); 2 from the
+    function itself; the rest the AWS website (free). Now: the bill from the budget, Cost Explorer out of the code, out of the
+    role's permissions, and refused by the tests. The last Cost Explorer question from this Mac was at 16:53:31 UTC.
   - **Five more screeners, the "Coming Soon" ones that had current lists** (the owner: "set those up and make sure they are
     adding to the autopilot etc so its like other screeners"): Euro Stoxx 50, Sweden OMX Stockholm 30, China CSI 300, Taiwan 50,
     New Zealand NZX 50 (the table in section 8b). 48 workers by `workers/create_group.py`; the coordinator, the page's entries and

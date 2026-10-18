@@ -17,6 +17,17 @@ class DB:
     def Table(s, n): return s.t.setdefault(n, T())
 os.environ['AI_TRADER_USERS'] = 'dave@x.com, tester@x.com'
 spec = importlib.util.spec_from_file_location('tr', sys.argv[1]); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+# The tests never reach AWS's billing or metrics (17 Oct 2026: the Admin page's tests ran the function's reading of the bill
+# against the real Cost Explorer, $0.01 a question, 253 times in one day). Cost Explorer is refused outright; the budget,
+# CloudWatch and STS answer with fixed figures. Other clients (the tables) are stood in by the tests as before.
+class _NoBilling:
+    def __init__(self, kind): self.kind = kind
+    def get_cost_and_usage(self, **k): raise AssertionError('a test tried to ask Cost Explorer ($0.01 a question)')
+    def get_caller_identity(self): return {'Account': '000000000000'}
+    def describe_budget(self, **k): return {'Budget': {'BudgetLimit': {'Amount': '1.5'}, 'CalculatedSpend': {'ActualSpend': {'Amount': '0.5'}}}}
+    def get_metric_statistics(self, **k): return {'Datapoints': []}
+_boto_client = m.boto3.client
+m.boto3.client = lambda kind, *a, **k: _NoBilling(kind) if kind in ('ce', 'budgets', 'cloudwatch', 'sts') else _boto_client(kind, *a, **k)
 # These tests set the pace (build-up days, check-in gap, holding time) by hand, as a user who has chosen his own values.
 # A new user leaves all three to the risk level; that is tested on its own further down, with the real defaults (REAL).
 REAL = dict(m.DEFAULTS, auto=list(m.DEFAULTS['auto'])); m.DEFAULTS.update(periodDays=10, everyHours=24, maxHoldDays=20, auto=[])
@@ -1421,18 +1432,22 @@ if HAS_AI_SELL:
 if hasattr(m, 'words_and'):
     check('several names read "A, B and C"', (m.words_and(['A']), m.words_and(['A', 'B']), m.words_and(['A', 'B', 'C']), m.words_and([])) == ('A', 'A and B', 'A, B and C', ''))
     check('the AI review\'s old verdicts are not sent with the holdings while it is switched off', "'view': (facts or {}).get('view') if AI_SELL else None" in open(sys.argv[1]).read())
-if hasattr(m, 'COST_MANUAL_HOURS'):
+if hasattr(m, 'BUDGET_NAME'):
     class _Fake:
         def __init__(self, kind): self.kind = kind
-        def get_cost_and_usage(self, **k): _asked.append('ce'); return {'ResultsByTime': [{'Total': {'UnblendedCost': {'Amount': '0.61'}}}]}
+        def get_cost_and_usage(self, **k): _asked.append('ce'); raise AssertionError('Cost Explorer costs $0.01 a reading')
+        def get_caller_identity(self): _asked.append('sts'); return {'Account': '123'}
+        def describe_budget(self, **k): _asked.append('budget'); return {'Budget': {'BudgetLimit': {'Amount': '1.5'}, 'LastUpdatedTime': dt.datetime(2026, 10, 17, 14, 54, tzinfo=dt.timezone.utc),
+                                                                                'CalculatedSpend': {'ActualSpend': {'Amount': '0.591'}, 'ForecastedSpend': {'Amount': '0.935'}}}}
         def get_metric_statistics(self, **k): _asked.append('cw'); return {'Datapoints': [{'Timestamp': dt.datetime(2026, 10, 16), 'Sum': 5000.0}, {'Timestamp': dt.datetime(2026, 10, 17), 'Sum': 3000.0}]}
     _real = m.boto3.client; m.boto3.client = lambda kind, **k: _Fake(kind)
-    now = dt.datetime(2026, 10, 17, 16, 0)
-    _asked = []; u = m.aws_usage(now, {'cost': 0.56, 'costAt': '2026-10-17T12:00:00Z'}, manual=True)
-    check('"Refresh now" reads the calls at once and leaves a bill read 4 hours ago (each reading costs $0.01)', _asked == ['cw'] and u['cost'] == 0.56 and u['calls'] == 8000, _asked)
-    _asked = []; u = m.aws_usage(now, {'cost': 0.56, 'costAt': '2026-10-17T08:00:00Z'}, manual=True)
-    check('and reads the bill again when it is more than 6 hours old', _asked == ['ce', 'cw'] and u['cost'] == 0.61, _asked)
-    _asked = []; u = m.aws_usage(now, {'cost': 0.56, 'costAt': '2026-10-17T08:00:00Z'})
-    check('the scheduled reading still leaves the bill for 3 days', _asked == ['cw'] and u['cost'] == 0.56, _asked)
+    _asked = []; u = m.aws_usage(dt.datetime(2026, 10, 17, 16, 0), {'cost': 0.56}, manual=True)
+    check('the bill comes from the AWS budget (free), with its forecast; Cost Explorer is never asked', 'ce' not in _asked and 'budget' in _asked and u['cost'] == 0.59 and u['costForecast'] == 0.94 and u['costAt'].startswith('2026-10-17T14:54') and u['calls'] == 8000, (_asked, u))
+    check('no Cost Explorer call is left in the function', 'get_cost_and_usage' not in open(sys.argv[1]).read())
+    class _Broken(_Fake):
+        def describe_budget(self, **k): raise RuntimeError('no access')
+    m.boto3.client = lambda kind, **k: _Broken(kind)
+    u = m.aws_usage(dt.datetime(2026, 10, 17, 16, 0), {'cost': 0.56, 'costAt': '2026-10-17T10:00:00Z'})
+    check('a budget that cannot be read keeps the last figure and says so', u['cost'] == 0.56 and u.get('costError') == 'RuntimeError', u)
     m.boto3.client = _real
 print('ALL PASS' if ok else 'SOME FAILED')

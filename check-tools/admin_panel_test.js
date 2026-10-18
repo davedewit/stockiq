@@ -61,8 +61,8 @@ async function page(status, uid) {
   { const q = await page(200, 'dave@x.com'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
     check('the settings chips name the level in words and leave out the AI review switch (always off now)', !/Level \d/.test(pl) && !/AI review's early sales/.test(pl) && /(Cautious|Careful|Balanced|Bold|Adventurous) level/.test(pl), pl.slice(pl.indexOf('Autopilot on'), pl.indexOf('Autopilot on') + 200)); }
   { const q = await page(200, 'dave@x.com'); const pl = () => q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
-    check('the AWS figures have a Refresh now button and say how often they are read by themselves', /data-ad="usage"/.test(q.panel.innerHTML) && /↻ Refresh now/.test(pl()) && /reads the calls about once a day and the bill every 3 days/.test(pl()) && /calls read just now/.test(pl()));
+    check('the AWS figures have a Refresh now button and say how often they are read by themselves', /data-ad="usage"/.test(q.panel.innerHTML) && /↻ Refresh now/.test(pl()) && /reads both about once a day/.test(pl()) && /Both are free to read/.test(pl()) && /calls read just now/.test(pl()));
     await q.click({ 'data-ad': 'usage' });
-    check('pressing it asks the function for the figures (op usage) and says what was read', q.sent.at(-1).op === 'usage' && /AWS figures read just now/.test(pl()), q.sent.at(-1)); }
+    check('pressing it asks the function for the figures (op usage) and says what was read', q.sent.at(-1).op === 'usage' && /Read just now, free/.test(pl()), q.sent.at(-1)); }
   console.log(ok ? 'ALL PASS' : 'SOME FAILED'); process.exit(ok ? 0 : 1);
 })();
