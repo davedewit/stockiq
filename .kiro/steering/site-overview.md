@@ -762,6 +762,25 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
     login.html signup.html stocks/AAPL.html` (`LIVE=1` for the site itself): a finger in headless Chrome at phone
     size; after every step, that the page has not moved. **Not checked: a real phone; Safari on an iPhone.** The
     pages without the script (blog, news, sign in, sign up, stock pages) open the menu by ☰ only, as before.
+- **The market data moves while someone is looking at it** (18 Oct 2026; the owner: "they should update often so when users on
+  the page they see its active not a static site ... only if user is active on page"). **`website/live-market.js`**, loaded by
+  `theme.js` (between `LIVE_MARKET_START` and `LIVE_MARKET_END`: take those lines out to switch it off everywhere) on any page with
+  the market-data side panel (`#market-data-sidebar-container`) or the movers lists (rows `gainer-`, `loser-`, `active-`,
+  `trend-price-<symbol>`): the home page and the dashboard (stock pages have neither; their own price refreshes every 5 s).
+  One request a round to `ticker-data-fetcher` for every figure on show (the movers from the lists the page saved,
+  `<kind>TickersList`; the side panel's symbols from `marketDataSidebar`; the open tab from `.market-tab-sidebar.active`),
+  every 6 to 10 s at random, **only while the tab is on screen and someone has moved, scrolled, typed or touched in the last 90 s**;
+  a round that changes nothing makes the next gap half as long again, up to a minute (a closed market costs almost nothing), and
+  a change or a return to the page brings it back. A figure that moves flashes green or red (`lm-up`, `lm-down`), each row a
+  moment apart (the owner's own random delay). **The side panel's small charts were random lines** (`generateSparkline`): they
+  are today's real prices now (the price function's `spark`), hidden until they arrive; when the page draws the panel again
+  (a tab chosen) the real line is put back at once. `window.liveMarket`: `version, round, apply, movers, panelRows, sparkPoints,
+  state`. The pages' own loops (the 7 side-panel categories, the four lists and their prices) were once a minute and are every
+  5 minutes now: they keep which shares are on the lists up to date. About 6 requests a minute while someone watches, none
+  otherwise. **Found on the way:** the home page fetched the side panel's data every minute and never drew it ("Don't
+  re-render"), so it showed the figures of the moment the page was opened. Test: `node check-tools/live_market_check.js
+  index.html dashboard.html stocks/AAPL.html` (`WEB=<folder>` for a staged copy; the price function answered by a stand-in
+  whose prices move; 18 checks).
 - Live prices on stock pages (main ticker + "People also watch" cards) come from
   `stock-prices.js` → Lambda `stockiq-popular-prices`, refreshed every 5 s. Pages opened from local files
   show `--` (the proxy only answers the live site), which is expected.
@@ -4677,3 +4696,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     Guide & Investment Blog"; now "Market and Stock News" (published by the next daily run). The AWS budget read $2.10 this
     month: the 253 Cost Explorer questions of 17 Oct (the session's fault, stopped); since then only the owner's own billing
     pages have asked (CloudTrail: "AWS Internal", free).
+  - **The market data moves while someone is on the page** (09:02 and 09:05 UTC; `ticker-data-fetcher` `uhm8WRpQ…` then the
+    five-minute version at 512 MB, rollback zips `ticker-data-fetcher_before_live_20261018.zip`, `…_before_live2_20261018.zip`;
+    `live-market.js` (new), `theme.js`, `index.html`, `dashboard.html`): section 8, "The market data moves while someone is
+    looking at it". The price function fetched its symbols one after another (26 in 9 s); now side by side, five-minute prices
+    (the same current price, a fifth of the data), 512 MB (128 gave it too little processor: 7.6 s on Lambda against 0.6 s on
+    the Mac): about 1.8 s inside AWS, about the same compute a call as before. Older callers get the same answer. Cost: about
+    20,000 calls and 20,000 GB-seconds a month for two hours of watching a day, inside the free allowances.
