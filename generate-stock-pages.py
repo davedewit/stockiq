@@ -378,7 +378,6 @@ if (hasPaid) {{
         </p>
     </footer>
     
-    <script src="../sidebar.js"></script>
     <script>
     function toggleMobileMenu() {{
         const menu = document.getElementById('mobile-menu');

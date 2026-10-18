@@ -148,6 +148,11 @@ function anyAnswer() {
         const want = await js(`(function () { var a = ${JSON.stringify(lastData[after.want])}; return window.liveMarket.sparkPoints(a.spark, a.prev); })()`);
         check('the side panel\'s small chart is today\'s line from the answer, not a random one', after.line === want, { line: after.line, want });
       }
+      if (pg === 'index.html') {
+        const cards = await js(`(function () { var lm = window.liveMarket, d = ${JSON.stringify(lastData)}; return (lm.cards ? lm.cards() : []).map(function (c) { var a = d[c.sym];
+          return { sym: c.sym, value: c.value.textContent, line: c.line && c.line.getAttribute('points'), want: a ? lm.sparkPoints(a.spark, a.prev, 58) : 'no answer' }; }); })()`);
+        check('the four index cards on the home page show figures and today\'s real line (it was a fixed up or down line)', cards.length === 4 && cards.every(c => /\d/.test(c.value) && c.line === c.want), cards);
+      }
       await sleep(9000);                                 // nobody moves: past the (shortened) idle time
       const idleFrom = priceRequests.length; await sleep(6000);
       check('when nobody has moved for a while nothing more is asked for', priceRequests.length - idleFrom === 0, { asked: priceRequests.length - idleFrom });
@@ -155,9 +160,10 @@ function anyAnswer() {
       const st = await js('window.liveMarket.state()');
       check('when the prices stop moving the gap between rounds grows (up to its longest)', st.gap > 2000, st);
       check('no script error on the page', errors.length === 0, errors);
+      if (process.env.SHOTS) { const r = await send('Page.captureScreenshot', { format: 'png' }); fs.writeFileSync(path.join(process.env.SHOTS, pg.replace(/\W+/g, '_') + '.png'), Buffer.from(r.data, 'base64')); }
       if (process.env.SHOTS && pg === 'index.html') { await js(`(function () { var e = document.getElementById('stock-pages'); if (e) { document.documentElement.style.scrollBehavior = 'auto'; e.scrollIntoView({ block: 'start' }); window.scrollBy(0, -120); } })()`); await sleep(400);
         const r2 = await send('Page.captureScreenshot', { format: 'png' }); fs.writeFileSync(path.join(process.env.SHOTS, 'index_stock_pages.png'), Buffer.from(r2.data, 'base64')); }
-      if (process.env.SHOTS) { const r = await send('Page.captureScreenshot', { format: 'png' }); fs.writeFileSync(path.join(process.env.SHOTS, pg.replace(/\W+/g, '_') + '.png'), Buffer.from(r.data, 'base64')); }
+
     }
   } catch (e) { console.log('ERROR ' + e.stack); failed++; }
   finally { chrome.kill(); server.close(); console.log(`\n${failed ? 'SOME FAILED' : 'ALL PASS'} (${passed} passed, ${failed} failed)`); process.exit(failed ? 1 : 0); }

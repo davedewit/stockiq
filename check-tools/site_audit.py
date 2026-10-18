@@ -18,6 +18,7 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
 
     python3 check-tools/site_audit.py            print the findings, keep them in check-tools/audit/ (latest.json, history)
     python3 check-tools/site_audit.py --admin    also put them on the owner's Admin page (admin.py audit)
+    AUDIT_WEB=<staging folder>/web python3 check-tools/site_audit.py   read the staged files first (before a deploy); saves nothing
 
 The daily deploy runs it with --admin; session_start.py prints the latest. A finding is a lead for a session, not a verdict:
 fix it, or teach this script that it is fine (KNOWN below, with the reason). Each new kind of fault found by hand gets a check.
@@ -34,7 +35,8 @@ KNOWN = {
     'duplicate-code': {'toggleMobileMenu', 'closeMobileMenu', 'showDropdown', 'hideDropdown', 'toggleDropdown', 'toggleTheme', 'logout',
                        'fillMobileSidebar', 'emptyMobileSidebar', 'toggleMobileSidebar', 'closeMobileSidebar',   # each page's own menu and sidebar hooks (mobile-sidebar.js calls them)
                        'gtag',                                                    # Google Analytics' own snippet, on every page by design
-                       'load', 'start', 'init', 'read', 'write', 'esc', 'render', 'go', 'tick', 'one', 'run', 'show', 'hide'},   # local names inside separate scripts, not shared code
+                       'goToNotifications',                                       # one line in each page's header (go to the dashboard); not worth a shared script
+                       'load', 'start', 'init', 'read', 'write', 'esc', 'render', 'go', 'tick', 'one', 'run', 'show', 'hide', 'style', 'refresh'},   # local names inside separate scripts, not shared code
 }
 findings = []
 
@@ -43,7 +45,14 @@ def find(check, level, text, where=''):
     findings.append({'check': check, 'level': level, 'text': text, 'where': where})
 
 
+STAGE = os.environ.get('AUDIT_WEB', '')
+
+
 def read(p):
+    if STAGE and os.path.abspath(p).startswith(os.path.abspath(WEB) + os.sep):
+        staged = os.path.join(STAGE, os.path.relpath(os.path.abspath(p), os.path.abspath(WEB)))
+        if os.path.exists(staged):
+            p = staged
     try:
         return open(p, encoding='utf-8', errors='replace').read()
     except Exception:
@@ -112,6 +121,11 @@ def main():
                 near = ' '.join(lines[max(0, i - 4):i + 5]).lower()
                 if re.search(r'polyline|sparkline|points\.push|<svg|chart|y = base|candle', near) and not re.search(r'delay|setTimeout|jitter|anonymous|id\b|sample', l.lower()):
                     find('made-up-visuals', 'problem', f'Math.random() draws something (line {i + 1}: "{l.strip()[:80]}")', f)
+            # a fixed line written into a chart (the home page's index cards drew one "up" or one "down" shape, whatever the market did)
+            if re.search(r"setAttribute\(\s*['\"]points['\"]\s*,\s*['\"][\d ,.]{12,}['\"]", l):
+                find('made-up-visuals', 'problem', f'a fixed line is drawn into a chart (line {i + 1}: "{l.strip()[:80]}")', f)
+        for m in re.finditer(r'id="[\w-]*chart"[^>]*>\s*<polyline points="([\d ,.]{12,})"', src[f]):
+            find('made-up-visuals', 'problem', f'a chart starts with a made-up line ("{m.group(1)[:30]}…")', f)
 
     # unused-scripts
     every = '\n'.join(src.values()) + '\n'.join(read(p) for p in glob.glob(os.path.join(WEB, 'stocks', 'AAPL.html'))) + '\n'.join(read(p) for p in glob.glob(os.path.join(WEB, 'js', '*.js')))
@@ -205,14 +219,18 @@ def main():
     at = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     out = {'at': at, 'pages': len(pages), 'scripts': len(scripts), 'problems': sum(f['level'] == 'problem' for f in findings),
            'ideas': sum(f['level'] == 'idea' for f in findings), 'new': sum(f['new'] for f in findings), 'gone': gone, 'findings': findings}
-    json.dump(out, open(os.path.join(OUT, 'latest.json'), 'w'), indent=1, ensure_ascii=False)
+    if STAGE:
+        print(f'(staged files read from {STAGE}: nothing saved)')
+    else:
+        json.dump(out, open(os.path.join(OUT, 'latest.json'), 'w'), indent=1, ensure_ascii=False)
     hist = (hist + [{'at': at, 'keys': now_keys, 'weights': weights}])[-60:]
-    json.dump(hist, open(hist_p, 'w'))
+    if not STAGE:
+        json.dump(hist, open(hist_p, 'w'))
     print(f"site check {at}: {len(pages)} pages, {len(scripts)} scripts; {out['problems']} problems, {out['ideas']} ideas"
           + (f"; {out['new']} new since the last check, {gone} gone" if len(hist) > 1 else ''))
     for f in sorted(findings, key=lambda f: (f['level'] != 'problem', f['check'])):
         print(f"  [{f['level']}{', new' if f['new'] else ''}] {f['check']}: {f['text']}" + (f"  ({f['where']})" if f['where'] else ''))
-    if '--admin' in sys.argv:
+    if '--admin' in sys.argv and not STAGE:
         subprocess.run([sys.executable, os.path.join(HERE, 'admin.py'), 'audit'], check=False)
 
 
