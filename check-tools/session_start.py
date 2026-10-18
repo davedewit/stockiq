@@ -59,6 +59,19 @@ for uid in (owner or on)[:3]:
         if m.themes_on(rec['settings']) and th.get('last') and (now - m.parse_time(th['last'])).days > m.THEME_EVERY_DAYS + 3:
             finding(f"the themes part's monthly change is overdue (last {th['last'][:10]}): look at the function's log")
 
+
+# 1b. the nightly site check (site_audit.py, run by the daily deploy): its problems are findings
+head('1b. The nightly site check')
+try:
+    aud = json.load(open(os.path.join(HERE, 'audit', 'latest.json')))
+    age = (datetime.datetime.now(datetime.timezone.utc) - datetime.datetime.strptime(aud['at'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=datetime.timezone.utc)).total_seconds() / 3600
+    print(f"  last {aud['at']} ({age:.0f} h ago): {aud['problems']} problems, {aud['ideas']} ideas, {aud.get('new', 0)} new")
+    for f in aud['findings']:
+        if f['level'] == 'problem': finding(f"site check: {f['text']}" + (f" ({f['where']})" if f['where'] else ''))
+    if age > 36: finding('the nightly site check has not run for over a day and a half: look at the daily deploy')
+except Exception as e:
+    print(f'  not read ({type(e).__name__}): python3 check-tools/site_audit.py')
+
 # 2. the Admin page
 head('2. The Admin page')
 admin = m.load_admin()

@@ -66,5 +66,13 @@ async function page(status, uid) {
     check('the AWS figures have a Refresh now button and say how often they are read by themselves', /data-ad="usage"/.test(q.panel.innerHTML) && /↻ Refresh now/.test(pl()) && /reads both about once a day/.test(pl()) && /Both are free to read/.test(pl()) && /calls read just now/.test(pl()));
     await q.click({ 'data-ad': 'usage' });
     check('pressing it asks the function for the figures (op usage) and says what was read', q.sent.at(-1).op === 'usage' && /Read just now, free/.test(pl()), q.sent.at(-1)); }
+  if (/function auditHtml/.test(fs.readFileSync(process.argv[2], 'utf8'))) {
+    ADMIN.plan = Object.assign({}, ADMIN.plan, { audit: { at: '2026-10-18T11:00:00Z', problems: 1, ideas: 1, new: 1, gone: 2, findings: [
+      { check: 'seo-basics', level: 'problem', text: 'no meta description', where: 'analysis.html', new: true },
+      { check: 'stock-links', level: 'idea', text: 'the guides link to no stock page', where: 'guides', new: false }] } });
+    const q = await page(200, 'dave@x.com'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    check('the Overview has the nightly site check: its problems on show, new ones marked, the ideas folded, what was put right', /Site check/.test(pl) && /1 problem, 1 idea · 1 new · 2 put right/.test(pl)
+      && /problem new no meta description analysis\.html/.test(pl) && /1 idea idea the guides link to no stock page/.test(pl), pl.slice(pl.indexOf('Site check') + 250, pl.indexOf('Site check') + 700));
+  }
   console.log(ok ? 'ALL PASS' : 'SOME FAILED'); process.exit(ok ? 0 : 1);
 })();

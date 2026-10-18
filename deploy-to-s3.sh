@@ -148,6 +148,14 @@ else
     echo "⏭️  Skipping stock data snapshots"
 fi
 
+# The site checked every night (links, search basics, copied code, made-up visuals, page weight...): findings onto the Admin page.
+# Read-only on the site's files; never stops the deploy.
+if [ "$DRY_RUN" != "true" ]; then
+    $PYTHON "/Users/dave/VSCODE/stockiq/check-tools/site_audit.py" --admin || echo "⚠️  Site check not run"
+else
+    $PYTHON "/Users/dave/VSCODE/stockiq/check-tools/site_audit.py" || echo "⚠️  Site check not run"
+fi
+
 # Remove backups older than 30 days (for both website and stockiq)
 echo "🧹 Removing backups older than 30 days..."
 find "$BACKUP_DIR_BASE" -maxdepth 1 -type d -name "*_backup_*" -mtime +30 -exec rm -rf {} +

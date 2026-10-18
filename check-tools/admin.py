@@ -6,6 +6,7 @@ keeps its proposals in item `_admin` of table stockiq-ai-trader. A session start
     python3 check-tools/admin.py done <id> "<what was done>"     mark a "yes" as done once it is built and live
     python3 check-tools/admin.py add session "<title>" "<why>"   put a question to the owner that needs code
     python3 check-tools/admin.py add setting "<title>" "<why>" '<json change>'   e.g. '{"aiSell": false}' or '{"untick": "7-1"}'
+    python3 check-tools/admin.py audit               the nightly site check's findings (audit/latest.json) onto the page
 
 A "setting" proposal is applied by the function itself the moment the owner presses "Yes"; a "session" one waits for a
 session. Nothing here prints an account's address.
@@ -51,10 +52,25 @@ elif args[0] == 'sync':
     parts = json.load(open(os.path.join(here, 'site_parts.json')))['parts']
     reviews = sorted(({'part': p['part'], 'at': l['at'], 'found': l['found']} for p in parts for l in p.get('log', [])), key=lambda x: x['at'], reverse=True)[:8]
     keep = ('id', 'what', 'angle', 'measure', 'status', 'started', 'decide', 'decided', 'result', 'order', 'public', 'publicText')
+    kept = (admin.get('plan') or {}).get('audit')                  # the nightly site check stays when the improvements are synced
     admin['plan'] = {'at': now(), 'items': [{k: e[k] for k in keep if k in e} for e in ex], 'reviews': reviews,
                      'parts': len(parts), 'reviewed': sum(1 for p in parts if p.get('last'))}
+    if kept:
+        admin['plan']['audit'] = kept
     save(admin)
     print(f"the Admin page's improvements: {len(ex)} items, {len(reviews)} recent reviews")
+elif args[0] == 'audit':
+    # The nightly site check (site_audit.py --admin): its findings onto the Admin page. The autopilot's scheduled run writes the
+    # same record at :10 and :40 past the hour, so this waits until it is clear of those minutes.
+    import time
+    here = os.path.dirname(os.path.abspath(__file__))
+    a = json.load(open(os.path.join(here, 'audit', 'latest.json')))
+    while datetime.now(timezone.utc).minute % 30 in (9, 10, 11, 12, 13):
+        time.sleep(20)
+    admin = load()
+    admin.setdefault('plan', {})['audit'] = {k: a[k] for k in ('at', 'problems', 'ideas', 'new', 'gone')} | {'findings': a['findings'][:40]}
+    save(admin)
+    print(f"the Admin page's site check: {a['problems']} problems, {a['ideas']} ideas")
 elif args[0] == 'done' and len(args) >= 3:
     p = next((x for x in admin['proposals'] if str(x['id']) == args[1]), None)
     if not p:
