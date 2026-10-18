@@ -1,0 +1,14 @@
+Stock-page score against what shares did over the next 20 trading days (top fifth minus bottom fifth, in % points; a date every 10 trading days; t = mean / standard error over the dates, which overlap little at this step)
+
+sp400_600   96 dates | score: first half -0.57 (t -1.4), second -0.15 (t -0.3) | momentum: first +0.19 (t +0.3), second +0.24 (t +0.3) | turned round: first -0.07 (t -0.2), second +0.33 (t +0.6)
+ftse100     96 dates | score: first half -0.02 (t -0.0), second -0.44 (t -0.8) | momentum: first +0.56 (t +1.1), second +1.20 (t +1.9) | turned round: first +0.04 (t +0.1), second +0.60 (t +1.1)
+dax40       98 dates | score: first half -0.78 (t -1.5), second -0.98 (t -1.5) | momentum: first +0.44 (t +0.7), second +3.47 (t +4.0) | turned round: first -0.17 (t -0.3), second +1.92 (t +2.7)
+cac40       98 dates | score: first half -0.86 (t -1.6), second +1.48 (t +2.1) | momentum: first +0.98 (t +2.5), second +2.58 (t +3.3) | turned round: first -1.08 (t -2.0), second +2.45 (t +3.3)
+aex         98 dates | score: first half -0.18 (t -0.3), second -0.42 (t -0.6) | momentum: first -0.67 (t -0.8), second +1.97 (t +1.9) | turned round: first -0.39 (t -0.6), second +0.08 (t +0.1)
+smi         96 dates | score: first half +0.99 (t +1.5), second -0.36 (t -0.4) | momentum: first -1.20 (t -1.5), second -0.08 (t -0.1) | turned round: first +0.06 (t +0.1), second -0.06 (t -0.1)
+nikkei225   92 dates | score: first half +0.59 (t +1.8), second +0.23 (t +0.4) | momentum: first +0.73 (t +1.4), second +0.90 (t +0.9) | turned round: first +0.97 (t +2.3), second +1.28 (t +1.4)
+asx200      97 dates | score: first half -0.43 (t -0.8), second +0.14 (t +0.2) | momentum: first +0.89 (t +1.3), second +1.59 (t +1.6) | turned round: first -0.04 (t -0.1), second +1.07 (t +1.2)
+tsx60       96 dates | score: first half -0.26 (t -0.6), second -0.70 (t -1.0) | momentum: first +0.42 (t +0.8), second +2.51 (t +3.4) | turned round: first +0.41 (t +0.9), second +0.50 (t +0.7)
+
+Half-periods where the top fifth beat the bottom fifth: score 5 of 18, momentum 15 of 18, the score turned round 12 of 18.
+Limits: today's index members (flatters momentum); no company figures in the score (no history of them here); before costs; a mostly rising period.

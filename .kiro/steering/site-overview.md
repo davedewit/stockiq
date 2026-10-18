@@ -494,8 +494,14 @@ line by line. What was wrong, and what it does now:
   itself in a browser, a real phone, the dashboard's "Run in Background" for a single stock.
   Rollback zips, in order: `~/VSCODE/backup/stockiq-chart-generator_before_report_20261011.zip`,
   `stockiq-option-1-1-custom-analysis_before_report_…`, `…_before_figures_…`, `…_before_source_…`, `…_before_newstime_…`, `…_before_coin_20261012.zip`.
-- **Left as it is:** the first line still says "(REAL-TIME DATA)", as every screener's does (one wording decision for
-  the whole site); MACD still scores +8 or -8 on its sign and RSI in steps at 30 / 40 / 60 / 70; valuation is counted
+- **The score's points that bet against the trend were turned round on 18 Oct 2026** (`check-tools/scoring/page_score_study.py`,
+  `results-page-score-2026-10-18.txt`: five years, nine markets, the technical part only; its top fifth did worse than its bottom
+  fifth over the next 20 days in 13 of 18 half-periods; the candidate, written down first, beat the old score in 15 of 18):
+  RSI counts against a share only over 80 (-5; oversold +15 and overbought -15 are gone), the year's rise counts for it (+8 over
+  30%, +10 over 50%, +12 over 100%; they were +3, -8, -15), near the year's high +5 and near the low -5 (they were the other way
+  round). Live in the report function (rollback `…_before_pagescore_20261018.zip`) and in `stock_metrics.py` for the pages.
+  Scores moved about 6 points on average, most for strong risers. Its "(REAL-TIME DATA)" heading is "(LATEST AVAILABLE PRICES)".
+- **Left as it is:** MACD still scores +8 or -8 on its sign and RSI in steps at 30 / 40 / 60 / 70; valuation is counted
   twice for a share with a high P/E and a high price-to-book; the Finnhub call is still made for shares it never has;
   the report's time is the visitor's only when the page sends its offset.
 
