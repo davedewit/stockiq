@@ -132,7 +132,7 @@ for repo in (ROOT, WEB):
     print(f"  {os.path.basename(repo)}: {st[0] if st else '?'}; {len(dirty)} other uncommitted file(s)")
     if 'ahead' in (st[0] if st else ''): finding(f"{os.path.basename(repo)}: commits not pushed ({st[0]})")
     if dirty: finding(f"{os.path.basename(repo)}: uncommitted: {', '.join(l[3:] for l in dirty[:6])} (another session's work? look before committing)")
-kept = {'pending-screeners-undo', 'pending-cleanup-undo', 'pending-banners-undo'}
+kept = {'pending-screeners-undo', 'pending-cleanup-undo', 'pending-banners-undo', 'pending-simple-undo'}
 left = [os.path.basename(d) for d in glob.glob(os.path.join(HERE, 'pending-*')) if os.path.basename(d) not in kept]
 if left: finding(f"staging folders left over: {', '.join(left)} (a deploy not finished, or another session's)")
 print(f"  staging folders: {', '.join(sorted(kept & set(os.listdir(HERE))))} (kept on purpose)" + (f"; others: {', '.join(left)}" if left else ''))

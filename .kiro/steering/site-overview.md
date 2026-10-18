@@ -1499,7 +1499,14 @@ listing what only the owner can put right) and the buttons "Check in now" / "Sel
 holds" sit at the top; below them the panel is in **two parts, Activity and Settings**, so neither is a long scroll (it opens on Settings until it is switched on with a
 screener, then on Activity; the part last looked at is remembered, `stockiqAutopilotPart`). Both
 parts are always in the page and one is hidden, so settings are read and saved whichever is on
-show. Settings holds the first five items below, Activity the last five:
+show. Settings holds the first five items below, Activity the last five. **Since 18 Oct 2026 Activity opens on a short summary** (the
+owner: "wondering if there is just too much going on in the site"; it showed about 13,000 characters before anything was opened):
+the market-risk gauge, "What happens next" with 3 rows on show, "How it is doing" with 5 holdings on show (a row's reason cut
+to 90 characters, all of it in the plan), the themes part in one line (`themesLine`, "Its detail" opens the fold), and the
+latest 5 entries of "What it has done"; **the bar, the themes part in full, progress every 20 trades and "How it is improving"
+are under one fold, "More detail"** (`data-ap-fold="more-all"`; a jump link opens any fold it lands in). About 6,400
+characters on show. **The way back, one command:** `bash /Users/dave/VSCODE/stockiq/check-tools/pending-simple-undo/deploy.sh`
+(keep that folder):
 - (**The "Quick set-ups" are gone since 13 Oct 2026.** "Quick coin trading", "Steady shares" and "Shares and coins" each
   replaced the screeners ticked **and the pace and the level**; the owner lost his settings to them twice in one evening
   and a check-in traded on one of them: section 13. Their place is taken by the shortcuts in the screeners card, below,
@@ -1648,7 +1655,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=42` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=60`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=61`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -4655,3 +4662,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     may act come in weeks, not months (the calls overlap in time, which a verdict must allow for). About 2 US cents a month of
     OpenAI. Tests: 509 function, 234 panel, 24 chat; looked at on the owner's real account through the staged function before
     the deploy.
+  - **The AI autopilot's Activity part made shorter** (07:2x UTC; `practice-autopilot.js?v=61`, `dashboard.html`), at the owner's
+    word after he asked whether there is too much going on. Nothing removed: a short summary on top, the rest under one "More
+    detail" fold (section 8c, "What the owner sees", at the start of the autopilot part). On his real data the Activity part shows
+    about 6,400 characters before anything is opened, half of before. "The details" of the rule trials were going to be shown to
+    his account only; left for everyone, since they are a fold inside "More detail" now and hold lines every user should see.
+    Settings (about 8,800) was not touched. **Found on the way:** `clarity_check.py` counted the text of a fold inside a closed
+    fold as on show (the 34 older holdings), so earlier totals were too high; fixed. **The way back:**
+    `check-tools/pending-simple-undo/deploy.sh`, dry run tried. 235 panel checks.
