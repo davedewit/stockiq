@@ -214,6 +214,15 @@ def main():
         "A fair comparison counts both: what was sold and what is still held, for buys of the same weeks.")
     say(f"  this account: trial of the buying order '{(state.get('order') or {}).get('mode')}', {(state.get('order') or {}).get('buys', 0)} share buys counted; AI calls today {((state.get('ai') or {}).get('n'))}; early sells by the AI review {'paused' if (state.get('aiSell') or {}).get('until') else 'allowed'}")
 
+    th = state.get('themes') or {}
+    if th or getattr(m, 'THEMES', False):
+        say("\n6b. THE THEMES PART (a trial since 18 Oct 2026: 20% of the budget in the 3 strongest of 14 sector and theme funds, changed monthly)")
+        if hasattr(m, 'theme_review_lines') and port:
+            for l in m.theme_review_lines(rec, port, datetime.now(timezone.utc).replace(tzinfo=None)): say('  ' + l)
+        for t in (th.get('trades') or [])[-6:]: say(f"  sold {t.get('symbol')}: {t.get('pct', 0):+.2f}%, against the S&P 500 fund {t.get('vs') if t.get('vs') is not None else '?'}")
+        for c in (th.get('calls') or [])[-8:]: say(f"  AI call {str(c.get('at'))[:10]} {c.get('symbol')} {c.get('view')}: " + (f"{'right' if c.get('right') else 'wrong'} ({c.get('rel'):+.2f}% against the fund)" if c.get('right') is not None else 'not scored yet') + f" ({c.get('why', '')[:80]})")
+        say("  Judge the part on its own, against an S&P 500 fund over the same days, for over a year; the AI's calls from 30 scored.")
+
     say("\n7. FAULTS IN THE FUNCTION'S LOG (the period)")
     logs, found, token = s.client('logs'), [], None
     try:

@@ -1302,6 +1302,14 @@ if THEMES_ON:
     check('the funds kept are not sold and bought again', len([e for e in rec['log'] if 'Themes part' in e['text'] and e['type'] == 'buy']) == 4)
     MODEL['answer'] = {'theme': 'Oil prices jump on supply fears.', 'calls': [{'symbol': 'XLE', 'view': 'better', 'why': 'oil'}, {'symbol': 'TLT', 'view': 'worse', 'why': 'rates'},
                        {'symbol': 'NOPE', 'view': 'better', 'why': 'not a fund'}, {'symbol': 'XLK', 'view': 'none', 'why': ''}]}
+    if hasattr(m, 'theme_review_lines'):
+        rl = m.theme_review_lines(rec, portfolio(), Open.utcnow() + dt.timedelta(days=28), tq)
+        check('the weekly review has a line on the themes part: what it holds and is worth, the fund sold against an S&P 500 fund, the AI calls', len(rl) == 1
+              and all(x in rl[0].split('(')[1] + rl[0] for x in ('GLD', 'SMH', 'XLK')) and 'holds ' in rl[0] and 'put in' in rl[0] and ' now)' in rl[0] and '1 fund sold' in rl[0] and 'against an S&P 500 fund' in rl[0]
+              and 'recorded and not acted on' in rl[0] and 'not counted in the share trades above' in rl[0], rl)
+        adm = m.write_review({'proposals': [], 'review': None, 'health': None, 'seq': 0}, rec, portfolio(), Open.utcnow() + dt.timedelta(days=28), tq)
+        check('and the review the Admin page shows carries it', any(l.startswith('Themes part (a trial since') for l in adm['review']['lines']), adm['review']['lines'])
+        check('an account that never ran the trial gets no such line', m.theme_review_lines({'settings': dict(rec['settings'], selfTune=False), 'state': {}}, portfolio(), Open.utcnow()) == [])
     th = rec['state']['themes']; th['aiAt'] = m.iso(Open.utcnow() - dt.timedelta(days=30)); port = portfolio(); MODEL['prompts'].clear()
     m.run_themes(rec, port, Open.utcnow() + dt.timedelta(days=29), tq, model, headlines=['Oil jumps', 'Rates rise'])
     check('once a week the AI model reads the headlines; its calls are kept with the prices of the moment, and only for the 14 funds',

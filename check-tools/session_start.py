@@ -53,6 +53,12 @@ for uid in (owner or on)[:3]:
     print(f"  settings: level {rec['settings'].get('risk')}, holdings {rec['settings'].get('holdings')}, every {rec['settings'].get('everyHours')} h, keeps up to {rec['settings'].get('maxHoldDays')} days, "
           f"AI review sales {'on' if rec['settings'].get('aiSell') else 'off'}, {len(rec['settings'].get('screeners', []))} screeners; open trials: order {rec['state'].get('order', {}).get('mode')}, patient {'on' if m.PATIENT else 'off'}")
 
+    if hasattr(m, 'theme_review_lines'):
+        for l in m.theme_review_lines(rec, pf, now, m.fetch_quote): print('  ' + l)
+        th = rec['state'].get('themes') or {}
+        if m.themes_on(rec['settings']) and th.get('last') and (now - m.parse_time(th['last'])).days > m.THEME_EVERY_DAYS + 3:
+            finding(f"the themes part's monthly change is overdue (last {th['last'][:10]}): look at the function's log")
+
 # 2. the Admin page
 head('2. The Admin page')
 admin = m.load_admin()
