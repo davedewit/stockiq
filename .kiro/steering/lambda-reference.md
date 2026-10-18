@@ -232,7 +232,7 @@ Lambda URLs are **hardcoded** in these JS/HTML files:
 - `stock-prices.js` — live prices on stock pages (`stockiq-popular-prices` for a list of symbols)
 - `market-panel.js` — the market panel on the right of the home page and the dashboard (its tabs and figures: the seven `stockiq-market-data-*` functions; the four lists: `trending-scraper`, `gainers-scraper`, `losers-scraper`, `most-active-scraper`; their prices: `ticker-data-fetcher`)
 - `live-market.js` — keeps the figures on show moving while someone is on the page (`ticker-data-fetcher`, every 6 to 10 s; loaded by `theme.js`)
-- `sidebar.js` — an older copy of the market panel's code, loaded by the stock pages and the analysis page, which have no panel (it does nothing there)
+- `sidebar.js` — empty since 18 Oct 2026 (it was an older copy of the market panel's code); the stock pages still ask for it until they are next regenerated
 - `script.js` — homepage widgets
 - `dashboard.html` — dashboard data, CSV export, payment
 - `practice-portfolio.js` — practice portfolio storage (`stockiq-paper-portfolio`), prices, symbol lookup

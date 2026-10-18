@@ -7,7 +7,9 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
   loading-text    "Loading..." in the HTML of an indexed page: what a search engine reads before any script runs
   broken-links    a link or a script on a page whose file is not on the site
   duplicate-code  the same function defined in several pages or scripts (the market panel was three copies)
-  made-up-visuals Math.random() used to draw something (the side panel's charts were random lines)
+  made-up-visuals Math.random() used to draw something (the side panel's charts were random lines), a fixed line written into a
+                  chart, or figures written into the code to show when the data fails
+  stale-stock-pages indexed stock pages whose "Data as of" is more than 4 days behind the newest
   unused-scripts  a script no page loads; a script a page loads that finds none of its elements there (sidebar.js)
   page-weight     a page heavier than 250 KB, or 15% heavier than at the last check
   stale-counts    the home page's count of screeners against screeners.js
@@ -80,6 +82,30 @@ def main():
     bare = [g for g in GUIDES if g in src and not re.search(r'href="stocks/', src[g])]
     if bare:
         find('stock-links', 'idea', f'{len(bare)} of the 4 guides link to no stock page (a few relevant ones would help search)', ', '.join(bare))
+
+    # stale-stock-pages: the indexed stock pages say "Updated daily"; the snapshot step keeps yesterday's when Yahoo refuses this
+    # Mac, and on 18 Oct 2026 the owner's daily review found 532 of them still at 9 Oct (this check had not looked)
+    from datetime import datetime as _dt
+    dates = {}
+    for sym in (l.strip() for l in open(os.path.join(HERE, '..', 'indexable_stocks.txt')) if l.strip()):
+        m = re.search(r'Data as of (\d{1,2} \w{3} \d{4})', read(os.path.join(WEB, 'stocks', sym + '.html')))
+        if m:
+            try:
+                dates[sym] = _dt.strptime(m.group(1), '%d %b %Y').date()
+            except ValueError:
+                pass
+    if dates:
+        newest = max(dates.values()); old = sorted((d, s_) for s_, d in dates.items() if (newest - d).days > 4)
+        if old:
+            find('stale-stock-pages', 'problem', f'{len(old)} of {len(dates)} indexed stock pages show data more than 4 days older than the newest '
+                 f'({newest:%d %b}); the oldest {old[0][0]:%d %b} (e.g. {", ".join(s_ for _, s_ in old[:4])})',
+                 'update_stock_analysis.py (Yahoo refuses this Mac: "No price data" in ~/stockiq-daily.log)')
+
+    # made-up fallback figures: numbers written into the page to show when the data cannot be had (the home page's index cards
+    # showed January 2024 figures as today's until 18 Oct 2026)
+    for f_ in pages + scripts:
+        for m in re.finditer(r'fallback\w*\s*=\s*\{[^;]{0,400}?\b(price|value)\s*:\s*\d{3,}', src[f_], re.I):
+            find('made-up-visuals', 'problem', f'figures written into the code to show when the data fails (line {src[f_][:m.start()].count(chr(10)) + 1})', f_)
 
     # loading-text
     for p in indexed:

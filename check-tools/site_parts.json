@@ -23,7 +23,13 @@
    "id": "home-widgets",
    "part": "Home page: market widgets, movers lists, news panel",
    "where": "index.html, the widgets and the right-hand panel",
-   "last": null
+   "last": "2026-10-18",
+   "log": [
+    {
+     "at": "2026-10-18",
+     "found": "Index cards: hard-coded Jan-2024 fallback figures shown as live on failure and fixed-shape fake charts (proposal); cards lag the side panel up to 5 min; 9 'Loading...' could be filled by the daily run"
+    }
+   ]
   },
   {
    "id": "home-email",
@@ -35,7 +41,13 @@
    "id": "report",
    "part": "The single-stock report and its chart",
    "where": "analysis.html option 1; stockiq-option-1-1-custom-analysis, stockiq-chart-generator",
-   "last": null
+   "last": "2026-10-18",
+   "log": [
+    {
+     "at": "2026-10-18",
+     "found": "0-100 score penalises big 1-year rises and rewards the 52-week low, opposite of the trend score; never tested (proposal); 'REAL-TIME DATA' heading contradicts the FAQ (proposal); 532 of 961 indexed pages built on 9 Oct prices (proposal)"
+    }
+   ]
   },
   {
    "id": "signals",
@@ -119,7 +131,13 @@
    "id": "usage-chip",
    "part": "The usage chip, trial, sign-up prompts and round buttons",
    "where": "visitor-bar.js, auth.js",
-   "last": null
+   "last": "2026-10-18",
+   "log": [
+    {
+     "at": "2026-10-18",
+     "found": "visitor-bar.js reads every text auth.js writes; owner's address still in auth.js; custom:tier branch is dead (never set); any success:false from the trial function shows 'Trial expired' even to a paid member (unchecked without a real account)"
+    }
+   ]
   },
   {
    "id": "signup-login",

@@ -49,6 +49,7 @@ For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-s
 | Script | What it does |
 |---|---|
 | `session_start.py` | The first command of every session: the account, the bill, logs, live code against the mirrors, the registers, and a numbered list of findings |
+| `site_audit.py` | The nightly site check (run by the daily deploy with `--admin`, which puts its findings on the Admin page): stock links, "Loading..." text, broken links, duplicated functions, made-up charts, unused scripts, page weight, counts, titles / descriptions / canonicals, the sitemap, structured data. `AUDIT_WEB=<staging>/web` reads staged files first and saves nothing |
 | `clarity_check.py` | Draws the AI autopilot tab and the Admin page with the account's real answers and flags what reads badly (near-identical lines, "A and B and C", a switched-off feature still described, huge menus, "undefined"). `CLARITY_WEB=<staging>/web` for staged files, `--keep` for the text. Run by `session_start.py` |
 | `autopilot_review.py` | The weekly review of the autopilot's record |
 

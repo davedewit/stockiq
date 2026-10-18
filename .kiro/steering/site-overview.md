@@ -50,9 +50,11 @@ finding one weak spot after another himself: "why can't you actively do this eve
 deploy runs it with `--admin`: its findings go onto the Admin page ("🔎 Site check", via `admin.py audit`, inside `_admin['plan']`)
 and session_start prints them (part 1b; every problem is a finding). It tests concrete things a session had missed: links to the
 stock pages, "Loading..." text a search engine reads, broken links, the same function in 3 or more files, `Math.random()` drawing
-something, scripts no page loads or that find nothing on a page, page weight and its growth, the home page's screener count,
+something, a fixed line written into a chart or figures written in to show when the data fails, indexed stock pages whose
+data is more than 4 days behind (`stale-stock-pages`), scripts no page loads or that find nothing on a page, page weight and its growth, the home page's screener count,
 titles / descriptions / canonicals, the sitemap, JSON-LD, console noise. **Each time a fault is found by hand, give this script a
-check for that kind of fault**; something accepted on purpose goes into its `KNOWN` with the reason.
+check for that kind of fault**; something accepted on purpose goes into its `KNOWN` with the reason. Before a deploy,
+`AUDIT_WEB=<staging folder>/web python3 check-tools/site_audit.py` reads the staged files first and saves nothing.
 **A daily review by Claude, unattended, is built and NOT installed** (`check-tools/daily_review.sh`, instructions in
 `daily_review_prompt.md`): once a day after the deploy, refused anything but reading, the read-only checks, its report
 (`check-tools/reviews/daily/`) and up to three proposals on the Admin page; 50 minutes at most; a trial that ends by itself on
@@ -692,7 +694,7 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   reviews its holdings with the AI model and recent headlines, and tries bounded changes to its own
   rules. `practice-portfolio.js`, `practice-autopilot.js`, Lambdas `stockiq-paper-portfolio` and
   `stockiq-ai-trader`. **Everything about them, and how to work on them, is in section 8c.**
-- Stock pages load `sidebar.js` (an old copy of the market panel's code; a stock page has no panel, so it does nothing), `stock-prices.js` (live ticker), `ai-chat.js`, `auth.js`, `theme.js`.
+- Stock pages load `sidebar.js` (an empty file since 18 Oct 2026: it was an old copy of the market panel's code, used by nothing there; the template no longer asks for it, so the tag goes at the next regeneration, and the file can then be deleted), `stock-prices.js` (live ticker), `ai-chat.js`, `auth.js`, `theme.js`.
 - **Notification bell** (🔔 in the header of 18 hand-edited pages and of the stock pages): one list, drawn by
   `autopilot-bell.js` for every page, of the reports and the AI autopilot's buys and sells (section 8c, "The notification
   bell").
@@ -808,8 +810,8 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   (the owner: it gives a visitor more reason to scroll down the page), on the dashboard it stays in view and scrolls inside
   itself, with the arrow and fade at its foot (you look at it and at your portfolio together). It was made the same for an
   hour on 18 Oct 2026 and put back. About 60,000 characters of the home page and 46,000 of the dashboard went.
-  **`sidebar.js` is a third copy, loaded by the stock pages and the analysis page, which have no panel: it does nothing
-  there** (left in place). **The way back, one command:** `bash /Users/dave/VSCODE/stockiq/check-tools/pending-panel-undo/deploy.sh`
+  **`sidebar.js` was a third copy, with charts from random numbers, loaded by the stock pages, which have no panel: it was
+  emptied on 18 Oct 2026** (a comment only, so the 3,467 stock pages need no regeneration). **The way back, one command:** `bash /Users/dave/VSCODE/stockiq/check-tools/pending-panel-undo/deploy.sh`
   (keep that folder). Tests: `live_market_check.js` (the tabs, the arrows, the four lists, the countdown, the layout, 32
   checks), `mobile_sidebar_check.js`, `header_room_check.js`, `visitor_bar_check.js`.
 - **The market data moves while someone is looking at it** (18 Oct 2026; the owner: "they should update often so when users on
@@ -3552,7 +3554,8 @@ Ideas:
   the ~957 indexed pages; consider the $2B threshold if they perform.
 - Backlinks remain the biggest lever (see `backlinks-progress.md`).
 - Link to indexed stock pages from index.html, the guides and analysis results (internal links).
-- Home page market widgets are filled in by JavaScript; crawlers see "Loading...".
+- Home page market widgets are filled in by JavaScript; since 18 Oct 2026 a crawler sees a dash in the four index cards and the
+  site's spinner in the side panel, not "Loading...". Writing the last close into the cards daily would give it figures.
 - "People also watch" Fix 1 in `future-work.md`. India (BSE Sensex) is the next screener
   (`add-new-screener.md`). Price alerts are not built (`roadmap-to-9.md`).
 - `fix_amazonq_chat.sh` is obsolete (Amazon Q is not used).
@@ -4790,3 +4793,31 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     writes `~/Library/LaunchAgents/com.stockiq.review.plist` (Label `com.stockiq.review`, ProgramArguments `/bin/bash
     /Users/dave/VSCODE/stockiq/check-tools/daily_review.sh`, StartInterval 1800) and runs `launchctl load` on it; to try it once,
     `bash /Users/dave/VSCODE/stockiq/check-tools/daily_review.sh --now`. Never run by a session.
+  - **The site check's findings fixed** (the owner: "sure fix the issues"; live 11:52 UTC, 18 Oct 2026, website only, through
+    `check-tools/pending-fixes/deploy.sh`): a description for search results on the nine pages without one, and
+    `unsubscribe.html` kept out of search (noindex) with its canonical address; **the home page's four index cards drew one fixed
+    "up" or "down" shape whatever the market did**, found while fixing their "Loading..." (the check had missed it: it looked
+    only for `Math.random`): `live-market.js` version 3 now keeps their figures fresh and draws today's real line, as for the
+    side panel (`cards()`, `drawCard`, `sparkPoints(list, prev, width)`), and the page shows a dash until the figures are in;
+    the side panel's "Loading..." is the site's spinner; `sidebar.js` emptied (above); the four guides each link to eight
+    real stock pages (`<!-- STOCK_EXAMPLES_START/END -->`, written once by hand, all of them indexed pages). Checked:
+    `live_market_check.js` (40, one new: the cards' line is the answer's), `mobile_sidebar_check.js`, `header_room_check.js`, every inline
+    script parses, the live home page read with real prices (the four cards with Friday's lines, no script error). The site
+    check now reads 0 problems and 3 ideas. **Left, with the reason:** `script.js` (loaded by no page) waits for the owner's
+    yes to delete it; the notification functions copied in four files (`showLoginModal`, `updateNotificationBell` and the
+    rest) need a real signed-in browser to merge safely; the 192 console.log lines; `goToNotifications` (one line in each
+    page's header) is in the check's `KNOWN`. **Seen on the way, the owner's to decide:** `contact.html` names "StockIQ Pty
+    Ltd" with an ABN, while the terms and these notes say StockIQ is run by an individual with no company; `refunds.html`
+    and `privacy-policy.html` say "Last updated: December 2024".
+  - **The owner ran the daily review by hand** (11:33 UTC, `daily_review.sh --now`; the schedule is still not installed). It
+    worked and found three things the nightly check had missed, with three proposals on the Admin page: **596 of the 958
+    indexed stock pages still show 8 or 9 Oct data** although each says "Updated daily" (the snapshot step gets no prices
+    from Yahoo on most days: section 9; proposal 1, prices through the price function on AWS); every report's "(REAL-TIME
+    DATA)" heading against the FAQ's "no real-time data" (proposal 3); the stock pages' 0-100 score penalises the rise the
+    trend score rewards and has never been tested (proposal 2). **Its report could not be saved**: Claude Code counts
+    writing a file as an edit, so `Write(...)` never matched and the blocked "Edit" refused it; `daily_review.sh` now allows
+    `Edit(check-tools/reviews/daily/**)` only, and the report was saved from `~/stockiq-review.log`
+    (`check-tools/reviews/daily/2026-10-18.md`). Done from it the same hour (`pending-fixes2`, 11:58 UTC): the home page's
+    index cards no longer show January 2024 figures when the market data fails ("Not available just now", until
+    `live-market.js` fills them), and `login.html` is noindex and out of the sitemap. The nightly check learned both new kinds
+    of fault (`stale-stock-pages`, fallback figures), and now reads 1 problem (the stale pages) and 3 ideas.
