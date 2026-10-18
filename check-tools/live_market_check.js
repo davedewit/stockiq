@@ -122,7 +122,8 @@ function anyAnswer() {
         check('the four lists each show their five', lists.join() === '5,5,5,5', lists);
         check('the countdown says when the US market opens or closes', /U\.S\. markets (open|close) in/.test(await js(`document.getElementById('market-status-sidebar').textContent`)) && /\d+h \d+m/.test(await js(`document.getElementById('market-countdown-sidebar').textContent`)));
         const pos = await js(`(function () { var n = document.getElementById('news-panel'); var c = getComputedStyle(n); return [c.position, c.overflowY, !!document.getElementById('scroll-indicator')]; })()`);
-        check('the panel stays in view and scrolls inside itself, with its arrow (the same on both pages)', pos.join() === 'fixed,auto,true', pos);
+        const want = pg.indexOf('dashboard') >= 0 ? 'fixed,auto,true' : 'absolute,visible,false';
+        check(pg.indexOf('dashboard') >= 0 ? 'on the dashboard the panel stays in view and scrolls inside itself, with its arrow' : 'on the home page the panel scrolls with the page', pos.join() === want, pos);
       }
       const before = priceRequests.length;
       await mouse(16);                                   // eight seconds of someone using the page
