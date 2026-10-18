@@ -40,6 +40,7 @@ SHARED = m.CENTRAL; m.CENTRAL = False
 NOTES = getattr(m, 'LESSONS_MIN', 0); m.LESSONS_MIN = 5
 # And every share is sold by the ordinary rules here; the trial in which some are "patient" is tested on its own (PATIENT).
 PATIENT_ON = getattr(m, 'PATIENT', False); m.PATIENT = False
+THEMES_ON = getattr(m, 'THEMES', False); m.THEMES = False    # the themes part (a trial) has its own tests; the older ones give the whole budget to shares
 HAS_AI_SELL = hasattr(m, 'AI_SELL'); m.AI_SELL = True      # the AI review is off on the site (17 Oct 2026); its code is still tested
 # And no trading cost is taken off here, so that the amounts in the older checks stay round; the cost is tested on its own (COSTS).
 COSTS = getattr(m, 'TRADE_COST', 0); m.TRADE_COST = 0
@@ -1260,6 +1261,67 @@ if PATIENT_ON:
     check('nor is an account with "Try changes to its own rules" switched off', rec['state']['open'] and all('pt' not in f for f in rec['state']['open'].values()))
     check('the tag goes with a finished trade into the shared record', 'pt' in m.POOL_FIELDS)
     m.PATIENT = False; m.CENTRAL = was_central; m.datetime = clock; D.t.clear(); m._BRAIN.clear()
+# ---- the themes part (a trial since 18 Oct 2026): 20% of the budget in the 3 strongest of 14 sector and theme funds, changed monthly
+if THEMES_ON:
+    m.THEMES = True; D.t.clear(); m._BRAIN.clear(); was_central = m.CENTRAL; m.CENTRAL = False; m.datetime = Open; SNAP['3-100'] = rows(); MODEL['answer'] = None; MODEL['prompts'].clear()
+    FUNDP = {s_: 100.0 for s_, _n in m.THEME_FUNDS}
+    def rank_of(order):
+        return [{'symbol': s_, 'name': m.THEME_NAMES[s_], 'price': FUNDP[s_], 'trend': 50.0 - i * 3, 'm3': 5.0} for i, s_ in enumerate(order)]
+    ORDER = ['SMH', 'GLD', 'XLE', 'XLK', 'XLF', 'XLV', 'XLI', 'XLY', 'XLP', 'XLU', 'XLB', 'XLRE', 'XLC', 'TLT']
+    real_rank = m.theme_ranking; m.theme_ranking = lambda fetch=None: rank_of(ORDER)
+    def tq(sym):
+        return {'price': FUNDP[sym], 'currency': 'USD', 'name': m.THEME_NAMES[sym]} if sym in FUNDP else quote(sym)
+    base = dict(m.DEFAULTS, enabled=True, risk=3, budgetUsd=10000, periodDays=1, everyHours=24, maxHoldDays=5, auto=[], screeners=['3-100'])
+    check('the trial runs only with a share screener ticked and "Try changes to its own rules" on', m.themes_on(base) and not m.themes_on(dict(base, selfTune=False))
+          and not m.themes_on(dict(base, screeners=['7-1'])) and not m.themes_on(dict(base, enabled=False)))
+    check('while it runs the share part works with the rest of the budget', m.share_part(base)['budgetUsd'] == 8000 and m.share_part(dict(base, selfTune=False))['budgetUsd'] == 10000)
+    rec = m.load_item(U); rec['settings'] = dict(base); rec['state'] = {'startedAt': m.iso(Open.utcnow() - dt.timedelta(days=2))}
+    m.run_user(U, rec, Open.utcnow(), snapshot=snapshot, quote=tq, model=model)
+    port = portfolio(); themes = [h for h in port['holdings'] if m.is_theme(h)]; shares = [h for h in port['holdings'] if h.get('by') == 'ai' and not m.is_theme(h)]
+    check('the first check-in with the US market open buys the 3 strongest funds with 20% of the budget, in equal parts', sorted(h['symbol'] for h in themes) == ['GLD', 'SMH', 'XLE']
+          and abs(sum(h['costUsd'] for h in themes) - 2000) < 0.05 and all(abs(h['costUsd'] - 666.67) < 0.02 for h in themes), [(h['symbol'], h['costUsd']) for h in themes])
+    check('the share part keeps within the other 80%', 0 < sum(h['costUsd'] for h in shares) <= 8000 + 0.01, sum(h['costUsd'] for h in shares))
+    check('the funds are not remembered as share buys (the share rules and the share record leave them alone)', all(h['id'] not in rec['state']['open'] for h in themes))
+    check('the activity list says what was bought and why', sum('Themes part (trial), monthly change: bought' in e['text'] for e in rec['log']) == 3)
+    pub = m.public(rec, Open.utcnow(), U); tv = pub.get('themes') or {}
+    check('the page is told about the themes part: on, what it holds, its target, the next change', tv.get('on') and len(tv.get('held') or []) == 3 and tv.get('target') == 2000 and tv.get('next'), {k: tv.get(k) for k in ('on', 'target', 'next')})
+    check('each fund has a plan of its own for the portfolio tab (kept until the monthly change)', sum(1 for p_ in pub['plans'] if p_.get('theme')) == 3 and all(p_['sellBy'] == tv['next'] for p_ in pub['plans'] if p_.get('theme')))
+    check('the money the autopilot can reach counts the funds too', abs(pub['money']['invested'] - sum(h['costUsd'] for h in port['holdings'] if h.get('by') == 'ai')) < 0.05)
+    check('"What happens next" has the monthly change', any(c.get('kind') == 'theme' for c in pub.get('coming') or []))
+    m.run_user(U, rec, Open.utcnow() + dt.timedelta(days=7), snapshot=snapshot, quote=tq, model=model)
+    port = portfolio()
+    check('a week later the share rules have sold shares at their time limit, and the funds are still held', sorted(h['symbol'] for h in port['holdings'] if m.is_theme(h)) == ['GLD', 'SMH', 'XLE'])
+    ORDER[:] = ['SMH', 'XLK', 'GLD', 'XLE'] + [x for x in ORDER if x not in ('SMH', 'XLK', 'GLD', 'XLE')]
+    FUNDP['XLE'] = 110.0; was_real = float(rec['state'].get('realizedUsd') or 0.0)
+    m.run_user(U, rec, Open.utcnow() + dt.timedelta(days=28), snapshot=snapshot, quote=tq, model=model)
+    port = portfolio(); held = sorted(h['symbol'] for h in port['holdings'] if m.is_theme(h)); tr = rec['state']['themes']['trades']
+    check('at the monthly change the fund that dropped out is sold and the one that came in is bought', held == ['GLD', 'SMH', 'XLK'], held)
+    check('the sale goes into the trial\'s own record, with its result against an S&P 500 fund, and into the autopilot\'s running total',
+          len(tr) == 1 and tr[0]['symbol'] == 'XLE' and abs(tr[0]['pct'] - (((1 - m.TRADE_COST / 100) ** 2 * 1.1 - 1) * 100)) < 0.05 and tr[0]['vs'] is not None
+          and abs(float(rec['state']['realizedUsd']) - was_real - sum(t['usd'] for t in rec['history'] if t.get('sold') == tr[0]['sold']) - tr[0]['usd']) < 0.05, tr)
+    check('the funds kept are not sold and bought again', len([e for e in rec['log'] if 'Themes part' in e['text'] and e['type'] == 'buy']) == 4)
+    MODEL['answer'] = {'theme': 'Oil prices jump on supply fears.', 'calls': [{'symbol': 'XLE', 'view': 'better', 'why': 'oil'}, {'symbol': 'TLT', 'view': 'worse', 'why': 'rates'},
+                       {'symbol': 'NOPE', 'view': 'better', 'why': 'not a fund'}, {'symbol': 'XLK', 'view': 'none', 'why': ''}]}
+    th = rec['state']['themes']; th['aiAt'] = m.iso(Open.utcnow() - dt.timedelta(days=30)); port = portfolio(); MODEL['prompts'].clear()
+    m.run_themes(rec, port, Open.utcnow() + dt.timedelta(days=29), tq, model, headlines=['Oil jumps', 'Rates rise'])
+    check('once a week the AI model reads the headlines; its calls are kept with the prices of the moment, and only for the 14 funds',
+          [c['symbol'] for c in th['calls']] == ['XLE', 'TLT'] and th['theme'].startswith('Oil') and all(c.get('price') and c.get('spy') for c in th['calls']), th.get('calls'))
+    check('the headlines are given to the model as untrusted data', MODEL['prompts'] and 'untrusted' in MODEL['prompts'][-1]['system'])
+    check('the calls change nothing that is held', sorted(h['symbol'] for h in port['holdings'] if m.is_theme(h)) == ['GLD', 'SMH', 'XLK'])
+    FUNDP['XLE'] = 121.0; FUNDP['TLT'] = 95.0
+    m.score_theme_calls(th, tq, Open.utcnow() + dt.timedelta(days=37))
+    check('a week later each call is scored against what the fund did beside an S&P 500 fund', all(c.get('right') is True for c in th['calls']) and th['calls'][0]['rel'] > 0, [(c['symbol'], c.get('rel'), c.get('right')) for c in th['calls']])
+    MODEL['prompts'].clear(); th['aiAt'] = m.iso(Open.utcnow() - dt.timedelta(days=30))
+    m.run_themes(rec, port, Open.utcnow() + dt.timedelta(days=29), tq, model, headlines=[])
+    check('with no headlines the model is not asked', not MODEL['prompts'])
+    m.save_item(U, rec)
+    gone = m.sell_everything(U, rec, Open.utcnow() + dt.timedelta(days=29), quote=tq)
+    port = portfolio()
+    check('"Sell everything it holds" sells the funds too, into the trial\'s record', not any(m.is_theme(h) for h in port['holdings']) and len(rec['state']['themes']['trades']) == 4, gone)
+    shut = Open.utcnow() + dt.timedelta(days=2, hours=12)
+    while m.market_open('us', shut): shut += dt.timedelta(hours=3)
+    check('nothing is done while the US market is shut', m.run_themes(rec, port, shut, tq, model) == (0, 0, []))
+    m.theme_ranking = real_rank; m.THEMES = False; m.CENTRAL = was_central; m.datetime = clock; D.t.clear(); m._BRAIN.clear(); MODEL['answer'] = None
 # ---- a build-up that begins again paces out only what is not invested yet
 if hasattr(m, 'already_in'):
     began = Open.utcnow(); S10 = dict(m.DEFAULTS, enabled=True, risk=3, budgetUsd=10000, periodDays=1, everyHours=3, maxHoldDays=10, auto=[], screeners=['3-100'])

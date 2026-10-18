@@ -653,6 +653,24 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       check('an answer from the older function shows no such box', /How it is improving/.test(own.text()) && !/It learns from every account/.test(own.text()));
     }
   }
+  { const OPT = { ...OPTIONS, groups: ['US shares', 'Coins'], screeners: { '3-8': { name: 'Dow 30', kind: 'stock', group: 'US shares' }, '3-100': { name: 'S&P 100', kind: 'stock', group: 'US shares' }, '7-1': { name: 'Crypto (top coins)', kind: 'crypto', group: 'Coins' } } };
+    const st = { settings: { ...settings, enabled: true, risk: 3, budgetUsd: 10000, screeners: ['3-100', '3-8', '7-1'], shares: {} }, state: {}, practiceCash: 100000, log: [], plans: [] };
+    const T = { on: true, share: 0.2, count: 3, every: 28, target: 2000, invested: 1999.98, next: '2026-11-12T14:40:00Z', last: '2026-10-15T15:10:00Z',
+      held: [{ id: 't1', symbol: 'SMH', name: 'Chips (semiconductors)', cost: 666.66 }, { id: 't2', symbol: 'GLD', name: 'Gold', cost: 666.66 }, { id: 't3', symbol: 'XLE', name: 'Energy', cost: 666.66 }],
+      ranking: [{ symbol: 'SMH', name: 'Chips (semiconductors)', trend: 61.2, m3: 9.1 }, { symbol: 'GLD', name: 'Gold', trend: 40.5, m3: 7.7 }, { symbol: 'XLE', name: 'Energy', trend: 22.1, m3: 12.0 }, { symbol: 'XLK', name: 'Technology', trend: 20.3, m3: 4.2 }],
+      trades: { n: 0, usd: 0, avg: null, vs: null }, ai: { scored: 4, right: 3, theme: 'Oil prices jump on supply fears.', at: '2026-10-16T15:10:00Z',
+        recent: [{ at: '2026-10-09T15:10:00Z', symbol: 'XLE', view: 'better', why: 'oil supply', rel: 2.1, right: true }, { at: '2026-10-16T15:10:00Z', symbol: 'TLT', view: 'worse', why: 'rates', rel: null, right: null }] } };
+    const tplans = st.plans.concat([{ id: 't1', label: 'SMH', boughtAt: '2026-10-15T15:10:00Z', auto: true, theme: true, sellBy: T.next, name: 'Chips' }]);
+    const tw = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPT, ...st, plans: tplans, themes: T, holding: { count: 3, investedUsd: 2400 } } })); await sleep(30); const tt = tw.text();
+    check('the themes part has its own section: what it holds, the next change, its result so far and the AI model\'s weekly calls (recorded, not acted on)',
+      /Themes part a trial: 20% of the budget \(\$2,000\)/.test(tt) && /Holds: SMH Chips \(semiconductors\)/.test(tt) && /Next monthly change/.test(tt) && /No fund sold yet/.test(tt)
+      && /recorded and scored, not acted on/.test(tt) && /3 of 4 of its calls scored so far were right \(too few to read under 30\)/.test(tt) && /Oil prices jump/.test(tt), tt.slice(tt.indexOf('Themes part'), tt.indexOf('Themes part') + 500));
+    check('a fund is not listed under "Holding now" with the shares', !/ap-held-name">SMH</.test(tw.container.innerHTML));
+    check('the share part\'s sizes and the description use the other 80% of the budget, and say why', /20% of the \$10,000 budget \(\$2,000\) is the themes part/.test(tt) && /of the \$8,000 for shares is invested/.test(tt), (tt.match(/It checks in[^.]*\.[^.]*\./) || [''])[0]);
+    check('the chat is told about the themes part', /Themes part \(a trial since 18 Oct 2026\): 20% of the budget/.test(tw.ctx.practiceAutopilot.summary()));
+    const off = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPT, ...st, themes: Object.assign({}, T, { on: false, held: [] }) } })); await sleep(30);
+    check('while it is not running the section says when it would', /It runs while "Try changes to its own rules" is on and at least one share screener is ticked/.test(off.text()) && !/of the \$8,000 for shares/.test(off.text()));
+  }
   check('no broken values', !/undefined|NaN|\[object/.test(p.container.innerHTML), (p.container.innerHTML.match(/.{30}(undefined|NaN|\[object).{30}/) || [])[0]);
   console.log(ok ? 'ALL PASS' : 'SOME FAILED');
 })();

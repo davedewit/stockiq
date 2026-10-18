@@ -43,6 +43,7 @@ code, sent = ask('How is AAPL?', page='stock', symbol='AAPL', company='Apple Inc
 # the levels it quotes must be the autopilot's own (RISK in stockiq-ai-trader): change one, change the other
 tr_path = os.path.join(os.path.dirname(os.path.abspath(sys.argv[1])), '..', 'stockiq-ai-trader', 'lambda_function.py')
 tr_path = tr_path if os.path.exists(tr_path) else os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lambda-sync', 'stockiq-ai-trader', 'lambda_function.py')
+tr_path = os.environ.get('TRADER') or tr_path  # a staged copy of the autopilot's function
 os.environ.setdefault('AI_TRADER_USERS', ''); ts = importlib.util.spec_from_file_location('trader', tr_path); tr = importlib.util.module_from_spec(ts); ts.loader.exec_module(tr)
 want = '; '.join((f"{r['name']} {r['positions']} holdings, {r['stop']}%, +{r['take']}%" if k == 1 else f"{r['name']} {r['positions']}, {r['stop']}%, +{r['take']}%") for k, r in sorted(tr.RISK.items()))
 check('the risk levels it quotes are the autopilot\'s own numbers', want in m.DASHBOARD_GUIDE and 'a lower level means MORE, smaller holdings' in m.DASHBOARD_GUIDE, want)
@@ -58,5 +59,8 @@ check('the number of holdings a user may set, and what follows from it, are the 
 check('and the age of a price it will trade at is the autopilot\'s own', f"a price that has traded in the last {tr.FRESH_HOURS} hours" in m.DASHBOARD_GUIDE and '"Left alone"' in m.DASHBOARD_GUIDE and 'about half an hour later' in m.DASHBOARD_GUIDE)
 if 'patient' in m.DASHBOARD_GUIDE: check('it knows the patient-shares trial, and that the trial of buying furthest above the 52-week low ended without being kept', all(x in m.DASHBOARD_GUIDE for x in ('every second pair of shares bought is a "patient" share', 'never because its screener signal turned', 'ended on 17 Oct 2026 and was not kept', 'Coins are not part of these trials')))
 check('it knows the section is called "How it is improving" (not the old name)', '"How it is improving"' in m.DASHBOARD_GUIDE and '"Improving its own rules"' not in m.DASHBOARD_GUIDE)
+if '"Themes part"' in m.DASHBOARD_GUIDE: check('it knows the themes part: its share of the budget and number of funds are the autopilot\'s own, it is changed monthly, and the AI\'s weekly calls are recorded, not acted on',
+      (not hasattr(tr, 'THEME_SHARE') or (f"{round(tr.THEME_SHARE * 100)}% of the budget" in m.DASHBOARD_GUIDE and f"the {tr.THEME_COUNT} strongest of {len(tr.THEME_FUNDS)}" in m.DASHBOARD_GUIDE))
+      and all(x in m.DASHBOARD_GUIDE for x in ('changed once a month', 'only recorded and scored a week later', 'buy and sell nothing', '30 or more scored calls')))
 check('nothing in the guide gives advice or promises a result', not any(w in m.DASHBOARD_GUIDE.lower() for w in ('you should', 'recommend', 'will make money', 'guarantee', 'picks')))
 print('ALL PASS' if ok else 'SOME FAILED')
