@@ -62,5 +62,6 @@ check('it knows the section is called "How it is improving" (not the old name)',
 if '"Themes part"' in m.DASHBOARD_GUIDE: check('it knows the themes part: its share of the budget and number of funds are the autopilot\'s own, it is changed monthly, and the AI\'s weekly calls are recorded, not acted on',
       (not hasattr(tr, 'THEME_SHARE') or (f"{round(tr.THEME_SHARE * 100)}% of the budget" in m.DASHBOARD_GUIDE and f"the {tr.THEME_COUNT} strongest of {len(tr.THEME_FUNDS)}" in m.DASHBOARD_GUIDE))
       and all(x in m.DASHBOARD_GUIDE for x in ('changed once a month', 'only recorded and scored a week later', 'buy and sell nothing', '30 or more scored calls')))
+if '"Market risk now"' in m.DASHBOARD_GUIDE: check('it knows the market-risk gauge: what makes it up, that it is for information and holds no cash', all(x in m.DASHBOARD_GUIDE for x in ('below its 200-day average', 'VIX is over 20 and over 30', 'it does not make the autopilot hold cash')) and 'Every trading day the AI model also reads' in m.DASHBOARD_GUIDE)
 check('nothing in the guide gives advice or promises a result', not any(w in m.DASHBOARD_GUIDE.lower() for w in ('you should', 'recommend', 'will make money', 'guarantee', 'picks')))
 print('ALL PASS' if ok else 'SOME FAILED')

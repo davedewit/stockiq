@@ -156,6 +156,7 @@ def main():
     breakdown('by how long it was held', trades, lambda t: band(t.get('days'), [0.25, 1, 5, 10 ** 9], ['under 6 hours', '6 hours to a day', '1 to 5 days', 'over 5 days']))
     breakdown('by who chose it', trades, lambda t: {'ai': 'the AI model', 'rank': 'by rank (the model did not answer)', 'order': 'furthest above its 52-week low (trial)'}.get(t.get('chosen'), str(t.get('chosen'))))
     breakdown('by headlines shown to the model when it was bought (recorded from 12 Oct 2026)', trades, lambda t: 'not recorded (bought before)' if t.get('heads') is None else 'none found' if not t['heads'] else 'newest under a day old' if (t.get('headAge') or 0) < 24 else 'newest one to three days old')
+    breakdown('the market-risk gauge when bought (from 18 Oct 2026; 0 very low .. 4 very high; for information, it holds no cash)', [t for t in trades if t.get('mg') is not None], lambda t: f"{t['mg']} {('very low', 'low', 'medium', 'high', 'very high')[t['mg']]}")
     breakdown('the patient-shares trial (from 12 Oct 2026: a patient share is not sold on the signal, nor by the AI review)', [t for t in trades if t.get('pt') is not None], lambda t: 'patient: sold by price or time only' if t.get('pt') == 1 else 'ordinary: also sold when the signal turns')
     breakdown('by risk level at the time', trades, lambda t: m.RISK.get(t.get('risk'), {}).get('name', str(t.get('risk'))))
 

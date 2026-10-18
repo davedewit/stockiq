@@ -1520,4 +1520,31 @@ if hasattr(m, 'BUDGET_NAME'):
     u = m.aws_usage(dt.datetime(2026, 10, 17, 16, 0), {'cost': 0.56, 'costAt': '2026-10-17T10:00:00Z'})
     check('a budget that cannot be read keeps the last figure and says so', u['cost'] == 0.56 and u.get('costError') == 'RuntimeError', u)
     m.boto3.client = _real
+# ---- the market-risk gauge (18 Oct 2026): shown on the page and recorded with each buy, for information; it holds no cash
+if hasattr(m, 'market_gauge'):
+    def series(vals): return {'chart': {'result': [{'indicators': {'quote': [{'close': vals}]}}]}}
+    calls = []
+    def gfetch(rising, vix):
+        def f(sym, rng):
+            calls.append(sym)
+            if sym == 'SPY': return series([100 + (i if rising else -i) * 0.1 for i in range(250)])
+            return series([vix] * 30)
+        return f
+    T0 = dt.datetime(2026, 10, 19, 15, 0)
+    m._GAUGE.clear(); g = m.market_gauge(T0, gfetch(True, 15))
+    check('a rising market with a calm VIX is level 0, very low', g and g['level'] == 0 and g['name'] == 'very low' and g['vix'] == 15, g)
+    m._GAUGE.clear(); g = m.market_gauge(T0, gfetch(False, 33))
+    check('a falling market (below both averages) with the VIX over 30 is level 4, very high', g and g['level'] == 4 and g['name'] == 'very high', g)
+    n_calls = len(calls); g2 = m.market_gauge(T0 + dt.timedelta(hours=2), gfetch(True, 15))
+    check('it is kept for a few hours: no new prices asked for, the same answer', len(calls) == n_calls and g2['level'] == 4)
+    m._GAUGE.clear(); g3 = m.market_gauge(T0, lambda s, r: (_ for _ in ()).throw(RuntimeError('down')))
+    check('when the prices cannot be read there is no gauge, and nothing breaks', g3 is None)
+    m._GAUGE.clear(); check('without a price lookup and not running as the function it asks for nothing', m.market_gauge(T0) is None)
+    m._GAUGE['v'] = {'level': 2, 'name': 'medium', 'at': m.iso(T0)}
+    st = {'open': {}}; hold = {'id': 'g1', 'boughtAt': m.iso(T0)}
+    cand = {'symbol': 'AAA', 'label': 'AAA', 'screener': '3-3', 'rank': 1, 'score': 1.0, 'rsi': 50, 'd7': 1, 'd30': 2, 'volume': 1, 'kind': 'stock'}
+    facts = m.remember_buy(st, hold, cand, dict(m.DEFAULTS, risk=3, maxHoldDays=10), 'model')
+    check('a buy remembers the gauge at the moment it was bought, and the shared record takes it', facts.get('mg') == 2 and 'mg' in m.POOL_FIELDS, facts)
+    check('the news read of the themes part is every trading day now (it was weekly)', m.THEME_AI_EVERY_DAYS < 1)
+    m._GAUGE.clear()
 print('ALL PASS' if ok else 'SOME FAILED')

@@ -1,0 +1,28 @@
+Halves: 28 Oct 2022 to 22 Oct 2024, and 22 Oct 2024 to 16 Oct 2026
+  S&P 500 fund held: +49.9% / +30.8%
+
+all 14 funds: top 3, changed every N trading days (first half / second half; ahead of the S&P 500 fund?)
+  past year less the last month   every  5 days:  +47.9% /  +74.2%   mixed
+  past year less the last month   every 10 days:  +50.5% /  +51.1%   ahead in both
+  past year less the last month   every 21 days:  +55.9% /  +54.9%   ahead in both   <- the live rule
+  past year less the last month   every 42 days:  +64.7% /  +56.5%   ahead in both
+  past year less the last month   every 63 days:  +62.0% /  +59.3%   ahead in both
+  past 3 months                   every  5 days:  +18.2% /  +59.4%   mixed
+  past 3 months                   every 10 days:  +22.4% /  +56.0%   mixed
+  past 3 months                   every 21 days:  +27.6% /  +45.2%   mixed
+  past 3 months                   every 42 days:  +28.9% /  +39.1%   mixed
+  past 3 months                   every 63 days:  +19.9% /  +33.4%   mixed
+
+without the chip fund (SMH): top 3, changed every N trading days (first half / second half; ahead of the S&P 500 fund?)
+  past year less the last month   every  5 days:  +28.2% /  +56.0%   mixed
+  past year less the last month   every 10 days:  +31.3% /  +50.0%   mixed
+  past year less the last month   every 21 days:  +26.4% /  +53.5%   mixed
+  past year less the last month   every 42 days:  +40.0% /  +57.4%   mixed
+  past year less the last month   every 63 days:  +40.1% /  +37.4%   mixed
+  past 3 months                   every  5 days:  +10.0% /  +37.4%   mixed
+  past 3 months                   every 10 days:   +9.2% /  +38.2%   mixed
+  past 3 months                   every 21 days:  +15.9% /  +26.3%   behind in both
+  past 3 months                   every 42 days:  +17.5% /  +16.8%   behind in both
+  past 3 months                   every 63 days:  +22.7% /  +10.7%   behind in both
+
+20 variants a list: a few look good by luck. Read the pattern across the paces, not the best single line.

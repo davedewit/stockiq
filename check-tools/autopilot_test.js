@@ -670,6 +670,16 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     if (/ap-themes-note/.test(tw.container.innerHTML)) check('the screeners card says the themes part is not a screener and links to it under Activity', /(Besides these screeners, 20% of the budget|The other 20% of the \$10,000 budget) \(\$2,000\) is the themes part/.test(tt) && /data-ap-goto="ap-themes"/.test(tw.container.innerHTML) && /id="ap-themes"/.test(tw.container.innerHTML));
     if (/function ofWhat/.test(src)) check('while the themes part runs, the market shares say they are of the money for shares, and the card says the themes part is the other 20%', /Share of the \$8,000 for shares/.test(tt) && /How the \$8,000 for shares is spread/.test(tt) && /so the shares below add up to 100% of it/.test(tt) && /The percentages above are of the \$8,000 for shares\. The other 20% of the \$10,000 budget \(\$2,000\) is the themes part/.test(tt), (tt.match(/How the[^.]*\./) || [''])[0]);
     if (/Euro Stoxx 50 is not one country/.test(tt)) check('the first shortcut says why the Euro Stoxx 50 is left out', /47 of its 50 shares are already in the DAX, CAC, AEX, FTSE MIB and IBEX lists/.test(tt));
+    if (/function gaugeHtml/.test(src)) {
+      const G = { level: 3, name: 'high', spy: 600, avg50: 620, avg200: 610, vix: 24.5, at: '2026-10-19T15:00:00Z' };
+      const gw = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPT, ...st, gauge: G } })); await sleep(30); const gt = gw.text();
+      check('the market-risk gauge is shown on Activity, in words and as five steps, with what makes it up folded', /Market risk now: high/.test(gt) && /high, 3 of 4/.test(gw.container.innerHTML)
+        && /below its 200-day average; below its 50-day average; the VIX \(the swings the market expects\) is 24\.5, over 20/.test(gt), gt.slice(gt.indexOf('Market risk'), gt.indexOf('Market risk') + 300));
+      check('it says that it holds no cash, and why', /it does not make the autopilot hold cash/.test(gt) && /made less than staying invested/.test(gt));
+      check('the chat is told the gauge', /Market risk gauge now: high \(3 of 4/.test(gw.ctx.practiceAutopilot.summary()));
+      const ng = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPT, ...st } })); await sleep(30);
+      check('without a gauge in the answer nothing is shown', !/Market risk now/.test(ng.text()));
+    }
     check('the chat is told about the themes part', /Themes part \(a trial since 18 Oct 2026\): 20% of the budget/.test(tw.ctx.practiceAutopilot.summary()));
     const off = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPT, ...st, themes: Object.assign({}, T, { on: false, held: [] }) } })); await sleep(30);
     check('while it is not running the section says when it would', /It runs while "Try changes to its own rules" is on and at least one share screener is ticked/.test(off.text()) && !/of the \$8,000 for shares/.test(off.text()));
