@@ -106,7 +106,8 @@ function anyAnswer() {
         const names = () => js(`Array.from(document.querySelectorAll('#market-data-sidebar-container .market-item-sidebar-name')).map(e => e.textContent)`);
         const tabNow = () => js(`(document.querySelector('.market-tab-sidebar.active') || {}).getAttribute && document.querySelector('.market-tab-sidebar.active').getAttribute('data-tab')`);
         const click = (sel) => js(`(function () { var e = document.querySelector(${JSON.stringify(sel)}); if (!e) return false; e.click(); return true; })()`);
-        check('the panel shows the US figures first', (await names()).join() === CATS.us.map(x => x[0]).join() && await tabNow() === 'us', await names());
+        const opening = await js(`window.marketPanel.openTab ? window.marketPanel.openTab() : 'us'`);
+        check('the panel opens on the tab of the market trading now (' + opening + '), with its figures', (await names()).join() === CATS[opening].map(x => x[0]).join() && await tabNow() === opening, [opening, await tabNow(), await names()]);
         await click('.market-tab-sidebar[data-tab="europe"]'); await sleep(300);
         check('a tab shows its own figures', (await names())[0] === 'europe S&P 500' && await tabNow() === 'europe', [await tabNow(), await names()]);
         const drawn = await js(`(function () { var l = document.querySelectorAll('#market-data-sidebar-container .market-item-sidebar-chart polyline'); return Array.from(l).filter(function (x) { return x.getAttribute('data-lm') && x.getAttribute('points'); }).length; })()`);
