@@ -157,6 +157,7 @@ Lambdas ──> Yahoo Finance + Finnhub (data), OpenAI gpt-4o-mini (AI chat), Dy
 | `news.html` article list | `update_news.py`, `update_stock_news.py`, then trimmed by `finalize_news_html.py` | Head and footer are preserved by all writers, so hand edits there stick |
 | `news.js` (sidebar, 100-item pool) | `update_news.py`, `update_stock_news.py` | Script only. **The file holds its own display code** (`renderNewsItems`, written into it by both scripts: change the two alike). It shows the newest general article and the four newest stock articles **by each item's `timestamp`**, whatever order the file is in. Check: `node check-tools/news_sidebar_test.js` |
 | `sitemap.xml` | `update_sitemap.py` (daily), `generate_sitemap.py` (manual) | Scripts only |
+| `index.html` "Stock Pages" section (between `<!-- STOCK_LINKS_START/END -->`) and `stock-pages.js` | `update_home_stock_links.py` (daily, after the snapshot step; since 18 Oct 2026) | Script only. The rest of `index.html` is hand-edited |
 | `stocks.txt` (3,467 symbols, CSV) | Hand-edited + `fetch_stock_data.py` | See `stocks-txt-csv-format.md` |
 | `index.html`, `about.html`, `faq.html`, `analysis.html`, `dashboard.html`, guides, legal pages, `*.js`, `styles.css` | Hand-edited, no generator | Edit directly |
 
@@ -178,7 +179,7 @@ out when the next run is.
 Order inside `deploy-to-s3.sh`:
 1. `update_news.py`: Yahoo/Google RSS → OpenAI summaries → news.html + news.js (2-hour cooldown)
 2. `update_stock_news.py`: per-stock news into stock pages + news.html/news.js (23-hour cooldown per stock)
-3. `update_stock_analysis.py` (**daily run only**: it sits inside the `UPDATE_STOCK_NEWS=true` block, so a plain `./deploy-to-s3.sh` prints "Skipping stock data snapshots"): data snapshots on all 3,467 stocks, sets index/noindex on large caps (≥$10B), writes `indexable_stocks.txt`. ~20 min, no API cost. 404s for delisted stocks are normal/cached. When Yahoo has no price for a stock it keeps yesterday's snapshot and does not de-index it. Straight after it, in the same block, `publish_company_figures.py` publishes the company figures the single-stock report uses for shares outside the US (section 7, "The single-stock report"); it never stops the deploy.
+3. `update_stock_analysis.py` (**daily run only**: it sits inside the `UPDATE_STOCK_NEWS=true` block, so a plain `./deploy-to-s3.sh` prints "Skipping stock data snapshots"): data snapshots on all 3,467 stocks, sets index/noindex on large caps (≥$10B), writes `indexable_stocks.txt`. ~20 min, no API cost. 404s for delisted stocks are normal/cached. When Yahoo has no price for a stock it keeps yesterday's snapshot and does not de-index it. Then `update_home_stock_links.py` rewrites the home page's "Stock Pages" section and `stock-pages.js` (section 6). Straight after it, in the same block, `publish_company_figures.py` publishes the company figures the single-stock report uses for shares outside the US (section 7, "The single-stock report"); it never stops the deploy.
 4. Backups (website + stockiq; prod_scripts every 23h)
 5. `people_also_watch_stocks.py --missing`
 6. `update_sitemap.py`: **rebuilds** stock URLs from `indexable_stocks.txt` (not all HTML files), updates lastmod on site pages. Refuses if list < 200 entries.
@@ -303,6 +304,13 @@ git pull --rebase && git push
   `dateModified` = data date. (Was a fake `NewsArticle` dated 2026-03-14 on every page.)
 - **Analytics:** GA4 `G-WVETNMPF8V` on all content pages and all stock pages (before Sep 2026
   only 5 pages were tagged, so older GA numbers undercount).
+- **Links to the stock pages (18 Oct 2026):** until then no page of the site linked to any stock page (they were reached only
+  through the sitemap and each other's "People also watch"). The home page has a "Stock Pages" section (`#stock-pages`, after
+  the guides): the largest indexed companies of each market by market value in US dollars (US 16, Canada, UK, Japan, Hong Kong,
+  Australia 4 each, Europe 6, India 2; one share a company), rewritten daily by `update_home_stock_links.py` (it refuses with
+  fewer than 20 links and leaves the page as it was). On the home page a share in the four market lists links to its stock page
+  (`market-panel.js`, from `stock-pages.js`); on the dashboard the click runs the analysis as before. Not done: links from the
+  guides; real figures in place of the home page's nine "Loading..." placeholders; Google Analytics events.
 - `robots.txt` allows all and points to the sitemap. Canonicals are set on all pages.
 - Bot checks in `auth.js` / `js/analysis-core.js` only skip login redirects and auto-run for
   crawlers; they do not hide content.
@@ -777,7 +785,9 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   so the items stayed and the opening tab follows the clock instead): weekdays the US (9:30-16:00 New York), else Europe
   (8:00-16:30 London), else Asia (Tokyo, Hong Kong, Sydney or Mumbai in session), each on its own clock; at a weekend Crypto;
   when nothing trades, the US. A tab picked later stays for the visit. A row's click runs the analysis in the background where the page can (`runSidebarAnalysis`, the
-  dashboard) and opens the analysis page otherwise. Every 5 minutes while the page is in use; live-market.js keeps the figures
+  dashboard); **on the home page a share that has a stock page is a link to it** (version 3, `stock-pages.js`: the visitor
+  sees the page first instead of spending an anonymous visitor's one free analysis, and Google finds the link); otherwise it
+  opens the analysis page. Every 5 minutes while the page is in use; live-market.js keeps the figures
   on show moving. The phone sidebar (`fillMobileSidebar` / `emptyMobileSidebar` on each page) moves the panel and calls
   `marketPanel.refresh()`; the panel is put back with the style it had at load (`data-desk-style`; both pages put it back
   as `position: absolute` before). **The layout is each page's own, on purpose:** on the home page the panel scrolls with the page
@@ -4747,3 +4757,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     now every tab's lines are fetched in one request in the background (`fetchAllSparks`, at most every 5 minutes) and kept in
     the browser 20 minutes (`lmSparks`), so a tab chosen later, or a reload, shows them at once. The lines are each item's
     real prices for its latest trading day (until this day they were random). 36 checks in `live_market_check.js`.
+  - **Links to the stock pages** (website: `index.html`, `market-panel.js` version 3, `stock-pages.js` new; `stockiq`:
+    `update_home_stock_links.py` new, a line in `deploy-to-s3.sh`'s daily block). The owner asked what the home page needs to
+    get more visitors. No page linked to any of the 958 indexed stock pages: section 6, "Links to the stock pages". Also asked:
+    should a click on a share in the side lists open its stock page instead of running the report? On the home page yes (more
+    for the visitor than for Google: it no longer spends an anonymous visitor's one free analysis); the dashboard keeps its
+    click. 44 links live, 37 checks in `live_market_check.js`. **The panel's way back (`pending-panel-undo`) would take the
+    Stock Pages section and its markers out of the home page too** (it restores the page as it was before the shared panel):
+    the daily script would then say "nothing written" until the markers are put back.
