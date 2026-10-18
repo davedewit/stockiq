@@ -6,6 +6,7 @@
 //
 //   node check-tools/live_market_check.js index.html dashboard.html stocks/AAPL.html
 //   WEB=<folder> node ...    files found in that folder are served instead of the ones in ../website (a staged copy)
+//   SHOTS=<folder> node ...  a picture of each page at the end
 //
 // Nothing real is called: every request beyond the site's own files is answered here.
 const { spawn } = require('child_process'); const os = require('os'), fs = require('fs'), path = require('path'), http = require('http');
@@ -101,6 +102,23 @@ function anyAnswer() {
         continue;
       }
       check('live-market.js is loaded on the page and finds its figures', first.loaded && first.movers + first.panel > 0, first);
+      if (await js('!!window.marketPanel')) {             // the shared panel script (market-panel.js): tabs, arrows, lists, countdown
+        const names = () => js(`Array.from(document.querySelectorAll('#market-data-sidebar-container .market-item-sidebar-name')).map(e => e.textContent)`);
+        const tabNow = () => js(`(document.querySelector('.market-tab-sidebar.active') || {}).getAttribute && document.querySelector('.market-tab-sidebar.active').getAttribute('data-tab')`);
+        const click = (sel) => js(`(function () { var e = document.querySelector(${JSON.stringify(sel)}); if (!e) return false; e.click(); return true; })()`);
+        check('the panel shows the US figures first', (await names()).join() === CATS.us.map(x => x[0]).join() && await tabNow() === 'us', await names());
+        await click('.market-tab-sidebar[data-tab="europe"]'); await sleep(300);
+        check('a tab shows its own figures', (await names())[0] === 'europe S&P 500' && await tabNow() === 'europe', [await tabNow(), await names()]);
+        await click('#nav-right-sidebar'); await sleep(300);
+        check('the arrow moves one tab on, not two', await tabNow() === 'asia' && (await names())[0] === 'asia S&P 500', await tabNow());
+        await click('#nav-left-sidebar'); await click('#nav-left-sidebar'); await sleep(300);
+        check('and back', await tabNow() === 'us', await tabNow());
+        const lists = await js(`['trending', 'gainers', 'losers', 'active'].map(k => (document.getElementById(k + '-tickers-container') || { children: [] }).children.length)`);
+        check('the four lists each show their five', lists.join() === '5,5,5,5', lists);
+        check('the countdown says when the US market opens or closes', /U\.S\. markets (open|close) in/.test(await js(`document.getElementById('market-status-sidebar').textContent`)) && /\d+h \d+m/.test(await js(`document.getElementById('market-countdown-sidebar').textContent`)));
+        const pos = await js(`(function () { var n = document.getElementById('news-panel'); var c = getComputedStyle(n); return [c.position, c.overflowY, !!document.getElementById('scroll-indicator')]; })()`);
+        check('the panel stays in view and scrolls inside itself, with its arrow (the same on both pages)', pos.join() === 'fixed,auto,true', pos);
+      }
       const before = priceRequests.length;
       await mouse(16);                                   // eight seconds of someone using the page
       const after = await js(`(function () { var lm = window.liveMarket; return { st: lm.state(), flashes: window.__flashes,
@@ -124,6 +142,7 @@ function anyAnswer() {
       const st = await js('window.liveMarket.state()');
       check('when the prices stop moving the gap between rounds grows (up to its longest)', st.gap > 2000, st);
       check('no script error on the page', errors.length === 0, errors);
+      if (process.env.SHOTS) { const r = await send('Page.captureScreenshot', { format: 'png' }); fs.writeFileSync(path.join(process.env.SHOTS, pg.replace(/\W+/g, '_') + '.png'), Buffer.from(r.data, 'base64')); }
     }
   } catch (e) { console.log('ERROR ' + e.stack); failed++; }
   finally { chrome.kill(); server.close(); console.log(`\n${failed ? 'SOME FAILED' : 'ALL PASS'} (${passed} passed, ${failed} failed)`); process.exit(failed ? 1 : 0); }
