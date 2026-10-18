@@ -4726,3 +4726,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     `dashboard.html`), at the owner's word that the two "should match": section 8, "The market panel on the right". Found
     on the way: the home page switched tabs in three places and set its arrows twice; both pages put the panel back after
     the phone sidebar with another position than it started with. The way back: `pending-panel-undo/deploy.sh`, dry run tried.
+  - **The side panel's small charts for every item, and at once** (`ticker-data-fetcher`, rollback zip
+    `…_before_spark_20261018.zip`; `live-market.js` version 2). The owner saw no line on the Asia tab (they came seconds after
+    the tab opened), and none for the 2- and 10-year notes or any commodity. **Futures** (`ZT=F`, `ZN=F`, `GC=F`, `CL=F` …) have
+    no points in Yahoo's one-day chart until their session reopens (a weekend): the function then takes the last trading day's
+    prices from the five-day chart (`last_session`). **The delay:** a tab's lines came only with the next round for that tab;
+    now every tab's lines are fetched in one request in the background (`fetchAllSparks`, at most every 5 minutes) and kept in
+    the browser 20 minutes (`lmSparks`), so a tab chosen later, or a reload, shows them at once. The lines are each item's
+    real prices for its latest trading day (until this day they were random). 36 checks in `live_market_check.js`.
