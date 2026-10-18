@@ -1,10 +1,41 @@
-{"about": "What the sessions changed on the site, newest first, in plain words for the owner's Admin page ('What changed lately'). Add with: python3 check-tools/admin.py change \"<what>\". Nothing private: both repositories are public.",
+{
+ "about": "What the sessions changed on the site, newest first, in plain words for the owner's Admin page ('What changed lately'). Add with: python3 check-tools/admin.py change \"<what>\". Nothing private: both repositories are public.",
  "changes": [
-  {"at": "2026-10-18", "what": "Stock pages: 596 of the 958 in Google still showed 8 or 9 Oct figures, and would have started dropping out of Google this week. Prices now come through our own price function on AWS whenever Yahoo refuses this Mac; all 596 refreshed (online with Monday's daily run)."},
-  {"at": "2026-10-18", "what": "Reports no longer say 'real-time' (the site's prices can be delayed): they say 'latest available prices'."},
-  {"at": "2026-10-18", "what": "Home page: the four index cards draw the day's real line (it was a fixed up or down shape) and no longer show January 2024 figures when the data fails."},
-  {"at": "2026-10-18", "what": "Search: descriptions on nine pages that had none; the sign-in and unsubscribe pages kept out of Google; the four guides link to 32 stock pages."},
-  {"at": "2026-10-18", "what": "Clean-up: three unused scripts and report writers removed (script.js, sidebar.js emptied, the old CoinSpot report)."},
-  {"at": "2026-10-18", "what": "The site is checked every night (site_audit.py): its findings are the Site check card below; it now also catches stale stock pages and made-up figures."},
-  {"at": "2026-10-18", "what": "Admin page: Answered sits under Decisions for you; this list of changes added."}
- ]}
+  {
+   "at": "2026-10-18",
+   "what": "The 'Answered' list now sits right under 'Decisions for you'; the contact page says StockIQ is a sole trader (it said Pty Ltd)."
+  },
+  {
+   "at": "2026-10-18",
+   "what": "The 0-100 score on the stock pages and in the stock report was marking down shares that were rising, and on five years of prices it picked worse than chance. It now counts a strong rise and a price near the year's high for a share, as the screeners do (tested: better in 15 of 18 market-halves). Stock pages update with Monday's daily run."
+  },
+  {
+   "at": "2026-10-18",
+   "what": "Stock pages: 596 of the 958 in Google still showed 8 or 9 Oct figures, and would have started dropping out of Google this week. Prices now come through our own price function on AWS whenever Yahoo refuses this Mac; all 596 refreshed (online with Monday's daily run)."
+  },
+  {
+   "at": "2026-10-18",
+   "what": "Reports no longer say 'real-time' (the site's prices can be delayed): they say 'latest available prices'."
+  },
+  {
+   "at": "2026-10-18",
+   "what": "Home page: the four index cards draw the day's real line (it was a fixed up or down shape) and no longer show January 2024 figures when the data fails."
+  },
+  {
+   "at": "2026-10-18",
+   "what": "Search: descriptions on nine pages that had none; the sign-in and unsubscribe pages kept out of Google; the four guides link to 32 stock pages."
+  },
+  {
+   "at": "2026-10-18",
+   "what": "Clean-up: three unused scripts and report writers removed (script.js, sidebar.js emptied, the old CoinSpot report)."
+  },
+  {
+   "at": "2026-10-18",
+   "what": "The site is checked every night (site_audit.py): its findings are the Site check card below; it now also catches stale stock pages and made-up figures."
+  },
+  {
+   "at": "2026-10-18",
+   "what": "Admin page: Answered sits under Decisions for you; this list of changes added."
+  }
+ ]
+}
