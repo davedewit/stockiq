@@ -74,5 +74,14 @@ async function page(status, uid) {
     check('the Overview has the nightly site check: its problems on show, new ones marked, the ideas folded, what was put right', /Site check/.test(pl) && /1 problem, 1 idea · 1 new · 2 put right/.test(pl)
       && /problem new no meta description analysis\.html/.test(pl) && /1 idea idea the guides link to no stock page/.test(pl), pl.slice(pl.indexOf('Site check') + 250, pl.indexOf('Site check') + 700));
   }
+  { // What changed lately, and Answered straight under Decisions for you (18 Oct 2026)
+    ADMIN.plan = Object.assign({}, ADMIN.plan, { changes: Array.from({ length: 7 }, (_, i) => ({ at: '2026-10-18', what: 'Change number ' + (i + 1) })) });
+    ADMIN.answered = Array.from({ length: 5 }, (_, i) => ({ id: 20 + i, title: 'Answered item ' + (i + 1), status: 'done', answered: '2026-10-18T10:00:00Z' }));
+    const q = await page(200, 'dave@x.com'); const h = q.panel.innerHTML, pl = h.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    if (typeof check === 'function') {
+      check('What changed lately shows the latest five and folds the rest', /What changed lately/.test(pl) && /Change number 5/.test(pl) && /2 earlier/.test(pl), pl.slice(pl.indexOf('What changed'), pl.indexOf('What changed') + 300));
+      check('Answered comes straight after Decisions for you, before the site check and the goal, the latest three on show', h.indexOf('ad-answered') > h.indexOf('Decisions for you') && h.indexOf('ad-answered') < h.indexOf('ad-changes') && /2 earlier/.test(pl) && /Answered item 3/.test(pl));
+    }
+  }
   console.log(ok ? 'ALL PASS' : 'SOME FAILED'); process.exit(ok ? 0 : 1);
 })();

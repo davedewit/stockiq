@@ -7,6 +7,7 @@ keeps its proposals in item `_admin` of table stockiq-ai-trader. A session start
     python3 check-tools/admin.py add session "<title>" "<why>"   put a question to the owner that needs code
     python3 check-tools/admin.py add setting "<title>" "<why>" '<json change>'   e.g. '{"aiSell": false}' or '{"untick": "7-1"}'
     python3 check-tools/admin.py audit               the nightly site check's findings (audit/latest.json) onto the page
+    python3 check-tools/admin.py change "<what>"     add a line to "What changed lately" (check-tools/changes.json), in plain words
 
 A "setting" proposal is applied by the function itself the moment the owner presses "Yes"; a "session" one waits for a
 session. Nothing here prints an account's address.
@@ -53,10 +54,12 @@ elif args[0] == 'sync':
     reviews = sorted(({'part': p['part'], 'at': l['at'], 'found': l['found']} for p in parts for l in p.get('log', [])), key=lambda x: x['at'], reverse=True)[:8]
     keep = ('id', 'what', 'angle', 'measure', 'status', 'started', 'decide', 'decided', 'result', 'order', 'public', 'publicText')
     kept = (admin.get('plan') or {}).get('audit')                  # the nightly site check stays when the improvements are synced
+    changes = json.load(open(os.path.join(here, 'changes.json')))['changes'][:12]
     admin['plan'] = {'at': now(), 'items': [{k: e[k] for k in keep if k in e} for e in ex], 'reviews': reviews,
                      'parts': len(parts), 'reviewed': sum(1 for p in parts if p.get('last'))}
     if kept:
         admin['plan']['audit'] = kept
+    admin['plan']['changes'] = changes
     save(admin)
     print(f"the Admin page's improvements: {len(ex)} items, {len(reviews)} recent reviews")
 elif args[0] == 'audit':
@@ -71,6 +74,16 @@ elif args[0] == 'audit':
     admin.setdefault('plan', {})['audit'] = {k: a[k] for k in ('at', 'problems', 'ideas', 'new', 'gone')} | {'findings': a['findings'][:40]}
     save(admin)
     print(f"the Admin page's site check: {a['problems']} problems, {a['ideas']} ideas")
+elif args[0] == 'change' and len(args) >= 2:
+    # A line for "What changed lately" on the Admin page (18 Oct 2026, the owner: "easy for me to read on admin page what is
+    # going on"); then the page's copy is brought up to date.
+    here = os.path.dirname(os.path.abspath(__file__)); path = os.path.join(here, 'changes.json')
+    doc = json.load(open(path))
+    doc['changes'] = ([{'at': now()[:10], 'what': args[1]}] + doc['changes'])[:60]
+    json.dump(doc, open(path, 'w'), indent=1, ensure_ascii=False)
+    admin.setdefault('plan', {})['changes'] = doc['changes'][:12]
+    save(admin)
+    print(f"added to What changed lately ({len(doc['changes'])} kept)")
 elif args[0] == 'done' and len(args) >= 3:
     p = next((x for x in admin['proposals'] if str(x['id']) == args[1]), None)
     if not p:
