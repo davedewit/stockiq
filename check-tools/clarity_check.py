@@ -79,9 +79,10 @@ class Visible(HTMLParser):
     def handle_data(self, data):
         # inside a closed fold only its summary shows: the summary pushed False on top of 'closed-details'
         if any(x == 'hide' for x in self.stack): return
-        if 'closed-details' in self.stack:
-            i = len(self.stack) - 1 - self.stack[::-1].index('closed-details')
-            if 'summary' not in self.stack[i + 1:]: return
+        # every closed fold on the way down must be passed through its summary (a fold inside a closed fold shows nothing,
+        # its own summary included: found 18 Oct 2026, when the 34 older holdings inside "and 34 bought earlier" were counted)
+        for i, x in enumerate(self.stack):
+            if x == 'closed-details' and (i + 1 >= len(self.stack) or self.stack[i + 1] != 'summary'): return
         self.out.append(data)
     def text(self):
         t = html.unescape(''.join(self.out))
