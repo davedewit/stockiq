@@ -670,7 +670,7 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   reviews its holdings with the AI model and recent headlines, and tries bounded changes to its own
   rules. `practice-portfolio.js`, `practice-autopilot.js`, Lambdas `stockiq-paper-portfolio` and
   `stockiq-ai-trader`. **Everything about them, and how to work on them, is in section 8c.**
-- Stock pages load `sidebar.js`, `stock-prices.js` (live ticker), `ai-chat.js`, `auth.js`, `theme.js`.
+- Stock pages load `sidebar.js` (an old copy of the market panel's code; a stock page has no panel, so it does nothing), `stock-prices.js` (live ticker), `ai-chat.js`, `auth.js`, `theme.js`.
 - **Notification bell** (🔔 in the header of 18 hand-edited pages and of the stock pages): one list, drawn by
   `autopilot-bell.js` for every page, of the reports and the AI autopilot's buys and sells (section 8c, "The notification
   bell").
@@ -753,8 +753,9 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
     needed no regeneration. If a page ever sets it with `setProperty(..., 'important')`, as the dashboard did, the
     stylesheet loses: do not.
   - **What each side keeps:** sidebar: the page's `fillMobileSidebar()` / `emptyMobileSidebar()` (move its two panels in
-    and out), and it counts as open while `#mobile-sidebar-modal` has `style.display === 'block'` (`sidebar.js`, both
-    pages' `renderMarketDataSidebar`); the page's own `toggleMobileSidebar()` / `closeMobileSidebar()` are a fallback
+    and out), and it counts as open while `#mobile-sidebar-modal` has `style.display === 'block'` (`renderMarketDataSidebar` in
+    `market-panel.js` draws into the sidebar's copy then; the page's `fillMobileSidebar` / `emptyMobileSidebar` call
+    `marketPanel.refresh()`); the page's own `toggleMobileSidebar()` / `closeMobileSidebar()` are a fallback
     that the script replaces. Menu: the pages' own `toggleMobileMenu()` / `closeMobileMenu()` stay as they are; the
     menu is open while `#mobile-menu` has the class `open`; the script drags it by inline `left`, and when it has
     stopped sets the classes the pages set (shutting goes through the page's `closeMobileMenu()`).
@@ -797,15 +798,21 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   every 6 to 10 s at random, **only while the tab is on screen and someone has moved, scrolled, typed or touched in the last 90 s**;
   a round that changes nothing makes the next gap half as long again, up to a minute (a closed market costs almost nothing), and
   a change or a return to the page brings it back. A figure that moves flashes green or red (`lm-up`, `lm-down`), each row a
-  moment apart (the owner's own random delay). **The side panel's small charts were random lines** (`generateSparkline`): they
-  are today's real prices now (the price function's `spark`), hidden until they arrive; when the page draws the panel again
-  (a tab chosen) the real line is put back at once. `window.liveMarket`: `version, round, apply, movers, panelRows, sparkPoints,
-  state`. The pages' own loops (the 7 side-panel categories, the four lists and their prices) were once a minute and are every
-  5 minutes now: they keep which shares are on the lists up to date. About 6 requests a minute while someone watches, none
+  moment apart (the owner's own random delay). **The side panel's small charts were random lines** (`generateSparkline`): each is
+  now that item's real prices for its latest trading day (the price function's `spark`, about 30 points; a green line is
+  up on the previous close, red down). Futures (the Rates tab's 2- and 10-year notes, every Commodities item: `=F`) have no
+  points in Yahoo's one-day chart until their session reopens, so the function takes the last trading day from the five-day
+  chart (`last_session`). **Every tab's lines are fetched once in the background** (`fetchAllSparks`, at most every 5
+  minutes) **and kept in the browser 20 minutes** (`lmSparks`), so a tab chosen later or a reload shows them at once; a line
+  stays hidden until its real prices are in. `window.liveMarket`: `version, round, apply, movers, panelRows, sparkPoints,
+  state`. The rest is `market-panel.js`'s (next part): every 5
+  minutes while the page is in use it fetches the 7 side-panel categories and which shares are on the four lists (they were
+  once a minute, and before 17 Oct every second). About 6 requests a minute while someone watches, none
   otherwise. **Found on the way:** the home page fetched the side panel's data every minute and never drew it ("Don't
   re-render"), so it showed the figures of the moment the page was opened. Test: `node check-tools/live_market_check.js
   index.html dashboard.html stocks/AAPL.html` (`WEB=<folder>` for a staged copy; the price function answered by a stand-in
-  whose prices move; 18 checks).
+  whose prices move; with `market-panel.js` too: the tabs, the arrows, the four lists, the countdown, each page's layout;
+  36 checks).
 - Live prices on stock pages (main ticker + "People also watch" cards) come from
   `stock-prices.js` → Lambda `stockiq-popular-prices`, refreshed every 5 s. Pages opened from local files
   show `--` (the proxy only answers the live site), which is expected.
