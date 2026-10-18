@@ -213,6 +213,13 @@
    "decide": "2027-01-18",
    "public": true,
    "publicText": "A market-risk gauge (since 18 Oct 2026), from very low to very high, shown on the autopilot's Activity and recorded with every buy. It does not hold cash: tested on past prices, that made less than staying invested. The record will show whether buys made at a high reading do worse."
+  },
+  {
+   "id": "daily-review",
+   "what": "A daily review by Claude, unattended (check-tools/daily_review.sh, launchd com.stockiq.review): reads the site, runs the read-only checks, writes a report to check-tools/reviews/daily/ and up to three proposals on the Admin page; it cannot deploy or change the site",
+   "angle": "ease of use, faults, profit, AI use",
+   "measure": "whether its proposals are worth the usage they cost the owner's Claude allowance; a two-week trial once installed, ending by itself on 1 Nov 2026 unless check-tools/reviews/daily/KEEP exists",
+   "status": "idea"
   }
  ]
 }

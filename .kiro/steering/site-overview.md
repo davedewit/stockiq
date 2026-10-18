@@ -45,6 +45,20 @@ or the console, and are free). About $0.09 a month is the owner's other projects
 when it helps the learning (the record, the diary, the shared record, the coin entry log, the research prices on this Mac);
 delete only with his yes to an exact list, and only when it costs something.
 
+**THE SITE IS CHECKED EVERY NIGHT, WITH NO AI AND NO COST: `python3 check-tools/site_audit.py`** (18 Oct 2026; the owner, after
+finding one weak spot after another himself: "why can't you actively do this every 24+ hours since a last check"). The daily
+deploy runs it with `--admin`: its findings go onto the Admin page ("🔎 Site check", via `admin.py audit`, inside `_admin['plan']`)
+and session_start prints them (part 1b; every problem is a finding). It tests concrete things a session had missed: links to the
+stock pages, "Loading..." text a search engine reads, broken links, the same function in 3 or more files, `Math.random()` drawing
+something, scripts no page loads or that find nothing on a page, page weight and its growth, the home page's screener count,
+titles / descriptions / canonicals, the sitemap, JSON-LD, console noise. **Each time a fault is found by hand, give this script a
+check for that kind of fault**; something accepted on purpose goes into its `KNOWN` with the reason.
+**A daily review by Claude, unattended, is built and NOT installed** (`check-tools/daily_review.sh`, instructions in
+`daily_review_prompt.md`): once a day after the deploy, refused anything but reading, the read-only checks, its report
+(`check-tools/reviews/daily/`) and up to three proposals on the Admin page; 50 minutes at most; a trial that ends by itself on
+1 Nov 2026 unless `reviews/daily/KEEP` exists (experiments `daily-review`). Claude Code's safety check refused to set up its
+launchd job from a session ("Create Unsafe Agents"), so only the owner can install it (the plist is in the change log of 18 Oct).
+
 **THE PAGE IS READ AS THE OWNER READS IT, EVERY SESSION: `python3 check-tools/clarity_check.py`** (session_start runs it; built 17
 Oct 2026 after the owner, having pointed at one confusing thing after another himself: "anything else confusing you want to
 optimise? and i'm tired of asking this!"). It draws the AI autopilot tab and the Admin page from the site's own scripts with the
@@ -4765,3 +4779,14 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     click. 44 links live, 37 checks in `live_market_check.js`. **The panel's way back (`pending-panel-undo`) would take the
     Stock Pages section and its markers out of the home page too** (it restores the page as it was before the shared panel):
     the daily script would then say "nothing written" until the markers are put back.
+  - **The site checked every night, and a daily review by Claude prepared** (the owner: "why can't you actively do this every
+    24+ hours since a last check"; the top of this file). Live: `check-tools/site_audit.py` in the daily deploy, its findings on
+    the Admin page (`admin-panel.js?v=13`, "🔎 Site check") and in session_start. The first run found 11 problems and 5 ideas:
+    no search description on 9 pages (`analysis.html`, `contact.html`, `terms.html` among them) and no canonical on
+    `unsubscribe.html`; `sidebar.js` still draws random lines (it does nothing where it is loaded); `script.js` is loaded by no
+    page; the 4 guides link to no stock page; 9 "Loading..." on the home page; 13 functions copied in 3 or more files
+    (`goToNotifications` in 18); 192 console.log lines. Not fixed yet: for the owner's yes. The daily review
+    (`check-tools/daily_review.sh`) is built but its schedule could not be installed from a session; to install it, the owner
+    writes `~/Library/LaunchAgents/com.stockiq.review.plist` (Label `com.stockiq.review`, ProgramArguments `/bin/bash
+    /Users/dave/VSCODE/stockiq/check-tools/daily_review.sh`, StartInterval 1800) and runs `launchctl load` on it; to try it once,
+    `bash /Users/dave/VSCODE/stockiq/check-tools/daily_review.sh --now`. Never run by a session.
