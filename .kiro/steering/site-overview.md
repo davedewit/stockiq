@@ -2993,6 +2993,19 @@ buying-order trial finished and was not kept; the AI review's early sales switch
 
 ### Ideas offered and not built
 
+**Real trades through a broker (asked 18 Oct 2026: "if i had api access to a market to buy for real, would it be possible…
+i'm not looking to do this anytime soon"). Answered, not built.** Technically yes: the autopilot decides in one place and
+"buys" by writing to the practice portfolio; that step could instead send an order to a broker with an API (Alpaca for US
+shares, with a paper account that behaves like the real one; Interactive Brokers for most markets including the ASX). The
+work is in what changes with real money: orders that fill at a different price or not at all, the broker's own cash and
+holdings as the truth, real fees and exchange rates, holidays, a kill switch and daily limits, the broker key in AWS
+Secrets Manager, and a separate function with no public address (today the `userId` is whatever a browser sends). **What
+stands in the way is not the code:** the record is losing (51 trades, -1.15% a trade on 17 Oct) and the bar of section 8c is
+far from met; offering it to paying users for their own money would need a financial services licence (section 11, "Legal");
+for his own account only, with his own broker, the trades are his own (and taxable). **The sensible order, if he ever wants
+it:** the bar cleared first; then a broker's paper account (real order handling, no money) beside the practice portfolio;
+then a small amount, his account only. Until then the rule at the top of this section stands: nothing here touches real money.
+
 **The number of holdings as a setting of its own (thought through on 12 Oct 2026 at the owner's question, and built the same day at his word: the settings table in "The autopilot: settings").** He saw
 that it buys "say 10 stocks max across the 100,000", that the less risk he picks the more holdings it has, and wondered
 about a second slider ("one customer would want to auto trade 50 stocks a day, another 2"). What is so today: the number of
