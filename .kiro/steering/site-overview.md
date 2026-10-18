@@ -1648,7 +1648,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 | Thing | Where | Notes |
 |---|---|---|
 | Portfolio section | `website/practice-portfolio.js` (`?v=42` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
-| Autopilot panel | `website/practice-autopilot.js` (`?v=59`) | Controls and reports only; decisions are made by the Lambda |
+| Autopilot panel | `website/practice-autopilot.js` (`?v=60`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
 | Portfolio storage | Lambda `stockiq-paper-portfolio` (128 MB, 10 s), table `stockiq-paper-portfolios` | Actions `get`, `save` (with `expectedVersion`), `reset`. One item per user: `data` (JSON), `version` |
@@ -2761,7 +2761,7 @@ to optimise and see profit month on month").
   `state.open`: not sold by the shares' rules or time limit, not in "Holding now", not in the share budget's sums (`ai_holdings`
   leaves them out unless asked). A sale goes into `state.themes.trades` and `realizedUsd` (`theme_sold`); "Sell everything it holds"
   sells them too.
-- **The AI model's weekly read** (`theme_read`, every 7 days, only when headlines were found: `market_headlines`, Google News, only
+- **The AI model's daily read** (`theme_read`, every trading day since 18 Oct 2026, `THEME_AI_EVERY_DAYS` 0.8; it was every 7 days, only when headlines were found: `market_headlines`, Google News, only
   when deployed): it is given the 14 funds with their trends and the market's headlines (untrusted text, the prompt says so) and
   names the funds it expects to do better or worse than an S&P 500 fund over the next week (up to 900 tokens, `prompt['tokens']`).
   **Recorded, never acted on**: `score_theme_calls` scores each call a week later (`rel`, the fund against SPY in percent, `right`).
@@ -4639,3 +4639,19 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     was behind all in the fund in both halves, even with cash earning 4%; the worst fall 2 to 5 points smaller. The gauge
     itself is in the experiments register as an idea (`market-gauge`: shown and recorded with each buy, no cash held for
     it); `questions.md` 31.
+  - **The market-risk gauge, and the themes part's news read every trading day** (06:36 UTC; `stockiq-ai-trader` `CXfWPnap…`,
+    `stockiq-ai-chat` `5cj0jrg4…`, rollback zips `…_before_autopilot_gauge_20261018.zip`, `stockiq-ai-chat_before_gauge_20261018.zip`;
+    `practice-autopilot.js?v=60`, `dashboard.html`, `faq.html`), at the owner's word ("yes i go with your recommendations").
+    **The gauge** (`market_gauge`, `GAUGE_NAMES`, cached 6 hours in the warm function): 0 very low to 4 very high, a point each
+    for the S&P 500 fund below its 200-day and its 50-day average and the VIX over 20 and over 30, from the price function
+    (`SPY` a year, `^VIX` three months: two requests every 6 hours at most). Shown at the top of Activity ("Market risk now: low"
+    with five steps and a fold that says what makes it up and why it holds no cash: `gaugeHtml`), sent as `gauge` in every
+    answer, recorded with every buy (`mg`, in `POOL_FIELDS`), split by in the review tool; the chat knows it. Experiment
+    `market-gauge` (public, decide by 18 Jan 2027): do buys at a high reading do worse? First live reading: low (the fund
+    0.7% under its 50-day average, the VIX 19.99). **The news read**: the owner asked whether the themes part should be checked
+    more often "to pickup on changes in market news". The funds: no (`replay/sector_pace.py`: faster changes were no better,
+    the quick-reacting variant clearly worse; `questions.md` 28). The AI model's read of the headlines: yes, every trading day,
+    each call still scored a week later and still never acted on: about five times the calls, so the 30 that decide whether it
+    may act come in weeks, not months (the calls overlap in time, which a verdict must allow for). About 2 US cents a month of
+    OpenAI. Tests: 509 function, 234 panel, 24 chat; looked at on the owner's real account through the staged function before
+    the deploy.
