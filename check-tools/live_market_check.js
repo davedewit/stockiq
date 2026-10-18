@@ -120,6 +120,13 @@ function anyAnswer() {
         check('and back', await tabNow() === 'us', await tabNow());
         const lists = await js(`['trending', 'gainers', 'losers', 'active'].map(k => (document.getElementById(k + '-tickers-container') || { children: [] }).children.length)`);
         check('the four lists each show their five', lists.join() === '5,5,5,5', lists);
+        const rows = await js(`Array.from(document.querySelectorAll('#gainers-tickers-container > *')).map(e => e.tagName + ' ' + (e.getAttribute('href') || ''))`);
+        if (pg.indexOf('dashboard') >= 0) check('on the dashboard a list row still runs the analysis in the background (no link)', rows.every(r => r.startsWith('DIV')), rows);
+        else check('on the home page a share with a stock page is a link to it', rows.length === 5 && rows.every(r => /^A .*stocks\/[A-Z]+\.html$/.test(r)), rows);
+        if (pg === 'index.html') {
+          const sec = await js(`(function () { var s = document.getElementById('stock-pages'); return s ? s.querySelectorAll('a[href^="stocks/"]').length : -1; })()`);
+          check('the home page has its section of links to the largest companies\' stock pages', sec >= 20, sec);
+        }
         check('the countdown says when the US market opens or closes', /U\.S\. markets (open|close) in/.test(await js(`document.getElementById('market-status-sidebar').textContent`)) && /\d+h \d+m/.test(await js(`document.getElementById('market-countdown-sidebar').textContent`)));
         const pos = await js(`(function () { var n = document.getElementById('news-panel'); var c = getComputedStyle(n); return [c.position, c.overflowY, !!document.getElementById('scroll-indicator')]; })()`);
         const want = pg.indexOf('dashboard') >= 0 ? 'fixed,auto,true' : 'absolute,visible,false';
@@ -148,6 +155,8 @@ function anyAnswer() {
       const st = await js('window.liveMarket.state()');
       check('when the prices stop moving the gap between rounds grows (up to its longest)', st.gap > 2000, st);
       check('no script error on the page', errors.length === 0, errors);
+      if (process.env.SHOTS && pg === 'index.html') { await js(`(function () { var e = document.getElementById('stock-pages'); if (e) { document.documentElement.style.scrollBehavior = 'auto'; e.scrollIntoView({ block: 'start' }); window.scrollBy(0, -120); } })()`); await sleep(400);
+        const r2 = await send('Page.captureScreenshot', { format: 'png' }); fs.writeFileSync(path.join(process.env.SHOTS, 'index_stock_pages.png'), Buffer.from(r2.data, 'base64')); }
       if (process.env.SHOTS) { const r = await send('Page.captureScreenshot', { format: 'png' }); fs.writeFileSync(path.join(process.env.SHOTS, pg.replace(/\W+/g, '_') + '.png'), Buffer.from(r.data, 'base64')); }
     }
   } catch (e) { console.log('ERROR ' + e.stack); failed++; }
