@@ -63,7 +63,7 @@ INFO_MAX_AGE_SMALL_DAYS = 30    # everything else (only needed to spot threshold
 NEAR_THRESHOLD_USD = 5e9
 DEFAULT_MAX_INFO = 600          # fundamentals refreshes per daily run (~2s each)
 MIN_PRICE_ROWS = 50             # need enough history for 50-day average and MACD
-STALE_BLOCK_DAYS = 10           # drop a snapshot whose data is older than this
+STALE_BLOCK_DAYS = 21           # drop a snapshot whose data is older than this (10 until 18 Oct 2026: the laptop is often off for days)
 PRICE_BATCH = 150
 # The site's own price function on AWS (stockiq-price-proxy): Yahoo answers it where it refuses this Mac (HTTP 429 after a few
 # hundred requests). Used for the shares the batch download did not return that could be indexed, and for exchange rates

@@ -115,6 +115,11 @@ if os.path.exists(daily):
         if mm and int(mm.group(1)) > 1000: finding(f"the daily run got no prices for {mm.group(1)} stocks (Yahoo's limit on this machine): nothing de-indexed, but re-run update_stock_analysis.py later")
     for bad in ('could not rebase', 'push failed', 'Traceback', 'FAILED'):
         if bad in text: finding(f"the daily deploy's log says '{bad}': read ~/stockiq-daily.log")
+    gap = (time.time() - os.path.getmtime(daily)) / 86400            # the laptop is often off a few days (18 Oct 2026)
+    if gap > 1.5:
+        print(f"  the daily update last ran {gap:.0f} days ago (the laptop was off): its first run back catches up by itself")
+    if gap > 8:
+        finding(f"the daily update has not run for {gap:.0f} days: news after 7 days is missed and stock figures are {gap:.0f} days old; run it now (cd stockiq && ./deploy.sh) or leave the laptop on for an afternoon")
     print(f"  daily deploy log: {time.strftime('%d %b %H:%M', time.localtime(os.path.getmtime(daily)))}; " + ('; '.join(l.strip() for l in text.splitlines() if re.search(r'Indexable|All done|pushed to GitHub', l))[:300]))
 
 # 5. drift

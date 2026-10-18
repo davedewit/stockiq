@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-18",
+   "what": "Made for a laptop that is often off for days: stock news now looks back a week, stock pages keep their figures up to three weeks before leaving Google, and the first daily update after a gap catches up by itself."
+  },
+  {
+   "at": "2026-10-18",
    "what": "A daily review by Claude now runs by itself every afternoon after the daily update: it checks the site and puts what it finds under Decisions for you; the next session acts on it."
   },
   {

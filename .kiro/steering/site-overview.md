@@ -229,6 +229,13 @@ Order inside `deploy-to-s3.sh`:
 11. Git: for **both** repos, commit if changed → `pull --rebase` → push, unless the last
     push by this step was under 23h ago. Full rules and timing examples in section 5b.
 
+**The laptop is often off for a few days at a time (the owner, 18 Oct 2026), and that is fine.** The site, the AI autopilot, the
+crypto history and the Admin page's weekly review run on AWS and carry on. What waits for the Mac: this daily update, the nightly
+site check and the daily Claude review; the first run back catches up by itself (one run a day, whatever day it is). Built for gaps:
+stock news looks back 7 days (`update_stock_news.py`); a stock page keeps its snapshot up to 21 days when no price can be had
+(`STALE_BLOCK_DAYS`), and prices come through AWS when Yahoo refuses this Mac, so a run after a gap refreshes them; the opening
+check says how long the update has not run, and makes it a finding after 8 days.
+
 Preview without uploading or pushing: `cd stockiq && DRY_RUN=true ./deploy-to-s3.sh`.
 It still runs the local steps (backups, sitemap, news trim), then prints `(dryrun)` lines.
 The script lost this mode once (section 9): check `grep -c DRY_RUN deploy-to-s3.sh` is above 0 first.

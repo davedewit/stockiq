@@ -306,9 +306,10 @@ def fetch_stock_news(symbol):
         soup = BeautifulSoup(response.content, 'xml')
         items = soup.find_all('item')
         
-        # Only consider articles from last 2 days
+        # Articles from the last 7 days: the laptop that runs this is often off a few days at a time (the owner, 18 Oct 2026),
+        # and the first run back should still pick up what came out meanwhile (it was 4 days, 2 before that)
         from dateutil import parser as date_parser
-        cutoff_date = datetime.now() - timedelta(days=4)
+        cutoff_date = datetime.now() - timedelta(days=7)
         
         news = []
         for item in items[:30]:  # Check first 30 articles
@@ -322,7 +323,7 @@ def fetch_stock_news(symbol):
                 try:
                     article_date = date_parser.parse(pub_date)
                     if article_date.replace(tzinfo=None) < cutoff_date:
-                        continue  # Skip articles older than 2 days
+                        continue  # Skip articles older than 7 days
                 except:
                     continue  # Skip if can't parse date - we need to verify it's recent
             
