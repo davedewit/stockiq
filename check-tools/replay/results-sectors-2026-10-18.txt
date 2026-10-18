@@ -1,0 +1,31 @@
+
+First half: 28 Oct 2022 to 31 Oct 2024
+  S&P 500 (SPY) held:             +46.0%
+  all 14 funds, equal:            +37.9%
+  3 funds at random (median):     +32.3%
+  top 2 by 3 months                  +16.0%   behind the S&P 500 by 30.0%; random 3 did worse 9% of the time
+  top 3 by 3 months                  +26.1%   behind the S&P 500 by 19.9%; random 3 did worse 32% of the time
+  top 2 by 6 months                  +40.4%   behind the S&P 500 by 5.6%; random 3 did worse 71% of the time
+  top 3 by 6 months                  +47.9%   AHEAD of the S&P 500 by 1.9%; random 3 did worse 86% of the time
+  top 2 by 12 months less the last   +39.2%   behind the S&P 500 by 6.9%; random 3 did worse 68% of the time
+  top 3 by 12 months less the last   +53.0%   AHEAD of the S&P 500 by 7.0%; random 3 did worse 92% of the time
+
+Second half: 31 Oct 2024 to 07 Oct 2026
+  S&P 500 (SPY) held:             +36.5%
+  all 14 funds, equal:            +26.4%
+  3 funds at random (median):     +20.8%
+  top 2 by 3 months                  +69.5%   AHEAD of the S&P 500 by 33.0%; random 3 did worse 100% of the time
+  top 3 by 3 months                  +46.2%   AHEAD of the S&P 500 by 9.7%; random 3 did worse 96% of the time
+  top 2 by 6 months                  +87.7%   AHEAD of the S&P 500 by 51.2%; random 3 did worse 100% of the time
+  top 3 by 6 months                  +74.5%   AHEAD of the S&P 500 by 37.9%; random 3 did worse 100% of the time
+  top 2 by 12 months less the last  +110.3%   AHEAD of the S&P 500 by 73.8%; random 3 did worse 100% of the time
+  top 3 by 12 months less the last   +81.9%   AHEAD of the S&P 500 by 45.4%; random 3 did worse 100% of the time
+
+12 variants tried on 14 funds; with that many tries a few look good by luck. A variant counts only if it is ahead in both halves.
+
+The whole period: S&P 500 +99.8%, worst fall -19.0%
+  top 3 by 6 months: whole period +158.4%, worst fall -17.9%; held most: SMH 33, XLK 20, XLC 20, GLD 18, XLF 14
+  top 3 by 12 months less the last: whole period +178.4%, worst fall -16.2%; held most: SMH 35, XLC 26, XLK 23, GLD 21, XLE 11
+Without the chip fund (SMH):
+  first half: top 3 by 6 months -21.2% against the S&P 500; top 3 by 12 less 1 -21.0%
+  second half: top 3 by 6 months -16.6% against the S&P 500; top 3 by 12 less 1 +19.9%

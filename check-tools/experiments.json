@@ -191,6 +191,13 @@
    "status": "kept",
    "decided": "2026-10-17",
    "result": "Kept"
+  },
+  {
+   "id": "theme-sleeve",
+   "what": "A themes part of the budget (about 20%): the 3 strongest of 14 sector and theme funds by their 12-month trend (without the last month), changed monthly; optionally a weekly AI read of the market's headlines that may hold back one fund, its calls measured separately",
+   "angle": "profit, analysis, AI use",
+   "measure": "against an S&P 500 fund over the same days, for over a year (the owner's bar); the AI's calls against the plain rule. Replay 18 Oct 2026: ahead of the S&P 500 in both halves (+7.0% and +45.4%) but mostly from the chip fund SMH; without it behind in 3 of 4 half-periods",
+   "status": "idea"
   }
  ]
 }
