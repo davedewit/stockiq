@@ -2768,6 +2768,14 @@ to optimise and see profit month on month").
   It may be allowed to act only after 30 or more scored calls are right clearly more often than chance; that would be a trial of
   its own. First read, on a copy of the owner's record on 18 Oct: "Concerns about a potential stock market crash and volatility in
   tech stocks", XLE better, SMH and XLK worse.
+- **Where else it is known** (18 Oct 2026, the owner: "i hope this is aware across the site"): the screeners card (the market
+  shares are of the money for shares, and a line links to the themes part); the weekly review on the Admin page
+  (`theme_review_lines`: what it holds and is worth, funds sold against the fund, the AI's calls scored); the session's review
+  tool (part 6b) and opening check (`session_start.py`, with a finding if the monthly change is overdue); the notification bell
+  (its buys and sells are ordinary log entries); the public pages (home page card, About, FAQ); the chat's guide; the
+  experiments register (`theme-sleeve`, public, so it is listed under "How it is improving" and on the Admin page);
+  `questions.md` 26 to 30; `lambda-reference.md`, `stockiq.md`. Not in it on purpose: the share record, the bar and the
+  month's goals' trade counts (the funds' trades are kept apart in `state.themes.trades`); the account value includes them.
 - **What the page shows:** a "Themes part" section under Activity (`themesHtml`: what it holds, the next monthly change, results
   against the fund, the AI's last read and its scored calls, the 14 funds as last ranked, folded); the descriptions say the shares
   get 80%; the portfolio's plan line for a fund ("themes part (a trial)… kept until the monthly change around…"); a row in "What
@@ -4613,3 +4621,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     the $78,080 for shares", "How the $78,080 for shares is spread", and the themes line says it is the other 20% of the whole
     budget (`ofWhat`). Found on the way: the new label applied the 80% twice ($6,400 for $8,000 in the test); `sharePart` is
     now safe to repeat (`partOfShares`). 230 panel checks.
+  - **The themes part known across the site** (05:01 UTC; `stockiq-ai-trader` `s8Spsvuj…`, rollback zip
+    `…_before_autopilot_awareness_20261018.zip`; `index.html`, `about.html`, `faq.html`): the weekly review's line, the review
+    tool, the opening check, the public pages, the reference notes and five new questions (section 8c, "THE THEMES PART",
+    "Where else it is known"). 502 function checks.
