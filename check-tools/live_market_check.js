@@ -109,6 +109,10 @@ function anyAnswer() {
         check('the panel shows the US figures first', (await names()).join() === CATS.us.map(x => x[0]).join() && await tabNow() === 'us', await names());
         await click('.market-tab-sidebar[data-tab="europe"]'); await sleep(300);
         check('a tab shows its own figures', (await names())[0] === 'europe S&P 500' && await tabNow() === 'europe', [await tabNow(), await names()]);
+        const drawn = await js(`(function () { var l = document.querySelectorAll('#market-data-sidebar-container .market-item-sidebar-chart polyline'); return Array.from(l).filter(function (x) { return x.getAttribute('data-lm') && x.getAttribute('points'); }).length; })()`);
+        check('a tab chosen later shows its small charts at once (every tab\'s lines were fetched in the background)', drawn === 6, drawn);
+        const kept = await js(`Object.keys(JSON.parse(localStorage.getItem('lmSparks') || '{}')).length`);
+        check('the lines are kept in the browser, so a reload shows them before any request (the stand-in tabs share their 6 symbols)', kept >= 6, kept);
         await click('#nav-right-sidebar'); await sleep(300);
         check('the arrow moves one tab on, not two', await tabNow() === 'asia' && (await names())[0] === 'asia S&P 500', await tabNow());
         await click('#nav-left-sidebar'); await click('#nav-left-sidebar'); await sleep(300);
