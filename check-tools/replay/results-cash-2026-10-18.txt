@@ -1,0 +1,19 @@
+S&P 500 fund and VIX, 2022-08-03 to 2026-10-16 (1056 trading days); halves split at 2024-09-10
+days at each gauge level 0 (very low) .. 4 (very high): 0: 675 (64%), 1: 153 (14%), 2: 112 (11%), 3: 86 (8%), 4: 30 (3%)
+
+cash earns 0% a year
+                                            first half                 second half                         all
+  all in the fund            +31.8%, worst fall -17.0%   +39.7%, worst fall -19.0%   +84.2%, worst fall -19.0%
+  A caution                  +28.0%, worst fall -14.8%   +35.3%, worst fall -16.2%   +73.1%, worst fall -16.2%
+  B reserve for a crash      +29.5%, worst fall -16.5%   +36.0%, worst fall -18.3%   +76.2%, worst fall -18.3%
+  C trend only               +29.1%, worst fall -12.2%   +36.8%, worst fall -16.2%   +76.6%, worst fall -16.2%
+
+cash earns 4% a year
+                                            first half                 second half                         all
+  all in the fund            +31.8%, worst fall -17.0%   +39.7%, worst fall -19.0%   +84.2%, worst fall -19.0%
+  A caution                  +28.5%, worst fall -14.7%   +35.7%, worst fall -16.1%   +74.3%, worst fall -16.1%
+  B reserve for a crash      +30.4%, worst fall -16.5%   +37.0%, worst fall -18.3%   +78.6%, worst fall -18.3%
+  C trend only               +29.9%, worst fall -12.0%   +37.2%, worst fall -16.2%   +78.1%, worst fall -16.2%
+
+Read: a rule is only worth having if it is ahead of 'all in the fund' in both halves, or gives up little and cuts the worst fall clearly.
+Five years hold one real fall (2022) and a few sharp drops: few events, so treat any lead as a lead, not a finding.

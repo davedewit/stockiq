@@ -1647,7 +1647,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 
 | Thing | Where | Notes |
 |---|---|---|
-| Portfolio section | `website/practice-portfolio.js` (`?v=41` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
+| Portfolio section | `website/practice-portfolio.js` (`?v=42` in `dashboard.html`) | Sums and page, and the graph of the account over time (`seriesOf, valueAt, valueSeries, axisTicks, chartSvg`, and for the S&P 500 fund's line `fundRange, fundKnots, versusStart`, also exported). Pure functions exported for tests: `newState, fxFor, fxRate, versusMarket, applyBuy, applySell, applyClearSold, soldSummary, valueOf, summarize, splitGain, planLine` |
 | Autopilot panel | `website/practice-autopilot.js` (`?v=59`) | Controls and reports only; decisions are made by the Lambda |
 | The bell (one list for every page) | `website/autopilot-bell.js` (asked for as `?h=<the hour>`, no version to raise; fetched by each hand-edited page with a bell, by `dashboard.html`, and by `theme.js` for the stock pages) | The autopilot's buys and sells in the notification bell |
 | Page | `website/dashboard.html` | The tab bar, the three panels with the two containers in the second and third, the tab script before the footer, and the two script tags at the end. **Raise `?v=N` whenever a script changes** (since 11 Oct browsers keep a script only five minutes, so this is a belt on top of that, not the only way a change arrives) |
@@ -2375,7 +2375,7 @@ He asked for "an admin account… so i can see status", with items to action, ad
 unless you need me to make a big decision. i'd prefer it all run without me". Built lean, as decided by the session:
 - **Where:** a "🛠 Admin" tab on the dashboard and an "Admin" link at the top of the dashboard's Account menu, shown only
   when the autopilot's function answers action `admin` for the account (`listed`: the site's own accounts, env
-  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=11`), the tab,
+  `AI_TRADER_USERS`; anyone else gets HTTP 403 and the page shows nothing). `website/admin-panel.js` (`?v=12`), the tab,
   panel and `NAMES` entry in `dashboard.html`. The link is on the dashboard only, not yet on the other pages.
 - **What it shows:** the month's goal, each figure against its target (`goal_standing`; the same numbers as `GOALS` in
   `check-tools/autopilot_review.py`: change the two together); **"Decisions for you"** (it was "Needs your yes" until 17 Oct 2026): proposals with "Yes" / "Not now"; the
@@ -4625,3 +4625,17 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     `…_before_autopilot_awareness_20261018.zip`; `index.html`, `about.html`, `faq.html`): the weekly review's line, the review
     tool, the opening check, the public pages, the reference notes and five new questions (section 8c, "THE THEMES PART",
     "Where else it is known"). 502 function checks.
+  - **"Today" on a Sunday, and the Admin page's figure that changed a second later** (05:17 UTC; `practice-portfolio.js?v=42`,
+    `admin-panel.js?v=12`, `dashboard.html`). The owner: why does it say "Today ▲ $1,059.10" when the market has been shut over
+    a day; and the Admin page showed $99,411, then $99,642. The day figure was right (each holding's last session, as a broker
+    shows it) but the label was not: with every market it holds closed it now reads **"Last trading day … its markets are
+    closed now: each holding's last session (latest prices …)"** (`summarize`: `dayClosed`, `dayLast`; the chat's summary
+    likewise); with any market trading it is "Today". The Admin page shows "…" for up to 8 seconds while the Practice tab gets
+    its prices (`LIVE_WAIT_MS`), and the function's estimate, said to be one, only if they do not come. Tried on the live
+    page as his account before the deploy. 141+ portfolio checks, 18 Admin page checks.
+  - **Holding more cash when the market looks risky: tested, not built** (the owner's idea: a gauge from very low to very high
+    risk, more cash when high, or a reserve to buy after a big drop). `check-tools/replay/cash_study.py`,
+    `results-cash-2026-10-18.txt` (the S&P 500 fund and the VIX, Aug 2022 to Oct 2026, rules written down first): every rule
+    was behind all in the fund in both halves, even with cash earning 4%; the worst fall 2 to 5 points smaller. The gauge
+    itself is in the experiments register as an idea (`market-gauge`: shown and recorded with each buy, no cash held for
+    it); `questions.md` 31.

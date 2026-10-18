@@ -202,6 +202,13 @@
    "decide": "2027-10-19",
    "public": true,
    "publicText": "A themes part (since 18 Oct 2026): a fifth of the budget is held in the three strongest of 14 sector and theme funds, changed once a month, and compared with an S&P 500 fund. Once a week the AI model also reads the market's headlines and makes calls on the funds, which are scored but not acted on."
+  },
+  {
+   "id": "market-gauge",
+   "what": "A market-risk gauge (0 very low to 4 very high: the S&P 500 below its 200- and 50-day averages, the VIX above 20 and 30) shown on the autopilot tab and recorded with every buy, for information; no cash held because of it",
+   "angle": "profit, analysis, ease of use",
+   "measure": "whether buys made at a high gauge do worse than buys at a low one (30 a side); the replay of 18 Oct 2026 (replay/cash_study.py) found holding more cash by the gauge behind an S&P 500 fund in both halves, with worst falls 2 to 5 points smaller",
+   "status": "idea"
   }
  ]
 }
