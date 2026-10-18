@@ -762,6 +762,25 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
     login.html signup.html stocks/AAPL.html` (`LIVE=1` for the site itself): a finger in headless Chrome at phone
     size; after every step, that the page has not moved. **Not checked: a real phone; Safari on an iPhone.** The
     pages without the script (blog, news, sign in, sign up, stock pages) open the menu by ☰ only, as before.
+- **The market panel on the right of the home page and the dashboard is drawn by one script: `website/market-panel.js`**
+  (`?v=1`, loaded by both pages where their panel code was; 18 Oct 2026, the owner: "is there a smarter way to set them up. the
+  dashboard and index.html should match"). The market tabs and their figures (the tab on show fetched first, the six others a
+  moment later), the four lists (which shares are on them, four small requests, then their prices in one), the US market
+  countdown, the arrows (one tab a click: the home page had three sets of handlers), the scroll arrow and fade at the panel's
+  foot. Each page keeps only its markup in `#news-panel` (the same on both; the home page also has its sign-in box for an
+  anonymous visitor). It keeps the names the pages' other code calls (`renderMarketDataSidebar`, `fetchMarketDataSidebar`,
+  `switchToTab`, `updateMarketCountdownSidebar`, `render<Trending|Gainers|Losers|Active>Tickers`, `fetchSidebarTickers`, and the
+  globals `marketDataSidebar`, `currentTabSidebar`, `tabOrder`, `currentTabIndex`); `window.marketPanel`: `version, refresh,
+  renderLists, deskStyle`. A row's click runs the analysis in the background where the page can (`runSidebarAnalysis`, the
+  dashboard) and opens the analysis page otherwise. Every 5 minutes while the page is in use; live-market.js keeps the figures
+  on show moving. The phone sidebar (`fillMobileSidebar` / `emptyMobileSidebar` on each page) moves the panel and calls
+  `marketPanel.refresh()`; the panel is put back with the style it had at load (`data-desk-style`; both pages put it back
+  as `position: absolute` before). **The home page's panel is laid out as the dashboard's now** (fixed, scrolling inside
+  itself, the arrow and fade at its foot). About 60,000 characters of the home page and 46,000 of the dashboard went.
+  **`sidebar.js` is a third copy, loaded by the stock pages and the analysis page, which have no panel: it does nothing
+  there** (left in place). **The way back, one command:** `bash /Users/dave/VSCODE/stockiq/check-tools/pending-panel-undo/deploy.sh`
+  (keep that folder). Tests: `live_market_check.js` (the tabs, the arrows, the four lists, the countdown, the layout, 32
+  checks), `mobile_sidebar_check.js`, `header_room_check.js`, `visitor_bar_check.js`.
 - **The market data moves while someone is looking at it** (18 Oct 2026; the owner: "they should update often so when users on
   the page they see its active not a static site ... only if user is active on page"). **`website/live-market.js`**, loaded by
   `theme.js` (between `LIVE_MARKET_START` and `LIVE_MARKET_END`: take those lines out to switch it off everywhere) on any page with
@@ -4703,3 +4722,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     (the same current price, a fifth of the data), 512 MB (128 gave it too little processor: 7.6 s on Lambda against 0.6 s on
     the Mac): about 1.8 s inside AWS, about the same compute a call as before. Older callers get the same answer. Cost: about
     20,000 calls and 20,000 GB-seconds a month for two hours of watching a day, inside the free allowances.
+  - **One market panel script for the home page and the dashboard** (website only: `market-panel.js` new, `index.html`,
+    `dashboard.html`), at the owner's word that the two "should match": section 8, "The market panel on the right". Found
+    on the way: the home page switched tabs in three places and set its arrows twice; both pages put the panel back after
+    the phone sidebar with another position than it started with. The way back: `pending-panel-undo/deploy.sh`, dry run tried.
