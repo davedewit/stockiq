@@ -130,12 +130,13 @@ def calculate_unified_investment_score(closes, highs, lows, volumes, rsi, macd_l
     
     # Technical Analysis (40% weight)
     if rsi:
-        if rsi < 30:
-            score += 15
-            score_breakdown.append("RSI Oversold: +15 (Oversold reading)")
-        elif rsi > 70:
-            score -= 15
-            score_breakdown.append("RSI Overbought: -15 (Caution signal)")
+        # Turned round on 18 Oct 2026 (check-tools/scoring/page_score_study.py): the score bet against the trend (oversold +15,
+        # overbought -15, a big rise over the year marked down, near the 52-week low marked up) and its top fifth did worse than
+        # its bottom fifth in 13 of 18 half-periods of five years of prices. Now as the screeners' trend score: only an RSI over
+        # 80 counts against a share, the year's rise counts for it, and so does standing near the top of its range.
+        if rsi > 80:
+            score -= 5
+            score_breakdown.append(f"RSI Very High ({rsi:.0f}): -5 (stretched)")
         elif 40 <= rsi <= 60:
             score += 5
             score_breakdown.append("RSI Neutral: +5 (Healthy condition)")
@@ -261,16 +262,16 @@ def calculate_unified_investment_score(closes, highs, lows, volumes, rsi, macd_l
                 score_breakdown.append(f"Below MA200: -4 (Long-term resistance)")
     
     # Market Momentum (20% weight)
-    # Momentum with overextension penalties
+    # The rise over the year, counted with the trend
     if ytd_change > 100:
-        score -= 15
-        score_breakdown.append(f"Extreme Overextension ({ytd_change:+.1f}% over 1 year): -15 (High pullback risk)")
+        score += 12
+        score_breakdown.append(f"Very Strong Rise ({ytd_change:+.1f}% over 1 year): +12 (strong momentum)")
     elif ytd_change > 50:
-        score -= 8
-        score_breakdown.append(f"Overextended ({ytd_change:+.1f}% over 1 year): -8 (Caution - mean reversion likely)")
+        score += 10
+        score_breakdown.append(f"Strong Rise ({ytd_change:+.1f}% over 1 year): +10 (strong momentum)")
     elif ytd_change > 30:
-        score += 3
-        score_breakdown.append(f"Strong Momentum ({ytd_change:+.1f}% over 1 year): +3 (Good but stretched)")
+        score += 8
+        score_breakdown.append(f"Strong Momentum ({ytd_change:+.1f}% over 1 year): +8")
     elif ytd_change > 15:
         score += 7
         score_breakdown.append(f"Healthy Momentum ({ytd_change:+.1f}% over 1 year): +7 (Ideal range)")
@@ -297,13 +298,13 @@ def calculate_unified_investment_score(closes, highs, lows, volumes, rsi, macd_l
             score -= 3
             score_breakdown.append(f"Low Volume ({volume_ratio:.1f}x): -3 (Weak interest)")
     
-    # Range Position - Overextension Check (±5 points)
+    # Range Position (±5 points): near the top of its range counts for a share, near the bottom against it
     if range_position > 95:
-        score -= 5
-        score_breakdown.append(f"Near 52-Week High ({range_position:.0f}%): -5 (High in its range)")
-    elif range_position < 5:
         score += 5
-        score_breakdown.append(f"Near 52-Week Low ({range_position:.0f}%): +5 (Low in its range)")
+        score_breakdown.append(f"Near 52-Week High ({range_position:.0f}%): +5 (strong in its range)")
+    elif range_position < 5:
+        score -= 5
+        score_breakdown.append(f"Near 52-Week Low ({range_position:.0f}%): -5 (weak in its range)")
     
     final_score = max(0, min(100, score))
     return final_score, score_breakdown
