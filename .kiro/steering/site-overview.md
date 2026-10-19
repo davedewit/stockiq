@@ -4960,3 +4960,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     days, then Low / Medium / High (red / amber / green) with the plain reason ("ahead on 18 of 30 days, more than chance would give");
     "so far", never "will"; the first week look-backs (`a7`) arrive
     from about 22 Oct; the weekly review is due around 26 Oct; `bar_of` on the latest 300 at the next function change.
+  - **Holdings listed once (the owner's question, the same day):** the autopilot tab's "Holding now" rows repeated the Practice portfolio
+    table; they are gone, and "How it is doing" says how many it holds with a link to the tab. The table's rows carry the tags
+    those rows had, visible without opening the plan (`tags` in `practice-portfolio.js`, class `pp-tags`: the market closed until…,
+    "has been up X: sold if it falls back to Y", patient share), and a choice above the table, **All N · Can be sold now M**, shown
+    when some markets are open and some shut (`heldOpenOnly`, not remembered). A holding's plan no longer says "the AI model also
+    reviews it" (off since 17 Oct): it says it is also sold if its signal turns or it slips far down the ranking. The AI chat's guide
+    follows, with the stop watch and the budget that follows results (`stockiq-ai-chat`, rollback `…_before_holdings_20261019.zip`).
+    `practice-portfolio.js` and `practice-autopilot.js` one version up. "What it has done" (the log of events) is unchanged.

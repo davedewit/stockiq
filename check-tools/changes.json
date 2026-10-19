@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-19",
+   "what": "The autopilot's holdings are listed once, on the Practice portfolio tab, each with its tags (market closed until…, its stop, patient share) and a 'Can be sold now' choice; the autopilot tab links there instead of listing them again"
+  },
+  {
+   "at": "2026-10-19",
    "what": "Month targets raised above break-even; the home page's first sentence is clearer and its stock links sit compactly at the bottom; market panel clicks run the analysis (in the background on the dashboard)"
   },
   {
