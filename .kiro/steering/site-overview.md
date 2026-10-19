@@ -4975,6 +4975,15 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     S&P 500 with $100,000 of fake money", updated weekly, losses included (describe, don't advise; past results only): something
     others link to; (4) a weekly screener-highlights email to the signup list (nothing has ever been sent). Told him plainly: SEO
     takes 3-6 months from 25 Sep; for his own money an S&P 500 fund is the sensible choice; the autopilot runs on as a test to 12 Jan.
+  - **NEXT SESSION, AROUND 26 OCT 2026 (the owner will open it when the Admin page's "Do you need to check in?" says so, or on the 26th):**
+    (1) say the steering files were loaded in full; (2) the opening check, then the Admin page as he sees it: the check-in card and
+    "Coming up", the first automatic full check (due 26 Oct with the daily update; the expanded run of 19 Oct finished after the session
+    closed: read `check-tools/weekly_check.json` and `reviews/weekly/`), its email; (3) the weekly review (`autopilot_review.py --days 7`):
+    the stop watch's sales (`w`), the budget lines ("The budget is now …"), the first week look-backs (`a7`, from about 22 Oct), the
+    company-figure split once there are shares sold with them, the themes part's first buys, the confidence dial; (4) BEZ.L, SDR.L,
+    PSKY out of the index by 24 Oct (`KNOWN['stale-until']` in site_audit.py expires then); (5) **then the traffic plan's first
+    build: the daily public screener pages** (visitors and sign-ups come first, top of this file); (6) end with the plain report:
+    what was checked, what was fixed, what improved, the account against the S&P 500 fund.
   - **Next session, first:** say the steering files were loaded in full; the opening check; the stop watch's first sales (marked `w`)
     and the first budget changes from results ("The budget is now …" in the activity list); (done the same day, below: the confidence line) one line beside the month's goal, owner only, never on the
     Practice portfolio tab (a forecast there would break the no-advice rule): how sure the record is that the account has been ahead of
