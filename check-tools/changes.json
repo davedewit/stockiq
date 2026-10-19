@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-19",
+   "what": "The AI autopilot's breakdown now starts with shares against coins, and every line shows the dollars made or lost"
+  },
+  {
+   "at": "2026-10-19",
    "what": "On this page: 'Coming up' under the check-in answer (your next check-in, the next full check and review, decisions, the goal), and a row 'What runs by itself' with when each last ran"
   },
   {

@@ -219,7 +219,7 @@ gone = next(h for h in data['holdings'] if h['symbol'] == 'S03'); data['holdings
 s, rec = run(t0 + dt.timedelta(days=3)); hist = {x['symbol']: x for x in rec['history']}
 check('a sale by hand is learned from too; a vanished holding is not guessed at', hist['S02']['exit'] == 'hand' and abs(hist['S02']['market'] - 3.0) < 0.01 and abs(hist['S02']['vs'] - (hist['S02']['pct'] - 3.0)) < 0.011 and 'S03' not in hist and gone['id'] not in rec['state']['open'], hist.get('S02'))
 card = m.scorecard(rec['history'])
-check('scorecard adds up', card['n'] == 3 and card['up'] == 2 and card['judged'] == 3 and [g['label'] for g in card['groups']['exit']] == ['sold at the loss limit', 'sold at the gain mark', 'sold by you'] and card['groups']['screener'][0] == dict(label='S&P 100', n=3, avg=card['avg'], vs=card['vs'], beat=card['beat'], judged=3, up=2) and card['groups']['rank'][0]['label'] == 'rank 1 to 3', card)
+check('scorecard adds up', card['n'] == 3 and card['up'] == 2 and card['judged'] == 3 and [g['label'] for g in card['groups']['exit']] == ['sold at the loss limit', 'sold at the gain mark', 'sold by you'] and {k: v for k, v in card['groups']['screener'][0].items() if k != 'usd'} == dict(label='S&P 100', n=3, avg=card['avg'], vs=card['vs'], beat=card['beat'], judged=3, up=2) and card['groups']['rank'][0]['label'] == 'rank 1 to 3', card)
 check('an empty history gives an empty scorecard', m.scorecard([]) == {'n': 0, 'groups': {}} and m.memory_text(m.scorecard([]), None) == '')
 def trade(i, vs, key='3-100', sold=None): return {'symbol': f'T{i}', 'label': f'T{i}', 'screener': key, 'risk': 3, 'chosen': 'ai', 'rank': 1 + i % 12, 'score': 3.0, 'rsi': 40 + i * 2, 'd7': 1.0, 'd30': 5.0, 'volume': 1.0, 't': 'x', 'pct': vs + 1.0, 'market': 1.0, 'vs': vs, 'days': 3.0, 'exit': 'time', 'sold': sold or m.iso(t0 + dt.timedelta(days=i))}
 rec = m.load_item(U); rec['history'] = [trade(i, -3.0) for i in range(7)]
@@ -1665,4 +1665,9 @@ if hasattr(m, 'follow_results'):
     check('it is on for a new account, and kept off when switched off', m.clean_settings({}, 'x@y.z')['compound'] is True and m.clean_settings({'compound': False}, 'x@y.z')['compound'] is False)
     src = open(sys.argv[1]).read()
     check('a check-in follows the results before fitting the budget to the practice money; a page opened before the change cannot save the old budget back', 'follow_results(record, now)                             # profits added' in src and "raw_settings = dict(raw_settings, budgetUsd=grown['to'])" in src)
+# ---- the breakdown splits shares from coins (19 Oct 2026)
+if "'kind': split(" in open(sys.argv[1]).read():
+    card = m.scorecard([{'symbol': 'AAPL', 'screener': '3-3', 'pct': 2.0, 'usd': 40.0}, {'symbol': 'SUI-USD', 'screener': '7-1', 'pct': -3.0, 'usd': -60.0}, {'symbol': 'BHP.AX', 'screener': '4-200', 'pct': 1.0, 'usd': 20.0}])
+    kinds = {g['label']: (g['n'], round(g.get('usd', 0), 2)) for g in card['groups']['kind']}
+    check('the breakdown splits shares from coins, shares first', kinds == {'shares': (2, 60.0), 'coins': (1, -60.0)} and card['groups']['kind'][0]['label'] == 'shares', kinds)
 print('ALL PASS' if ok else 'SOME FAILED')
