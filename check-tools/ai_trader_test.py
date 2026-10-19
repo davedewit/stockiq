@@ -85,7 +85,7 @@ check('someone not on the list and not on a paid plan is refused, and pointed to
 check('not on the list cannot switch it on', m.clean_settings({'enabled': True}, 'stranger@y.com')['enabled'] is False)
 s, b = call(action='get', userId=U); check('defaults', b['allowed'] and b['settings'] == dict(m.DEFAULTS) and '3-100' in b['options']['screeners'], b)
 s, b = call(action='save', userId=U, settings={'enabled': True, 'risk': 9, 'budgetUsd': 'lots', 'periodDays': 0.2, 'everyHours': 7, 'maxHoldDays': 5, 'screeners': ['3-100', 'nope'], 'x': 1})
-check('settings are cleaned', b['settings'] == {'enabled': True, 'risk': 5, 'budgetUsd': 10000.0, 'periodDays': 1, 'everyHours': 24, 'maxHoldDays': 5, 'screeners': ['3-100'], 'aiSell': True, 'selfTune': True, 'emails': True, 'stopPct': None, 'takePct': None, 'auto': [], 'trailMode': 'gains', 'shares': {}, **({'holdings': None} if hasattr(m, 'holdings_of') else {})} and b['state'].get('startedAt') and b['log'][-1]['text'].startswith('Autopilot on'), b['settings'])
+check('settings are cleaned', b['settings'] == {'enabled': True, 'risk': 5, 'budgetUsd': 10000.0, 'periodDays': 1, 'everyHours': 24, 'maxHoldDays': 5, 'screeners': ['3-100'], 'aiSell': True, 'selfTune': True, 'emails': True, 'stopPct': None, 'takePct': None, 'auto': [], 'trailMode': 'gains', 'shares': {}, **({'holdings': None} if hasattr(m, 'holdings_of') else {}), **({'compound': True} if hasattr(m, 'follow_results') else {})} and b['state'].get('startedAt') and b['log'][-1]['text'].startswith('Autopilot on'), b['settings'])
 check('run before switching on is refused', call(action='run', userId='dave@x.com')[0] == 400)
 check('garbage requests', m.lambda_handler({'requestContext': {}, 'body': 'x'}, None)['statusCode'] == 400 and call(action='zzz', userId=U)[0] == 400 and call(action='get')[0] == 400)
 
@@ -1649,4 +1649,20 @@ if hasattr(m, 'watch_stops'):
     check('a price that has not traded for hours is not sold at', m.watch_stops(W, rec_w, WT, quote=lambda sym: old_q.get(sym)) == 0)
     src = open(sys.argv[1]).read()
     check('the schedule runs it only for an account that is not due for a check-in, and only with time to spare', 'watched = watch_stops(user_id, record, now) if STOP_WATCH and time_left() >= RUN_RESERVE_SECONDS else 0' in src)
+# ---- the budget follows the autopilot's results (19 Oct 2026)
+if hasattr(m, 'follow_results'):
+    FT = dt.datetime(2026, 10, 14, 16, 0)
+    rec_b = {'settings': dict(m.DEFAULTS, budgetUsd=10000.0), 'state': {'realizedUsd': 0.0}, 'log': [], 'history': []}
+    check('the first time it only notes where the results stand', m.follow_results(rec_b, FT) == 0 and rec_b['state']['budgetMark'] == 0.0 and rec_b['settings']['budgetUsd'] == 10000.0)
+    rec_b['state']['realizedUsd'] = 432.31
+    check('a profit of $432.31 on its sales adds $432 to the budget, with one line saying so', m.follow_results(rec_b, FT) == 432.31 and rec_b['settings']['budgetUsd'] == 10432.0 and 'follows the results' in rec_b['log'][-1]['text'], (rec_b['settings']['budgetUsd'], rec_b['log']))
+    rec_b['state']['realizedUsd'] = 132.31
+    m.follow_results(rec_b, FT); check('a loss of $300 takes it off again', rec_b['settings']['budgetUsd'] == 10132.0 and len(rec_b['log']) == 1, (rec_b['settings']['budgetUsd'], len(rec_b['log'])))
+    rec_b['state']['realizedUsd'] = 132.81; m.follow_results(rec_b, FT); rec_b['state']['realizedUsd'] = 133.41; m.follow_results(rec_b, FT)
+    check('changes under a dollar add up until they reach one', rec_b['settings']['budgetUsd'] == 10133.0, rec_b['settings']['budgetUsd'])
+    rec_b['settings']['compound'] = False; rec_b['state']['realizedUsd'] = 1133.41
+    check('with the switch off the budget stays as typed', m.follow_results(rec_b, FT) == 0 and rec_b['settings']['budgetUsd'] == 10133.0)
+    check('it is on for a new account, and kept off when switched off', m.clean_settings({}, 'x@y.z')['compound'] is True and m.clean_settings({'compound': False}, 'x@y.z')['compound'] is False)
+    src = open(sys.argv[1]).read()
+    check('a check-in follows the results before fitting the budget to the practice money; a page opened before the change cannot save the old budget back', 'follow_results(record, now)                             # profits added' in src and "raw_settings = dict(raw_settings, budgetUsd=grown['to'])" in src)
 print('ALL PASS' if ok else 'SOME FAILED')

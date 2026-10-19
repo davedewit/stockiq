@@ -48,7 +48,8 @@ def full(c):
     """Whole check-ins through run_user() with stand-in storage, prices and screener results (always something new to buy)."""
     D = DB(); m._db = D; key = '7-1' if c['coins'] else '3-100'; kind = 'crypto' if c['coins'] else 'stock'
     m.STAY_CHECKS = 1          # this replay offers new coins at every check-in; the one-check-in wait for a coin to stay is described in words on the panel, not in these sums
-    rec = {'settings': dict(m.DEFAULTS, enabled=True, screeners=[key], **{k: c[k] for k in ('budgetUsd', 'periodDays', 'everyHours', 'maxHoldDays', 'risk')}), 'state': {'startedAt': m.iso(t0)}, 'log': [], 'history': []}
+    # compound off: the panel describes a fixed budget; a budget that follows the results (19 Oct 2026) is checked in ai_trader_test.py
+    rec = {'settings': dict(m.DEFAULTS, enabled=True, screeners=[key], compound=False, **{k: c[k] for k in ('budgetUsd', 'periodDays', 'everyHours', 'maxHoldDays', 'risk')}), 'state': {'startedAt': m.iso(t0)}, 'log': [], 'history': []}
     first = peak = count = hours = 0; step = [0]
     def snapshot(k): return [dict(symbol=f'N{step[0]}I{i}' + ('-USD' if c['coins'] else ''), label=f'N{step[0]}I{i}', kind=kind, screener=key, price=10.0, score=4.0 - i * 0.1, signal='BUY', rsi=50, d1=1.0, d7=3.0, d30=5.0, volume=1.2, from_high=-5.0, macd='BULLISH', position=i, rank=i + 1) for i in range(5)]
     quote = lambda sym: {'price': 10.0, 'currency': 'USD', 'name': sym}
