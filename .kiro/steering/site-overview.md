@@ -4980,3 +4980,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     (the owner searched the page for "confidence"). The account's bar in the goal card runs from the $100,000 start to the target
     (`START`; it ran from 0, so $99,847 against $101,000 looked 99% done), with "$X below / above the $100,000 it started with · $Y
     to go" under it.
+  - **The confidence dial (the owner: "like a fire warning when driving ... i just want to see your confidence grow or fall"):** the
+    confidence line on the Admin page is now a half-circle dial (`dialSvg` in `admin-panel.js`): **red under 50% (more likely behind
+    the fund than ahead; 50% is a coin flip, the owner's correction), yellow 50 to 90% (leaning ahead), green from 90% (clearly
+    ahead so far)**, the needle and the percentage below it; drawn faded with a grey dashed needle and "Early reading: needs N more
+    trading days" until 30, and a small line of how the reading moved day by day (`trailSvg`, dashed at 50% and 90%). The daily gaps
+    come from `versusDays(...).gaps` in `practice-portfolio.js`. The words: "More likely behind / Leaning ahead / Clearly ahead".

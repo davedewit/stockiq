@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-19",
+   "what": "The confidence line on this page is now a dial: red under 50%, yellow to 90%, green from 90%, with a line of how it has moved day by day (faded until 30 trading days)"
+  },
+  {
+   "at": "2026-10-19",
    "what": "On the AI autopilot's Activity part, the themes part, the bar, progress and how it improves are each a row that opens and closes where it is"
   },
   {
