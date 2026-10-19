@@ -1,15 +1,15 @@
-FULL CHECK OF THE SITE, 2026-10-19 (everything): 32 of 32 passed
+FULL CHECK OF THE SITE, 2026-10-19 (everything): 79 of 79 passed
+It covers 42 of the 44 parts of the site. Left to a person: The screeners' trend score itself: does it still beat its lists?; Sign up, log in, activation.
 
 1. Test suites on the live code
   PASS  the autopilot function (536 checks)
   PASS  the autopilot panel (227 checks)
   PASS  the practice portfolio (147 checks)
-  PASS  the Admin page (35 checks)
+  PASS  the Admin page (36 checks)
   PASS  the notification bell (21 checks)
   PASS  the AI chat (25 checks)
   PASS  the trading signals (42 checks)
-  FAIL  the home page news list (4 checks)
-        ['all checks passed']
+  PASS  the home page news list (4 checks)
   PASS  the panel works out the budget, the spread and the check-ins as the function does
   PASS  the AI autopilot tab and the Admin page read clearly (clarity check)
   PASS  the nightly site check's tests (1 problems; stale-stock-pages (known: BEZ.L and SDR.L (taken over, last traded 1 Oct) and PSKY leave the index by the 21-day rule, by 2026-10-24))
@@ -20,21 +20,70 @@ FULL CHECK OF THE SITE, 2026-10-19 (everything): 32 of 32 passed
   PASS  the header and the room under it
 
 2. The figures agree across the site
-  PASS  the account value: the Admin page's $99,879 and the Practice portfolio tab's $99,870 (prices a few seconds apart)
+  PASS  the account value: the Admin page's $99,836 and the Practice portfolio tab's $99,838 (prices a few seconds apart)
   PASS  the S&P 500 fund since the start: the weekly review and the graph agree
-  PASS  every holding of the autopilot (41) has its remembered buy (the plan and the record need it)
+  PASS  every holding of the autopilot (40) has its remembered buy (the plan and the record need it)
   PASS  no remembered buy is left for a holding already sold
-  PASS  the budget ($98,100) is within the practice money it can reach ($98,536)
-  PASS  the autopilot's results so far: its running total ($-1,684.54) and its finished trades added up ($-1,684.54)
-  PASS  the diary holds every finished trade (55 written, 55 in the record)
+  PASS  the budget ($98,100) is within the practice money it can reach ($98,605)
+  PASS  the autopilot's results so far: its running total ($-1,616.12) and its finished trades added up ($-1,616.12)
+  PASS  the diary holds every finished trade (56 written, 56 in the record)
   PASS  the bill on the Admin page adds up ($3.24 = StockIQ $3.13 + other $0.11)
   PASS  StockIQ's running cost within the cost rule ($0.48 this month, under $1)
   PASS  Lambda calls on course for 824,774 of the free 1,000,000
   PASS  the sitemap lists every indexed stock page (956 in it, 956 indexed)
+  PASS  every improvement on trial past its decision day has been decided (the Improvements tab stays true)
   PASS  the autopilot's last scheduled run reported no failed check-in
 
-3. Real buttons
-  PASS  Dow 30: runs, no error, no raw codes or 'undefined', the tracker reads its top 10
-  PASS  Germany DAX 40: runs, no error, no raw codes or 'undefined', the tracker reads its top 10
-  PASS  ASX 200: runs, no error, no raw codes or 'undefined', the tracker reads its top 10
-  PASS  a single-stock report: runs, no error, no raw codes or 'undefined', the tracker reads its top 10
+3. Every analysis button
+  PASS  S&P 100: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  S&P 400 + 600: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  S&P 500: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  S&P 1500: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Russell 1000: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Russell 2000: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  NASDAQ 100: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Dow Jones 30: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  UK FTSE 100: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  ASX 100: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  ASX 200: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  ASX 300: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  ASX 50: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Netherlands AEX: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Brazil Bovespa: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  France CAC 40: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  China CSI 300: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Germany DAX 40: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Italy FTSE MIB: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Hong Kong Hang Seng: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Spain IBEX 35: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Mexico IPC: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  South Korea KOSPI 200: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Japan Nikkei 225: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  New Zealand NZX 50: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Sweden OMX Stockholm 30: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  India Sensex: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Switzerland SMI: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Singapore STI: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Euro Stoxx 50: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Canada TSX 60: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Taiwan 50: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  the single-stock report (AAPL, KO): runs, no error, no raw codes or 'undefined'
+  PASS  live trading signals: runs, no error, no raw codes or 'undefined'
+  PASS  auto-detect signals: runs, no error, no raw codes or 'undefined'
+  PASS  the crypto screener: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  single coin analysis (BTC): runs, no error, no raw codes or 'undefined'
+
+4. Background run and visitors
+  PASS  "Run in Background" for Dow Jones 30 (the dashboard's path): every worker answers, the report is formed (30 of 30)
+  PASS  "Run in Background" for Germany DAX 40 (the dashboard's path): every worker answers, the report is formed (40 of 40)
+  PASS  "Run in Background" for Japan Nikkei 225 (the dashboard's path): every worker answers, the report is formed (225 of 225)
+  PASS  "Run in Background" for 4-200 (the dashboard's path): every worker answers, the report is formed (195 of 195)
+  PASS  a visitor who is not signed in gets their one free analysis
+  PASS  and after it is used, is sent to sign up before anything runs
+  PASS  a visitor on the free trial gets a result
+  PASS  and with the day's 5 used, is sent to the plans before anything runs
+  PASS  the usage chip and the sign-up buttons, for every kind of visitor, at four widths
+  PASS  the home page's "View Pricing Plans" lands on the plans, clear of the header
+  PASS  your Practice portfolio tab, opened as your account (read-only): it draws, with your holdings
+  PASS  the notification bell on the home page, as your account (read-only): one list, no errors
+  PASS  the last daily update finished cleanly (0 days ago)
