@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-19",
+   "what": "At the top of this page: Real money, the decision. One verdict from four checks, decided on 11 Oct 2027; until then it shows how each check stands"
+  },
+  {
+   "at": "2026-10-19",
    "what": "The confidence line on this page is now a dial: red under 50%, yellow to 90%, green from 90%, with a line of how it has moved day by day (faded until 30 trading days)"
   },
   {

@@ -4986,3 +4986,12 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     ahead so far)**, the needle and the percentage below it; drawn faded with a grey dashed needle and "Early reading: needs N more
     trading days" until 30, and a small line of how the reading moved day by day (`trailSvg`, dashed at 50% and 90%). The daily gaps
     come from `versusDays(...).gaps` in `practice-portfolio.js`. The words: "More likely behind / Leaning ahead / Clearly ahead".
+  - **REAL MONEY: THE DECISION (the owner: "i need something to make a decision ... a combination").** A card at the top of the Admin
+    page (`decisionHtml`): one verdict from four checks, **judged on 11 Oct 2027, fixed in advance** (`JUDGE_ON`) so that a lucky
+    stretch cannot decide it: (1) a full year of results; (2) the confidence dial at 90% or more (from 30 trading days); (3) ahead of
+    the S&P 500 fund by 5% a year or more (the owner's bar; a yearly rate from 30 days); (4) still ahead with its three largest
+    winning trades taken out (from the sold list; `figures().topGains`). Before the day: "Not yet" and each check as it stands
+    (19 Oct: 1 of 4, still ahead by $958 without its three biggest wins). On the day: all four pass gives "Ready for a small
+    real-money trial" (about 10% of what he would invest, the rest in an S&P 500 fund, six months side by side, back to the fund
+    if the real account falls 10% behind); otherwise "Keep your money in an S&P 500 fund". Never more than that, and "not financial
+    advice" (a licensed adviser before real money). **Do not move the date or loosen a check because a reading looks good.**

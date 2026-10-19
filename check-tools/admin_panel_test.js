@@ -116,5 +116,14 @@ async function page(status, uid) {
     const bar = (h.match(/The practice account, at the latest prices[\s\S]*?ad-bar[^>]*><span style="width: (\d+)%/) || [])[1];
     check('below the start the account\'s bar is empty (not 99% full) and the line says how far below the start and how far to go', bar === '2' && /\$153 below the \$100,000 it started with · \$153 to go/.test(pl), { bar, line: pl.slice(pl.indexOf('it started with') - 60, pl.indexOf('it started with') + 80) });
   }
+  if (/function decisionHtml/.test(fs.readFileSync(process.argv[2], 'utf8'))) { // real money: the decision (19 Oct 2026)
+    const card = async (fig) => { const q = await page(200, 'dave@x.com'); q.ctx.window.practicePortfolio = { figures: () => fig }; q.fire('practice-portfolio:figures'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' '); return pl.slice(pl.indexOf('Real money: the decision'), pl.indexOf('Real money: the decision') + 700); };
+    const base = { accountValue: 99856, gainUsd: -144, gainPct: -0.14, startingCash: 100000, fundValue: 98032, topGains: 700, createdAt: new Date(Date.now() - 9 * 86400000).toISOString(), versus: { days: 4, ahead: 3, avg: 0.6, se: 0.5, gaps: [0.5, 1.4, -0.4, 1.0] } };
+    let t = await card(base);
+    check('before the judging day: "Not yet", the date, and each of the four checks as it stands', /Real money: the decision Not yet 1 of 4 so far/.test(t) && /Decided on 11 Oct 2027/.test(t) && /✗ A full year of results \(9 of 365 days\)/.test(t) && /✗ Confidence dial at 90% or more \(\d+%, early reading\)/.test(t) && /ahead by \$1,824 so far; a yearly rate from 30 days/.test(t) && /✓ Still ahead without its 3 biggest winning trades \(ahead by \$1,124 without them\)/.test(t), t);
+    t = await card(Object.assign({}, base, { topGains: 2500 }));
+    check('a lead carried by its three biggest winners fails that check', /✗ Still ahead without its 3 biggest winning trades \(behind by \$676 without them\)/.test(t), t);
+    check('it never says more than a small trial, and says it is not advice', /about 10% of what you would invest/.test(fs.readFileSync(process.argv[2], 'utf8')) && /Not financial advice/.test(t));
+  }
   console.log(ok ? 'ALL PASS' : 'SOME FAILED'); process.exit(ok ? 0 : 1);
 })();
