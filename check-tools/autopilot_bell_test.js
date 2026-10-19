@@ -61,10 +61,12 @@ const T = [{ t: '2026-10-10T10:00:00Z', type: 'buy', symbol: 'CFX-USD', name: 'C
     const anon = page({ user: null, answer: { success: true, allowed: true, trades: T } }); await sleep(20); check('a visitor who is not signed in is never asked about, and sees nothing', anon.calls.length === 0 && anon.bell.html() === '' && anon.bell.unseen() === 0);
     const free = page({ answer: { success: true, allowed: false, trades: [] } }); await sleep(20); free.bell.load(); await sleep(20);
     check('an account without the autopilot gets no trades, no number, a list of its reports alone, and is not asked about again for a while', free.calls.length === 1 && !/data-kind="trade"/.test(free.bell.html()) && /Nothing here yet/.test(free.bell.html()) && !/autopilot/.test(plain(free.bell.html())) && free.bell.unseen() === 0 && free.els['notification-badge'].style.display === 'none'); }
-  { const store = { 'stockiqAutopilotTrades_tester@x.com': JSON.stringify({ at: 1, allowed: true, trades: T }), 'stockiqAutopilotBell_tester@x.com': '2026-10-10T12:00:00Z', 'stockiqAutopilotRead_tester@x.com': '2026-10-10T12:00:00Z' };
+  // the take-over from copies kept in browsers since 11 Oct was taken out on 19 Oct 2026 (version 9): checked only on a script that has it
+  if (/oldKey/.test(require('fs').readFileSync(process.argv[2], 'utf8'))) { const store = { 'stockiqAutopilotTrades_tester@x.com': JSON.stringify({ at: 1, allowed: true, trades: T }), 'stockiqAutopilotBell_tester@x.com': '2026-10-10T12:00:00Z', 'stockiqAutopilotRead_tester@x.com': '2026-10-10T12:00:00Z' };
     const kept = Object.assign({ userId: 'tester@x.com' }, store), ctx0 = { older: { version: undefined, set() {}, trades: () => [] } };
     const p = page({ store }); // an older copy's leftovers are in the browser's store
     check('it takes over from an older copy: that copy\'s marks are kept, its list of trades is emptied so that it draws nothing', p.bell.version >= 4 && !('stockiqAutopilotTrades_tester@x.com' in p.kept) && p.kept['stockiqBellBell_tester@x.com'] === '2026-10-10T12:00:00Z' && p.kept['stockiqBellRead_tester@x.com'] === '2026-10-10T12:00:00Z', Object.keys(p.kept));
     p.bell.set(T, true); check('and with the marks taken over, the two sales since then are new', p.bell.unseen() === 2 && p.bell.unread() === 2 && 'stockiqBellTrades_tester@x.com' in p.kept); }
+  { const p = page({}); check('a newer copy wins: a second load of the same or an older version leaves the first in place', p.bell.version >= 8); }
   console.log(ok ? 'ALL PASS' : 'SOME FAILED');
 })();

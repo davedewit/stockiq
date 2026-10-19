@@ -157,6 +157,13 @@ def main():
     breakdown('by who chose it', trades, lambda t: {'ai': 'the AI model', 'rank': 'by rank (the model did not answer)', 'order': 'furthest above its 52-week low (trial)'}.get(t.get('chosen'), str(t.get('chosen'))))
     breakdown('by headlines shown to the model when it was bought (recorded from 12 Oct 2026)', trades, lambda t: 'not recorded (bought before)' if t.get('heads') is None else 'none found' if not t['heads'] else 'newest under a day old' if (t.get('headAge') or 0) < 24 else 'newest one to three days old')
     breakdown('the market-risk gauge when bought (from 18 Oct 2026; 0 very low .. 4 very high; for information, it holds no cash)', [t for t in trades if t.get('mg') is not None], lambda t: f"{t['mg']} {('very low', 'low', 'medium', 'high', 'very high')[t['mg']]}")
+    # company figures when bought (recorded from 19 Oct 2026; shares only): the measurement behind replacing the screeners' empty
+    # "financial" factors one day. A group says something only from 30 trades and beyond twice its margin of error, as everywhere.
+    shares_cf = [t for t in trades if t.get('pm') is not None or t.get('de') is not None or t.get('rg') is not None]
+    if shares_cf:
+        breakdown('by profit margin when bought (shares; recorded from 19 Oct 2026)', [t for t in shares_cf if t.get('pm') is not None], lambda t: 'losing money (margin under 0%)' if t['pm'] < 0 else 'margin 0% to 10%' if t['pm'] < 10 else 'margin 10% or more')
+        breakdown('by debt to equity when bought (shares)', [t for t in shares_cf if t.get('de') is not None], lambda t: 'low debt (under 0.5)' if t['de'] < 0.5 else 'some debt (0.5 to 1.5)' if t['de'] <= 1.5 else 'high debt (over 1.5)')
+        breakdown('by revenue growth when bought (shares)', [t for t in shares_cf if t.get('rg') is not None], lambda t: 'revenue shrinking' if t['rg'] < 0 else 'growing under 15%' if t['rg'] < 15 else 'growing 15% or more')
     breakdown('the patient-shares trial (from 12 Oct 2026: a patient share is not sold on the signal, nor by the AI review)', [t for t in trades if t.get('pt') is not None], lambda t: 'patient: sold by price or time only' if t.get('pt') == 1 else 'ordinary: also sold when the signal turns')
     breakdown('by risk level at the time', trades, lambda t: m.RISK.get(t.get('risk'), {}).get('name', str(t.get('risk'))))
 
@@ -213,7 +220,11 @@ def main():
     now_at = lambda group: (sum((h.get('path') or [[0, 0]])[-1][1] for h in group) / len(group)) if group else 0.0
     say(f"  the patient-shares trial, still held: {len(pat)} patient (on paper {now_at(pat):+.2f}% on average at their last check-in), {len(plain)} ordinary ({now_at(plain):+.2f}%). "
         "A fair comparison counts both: what was sold and what is still held, for buys of the same weeks.")
-    say(f"  this account: trial of the buying order '{(state.get('order') or {}).get('mode')}', {(state.get('order') or {}).get('buys', 0)} share buys counted; AI calls today {((state.get('ai') or {}).get('n'))}; early sells by the AI review {'paused' if (state.get('aiSell') or {}).get('until') else 'allowed'}")
+    order = state.get('order') or {}
+    order_words = {'trial': 'the trial of the buying order is running', 'low52': 'shares are bought furthest above their 52-week low (kept after a trial)',
+                   'rank': 'shares are bought as ranked' + (' (the trial of the buying order ended, not kept)' if order.get('ended') else '')}.get(order.get('mode'), f"buying order '{order.get('mode')}'")
+    ai_sell = 'switched off for every account (AI_SELL)' if not getattr(m, 'AI_SELL', True) else 'paused' if (state.get('aiSell') or {}).get('until') else 'allowed'
+    say(f"  this account: {order_words}, {order.get('buys', 0)} share buys counted; AI calls today {((state.get('ai') or {}).get('n'))}; early sells by the AI review {ai_sell}")
 
     th = state.get('themes') or {}
     if th or getattr(m, 'THEMES', False):

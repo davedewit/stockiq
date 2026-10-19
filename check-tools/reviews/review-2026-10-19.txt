@@ -1,4 +1,4 @@
-REVIEW OF THE AI AUTOPILOT (fake money)   12 Oct 2026 08:25 to 19 Oct 2026 08:25 UTC (7 days)
+REVIEW OF THE AI AUTOPILOT (fake money)   12 Oct 2026 08:35 to 19 Oct 2026 08:35 UTC (7 days)
 Read-only. Past practice results; nothing here is a forecast. Judge by dollars and the average per trade, not by how many ended up.
 
 1. SETTINGS
@@ -161,7 +161,7 @@ by risk level at the time
   note: Buying when the price was 20% to 50% above the 52-week low yielded the best results, averaging -0.3% with 5 of 9 trades ahead.
   note: Most recent trades show mixed results; AI-selected trades had an average of -0.9% but varied widely in performance.
   the patient-shares trial, still held: 27 patient (on paper +1.34% on average at their last check-in), 14 ordinary (+2.30%). A fair comparison counts both: what was sold and what is still held, for buys of the same weeks.
-  this account: trial of the buying order 'rank', 56 share buys counted; AI calls today 17; early sells by the AI review allowed
+  this account: shares are bought as ranked (the trial of the buying order ended, not kept), 56 share buys counted; AI calls today 17; early sells by the AI review switched off for every account (AI_SELL)
 
 6b. THE THEMES PART (a trial since 18 Oct 2026: 20% of the budget in the 3 strongest of 14 sector and theme funds, changed monthly)
   Themes part (a trial since its first check-in, 20% of the budget, not counted in the share trades above): holds nothing yet. No fund sold yet. The AI model's daily calls on the funds (each scored a week later), recorded and not acted on: none scored yet.
