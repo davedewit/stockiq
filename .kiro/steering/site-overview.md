@@ -4975,4 +4975,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     Medium (70 to 90%), High (90% or more), the chance the daily lead is real from its average over its margin of error, with the
     plain reason, and "about the past only, not a forecast". Owner only; never on the Practice portfolio tab. On 19 Oct: 4 trading
     days, ahead on 3. Tests in `admin_panel_test.js` (3). The goal card (with this line) sits straight under the tiles since the same
-    evening (it was the seventh card down, and the owner could not find it).
+    evening (it was the seventh card down, and the owner could not find it). The line is headed "Confidence it has been ahead of an S&P 500 fund so far"
+    (the owner searched the page for "confidence"). The account's bar in the goal card runs from the $100,000 start to the target
+    (`START`; it ran from 0, so $99,847 against $101,000 looked 99% done), with "$X below / above the $100,000 it started with · $Y
+    to go" under it.

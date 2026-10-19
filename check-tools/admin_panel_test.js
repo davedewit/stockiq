@@ -101,11 +101,17 @@ async function page(status, uid) {
   if (/function confidenceHtml/.test(fs.readFileSync(process.argv[2], 'utf8'))) { // the confidence line (19 Oct 2026)
     const show = async (versus) => { const q = await page(200, 'dave@x.com'); q.ctx.window.practicePortfolio = { figures: () => ({ accountValue: 99856, gainUsd: -144, gainPct: -0.14, startingCash: 100000, versus }) }; q.fire('practice-portfolio:figures'); return q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' '); };
     let pl = await show({ days: 4, ahead: 3, avg: 0.63, se: 0.48 });
-    check('under 30 trading days it says too early to tell, with the days so far and no percentage', /Ahead of an S&P 500 fund so far: how sure the record is Too early to tell 4 of 30 trading days/.test(pl) && /ahead of the fund on 3 of 4 days/.test(pl) && !/\d+% is how sure/.test(pl), pl.slice(pl.indexOf('Ahead of an S&P'), pl.indexOf('Ahead of an S&P') + 300));
+    check('under 30 trading days it says too early to tell, with the days so far and no percentage', /Confidence it has been ahead of an S&P 500 fund so far Too early to tell 4 of 30 trading days/.test(pl) && /ahead of the fund on 3 of 4 days/.test(pl) && !/\d+% is how sure/.test(pl), pl.slice(pl.indexOf("Confidence it has"), pl.indexOf("Confidence it has") + 300));
     pl = await show({ days: 40, ahead: 26, avg: 0.2, se: 0.08 });
-    check('with 30 days or more a level and how sure, said to be about the past only', /how sure the record is High 9[6-9]%/.test(pl) && /on 26 of 40 trading days, by \+0\.20% a day on average/.test(pl) && /not a forecast/.test(pl), pl.slice(pl.indexOf('Ahead of an S&P'), pl.indexOf('Ahead of an S&P') + 400));
+    check('with 30 days or more a level and how sure, said to be about the past only', /fund so far High 9[6-9]%/.test(pl) && /on 26 of 40 trading days, by \+0\.20% a day on average/.test(pl) && /not a forecast/.test(pl), pl.slice(pl.indexOf("Confidence it has"), pl.indexOf("Confidence it has") + 400));
     pl = await show({ days: 40, ahead: 18, avg: -0.05, se: 0.1 });
-    check('a record behind the fund reads Low', /how sure the record is Low 3\d%/.test(pl), pl.slice(pl.indexOf('Ahead of an S&P'), pl.indexOf('Ahead of an S&P') + 200));
+    check('a record behind the fund reads Low', /fund so far Low 3\d%/.test(pl), pl.slice(pl.indexOf("Confidence it has"), pl.indexOf("Confidence it has") + 200));
+  }
+  if (/const START = 100000/.test(fs.readFileSync(process.argv[2], 'utf8'))) { // the account's bar runs from the start to the target (19 Oct 2026)
+    const q = await page(200, 'dave@x.com'); q.ctx.window.practicePortfolio = { figures: () => ({ accountValue: 99847, gainUsd: -153, gainPct: -0.15, startingCash: 100000 }) }; q.fire('practice-portfolio:figures');
+    const h = q.panel.innerHTML, pl = h.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    const bar = (h.match(/The practice account, at the latest prices[\s\S]*?ad-bar[^>]*><span style="width: (\d+)%/) || [])[1];
+    check('below the start the account\'s bar is empty (not 99% full) and the line says how far below the start and how far to go', bar === '2' && /\$153 below the \$100,000 it started with · \$153 to go/.test(pl), { bar, line: pl.slice(pl.indexOf('it started with') - 60, pl.indexOf('it started with') + 80) });
   }
   console.log(ok ? 'ALL PASS' : 'SOME FAILED'); process.exit(ok ? 0 : 1);
 })();
