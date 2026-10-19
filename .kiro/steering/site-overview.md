@@ -4941,5 +4941,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     page). `stock-pages.js` is still written daily but nothing loads it now: delete it and its writer's part at the next clean-up.
     Live `stockiq-ai-trader` `wZI+J09ds3y/twMuk2qnAfMdJaVuOnENYjLCltt7JCo=` (rollback `…_before_autopilot_goals_20261019.zip`).
   - **Next session, first:** say the steering files were loaded in full; the opening check; the stop watch's first sales (marked `w`)
-    and the first budget changes from results ("The budget is now …" in the activity list); the first week look-backs (`a7`) arrive
+    and the first budget changes from results ("The budget is now …" in the activity list); **build the confidence line on the Admin page** (agreed 19 Oct 2026): one line beside the month's goal, owner only, never on the
+    Practice portfolio tab (a forecast there would break the no-advice rule): how sure the record is that the account has been ahead of
+    an S&P 500 fund **so far** (daily gaps from `versus_market.js`'s sums, the cash allowed for): "Too early to tell" under 30 trading
+    days, then Low / Medium / High (red / amber / green) with the plain reason ("ahead on 18 of 30 days, more than chance would give");
+    "so far", never "will"; the first week look-backs (`a7`) arrive
     from about 22 Oct; the weekly review is due around 26 Oct; `bar_of` on the latest 300 at the next function change.
