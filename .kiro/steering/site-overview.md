@@ -4940,6 +4940,14 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     page; reverses version 3 of 18 Oct), and a market tab's item runs in the background on the dashboard** (it opened the analysis
     page). `stock-pages.js` is still written daily but nothing loads it now: delete it and its writer's part at the next clean-up.
     Live `stockiq-ai-trader` `wZI+J09ds3y/twMuk2qnAfMdJaVuOnENYjLCltt7JCo=` (rollback `…_before_autopilot_goals_20261019.zip`).
+  - **TRAFFIC PLAN (the owner, 19 Oct 2026: "nobody sees this site ... posting on sites doesn't work, i tried that for months").
+    Agreed order, mostly session work:** (1) **daily public screener pages**, one per screener (33), each the day's top 10 with
+    scores and a short plain explanation, written by the daily run, indexable, linked from the home page and linking to the stock
+    pages: matches searches like "ASX 200 top momentum stocks"; build first after the confidence line; (2) Search Console around
+    6 Nov: the owner sends its Performance page, improve the pages nearest page one; (3) one public page, "AI autopilot vs the
+    S&P 500 with $100,000 of fake money", updated weekly, losses included (describe, don't advise; past results only): something
+    others link to; (4) a weekly screener-highlights email to the signup list (nothing has ever been sent). Told him plainly: SEO
+    takes 3-6 months from 25 Sep; for his own money an S&P 500 fund is the sensible choice; the autopilot runs on as a test to 12 Jan.
   - **Next session, first:** say the steering files were loaded in full; the opening check; the stop watch's first sales (marked `w`)
     and the first budget changes from results ("The budget is now …" in the activity list); **build the confidence line on the Admin page** (agreed 19 Oct 2026): one line beside the month's goal, owner only, never on the
     Practice portfolio tab (a forecast there would break the no-advice rule): how sure the record is that the account has been ahead of
