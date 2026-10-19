@@ -140,9 +140,15 @@ for fn in ('stockiq-ai-trader', 'stockiq-screener-coordinator', 'stockiq-option-
 daily = os.path.expanduser('~/stockiq-daily.log')
 if os.path.exists(daily):
     text = open(daily, errors='replace').read()
-    for pat in (r'No price data: (\d+)', ):
-        mm = re.search(pat, text)
-        if mm and int(mm.group(1)) > 1000: finding(f"the daily run got no prices for {mm.group(1)} stocks (Yahoo's limit on this machine): nothing de-indexed, but re-run update_stock_analysis.py later")
+    # Most stocks without a price from Yahoo are small, not indexed and need none; what counts is whether the price function on AWS
+    # filled in the ones that can be indexed (19 Oct 2026: "No price data: 1788" was a false alarm while AWS had 1,155 of 1,159)
+    mm = re.search(r'Prices through the price function on AWS: (\d+) of (\d+)', text)
+    if mm and int(mm.group(2)) - int(mm.group(1)) > 20:
+        finding(f"the daily run's prices through AWS: only {mm.group(1)} of {mm.group(2)} indexable stocks: re-run update_stock_analysis.py later")
+    elif not mm and (lambda n: n and int(n.group(1)) > 1000)(re.search(r'No price data: (\d+)', text)):
+        finding("the daily run got no prices for many stocks and did not reach the price function on AWS: re-run update_stock_analysis.py later")
+    fails = text.count('Failed to resolve')
+    if fails > 200: finding(f"the daily run's stock news met {fails} 'Failed to resolve' errors (this Mac lost its internet part-way): those stocks were not checked that day")
     for bad in ('could not rebase', 'push failed', 'Traceback', 'FAILED'):
         if bad in text: finding(f"the daily deploy's log says '{bad}': read ~/stockiq-daily.log")
     gap = (time.time() - os.path.getmtime(daily)) / 86400            # the laptop is often off a few days (18 Oct 2026)

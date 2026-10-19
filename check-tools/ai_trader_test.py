@@ -1612,4 +1612,41 @@ if hasattr(m, 'LATER'):
     old_watch = {'state': {'watch': [{'id': 'x1', 'symbol': 'ZZZ', 'price': 100.0, 'due': m.iso(T1)}]}, 'history': [{'id': 'x1', 'pct': 1.0}]}
     m.look_back(old_watch, T1 + dt.timedelta(hours=1), q)
     check('a look queued by the older code (no field named) still fills "after"', old_watch['history'][0].get('after') == -1.0 and not old_watch['state']['watch'])
+# ---- the stop watch (19 Oct 2026): between check-ins, only holdings whose trailing stop has started are priced, and one at its floor is sold
+if hasattr(m, 'watch_stops'):
+    W = 'watch@x.com'; WT = dt.datetime(2026, 10, 14, 16, 0)        # a Wednesday, the US market open
+    def wsetup(mode='gains'):
+        rec_w = {'settings': dict(m.DEFAULTS, enabled=True, risk=3, screeners=['3-100'], trailMode=mode), 'log': [], 'history': [],
+                 'state': {'open': {
+                     'w1': {'symbol': 'WA', 'label': 'WA', 'screener': '3-100', 'risk': 3, 'rank': 1, 'score': 3.0, 'rsi': 50, 'd7': 1, 'd30': 1, 'volume': 1, 't': m.iso(WT - dt.timedelta(days=1)), 'hold': 10, 'peak': 6.0, 'low': 0.0,
+                            'stop': {'arm': 3.0, 'floor': 4.0, 'move': 1.0, 'room': 2.0, 'mode': mode}},
+                     'w2': {'symbol': 'WB', 'label': 'WB', 'screener': '3-100', 'risk': 3, 'rank': 2, 'score': 3.0, 'rsi': 50, 'd7': 1, 'd30': 1, 'volume': 1, 't': m.iso(WT - dt.timedelta(days=1)), 'hold': 10, 'peak': 1.0, 'low': 0.0,
+                            'stop': {'arm': 3.0, 'floor': None, 'move': 1.0, 'room': 2.0, 'mode': mode}},
+                     'w3': {'symbol': 'WC.T', 'label': 'WC.T', 'screener': '5-nikkei225', 'risk': 3, 'rank': 2, 'score': 3.0, 'rsi': 50, 'd7': 1, 'd30': 1, 'volume': 1, 't': m.iso(WT - dt.timedelta(days=1)), 'hold': 10, 'peak': 9.0, 'low': 0.0,
+                            'stop': {'arm': 3.0, 'floor': 6.0, 'move': 1.0, 'room': 2.0, 'mode': mode}}}}}
+        hold = lambda i, sym, scr: {'id': i, 'symbol': sym, 'label': sym, 'currency': 'USD', 'qty': 10.0, 'buyPrice': 100.0, 'buyFx': 1, 'costUsd': 1000.0, 'boughtAt': m.iso(WT - dt.timedelta(days=1)), 'spyAtBuy': 700.0, 'by': 'ai', 'screener': scr}
+        D.Table(m.PORTFOLIO_TABLE).rows[W] = {'userId': W, 'data': json.dumps(dict(m.new_portfolio(WT), holdings=[hold('w1', 'WA', '3-100'), hold('w2', 'WB', '3-100'), hold('w3', 'WC.T', '5-nikkei225')], cash=97000.0)), 'version': 1}
+        return rec_w
+    asked = []
+    def wq(prices):
+        def q(sym):
+            asked.append(sym); return {'price': prices[sym]} if sym in prices else None
+        return q
+    rec_w = wsetup(); asked.clear()
+    n = m.watch_stops(W, rec_w, WT, quote=wq({'WA': 104.5, 'WB': 90.0, 'WC.T': 50.0, m.BENCHMARK: 700.0}))
+    check('above its floor nothing is sold; only holdings whose stop has started, in an open market, are priced (not the one without a floor, not Tokyo at night)', n == 0 and sorted(asked) == sorted(['WA', m.BENCHMARK]), asked)
+    n = m.watch_stops(W, rec_w, WT, quote=wq({'WA': 103.5, 'WB': 90.0, m.BENCHMARK: 700.0}))
+    pf_w = json.loads(D.Table(m.PORTFOLIO_TABLE).rows[W]['data']); sale = rec_w['log'][-1] if rec_w['log'] else {}
+    check('at its floor it is sold between check-ins as the stop that followed it, with its story; the others stay', n == 1 and [h['id'] for h in pf_w['holdings']] == ['w2', 'w3'] and sale.get('kind') == 'trail' and 'between check-ins' in sale.get('text', '') and sale.get('detail'), (n, sale))
+    t_w = rec_w['history'][-1] if rec_w['history'] else {}
+    check('the record says it was sold by the trailing stop, between check-ins (w), and the shared record takes the mark', t_w.get('exit') == 'trail' and t_w.get('w') == 1 and 3.2 < t_w.get('pct', 0) < 3.6 and 'w' in m.POOL_FIELDS, t_w)
+    rec_w = wsetup('off'); check('with the trailing stop switched off it does nothing', m.watch_stops(W, rec_w, WT, quote=wq({'WA': 50.0, m.BENCHMARK: 700.0})) == 0)
+    rec_w = wsetup(); rec_w['settings']['enabled'] = False; check('with the autopilot off it does nothing', m.watch_stops(W, rec_w, WT, quote=wq({'WA': 50.0, m.BENCHMARK: 700.0})) == 0)
+    rec_w = wsetup(); D.Table(m.PORTFOLIO_TABLE).fail_next = True
+    n = m.watch_stops(W, rec_w, WT, quote=wq({'WA': 103.0, m.BENCHMARK: 700.0}))
+    check('a clash with the owner changing the portfolio at that moment sells nothing and leaves no mark', n == 0 and not rec_w['state'].get('exits') and len(json.loads(D.Table(m.PORTFOLIO_TABLE).rows[W]['data'])['holdings']) == 3)
+    rec_w = wsetup(); old_q = {'WA': {'price': 103.0, 'time': (WT - dt.timedelta(hours=5)).replace(tzinfo=dt.timezone.utc).timestamp()}, m.BENCHMARK: {'price': 700.0}}
+    check('a price that has not traded for hours is not sold at', m.watch_stops(W, rec_w, WT, quote=lambda sym: old_q.get(sym)) == 0)
+    src = open(sys.argv[1]).read()
+    check('the schedule runs it only for an account that is not due for a check-in, and only with time to spare', 'watched = watch_stops(user_id, record, now) if STOP_WATCH and time_left() >= RUN_RESERVE_SECONDS else 0' in src)
 print('ALL PASS' if ok else 'SOME FAILED')
