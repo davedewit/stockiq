@@ -85,10 +85,14 @@ async function page(status, uid) {
   }
   if (/costStockiq/.test(fs.readFileSync(process.argv[2], 'utf8'))) { // the bill split (19 Oct 2026)
     const keep = ADMIN.usage;
-    ADMIN.usage = Object.assign({}, keep, { cost: 3.24, costStockiq: 0.48, costStockiqForecast: 0.77, costExplorer: 2.65, costExplorerKnown: 2.65, costOther: 0.11 });
+    ADMIN.usage = Object.assign({}, keep, { cost: 3.24, costStockiq: 0.48, costStockiqForecast: 0.77, costExplorer: 2.65, costExplorerKnown: 2.65, costOther: 0.11,
+      costServices: { AWSCostExplorer: 2.65, AmazonDynamoDB: 0.28, AmazonS3: 0.18, AmazonCloudWatch: 0.02, AWSLambda: 0.0, AmazonCloudFront: 0.0 } });
     let q = await page(200, 'dave@x.com'); let h = q.panel.innerHTML, pl = h.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
-    check('the bill leads with what StockIQ costs to run, green under $1, and says what else is in the whole bill', /StockIQ's AWS cost this month so far: \$0\.48/.test(pl) && /ad-pill good">StockIQ's AWS cost/.test(h) && /on course for about \$0\.77 for the month/.test(pl)
-      && /The whole AWS bill this month is \$3\.24: StockIQ's \$0\.48, plus \$2\.65 for Cost Explorer \(a session's test runs on 17 Oct/.test(pl) && /plus \$0\.11 for your other projects' storage/.test(pl) && !/ad-pill bad/.test(h.slice(h.indexOf('AWS this month'))) && !/AWS bill this month so far: \$3/.test(pl), pl.slice(pl.indexOf('AWS this month'), pl.indexOf('AWS this month') + 500));
+    const bill = pl.slice(pl.indexOf('AWS this month'), pl.indexOf('AWS this month') + 1200);
+    check('the whole AWS bill comes first, then StockIQ\'s part of it, then its running cost against the cost rule', /Your whole AWS bill this month so far: \$3\.24/.test(bill) && /StockIQ's part of it: \$3\.13/.test(bill)
+      && /StockIQ's running cost: \$0\.48, on course for about \$0\.77 for the month/.test(bill) && /the cost rule: under \$1 a month/.test(bill) && bill.indexOf('whole AWS bill') < bill.indexOf("StockIQ's part"), bill);
+    check('and each figure is explained: the whole bill split, the one-off Cost Explorer charge, every service with its cost and the free ones named', /Whole bill \$3\.24 = StockIQ \$3\.13 \+ your other projects \$0\.11/.test(bill)
+      && /StockIQ \$3\.13 = \$2\.65 for Cost Explorer \(a one-off/.test(bill) && /DynamoDB \(the database\) \$0\.28, S3 \(file storage\) \$0\.18, CloudWatch \(logs\) \$0\.02/.test(bill) && /still inside the free allowances: (Lambda, CloudFront|CloudFront, Lambda)/.test(bill), bill);
     ADMIN.usage = Object.assign({}, ADMIN.usage, { costExplorer: 3.10 });
     q = await page(200, 'dave@x.com'); h = q.panel.innerHTML; pl = h.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
     check('a Cost Explorer charge beyond the known one is shown in red', /ad-pill bad">Cost Explorer is being asked again: \$0\.45 more/.test(h), pl.slice(pl.indexOf('AWS this month'), pl.indexOf('AWS this month') + 400));

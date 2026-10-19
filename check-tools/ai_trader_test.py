@@ -298,9 +298,10 @@ check('slipped back to +5% from a best of +12%: sold to keep part of the gain', 
 check('the sale carries its story: what it was bought on, how long, best and worst, the figures at the sale, the rules', len(sale['detail']) >= 5 and sale['detail'][0].startswith('Bought at rank ') and 'Held 2 days. It was set to keep a holding at most 20 days.' in sale['detail'] and '+12.0% at its best' in ' '.join(sale['detail']) and 'sell if it falls to -10% or reaches +18%' in ' '.join(sale['detail']) and not any('S&P 500 fund' in d for d in sale['detail']), sale['detail'])
 done = rec['history'][-1]
 check('the finished trade keeps the dollars, the best and worst, and how it was sold', done['exit'] == 'trail' and done['usd'] == 50.0 and done['cost'] == 1000.0 and done['peak'] == 12.0 and done['low'] == 0.0 and done['id'] == first['id'] and rec['state']['closedCount'] == 1 and m.scorecard(rec['history'])['groups']['exit'][0]['label'] == 'sold to keep part of a gain', done)
-check('its price is looked at again later', rec['state']['watch'][-1]['symbol'] == sym and rec['state']['watch'][-1]['due'] == m.iso(t0 + dt.timedelta(days=2) + dt.timedelta(days=5)), rec['state'].get('watch'))
+first_look = [w for w in rec['state']['watch'] if not w.get('f')][-1]
+check('its price is looked at again later', first_look['symbol'] == sym and first_look['due'] == m.iso(t0 + dt.timedelta(days=2) + dt.timedelta(days=5)), rec['state'].get('watch'))
 PRICES[sym] = base * 1.05 * 1.10; s, rec = run(t0 + dt.timedelta(days=7, hours=1))
-check('later: what it did after it was sold is added to the record', rec['history'][0].get('after') == 10.0 and not rec['state']['watch'], (rec['history'][0], rec['state'].get('watch')))
+check('later: what it did after it was sold is added to the record', rec['history'][0].get('after') == 10.0 and not [w for w in rec['state']['watch'] if not w.get('f')], (rec['history'][0], rec['state'].get('watch')))
 other = portfolio()['holdings'][0]; far = [dict(r, rank=r['rank'] + 60, score=1.0) if r['symbol'] == other['symbol'] else r for r in rows()]
 info = {}; sells = m.review_sells(portfolio(), rec['settings'], {'3-100': far}, {other['symbol']: {'price': other['buyPrice']}}, t0 + dt.timedelta(days=8), opened=rec['state']['open'], info=info)
 check('far down the ranking with under half its score: sold', len(sells) == 1 and info[other['id']]['kind'] == 'fade' and 'Slipped to rank' in sells[0][2] and 'less than half the score it was bought on' in sells[0][2], sells and sells[0][2])
@@ -1569,15 +1570,16 @@ if hasattr(m, 'KNOWN_CE'):
         def get_cost_and_usage(self, **k): raise AssertionError('Cost Explorer costs $0.01 a reading')
         def get_caller_identity(self): return {'Account': '123'}
         def describe_budget(self, **k): return {'Budget': {'BudgetLimit': {'Amount': '1.5'}, 'CalculatedSpend': {'ActualSpend': {'Amount': '3.242'}}}}
+        def list_metrics(self, **k): return {'Metrics': [{'Dimensions': [{'Name': 'ServiceName', 'Value': n}, {'Name': 'Currency', 'Value': 'USD'}, {'Name': 'LinkedAccount', 'Value': '123'}]} for n in ('AWSCostExplorer', 'AmazonDynamoDB', 'AmazonS3', 'AWSLambda')]}
         def get_metric_statistics(self, **k):
             if k['Namespace'] == 'AWS/Lambda': return {'Datapoints': [{'Timestamp': dt.datetime(2026, 10, 18), 'Sum': 3000.0}]}
             dims = {d['Name']: d['Value'] for d in k['Dimensions']}
             assert dims.get('LinkedAccount') == '123' and k['Namespace'] == 'AWS/Billing'
-            v = {None: (3.0, 3.13), 'AWSCostExplorer': (2.6, 2.65)}[dims.get('ServiceName')]
+            v = {None: (3.0, 3.13), 'AWSCostExplorer': (2.6, 2.65), 'AmazonDynamoDB': (0.27, 0.28), 'AmazonS3': (0.18, 0.18), 'AWSLambda': (0.0, 0.0)}[dims.get('ServiceName')]
             return {'Datapoints': [{'Timestamp': dt.datetime(2026, 10, 18, 3), 'Maximum': v[0]}, {'Timestamp': dt.datetime(2026, 10, 19, 3), 'Maximum': v[1]}]}
     _real = m.boto3.client; m.boto3.client = lambda kind, **k: _Bill(kind)
     u = m.aws_usage(dt.datetime(2026, 10, 19, 9, 0), {})
-    check('the bill is split: StockIQ $0.48 from the latest figure, Cost Explorer $2.65 (all of it known), other projects $0.11, and a month forecast', (u.get('costStockiq'), u.get('costExplorer'), u.get('costExplorerKnown'), u.get('costOther'), u['cost']) == (0.48, 2.65, 2.65, 0.11, 3.24) and 0.7 < u.get('costStockiqForecast', 0) < 0.85, u)
+    check('the bill is split: StockIQ $0.48 from the latest figure, Cost Explorer $2.65 (all of it known), other projects $0.11, and a month forecast', (u.get('costStockiq'), u.get('costExplorer'), u.get('costExplorerKnown'), u.get('costOther'), u['cost']) == (0.48, 2.65, 2.65, 0.11, 3.24) and 0.7 < u.get('costStockiqForecast', 0) < 0.85 and u.get('costServices') == {'AWSCostExplorer': 2.65, 'AmazonDynamoDB': 0.28, 'AmazonS3': 0.18, 'AWSLambda': 0.0}, u)
     u = m.aws_usage(dt.datetime(2026, 11, 3, 9, 0), {})
     check('in another month the October charge is not "known": any Cost Explorer charge would show as new', u.get('costExplorerKnown') == 0.0, u)
     class _NoSplit(_Bill):
@@ -1588,4 +1590,26 @@ if hasattr(m, 'KNOWN_CE'):
     u = m.aws_usage(dt.datetime(2026, 10, 19, 9, 0), {})
     check('without the billing figures the page gets the plain bill as before, and the calls', u['cost'] == 3.24 and 'costStockiq' not in u and u.get('splitError') == 'RuntimeError' and u['calls'] == 3000, u)
     m.boto3.client = _real
+# ---- what a sold holding did a week and a month after the sale, against the S&P 500 fund (19 Oct 2026)
+if hasattr(m, 'LATER'):
+    T1 = dt.datetime(2026, 10, 1, 15, 0)
+    rec_l = {'settings': dict(m.DEFAULTS), 'state': {'open': {'h9': {'symbol': 'ZZZ', 'label': 'ZZZ', 'screener': '3-3', 'risk': 3, 'rank': 1, 'score': 1.0, 'rsi': 50, 'd7': 1, 'd30': 1, 'volume': 1, 't': m.iso(T1), 'hold': 10, 'peak': 0, 'low': 0}}, 'exits': {}}, 'log': [], 'history': []}
+    pf_l = {'holdings': [], 'closed': [{'id': 'h9', 'symbol': 'ZZZ', 'label': 'ZZZ', 'by': 'ai', 'screener': '3-3', 'qty': 1, 'buyPrice': 100.0, 'costUsd': 100.0, 'boughtAt': m.iso(T1),
+                                        'sellPrice': 110.0, 'proceedsUsd': 109.89, 'soldAt': m.iso(T1 + dt.timedelta(days=2)), 'spyAtBuy': 500.0, 'spyAtSell': 500.0}], 'cash': 0}
+    m.settle(rec_l, pf_l)
+    looks = rec_l['state'].get('watch') or []
+    check('a sale is looked at three times afterwards: the same time again (up to 5 days), a week and a month after it, the last two with the S&P 500 fund then',
+          [w.get('f', 'after') for w in looks] == ['after', 'a7', 'a30'] and looks[1]['due'].startswith('2026-10-10') and looks[2]['due'].startswith('2026-11-02') and looks[1]['spy'] == 500.0, looks)
+    prices = {'ZZZ': 121.0, m.BENCHMARK: 510.0}
+    q = lambda sym: {'price': prices[sym]} if sym in prices else None
+    m.look_back(rec_l, T1 + dt.timedelta(days=9.5), q)
+    t = rec_l['history'][0]
+    check('a week after the sale: the share +10%, the fund +2% over the same days; the month look still waiting', t.get('after') == 10.0 and t.get('a7') == 10.0 and t.get('a7m') == 2.0 and t.get('a30') is None and [w.get('f') for w in rec_l['state']['watch']] == ['a30'], (t, rec_l['state']['watch']))
+    prices['ZZZ'] = 99.0
+    m.look_back(rec_l, T1 + dt.timedelta(days=33), q)
+    check('a month after: -10% against the fund +2%; nothing left to look at', t.get('a30') == -10.0 and t.get('a30m') == 2.0 and not rec_l['state']['watch'], t)
+    check('the week and month figures go to the shared record', all(f in m.POOL_FIELDS for f in ('a7', 'a30', 'a7m', 'a30m')))
+    old_watch = {'state': {'watch': [{'id': 'x1', 'symbol': 'ZZZ', 'price': 100.0, 'due': m.iso(T1)}]}, 'history': [{'id': 'x1', 'pct': 1.0}]}
+    m.look_back(old_watch, T1 + dt.timedelta(hours=1), q)
+    check('a look queued by the older code (no field named) still fills "after"', old_watch['history'][0].get('after') == -1.0 and not old_watch['state']['watch'])
 print('ALL PASS' if ok else 'SOME FAILED')
