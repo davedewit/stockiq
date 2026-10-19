@@ -56,6 +56,7 @@ elif args[0] == 'sync':
     kept = (admin.get('plan') or {}).get('audit')                  # the nightly site check stays when the improvements are synced
     kept_weekly = (admin.get('plan') or {}).get('weekly')          # and so does the last full check
     kept_daily = (admin.get('plan') or {}).get('dailyReview')
+    kept_est = (admin.get('plan') or {}).get('estimates')
     changes = json.load(open(os.path.join(here, 'changes.json')))['changes'][:12]
     admin['plan'] = {'at': now(), 'items': [{k: e[k] for k in keep if k in e} for e in ex], 'reviews': reviews,
                      'parts': len(parts), 'reviewed': sum(1 for p in parts if p.get('last'))}
@@ -65,6 +66,8 @@ elif args[0] == 'sync':
         admin['plan']['weekly'] = kept_weekly
     if kept_daily:
         admin['plan']['dailyReview'] = kept_daily
+    if kept_est:
+        admin['plan']['estimates'] = kept_est
     admin['plan']['changes'] = changes
     save(admin)
     print(f"the Admin page's improvements: {len(ex)} items, {len(reviews)} recent reviews")
@@ -95,6 +98,20 @@ elif args[0] == 'weekly':
         'covered': w.get('covered'), 'parts': w.get('parts'), 'uncovered': w.get('uncovered', [])[:12], 'items': [[i['part'][:2].strip('. '), i['name'][:150], i['ok']] for i in w.get('items', [])][:140]}
     save(admin)
     print(f"the Admin page's full check: {w['passed']} of {w['total']} passed")
+elif args[0] == 'estimate' and len(args) >= 3:
+    # The session's own estimate of the chance the account is ahead of an S&P 500 fund after a year (19 Oct 2026, the owner: "strange i
+    # have to still ask you this ... it tells me through the site"). Updated at every weekly session, with the reason; the history stays.
+    #   python3 check-tools/admin.py estimate 30 "<why, in plain words>"
+    import time
+    while datetime.now(timezone.utc).minute % 30 in (9, 10, 11, 12, 13):
+        time.sleep(20)
+    admin = load()
+    plan = admin.setdefault('plan', {})
+    hist = plan.get('estimates') or []
+    hist.append({'at': now()[:10], 'pct': int(args[1]), 'why': ' '.join(args[2:])[:400]})
+    plan['estimates'] = hist[-12:]
+    save(admin)
+    print(f"the Admin page's estimate: {args[1]}% ({len(plan['estimates'])} kept)")
 elif args[0] == 'change' and len(args) >= 2:
     # A line for "What changed lately" on the Admin page (18 Oct 2026, the owner: "easy for me to read on admin page what is
     # going on"); then the page's copy is brought up to date.

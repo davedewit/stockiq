@@ -130,6 +130,10 @@ improvements and wait for his yes. The routine, every session:
 4. **Clean up in the same session**: whatever a change replaces goes (old code, a card that now repeats another, a superseded
    note, the `pending-*` folder once deployed, a script nothing loads). The site and these notes must get simpler, not longer:
    when a part of this file is out of date, rewrite it rather than add a correction under it.
+5b. **At every weekly session, update Claude's estimate on the Admin page** (19 Oct 2026, the owner: "strange i have to still ask you
+   this ... it tells me through the site"): `python3 check-tools/admin.py estimate <pct> "<why, plain words>"`, the chance the account
+   is ahead of an S&P 500 fund after a year, honest, from the record (started at 30% on 19 Oct). It shows in the Real money card with
+   its history, so he sees it rise or fall without asking.
 5. **One plain line on the Admin page for each change**: `python3 check-tools/admin.py change "<what, in his words>"` ("What
    changed lately"; `check-tools/changes.json`). That list is how he sees what happened without asking.
 6. End with a short report: the account in dollars against the month's goal and against an S&P 500 fund, what was changed, what
