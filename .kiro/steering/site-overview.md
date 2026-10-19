@@ -92,6 +92,9 @@ improvements and wait for his yes. The routine, every session:
    wrap commands in it (it cost a confusing error at the opening of 19 Oct).
 1. `python3 check-tools/session_start.py`, and act on every finding (faults first, whatever the sample size). Its part 1c
    compares the account with an S&P 500 fund and an all-world fund day by day (`check-tools/versus_market.js`): read it.
+   **Keep a "hi" light unless the weekly review is due** (the owner, 19 Oct 2026: "each week ... do a big check ... to not
+   un-necessary take my session usage"): the opening check, act on its findings and on the daily review's proposals, report.
+   The big review, new studies and new builds belong to the weekly session.
 2. If the newest file in `check-tools/reviews/` is a week old or more, the full review (section 8c, "The diary, and the review
    every week or two"); `python3 check-tools/admin.py` and do what is open there, then `admin.py done <id> "<what>"`.
 3. Improve, in this order: what loses visitors or money now (a fault, a stale or untrue page, a broken path to sign up or pay);
@@ -1817,6 +1820,7 @@ sends. The autopilot acts for accounts on a paid plan and for the accounts liste
 |---|---|---|
 | `enabled` | on / off (default off) | Only for accounts on a paid plan, or listed in `AI_TRADER_USERS` (`allowed`) |
 | `risk` | 1–5 (default 3) | The level: see the table below |
+| `compound` | on / off (default on; 19 Oct 2026) | **The budget follows its results**: the profit or loss of its sales since the last time is added to the budget at each check-in (`follow_results`, `state.budgetMark`, one line in the activity list); `fit_budget` still keeps it within the practice money there is. Before this the budget shrank after losses (`fit_budget`) but never grew after profits. A budget the user types starts afresh from that moment; a page opened before an automatic change cannot save the old figure back (`state.budgetAuto`). The panel: one tick box under the budget field |
 | `budgetUsd` | 100 … the practice money there is (default 10,000) | The most it has invested at once. **It cannot be more than the practice cash plus what the autopilot itself has invested** (`money_of`, sent as `money`: `cash, invested, reach`). On 11 Oct the owner typed $200,000 against $100,000 of fake money and nothing objected; it would have bought one $50,000 holding and stalled. Now the panel says under the field how much there is (`budgetHint`), refuses a larger number ("Not saved: the budget can be at most …"), offers "Set it to $…" (`maxbudget`), and the `save` action sets a larger one to that amount and notes it (the backstop for an older cached script). An older, too-large budget does not block other settings from saving. **And a budget that is too large is put right wherever it is met** (`fit_budget`: when the page is opened (`get`), when settings are saved, at the start of every check-in), with the same line in the activity list: the owner had asked twice why $200,000 was still shown, because his saved figure predated the check. So the "Needs you" item `budget` should now never appear |
 | `periodDays` | 1–90 | "Build up to it over": the budget is released in equal steps over this long. **Not the holding time** (the owner mixed them up twice) |
 | `everyHours` | 0.5, 1, 3, 6, 12, 24 | How often it checks in |
@@ -2098,6 +2102,13 @@ same code; read "its record" below as the shared record, or the shared record at
   the same days for a share and zero for a coin.** It is measured on the shared record (every account). At the sweep: 4
   of 300, averaging -0.68 against the yardstick. Until it is cleared no result here is evidence of anything, and it must
   be cleared before real money is even discussed (and then discussed with a licensed adviser: section 11, "Legal").
+  **After 300 (decided 19 Oct 2026, the owner asked what happens then):** the bar keeps being judged on the latest 300 finished
+  trades, so it can be lost again when results slip (to build: `bar_of` on the last `BAR_TRADES` of the pool, and the panel's
+  words "the latest 300", at the next change of the function). Clearing it is a checkpoint, not the end: the owner's own bar
+  below follows, and the search for improvement does not stop. **His standing target in dollars (19 Oct 2026: "70% or more gains
+  over losses ... closer to 100% gains as possible"): gains 70% or more of the money its finished trades move** ($7 made for every
+  $3 lost; `GAINS_TARGET` in `autopilot_review.py`, printed by the review and the opening check). Not 70% of trades won: a rule
+  that sells at +2% wins most trades and can still lose money (section 7b). On 19 Oct: 31% in all, 51% for shares.
   **The owner's own bar for real money is higher (18 Oct 2026): the account clearly ahead of an S&P 500 fund for more than a
   year, by at least 5% a year** ("it would have to beat it by atleast 5% as s&p also has dividends"; he thinks it unlikely,
   and says so). Clearing the 300-trade bar is only the start of that year. **Dividends:** the fund's line and the yardstick
@@ -3347,6 +3358,10 @@ more finished trades than there are, and would chase noise before then.
 
 - The owner (Dave) built this with AI help, works in **Kiro**, and is not going to read code.
   Explain in plain terms what will change and what you found. Lead with the result.
+- **Keep the site simple; no additions for show** (the owner, 19 Oct 2026: "don't just keep adding shit ... the goal is profit. when
+  i talk smarts its more in the backend"). The smarts go into how it buys and sells. What a user sees changes only when it helps
+  them; figures for the owner go on the Admin page or into the opening check and the review tool, not onto the public pages or
+  the dashboard. Whatever a change replaces goes in the same session.
 - **Correct the owner when he is wrong, and say so plainly** (his standing instruction, 17 Oct 2026: "ignore me if it makes
   no sense and is fine as is. same for everything i ask your in control here to make a good site and correct me when wrong
   ... no issue with hearing i'm wrong and you suggesting another option or skipping it completely"). For every request:
@@ -4908,3 +4923,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     +2 for such a day. Recorded as experiment idea `crypto-no-chasing`; not changed (shares come first for the owner).
   - The owner asked whether news.html is faulty for showing 300 articles: no, it is trimmed to 240 stock and 60 general articles on
     purpose (section 6), and kept out of search.
+  - **Later the same morning, from the owner's questions:** the budget follows the autopilot's results (`compound`, above; live
+    `stockiq-ai-trader` after `b3xkSDNr…`, `practice-autopilot.js?v=62`, rollback `…_before_autopilot_compound_20261019.zip`; 541
+    function, 235 panel checks, the panel-versus-function comparison replays with the switch off); his 70% goal written down as
+    gains 70% of the money moved, not of trades; the bar after 300 decided (rolling, then his year bar); Lambda calls measured at
+    about 506,000 a month over the last 3 days (half the free million; the price proxy 219,000, the crypto workers 80,000), so
+    nothing is cut for closed markets; a "hi" kept light unless the weekly review is due; no additions to the site for show.

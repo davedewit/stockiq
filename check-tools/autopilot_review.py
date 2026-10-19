@@ -35,6 +35,14 @@ GOALS_START = '2026-10-12'
 GOALS = [('2026-11-12', 'Month 1: in profit', 100, 0.0, 100000),
          ('2026-12-12', 'Month 2: in profit, and more of it', 300, 0.2, 101000),
          ('2027-01-12', 'Month 3: clearly ahead, or a decision', 500, 0.3, 102000)]
+# The owner's standing target (19 Oct 2026: "ideally our goal is 70% or more gains over losses ... closer to 100% gains as possible").
+# Measured in dollars, not in trades won (a rule that sells at +2% "wins" most trades and can still lose money, section 7b): of the
+# money its finished trades made and lost together, the share that was gains. 70% means $7 made for every $3 lost.
+GAINS_TARGET = 70.0
+def gains_share(trades):
+    up = sum(t['usd'] for t in trades if isinstance(t.get('usd'), (int, float)) and t['usd'] > 0)
+    down = -sum(t['usd'] for t in trades if isinstance(t.get('usd'), (int, float)) and t['usd'] <= 0)
+    return (100.0 * up / (up + down) if up + down > 0 else None), up, down
 EXITS = {'stop': 'at the loss limit', 'take': 'at the gain mark', 'trail': 'by the stop that followed it', 'cut': 'by its trailing stop before it had risen',
          'time': 'at the time limit', 'signal': 'signal or score turned', 'fade': 'slipped down the ranking', 'ai': 'by the AI review', 'hand': 'by the owner'}
 out_lines = []
@@ -143,6 +151,10 @@ def main():
     say(f"  still held: {len(held)} holdings, ${sum(cost.get(i) or 0 for i in held):,.0f} put in, about {paper:+,.2f} USD on paper at their last check-in (not final; the dashboard has the live figure)")
     n, avg, se = stats([t.get('pct') for t in trades])
     say(f"  the bar: {BAR} finished trades whose average is clearly ahead. So far {n}. " + ("Far too few to judge anything: read what follows as a diary, not as evidence." if n < MIN_GROUP else f"Average {avg:+.2f}% ± {se:.2f}."))
+    for words, group in (('all', trades), ('shares', [t for t in trades if group_of(t.get('screener')) != 'Coins'])):
+        share, up, down = gains_share(group)
+        if share is not None:
+            say(f"  gains as a share of the money its finished trades moved ({words}): {share:.0f}% (${up:,.0f} made, ${down:,.0f} lost); the owner's target {GAINS_TARGET:.0f}% or more")
     shares = [t for t in trades if group_of(t.get('screener')) != 'Coins' and isinstance(t.get('vs'), (int, float))]
     if shares:
         n, avg, se = stats([t['vs'] for t in shares]); say(f"  shares against an S&P 500 fund over the same days: {avg:+.2f}% a trade (± {se:.2f}, {n} trades)")

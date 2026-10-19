@@ -47,6 +47,12 @@ for uid in (owner or on)[:3]:
     print(f"  account ${g['value']:,.2f} ({g['value'] - 100000:+,.2f} since the start)" + (f"; the same $100,000 in an S&P 500 fund ${vs[0]:,.2f}: {'ahead' if vs[1] >= 0 else 'BEHIND'} by ${abs(vs[1]):,.2f}" if vs else ''))
     print(f"  {g['name']} (due {g['due']}, {g['daysLeft']} days left): {g['trades']} of {g['tradesGoal']} trades; this month {g['avg']:+.2f}% a trade "
           f"(probably between {g['avg'] - 2 * g['se']:+.2f}% and {g['avg'] + 2 * g['se']:+.2f}%, {g['n']} trades) against above {g['avgGoal']:+.1f}%; account target ${g['valueGoal']:,.0f}")
+    hist = rec.get('history') or []
+    up = sum(t['usd'] for t in hist if isinstance(t.get('usd'), (int, float)) and t['usd'] > 0); down = -sum(t['usd'] for t in hist if isinstance(t.get('usd'), (int, float)) and t['usd'] <= 0)
+    shr = [t for t in hist if not str(t.get('symbol', '')).endswith('-USD')]
+    sup = sum(t['usd'] for t in shr if isinstance(t.get('usd'), (int, float)) and t['usd'] > 0); sdn = -sum(t['usd'] for t in shr if isinstance(t.get('usd'), (int, float)) and t['usd'] <= 0)
+    if up + down > 0:   # the owner's standing target (19 Oct 2026): gains 70% or more of the money moved, in dollars
+        print(f"  gains as a share of the money moved: {100 * up / (up + down):.0f}% in all, {100 * sup / (sup + sdn) if sup + sdn else 0:.0f}% for shares (target 70% or more; $7 made for every $3 lost)")
     if vs and vs[1] < 0: finding(f"BEHIND THE S&P 500 FUND by ${abs(vs[1]):,.0f}: say so first, find which groups lost, bring changes")
     if g['n'] >= 30 and g['avg'] + 2 * g['se'] < 0: finding(f"finished trades clearly losing this month ({g['avg']:+.2f}% a trade over {g['n']}): which groups? what changes?")
     if g['daysLeft'] <= 10 and not g['met']: finding(f"{g['name']} due in {g['daysLeft']} days and not met")
