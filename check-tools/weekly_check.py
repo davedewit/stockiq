@@ -158,29 +158,87 @@ const pp = require(process.argv[2]); const PRICE = 'https://dohdeb4vpu67fa2tq3ax
 except Exception as e:
     note('2. The figures agree across the site', 'the consistency checks themselves ran', False, f"{type(e).__name__}: {e}")
 
-# ---------------------------------------------------------------- 3. real buttons
+# ---------------------------------------------------------------- 3. real buttons, every one (19 Oct 2026, the owner: "make sure its thorough")
 if not QUICK:
-    print('\n== 3. Real buttons, end to end (nothing saved)', flush=True)
-    for opt, sub, name in (('3', '8', 'Dow 30'), ('5', 'dax40', 'Germany DAX 40'), ('5', '200', 'ASX 200'), ('1', 'custom', 'a single-stock report')):
-        code, out = run(['node', os.path.join(HERE, 'page_run.js'), opt, sub], 600, cwd=tmp)
-        try:
-            s = json.loads([l for l in out.splitlines() if l.startswith('{')][-1])
-        except Exception:
-            s = {}
-        ok = s and not s.get('error') and not s.get('flags') and (opt == '1' or (s.get('trackerSymbols') or 0) >= 10)
-        note('3. Real buttons', f"{name}: runs, no error, no raw codes or 'undefined', the tracker reads its top 10", ok, {k: s.get(k) for k in ('error', 'flags', 'trackerSymbols', 'secs')} if s else out[-200:])
+    from concurrent.futures import ThreadPoolExecutor
+    print('\n== 3. Every analysis button, end to end (real worker calls; nothing saved)', flush=True)
+    keys = sorted(set(re.findall(r"'(\d-[a-z0-9]+)':\s*\{", open(os.path.join(WEB, 'screeners.js')).read())))
+    names = dict(re.findall(r"'(\d-[a-z0-9]+)':\s*\{\s*name:\s*'([^']+)'", open(os.path.join(WEB, 'screeners.js')).read()))
+    buttons = [(k.split('-')[0], k.split('-', 1)[1], names.get(k, k), True) for k in keys]
+    buttons += [('1', 'custom', 'the single-stock report (AAPL, KO)', False), ('2', 'custom', 'live trading signals', False), ('2', 'auto', 'auto-detect signals', False),
+                ('7', 'coinspot', 'the crypto screener', True), ('72', 'single', 'single coin analysis (BTC)', False)]
+    def press(b):
+        opt, sub, name, top10 = b
+        d = tempfile.mkdtemp(dir=tmp)
+        code, out = run(['node', os.path.join(HERE, 'page_run.js'), opt, sub], 900, cwd=d)
+        try: sm = json.loads([l for l in out.splitlines() if l.startswith('{')][-1])
+        except Exception: sm = {}
+        ok = bool(sm) and not sm.get('error') and not sm.get('flags') and (not top10 or (sm.get('trackerSymbols') or 0) >= 10)
+        return name, ok, ({k: sm.get(k) for k in ('error', 'flags', 'trackerSymbols', 'secs')} if sm else out[-200:]), top10
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        for name, ok, detail, top10 in pool.map(press, buttons):
+            note('3. Every analysis button', f"{name}: runs, no error, no raw codes or 'undefined'" + (', the 🎯 tracker reads its top 10' if top10 else ''), ok, detail)
+    print('\n== 4. The background run, the visitors\' limits, and your live pages (read-only)', flush=True)
+    code, out = run(['python3', os.path.join(HERE, 'run_all.py'), '3-8', '5-dax40', '5-nikkei225', '4-200'], 1800, cwd=tmp, env={'AWS_DEFAULT_REGION': 'us-east-1'})
+    for line in out.splitlines():
+        if re.match(r'^[0-9]-[a-z0-9]+ \{', line):
+            key, js = line.split(' ', 1); r = json.loads(js)
+            ok = r.get('status') == 200 and not r.get('error') and not r.get('failed_workers') and r.get('saved_report') and (r.get('results') or 0) >= 0.9 * (r.get('listed') or 1)
+            note('4. Background run and visitors', f"\"Run in Background\" for {names.get(key, key)} (the dashboard's path): every worker answers, the report is formed ({r.get('results')} of {r.get('listed')})", ok, r)
+    code, out = run(['node', os.path.join(HERE, 'anon_run.js'), '3', '8'], 600, cwd=tmp)
+    note('4. Background run and visitors', 'a visitor who is not signed in gets their one free analysis', 'result=true' in out, out.strip().splitlines()[-3:])
+    code, out = run(['node', os.path.join(HERE, 'anon_run.js'), '3', '8'], 600, cwd=tmp, env={'USED': '1'})
+    note('4. Background run and visitors', 'and after it is used, is sent to sign up before anything runs', 'result=false' in out and 'signup' in out, out.strip().splitlines()[-3:])
+    code, out = run(['node', os.path.join(HERE, 'trial_run.js'), '3', '8'], 600, cwd=tmp, env={'TRIAL': '1'})
+    note('4. Background run and visitors', 'a visitor on the free trial gets a result', 'result=true' in out, out.strip().splitlines()[-3:])
+    code, out = run(['node', os.path.join(HERE, 'trial_run.js'), '3', '8'], 600, cwd=tmp, env={'TRIAL': '1', 'USED': '5'})
+    note('4. Background run and visitors', "and with the day's 5 used, is sent to the plans before anything runs", 'result=false' in out, out.strip().splitlines()[-3:])
+    code, out = run(['node', 'visitor_bar_check.js'], 1500)
+    note('4. Background run and visitors', 'the usage chip and the sign-up buttons, for every kind of visitor, at four widths', ('ALL PASS' in out or re.search(r'all \d+ checks passed', out)) and 'FAIL' not in out, [l for l in out.splitlines() if 'FAIL' in l][:3] or out.strip().splitlines()[-1:])
+    code, out = run(['node', 'pricing_link_check.js'], 300)
+    note('4. Background run and visitors', "the home page's \"View Pricing Plans\" lands on the plans, clear of the header", code == 0 and 'FAIL' not in out, out.strip().splitlines()[-2:])
+    code, out = run(['node', 'live_practice_check.js'], 300, env={'REAL_USER': OWNER})
+    note('4. Background run and visitors', 'your Practice portfolio tab, opened as your account (read-only): it draws, with your holdings', '"shown": true' in out and 'Holding (' in out and 'Error' not in out, out.strip().splitlines()[-3:])
+    code, out = run(['node', 'live_bell_check.js', 'index.html'], 300, env={'REAL_USER': OWNER, 'PASS_GET': '1'})
+    note('4. Background run and visitors', 'the notification bell on the home page, as your account (read-only): one list, no errors', 'ONE LIST' in out and '"errors":[]' in out, out.strip().splitlines()[-2:])
+    log = os.path.expanduser('~/stockiq-daily.log')
+    if os.path.exists(log):
+        t = open(log, errors='replace').read(); age = (datetime.datetime.now().timestamp() - os.path.getmtime(log)) / 86400
+        note('4. Background run and visitors', f"the last daily update finished cleanly ({age:.0f} day{'' if round(age) == 1 else 's'} ago)", 'All done' in t and not re.search(r'could not rebase|push failed|Traceback', t) and age < 3, [l for l in t.splitlines() if re.search('could not|failed|Traceback', l)][:3] or f'{age:.1f} days old')
 
 shutil.rmtree(tmp, ignore_errors=True)
 passed, total = sum(1 for r in results if r[2]), len(results)
+# Which of the 44 parts of the site (site_parts.json) the checks cover; the rest need a person (a real login, payments, judgement)
+COVER = [('the autopilot function', 'ap-buying ap-selling ap-learning ap-status ap-switches'), ('the autopilot panel', 'ap-status ap-settings ap-screeners ap-switches ap-activity ap-doing'),
+         ('the practice portfolio', 'pp-top pp-graph pp-holdings'), ('the Admin page', 'admin'), ('notification bell', 'bell'), ('the AI chat', 'chat'),
+         ('trading signals', 'signals'), ('auto-detect signals', 'signals'), ('news list', 'news'), ('the panel works out', 'ap-settings ap-screeners'),
+         ('read clearly', 'ap-activity ap-doing admin'), ("site check's tests", 'stock-pages seo guides about-faq legal home-hero home-features home-email'),
+         ("stock lists", 'stock-lists'), ('market panel', 'home-widgets'), ('sliding panels', 'phone'), ('the header', 'phone'), ('account value', 'pp-top admin'),
+         ('S&P 500 fund since', 'pp-graph'), ('remembered buy', 'pp-holdings'), ('running total', 'ap-doing'), ('diary', 'ap-learning'), ('bill', 'costs'),
+         ('cost rule', 'costs'), ('Lambda calls', 'costs'), ('sitemap', 'seo'), ('decision day', 'admin'), ('scheduled run', 'ap-status'),
+         ('single-stock report', 'report presets'), ('crypto screener', 'crypto'), ('single coin', 'crypto'), ('tracker reads', 'tracker'),
+         ('Run in Background', 'reports-tab'), ('free analysis', 'usage-chip'), ('free trial', 'usage-chip'), ('usage chip', 'usage-chip phone'),
+         ('Pricing Plans', 'home-pricing plans'), ('Practice portfolio tab, opened', 'pp-top pp-holdings'), ('daily update', 'daily-run')]
+REGION = {'us': '3-', 'europe': 'ftse100 dax40 cac40 aex ftsemib ibex35 smi sx5e omx30', 'apac': '5-50 5-100 5-200 5-300 nikkei225 hangseng sensex kospi200 sti csi300 tw50 nzx50', 'americas': 'tsx60 bovespa ipc'}
+parts = {x['id']: x['part'] for x in json.load(open(os.path.join(HERE, 'site_parts.json')))['parts']}
+covered = set()
+for p_, name, ok, d in results:
+    for key, ids in COVER:
+        if key in name: covered.update(ids.split())
+    if p_.startswith('3.') and 'tracker' in name: covered.add('tracker')
+covered.update(f"screeners-{r}" for r in REGION if any(n for p_, n, ok, d in results if p_.startswith('3.')))
+covered &= set(parts)
+uncovered = [parts[k] for k in parts if k not in covered]
 at = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
-lines = [f"FULL CHECK OF THE SITE, {at[:10]} ({'quick' if QUICK else 'everything'}): {passed} of {total} passed", '']
+lines = [f"FULL CHECK OF THE SITE, {at[:10]} ({'quick' if QUICK else 'everything'}): {passed} of {total} passed", f"It covers {len(covered)} of the {len(parts)} parts of the site. Left to a person: " + '; '.join(uncovered) + '.', '']
 for part in sorted({r[0] for r in results}):
     lines.append(part)
     lines += [f"  {'PASS' if ok else 'FAIL'}  {name}" + ('' if ok else f"\n        {detail}") for p, name, ok, detail in results if p == part]
     lines.append('')
 os.makedirs(os.path.join(HERE, 'reviews', 'weekly'), exist_ok=True)
 open(os.path.join(HERE, 'reviews', 'weekly', f"check-{at[:10]}.txt"), 'w').write('\n'.join(lines))
-json.dump({'at': at, 'quick': QUICK, 'passed': passed, 'total': total, 'failed': [{'part': p, 'name': n, 'detail': d} for p, n, ok, d in results if not ok]},
+json.dump({'at': at, 'quick': QUICK, 'passed': passed, 'total': total, 'covered': len(covered), 'parts': len(parts), 'uncovered': uncovered,
+           'items': [{'part': p, 'name': n, 'ok': ok} for p, n, ok, d in results], 'failed': [{'part': p, 'name': n, 'detail': d} for p, n, ok, d in results if not ok]},
           open(os.path.join(HERE, 'weekly_check.json'), 'w'), indent=1)
 print('\n' + lines[0])
 if not QUICK:
@@ -189,9 +247,8 @@ if EMAIL:
     try:
         import boto3
         failed = [f"- {p}: {n}" for p, n, ok, d in results if not ok]
-        body = (f"{lines[0]}\n\n" + ('Everything passed: every test suite on the live code, the figures agreeing across the pages (account, holdings, '
-                'trades, bill, sitemap), and real screener buttons.' if not failed else 'What failed (a session fixes these first):\n' + '\n'.join(failed))
-                + f"\n\nThe full report: stockiq/check-tools/reviews/weekly/check-{at[:10]}.txt. The Admin page shows the same result.\n\nStockIQ")
+        body = (('What failed (a session fixes these first):\n' + '\n'.join(failed) + '\n\n' if failed else 'Everything passed.\n\n')
+                + '\n'.join(lines) + '\nThe Admin page shows the same list under "Full check of the site".\n\nStockIQ')
         boto3.Session(profile_name='default', region_name='us-east-1').client('ses').send_email(
             Source='StockIQ <autopilot@stockiq.tech>', Destination={'ToAddresses': [OWNER]},
             Message={'Subject': {'Data': f"StockIQ full check: {'all ' + str(total) + ' passed' if passed == total else str(total - passed) + ' of ' + str(total) + ' failed'}"},

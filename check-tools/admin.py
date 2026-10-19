@@ -85,7 +85,8 @@ elif args[0] == 'weekly':
     while datetime.now(timezone.utc).minute % 30 in (9, 10, 11, 12, 13):
         time.sleep(20)
     admin = load()
-    admin.setdefault('plan', {})['weekly'] = {k: w[k] for k in ('at', 'passed', 'total')} | {'failed': [f['name'] for f in w['failed']][:20]}
+    admin.setdefault('plan', {})['weekly'] = {k: w[k] for k in ('at', 'passed', 'total')} | {'failed': [f['name'] for f in w['failed']][:20],
+        'covered': w.get('covered'), 'parts': w.get('parts'), 'uncovered': w.get('uncovered', [])[:12], 'items': [[i['part'][:2].strip('. '), i['name'][:150], i['ok']] for i in w.get('items', [])][:140]}
     save(admin)
     print(f"the Admin page's full check: {w['passed']} of {w['total']} passed")
 elif args[0] == 'change' and len(args) >= 2:
