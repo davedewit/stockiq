@@ -4974,4 +4974,5 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     asked of AWS). Under 30 trading days: "Too early to tell (N of 30 trading days)" with the days ahead so far; then Low (under 70%),
     Medium (70 to 90%), High (90% or more), the chance the daily lead is real from its average over its margin of error, with the
     plain reason, and "about the past only, not a forecast". Owner only; never on the Practice portfolio tab. On 19 Oct: 4 trading
-    days, ahead on 3. Tests in `admin_panel_test.js` (3).
+    days, ahead on 3. Tests in `admin_panel_test.js` (3). The goal card (with this line) sits straight under the tiles since the same
+    evening (it was the seventh card down, and the owner could not find it).
