@@ -835,12 +835,73 @@ def update_stock_page(symbol, news_html):
     
     return True
 
+def fix_news_dates(dry_run=False, only=None):
+    """One-off repair (19 Oct 2026): set each article's data-timestamp on the stock pages back to the date the article itself shows.
+    The removed "refresh" step had set every timestamp on a page to its newest article's date; the browser rewrites the date
+    shown from the timestamp, so History buttons and older articles read the wrong day. Only the NEWS section is touched; a page
+    whose timestamps are already right is not written (so it is not uploaded again). Returns (pages changed, stamps changed)."""
+    from datetime import timezone as _tz
+    pages = stamps = 0
+    files = sorted(f for f in os.listdir(STOCKS_DIR) if f.endswith('.html'))
+    for name in files:
+        if only and name[:-5] not in only:
+            continue
+        path = os.path.join(STOCKS_DIR, name)
+        with open(path, 'r') as f:
+            page = f.read()
+        m = re.search(r'(<!-- NEWS_SECTION_START -->)(.*?)(<!-- NEWS_SECTION_END -->)', page, re.S)
+        if not m:
+            continue
+        section, changed = m.group(2), 0
+        def shown_date(text):
+            d = re.match(r'\s*(?:Published: )?\w{3}, (\w+ \d{1,2}, \d{4}) at (\d{1,2}:\d{2} [AP]M) UTC', text)
+            if not d:
+                return None
+            try:
+                return datetime.strptime(f"{d.group(1)} {d.group(2)}", '%B %d, %Y %I:%M %p').replace(tzinfo=_tz.utc).isoformat()
+            except ValueError:
+                return None
+        def fix_p(match):
+            nonlocal changed
+            iso_now = shown_date(match.group(3))
+            try:
+                off = abs((datetime.fromisoformat(match.group(2).replace('Z', '+00:00')) - datetime.fromisoformat(iso_now)).total_seconds()) if iso_now else 0
+            except ValueError:
+                off = 10 ** 9
+            if not iso_now or off < 600:                    # the shown date has minutes only: within ten minutes counts as right
+                return match.group(0)
+            changed += 1
+            return match.group(1) + iso_now + match.group(0)[len(match.group(1)) + len(match.group(2)):]
+        section = re.sub(r'(<p [^>]*?data-timestamp=")([^"]*)"[^>]*class="article-date"[^>]*>([^<]*)', fix_p, section)
+        # a History button carries the timestamp of the article it opens: take it from that article's own (now right) stamp
+        def fix_btn(match):
+            nonlocal changed
+            inner = re.search(r'data-timestamp="([^"]*)"[^>]*class="article-date"', match.group(4))
+            if not inner or inner.group(1)[:16] == match.group(2)[:16]:
+                return match.group(0)
+            changed += 1
+            return match.group(1) + inner.group(1) + match.group(3) + match.group(4)
+        section = re.sub(r'(<button data-timestamp=")([^"]*)("[^>]*class="collapsed-btn".*?</button>)(\s*<div id="older-news-[^"]*"[^>]*>.*?class="article-date"[^>]*>)', fix_btn, section, flags=re.S)
+        if changed:
+            pages += 1
+            stamps += changed
+            if not dry_run:
+                with open(path, 'w') as f:
+                    f.write(page[:m.start(2)] + section + page[m.end(2):])
+    return pages, stamps
+
+
 def main():
     import sys
     import os
     
     force_update = os.getenv('UPDATE_STOCK_NEWS', 'false').lower() == 'true'
     
+    if len(sys.argv) > 1 and sys.argv[1] == '--fix-dates':
+        dry = '--dry-run' in sys.argv
+        pages, stamps = fix_news_dates(dry_run=dry, only=[a.upper() for a in sys.argv[2:] if not a.startswith('--')] or None)
+        print(f"{'(dry run) would correct' if dry else 'Corrected'} {stamps} news date stamps on {pages} stock pages")
+        return
     if len(sys.argv) > 1:
         arg = sys.argv[1]
         # Check if CSV file
@@ -949,34 +1010,10 @@ def main():
             with open(file_path, 'r') as f:
                 page_content = f.read()
             if latest_news['title'] in page_content:
-                # Update timestamp even if article is the same (fresh signal for Google)
-                import random
-                now = datetime.now()
-                read_time = random.choice([2, 3, 4])
-                today = now.strftime(f'%a, %B %-d, %Y at %-I:%M %p UTC {read_time} min read')
-                today_iso = now.isoformat()
-                # Update both the date text and timestamp attribute
-                updated_content = re.sub(
-                    r'data-timestamp="[^"]*"[^>]*class="article-date"[^>]*>Published: [^<]+',
-                    f'data-timestamp="{today_iso}" class="article-date">Published: {today}',
-                    page_content
-                )
-                # Update data-timestamp attribute
-                from dateutil import parser as date_parser
-                if latest_news.get('date'):
-                    try:
-                        pub_date = date_parser.parse(latest_news['date'])
-                        date_iso = pub_date.isoformat()
-                        updated_content = re.sub(
-                            r'data-timestamp="[^"]*"',
-                            f'data-timestamp="{date_iso}"',
-                            updated_content
-                        )
-                    except:
-                        pass
-                with open(file_path, 'w') as f:
-                    f.write(updated_content)
-                continue  # Skip adding duplicate article but timestamp is refreshed
+                # The page already has its newest article: leave it alone. (Until 19 Oct 2026 the page was "refreshed" here
+                # for Google, which set every article's data-timestamp to the newest article's date, so the History showed
+                # wrong dates, and rewrote hundreds of unchanged pages a day, which the deploy then uploaded again.)
+                continue
         
         print(f"📰 {symbol}: {latest_news['title'][:60]}...")
         
@@ -997,7 +1034,7 @@ def main():
             news_section_match = re.search(r'<!-- NEWS_SECTION_START -->(.*?)<!-- NEWS_SECTION_END -->', updated_content, re.DOTALL)
             if news_section_match:
                 # Count: 1 latest + collapsed buttons
-                article_count = 1 + news_section_match.group(1).count('<button onclick=')
+                article_count = 1 + news_section_match.group(1).count('class="collapsed-btn"')      # the History buttons
             else:
                 article_count = 1
             
