@@ -5031,3 +5031,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     month's goal and the real-money decision, soonest first. A row "🔁 What runs by itself" (`selfRunHtml`) lists each automatic job,
     how often and when it last ran, with a green or red dot; the daily review's latest report date comes via `admin.py audit` (the
     daily deploy runs it) as `plan.dailyReview`.
+  - **Known-ending problems no longer call the owner in:** `site_audit.py` `KNOWN['stale-until']` leaves stock pages known to be stale for a
+    reason that ends by itself out of the stale count until their date (BEZ.L, SDR.L, PSKY until 24 Oct), and counts them again after
+    it. "Coming up" says "when you can, by <date>" for amber and "now" only for red; far-off dates show their year.
+  - **`check-tools/web_deploy.sh`**: the shared website deploy (fingerprint checks, upload with the right cache rules, CloudFront,
+    compare with the live file). A one-off website deploy is now `pending-<name>/deploy.sh` of three lines: `ROWS="file:was:new …"
+    exec bash /Users/dave/VSCODE/stockiq/check-tools/web_deploy.sh <its folder>`.

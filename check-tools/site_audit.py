@@ -34,6 +34,9 @@ OUT = os.path.join(HERE, 'audit')
 GUIDES = ('stock-analysis-guide.html', 'stock-screener-guide.html', 'technical-analysis-guide.html', 'investment-research-tools.html')
 # Accepted on purpose, with the reason, so that they are not reported every night
 KNOWN = {
+    # stock pages known to be stale for a reason that ends by itself, with the day it should be over: left out of the stale count
+    # until then, counted again after it (19 Oct 2026: they turned the Admin page's check-in card amber for nothing)
+    'stale-until': {'BEZ.L': '2026-10-24', 'SDR.L': '2026-10-24', 'PSKY': '2026-10-24'},   # taken over / no usable prices; the 21-day rule de-indexes them
     'duplicate-code': {'toggleMobileMenu', 'closeMobileMenu', 'showDropdown', 'hideDropdown', 'toggleDropdown', 'toggleTheme', 'logout',
                        'fillMobileSidebar', 'emptyMobileSidebar', 'toggleMobileSidebar', 'closeMobileSidebar',   # each page's own menu and sidebar hooks (mobile-sidebar.js calls them)
                        'gtag',                                                    # Google Analytics' own snippet, on every page by design
@@ -95,7 +98,8 @@ def main():
             except ValueError:
                 pass
     if dates:
-        newest = max(dates.values()); old = sorted((d, s_) for s_, d in dates.items() if (newest - d).days > 4)
+        today = _dt.utcnow().strftime('%Y-%m-%d')
+        newest = max(dates.values()); old = sorted((d, s_) for s_, d in dates.items() if (newest - d).days > 4 and not today <= KNOWN['stale-until'].get(s_, ''))
         if old:
             find('stale-stock-pages', 'problem', f'{len(old)} of {len(dates)} indexed stock pages show data more than 4 days older than the newest '
                  f'({newest:%d %b}); the oldest {old[0][0]:%d %b} (e.g. {", ".join(s_ for _, s_ in old[:4])})',
