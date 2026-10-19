@@ -75,6 +75,16 @@ try:
 except Exception as e:
     print(f'  not worked out ({type(e).__name__}): node check-tools/versus_market.js <account>')
 
+# 1d. the full check of the site (weekly_check.py), every 7 days or more (19 Oct 2026, the owner)
+try:
+    w = json.load(open(os.path.join(HERE, 'weekly_check.json')))
+    wage = (datetime.datetime.now(datetime.timezone.utc) - datetime.datetime.strptime(w['at'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=datetime.timezone.utc)).days
+    print(f"\n== 1d. The full check of the site\n  last {w['at'][:10]} ({wage} days ago){' (quick)' if w.get('quick') else ''}: {w['passed']} of {w['total']} passed")
+    for f in w.get('failed', []): finding(f"full check: {f['name']}: {f['detail'][:120]}")
+    if wage >= 7: finding('the full check of the site is 7 days old or more: python3 check-tools/weekly_check.py (about 15 minutes), then read a tab with clarity_check.py --keep and tell the owner in plain words what was checked')
+except FileNotFoundError:
+    finding('the full check of the site has never run: python3 check-tools/weekly_check.py')
+
 # 1b. the nightly site check (site_audit.py, run by the daily deploy): its problems are findings
 head('1b. The nightly site check')
 try:

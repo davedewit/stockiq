@@ -125,5 +125,20 @@ async function page(status, uid) {
     check('a lead carried by its three biggest winners fails that check', /✗ Still ahead without its 3 biggest winning trades \(behind by \$676 without them\)/.test(t), t);
     check('it never says more than a small trial, and says it is not advice', /about 10% of what you would invest/.test(fs.readFileSync(process.argv[2], 'utf8')) && /Not financial advice/.test(t));
   }
+  if (/function needMeHtml/.test(fs.readFileSync(process.argv[2], 'utf8'))) { // "Do you need to check in?" and the full check (19 Oct 2026)
+    const keep = JSON.parse(JSON.stringify(ADMIN)), today = new Date().toISOString();
+    const look = async () => { const q = await page(200, 'dave@x.com'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' '); return pl; };
+    ADMIN.open = []; ADMIN.health = { at: today, ran: 1, on: 1, failed: 0 }; ADMIN.usage = Object.assign({}, ADMIN.usage, { costStockiq: 0.48, costExplorer: 2.65, costExplorerKnown: 2.65 });
+    ADMIN.plan = Object.assign({}, ADMIN.plan, { changes: [{ at: today.slice(0, 10), what: 'x' }], weekly: { at: today, passed: 25, total: 25, failed: [] }, audit: Object.assign({}, (ADMIN.plan || {}).audit || {}, { problems: 0, ideas: 0, findings: [] }) });
+    let pl = await look();
+    check('all in order: "No, all good" at the very top, with the reasons, and the full check\'s card', /^\s*\S*.{0,200}Do you need to check in\? No, all good Nothing needs you: the autopilot is running normally; the full check passed all 25 \(today\); the bill is in order \(\$0\.48 this month\); the last session was today/.test(pl) && /Full check of the site ✓ All 25 checks passed/.test(pl), pl.slice(0, 500));
+    ADMIN.plan.weekly = { at: today, passed: 23, total: 25, failed: ['the trading signals', 'the sitemap'] };
+    pl = await look();
+    check('a failed full check: "Yes, please check in", and the card lists what failed', /Do you need to check in\? Yes, please check in Open a session and say hi: the full check found 2 problems/.test(pl) && /2 of 25 checks failed/.test(pl) && /the sitemap/.test(pl), pl.slice(0, 400));
+    ADMIN.plan.weekly = { at: today, passed: 25, total: 25, failed: [] }; ADMIN.plan.changes = [{ at: new Date(Date.now() - 9 * 86400000).toISOString().slice(0, 10), what: 'x' }];
+    pl = await look();
+    check('nine days since the last session: "When you can", the weekly review and improvements due', /Do you need to check in\? When you can Nothing is broken, but a session would help: the last session was 9 days ago: the weekly review and new improvements are due/.test(pl), pl.slice(0, 400));
+    Object.keys(ADMIN).forEach(k => delete ADMIN[k]); Object.assign(ADMIN, keep);
+  }
   console.log(ok ? 'ALL PASS' : 'SOME FAILED'); process.exit(ok ? 0 : 1);
 })();

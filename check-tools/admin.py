@@ -54,11 +54,14 @@ elif args[0] == 'sync':
     reviews = sorted(({'part': p['part'], 'at': l['at'], 'found': l['found']} for p in parts for l in p.get('log', [])), key=lambda x: x['at'], reverse=True)[:8]
     keep = ('id', 'what', 'angle', 'measure', 'status', 'started', 'decide', 'decided', 'result', 'order', 'public', 'publicText')
     kept = (admin.get('plan') or {}).get('audit')                  # the nightly site check stays when the improvements are synced
+    kept_weekly = (admin.get('plan') or {}).get('weekly')          # and so does the last full check
     changes = json.load(open(os.path.join(here, 'changes.json')))['changes'][:12]
     admin['plan'] = {'at': now(), 'items': [{k: e[k] for k in keep if k in e} for e in ex], 'reviews': reviews,
                      'parts': len(parts), 'reviewed': sum(1 for p in parts if p.get('last'))}
     if kept:
         admin['plan']['audit'] = kept
+    if kept_weekly:
+        admin['plan']['weekly'] = kept_weekly
     admin['plan']['changes'] = changes
     save(admin)
     print(f"the Admin page's improvements: {len(ex)} items, {len(reviews)} recent reviews")
@@ -74,6 +77,17 @@ elif args[0] == 'audit':
     admin.setdefault('plan', {})['audit'] = {k: a[k] for k in ('at', 'problems', 'ideas', 'new', 'gone')} | {'findings': a['findings'][:40]}
     save(admin)
     print(f"the Admin page's site check: {a['problems']} problems, {a['ideas']} ideas")
+elif args[0] == 'weekly':
+    # The full check (weekly_check.py, every 7 days or more): its result onto the Admin page, clear of :10 and :40 past the hour
+    import time
+    here = os.path.dirname(os.path.abspath(__file__))
+    w = json.load(open(os.path.join(here, 'weekly_check.json')))
+    while datetime.now(timezone.utc).minute % 30 in (9, 10, 11, 12, 13):
+        time.sleep(20)
+    admin = load()
+    admin.setdefault('plan', {})['weekly'] = {k: w[k] for k in ('at', 'passed', 'total')} | {'failed': [f['name'] for f in w['failed']][:20]}
+    save(admin)
+    print(f"the Admin page's full check: {w['passed']} of {w['total']} passed")
 elif args[0] == 'change' and len(args) >= 2:
     # A line for "What changed lately" on the Admin page (18 Oct 2026, the owner: "easy for me to read on admin page what is
     # going on"); then the page's copy is brought up to date.

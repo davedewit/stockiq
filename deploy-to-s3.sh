@@ -466,5 +466,13 @@ if [ "$GIT_PUSH_NEEDED" = true ]; then
     fi
 fi
 
+# The full check of the site, every 7 days (check-tools/weekly_check.py; 19 Oct 2026, the owner: "if done without you ... add it as
+# a report to the admin page ... or email me"). Called every day, it works only when the last full check is 7 days old. It runs in
+# the background (about 15 minutes) so the deploy finishes; its result goes onto the Admin page and to the owner by email.
+if [ "$DRY_RUN" != "true" ] && [ "$UPDATE_STOCK_NEWS" = "true" ]; then
+    (cd "/Users/dave/VSCODE/stockiq/check-tools" && nohup "$PYTHON" weekly_check.py --if-due --email > "$HOME/stockiq-weekly-check.log" 2>&1 &)
+    echo "🧪 Full check of the site: started in the background if due (log: ~/stockiq-weekly-check.log)"
+fi
+
 echo ""
 echo "✅ All done!"

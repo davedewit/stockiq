@@ -61,6 +61,27 @@ deploy, refused anything but reading, the read-only checks, its report (`check-t
 the Admin page; 50 minutes at most; a trial that ends by itself on 1 Nov 2026 unless `reviews/daily/KEEP` exists (experiments
 `daily-review`). Installed by the owner on 18 Oct 2026; a session reads its reports in `check-tools/reviews/daily/` and acts on them.
 
+**THE FULL CHECK OF THE SITE, EVERY 7 DAYS, BY ITSELF: `python3 check-tools/weekly_check.py`** (19 Oct 2026; the owner: "do a full
+check of everything ... consistency and confidence everything is good ... i want you to say hey i checked everything ... i checked
+xyz"). One command, read-only, about 15 minutes: (1) every test suite against the LIVE code (the autopilot function, the panel, the
+practice portfolio, the Admin page, the bell, the chat, the signals, the news list, the panel-versus-function comparison, the
+clarity check, the nightly site check's tests, the screener lists, the worker packages, the market panel, the phone panels, the
+header); (2) the figures agreeing across the site (the account value on the Admin page and on the Practice portfolio tab, the
+S&P 500 fund both ways, every holding with its remembered buy, the budget within the money, the autopilot's running total against
+its trades, the diary against the record, the bill's parts, the cost rule, Lambda calls, the sitemap against the indexed pages,
+the last scheduled run); (3) real buttons (Dow 30, DAX 40, ASX 200, a single-stock report) through the page's code, nothing saved.
+Report `check-tools/reviews/weekly/check-<date>.txt`, `weekly_check.json`, a card "🧪 Full check of the site" on the Admin page
+(`admin.py weekly`), and an email to the owner (`--email`). **The daily update starts it in the background when 7 days have
+passed** (`--if-due`, end of `deploy-to-s3.sh`, log `~/stockiq-weekly-check.log`); session_start part 1d makes a failure or a check
+7+ days old a finding. **A session acts on every failure first, then reads a dashboard tab in full (`clarity_check.py --keep`) and
+tells the owner in plain words what was checked and what was fixed. When a fault is found by hand, add a check for it here.**
+The script is the floor; the daily Claude review and the sessions are the eyes. **"🤖 Do you need to check in?"** heads the Admin page
+(`needMeHtml`; the owner: "then i can go there on my phone see if you need me"): **Yes, please check in** (red: a failed check-in,
+the autopilot not run for 2 hours, a failed full check, the bill), **When you can** (amber: the last session 7+ days ago, going by
+"What changed lately", so the weekly review and new improvements are due; decisions waiting; site-check problems; a full check 8+
+days old), **No, all good** (green, with the reasons). **So every session that changes anything must add a line with `admin.py
+change`**, or the card will think no session happened.
+
 **THE PAGE IS READ AS THE OWNER READS IT, EVERY SESSION: `python3 check-tools/clarity_check.py`** (session_start runs it; built 17
 Oct 2026 after the owner, having pointed at one confusing thing after another himself: "anything else confusing you want to
 optimise? and i'm tired of asking this!"). It draws the AI autopilot tab and the Admin page from the site's own scripts with the
