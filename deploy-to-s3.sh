@@ -148,14 +148,6 @@ else
     echo "⏭️  Skipping stock data snapshots"
 fi
 
-# The site checked every night (links, search basics, copied code, made-up visuals, page weight...): findings onto the Admin page.
-# Read-only on the site's files; never stops the deploy.
-if [ "$DRY_RUN" != "true" ]; then
-    $PYTHON "/Users/dave/VSCODE/stockiq/check-tools/site_audit.py" --admin || echo "⚠️  Site check not run"
-else
-    $PYTHON "/Users/dave/VSCODE/stockiq/check-tools/site_audit.py" || echo "⚠️  Site check not run"
-fi
-
 # Remove backups older than 30 days (for both website and stockiq)
 echo "🧹 Removing backups older than 30 days..."
 find "$BACKUP_DIR_BASE" -maxdepth 1 -type d -name "*_backup_*" -mtime +30 -exec rm -rf {} +
@@ -204,6 +196,15 @@ $PYTHON "/Users/dave/VSCODE/stockiq/people_also_watch_stocks.py" --missing
 # Update sitemap with current date
 echo "📅 Updating sitemap dates..."
 $PYTHON "/Users/dave/VSCODE/stockiq/update_sitemap.py"
+
+# The site checked every night, after the sitemap is rebuilt so that it reads the final files (links, search basics, copied code, made-up visuals, page weight...): findings onto the Admin page.
+# Read-only on the site's files; never stops the deploy.
+if [ "$DRY_RUN" != "true" ]; then
+    $PYTHON "/Users/dave/VSCODE/stockiq/check-tools/site_audit.py" --admin || echo "⚠️  Site check not run"
+else
+    $PYTHON "/Users/dave/VSCODE/stockiq/check-tools/site_audit.py" || echo "⚠️  Site check not run"
+fi
+
 
 # Clean up broken article links in news.html
 echo "🧹 Cleaning up broken links..."

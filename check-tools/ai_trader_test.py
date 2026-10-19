@@ -1547,4 +1547,45 @@ if hasattr(m, 'market_gauge'):
     check('a buy remembers the gauge at the moment it was bought, and the shared record takes it', facts.get('mg') == 2 and 'mg' in m.POOL_FIELDS, facts)
     check('the news read of the themes part is every trading day now (it was weekly)', m.THEME_AI_EVERY_DAYS < 1)
     m._GAUGE.clear()
+# ---- company figures with each share bought (19 Oct 2026): a measurement, from the site's daily file; never for a coin
+if hasattr(m, 'company_figures'):
+    m._FIGURES.update(f={'AAA': {'as_of': '2026-10-13', 'profit_margin': 12.345, 'debt_to_equity': 0.44685, 'revenue_growth': -1.94, 'pe_ratio': 22.04, 'price_to_book': 3.0},
+                         'BBB': {'profit_margin': None, 'debt_to_equity': float('nan'), 'revenue_growth': True}}, at=m._clock.time())
+    st = {'open': {}}
+    cand = {'symbol': 'AAA', 'label': 'AAA', 'screener': '3-3', 'rank': 1, 'score': 1.0, 'rsi': 50, 'd7': 1, 'd30': 2, 'volume': 1, 'kind': 'stock'}
+    facts = m.remember_buy(st, {'id': 'f1', 'boughtAt': m.iso(T0)}, cand, dict(m.DEFAULTS, risk=3, maxHoldDays=10), 'model')
+    check('a share bought keeps its profit margin, debt, growth and P/E, rounded, and the shared record takes them', (facts.get('pm'), facts.get('de'), facts.get('rg'), facts.get('pe')) == (12.3, 0.45, -1.9, 22.0) and all(k in m.POOL_FIELDS for k in ('pm', 'de', 'rg', 'pe')), facts)
+    coin = dict(cand, symbol='AAA', kind='coin')
+    facts = m.remember_buy(st, {'id': 'f2', 'boughtAt': m.iso(T0)}, coin, dict(m.DEFAULTS, risk=3, maxHoldDays=10), 'model')
+    check('a coin carries no company figures', not any(k in facts for k in ('pm', 'de', 'rg', 'pe')), facts)
+    facts = m.remember_buy(st, {'id': 'f3', 'boughtAt': m.iso(T0)}, dict(cand, symbol='BBB'), dict(m.DEFAULTS, risk=3, maxHoldDays=10), 'model')
+    check('missing, broken or true/false figures are left out, and a share not in the file has none', not any(k in facts for k in ('pm', 'de', 'rg', 'pe')) and m.company_figures('ZZZ') == {}, facts)
+    m._FIGURES.update(f=None, at=0)
+    check('not running as the function and with nothing loaded, the file is not asked for', m.company_figures('AAA') == {})
+# ---- the bill split (19 Oct 2026): StockIQ's own cost, the Cost Explorer part and the other projects, from CloudWatch (free)
+if hasattr(m, 'KNOWN_CE'):
+    class _Bill:
+        def __init__(self, kind): self.kind = kind
+        def get_cost_and_usage(self, **k): raise AssertionError('Cost Explorer costs $0.01 a reading')
+        def get_caller_identity(self): return {'Account': '123'}
+        def describe_budget(self, **k): return {'Budget': {'BudgetLimit': {'Amount': '1.5'}, 'CalculatedSpend': {'ActualSpend': {'Amount': '3.242'}}}}
+        def get_metric_statistics(self, **k):
+            if k['Namespace'] == 'AWS/Lambda': return {'Datapoints': [{'Timestamp': dt.datetime(2026, 10, 18), 'Sum': 3000.0}]}
+            dims = {d['Name']: d['Value'] for d in k['Dimensions']}
+            assert dims.get('LinkedAccount') == '123' and k['Namespace'] == 'AWS/Billing'
+            v = {None: (3.0, 3.13), 'AWSCostExplorer': (2.6, 2.65)}[dims.get('ServiceName')]
+            return {'Datapoints': [{'Timestamp': dt.datetime(2026, 10, 18, 3), 'Maximum': v[0]}, {'Timestamp': dt.datetime(2026, 10, 19, 3), 'Maximum': v[1]}]}
+    _real = m.boto3.client; m.boto3.client = lambda kind, **k: _Bill(kind)
+    u = m.aws_usage(dt.datetime(2026, 10, 19, 9, 0), {})
+    check('the bill is split: StockIQ $0.48 from the latest figure, Cost Explorer $2.65 (all of it known), other projects $0.11, and a month forecast', (u.get('costStockiq'), u.get('costExplorer'), u.get('costExplorerKnown'), u.get('costOther'), u['cost']) == (0.48, 2.65, 2.65, 0.11, 3.24) and 0.7 < u.get('costStockiqForecast', 0) < 0.85, u)
+    u = m.aws_usage(dt.datetime(2026, 11, 3, 9, 0), {})
+    check('in another month the October charge is not "known": any Cost Explorer charge would show as new', u.get('costExplorerKnown') == 0.0, u)
+    class _NoSplit(_Bill):
+        def get_metric_statistics(self, **k):
+            if k['Namespace'] == 'AWS/Billing': raise RuntimeError('no billing figures')
+            return _Bill.get_metric_statistics(self, **k)
+    m.boto3.client = lambda kind, **k: _NoSplit(kind)
+    u = m.aws_usage(dt.datetime(2026, 10, 19, 9, 0), {})
+    check('without the billing figures the page gets the plain bill as before, and the calls', u['cost'] == 3.24 and 'costStockiq' not in u and u.get('splitError') == 'RuntimeError' and u['calls'] == 3000, u)
+    m.boto3.client = _real
 print('ALL PASS' if ok else 'SOME FAILED')
