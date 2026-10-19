@@ -182,6 +182,16 @@ def main():
         groups = {}
         for t in later: groups.setdefault(EXITS.get(t.get('exit'), str(t.get('exit'))), []).append(t['after'])
         for g, v in sorted(groups.items()): n, avg, se = stats(v); say(f"    sold {g:<42} {n:>3} trades  went on {avg:+.2f}% (± {se:.2f})")
+    # a week and a month after each sale, against the S&P 500 fund over the same days (recorded from 19 Oct 2026): would holding on
+    # have paid, more than the market? A plus means the share beat the fund after it was sold (selling it cost money)
+    for field, words in (('a7', 'a week'), ('a30', 'a month')):
+        rows_l = [t for t in trades if t.get(field) is not None]
+        if not rows_l:
+            continue
+        say(f"  {words} after the sale, the share against an S&P 500 fund over the same days (a plus means holding on would have beaten the fund):")
+        groups = {}
+        for t in rows_l: groups.setdefault(EXITS.get(t.get('exit'), str(t.get('exit'))), []).append(t[field] - (t.get(field + 'm') or 0.0))
+        for g, v in sorted(groups.items()): n, avg, se = stats(v); say(f"    sold {g:<42} {n:>3} trades  {avg:+.2f}% (± {se:.2f})" + ('   too few to read' if n < 30 else ''))
 
     say("\n5. WHAT IT DID AND DID NOT DO (activity lines in the period)")
     kinds = {k: sum(1 for e in lines if e.get('type') == k) for k in ('buy', 'sell', 'note')}

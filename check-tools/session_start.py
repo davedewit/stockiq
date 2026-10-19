@@ -60,6 +60,15 @@ for uid in (owner or on)[:3]:
             finding(f"the themes part's monthly change is overdue (last {th['last'][:10]}): look at the function's log")
 
 
+# 1c. the account against the market, day by day (19 Oct 2026, the owner: whether it does well on the days the market falls is
+# "something AI thinks about"): the dashboard's own sums, against an S&P 500 fund and an all-world fund
+head('1c. Against the market, day by day (the graph\'s own sums)')
+try:
+    out = subprocess.run(['node', os.path.join(HERE, 'versus_market.js'), on[0]], capture_output=True, text=True, timeout=180).stdout if on else ''
+    print('\n'.join('  ' + l for l in out.strip().splitlines()[-9:]) or '  not worked out')
+except Exception as e:
+    print(f'  not worked out ({type(e).__name__}): node check-tools/versus_market.js <account>')
+
 # 1b. the nightly site check (site_audit.py, run by the daily deploy): its problems are findings
 head('1b. The nightly site check')
 try:

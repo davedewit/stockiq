@@ -2,6 +2,22 @@
  "about": "What the sessions changed on the site, newest first, in plain words for the owner's Admin page ('What changed lately'). Add with: python3 check-tools/admin.py change \"<what>\". Nothing private: both repositories are public.",
  "changes": [
   {
+   "at": "2026-10-19",
+   "what": "Every sale is now looked at again a week and a month later, each against the S&P 500 over the same days, so the reviews can tell whether holding on would have paid"
+  },
+  {
+   "at": "2026-10-19",
+   "what": "The Admin page's bill now shows your whole AWS bill first, then StockIQ's part of it (the one-off Cost Explorer charge included), then what running the site costs, service by service"
+  },
+  {
+   "at": "2026-10-19",
+   "what": "Every share the autopilot buys now keeps its profit margin, debt and revenue growth, so the reviews can tell whether healthier companies do better (a measurement; it buys nothing differently)"
+  },
+  {
+   "at": "2026-10-19",
+   "what": "The Admin page's AWS figure now shows what StockIQ itself costs to run ($0.48 this month, on course for about $0.80), with the one-off $2.65 Cost Explorer charge of 17 Oct and your other projects ($0.11) listed apart, so the red $3.24 is gone"
+  },
+  {
    "at": "2026-10-18",
    "what": "Made for a laptop that is often off for days: stock news now looks back a week, stock pages keep their figures up to three weeks before leaving Google, and the first daily update after a gap catches up by itself."
   },

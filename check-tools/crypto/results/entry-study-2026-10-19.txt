@@ -1,0 +1,25 @@
+ENTRIES INTO THE COIN TOP 10 since 11 Oct 2026 11:52 UTC, at least 6 hours old: 497 (of 591 logged), 102 different coins, on 9 days; 19 Oct 2026 08:40 UTC
+hours since entering: median 95, longest 189
+  all entries                              497 entries   since entering: average  -3.72% (± 0.77)   median  -2.78%   up 184, down 313
+by its rise in the 24 hours before it entered:
+    up 10% or more                         123 entries   since entering: average -13.87% (± 1.88)   median -12.37%   up 22, down 101
+    up 3% to 10%                           149 entries   since entering: average  +1.26% (± 1.25)   median  -2.03%   up 63, down 86
+    under 3%, or down                      225 entries   since entering: average  -1.48% (± 0.89)   median  -0.51%   up 99, down 126
+by its rise in the 7 days before it entered:
+    up 20% or more                         175 entries   since entering: average  -7.04% (± 1.63)   median  -7.50%   up 53, down 122
+    up 5% to 20%                           214 entries   since entering: average  -3.11% (± 0.97)   median  -3.17%   up 72, down 142
+    under 5%, or down                      108 entries   since entering: average  +0.43% (± 1.20)   median  +0.03%   up 59, down 49
+by the day it entered:
+    11 Oct                                  33 entries   since entering: average  -7.64% (± 4.39)   median -11.36%   up 6, down 27
+    12 Oct                                  70 entries   since entering: average  -8.82% (± 1.66)   median -10.99%   up 12, down 58
+    13 Oct                                  51 entries   since entering: average  -4.66% (± 2.15)   median  -6.92%   up 15, down 36
+    14 Oct                                  63 entries   since entering: average  -1.60% (± 2.09)   median  -4.81%   up 17, down 46
+    15 Oct                                  66 entries   since entering: average  -2.26% (± 2.69)   median  -0.34%   up 30, down 36
+    16 Oct                                  59 entries   since entering: average  -5.34% (± 2.40)   median  -2.85%   up 21, down 38
+    17 Oct                                  69 entries   since entering: average  -0.95% (± 1.80)   median  -0.61%   up 31, down 38
+    18 Oct                                  77 entries   since entering: average  -1.49% (± 1.44)   median  +0.22%   up 46, down 31
+    19 Oct                                   9 entries   since entering: average  +0.20% (± 1.17)   median  +0.80%   up 6, down 3
+the large coins over the last day, for scale (now against yesterday's close):
+  BTC-USD: +0.99%
+  ETH-USD: +1.14%
+  SOL-USD: +1.75%

@@ -35,7 +35,8 @@ $0.56 that month, mostly the autopilot panel re-reading the record every minute 
 minutes, the bell every 10), S3 requests from the daily deploy, and Cost Explorer questions ($0.01 each). **NEVER ASK COST
 EXPLORER, FROM ANYTHING** (the owner, 17 Oct 2026: "i do not want to pay 1c just to check usage!"): on 17 Oct the autopilot's test
 suite, run on this Mac, asked it 253 times through the function's own bill-reading code (about $2.53, the session's fault; found
-in CloudTrail's free event history). The bill is read from the AWS budget instead, free: `aws budgets describe-budget
+in CloudTrail's free event history; checked again on 19 Oct: no question from code since 16:53 UTC on 17 Oct, only five from the
+owner's own billing pages, which are free). The bill is read from the AWS budget instead, free: `aws budgets describe-budget
 --account-id 114366766218 --budget-name stockiq-monthly` (spend so far and AWS's forecast); calls from CloudWatch (free). The
 function's role has no Cost Explorer permission any more, and `ai_trader_test.py` refuses it. **A test must never reach a paid
 AWS service: stand it in.** To see who asked Cost Explorer: `aws cloudtrail lookup-events --lookup-attributes
@@ -85,7 +86,12 @@ think you need to ask me permission i just want you actively making this site pr
 site make sure its doing well and getting better everyday. it shouldn't just keep building shit making it more confusing either which
 is why i say cleanup old crap ... its YOU to make decisions ... profit is the number 1 priority." It replaces the older rule to list
 improvements and wait for his yes. The routine, every session:
-1. `python3 check-tools/session_start.py`, and act on every finding (faults first, whatever the sample size).
+0. **Open the first reply by confirming that the steering files were loaded in full** (CLAUDE.md loads all eleven, this one
+   included, before the first reply; the owner asked on 19 Oct 2026 to be told so at every session's opening). If they were not
+   (the session started without CLAUDE.md), read this file in full before anything else. A Mac has no `timeout` command: do not
+   wrap commands in it (it cost a confusing error at the opening of 19 Oct).
+1. `python3 check-tools/session_start.py`, and act on every finding (faults first, whatever the sample size). Its part 1c
+   compares the account with an S&P 500 fund and an all-world fund day by day (`check-tools/versus_market.js`): read it.
 2. If the newest file in `check-tools/reviews/` is a week old or more, the full review (section 8c, "The diary, and the review
    every week or two"); `python3 check-tools/admin.py` and do what is open there, then `admin.py done <id> "<what>"`.
 3. Improve, in this order: what loses visitors or money now (a fault, a stale or untrue page, a broken path to sign up or pay);
@@ -2511,6 +2517,13 @@ unless you need me to make a big decision. i'd prefer it all run without me". Bu
   reviewed lately. It is `check-tools/experiments.json` and `site_parts.json`, copied into `_admin['plan']` by
   `python3 check-tools/admin.py sync` (experiments.py and site_parts.py run it after every change; one small write). **The
   bill's colours:** green under $1, amber to $1.50, red beyond (the owner's warning and limit).
+  **What the bill shows (19 Oct 2026; the owner: "i'd like to see my full aws bill, as well as that specific stockiq bill ... make it
+  clear what i'm looking at")**, `admin-panel.js?v=17`: the whole AWS bill (the budget, every account on it), then StockIQ's part of it
+  (this account's charges, the one-off Cost Explorer charge included), then StockIQ's running cost (without Cost Explorer: what the
+  cost rule is about) with every service and its cost, and the services still inside the free allowances. From CloudWatch's billing
+  figures (`aws_usage`: `costStockiq`, `costExplorer`, `costServices`, `costOther`; free). On 19 Oct: whole bill $3.24 = StockIQ
+  $3.13 ($2.65 Cost Explorer of 17 Oct + $0.48 running: DynamoDB $0.28, S3 $0.18, CloudWatch $0.02) + other projects $0.11.
+  `KNOWN_CE` (function and `session_start.py`) holds the explained Cost Explorer charge; anything beyond shows in red.
   **How often the AWS figures are read, and "↻ Refresh now"** (17 Oct 2026, the owner: "how often does this update and give me a
   manual refresh button"): by itself the scheduled run reads the Lambda calls about once a day (`USAGE_EVERY_HOURS` 20, CloudWatch,
   free) and the bill as often, **from the AWS budget `stockiq-monthly` (`BUDGET_NAME`), free**, with AWS's own forecast for the
@@ -3026,7 +3039,7 @@ are titles only, and most candidates have none. **Not known:** how the owner loo
 preview from Kiro): ask early when a change "does not show" (section 9).
 
 **What is live, and how to confirm nothing has moved since** (all compared with the local copies on 12 Oct, 10:17 UTC):
-- `stockiq-ai-trader` `K5Sj58IvkSa7DcNcSVsfZeidlJEimX8XnuA/6o/eQnU=` (since 03:19 UTC, 18 Oct 2026: the themes part; `stockiq-ai-chat` `snC0Sn/V…` the same minute; earlier `15k0lkcP…` 17:00 UTC, 17 Oct, the free bill; `vSGWQgIB…` from 04:54 UTC that day: the Admin page; `wLHHlexH…` from 16:59 UTC on 13 Oct: the waiting rule; `i9WtL7oP…` from 16:32 that day: 27 screeners in five regions; before that `0tynNBjn…`, 3,079 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC, a holding's own stop kept with the buy 16:51 UTC, the build-up that leaves out what is invested 17:25 UTC); `stockiq-ai-chat`
+- `stockiq-ai-trader` `sRDNpn92Qlwx4nqz8BpsaNDMKfulbOCB8vjD1TipunM=` (since 08:47 UTC, 19 Oct 2026: company figures with each buy, week and month look-backs, the bill by service; before it `CXfWPnap…`, the gauge, and `K5Sj58Iv…` from 03:19 UTC, 18 Oct 2026: the themes part; `stockiq-ai-chat` `snC0Sn/V…` the same minute; earlier `15k0lkcP…` 17:00 UTC, 17 Oct, the free bill; `vSGWQgIB…` from 04:54 UTC that day: the Admin page; `wLHHlexH…` from 16:59 UTC on 13 Oct: the waiting rule; `i9WtL7oP…` from 16:32 that day: 27 screeners in five regions; before that `0tynNBjn…`, 3,079 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC, a holding's own stop kept with the buy 16:51 UTC, the build-up that leaves out what is invested 17:25 UTC); `stockiq-ai-chat`
   `9K5HRpizpV9lHdwP8eOwKpB00IGaNRgUz2qQEQRi6rs=` (since 13 Oct 2026, 17:00 UTC); `stockiq-price-proxy` `lzqBC+6a/h51byePPZpa+e29ACnMZGPQp+TEt2SQJ8g=`; `stockiq-screener-coordinator` `979X4yAm37f76T4RQfYT8ClqaR9P8NO0r+5LeqgDK7A=` (since 13 Oct 2026, 16:11 UTC, with the twelve screeners added that day);
   `stockiq-option-1-1-custom-analysis` `I84SxSgLYNt7…`; `stockiq-chart-generator` `OIDrZ2W9G3lJ…`; `stockiq-paper-portfolio`
   `s6IR+/80N/3k…`; the two signals functions `6nVDLm4/8G6K…`; the crypto orchestrator `yvmucU37gHJH…` and its 54 workers
@@ -3055,7 +3068,14 @@ buying-order trial finished and was not kept; the AI review's early sales switch
 - **At the first weekly review (on or after 19 Oct 2026), build: (A)** the trial queue, starting with **a longer holding
   time for shares** (question 6; the replay's clearest finding); **(B)** company figures (profit margin, debt, revenue
   growth) **recorded with every share bought** and the record split by them, from `site-data/company_figures.json` (3,333
-  shares; question 18); **(C)** item 9b below (done the same day).
+  shares; question 18; **live since 08:33 UTC on 19 Oct 2026**: `pm`, `de`, `rg`, `pe` on every share bought, `company_figures`,
+  split by in the review tool's part 3); **(C)** item 9b below (done the same day). **(A) was not built on 19 Oct:** the only
+  account sets its holding time by hand (10 days), and a trial may not override a setting the user made (the lesson of the
+  first patient-shares design), so it would test nothing; the replay's advice (20 days for shares) was given to the owner
+  instead. **Next build: the stop watch** (experiment `stop-watch`): between check-ins the half-hourly run looks only at the
+  prices of holdings whose trailing stop has started and sells one that has fallen through it (no screener run, no AI call;
+  a model for it is `sell_everything`). On 19 Oct, 8 of 54 trades had been up 2% or more and ended down, giving back about 6
+  points from their best, because a stop acts only at a check-in (every 3 hours on his settings).
 - **Prepare as tested options for his decision: (D)** a market-mood rule: hold fewer shares, or none, while the S&P 500 is
   below its 200-day average (question 9; replay first, the four tests of "THE MANDATE"); **(E)** the screeners' own scoring:
   the three factors that use no real data replaced by company figures, and momentum over months given its due (the part
@@ -3107,7 +3127,7 @@ buying-order trial finished and was not kept; the AI review's early sales switch
     git history: commit `33588f1`, `check-tools/pending-cleanup/`). Also still there, in use
     until this month: `stockiq-option-7-2-worker-1`, `stockiq-coinspot-predictions-updater`. The local folder
     `website/stocks-backup-before-restore/` (118 MB) can go when he says.
-11. Thin the bell script's handling of older copies (any time after 18 Oct 2026; keep "the newer version wins").
+11. (Done 19 Oct 2026: the bell's handling of 11 Oct copies taken out, version 9; "the newer version wins" kept.)
 12. The report function holds the Finnhub key in its code: move it to the function's settings so the code can go into git.
 13. The record's size (the review tool warns above 300 KB of the 400 KB a row can hold): drop `path` from finished
     trades kept in `history`, or store the record compressed.
@@ -4857,3 +4877,23 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     index cards no longer show January 2024 figures when the market data fails ("Not available just now", until
     `live-market.js` fills them), and `login.html` is noindex and out of the sitemap. The nightly check learned both new kinds
     of fault (`stale-stock-pages`, fallback figures), and now reads 1 problem (the stale pages) and 3 ideas.
+
+- **19 Oct 2026** (the owner: "its only been a day but hi how we doing"):
+  - **The account:** $99,871 (the graph's sums), -0.14% since 10 Oct, while the S&P 500 fund is -1.97% and an all-world fund
+    (ACWI) -1.96%; on the S&P's 4 down days the account averaged -0.15% against -0.56%. Read with care: 24% of it is cash, which
+    does not fall; five trading days; one share (6532.T, +$432) is a third of the gain since 13 Oct. Now in every opening check
+    (part 1c, `check-tools/versus_market.js`). 54 finished trades, -0.59% a trade; **shares alone about level (33 trades, +$31),
+    shares not sold by the AI review +0.63% a trade**: the losses were coins and the AI review's sales, both off since 17 Oct.
+    Weekly review: `check-tools/reviews/review-2026-10-19.txt`.
+  - **Live `stockiq-ai-trader` `sRDNpn92…`** (two deploys, rollback zips `…_before_autopilot_figures_20261019.zip`, `…_later_…`):
+    company figures with every share bought (and the role may read that one file: policy `stockiq-company-figures-read`); every
+    sale looked at again a week and a month later against the S&P 500 fund (`a7`, `a30`, `a7m`, `a30m`; `LATER`, the shared
+    record and the diary carry them; the review tool's part 4 reports them); the bill split by service. `admin-panel.js?v=17`.
+    `autopilot-bell.js` version 9. Tests: 521 function, 24 Admin page, 22 bell.
+  - The nightly site check runs after the sitemap step (it had reported sitemap pages that the step was about to drop).
+    Two London stock pages (BEZ.L, SDR.L: taken over, last traded 1 Oct) leave the index by themselves around 22 Oct.
+  - **Coins:** the entry study over 9 days: coins entering the top 10 after a 10%+ day fell 13.8% on average afterwards (123
+    entries, every day negative); slow risers about flat (`check-tools/crypto/results/entry-study-2026-10-19.txt`). The score gives
+    +2 for such a day. Recorded as experiment idea `crypto-no-chasing`; not changed (shares come first for the owner).
+  - The owner asked whether news.html is faulty for showing 300 articles: no, it is trimmed to 240 stock and 60 general articles on
+    purpose (section 6), and kept out of search.

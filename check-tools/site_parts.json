@@ -125,7 +125,13 @@
    "id": "crypto",
    "part": "The crypto screener and single coin",
    "where": "analysis.html option 7; the orchestrator",
-   "last": null
+   "last": "2026-10-19",
+   "log": [
+    {
+     "at": "2026-10-19",
+     "found": "Entry study over 9 days: coins entering the top 10 after a 10%+ day fell 13.8% on average afterwards (123 entries), slow risers about flat; the score gives +2 for such a jump. Put to the owner as an idea (crypto-no-chasing); not changed, since shares come first for him."
+    }
+   ]
   },
   {
    "id": "usage-chip",
@@ -275,7 +281,13 @@
    "id": "ap-selling",
    "part": "Autopilot engine: how it sells (limits, stops, time, trials)",
    "where": "stockiq-ai-trader review_sells",
-   "last": null
+   "last": "2026-10-19",
+   "log": [
+    {
+     "at": "2026-10-19",
+     "found": "Rules work as documented; the weak spot is the stop acting only at check-ins (8 of 54 gave back a 2%+ gain): proposal #6"
+    }
+   ]
   },
   {
    "id": "ap-learning",
@@ -299,7 +311,13 @@
    "id": "bell",
    "part": "The notification bell",
    "where": "autopilot-bell.js",
-   "last": null
+   "last": "2026-10-19",
+   "log": [
+    {
+     "at": "2026-10-19",
+     "found": "Looked at as the owner's account on the live pages: one list, 12 trades, no errors. Took out the handling of 11 Oct copies kept in browsers (version 9, 18 lines fewer); the newer-version guard stays."
+    }
+   ]
   },
   {
    "id": "chat",
@@ -341,13 +359,25 @@
    "id": "phone",
    "part": "The site on a phone: menus, sidebars, the dashboard",
    "where": "mobile-sidebar.js, styles.css",
-   "last": null
+   "last": "2026-10-19",
+   "log": [
+    {
+     "at": "2026-10-19",
+     "found": "Dashboard: chat button covers the green market-data button; chat window 600px tall overflows small phones (proposal #5); the phone test never taps buttons"
+    }
+   ]
   },
   {
    "id": "daily-run",
    "part": "The daily run: news, snapshots, sitemap, deploy, push",
    "where": "~/stockiq-daily.log, deploy-to-s3.sh",
-   "last": null
+   "last": "2026-10-19",
+   "log": [
+    {
+     "at": "2026-10-19",
+     "found": "update_stock_news.py rewrites every news timestamp to the newest article's date and re-uploads pages daily (proposal #4); a DNS drop cost half today's news lookups; session_start's 'no prices for 1788' finding is now misleading"
+    }
+   ]
   },
   {
    "id": "costs",

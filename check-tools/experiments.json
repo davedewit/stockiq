@@ -220,6 +220,20 @@
    "angle": "ease of use, faults, profit, AI use",
    "measure": "whether its proposals are worth the usage they cost the owner's Claude allowance; a two-week trial once installed, ending by itself on 1 Nov 2026 unless check-tools/reviews/daily/KEEP exists",
    "status": "idea"
+  },
+  {
+   "id": "crypto-no-chasing",
+   "what": "The crypto screener stops rewarding a coin that jumped 10% or more in the last day (it gives +2 for it now); entries after such a jump fell 13.8% on average over the next days (123 entries over 9 days, every day negative), others about flat",
+   "angle": "analysis, profit",
+   "measure": "the entry log: the top 10's average change in the days after entering, before and after the change, against the whole coin list",
+   "status": "idea"
+  },
+  {
+   "id": "stop-watch",
+   "what": "Between check-ins, the half-hourly run looks only at the prices of holdings whose trailing stop has started and sells one that has fallen through it (no screener run, no AI call)",
+   "angle": "profit, realism",
+   "measure": "how much of the best gain is kept by sales of the trailing stop, before and after; 8 of 54 trades had been up 2% or more and ended down",
+   "status": "idea"
   }
  ]
 }
