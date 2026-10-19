@@ -5024,7 +5024,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     (19 Oct: 1 of 4, still ahead by $958 without its three biggest wins). On the day: all four pass gives "Ready for a small
     real-money trial" (about 10% of what he would invest, the rest in an S&P 500 fund, six months side by side, back to the fund
     if the real account falls 10% behind); otherwise "Keep your money in an S&P 500 fund". Never more than that, and "not financial
-    advice" (a licensed adviser before real money). **Do not move the date or loosen a check because a reading looks good.**
+    advice" (a licensed adviser before real money). In dollars (the owner asked): at least the fund's value on the day plus 5% (about
+    $115,500 in a year the S&P rises 10%); the card shows the figure as if the day were today. **Do not move the date or loosen a check
+    because a reading looks good.**
   - **The Admin Overview made calm (the owner: "are things overlapping and just gone crazy ... i just want the site fucking good and to see
     progress").** Order now: "Do you need to check in?" (it replaced the four tiles, which repeated it and the goal card); "Real
     money: the decision" with the confidence dial inside it (it had sat in the goal card); the month's goal; "Decisions for you"
