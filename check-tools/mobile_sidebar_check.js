@@ -135,8 +135,13 @@ const server = http.createServer((q, r) => {
         check('a quick short flick to the left brings it out (' + (s.last && -s.last.speed) + ' px a ms)', s.shown && near(s.onScreen, W, 3), s);
         await swipe(150, Y, 230, Y, 0, { steps: 3, rest: 500 }); s = await look();
         check('a quick short flick to the right hides it', !s.shown && !s.menu, s); still('after the two flicks', s);
-        // 7. The buttons
-        await js(`toggleMobileSidebar(); 1`); await sleep(500); s = await look();
+        // 7. The buttons. The green button is tapped where it sits on screen (19 Oct 2026: on the dashboard it sat under the
+        // AI chat button, which a call to toggleMobileSidebar() in code could never notice)
+        const btn = JSON.parse(await js(`(() => { const b = document.getElementById('mobile-sidebar-toggle'); if (!b) return JSON.stringify(null); const r = b.getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2, top = document.elementFromPoint(x, y); return JSON.stringify({ x, y, mine: !!top && (top === b || b.contains(top)), over: top ? (top.id || top.tagName) : null }); })()`));
+        check('the green button is not covered by anything (what is on top at its middle: ' + (btn && btn.over) + ')', btn && btn.mine, btn);
+        if (btn && btn.mine) { await touch('touchStart', btn.x, btn.y); await touch('touchEnd', btn.x, btn.y); await sleep(600); }
+        else { await js(`toggleMobileSidebar(); 1`); await sleep(500); }
+        s = await look();
         check('the green button opens it', s.shown && near(s.onScreen, W, 3), s); still('opened by the button', s);
         await js(`closeMobileSidebar(); 1`); await sleep(500); s = await look();
         check('the close button hides it', !s.shown && s.panelHome, s); still('closed by the button', s);
