@@ -190,7 +190,8 @@ if not QUICK:
         if re.match(r'^[0-9]-[a-z0-9]+ \{', line):
             key, js = line.split(' ', 1); r = json.loads(js)
             ok = r.get('status') == 200 and not r.get('error') and not r.get('failed_workers') and r.get('saved_report') and (r.get('results') or 0) >= 0.9 * (r.get('listed') or 1)
-            note('4. Background run and visitors', f"\"Run in Background\" for {names.get(key, key)} (the dashboard's path): every worker answers, the report is formed ({r.get('results')} of {r.get('listed')})", ok, r)
+            label = names.get(key) or names.get('5-' + key.split('-', 1)[1]) or names.get('4-' + key.split('-', 1)[1]) or key   # the coordinator's keys differ from the page's for ASX and FTSE
+            note('4. Background run and visitors', f"\"Run in Background\" for {label} (the dashboard's path): every worker answers, the report is formed ({r.get('results')} of {r.get('listed')})", ok, r)
     code, out = run(['node', os.path.join(HERE, 'anon_run.js'), '3', '8'], 600, cwd=tmp)
     note('4. Background run and visitors', 'a visitor who is not signed in gets their one free analysis', 'result=true' in out, out.strip().splitlines()[-3:])
     code, out = run(['node', os.path.join(HERE, 'anon_run.js'), '3', '8'], 600, cwd=tmp, env={'USED': '1'})
