@@ -4954,7 +4954,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     others link to; (4) a weekly screener-highlights email to the signup list (nothing has ever been sent). Told him plainly: SEO
     takes 3-6 months from 25 Sep; for his own money an S&P 500 fund is the sensible choice; the autopilot runs on as a test to 12 Jan.
   - **Next session, first:** say the steering files were loaded in full; the opening check; the stop watch's first sales (marked `w`)
-    and the first budget changes from results ("The budget is now …" in the activity list); **build the confidence line on the Admin page** (agreed 19 Oct 2026): one line beside the month's goal, owner only, never on the
+    and the first budget changes from results ("The budget is now …" in the activity list); (done the same day, below: the confidence line) one line beside the month's goal, owner only, never on the
     Practice portfolio tab (a forecast there would break the no-advice rule): how sure the record is that the account has been ahead of
     an S&P 500 fund **so far** (daily gaps from `versus_market.js`'s sums, the cash allowed for): "Too early to tell" under 30 trading
     days, then Low / Medium / High (red / amber / green) with the plain reason ("ahead on 18 of 30 days, more than chance would give");
@@ -4968,3 +4968,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     reviews it" (off since 17 Oct): it says it is also sold if its signal turns or it slips far down the ranking. The AI chat's guide
     follows, with the stop watch and the budget that follows results (`stockiq-ai-chat`, rollback `…_before_holdings_20261019.zip`).
     `practice-portfolio.js` and `practice-autopilot.js` one version up. "What it has done" (the log of events) is unchanged.
+  - **The confidence line, live (agreed with the owner the same day):** on the Admin page, under the month's goal: "Ahead of an S&P 500
+    fund so far: how sure the record is". From the daily gap between the account and the fund at each of the fund's closes since
+    the account began (`versusDays` in `practice-portfolio.js`, the graph's own sums, handed over in `figures().versus`; nothing new
+    asked of AWS). Under 30 trading days: "Too early to tell (N of 30 trading days)" with the days ahead so far; then Low (under 70%),
+    Medium (70 to 90%), High (90% or more), the chance the daily lead is real from its average over its margin of error, with the
+    plain reason, and "about the past only, not a forecast". Owner only; never on the Practice portfolio tab. On 19 Oct: 4 trading
+    days, ahead on 3. Tests in `admin_panel_test.js` (3).

@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-19",
+   "what": "Under the month's goal on this page: how sure the record is that the account has been ahead of an S&P 500 fund so far (too early to tell until 30 trading days)"
+  },
+  {
+   "at": "2026-10-19",
    "what": "The autopilot's holdings are listed once, on the Practice portfolio tab, each with its tags (market closed until…, its stop, patient share) and a 'Can be sold now' choice; the autopilot tab links there instead of listing them again"
   },
   {

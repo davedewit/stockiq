@@ -98,5 +98,14 @@ async function page(status, uid) {
     check('a Cost Explorer charge beyond the known one is shown in red', /ad-pill bad">Cost Explorer is being asked again: \$0\.45 more/.test(h), pl.slice(pl.indexOf('AWS this month'), pl.indexOf('AWS this month') + 400));
     ADMIN.usage = keep;
   }
+  if (/function confidenceHtml/.test(fs.readFileSync(process.argv[2], 'utf8'))) { // the confidence line (19 Oct 2026)
+    const show = async (versus) => { const q = await page(200, 'dave@x.com'); q.ctx.window.practicePortfolio = { figures: () => ({ accountValue: 99856, gainUsd: -144, gainPct: -0.14, startingCash: 100000, versus }) }; q.fire('practice-portfolio:figures'); return q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' '); };
+    let pl = await show({ days: 4, ahead: 3, avg: 0.63, se: 0.48 });
+    check('under 30 trading days it says too early to tell, with the days so far and no percentage', /Ahead of an S&P 500 fund so far: how sure the record is Too early to tell 4 of 30 trading days/.test(pl) && /ahead of the fund on 3 of 4 days/.test(pl) && !/\d+% is how sure/.test(pl), pl.slice(pl.indexOf('Ahead of an S&P'), pl.indexOf('Ahead of an S&P') + 300));
+    pl = await show({ days: 40, ahead: 26, avg: 0.2, se: 0.08 });
+    check('with 30 days or more a level and how sure, said to be about the past only', /how sure the record is High 9[6-9]%/.test(pl) && /on 26 of 40 trading days, by \+0\.20% a day on average/.test(pl) && /not a forecast/.test(pl), pl.slice(pl.indexOf('Ahead of an S&P'), pl.indexOf('Ahead of an S&P') + 400));
+    pl = await show({ days: 40, ahead: 18, avg: -0.05, se: 0.1 });
+    check('a record behind the fund reads Low', /how sure the record is Low 3\d%/.test(pl), pl.slice(pl.indexOf('Ahead of an S&P'), pl.indexOf('Ahead of an S&P') + 200));
+  }
   console.log(ok ? 'ALL PASS' : 'SOME FAILED'); process.exit(ok ? 0 : 1);
 })();
