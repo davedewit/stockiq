@@ -81,6 +81,11 @@ teaches the script any new kind of fault it found. When the owner says "this is 
   once, with a reason). At least one new idea of the session's own goes in every session. His words: "think of new ideas and
   add to it test over a period of time then keep it or remove it based on whether it improves".
 
+**PRIORITY FROM 19 OCT 2026: VISITORS AND SIGN-UPS COME FIRST** (the owner: "focus on that more making this site good to get
+signups"). The AI autopilot keeps running on fake money as a test until the 12 Jan 2027 decision, with light check-ins only: faults
+fixed, no new trading features unless the record asks for them. Session effort goes to the traffic plan (section 13, 19 Oct: daily
+screener pages first) and to what turns a visitor into a sign-up and a sign-up into a paying plan.
+
 **WHEN THE OWNER SAYS "HI": TAKE CARE OF THE SITE. NO PERMISSION NEEDED (the standing mandate, 18 Oct 2026).** His words: "i don't
 think you need to ask me permission i just want you actively making this site profitable ... when i say hi here you take care of the
 site make sure its doing well and getting better everyday. it shouldn't just keep building shit making it more confusing either which
