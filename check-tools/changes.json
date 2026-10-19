@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-19",
+   "what": "On the AI autopilot's Activity part, the themes part, the bar, progress and how it improves are each a row that opens and closes where it is"
+  },
+  {
+   "at": "2026-10-19",
    "what": "Under the month's goal on this page: how sure the record is that the account has been ahead of an S&P 500 fund so far (too early to tell until 30 trading days)"
   },
   {

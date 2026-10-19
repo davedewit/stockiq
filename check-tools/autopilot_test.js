@@ -682,8 +682,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       check('without a gauge in the answer nothing is shown', !/Market risk now/.test(ng.text()));
     }
     if (/function themesLine/.test(src)) {
-      check('the Activity part opens on a summary: the themes part in one line with a link, the rest under one "More detail" fold', /Themes part a trial, 20% of the budget ?: holds SMH/.test(tt) && /data-ap-fold="more-all"/.test(tw.container.innerHTML)
-        && tw.container.innerHTML.indexOf('ap-themes-line') < tw.container.innerHTML.indexOf('data-ap-fold="more-all"') && tw.container.innerHTML.indexOf('data-ap-fold="more-all"') < tw.container.innerHTML.indexOf('id="ap-themes"'), tt.slice(tt.indexOf('Themes part'), tt.indexOf('Themes part') + 120));
+      check('the Activity part opens on a summary: the themes part, the bar, progress and how it improves are each a row that opens in place (19 Oct 2026)', /Themes part a trial, 20% of the budget ?: holds SMH/.test(tt) && /<details class="ap-part" data-ap-fold="part-themes"[^>]*><summary><strong>Themes part/.test(tw.container.innerHTML) && !/data-ap-fold="more-all"/.test(tw.container.innerHTML)
+        && tw.container.innerHTML.indexOf('data-ap-fold="part-themes"') < tw.container.innerHTML.indexOf('id="ap-themes"'), tw.container.innerHTML.slice(tw.container.innerHTML.indexOf('part-themes') - 60, tw.container.innerHTML.indexOf('part-themes') + 160));
     }
     check('the chat is told about the themes part', /Themes part \(a trial since 18 Oct 2026\): 20% of the budget/.test(tw.ctx.practiceAutopilot.summary()));
     const off = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPT, ...st, themes: Object.assign({}, T, { on: false, held: [] }) } })); await sleep(30);

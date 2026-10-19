@@ -1619,9 +1619,10 @@ owner: "wondering if there is just too much going on in the site"; it showed abo
 the market-risk gauge, "What happens next" with 3 rows on show, "How it is doing" with 5 holdings on show (a row's reason cut
 to 90 characters, all of it in the plan), the themes part in one line (`themesLine`, "Its detail" opens the fold), and the
 latest 5 entries of "What it has done"; **the bar, the themes part in full, progress every 20 trades and "How it is improving"
-are under one fold, "More detail"** (`data-ap-fold="more-all"`; a jump link opens any fold it lands in). About 6,400
-characters on show. **The way back, one command:** `bash /Users/dave/VSCODE/stockiq/check-tools/pending-simple-undo/deploy.sh`
-(keep that folder):
+were put under one fold, "More detail"; **since 19 Oct 2026 each of the four is a row of its own that opens and closes in
+place** (`partRow`, `data-ap-fold` `part-themes`, `part-bar`, `part-progress`, `part-tune`; the owner: "Its detail" opened the whole
+fold and jumped into the middle, and he could not tell where the themes part started or ended, nor close it). A jump link opens
+the fold it lands in. The 18 Oct way back (`pending-simple-undo`) was removed: it could no longer apply:
 - (**The "Quick set-ups" are gone since 13 Oct 2026.** "Quick coin trading", "Steady shares" and "Shares and coins" each
   replaced the screeners ticked **and the pace and the level**; the owner lost his settings to them twice in one evening
   and a check-in traded on one of them: section 13. Their place is taken by the shortcuts in the screeners card, below,
@@ -3071,7 +3072,7 @@ preview from Kiro): ask early when a change "does not show" (section 9).
 - Tests on the live files: 451 function, 216 panel (13 Oct 2026, with the regions, the shortcuts and the waiting rule; they were 442 and 210), 130 portfolio, 22 chat (13 Oct 2026, after the fund's line; they were 118 and 21) (one of them, "buying by quantity buys exactly that many", fails on and off while the US market is open: improvements, item 0b), 22 bell, 20 chat, 42 signals; the panel-versus-function
   comparison clean (3,780 budgets, 4,166 spreads); the worker deploy tool's self-test passes.
 - No fault line in 48 hours in the logs of 15 functions, no Lambda error in three days; both schedules enabled.
-- Both repos pushed; **the only `check-tools/pending-*` folders left are the ways back, kept on purpose:** `pending-cleanup-undo` then `pending-banners-undo` (the two steps back from the header chip, in that order), `pending-panel-undo` (the shared market panel) and `pending-simple-undo` (the shorter Activity part), both of 18 Oct 2026. `website/` carries the daily job's own three files
+- Both repos pushed; **the only `check-tools/pending-*` folders left are the ways back, kept on purpose:** `pending-cleanup-undo` then `pending-banners-undo` (the two steps back from the header chip, in that order), `pending-panel-undo` (the shared market panel, 18 Oct 2026). `website/` carries the daily job's own three files
   uncommitted (news.html, news.js, sitemap.xml) until its next push.
 - Rollback copies, one per deploy, in `~/VSCODE/backup/`: `stockiq-ai-trader_before_autopilot_<name>_<date>.zip`, in order:
   10 Oct `v2, fast, panel, autosave, desc, smart, review, controls, wording, limits, gains, pace, stop, orphan, steady,
