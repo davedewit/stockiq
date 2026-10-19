@@ -67,18 +67,17 @@ def main(dry):
         mine = one[:n]
         if mine:
             groups.append((market, mine)); total += len(mine)
-    chip = ('display: inline-flex; gap: 6px; align-items: baseline; padding: 6px 10px; margin: 0 6px 6px 0; border: 1px solid var(--border-color); '
-            'border-radius: 6px; background: var(--card-bg); text-decoration: none; font-size: 0.85rem;')
+    chip = ('display: inline-flex; gap: 6px; align-items: baseline; padding: 3px 8px; margin: 0 4px 4px 0; border: 1px solid var(--border-color); '
+            'border-radius: 6px; background: var(--card-bg); text-decoration: none; font-size: 0.78rem;')
     body = '\n'.join(
-        f'<div style="margin-top: 14px;"><h3 style="color: var(--text-primary); font-size: 0.95rem; margin: 0 0 8px 0;">{html.escape(market)}</h3><div>'
+        f'<div style="margin-top: 10px;"><h3 style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 600; margin: 0 0 5px 0;">{html.escape(market)}</h3><div>'
         + ''.join(f'<a href="stocks/{html.escape(s)}.html" style="{chip}"><strong style="color: #3b82f6;">{html.escape(s)}</strong>'
                   f'<span style="color: var(--text-secondary);">{html.escape(short(names.get(s), s))}</span></a>' for s in syms)
         + '</div></div>' for market, syms in groups)
-    section = (f'{START}\n<section id="stock-pages" style="background: var(--bg-secondary); padding: 40px 30px; border-radius: 12px; margin: 40px 0;">\n'
-               f'<h2 style="text-align: center; color: var(--text-primary); margin-bottom: 10px; font-size: 1.8rem;">📄 Stock Pages</h2>\n'
-               f'<p style="text-align: center; color: var(--text-secondary); max-width: 760px; margin: 0 auto 10px; line-height: 1.6;">Every stock page has the '
-               f'latest figures, its 0-100 score with every point explained, recent news and the shares people also watch. These are the largest '
-               f'companies on StockIQ by market value, refreshed every day; search above for any of the {len(pages):,} shares.</p>\n'
+    section = (f'{START}\n<section id="stock-pages" style="padding: 20px 10px; margin: 30px 0 10px; border-top: 1px solid var(--border-color);">\n'
+               f'<h2 style="color: var(--text-primary); margin: 0 0 6px 0; font-size: 1.05rem;">Stock pages</h2>\n'
+               f'<p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0 0 4px 0; line-height: 1.5;">The largest companies on StockIQ, each with '
+               f'its latest figures, 0-100 score, news and related shares. Search above for any of the {len(pages):,} shares.</p>\n'
                f'{body}\n</section>\n{END}')
     page = open(INDEX, encoding='utf-8').read()
     if page.count(START) != 1 or page.count(END) != 1:

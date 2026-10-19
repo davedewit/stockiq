@@ -122,7 +122,7 @@ function anyAnswer() {
         check('the four lists each show their five', lists.join() === '5,5,5,5', lists);
         const rows = await js(`Array.from(document.querySelectorAll('#gainers-tickers-container > *')).map(e => e.tagName + ' ' + (e.getAttribute('href') || ''))`);
         if (pg.indexOf('dashboard') >= 0) check('on the dashboard a list row still runs the analysis in the background (no link)', rows.every(r => r.startsWith('DIV')), rows);
-        else check('on the home page a share with a stock page is a link to it', rows.length === 5 && rows.every(r => /^A .*stocks\/[A-Z]+\.html$/.test(r)), rows);
+        else check('on the home page a row runs the analysis, it is not a link to a stock page (the owner, 19 Oct 2026)', rows.length === 5 && rows.every(r => /^DIV/.test(r)), rows);
         if (pg === 'index.html') {
           const sec = await js(`(function () { var s = document.getElementById('stock-pages'); return s ? s.querySelectorAll('a[href^="stocks/"]').length : -1; })()`);
           check('the home page has its section of links to the largest companies\' stock pages', sec >= 20, sec);

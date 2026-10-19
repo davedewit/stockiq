@@ -32,9 +32,8 @@ FAULTS = ['check-in failed', 'not worked out', 'not sent', 'not written', 'learn
 # The owner had the first two raised the same day ("this is negative? we want positive. profit not loss"): every month's
 # goal is a profit; the first versions asked month 1 only to stop losing (-0.2% a trade, $98,000).
 GOALS_START = '2026-10-12'
-GOALS = [('2026-11-12', 'Month 1: in profit', 100, 0.0, 100000),
-         ('2026-12-12', 'Month 2: in profit, and more of it', 300, 0.2, 101000),
-         ('2027-01-12', 'Month 3: clearly ahead, or a decision', 500, 0.3, 102000)]
+GOALS = [('2026-11-12', 'Month 1: in profit', 100, 0.2, 101000), ('2026-12-12', 'Month 2: more profit', 300, 0.3, 102500),
+         ('2027-01-12', 'Month 3: clearly ahead, or a decision', 500, 0.4, 104000)]   # raised on 19 Oct 2026, the owner: a goal of breaking even is no goal
 # The owner's standing target (19 Oct 2026: "ideally our goal is 70% or more gains over losses ... closer to 100% gains as possible").
 # Measured in dollars, not in trades won (a rule that sells at +2% "wins" most trades and can still lose money, section 7b): of the
 # money its finished trades made and lost together, the share that was gains. 70% means $7 made for every $3 lost.

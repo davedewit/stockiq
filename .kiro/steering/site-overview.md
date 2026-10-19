@@ -349,7 +349,7 @@ git pull --rebase && git push
   `dateModified` = data date. (Was a fake `NewsArticle` dated 2026-03-14 on every page.)
 - **Analytics:** GA4 `G-WVETNMPF8V` on all content pages and all stock pages (before Sep 2026
   only 5 pages were tagged, so older GA numbers undercount).
-- **Links to the stock pages (18 Oct 2026):** until then no page of the site linked to any stock page (they were reached only
+- **Links to the stock pages (18 Oct 2026; since 19 Oct the section is compact, at the bottom of the home page, and the market panel's rows run the analysis instead of linking):** until then no page of the site linked to any stock page (they were reached only
   through the sitemap and each other's "People also watch"). The home page has a "Stock Pages" section (`#stock-pages`, after
   the guides): the largest indexed companies of each market by market value in US dollars (US 16, Canada, UK, Japan, Hong Kong,
   Australia 4 each, Europe 6, India 2; one share a company), rewritten daily by `update_home_stock_links.py` (it refuses with
@@ -2856,9 +2856,12 @@ the account at about $98,600.
 
 | Due | Goal | Finished trades in all | Average a trade in that month, after costs | The account |
 |---|---|---|---|---|
-| 12 Nov 2026 | **Month 1: in profit** | 100 | above 0% | $100,000 or more |
-| 12 Dec 2026 | **Month 2: in profit, and more of it** | 300 (the bar's count) | +0.2% or better | $101,000 or more |
-| 12 Jan 2027 | **Month 3: clearly ahead, or a decision** | 500 | +0.3% or better, and the bar cleared | $102,000 or more |
+| 12 Nov 2026 | **Month 1: in profit** | 100 | +0.2% or better | $101,000 or more |
+| 12 Dec 2026 | **Month 2: more profit** | 300 (the bar's count) | +0.3% or better | $102,500 or more |
+| 12 Jan 2027 | **Month 3: clearly ahead, or a decision** | 500 | +0.4% or better, and the bar cleared | $104,000 or more |
+
+(Raised on 19 Oct 2026, the owner: "no point investing in something with a goal to break even". The same numbers are `GOALS` in
+`stockiq-ai-trader` (the Admin page) and in `check-tools/autopilot_review.py`: change the two together.)
 
 - **What a session owes each month besides the numbers:** month 1: the buying-order trial has its verdict and the trial
   queue (below) is built and running; a review every week. Month 2: at least one change kept after a trial, or a plain
@@ -4929,3 +4932,14 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     gains 70% of the money moved, not of trades; the bar after 300 decided (rolling, then his year bar); Lambda calls measured at
     about 506,000 a month over the last 3 days (half the free million; the price proxy 219,000, the crypto workers 80,000), so
     nothing is cut for closed markets; a "hi" kept light unless the weekly review is due; no additions to the site for show.
+  - **End of the session (the owner away a few days):** month targets raised above break-even (table in section 8c); the Admin page is
+    only for the listed accounts (owner, deploy test) and shows the viewer's own record (checked); the home page's first sentence
+    reads "Get a 0-100 score for any stock, ETF or coin, with every point that makes it up explained"; **the Stock Pages section is
+    compact and at the bottom of the home page** (`update_home_stock_links.py` writes the smaller markup; the markers moved, the
+    script follows them); **`market-panel.js` v2: a list row runs the analysis again (the owner preferred that to opening the stock
+    page; reverses version 3 of 18 Oct), and a market tab's item runs in the background on the dashboard** (it opened the analysis
+    page). `stock-pages.js` is still written daily but nothing loads it now: delete it and its writer's part at the next clean-up.
+    Live `stockiq-ai-trader` after the goals deploy (rollback `…_before_autopilot_goals_20261019.zip`).
+  - **Next session, first:** say the steering files were loaded in full; the opening check; the stop watch's first sales (marked `w`)
+    and the first budget changes from results ("The budget is now …" in the activity list); the first week look-backs (`a7`) arrive
+    from about 22 Oct; the weekly review is due around 26 Oct; `bar_of` on the latest 300 at the next function change.
