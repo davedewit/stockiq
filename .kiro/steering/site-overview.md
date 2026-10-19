@@ -69,7 +69,7 @@ clarity check, the nightly site check's tests, the screener lists, the worker pa
 header); (2) the figures agreeing across the site (the account value on the Admin page and on the Practice portfolio tab, the
 S&P 500 fund both ways, every holding with its remembered buy, the budget within the money, the autopilot's running total against
 its trades, the diary against the record, the bill's parts, the cost rule, Lambda calls, the sitemap against the indexed pages,
-the last scheduled run); (3) real buttons (Dow 30, DAX 40, ASX 200, a single-stock report) through the page's code, nothing saved.
+the last scheduled run); (3) analysis buttons through the page's code, nothing saved: six share screeners a run in turn (every one about every five weeks; `ROTATE_ALL=1` for all), the single-stock report, both signals buttons, the crypto screener and single coin; (4) "Run in Background" for four screeners, the free-visitor and trial limits, the usage chip for every kind of visitor, the pricing link, the owner's live Practice tab and bell read-only, the daily update's log. It also says how many of the 44 parts of the site it covers. The whole report goes in the email and in the Admin page's Full check row.
 Report `check-tools/reviews/weekly/check-<date>.txt`, `weekly_check.json`, a card "🧪 Full check of the site" on the Admin page
 (`admin.py weekly`), and an email to the owner (`--email`). **The daily update starts it in the background when 7 days have
 passed** (`--if-due`, end of `deploy-to-s3.sh`, log `~/stockiq-weekly-check.log`); session_start part 1d makes a failure or a check

@@ -161,9 +161,15 @@ except Exception as e:
 # ---------------------------------------------------------------- 3. real buttons, every one (19 Oct 2026, the owner: "make sure its thorough")
 if not QUICK:
     from concurrent.futures import ThreadPoolExecutor
-    print('\n== 3. Every analysis button, end to end (real worker calls; nothing saved)', flush=True)
+    print('\n== 3. Analysis buttons, end to end: six screeners in turn, and the report, signals and crypto buttons (real worker calls; nothing saved)', flush=True)
     keys = sorted(set(re.findall(r"'(\d-[a-z0-9]+)':\s*\{", open(os.path.join(WEB, 'screeners.js')).read())))
     names = dict(re.findall(r"'(\d-[a-z0-9]+)':\s*\{\s*name:\s*'([^']+)'", open(os.path.join(WEB, 'screeners.js')).read()))
+    # Six share screeners a run, in turn (the owner: "you probably don't need to check every screener"), so every one is pressed about
+    # every five weeks: data changes (a takeover, an index review, the price source) can break a screener without any code changing.
+    # ROTATE_ALL=1 presses all of them.
+    if os.environ.get('ROTATE_ALL') != '1':
+        week = datetime.datetime.utcnow().isocalendar()[1]; per = 6; rounds = (len(keys) + per - 1) // per
+        start = (week % rounds) * per; keys = keys[start:start + per]
     buttons = [(k.split('-')[0], k.split('-', 1)[1], names.get(k, k), True) for k in keys]
     buttons += [('1', 'custom', 'the single-stock report (AAPL, KO)', False), ('2', 'custom', 'live trading signals', False), ('2', 'auto', 'auto-detect signals', False),
                 ('7', 'coinspot', 'the crypto screener', True), ('72', 'single', 'single coin analysis (BTC)', False)]

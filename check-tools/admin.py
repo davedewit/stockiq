@@ -55,6 +55,7 @@ elif args[0] == 'sync':
     keep = ('id', 'what', 'angle', 'measure', 'status', 'started', 'decide', 'decided', 'result', 'order', 'public', 'publicText')
     kept = (admin.get('plan') or {}).get('audit')                  # the nightly site check stays when the improvements are synced
     kept_weekly = (admin.get('plan') or {}).get('weekly')          # and so does the last full check
+    kept_daily = (admin.get('plan') or {}).get('dailyReview')
     changes = json.load(open(os.path.join(here, 'changes.json')))['changes'][:12]
     admin['plan'] = {'at': now(), 'items': [{k: e[k] for k in keep if k in e} for e in ex], 'reviews': reviews,
                      'parts': len(parts), 'reviewed': sum(1 for p in parts if p.get('last'))}
@@ -62,6 +63,8 @@ elif args[0] == 'sync':
         admin['plan']['audit'] = kept
     if kept_weekly:
         admin['plan']['weekly'] = kept_weekly
+    if kept_daily:
+        admin['plan']['dailyReview'] = kept_daily
     admin['plan']['changes'] = changes
     save(admin)
     print(f"the Admin page's improvements: {len(ex)} items, {len(reviews)} recent reviews")
@@ -75,6 +78,9 @@ elif args[0] == 'audit':
         time.sleep(20)
     admin = load()
     admin.setdefault('plan', {})['audit'] = {k: a[k] for k in ('at', 'problems', 'ideas', 'new', 'gone')} | {'findings': a['findings'][:40]}
+    daily = sorted(f for f in os.listdir(os.path.join(here, 'reviews', 'daily')) if f.endswith('.md')) if os.path.isdir(os.path.join(here, 'reviews', 'daily')) else []
+    if daily:
+        admin['plan']['dailyReview'] = daily[-1][:10]          # the latest report of the daily review by Claude, for "What runs by itself"
     save(admin)
     print(f"the Admin page's site check: {a['problems']} problems, {a['ideas']} ideas")
 elif args[0] == 'weekly':
