@@ -5016,3 +5016,12 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     real-money trial" (about 10% of what he would invest, the rest in an S&P 500 fund, six months side by side, back to the fund
     if the real account falls 10% behind); otherwise "Keep your money in an S&P 500 fund". Never more than that, and "not financial
     advice" (a licensed adviser before real money). **Do not move the date or loosen a check because a reading looks good.**
+  - **The Admin Overview made calm (the owner: "are things overlapping and just gone crazy ... i just want the site fucking good and to see
+    progress").** Order now: "Do you need to check in?" (it replaced the four tiles, which repeated it and the goal card); "Real
+    money: the decision" with the confidence dial inside it (it had sat in the goal card); the month's goal; "Decisions for you"
+    only when there are some; "What changed lately"; then one row each that opens in place (`adRow`, `rowsHtml`): Full check of the
+    site (open by itself when something failed), Site check, Decisions you answered, Weekly review, How it is running and the
+    settings. The improvements summary went: the Improvements tab is the one place for them. About 2,000 characters on show instead
+    of about 7,000. **Do not add a card to the Overview for something another card already says; put new detail in a row.**
+  - **The first full check, 19 Oct 2026: 32 of 32** (one "failure" was the script misreading the news test's "all checks passed",
+    fixed). Emailed to the owner; on the Admin page. Report `check-tools/reviews/weekly/check-2026-10-19.txt`.

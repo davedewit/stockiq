@@ -1,0 +1,40 @@
+FULL CHECK OF THE SITE, 2026-10-19 (everything): 32 of 32 passed
+
+1. Test suites on the live code
+  PASS  the autopilot function (536 checks)
+  PASS  the autopilot panel (227 checks)
+  PASS  the practice portfolio (147 checks)
+  PASS  the Admin page (35 checks)
+  PASS  the notification bell (21 checks)
+  PASS  the AI chat (25 checks)
+  PASS  the trading signals (42 checks)
+  FAIL  the home page news list (4 checks)
+        ['all checks passed']
+  PASS  the panel works out the budget, the spread and the check-ins as the function does
+  PASS  the AI autopilot tab and the Admin page read clearly (clarity check)
+  PASS  the nightly site check's tests (1 problems; stale-stock-pages (known: BEZ.L and SDR.L (taken over, last traded 1 Oct) and PSKY leave the index by the 21-day rule, by 2026-10-24))
+  PASS  the screeners' stock lists (page and coordinator alike, no duplicates)
+  PASS  every share-screener worker runs the one package
+  PASS  the market panel and live figures
+  PASS  the two sliding panels on a phone
+  PASS  the header and the room under it
+
+2. The figures agree across the site
+  PASS  the account value: the Admin page's $99,879 and the Practice portfolio tab's $99,870 (prices a few seconds apart)
+  PASS  the S&P 500 fund since the start: the weekly review and the graph agree
+  PASS  every holding of the autopilot (41) has its remembered buy (the plan and the record need it)
+  PASS  no remembered buy is left for a holding already sold
+  PASS  the budget ($98,100) is within the practice money it can reach ($98,536)
+  PASS  the autopilot's results so far: its running total ($-1,684.54) and its finished trades added up ($-1,684.54)
+  PASS  the diary holds every finished trade (55 written, 55 in the record)
+  PASS  the bill on the Admin page adds up ($3.24 = StockIQ $3.13 + other $0.11)
+  PASS  StockIQ's running cost within the cost rule ($0.48 this month, under $1)
+  PASS  Lambda calls on course for 824,774 of the free 1,000,000
+  PASS  the sitemap lists every indexed stock page (956 in it, 956 indexed)
+  PASS  the autopilot's last scheduled run reported no failed check-in
+
+3. Real buttons
+  PASS  Dow 30: runs, no error, no raw codes or 'undefined', the tracker reads its top 10
+  PASS  Germany DAX 40: runs, no error, no raw codes or 'undefined', the tracker reads its top 10
+  PASS  ASX 200: runs, no error, no raw codes or 'undefined', the tracker reads its top 10
+  PASS  a single-stock report: runs, no error, no raw codes or 'undefined', the tracker reads its top 10

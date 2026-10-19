@@ -48,16 +48,16 @@ async function page(status, uid) {
   await p.click({ 'data-ad': 'review' });
   check('"Write it now" asks for a review', p.sent.at(-1).op === 'review' && /The review is written from the latest figures/.test(p.panel.innerHTML));
   { const q = await page(200, 'dave@x.com'); const pl = () => q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
-    check('the Overview has a short Improvements card: the counts, what is tested, the latest three done, and a way to the full list', /1 being tested · 1 next · 3 kept · 1 taken out/.test(pl()) && /Testing: Trend score/.test(pl()) && /Taken out: AI review early sales/.test(pl()) && /Old one B/.test(pl()) && !/Old one C/.test(pl()) && !/Hold fewer/.test(pl()) && /See every improvement/.test(pl()), pl().slice(0, 400));
+    check('the Overview no longer repeats the improvements (19 Oct 2026): they are on the Improvements tab only', !/See every improvement/.test(pl()) && !/1 being tested · 1 next · 3 kept · 1 taken out/.test(pl()) && /Improvements/.test(pl()), pl().slice(0, 400));
     await q.click({ 'data-ad-view': 'improvements' });
     check('the Improvements view has the whole list: next, every one done, the parts reviewed, and which users see', /Next, in order/.test(pl()) && /Hold fewer/.test(pl()) && /Old one C/.test(pl()) && /Parts of the site reviewed lately/.test(pl()) && /users see it/.test(pl()) && !/Needs your yes/.test(pl()));
     await q.click({ 'data-ad-view': 'overview' });
     check('and back to the Overview', /Decisions for you/.test(pl()) && !/Next, in order/.test(pl())); }
   p = await page(200, 'dave@x.com');
   const plain = () => p.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
-  check('before the Practice portfolio has its prices the account is not shown as a figure that changes a second later: "…" while the prices come', /Practice account … getting the latest prices/.test(plain()) && !/\$99,334/.test(plain()), plain().slice(0, 300));
+  check('before the Practice portfolio has its prices the account is not shown as a figure that changes a second later: "…" while the prices come', /The practice account \(getting the latest prices\) …/.test(plain()) && !/\$99,334/.test(plain()), plain().slice(0, 300));
   p.ctx.window.practicePortfolio = { figures: () => ({ accountValue: 99643.23, gainUsd: -356.77, gainPct: -0.36, startingCash: 100000 }) }; p.fire('practice-portfolio:figures');
-  check('once it has them the Admin page shows the very figure the Practice portfolio tab shows, at the latest prices', /\$99,643/.test(plain()) && !/\$99,334/.test(plain()) && /▼ \$357 since the start/.test(plain()) && /The practice account, at the latest prices/.test(plain()) && !/an estimate/.test(plain()), plain().slice(0, 300));
+  check('once it has them the Admin page shows the very figure the Practice portfolio tab shows, at the latest prices', /\$99,643/.test(plain()) && !/\$99,334/.test(plain()) && /\$357 below the \$100,000 it started with/.test(plain()) && /The practice account, at the latest prices/.test(plain()) && !/an estimate/.test(plain()), plain().slice(0, 300));
   { const q = await page(200, 'dave@x.com'); await new Promise(r => setTimeout(r, 8300)); const pl = () => q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
     check('if the prices never come, after a few seconds the function\'s estimate is shown, said to be one', /\$99,334/.test(pl()) && /an estimate: the latest prices did not come in/.test(pl()), pl().slice(0, 300)); }
   { const q = await page(200, 'dave@x.com'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
@@ -80,7 +80,7 @@ async function page(status, uid) {
     const q = await page(200, 'dave@x.com'); const h = q.panel.innerHTML, pl = h.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
     if (typeof check === 'function') {
       check('What changed lately shows the latest five and folds the rest', /What changed lately/.test(pl) && /Change number 5/.test(pl) && /2 earlier/.test(pl), pl.slice(pl.indexOf('What changed'), pl.indexOf('What changed') + 300));
-      check('Answered comes straight after Decisions for you, before the site check and the goal, the latest three on show', h.indexOf('ad-answered') > h.indexOf('Decisions for you') && h.indexOf('ad-answered') < h.indexOf('ad-changes') && /2 earlier/.test(pl) && /Answered item 3/.test(pl));
+      check('the decisions answered are one row under What changed lately (19 Oct 2026), the latest three on show inside it', h.indexOf('data-ad-row="answered"') > h.indexOf('ad-changes') && /2 earlier/.test(pl) && /Answered item 3/.test(pl));
     }
   }
   if (/costStockiq/.test(fs.readFileSync(process.argv[2], 'utf8'))) { // the bill split (19 Oct 2026)
@@ -99,10 +99,10 @@ async function page(status, uid) {
     ADMIN.usage = keep;
   }
   if (/function confidenceHtml/.test(fs.readFileSync(process.argv[2], 'utf8'))) { // the confidence line (19 Oct 2026)
-    const show = async (versus) => { const q = await page(200, 'dave@x.com'); q.ctx.window.practicePortfolio = { figures: () => ({ accountValue: 99856, gainUsd: -144, gainPct: -0.14, startingCash: 100000, versus }) }; q.fire('practice-portfolio:figures'); return q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' '); };
+    const show = async (versus) => { const q = await page(200, 'dave@x.com'); q.ctx.window.practicePortfolio = { figures: () => ({ accountValue: 99856, gainUsd: -144, gainPct: -0.14, startingCash: 100000, versus, fundValue: 98032, topGains: 700, createdAt: new Date(Date.now() - 9 * 86400000).toISOString() }) }; q.fire('practice-portfolio:figures'); return q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' '); };
     let pl = await show({ days: 4, ahead: 3, avg: 0.63, se: 0.48 });
     check('under 30 trading days it says too early to tell, with the days so far and no percentage', /Confidence it has been ahead of an S&P 500 fund so far Too early to tell 4 of 30 trading days/.test(pl) && /ahead of the fund on 3 of 4 days/.test(pl) && !/\d+% is how sure/.test(pl), pl.slice(pl.indexOf("Confidence it has"), pl.indexOf("Confidence it has") + 300));
-    { const q = await page(200, 'dave@x.com'); q.ctx.window.practicePortfolio = { figures: () => ({ accountValue: 99856, gainUsd: -144, gainPct: -0.14, startingCash: 100000, versus: { days: 4, ahead: 3, avg: 0.63, se: 0.48, gaps: [0.5, 1.4, -0.4, 1.0] } }) }; q.fire('practice-portfolio:figures');
+    { const q = await page(200, 'dave@x.com'); q.ctx.window.practicePortfolio = { figures: () => ({ accountValue: 99856, gainUsd: -144, gainPct: -0.14, startingCash: 100000, fundValue: 98032, topGains: 700, createdAt: new Date(Date.now() - 9 * 86400000).toISOString(), versus: { days: 4, ahead: 3, avg: 0.63, se: 0.48, gaps: [0.5, 1.4, -0.4, 1.0] } }) }; q.fire('practice-portfolio:figures');
       const h = q.panel.innerHTML;
       if (/function dialSvg/.test(fs.readFileSync(process.argv[2], 'utf8'))) check('a dial shows the confidence: faded with a grey dashed needle and "Early reading" until 30 days, and a line of how it has moved', /<svg viewBox="0 0 220 136"[^>]*aria-label="Confidence \d+%, an early reading"/.test(h) && /<g opacity="0.35">/.test(h) && /Early reading<\/strong>: needs 26 more trading days/.test(h) && /<polyline points="[^"]+"/.test(h), h.slice(h.indexOf('ad-dial'), h.indexOf('ad-dial') + 300)); }
     pl = await show({ days: 40, ahead: 26, avg: 0.2, se: 0.08 });
@@ -117,12 +117,13 @@ async function page(status, uid) {
     check('below the start the account\'s bar is empty (not 99% full) and the line says how far below the start and how far to go', bar === '2' && /\$153 below the \$100,000 it started with · \$153 to go/.test(pl), { bar, line: pl.slice(pl.indexOf('it started with') - 60, pl.indexOf('it started with') + 80) });
   }
   if (/function decisionHtml/.test(fs.readFileSync(process.argv[2], 'utf8'))) { // real money: the decision (19 Oct 2026)
-    const card = async (fig) => { const q = await page(200, 'dave@x.com'); q.ctx.window.practicePortfolio = { figures: () => fig }; q.fire('practice-portfolio:figures'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' '); return pl.slice(pl.indexOf('Real money: the decision'), pl.indexOf('Real money: the decision') + 700); };
+    const card = async (fig) => { const q = await page(200, 'dave@x.com'); q.ctx.window.practicePortfolio = { figures: () => fig }; q.fire('practice-portfolio:figures'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' '); return pl.slice(pl.indexOf('Real money: the decision'), pl.indexOf('Real money: the decision') + 2500); };
     const base = { accountValue: 99856, gainUsd: -144, gainPct: -0.14, startingCash: 100000, fundValue: 98032, topGains: 700, createdAt: new Date(Date.now() - 9 * 86400000).toISOString(), versus: { days: 4, ahead: 3, avg: 0.6, se: 0.5, gaps: [0.5, 1.4, -0.4, 1.0] } };
     let t = await card(base);
     check('before the judging day: "Not yet", the date, and each of the four checks as it stands', /Real money: the decision Not yet 1 of 4 so far/.test(t) && /Decided on 11 Oct 2027/.test(t) && /✗ A full year of results \(9 of 365 days\)/.test(t) && /✗ Confidence dial at 90% or more \(\d+%, early reading\)/.test(t) && /ahead by \$1,824 so far; a yearly rate from 30 days/.test(t) && /✓ Still ahead without its 3 biggest winning trades \(ahead by \$1,124 without them\)/.test(t), t);
     t = await card(Object.assign({}, base, { topGains: 2500 }));
     check('a lead carried by its three biggest winners fails that check', /✗ Still ahead without its 3 biggest winning trades \(behind by \$676 without them\)/.test(t), t);
+    check('the confidence dial sits inside the real-money card (19 Oct 2026), once on the page', /Confidence it has been ahead of an S&P 500 fund so far/.test(t) && (fs.readFileSync(process.argv[2], 'utf8').match(/confidenceHtml\(/g) || []).length === 2);
     check('it never says more than a small trial, and says it is not advice', /about 10% of what you would invest/.test(fs.readFileSync(process.argv[2], 'utf8')) && /Not financial advice/.test(t));
   }
   if (/function needMeHtml/.test(fs.readFileSync(process.argv[2], 'utf8'))) { // "Do you need to check in?" and the full check (19 Oct 2026)

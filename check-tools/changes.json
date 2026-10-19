@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-19",
+   "what": "The Admin page is calmer: your two questions first (do you need to check in; real money with the confidence dial and the month's goal), then what changed, and the rest as rows you open"
+  },
+  {
+   "at": "2026-10-19",
    "what": "At the top of this page: Real money, the decision. One verdict from four checks, decided on 11 Oct 2027; until then it shows how each check stands"
   },
   {

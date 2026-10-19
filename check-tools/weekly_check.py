@@ -48,7 +48,7 @@ def suite(name, cmd, timeout=900, env=None):
     code, out = run(cmd, timeout, env=env)
     fails = [l for l in out.splitlines() if l.strip().startswith('FAIL')]
     passed = len([l for l in out.splitlines() if l.strip().startswith('PASS')])
-    ok = ('ALL PASS' in out or re.search(r'all \d+ checks passed', out) or re.search(r'\b\d+ passed, 0 failed', out)) and not fails
+    ok = ('ALL PASS' in out or re.search(r'all (\d+ )?checks passed', out) or re.search(r'\b\d+ passed, 0 failed', out)) and not fails
     note('1. Test suites on the live code', f"{name} ({passed} checks)" if passed else name, ok, '; '.join(fails[:3]) or out.strip().splitlines()[-1:] if not ok else '')
 
 
