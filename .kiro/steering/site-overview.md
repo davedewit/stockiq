@@ -4939,7 +4939,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     script follows them); **`market-panel.js` v2: a list row runs the analysis again (the owner preferred that to opening the stock
     page; reverses version 3 of 18 Oct), and a market tab's item runs in the background on the dashboard** (it opened the analysis
     page). `stock-pages.js` is still written daily but nothing loads it now: delete it and its writer's part at the next clean-up.
-    Live `stockiq-ai-trader` after the goals deploy (rollback `…_before_autopilot_goals_20261019.zip`).
+    Live `stockiq-ai-trader` `wZI+J09ds3y/twMuk2qnAfMdJaVuOnENYjLCltt7JCo=` (rollback `…_before_autopilot_goals_20261019.zip`).
   - **Next session, first:** say the steering files were loaded in full; the opening check; the stop watch's first sales (marked `w`)
     and the first budget changes from results ("The budget is now …" in the activity list); the first week look-backs (`a7`) arrive
     from about 22 Oct; the weekly review is due around 26 Oct; `bar_of` on the latest 300 at the next function change.
