@@ -230,10 +230,12 @@
   },
   {
    "id": "stop-watch",
-   "what": "Between check-ins, the half-hourly run looks only at the prices of holdings whose trailing stop has started and sells one that has fallen through it (no screener run, no AI call)",
+   "what": "The stop watch: between check-ins, holdings whose trailing stop has started are priced every half hour and sold at their floor",
    "angle": "profit, realism",
-   "measure": "how much of the best gain is kept by sales of the trailing stop, before and after; 8 of 54 trades had been up 2% or more and ended down",
-   "status": "idea"
+   "measure": "of trailing-stop sales, the share of the best gain kept and the average result, sales marked w against those at check-ins; the 8 of 54 trades that had been up 2% and ended down",
+   "status": "running",
+   "started": "2026-10-19",
+   "decide": "2026-11-30"
   }
  ]
 }

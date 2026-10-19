@@ -3,6 +3,18 @@
  "changes": [
   {
    "at": "2026-10-19",
+   "what": "A holding's trailing stop is now watched every half hour between check-ins, so a gain is not handed back while waiting up to 3 hours for the next check-in"
+  },
+  {
+   "at": "2026-10-19",
+   "what": "Stock pages' news shows the right dates again (6,931 wrong date stamps corrected), and about 600 unchanged pages a day are no longer re-uploaded"
+  },
+  {
+   "at": "2026-10-19",
+   "what": "On a phone the dashboard's market-data button is no longer hidden under the AI chat button, and the chat window fits small screens"
+  },
+  {
+   "at": "2026-10-19",
    "what": "Every sale is now looked at again a week and a month later, each against the S&P 500 over the same days, so the reviews can tell whether holding on would have paid"
   },
   {

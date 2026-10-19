@@ -3039,7 +3039,7 @@ are titles only, and most candidates have none. **Not known:** how the owner loo
 preview from Kiro): ask early when a change "does not show" (section 9).
 
 **What is live, and how to confirm nothing has moved since** (all compared with the local copies on 12 Oct, 10:17 UTC):
-- `stockiq-ai-trader` `sRDNpn92Qlwx4nqz8BpsaNDMKfulbOCB8vjD1TipunM=` (since 08:47 UTC, 19 Oct 2026: company figures with each buy, week and month look-backs, the bill by service; before it `CXfWPnap…`, the gauge, and `K5Sj58Iv…` from 03:19 UTC, 18 Oct 2026: the themes part; `stockiq-ai-chat` `snC0Sn/V…` the same minute; earlier `15k0lkcP…` 17:00 UTC, 17 Oct, the free bill; `vSGWQgIB…` from 04:54 UTC that day: the Admin page; `wLHHlexH…` from 16:59 UTC on 13 Oct: the waiting rule; `i9WtL7oP…` from 16:32 that day: 27 screeners in five regions; before that `0tynNBjn…`, 3,079 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC, a holding's own stop kept with the buy 16:51 UTC, the build-up that leaves out what is invested 17:25 UTC); `stockiq-ai-chat`
+- `stockiq-ai-trader` `b3xkSDNrfBYKMLhhIvoKrvV1skyCCEK12EQElnxCKiI=` (since 09:01 UTC, 19 Oct 2026: the stop watch; before it `sRDNpn92…` 08:47 UTC: company figures with each buy, week and month look-backs, the bill by service; before it `CXfWPnap…`, the gauge, and `K5Sj58Iv…` from 03:19 UTC, 18 Oct 2026: the themes part; `stockiq-ai-chat` `snC0Sn/V…` the same minute; earlier `15k0lkcP…` 17:00 UTC, 17 Oct, the free bill; `vSGWQgIB…` from 04:54 UTC that day: the Admin page; `wLHHlexH…` from 16:59 UTC on 13 Oct: the waiting rule; `i9WtL7oP…` from 16:32 that day: 27 screeners in five regions; before that `0tynNBjn…`, 3,079 lines; after the check: the headline filter 10:29 UTC, the patient-shares trial 13:47 UTC, a holding's own stop kept with the buy 16:51 UTC, the build-up that leaves out what is invested 17:25 UTC); `stockiq-ai-chat`
   `9K5HRpizpV9lHdwP8eOwKpB00IGaNRgUz2qQEQRi6rs=` (since 13 Oct 2026, 17:00 UTC); `stockiq-price-proxy` `lzqBC+6a/h51byePPZpa+e29ACnMZGPQp+TEt2SQJ8g=`; `stockiq-screener-coordinator` `979X4yAm37f76T4RQfYT8ClqaR9P8NO0r+5LeqgDK7A=` (since 13 Oct 2026, 16:11 UTC, with the twelve screeners added that day);
   `stockiq-option-1-1-custom-analysis` `I84SxSgLYNt7…`; `stockiq-chart-generator` `OIDrZ2W9G3lJ…`; `stockiq-paper-portfolio`
   `s6IR+/80N/3k…`; the two signals functions `6nVDLm4/8G6K…`; the crypto orchestrator `yvmucU37gHJH…` and its 54 workers
@@ -3072,10 +3072,14 @@ buying-order trial finished and was not kept; the AI review's early sales switch
   split by in the review tool's part 3); **(C)** item 9b below (done the same day). **(A) was not built on 19 Oct:** the only
   account sets its holding time by hand (10 days), and a trial may not override a setting the user made (the lesson of the
   first patient-shares design), so it would test nothing; the replay's advice (20 days for shares) was given to the owner
-  instead. **Next build: the stop watch** (experiment `stop-watch`): between check-ins the half-hourly run looks only at the
-  prices of holdings whose trailing stop has started and sells one that has fallen through it (no screener run, no AI call;
-  a model for it is `sell_everything`). On 19 Oct, 8 of 54 trades had been up 2% or more and ended down, giving back about 6
-  points from their best, because a stop acts only at a check-in (every 3 hours on his settings).
+  instead. **The stop watch, live since 09:01 UTC on 19 Oct 2026** (experiment `stop-watch`; `watch_stops`, `STOP_WATCH`): at a
+  half-hourly run when an account is not due for a check-in, only the holdings whose trailing stop has started (a floor from the
+  last check-in) in an open market are priced, and one at its floor is sold as the check-in would have sold it (exit `trail` or
+  `cut`, marked `w` on the trade and in the shared record; its story says "between check-ins"). No screener run, no AI call; the
+  floor is not raised between check-ins, so it can only sell sooner. About 20 of the owner's 41 holdings had a stop started that
+  day. Why: 8 of 54 trades had been up 2% or more and ended down (about 6 points given back), because a stop acted only at a
+  check-in (every 3 hours on his settings). Judge it by how much of the best gain trailing-stop sales keep, before and after.
+  The AI chat's guide does not mention it yet (one sentence at its next change).
 - **Prepare as tested options for his decision: (D)** a market-mood rule: hold fewer shares, or none, while the S&P 500 is
   below its 200-day average (question 9; replay first, the four tests of "THE MANDATE"); **(E)** the screeners' own scoring:
   the three factors that use no real data replaced by company figures, and momentum over months given its due (the part
@@ -3584,9 +3588,8 @@ Needs the owner's decision or more work (nothing here is fixed):
 - Guides are ~800 words of definitions with no worked examples.
 - `uniqueSymbolsCount` constants in `saveAnalysisToHistory` (`analysis-functions.js`) still use
   the old list sizes (bookkeeping only).
-- News `data-timestamp` values on stock pages get bumped past the article date (e.g. 0006.HK
-  showed 16 Sep for a 10 Sep article). This inflates sitemap lastmod; cause not found (look in
-  `update_stock_news.py`). Also seen 10 Oct: a page with one article sometimes ends with one
+- (Fixed 19 Oct 2026: news `data-timestamp` values bumped past the article date. Cause: the "refresh" block of
+  `update_stock_news.py`, removed; the pages repaired with `--fix-dates`.) Also seen 10 Oct: a page with one article sometimes ends with one
   article after a new one arrives (the old one is not carried into History); counts never drop.
 - `website/stocks-backup-before-restore/` (118 MB, created 9 Oct, gitignored, not uploaded) can
   be deleted. Three rollback zips `~/VSCODE/backup/*_before_neutral_wording_20261009.zip` hold the
@@ -4890,6 +4893,14 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     sale looked at again a week and a month later against the S&P 500 fund (`a7`, `a30`, `a7m`, `a30m`; `LATER`, the shared
     record and the diary carry them; the review tool's part 4 reports them); the bill split by service. `admin-panel.js?v=17`.
     `autopilot-bell.js` version 9. Tests: 521 function, 24 Admin page, 22 bell.
+  - **From the daily review by Claude (its report `check-tools/reviews/daily/2026-10-19.md`; all three proposals done the same hour):**
+    the stock pages' news date stamps (the cause of the open item in section 11: `update_stock_news.py` "refreshed" a page whose
+    newest article it already had by setting every `data-timestamp` to that article's date, and rewrote ~600 unchanged pages a day:
+    removed; `--fix-dates` corrected 6,931 stamps on 1,985 pages from each article's own visible date; History count fixed); on a
+    phone the dashboard's green market button sat under the AI chat button (now `bottom: 90px`, as on the home page; the phone test
+    taps it where it is) and the chat window was taller than a small screen (`min(500px, 100dvh - 120px)`, `ai-chat.js`); the stop
+    watch (above, "Improvements to come"). The opening check judges the daily run by its prices through AWS, not Yahoo's misses,
+    and counts lost-internet news failures (1,964 that day).
   - The nightly site check runs after the sitemap step (it had reported sitemap pages that the step was about to drop).
     Two London stock pages (BEZ.L, SDR.L: taken over, last traded 1 Oct) leave the index by themselves around 22 Oct.
   - **Coins:** the entry study over 9 days: coins entering the top 10 after a 10%+ day fell 13.8% on average afterwards (123
