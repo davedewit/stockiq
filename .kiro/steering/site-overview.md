@@ -46,7 +46,7 @@ or the console, and are free). About $0.09 a month is the owner's other projects
 when it helps the learning (the record, the diary, the shared record, the coin entry log, the research prices on this Mac);
 delete only with his yes to an exact list, and only when it costs something.
 
-**THE SITE IS CHECKED EVERY NIGHT, WITH NO AI AND NO COST: `python3 check-tools/site_audit.py`** (18 Oct 2026; the owner, after
+**THE SITE IS CHECKED WITH EVERY DAILY UPDATE (Mon to Sat, while the Mac is on; not literally nightly), WITH NO AI AND NO COST: `python3 check-tools/site_audit.py`** (18 Oct 2026; the owner, after
 finding one weak spot after another himself: "why can't you actively do this every 24+ hours since a last check"). The daily
 deploy runs it with `--admin`: its findings go onto the Admin page ("🔎 Site check", via `admin.py audit`, inside `_admin['plan']`)
 and session_start prints them (part 1b; every problem is a finding). It tests concrete things a session had missed: links to the
