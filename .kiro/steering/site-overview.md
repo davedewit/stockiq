@@ -5025,3 +5025,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     of about 7,000. **Do not add a card to the Overview for something another card already says; put new detail in a row.**
   - **The first full check, 19 Oct 2026: 32 of 32** (one "failure" was the script misreading the news test's "all checks passed",
     fixed). Emailed to the owner; on the Admin page. Report `check-tools/reviews/weekly/check-2026-10-19.txt`.
+  - **"Coming up" and "What runs by itself" (the owner: "where do i see where things are at ... when i need to check in").** Under the
+    check-in answer, "Coming up" (`comingUp`): his next check-in (7 days after the last session's line in "What changed lately", or
+    "now" when the card is amber or red), the next full check, the autopilot's next weekly review, the next two trials decided, the
+    month's goal and the real-money decision, soonest first. A row "🔁 What runs by itself" (`selfRunHtml`) lists each automatic job,
+    how often and when it last ran, with a green or red dot; the daily review's latest report date comes via `admin.py audit` (the
+    daily deploy runs it) as `plan.dailyReview`.

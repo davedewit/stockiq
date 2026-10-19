@@ -141,6 +141,10 @@ async function page(status, uid) {
     check('nine days since the last session: "When you can", the weekly review and improvements due', /Do you need to check in\? When you can Nothing is broken, but a session would help: the last session was 9 days ago: the weekly review and new improvements are due/.test(pl), pl.slice(0, 400));
     Object.keys(ADMIN).forEach(k => delete ADMIN[k]); Object.assign(ADMIN, keep);
   }
+  if (/function comingUp/.test(fs.readFileSync(process.argv[2], 'utf8'))) {
+    const q = await page(200, 'dave@x.com'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    check('"Coming up" under the check-in answer: the next check-in and the dates ahead, soonest first, with the real-money decision', /Coming up/.test(pl) && /Real money: the decision/.test(pl.slice(pl.indexOf('Coming up'))) && (/Your next check-in/.test(pl)), pl.slice(pl.indexOf('Coming up'), pl.indexOf('Coming up') + 400));
+  }
   if (/function selfRunHtml/.test(fs.readFileSync(process.argv[2], 'utf8'))) {
     const q = await page(200, 'dave@x.com'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
     check('a row says what runs by itself, how often, and when each last ran', /What runs by itself , and when each last ran/.test(pl) && /The autopilot: trades, with the half-hourly stop watch/.test(pl) && /every 30 minutes/.test(pl) && /The full check of the site/.test(pl) && /Nothing changes the site's code by itself/.test(pl), pl.slice(pl.indexOf('What runs by itself'), pl.indexOf('What runs by itself') + 300));
