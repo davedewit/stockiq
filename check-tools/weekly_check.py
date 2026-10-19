@@ -150,6 +150,9 @@ const pp = require(process.argv[2]); const PRICE = 'https://dohdeb4vpu67fa2tq3ax
     smap = open(os.path.join(WEB, 'sitemap.xml')).read(); listed = [l.strip() for l in open(os.path.join(ROOT, 'indexable_stocks.txt')) if l.strip()]
     in_map = len(re.findall(r'/stocks/[^<]+\.html', smap))
     note('2. The figures agree across the site', f"the sitemap lists every indexed stock page ({in_map} in it, {len(listed)} indexed)", abs(in_map - len(listed)) <= 2, (in_map, len(listed)))
+    ex = json.load(open(os.path.join(HERE, 'experiments.json')))['experiments']
+    overdue = [x['id'] for x in ex if x.get('status') == 'running' and x.get('decide') and x['decide'] < datetime.datetime.utcnow().strftime('%Y-%m-%d')]
+    note('2. The figures agree across the site', 'every improvement on trial past its decision day has been decided (the Improvements tab stays true)', not overdue, overdue)
     h = admin.get('health') or {}
     note('2. The figures agree across the site', 'the autopilot\'s last scheduled run reported no failed check-in', h and not h.get('failed'), h)
 except Exception as e:

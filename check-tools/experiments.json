@@ -69,9 +69,11 @@
    "id": "company-figures",
    "what": "Record profit margin, debt and growth with every share bought, then split the record by them",
    "angle": "analysis, profit",
-   "measure": "the review split by each figure, 30 trades a band",
-   "status": "idea",
-   "order": 2
+   "measure": "the review splits finished share trades by profit margin, debt and revenue growth when bought; 30 a group before reading anything; then whether they could replace the screeners' empty \"financial\" factors",
+   "status": "running",
+   "order": 2,
+   "started": "2026-10-19",
+   "decide": "2026-11-30"
   },
   {
    "id": "market-mood",
@@ -101,7 +103,7 @@
   },
   {
    "id": "weekly-email",
-   "what": "A short weekly email to the owner: the account against the fund, the trades, what was changed",
+   "what": "A short weekly email to the owner with the account against an S&P 500 fund, the trades and what was changed (the full check already emails its result every 7 days)",
    "angle": "ease of use",
    "measure": "does he read and act on it (ask him after a month)",
    "status": "idea",
@@ -143,7 +145,7 @@
    "measure": "",
    "status": "kept",
    "decided": "2026-10-17",
-   "result": "Kept: $0.56 so far; the bill read every 3 days ($0.10 a month)"
+   "result": "Kept: read for free from the AWS budget and CloudWatch (Cost Explorer, $0.01 a reading, is no longer used); the page shows the whole bill, StockIQ's part and its running cost by service ($0.48 on 19 Oct)"
   },
   {
    "id": "plain-summary",
@@ -218,8 +220,10 @@
    "id": "daily-review",
    "what": "A daily review by Claude, unattended (check-tools/daily_review.sh, launchd com.stockiq.review): reads the site, runs the read-only checks, writes a report to check-tools/reviews/daily/ and up to three proposals on the Admin page; it cannot deploy or change the site",
    "angle": "ease of use, faults, profit, AI use",
-   "measure": "whether its proposals are worth the usage they cost the owner's Claude allowance; a two-week trial once installed, ending by itself on 1 Nov 2026 unless check-tools/reviews/daily/KEEP exists",
-   "status": "idea"
+   "measure": "whether its reports find real faults a session acts on (the first, 18 and 19 Oct, found stale stock pages, wrong news dates, a hidden phone button: all fixed); it ends by itself on 1 Nov unless kept",
+   "status": "running",
+   "started": "2026-10-18",
+   "decide": "2026-11-01"
   },
   {
    "id": "crypto-no-chasing",
