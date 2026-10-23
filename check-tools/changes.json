@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-23",
+   "what": "Admin page: each check now says what it covers (Full check: every test on the live site; Page scan: links, descriptions, stale pages); the Improvements tab lists every part of the site with when it was looked at and what was found; two new profit ideas",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-23",
    "what": "The Improvements tab's number now means 'being tested'; the tab starts with links to each section (being tested, ideas, done, fixes, the 48 questions)",
    "found": "owner"
   },

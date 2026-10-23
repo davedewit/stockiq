@@ -84,7 +84,8 @@ elif args[0] == 'sync':
     kept_est = (admin.get('plan') or {}).get('estimates')
     changes = json.load(open(os.path.join(here, 'changes.json')))['changes']
     admin['plan'] = {'at': now(), 'items': [{k: e[k] for k in keep if k in e} for e in ex], 'reviews': reviews,
-                     'parts': len(parts), 'reviewed': sum(1 for p in parts if p.get('last')), 'questions': questions(here)}
+                     'parts': len(parts), 'reviewed': sum(1 for p in parts if p.get('last')), 'questions': questions(here),
+                     'siteParts': [{'id': p['id'], 'part': p['part'][:120], 'last': p.get('last'), 'log': [{'at': l['at'], 'found': l['found'][:300]} for l in (p.get('log') or [])[-3:]]} for p in parts]}
     if kept:
         admin['plan']['audit'] = kept
     if kept_weekly:

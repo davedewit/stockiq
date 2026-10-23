@@ -346,6 +346,22 @@
    "added": "2026-10-23",
    "started": "2026-10-23",
    "decide": "2026-12-07"
+  },
+  {
+   "id": "asia-overnight",
+   "what": "Fewer or smaller Asian holdings overnight: on 22-23 Oct six loss limits were passed in one Asian night (one correlated bet)",
+   "angle": "profit",
+   "measure": "Replay first on the wide price set (research-data/prices/): the account with at most a set share in Asia-Pacific overnight against as it is, both halves; then a trial. Question 45",
+   "status": "idea",
+   "added": "2026-10-23"
+  },
+  {
+   "id": "market-hours-checkins",
+   "what": "Check-ins set by each market's own hours (soon after its open and before its close) instead of every 6 hours for all",
+   "angle": "profit",
+   "measure": "A 6-hour session can be looked at twice, then not for 19 hours; replay the stops passed between check-ins with and without; then a trial. Question 40",
+   "status": "idea",
+   "added": "2026-10-23"
   }
  ]
 }

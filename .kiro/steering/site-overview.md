@@ -5256,6 +5256,12 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     buying-order trial (15 Oct) and the day's price change; six rows of questions.md were stale (two trials already live read
     "open"). All put right; the tab now lists the 46 questions with their answers (`admin-panel.js?v=37`, `admin.py` `questions`).
     The next profit trial is `longer-holds`, from 12 Nov when patient-shares is decided (both are about how long shares are kept).
+  - **The Admin page read row by row at the owner's question** ("is this sort of a duplicate ... check all these things"): no duplicates,
+    names made to say what each covers ("Full check (every test, run on the live site)", "Page scan (links, descriptions, stale or
+    broken pages)", "The autopilot's weekly review"), "Decision due" for a trial's decision day, and **every part of the site with when
+    it was looked at and what was found, on the Improvements tab** (`partsHtml`, `plan.siteParts` from `admin.py sync`), with the next
+    three named. Parts go oldest first, not at random, so every part comes round. Two new profit ideas in the register
+    (`asia-overnight`, `market-hours-checkins`). `admin-panel.js?v=40`.
   - **The cost of the day's changes, checked at the owner's question** ("confirm nothing we have done will significantly increase
     cost ... more than 5c a month" is his line for being told first): Lambda calls fell (the price function's batches); its memory
     went 128 -> 256 MB (compute well inside the free 400,000 GB-seconds); emails fewer; the scripts run on the Mac. **Found: the
