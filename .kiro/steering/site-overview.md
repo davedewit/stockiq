@@ -5261,8 +5261,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     repositories, the function copies' dates), the parts in `PROFIT` sooner, age last; a part unchanged since a recent look waits.
     `next` shows what was found the time before. **Every look must end in an improvement** (the owner: "each time around you have to
     find an improvement, not say ok i did a check its ok done"): `site_parts.py done <id> fixed|improved|simplified|idea|question
-    "<what>"`; "it is fine" is refused, an idea must be in the register and a question in the list. Simplified (removing or merging) counts and is
-    often the best: nothing is added for show. The
+    "<what>"`; an idea must be in the register and a question in the list. Refined the same day ("some areas may just not need a change, but
+    a topic like figuring out how to make better profit ... can go on forever"): **a profit and growth part (`PROFIT`) must always end in an
+    improvement; any other part may end `fine` with its reason**, and then waits until its code changes. Simplified (removing or merging)
+    counts and is often the best: nothing is added for show. The
     Improvements tab names the same next three with the reason (`plan.partsNext`). The ideas that move profit come from the data
     (the trades, the visitors), through the questions and the trials: the parts sweep is the hygiene.
   - **The parts list made complete** (the owner: "only 45 parts ... nothing else can be improved?"): 13 parts added (the path from

@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-23",
+   "what": "Refined: a look at a profit or growth part of the site must always end in an improvement; other parts may end 'fine as it is' with the reason, and then wait until they change",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-23",
    "what": "Every look at a part of the site must now end in an improvement (fixed, improved, simplified, a new idea to test, or a new question): 'it's fine' is not accepted",
    "found": "owner"
   },

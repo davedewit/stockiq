@@ -12,7 +12,9 @@ LENSES below, fixes what is plainly wrong, and brings the rest as numbered impro
             improvement (23 Oct 2026, the owner: "each time around you have to find an improvement, not say ok i did a check its ok
             done"). fixed: a fault put right; improved: clearer, faster or more useful; simplified: something removed or merged (often
             the best one: the site must not just grow); idea: a profit idea in experiments.py (give its id); question: a new question in
-            reviews/questions.md (give its number). "It is fine" is not accepted.
+            reviews/questions.md (give its number); fine (refined the same day: "some areas may just not need a change"): only for a part
+            not in PROFIT, with its reason; it then waits until its code changes. A profit and growth part (PROFIT) must always end in an
+            improvement: "a topic like figuring out how to make better profit ... can go on forever".
     python3 check-tools/site_parts.py add <id> "<part>" "<where to look>"          a part that is missing from the list
 
 The list is research-data-free and in git (check-tools/site_parts.json): add a part whenever the site gains one.
@@ -42,7 +44,7 @@ def save(d):
 # The parts that matter most for profit and sign-ups come up sooner (the priority since 19 Oct 2026: visitors and sign-ups first).
 PROFIT = {'funnel', 'home-hero', 'home-pricing', 'plans', 'signup-login', 'usage-chip', 'seo', 'stock-pages', 'screener-score',
           'ap-buying', 'ap-selling', 'ap-learning', 'ap-themes', 'speed'}
-KINDS = {'fixed': 'Fixed', 'improved': 'Improved', 'simplified': 'Simplified', 'idea': 'New idea to test', 'question': 'New question'}
+KINDS = {'fixed': 'Fixed', 'improved': 'Improved', 'simplified': 'Simplified', 'idea': 'New idea to test', 'question': 'New question', 'fine': 'Fine as it is'}
 ROOT = os.path.dirname(HERE); WEB = os.path.join(os.path.dirname(ROOT), 'website')
 
 def files_of(part):
@@ -83,7 +85,8 @@ def ranked(d):
     for p in d['parts']:
         age = (today - datetime.date.fromisoformat(p['last'])).days if p.get('last') else None
         ch = changes_since(p)
-        score = (100 if age is None else 0) + (30 + 5 * min(ch, 6) if ch else 0) + (15 if p['id'] in PROFIT else 0) + (age or 0) / 7
+        fine = ((p.get('log') or [{}])[-1].get('kind') == 'fine') and not ch      # "fine" and unchanged since: it waits (age counts a third)
+        score = (100 if age is None else 0) + (30 + 5 * min(ch, 6) if ch else 0) + (15 if p['id'] in PROFIT else 0) + (age or 0) / (21 if fine else 7)
         why = 'never looked at' if age is None else (f'{ch} change{"s" if ch != 1 else ""} since its last look {age} days ago' if ch else f'unchanged since its last look {age} days ago')
         out.append((score, p, why + (', matters for profit and sign-ups' if p['id'] in PROFIT else '')))
     return sorted(out, key=lambda x: -x[0])
@@ -100,9 +103,14 @@ if __name__ == '__main__':
         for _, p, why in ranked(d)[:int(a[1]) if len(a) > 1 else 3]:
             before = (p.get('log') or [])[-1:]
             print(f"{p['id']}: {p['part']} (where: {p['where']}; {why})" + (f" | last time: {before[0]['found'][:220]}" if before else ''))
-        print('Start from what was found last time and what changed since. Each look MUST end in an improvement: fixed, improved, simplified '
-              '(remove or merge something), idea (a profit idea in experiments.py) or question (in questions.md); "it is fine" is not an answer. '
-              'Real ones only: nothing added for show. Ask of each: ' + ' / '.join(LENSES))
+        print('Start from what was found last time and what changed since. A profit and growth part must end in an improvement: fixed, improved, '
+              'simplified (remove or merge something), idea (in experiments.py) or question (in questions.md). Any other part may end "fine", '
+              'with the reason. Real improvements only: nothing added for show. Ask of each: ' + ' / '.join(LENSES))
+    elif a[0] == 'done' and len(a) >= 4 and a[2] == 'fine' and a[1] in PROFIT:
+        sys.exit(f'{a[1]} is a profit and growth part: a look there must end in an improvement (fixed, improved, simplified, idea or question). '
+                 'There is always another idea to test, measure or compare.')
+    elif a[0] == 'done' and len(a) >= 4 and a[2] == 'fine' and len(a[3]) < 40:
+        sys.exit('"Fine" needs its reason: what was checked, against what, and why nothing should change (at least a sentence).')
     elif a[0] == 'done' and len(a) >= 4 and a[2] in KINDS:
         import re
         if a[2] == 'idea':                       # an idea must be in the register, a question in the list: no empty promises
@@ -115,7 +123,7 @@ if __name__ == '__main__':
         p['last'] = datetime.date.today().isoformat(); p.setdefault('log', []).append({'at': p['last'], 'kind': a[2], 'found': f"{KINDS[a[2]]}: {a[3]}"}); p['log'] = p['log'][-10:]
         save(d); print(f"{a[1]}: recorded")
     elif a[0] == 'done':
-        sys.exit('A look must end in an improvement: site_parts.py done <id> fixed|improved|simplified|idea|question "<what>" ("it is fine" is not one)')
+        sys.exit('site_parts.py done <id> fixed|improved|simplified|idea|question|fine "<what>"  (fine: not for a profit part, and with its reason)')
     elif a[0] == 'add' and len(a) >= 4:
         d['parts'].append({'id': a[1], 'part': a[2], 'where': a[3], 'last': None}); save(d); print(f"{a[1]}: added")
     else:

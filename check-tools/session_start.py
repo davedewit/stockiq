@@ -232,7 +232,7 @@ if age_days >= 30: finding(f"the screeners' full list check is {'never run' if n
 head('6c. Parts of the site to look at this session')
 r = subprocess.run([sys.executable, os.path.join(HERE, 'site_parts.py'), 'next', '3'], capture_output=True, text=True)
 for l in r.stdout.splitlines()[:3]:
-    print('  ' + l); finding('IMPROVE without being asked: ' + l.split(' (where')[0] + ' (it must end in an improvement: python3 check-tools/site_parts.py done <id> fixed|improved|simplified|idea|question "<what>")')
+    print('  ' + l); finding('IMPROVE without being asked: ' + l.split(' (where')[0] + ' (profit parts must end in an improvement; others may end "fine" with a reason: python3 check-tools/site_parts.py done <id> fixed|improved|simplified|idea|question|fine "<what>")')
 
 # 6d. experiments whose day has come (experiments.py: keep or remove on the figures; the owner, 17 Oct 2026)
 head('6d. Experiments')
