@@ -159,10 +159,11 @@ about what the "Still never" list keeps for him (real money, costs above the rul
 settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
 warns about; one change at a time, measured, with its experiment entry.
 
-**WHERE THINGS STAND (rewrite this block at the end of every session; last: 23 Oct 2026, 03:30 UTC)**
-- The account: about $97,000, about $1,130 behind the same $100,000 in an S&P 500 fund (-1.1%); 97 finished trades, -0.21% a
-  trade; share trades about level with the fund trade for trade; month 1 goal ($101,000 by 12 Nov) out of reach. Claude's forecast
-  on the Admin page: 25% (was 30%).
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 23 Oct 2026, 08:10 UTC, end of the big session)**
+- The account: $97,115, $1,008 behind the same $100,000 in an S&P 500 fund (-1.0%); 98 finished trades, about -0.17% a trade; the
+  last 7 days +$767 over 55 trades (+0.74% a trade); share trades about level with the fund; month 1 goal ($101,000 by 12 Nov) out
+  of reach. Claude's forecast on the Admin page: 25% (was 30%). Settings: AI chooses the markets (21 main indexes), Balanced, 50
+  holdings, the pace left to the level since the owner pressed it on 23 Oct (every 6 h, holdings up to 5 days).
 - Full check 23 Oct: 54 of 54. Weekly review done early on 23 Oct (`check-tools/reviews/review-2026-10-23.txt`); the next due
   around 30 Oct.
 - Running and to read at the next session: **gap-wait** (`gw` on trades: what waiting a check-in after an overnight fall gave

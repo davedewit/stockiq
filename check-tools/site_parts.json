@@ -437,7 +437,13 @@
    "id": "costs",
    "part": "AWS and OpenAI costs, calls against the free allowance",
    "where": "the Admin page, session_start.py",
-   "last": null
+   "last": "2026-10-23",
+   "log": [
+    {
+     "at": "2026-10-23",
+     "found": "23 Oct: tables about 7 MB (storage free); StockIQ running about $0.60 this month, on course for $0.85; the cost is writing the autopilot's ~190 KB record at check-ins: store it compressed (a job after #8). Lambda calls on course for about 760k of the free million"
+    }
+   ]
   },
   {
    "id": "seo",
