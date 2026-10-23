@@ -183,6 +183,15 @@ warns about; one change at a time, measured, with its experiment entry.
   (`review_resting`) widened to markets and made visible as ticks, plus a market-trend filter replayed first on the wide price set
   (`research-data/prices/`: does leaving a market while its index is below its 200-day average beat staying, in both halves?).
   Risk level may set how quickly it drops and re-admits. Tests, the panel copy (`autopilot_plan_check.py`), the chat's guide.
+- **Tested the same evening, before building (`check-tools/scoring/market_trend_study.py`, `results-market-trend-2026-10-23.txt`;
+  five years, nine markets, the trend score's top 10 against SPY over 20 days): leaving a market while its own index is below its
+  200-day average does NOT help (worse when below in 5 of 9 lists, then 3 of 9); leaving a market whose picks lagged the S&P over
+  the last 12 weeks does NOT pass either (1 of 9, then 7 of 9: luck). So the AI mode must not drop markets on those signals.
+  Build the switch with the evidence-backed rule: on AI, the main index of every country stays ticked (spreading over markets is
+  what the data supports), a screener is unticked only while the existing resting rule rests it on its own live results
+  (`review_resting`), and is ticked again when the rest ends; each change logged and later judged. Keep looking for a market rule
+  that passes both halves (ideas: the market's own trend score against the others', a currency's trend, a longer test window);
+  when one passes, it becomes the AI mode's rule through an experiment.
 - Also from 23 Oct: the owner reads 25% as "awful". It is the honest forecast; tell him what would move it (the trials above, and
   this market selection if replayed evidence supports it), not a softer number.
 - Open ideas worth a session: questions.md 45 (one night in Asia cost six loss limits: fewer or smaller Asian holdings
