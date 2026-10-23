@@ -46,7 +46,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     if (process.env.MARKETS) {
       const info = fs.readFileSync(process.env.MARKETS, 'utf8');
       await run(`window.practicePortfolio.setPlans([], { realizedUsd: null, screeners: ${info} }); true`); await sleep(500);
-      const menu = await run(`(() => { const b = document.querySelector('[data-pp="mkt-toggle"]'); if (!b) return 'no menu'; b.click(); return JSON.stringify(Array.from(document.querySelectorAll('.pp-mkt-sum, .pp-mkt-row')).map(o => (o.classList.contains('sub') ? '   ' : '') + o.textContent.replace(/\\s+/g, ' ').trim())); })()`);
+      const menu = await run(`(() => { const b = document.querySelector('[data-pp="mkt-toggle"]'); if (!b) return 'no menu'; b.click(); return new Promise(done => setTimeout(() => done(JSON.stringify(Array.from(document.querySelectorAll('.pp-mkt-sum, .pp-mkt-row')).map(o => (o.classList.contains('sub') ? '   ' : '') + o.textContent.replace(/\\s+/g, ' ').trim()))), 4000)); })()`);      // 4 s: the indexes are fetched when the list opens
       console.log('market menu:', hide(menu));
       if (process.env.MARKET) { await run(`(() => { const r = document.querySelector('[data-pp="market"][data-id=' + JSON.stringify(${JSON.stringify(process.env.MARKET)}) + ']'); if (!r) { const b = document.querySelector('[data-pp="mkt-toggle"]'); if (b) b.click(); } const q = document.querySelector('[data-pp="market"][data-id=' + JSON.stringify(${JSON.stringify(process.env.MARKET)}) + ']'); if (q) q.click(); return !!q; })()`); await sleep(500); }
     }

@@ -16,9 +16,9 @@ FUNCS=(
 )
 # file : what it was : what it becomes : type : how long a copy may be kept
 FILES=(
- "practice-portfolio.js:7390f295fe92bd4cfcea193d30f86b633b68604a5e715ccb917340dbe947ef05:b51056e3fcea162f814f689a7404df6be0472ed8e2e17727c5c9fb702fb4bdfe:application/javascript:public, max-age=300, s-maxage=86400"
+ "practice-portfolio.js:b51056e3fcea162f814f689a7404df6be0472ed8e2e17727c5c9fb702fb4bdfe:31f8d7d8b9b4a1cc99eec627dd430510aaa39170e6bdb2492474f64e57757ccb:application/javascript:public, max-age=300, s-maxage=86400"
  "practice-autopilot.js:8063a2ce146fc61813f336d46a7d0f74996fd21dacfec6b513c513f6ee95c233:16e8996897c3ec705b7e627811d28e033d0e6980c0193e09545b90a28f6bd490:application/javascript:public, max-age=300, s-maxage=86400"
- "dashboard.html:bc843d9e864979350e3b26a781f99d9d8a862bbd62440b58415d51c9abb16e2a:80e353dff3d5bad32eafa775826f8ceb93592865dde979c1bcc50d98df0d766f:text/html; charset=utf-8:public, max-age=0, s-maxage=3600, must-revalidate"
+ "dashboard.html:bc843d9e864979350e3b26a781f99d9d8a862bbd62440b58415d51c9abb16e2a:f6f20d2b0a977fc47352583b603be94b43402b9cba0fb33bfda53cf58aac0290:text/html; charset=utf-8:public, max-age=0, s-maxage=3600, must-revalidate"
 )
 say()  { printf '\n== %s\n' "$*"; }
 stop() { printf '\nSTOPPED: %s\nNothing further was changed.\n' "$*"; exit 1; }

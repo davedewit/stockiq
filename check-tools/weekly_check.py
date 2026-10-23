@@ -81,6 +81,7 @@ known = [f"{x} (known: {KNOWN_UNTIL[x][1]}, by {KNOWN_UNTIL[x][0]})" for x in pr
 note('1. Test suites on the live code', f"the nightly site check's tests ({m.group(0) if m else '?'}{'; ' + '; '.join(known) if known else ''})", m is not None and not left, out.strip().splitlines()[-6:])
 code, out = run(['python3', 'lists_check.py'], 300)
 note('1. Test suites on the live code', "the screeners' stock lists (page and coordinator alike, no duplicates)", 'FINDINGS: none' in out, out.strip().splitlines()[-4:])
+suite('every index the site compares with has daily prices', ['node', 'index_check.js'], 300)
 code, out = run(['python3', 'workers.py'], 600)
 bad = [l for l in out.splitlines() if 'DIFFEREN' in l and '(not used)' not in l]      # old groups the site no longer calls are left alone (section 8b)
 note('1. Test suites on the live code', 'every share-screener worker runs the one package', code == 0 and not bad, bad[:3])

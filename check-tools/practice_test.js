@@ -68,6 +68,16 @@ if (pure.valueSeries) {      // the graph of the account over time (a copy of th
     check('a market filters the lists to the autopilot\'s holdings from it, a screener to its own', pure.partOf(mk.holdings, 'g:Europe markets', info).length === 2 && pure.partOf(mk.holdings, 's:5-dax40', info).map(h => h.symbol).join() === 'SAP.DE' && pure.partOf(mk.closed, 'g:US markets', info).length === 1 && pure.partOf(mk.holdings, 'g:US markets', info).length === 0);
     const ps = pure.valueSeries(mk, mq, Date.parse('2026-10-08T00:00:00Z'), null, 0, pure.pickOf('g:Europe markets', info)), pl = ps.points[ps.points.length - 1];
     check('the graph of one market ends on its result and on the fund\'s for the same money', near(pl.part, r['g:Europe markets'].gainUsd) && near(pl.pfund, r['g:Europe markets'].fundUsd) && ps.pfundAll === true && ps.points[0].part === 0, pl);
+    if (pure.homeGap) {      // against its own index, in its own currency (23 Oct 2026)
+      const hs = pure.newState('2026-10-01T00:00:00Z'), tb = Date.parse('2026-10-03T12:00:00Z');
+      const x = pure.applyBuy(hs, { symbol: 'SAP.DE', currency: 'EUR', price: 100, fx: 1.1, spy: 500, amountUsd: 1100, now: '2026-10-03T12:00:00Z' }); x.by = 'ai'; x.screener = '5-dax40';
+      const hq = { 'SAP.DE': { price: 105 }, 'EURUSD=X': { price: 1.0 }, '^GDAXI': { price: 1030, series: [[tb - 43200000, 1000], [tb + 43200000, 1020]] }, SPY: { price: 500 } };
+      const g = pure.homeGap(x, hq);
+      check('a holding against its own index: its result in its own currency (5%) less the index from the moment it was bought (1010 to 1030)', g && g.name === 'DAX' && near(g.gap, 1100 * (0.05 - (1030 / 1010 - 1)), 0.01), g);
+      const hr = pure.marketResults(hs, hq, info)['s:5-dax40'];
+      check('the euro falling does not count against the picks there, while it does against the S&P 500', near(hr.homePct, (0.05 - (1030 / 1010 - 1)) * 100, 0.01) && hr.aheadPct < 0 && hr.homeAll, hr);
+      check('a coin or a sector fund has no home index', pure.homeGap(Object.assign({}, x, { screener: '7-1' }), hq) === null && pure.homeGap(Object.assign({}, x, { screener: 'themes' }), hq) === null);
+    }
     const pic = pure.chartSvg(ps, 'part', 600, 200);
     check('its picture is against zero with the fund\'s line, and the whole account\'s graph is unchanged', pic.base === 0 && pic.fund === true && /pp-fund/.test(pic.svg) && !/NaN|undefined/.test(pic.svg) && pure.valueSeries(mk, mq, Date.parse('2026-10-08T00:00:00Z'), null).points.every(p => !('part' in p)), pic.svg.slice(0, 120));
   }

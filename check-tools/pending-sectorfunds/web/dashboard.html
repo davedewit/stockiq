@@ -3618,15 +3618,15 @@ ${analysis.report}
         // The index each screener's list is drawn from, for "how did the market do over the same period".
         const TOP10_BENCHMARKS = [
             [/Dow Jones/i, '^DJI', 'Dow Jones Industrial Average'], [/NASDAQ 100/i, '^NDX', 'NASDAQ 100 index'],
-            [/S&P 400/i, '^SP1000', 'S&P 1000 index (400 + 600)'], [/1500/, '^SP1500', 'S&P 1500 index'],
+            [/S&P 400/i, '^SP400', 'S&P 400 index'], [/1500/, '^GSPC', 'S&P 500 index'],
             [/S&P 500/i, '^GSPC', 'S&P 500 index'], [/S&P 100/i, '^OEX', 'S&P 100 index'],
             [/Russell 1000/i, '^RUI', 'Russell 1000 index'], [/Russell 2000/i, '^RUT', 'Russell 2000 index'],
             [/ASX 300/i, '^AXKO', 'S&P/ASX 300 index'], [/ASX 200/i, '^AXJO', 'S&P/ASX 200 index'],
             [/ASX 100/i, '^ATOI', 'S&P/ASX 100 index'], [/ASX 50/i, '^AFLI', 'S&P/ASX 50 index'],
-            [/FTSE 100/i, '^FTSE', 'FTSE 100 index'], [/Nikkei/i, '^N225', 'Nikkei 225 index'], [/DAX/i, '^GDAXI', 'DAX 40 index'], [/CAC 40/i, '^FCHI', 'CAC 40 index'], [/AEX/i, '^AEX', 'AEX index'], [/TSX/i, '^GSPTSE', 'S&P/TSX Composite index'], [/FTSE MIB/i, 'FTSEMIB.MI', 'FTSE MIB index'], [/IBEX/i, '^IBEX', 'IBEX 35 index'], [/Hang Seng/i, '^HSI', 'Hang Seng index'], [/Singapore STI/i, '^STI', 'Straits Times index'], [/Switzerland SMI/i, '^SSMI', 'Swiss Market Index'], [/Sensex/i, '^BSESN', 'BSE Sensex index'], [/KOSPI/i, '^KS200', 'KOSPI 200 index'], [/Bovespa/i, '^BVSP', 'Ibovespa index'],
+            [/FTSE 100/i, '^FTSE', 'FTSE 100 index'], [/Nikkei/i, '^N225', 'Nikkei 225 index'], [/DAX/i, '^GDAXI', 'DAX 40 index'], [/CAC 40/i, '^FCHI', 'CAC 40 index'], [/AEX/i, '^AEX', 'AEX index'], [/TSX/i, '^GSPTSE', 'S&P/TSX Composite index'], [/FTSE MIB/i, 'FTSEMIB.MI', 'FTSE MIB index'], [/IBEX/i, '^IBEX', 'IBEX 35 index'], [/Hang Seng/i, '^HSI', 'Hang Seng index'], [/Singapore STI/i, '^STI', 'Straits Times index'], [/Switzerland SMI/i, '^SSMI', 'Swiss Market Index'], [/Sensex/i, '^BSESN', 'BSE Sensex index'], [/KOSPI/i, '^KS11', 'KOSPI index'], [/Bovespa/i, '^BVSP', 'Ibovespa index'],
             [/Euro Stoxx/i, '^STOXX50E', 'Euro Stoxx 50 index'],
             [/OMX Stockholm/i, '^OMX', 'OMX Stockholm 30 index'],
-            [/CSI 300/i, '000300.SS', 'CSI 300 index'],
+            [/CSI 300/i, '510300.SS', 'CSI 300 index fund'],
             [/Taiwan 50/i, '^TWII', 'Taiwan TAIEX index'],
             [/NZX 50/i, '^NZ50', 'S&P/NZX 50 index'],
             [/Mexico IPC/i, '^MXX', 'S&P/BMV IPC index'],
