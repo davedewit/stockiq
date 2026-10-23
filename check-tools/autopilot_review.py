@@ -184,13 +184,21 @@ def main():
         say(f"  a fall through the loss limit overnight, kept one more check-in: {n_} cases, waiting gave back {m_:+.2f}% on average (+-{2 * se_:.2f}); decide at 30 (experiment gap-wait)")
     breakdown('by risk level at the time', trades, lambda t: m.RISK.get(t.get('risk'), {}).get('name', str(t.get('risk'))))
 
-    say("\n4. THE LOSSES, ONE BY ONE (finished in the period, worst first)")
+    say("\n4. THE LOSSES AND THE GAINS, ONE BY ONE (finished in the period; why each: part 4b)")
     for t in sorted((t for t in inside if (t.get('usd') or 0) < 0), key=lambda t: t.get('usd') or 0)[:15]:
         after = f"; in the same time again after the sale it went {t['after']:+.1f}%" if isinstance(t.get('after'), (int, float)) else ''
         say(f"  {t.get('label')}: {t.get('pct'):+.2f}% ({t.get('usd'):+,.2f} USD) in {t.get('days', 0):.1f} days, sold {EXITS.get(t.get('exit'), t.get('exit'))}. "
             f"Bought at rank {t.get('rank')} of {name_of(t.get('screener'))}, score {t.get('score')}, RSI {t.get('rsi')}, 30-day move {t.get('d30')}%. Best {t.get('peak', 0):+.1f}%, worst {t.get('low', 0):+.1f}%{after}.")
         if (t.get('view') or {}).get('text'): say(f"      the AI review's last word: {t['view']['text'][:200]}")
     if not any((t.get('usd') or 0) < 0 for t in inside): say("  none")
+    # the gains asked the same questions (23 Oct 2026, the owner: "x sold at negative, why? is there a pattern same for profit"): what
+    # it was bought on, how it was sold, and whether selling left more on the table (it went on rising after the sale)
+    say("\n  THE GAINS, ONE BY ONE (best first):")
+    for t in sorted((t for t in inside if (t.get('usd') or 0) > 0), key=lambda t: -(t.get('usd') or 0))[:10]:
+        after = f"; in the same time again after the sale it went {t['after']:+.1f}%" if isinstance(t.get('after'), (int, float)) else ''
+        say(f"  {t.get('label')}: {t.get('pct'):+.2f}% ({t.get('usd'):+,.2f} USD) in {t.get('days', 0):.1f} days, sold {EXITS.get(t.get('exit'), t.get('exit'))}. "
+            f"Bought at rank {t.get('rank')} of {name_of(t.get('screener'))}, score {t.get('score')}, RSI {t.get('rsi')}, 30-day move {t.get('d30')}%. Best {t.get('peak', 0):+.1f}%{after}.")
+    if not any((t.get('usd') or 0) > 0 for t in inside): say("  none")
     gave = [t for t in trades if (t.get('peak') or 0) >= 2 and (t.get('pct') or 0) <= 0]
     say(f"\n  had been up 2% or more and still ended down: {len(gave)} of {len(trades)}" + (f" ({', '.join(str(t.get('label')) for t in gave[:8])}); a stop only acts at a check-in" if gave else ''))
     later = [t for t in trades if isinstance(t.get('after'), (int, float))]
