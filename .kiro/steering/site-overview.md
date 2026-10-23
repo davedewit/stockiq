@@ -5230,8 +5230,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - **The Improvements tab is six closed rows** (the owner: "a mess of scrolling with no idea what i'm looking at"): Being tested, Ideas
     waiting, Decided, Fixes and changes, Questions asked, Parts of the site, each with its count and the one fact worth knowing (the next
     decision and its day, how many problems he pointed out, what comes next); the detail opens inside. Above them, always open, three
-    plain lines (the owner: "how do i see ... what its going to focus on next, what it improved"): working on next (the three parts and
-    the next trial decided), what the last session improved (its change lines), what is being tested. `admin-panel.js?v=44`. **Keep it
+    parts, the story (the owner: "confirmation AI is being smart figuring out new shit and it leads to profit, eg analyzed x data
+    trialed y over x days it consistantly led to higher profit so i implemented it"): **the score** (the account against the same money
+    in an S&P 500 fund, live from the Practice portfolio), **proven by testing** (profit tests decided whose result carries measured
+    figures: write every result that way, "N trades, X% a trade against Y%", or it does not show as proof), **testing now for profit**
+    (day N of M) and **next**. `admin-panel.js?v=45`. **Keep it
     that way: new detail goes inside a row, never as a new section on show.** The backend is three files (`experiments.json`,
     `reviews/questions.md`, `site_parts.json`) kept in step by `registers_check.py`.
   - **Why each trade ended as it did** (the owner: "a stock drops in price, why? ... and same for it increasing same for it staying
