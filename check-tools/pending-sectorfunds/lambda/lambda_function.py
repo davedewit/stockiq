@@ -232,7 +232,7 @@ POOL_KEEP = 3000                 # finished trades, from every account together,
 POOL_CARD = 600                  # the most recent of them that the AI model's summary is made from
 BRAIN_NEWS_KEEP = 30             # notes from the shared reviews that are kept for the accounts' activity lists
 POOL_FIELDS = ('c', 'symbol', 'label', 'screener', 'risk', 'chosen', 'rank', 'score', 'rsi', 'd7', 'd30', 'volume', 't', 'hold', 'peak', 'low', 'stay', 'above', 'heads', 'headAge', 'pt', 'mg',
-               'pm', 'de', 'rg', 'pe', 'o', 'x', 'v', 'pct', 'usd', 'cost', 'market', 'vs', 'days', 'exit', 'xrank', 'xscore', 'sold', 'after', 'a7', 'a30', 'a7m', 'a30m', 'w')
+               'pm', 'de', 'rg', 'pe', 'o', 'x', 'v', 'pct', 'usd', 'cost', 'market', 'vs', 'days', 'exit', 'xrank', 'xscore', 'sold', 'after', 'a7', 'a30', 'a7m', 'a30m', 'w', 'gw', 'rp')
 _BRAIN = {}
 NEWS_MAX_AGE_HOURS = 72          # headlines older than this are not shown to the AI model
 NEWS_KEEP_MINUTES = 120          # a holding's headlines are fetched again after this long
@@ -1036,6 +1036,7 @@ def review_sells(portfolio, settings, snapshots, quotes, now, rates=None, only_m
         days = (now - bought).total_seconds() / 86400
         row = next((r for r in snapshots.get(h.get('screener'), []) if r['symbol'] == h['symbol']), None)
         seen = (opened or {}).get(h['id'])
+        before = ((seen or {}).get('path') or [None])[-1]  # the last check-in that saw it: [hours held, change]
         if seen is not None:                                # its best and worst so far, as seen at check-ins
             seen['peak'] = round(max(num(seen.get('peak'), change), change), 2)
             seen['low'] = round(min(num(seen.get('low'), change), change), 2)
@@ -1047,7 +1048,15 @@ def review_sells(portfolio, settings, snapshots, quotes, now, rates=None, only_m
         if seen is not None:                                # what the dashboard shows until the next check-in
             seen['stop'] = {'arm': stop['arm'], 'floor': None if keep_above is None else round(keep_above, 1), 'move': stop['move'], 'room': stop['room'], 'mode': stop.get('mode', 'gains')}
         reason = kind = None
-        if change <= rules['stop']:
+        gap_hold = (GAP_WAIT and seen is not None and change <= rules['stop'] and 'gap' not in seen and market_of(h.get('screener')) != 'crypto'
+                    and before is not None and num(before[1]) > rules['stop'] and days * 24 - num(before[0]) >= GAP_HOURS)
+        if gap_hold:                                        # through the limit overnight: one more check-in (the trial above)
+            seen['gap'] = {'t': iso(now), 'p': quote['price'], 'c': round(change, 2)}
+        elif seen is not None and isinstance(seen.get('gap'), dict) and 'n' not in seen['gap']:
+            seen['gap']['n'] = quote['price']               # the price one check-in later, sold or not: what waiting gave back
+        if gap_hold:
+            pass
+        elif change <= rules['stop']:
             kind, reason = 'stop', f"Down {abs(change):.1f}% since it was bought: past the {rules['stop']:g}% limit for the {rules['name']} level"
         elif change >= rules['take']:
             kind, reason = 'take', f"Up {change:+.1f}% since it was bought: reached the +{rules['take']:g}% mark for the {rules['name']} level"
@@ -1073,7 +1082,7 @@ def review_sells(portfolio, settings, snapshots, quotes, now, rates=None, only_m
                   'signal': row['signal'] if row else None, 'stop': rules['stop'], 'take': rules['take'], 'trail': rules['trail'],
                   'price': quote['price'], 'rsi': row['rsi'] if row else None, 'd1': row['d1'] if row else None, 'd7': row['d7'] if row else None,
                   'arm': stop['arm'], 'floor': None if keep_above is None else round(keep_above, 2), 'move': stop['move'], 'room': stop['room'], 'roomWhy': stop['why'],
-                  'path': list((seen or {}).get('path') or [])}
+                  'path': list((seen or {}).get('path') or []), 'gapHold': bool(gap_hold)}
         if figures is not None:
             figures[h['id']] = now_is
         if reason:
@@ -1367,6 +1376,18 @@ def do_sell(portfolio, h, price, spy, now, rate=1.0):
 # ticked. The share part then works with the rest of the budget (share_part). Its holdings are sold only at the monthly change
 # (or by "Sell everything it holds"): the share rules (time limit, loss limit, stops, signals) do not touch them.
 THEMES = True
+# A share that falls through its loss limit overnight waits one check-in before it is sold (23 Oct 2026). On five years of prices
+# for 1,750 shares (check-tools/scoring/depth_rsi_study.py), after a share opened 8% or more below the previous close the same day's
+# close was 0.3 to 0.6% higher than the open and the next day's close about 1% higher, in both halves of the period; live, 7 of the
+# 8 sales at the loss limit were such falls, sold at the first check-in after the opening at -14.3% against a -10% limit. Every
+# case records the price it would have been sold at (`gap` on the holding; `gw`, what waiting gave back, on the finished trade),
+# so the record judges it directly: after 30 cases it is kept only if waiting gave back more than it cost (experiment `gap-wait`).
+GAP_WAIT = True
+# Does the AI model's choice beat simply taking the top-ranked share? (23 Oct 2026; questions.md 14 and 46: nothing measured it.)
+# While "Try changes to its own rules" is on, every second share the model picks is swapped for the highest-ranked share of the
+# same market on the shortlist (`rp` 1 on the remembered buy; 0 for the model's own). The review compares the two after 30 each.
+RANK_PICK = True
+GAP_HOURS = 8                    # hours without a check-in that saw a price: the market was shut in between (an overnight fall)
 THEME_KEY = 'themes'
 THEME_SHARE = 0.20
 THEME_COUNT = 3
@@ -1723,6 +1744,9 @@ def settle(record, portfolio):
             exit=how.get('kind') or 'hand', xrank=how.get('rank'), xscore=how.get('score'), sold=sold.get('soldAt')))
         if how.get('w'):
             record['history'][-1]['w'] = 1                  # sold between check-ins by the stop watch (watch_stops)
+        gap = facts.get('gap')
+        if isinstance(gap, dict) and gap.get('p') and (gap.get('n') or sold.get('sellPrice')):
+            record['history'][-1]['gw'] = round(((gap.get('n') or sold['sellPrice']) / gap['p'] - 1) * 100, 2)   # what waiting one check-in gave back (its own currency)
         if ended and sold.get('sellPrice'):                 # look at its price again later: what did it do after it was sold?
             later = ended + timedelta(days=min(5.0, max(1 / 24, num(facts.get('hold'), 1.0))))
             sym, spy_then = facts.get('symbol') or sold.get('symbol'), num(sold.get('spyAtSell')) or None
@@ -2070,6 +2094,28 @@ def apply_order(order, picks, candidates):
                                    f"score {best['score']:+.1f}, RSI {best['rsi']:.0f})")
         c['_order'] = 'low52' if follow else 'rank'
         out.append((c, reason))
+    return out
+
+
+def apply_rank_pick(state, settings, picks, candidates, source):
+    """The trial above: tag each share the AI model picked, and swap every second one for the top-ranked share of the same market
+    on the shortlist (the shortlist is in the order of each share's place in its own screener)."""
+    if not RANK_PICK or source != 'ai' or not settings.get('selfTune', True):
+        return picks
+    box = state.setdefault('rankPick', {'n': 0}); out, taken = [], {c['symbol'] for c, _ in picks}
+    for c, reason in picks:
+        if c.get('kind') != 'stock' or c.get('_order') == 'low52':
+            out.append((c, reason)); continue
+        by_rank = int(box.get('n', 0)) % 2 == 1
+        box['n'] = int(box.get('n', 0)) + 1
+        if by_rank:
+            top = next((x for x in candidates if x.get('kind') == 'stock' and group_of(x) == group_of(c) and (x['symbol'] == c['symbol'] or x['symbol'] not in taken)), c)
+            if top['symbol'] != c['symbol']:
+                taken.discard(c['symbol']); taken.add(top['symbol'])
+                top = dict(top, _order=c.get('_order'))
+            c, reason = top, (f"Taken by rank, not by the AI model (a trial: every second share is the top-ranked of its market on the shortlist, "
+                              f"to learn whether the model's choice adds anything): rank {top['rank']} in {SCREENERS[top['screener']][0]}, score {top['score']:+.1f}, RSI {num(top.get('rsi')):.0f}")
+        out.append((dict(c, _rp=1 if by_rank else 0), reason))     # a copy: the shortlist's own entries are left as they were
     return out
 
 
@@ -2595,6 +2641,7 @@ def run_user(user_id, record, now, snapshot=None, quote=None, model=None, manual
         seen = candidate_news(state, candidates[:shown], now, headlines or fetch_news, quote)
         picks, source = choose(settings, candidates[:shown], view, count, model, memory, seen, limits)
         picks = apply_order(order_of(state, settings, now), picks, candidates[:shown])
+        picks = apply_rank_pick(state, settings, picks, candidates[:shown], source)
         if picks:
             market_gauge(now)                                   # the market-risk gauge, recorded with each buy (cached 6 hours)
         for n, (c, reason) in enumerate(picks):
@@ -2617,6 +2664,8 @@ def run_user(user_id, record, now, snapshot=None, quote=None, model=None, manual
             # how many recent headlines the model was shown for it, and how old the newest was: nobody knows yet whether
             # headlines help a choice, so the record keeps this and the review splits its results by it
             facts['heads'] = len(seen.get(c['symbol']) or [])
+            if c.get('_rp') is not None:
+                facts['rp'] = c['_rp']                          # the trial of the model's choice against the top by rank
             if PATIENT and c.get('kind') == 'stock' and settings.get('selfTune', True):   # the patient-shares trial: pairs of shares in turn
                 turn = state.setdefault('patient', {'n': 0})
                 facts['pt'] = (int(turn.get('n', 0)) // 2) % 2
@@ -2654,6 +2703,12 @@ def run_user(user_id, record, now, snapshot=None, quote=None, model=None, manual
     # the one look a day at Tokyo falls ten minutes after its opening, and would otherwise find old prices every day.
     untraded = {market for _label, _age, market in stale} - traded
     stale_note = ''
+    waited = [(h, figures[h['id']]) for h in mine if (figures.get(h['id']) or {}).get('gapHold')]
+    if waited:                                              # the gap rule: said once, at the check-in that waits
+        entries.append({'t': iso(now), 'type': 'note', 'symbol': '', 'usd': 0,
+                        'text': 'Fell through the loss limit overnight, so kept for one more check-in: ' + ', '.join(f"{h['label']} ({f['change']:+.1f}%)" for h, f in waited)
+                                + '. A trial: on five years of prices a share that opens far down has tended to recover a little during the day, so selling at '
+                                  'the opening is close to the worst moment. If it is still below the limit at the next check-in, it is sold then.'})
     if stale:
         seen_labels, parts = set(), []
         for label, age, _market in stale:

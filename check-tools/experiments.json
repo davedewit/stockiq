@@ -247,6 +247,28 @@
    "angle": "profit",
    "measure": "Replay first (questions.md 39); then live: limit sales after a gap, sold at the open against one check-in later, the money got back against the limit",
    "status": "idea"
+  },
+  {
+   "id": "gap-wait",
+   "what": "A share that falls through its loss limit overnight waits one check-in before it is sold",
+   "angle": "profit",
+   "measure": "Each case records the price it would have been sold at and the price one check-in later (gw on the finished trade): kept if, over 30 cases, waiting gave back more than it cost, beyond twice the margin of error; removed if it cost money",
+   "status": "running",
+   "started": "2026-10-23",
+   "decide": "2026-12-22",
+   "public": true,
+   "publicText": "When a share has fallen through its loss limit while its market was shut, it is kept for one more check-in instead of being sold at the opening: on five years of prices, a share that opens far down has tended to recover a little during the day. Every case records what waiting gave back or cost."
+  },
+  {
+   "id": "rank-pick",
+   "what": "Every second share the AI model picks is swapped for the top-ranked share of its market, to learn whether the model's choice adds anything",
+   "angle": "AI use",
+   "measure": "Finished trades tagged rp 1 (by rank) against rp 0 (the model's choice), sold and still held, after 30 each way: if the model is not clearly ahead, buy by rank and drop the model from choosing (fewer calls, a simpler rule)",
+   "status": "running",
+   "started": "2026-10-23",
+   "decide": "2027-01-06",
+   "public": true,
+   "publicText": "Every second share the AI model would buy is swapped for the top-ranked share of the same market, to learn whether the model's choice does better than simply taking the top of the ranking."
   }
  ]
 }

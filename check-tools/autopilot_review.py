@@ -176,6 +176,12 @@ def main():
         breakdown('by debt to equity when bought (shares)', [t for t in shares_cf if t.get('de') is not None], lambda t: 'low debt (under 0.5)' if t['de'] < 0.5 else 'some debt (0.5 to 1.5)' if t['de'] <= 1.5 else 'high debt (over 1.5)')
         breakdown('by revenue growth when bought (shares)', [t for t in shares_cf if t.get('rg') is not None], lambda t: 'revenue shrinking' if t['rg'] < 0 else 'growing under 15%' if t['rg'] < 15 else 'growing 15% or more')
     breakdown('the patient-shares trial (from 12 Oct 2026: a patient share is not sold on the signal, nor by the AI review)', [t for t in trades if t.get('pt') is not None], lambda t: 'patient: sold by price or time only' if t.get('pt') == 1 else 'ordinary: also sold when the signal turns')
+    breakdown('the AI model against the top by rank (a trial from 23 Oct 2026: every second share the model picks is swapped for the top-ranked of its market)',
+              [t for t in trades if t.get('rp') is not None], lambda t: 'taken by rank' if t.get('rp') == 1 else "the AI model's own choice")
+    waits = [t['gw'] for t in trades if t.get('gw') is not None]
+    if waits:                                           # the gap rule (GAP_WAIT, a trial from 23 Oct 2026)
+        m_, n_ = sum(waits) / len(waits), len(waits); se_ = (sum((x - m_) ** 2 for x in waits) / (n_ - 1) / n_) ** 0.5 if n_ > 1 else float('nan')
+        say(f"  a fall through the loss limit overnight, kept one more check-in: {n_} cases, waiting gave back {m_:+.2f}% on average (+-{2 * se_:.2f}); decide at 30 (experiment gap-wait)")
     breakdown('by risk level at the time', trades, lambda t: m.RISK.get(t.get('risk'), {}).get('name', str(t.get('risk'))))
 
     say("\n4. THE LOSSES, ONE BY ONE (finished in the period, worst first)")

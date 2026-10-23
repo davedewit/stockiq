@@ -1,7 +1,7 @@
 #!/bin/bash
 # One-off deploy (23 Oct 2026): the themes part becomes "Sector funds", a row in the screeners card that can be unticked like a
 # market (unticking sells the funds at the next check-in while the US market is open); the "By market" menu's words in the chat's
-# guide. stockiq-ai-trader, stockiq-ai-chat; practice-autopilot.js, practice-portfolio.js, dashboard.html.
+# guide; a fall through the loss limit overnight waits one check-in (GAP_WAIT) and every second share the model picks is taken by rank instead (RANK_PICK), both trials. stockiq-ai-trader, stockiq-ai-chat; practice-autopilot.js, practice-portfolio.js, dashboard.html.
 #   Preview: DRY_RUN=true bash deploy.sh    Deploy: bash deploy.sh
 # Roll back: ~/VSCODE/backup/stockiq-ai-trader_before_autopilot_sectorfunds_20261023.zip and stockiq-ai-chat_before_sectorfunds_20261023.zip;
 # the website files from git.
@@ -11,12 +11,12 @@ ROOT=/Users/dave/VSCODE/stockiq; WEB=/Users/dave/VSCODE/website; AWS=(aws --prof
 BUCKET=stockiq-final-websitebucket-vqekic7enf9h; DIST=EHXV50CPHY07R; DRY="${DRY_RUN:-false}"; TMP="$(mktemp -d)"
 # function : staged folder : file : CodeSha256 it has : its file's fingerprint : the staged file's : the rollback zip's name
 FUNCS=(
- "stockiq-ai-trader:lambda:lambda_function.py:z6DDu0FgYKNjVKIjsITweUWXFb4dugjcHpQgtlS888U=:9f7fa38efd0b2cce6eb6d17e52e49bf19ee0ce32b6f6971b979a4629223c86f8:943a200bad7f3e90b6dca769d48c16cf755e56936229c2841691bca6f84eb6f1:before_autopilot_sectorfunds_20261023"
- "stockiq-ai-chat:chat:lambda_function.py:D+jWzbuJishDBaRiXNXHZkfoX91UJugelBvhfGyHwGc=:55f1df5ea97e7e1468a057af96e232a21aef75a20db180bad6a8c9aa52a9ebd8:9d88bdcbbe7e1336a149badb0518081ea6c535f84df9bf904a37eb4cb5cdcef4:before_sectorfunds_20261023"
+ "stockiq-ai-trader:lambda:lambda_function.py:z6DDu0FgYKNjVKIjsITweUWXFb4dugjcHpQgtlS888U=:9f7fa38efd0b2cce6eb6d17e52e49bf19ee0ce32b6f6971b979a4629223c86f8:2b4a81b0bc24c3460c3cec4408fe0d20683351f6725cc0c0eddee3f95eddbd8f:before_autopilot_sectorfunds_20261023"
+ "stockiq-ai-chat:chat:lambda_function.py:D+jWzbuJishDBaRiXNXHZkfoX91UJugelBvhfGyHwGc=:55f1df5ea97e7e1468a057af96e232a21aef75a20db180bad6a8c9aa52a9ebd8:4be4a47001a4b5002806c65bf70feef22bc8077b0359da5e918c9bdd9db6b49e:before_sectorfunds_20261023"
 )
 # file : what it was : what it becomes : type : how long a copy may be kept
 FILES=(
- "practice-portfolio.js:b51056e3fcea162f814f689a7404df6be0472ed8e2e17727c5c9fb702fb4bdfe:31f8d7d8b9b4a1cc99eec627dd430510aaa39170e6bdb2492474f64e57757ccb:application/javascript:public, max-age=300, s-maxage=86400"
+ "practice-portfolio.js:b51056e3fcea162f814f689a7404df6be0472ed8e2e17727c5c9fb702fb4bdfe:345b6bff55a1d72a6407e3f0a23d5b6c71ec6212223733bbc9d8405bff6711cb:application/javascript:public, max-age=300, s-maxage=86400"
  "practice-autopilot.js:8063a2ce146fc61813f336d46a7d0f74996fd21dacfec6b513c513f6ee95c233:16e8996897c3ec705b7e627811d28e033d0e6980c0193e09545b90a28f6bd490:application/javascript:public, max-age=300, s-maxage=86400"
  "dashboard.html:bc843d9e864979350e3b26a781f99d9d8a862bbd62440b58415d51c9abb16e2a:f6f20d2b0a977fc47352583b603be94b43402b9cba0fb33bfda53cf58aac0290:text/html; charset=utf-8:public, max-age=0, s-maxage=3600, must-revalidate"
 )

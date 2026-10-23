@@ -1,0 +1,25 @@
+DEPTH, RSI AND GAPS: 2026-10-23  (each week's ranking by the trend score; 20 trading days; against the whole list)
+  sp400_600  first   ranks 1-10  +1.72  ranks 11-30  +0.16 | top 30: RSI<50  +2.23 (696)  RSI>=50  -0.03 (1524)
+  sp400_600  second  ranks 1-10  +0.87  ranks 11-30  +1.60 | top 30: RSI<50  +2.19 (1223)  RSI>=50  +0.93 (2407)
+  ftse100    first   ranks 1-10  +0.93  ranks 11-30  -0.26 | top 30: RSI<50  +0.38 (673)  RSI>=50  +0.03 (1547)
+  ftse100    second  ranks 1-10  +1.45  ranks 11-30  -0.24 | top 30: RSI<50  +0.37 (1138)  RSI>=50  +0.30 (2522)
+  dax40      first   ranks 1-10  -0.05  ranks 11-30  -0.21 | top 30: RSI<50  -0.33 (791)  RSI>=50  -0.06 (1489)
+  dax40      second  ranks 1-10  +1.92  ranks 11-30  -0.56 | top 30: RSI<50  +0.08 (1456)  RSI>=50  +0.39 (2234)
+  cac40      first   ranks 1-10  -0.45  ranks 11-30  +0.16 | top 30: RSI<50  +0.23 (756)  RSI>=50  -0.18 (1524)
+  cac40      second  ranks 1-10  +0.59  ranks 11-30  +0.15 | top 30: RSI<50  +0.10 (1544)  RSI>=50  +0.44 (2176)
+  aex        first   ranks 1-10   +nan  ranks 11-30   +nan | top 30: RSI<50   +nan (0)  RSI>=50   +nan (0)
+  aex        second  ranks 1-10   +nan  ranks 11-30   +nan | top 30: RSI<50   +nan (0)  RSI>=50   +nan (0)
+  smi        first   ranks 1-10   +nan  ranks 11-30   +nan | top 30: RSI<50   +nan (0)  RSI>=50   +nan (0)
+  smi        second  ranks 1-10   +nan  ranks 11-30   +nan | top 30: RSI<50   +nan (0)  RSI>=50   +nan (0)
+  nikkei225  first   ranks 1-10  +0.29  ranks 11-30  +0.23 | top 30: RSI<50  -0.48 (650)  RSI>=50  +0.58 (1450)
+  nikkei225  second  ranks 1-10  +2.11  ranks 11-30  +0.79 | top 30: RSI<50  +1.04 (1135)  RSI>=50  +1.32 (2405)
+  asx200     first   ranks 1-10  +0.25  ranks 11-30  +0.04 | top 30: RSI<50  +1.07 (754)  RSI>=50  -0.38 (1496)
+  asx200     second  ranks 1-10  +2.39  ranks 11-30  +1.50 | top 30: RSI<50  +2.23 (1157)  RSI>=50  +1.59 (2503)
+  tsx60      first   ranks 1-10  +0.01  ranks 11-30  -0.23 | top 30: RSI<50  -0.03 (755)  RSI>=50  -0.21 (1465)
+  tsx60      second  ranks 1-10  +1.23  ranks 11-30  +0.10 | top 30: RSI<50  +1.10 (1087)  RSI>=50  +0.21 (2543)
+
+  ranks 11-30 behind ranks 1-10: 6 of 9 lists in the first half, 6 of 9 in the second -> does not pass the bar
+  RSI under 50 behind RSI 50 or more, in the top 30: 2 of 9 lists in the first half, 3 of 9 in the second -> does not pass the bar
+
+  gaps of 8% or more down at the open, first half: 1241; the same day's close against the open +0.60% (+-0.46), the next day's close +0.97% (+-0.57)
+  gaps of 8% or more down at the open, second half: 2184; the same day's close against the open +0.32% (+-0.29), the next day's close +1.14% (+-0.38)

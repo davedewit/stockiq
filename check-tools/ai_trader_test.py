@@ -40,6 +40,8 @@ SHARED = m.CENTRAL; m.CENTRAL = False
 NOTES = getattr(m, 'LESSONS_MIN', 0); m.LESSONS_MIN = 5
 # And every share is sold by the ordinary rules here; the trial in which some are "patient" is tested on its own (PATIENT).
 PATIENT_ON = getattr(m, 'PATIENT', False); m.PATIENT = False
+RANK_ON = getattr(m, 'RANK_PICK', False); m.RANK_PICK = False   # the trial of the model's choice against the top by rank has its own tests
+GAP_ON = getattr(m, 'GAP_WAIT', False); m.GAP_WAIT = False      # the wait after an overnight fall through the loss limit has its own tests
 THEMES_ON = getattr(m, 'THEMES', False); m.THEMES = False    # the themes part (a trial) has its own tests; the older ones give the whole budget to shares
 HAS_AI_SELL = hasattr(m, 'AI_SELL'); m.AI_SELL = True      # the AI review is off on the site (17 Oct 2026); its code is still tested
 # And no trading cost is taken off here, so that the amounts in the older checks stay round; the cost is tested on its own (COSTS).
@@ -1262,6 +1264,45 @@ if PATIENT_ON:
     check('nor is an account with "Try changes to its own rules" switched off', rec['state']['open'] and all('pt' not in f for f in rec['state']['open'].values()))
     check('the tag goes with a finished trade into the shared record', 'pt' in m.POOL_FIELDS)
     m.PATIENT = False; m.CENTRAL = was_central; m.datetime = clock; D.t.clear(); m._BRAIN.clear()
+# ---- a fall through the loss limit overnight waits one check-in (23 Oct 2026)
+if GAP_ON:
+    m.GAP_WAIT = True
+    lvl = dict(m.RISK[3]); stg = dict(m.DEFAULTS, enabled=True, risk=3, screeners=['3-100'], maxHoldDays=10, auto=[], trailMode='off')
+    t0g = Open.utcnow(); hg = {'id': 'g1', 'symbol': 'GAPX', 'label': 'GAPX', 'by': 'ai', 'screener': '3-100', 'qty': 10, 'buyPrice': 100.0, 'buyFx': 1, 'currency': 'USD', 'costUsd': 1000.0, 'boughtAt': m.iso(t0g - dt.timedelta(hours=26))}
+    portg = {'cash': 0, 'holdings': [hg], 'closed': []}
+    seen = {'g1': {'symbol': 'GAPX', 'score': 2.5, 'rank': 2, 'path': [[3.0, -1.0], [6.0, -4.0]], 'peak': 0.0, 'low': -4.0}}
+    fig, kinds = {}, {}
+    sells = m.review_sells(portg, stg, {'3-100': rows()}, {'GAPX': {'price': 88.0, 'currency': 'USD'}}, t0g, opened=seen, kinds=kinds, rules=lvl, figures=fig)
+    check('down 12% at the first check-in after the market was shut, from -4% at the one before: kept one more check-in, with the price it would have been sold at',
+          sells == [] and seen['g1']['gap']['p'] == 88.0 and seen['g1']['gap']['c'] == -12.0 and fig['g1']['gapHold'] is True, [sells, seen['g1'].get('gap')])
+    sells = m.review_sells(portg, stg, {'3-100': rows()}, {'GAPX': {'price': 89.5, 'currency': 'USD'}}, t0g + dt.timedelta(hours=3), opened=seen, kinds=kinds, rules=lvl)
+    check('at the next check-in it is still below the limit: sold then, and the price then is kept', len(sells) == 1 and kinds['g1'] == 'stop' and seen['g1']['gap']['n'] == 89.5, [sells, seen['g1'].get('gap')])
+    seen2 = {'g1': {'symbol': 'GAPX', 'score': 2.5, 'rank': 2, 'path': [[23.0, -9.0], [25.0, -9.5]], 'peak': 0.0, 'low': -9.5}}
+    check('a fall through the limit during a session (the check-in before was two hours earlier) is sold at once, as before',
+          len(m.review_sells(portg, stg, {'3-100': rows()}, {'GAPX': {'price': 88.0, 'currency': 'USD'}}, t0g, opened=seen2, kinds=(k3 := {}), rules=lvl)) == 1 and k3['g1'] == 'stop')
+    seen3 = {'g1': {'symbol': 'GAPX', 'score': 2.5, 'rank': 2, 'path': [[3.0, -1.0], [6.0, -4.0]], 'peak': 0.0, 'low': -4.0, 'gap': {'t': 'x', 'p': 90.0, 'n': 91.0}}}
+    check('it waits only once in a holding\'s life', len(m.review_sells(portg, stg, {'3-100': rows()}, {'GAPX': {'price': 88.0, 'currency': 'USD'}}, t0g, opened=seen3, rules=lvl)) == 1)
+    hc = dict(hg, symbol='GAPC-USD', screener='7-1'); seen4 = {'g1': {'symbol': 'GAPC-USD', 'path': [[3.0, -1.0], [6.0, -4.0]], 'peak': 0.0, 'low': -4.0}}
+    check('a coin (its market never shuts) is sold at once', len(m.review_sells({'cash': 0, 'holdings': [hc], 'closed': []}, dict(stg, screeners=['7-1']), {'7-1': []}, {'GAPC-USD': {'price': 88.0, 'currency': 'USD'}}, t0g, opened=seen4, rules=lvl)) == 1)
+    recg = {'state': {'open': {'g1': dict(seen['g1'])}, 'exits': {'g1': 'stop'}}, 'history': []}
+    m.settle(recg, {'holdings': [], 'closed': [dict(hg, sellPrice=89.5, sellFx=1, proceedsUsd=895.0, soldAt=m.iso(t0g + dt.timedelta(hours=3)), spyAtBuy=500, spyAtSell=500)]})
+    check('the finished trade says what waiting gave back (+1.7%: 88.00 to 89.50), and it goes to the shared record', recg['history'][-1].get('gw') == 1.7 and 'gw' in m.POOL_FIELDS, recg['history'][-1].get('gw'))
+    m.GAP_WAIT = False
+# ---- the AI model's choice against the top by rank (23 Oct 2026)
+if hasattr(m, 'apply_rank_pick'):
+    m.RANK_PICK = True
+    cands = [dict(r, kind='stock', label=r['symbol'], price=r['price']) for r in rows()[:6]]
+    picks = [(cands[3], 'model a'), (cands[4], 'model b'), (cands[5], 'model c'), (cands[2], 'model d')]
+    st_ = {}; stg = dict(m.DEFAULTS, selfTune=True)
+    out = m.apply_rank_pick(st_, stg, list(picks), cands, 'ai')
+    check('every second share the model picks is swapped for the top-ranked of its market on the shortlist, and each is tagged',
+          [c['_rp'] for c, _ in out] == [0, 1, 0, 1] and out[0][0]['symbol'] == cands[3]['symbol'] and out[1][0]['symbol'] == cands[0]['symbol'] and out[3][0]['symbol'] == cands[1]['symbol']
+          and 'Taken by rank, not by the AI model' in out[1][1] and st_['rankPick']['n'] == 4, [(c['symbol'], c.get('_rp')) for c, _ in out])
+    check('the alternation carries on across check-ins', [c['_rp'] for c, _ in m.apply_rank_pick(st_, stg, [(cands[5], 'm')], cands, 'ai')] == [0])
+    check('nothing is swapped when the model did not choose (picked by rank already), or with trials switched off',
+          m.apply_rank_pick({}, stg, list(picks), cands, 'rules') == picks and m.apply_rank_pick({}, dict(stg, selfTune=False), list(picks), cands, 'ai') == picks)
+    check('coins are left alone', m.apply_rank_pick({}, stg, [(dict(cands[3], kind='crypto'), 'm')], cands, 'ai')[0][0].get('_rp') is None and 'rp' in m.POOL_FIELDS)
+    m.RANK_PICK = False
 # ---- the themes part (a trial since 18 Oct 2026): 20% of the budget in the 3 strongest of 14 sector and theme funds, changed monthly
 if THEMES_ON:
     m.THEMES = True; D.t.clear(); m._BRAIN.clear(); was_central = m.CENTRAL; m.CENTRAL = False; m.datetime = Open; SNAP['3-100'] = rows(); MODEL['answer'] = None; MODEL['prompts'].clear()
