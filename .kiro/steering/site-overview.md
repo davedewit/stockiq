@@ -201,7 +201,11 @@ the data (a group that loses, a pattern that pays, a cause behind a trade) leads
 what pays), each action is a test with its figures, and what passes is kept and built on. The Improvements tab shows that chain (the
 score, proven by testing, testing now, next); a session that leaves no new link in it has not done its job. He throws in ideas as they
 come to him ("just throwing a ton of info at you to think put it all together and create something smart"): judge them, combine them,
-build the best of them; do not take each one literally.
+build the best of them; do not take each one literally. **And never fooled by a few cases** (the same day: "if something happens a
+few times doesn't mean it will happen everytime ... we are simply increasing our odds to make money"): a pattern is a lead until it
+holds over about 30 cases, beyond twice its margin of error, after costs, against the index fund, in both halves of past data and as a
+live trial beside the current rule; the more ideas tried, the higher the bar. Each kept change should tip the odds a little; most ideas
+will fail their tests, and that is the system working.
 
 **THE SEARCH FOR IMPROVEMENTS NEVER ENDS (the owner, 17 Oct 2026): "this needs to be continual never ending new ways to
 improve, espeically as your AI gets smarter!"** Every session, not only the weekly review:
