@@ -5256,6 +5256,12 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     buying-order trial (15 Oct) and the day's price change; six rows of questions.md were stale (two trials already live read
     "open"). All put right; the tab now lists the 46 questions with their answers (`admin-panel.js?v=37`, `admin.py` `questions`).
     The next profit trial is `longer-holds`, from 12 Nov when patient-shares is decided (both are about how long shares are kept).
+  - **The parts are ranked, not rotated** (the owner: "going through those parts more than once ... probably won't make it better"):
+    `site_parts.py` `ranked` puts first a part never looked at, then one whose files changed since its last look (git history of both
+    repositories, the function copies' dates), the parts in `PROFIT` sooner, age last; a part unchanged since a recent look waits.
+    `next` shows what was found the time before and says: look only for what is new, and if nothing is, say so in one line. The
+    Improvements tab names the same next three with the reason (`plan.partsNext`). The ideas that move profit come from the data
+    (the trades, the visitors), through the questions and the trials: the parts sweep is the hygiene.
   - **The parts list made complete** (the owner: "only 45 parts ... nothing else can be improved?"): 13 parts added (the path from
     a first visit to a sign-up and a paid plan, the analysis page itself, what every page shares, contact and support, the blog, speed,
     security, every email, the sector funds, the By market list, the checks themselves, the automatic jobs, backups): 58 now. Every page

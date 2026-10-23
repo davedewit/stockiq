@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-23",
+   "what": "Parts of the site are no longer just rotated: next come those never looked at, then those whose code changed since their last look, profit-related ones sooner; each look starts from what was found before, and an unchanged part waits",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-23",
    "what": "The list of site parts reviewed in turn is complete: 58 parts, now including the path from first visit to sign-up and paying, speed, security, every email and the checks themselves; every page and script must belong to a part, checked at every session",
    "found": "owner"
   },

@@ -21,6 +21,16 @@ TABLE, KEY = 'stockiq-ai-trader', '_admin'
 table = boto3.Session(profile_name='default', region_name='us-east-1').resource('dynamodb').Table(TABLE)
 
 
+def parts_next(here):
+    """The three parts a session looks at next, ranked as site_parts.py ranks them (changed since its last look, profit, age), with why."""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('site_parts', os.path.join(here, 'site_parts.py')); sp = importlib.util.module_from_spec(spec); spec.loader.exec_module(sp)
+        return [{'part': p['part'][:80], 'why': why} for _, p, why in sp.ranked(sp.load())[:3]]
+    except Exception:
+        return []
+
+
 def questions(here):
     """The questions asked so far (check-tools/reviews/questions.md, its table), for the Admin page's Improvements tab: each with its
     status and answer, so that what was already tried is seen and not tried again (23 Oct 2026, the owner)."""
@@ -85,7 +95,7 @@ elif args[0] == 'sync':
     changes = json.load(open(os.path.join(here, 'changes.json')))['changes']
     admin['plan'] = {'at': now(), 'items': [{k: e[k] for k in keep if k in e} for e in ex], 'reviews': reviews,
                      'parts': len(parts), 'reviewed': sum(1 for p in parts if p.get('last')), 'questions': questions(here),
-                     'siteParts': [{'id': p['id'], 'part': p['part'][:120], 'last': p.get('last'), 'log': [{'at': l['at'], 'found': l['found'][:300]} for l in (p.get('log') or [])[-3:]]} for p in parts]}
+                     'siteParts': [{'id': p['id'], 'part': p['part'][:120], 'last': p.get('last'), 'log': [{'at': l['at'], 'found': l['found'][:300]} for l in (p.get('log') or [])[-3:]]} for p in parts], 'partsNext': parts_next(here)}
     if kept:
         admin['plan']['audit'] = kept
     if kept_weekly:
