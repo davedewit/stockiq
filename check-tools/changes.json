@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-23",
+   "what": "The Practice portfolio's prices now refresh by themselves every minute while you're on the tab (the button stays)"
+  },
+  {
+   "at": "2026-10-23",
    "what": "Took the old boast off the bottom of every page ('Professional Investment Research Platform', 'Powered by AI') and three similar lines; the nightly check now catches such wording"
   },
   {

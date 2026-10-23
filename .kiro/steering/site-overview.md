@@ -1606,6 +1606,11 @@ with `document.querySelector('h3')`.
   only that the last trade is old. In the first minutes of a Sydney or Tokyo session (the price source is about 20 minutes
   behind there) a share also waits, as the autopilot's do. `practice_test.js`'s stand-in treats every real price as fresh,
   so the tests trade on any day; its made-up `SHUT.AX` opens and shuts on demand (7 checks).
+- **Prices refresh by themselves every minute** (23 Oct 2026; the owner: "i have to click ↻ Refresh prices often"): while the
+  Practice portfolio tab is on screen and the page was used in the last 10 minutes (`autoRefresh`, `AUTO_MS`, `IDLE_MS`). The
+  price function is asked once a symbol (about 60 for the owner's account), so a price that has not traded for half an hour (its
+  market shut) is asked for again only every 15 minutes (`SHUT_EVERY_MS`, `askedAt`); not while the pointer is on the graph.
+  The button stays. `practice-portfolio.js?v=47`. A list call that answers many symbols at once would cut this further.
 - **What is typed in the buy row survives a refresh of prices** (it was wiped: only a completed buy or a reset clears it now).
 - The cards have small capital labels and a green or red top edge on Account value; table headings are small capitals,
   rows highlight under the pointer, figures use tabular numerals.
@@ -3186,6 +3191,12 @@ buying-order trial finished and was not kept; the AI review's early sales switch
     `update_stock_analysis.py`): the 3,467 pages still carry the old footer ("Powered by AI • Real-time Data"), the old two
     menu labels, the older top-strip wording and the empty `sidebar.js` tag; the template has all of them right. The nightly
     site check counts the old footer (`claims`, an idea until then). Away from the daily run.
+13d. **Results by market, against the S&P 500 (the owner's idea, 23 Oct 2026; proposed, not built).** One menu beside the graph's
+    buttons (All markets, each region, each screener inside it), each entry with its result against the same dollars in an S&P 500
+    fund over the same days, sold and still held together ("too few to read" under 30 trades); choosing one filters the graph (its
+    gain and the fund's), the holdings and the sold list. The themes part renamed "Sector funds", shown in the same menu, and a tick
+    box of its own in the screeners card so that it can be left out without switching off every trial. Waiting for his word on the
+    design (one menu, or his two with tick boxes).
 14. Both GitHub repositories are public (section 11). The personal file in one is the owner's own business ("that youtube
     stuff is mine only focus on the repo for stockiq", 12 Oct): leave it alone and out of these lists.
 15. Ideas offered and not built are in the next part ("Ideas offered and not built"); section 11 has the rest of the site.
