@@ -250,11 +250,15 @@
   },
   {
    "id": "crypto-no-chasing",
-   "what": "The crypto screener stops rewarding a coin that jumped 10% or more in the last day (it gives +2 for it now); entries after such a jump fell 13.8% on average over the next days (123 entries over 9 days, every day negative), others about flat",
+   "what": "The crypto screener no longer rewards a coin that has just jumped: a day's rise over 10% scores -2 (it was +2), 5 to 10% nothing (it was +1), a week's rise over 20% scores -1",
    "angle": "analysis, profit",
-   "measure": "the entry log: the top 10's average change in the days after entering, before and after the change, against the whole coin list",
-   "status": "idea",
-   "added": "2026-10-19"
+   "measure": "The coin entry study (check-tools/crypto/entry_study.py): what coins did after entering the top 10, entries ranked from 03:15 UTC on 23 Oct 2026 against those before, against Bitcoin over the same days; kept if the new top 10 does better, put back if worse",
+   "status": "running",
+   "added": "2026-10-19",
+   "started": "2026-10-23",
+   "decide": "2026-12-07",
+   "public": true,
+   "publicText": "The crypto screener no longer gives extra points to a coin that has just jumped: on its own record, coins that entered its top 10 after a big one-day rise fell back 12% on average."
   },
   {
    "id": "stop-watch",
