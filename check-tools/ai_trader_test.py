@@ -85,7 +85,7 @@ check('someone not on the list and not on a paid plan is refused, and pointed to
 check('not on the list cannot switch it on', m.clean_settings({'enabled': True}, 'stranger@y.com')['enabled'] is False)
 s, b = call(action='get', userId=U); check('defaults', b['allowed'] and b['settings'] == dict(m.DEFAULTS) and '3-100' in b['options']['screeners'], b)
 s, b = call(action='save', userId=U, settings={'enabled': True, 'risk': 9, 'budgetUsd': 'lots', 'periodDays': 0.2, 'everyHours': 7, 'maxHoldDays': 5, 'screeners': ['3-100', 'nope'], 'x': 1})
-check('settings are cleaned', b['settings'] == {'enabled': True, 'risk': 5, 'budgetUsd': 10000.0, 'periodDays': 1, 'everyHours': 24, 'maxHoldDays': 5, 'screeners': ['3-100'], 'aiSell': True, 'selfTune': True, 'emails': True, 'stopPct': None, 'takePct': None, 'auto': [], 'trailMode': 'gains', 'shares': {}, **({'holdings': None} if hasattr(m, 'holdings_of') else {}), **({'compound': True} if hasattr(m, 'follow_results') else {})} and b['state'].get('startedAt') and b['log'][-1]['text'].startswith('Autopilot on'), b['settings'])
+check('settings are cleaned', b['settings'] == {'enabled': True, 'risk': 5, 'budgetUsd': 10000.0, 'periodDays': 1, 'everyHours': 24, 'maxHoldDays': 5, 'screeners': ['3-100'], 'aiSell': True, 'selfTune': True, 'emails': True, 'stopPct': None, 'takePct': None, 'auto': [], 'trailMode': 'gains', 'shares': {}, **({'holdings': None} if hasattr(m, 'holdings_of') else {}), **({'compound': True} if hasattr(m, 'follow_results') else {}), **({'themes': True} if hasattr(m, 'wind_down_themes') else {})} and b['state'].get('startedAt') and b['log'][-1]['text'].startswith('Autopilot on'), b['settings'])
 check('run before switching on is refused', call(action='run', userId='dave@x.com')[0] == 400)
 check('garbage requests', m.lambda_handler({'requestContext': {}, 'body': 'x'}, None)['statusCode'] == 400 and call(action='zzz', userId=U)[0] == 400 and call(action='get')[0] == 400)
 
@@ -1283,7 +1283,7 @@ if THEMES_ON:
           and abs(sum(h['costUsd'] for h in themes) - 2000) < 0.05 and all(abs(h['costUsd'] - 666.67) < 0.02 for h in themes), [(h['symbol'], h['costUsd']) for h in themes])
     check('the share part keeps within the other 80%', 0 < sum(h['costUsd'] for h in shares) <= 8000 + 0.01, sum(h['costUsd'] for h in shares))
     check('the funds are not remembered as share buys (the share rules and the share record leave them alone)', all(h['id'] not in rec['state']['open'] for h in themes))
-    check('the activity list says what was bought and why', sum('Themes part (trial), monthly change: bought' in e['text'] for e in rec['log']) == 3)
+    check('the activity list says what was bought and why', sum(any(w + ' (trial), monthly change: bought' in e['text'] for w in ('Themes part', 'Sector funds')) for e in rec['log']) == 3)
     pub = m.public(rec, Open.utcnow(), U); tv = pub.get('themes') or {}
     check('the page is told about the themes part: on, what it holds, its target, the next change', tv.get('on') and len(tv.get('held') or []) == 3 and tv.get('target') == 2000 and tv.get('next'), {k: tv.get(k) for k in ('on', 'target', 'next')})
     check('each fund has a plan of its own for the portfolio tab (kept until the monthly change)', sum(1 for p_ in pub['plans'] if p_.get('theme')) == 3 and all(p_['sellBy'] == tv['next'] for p_ in pub['plans'] if p_.get('theme')))
@@ -1300,7 +1300,7 @@ if THEMES_ON:
     check('the sale goes into the trial\'s own record, with its result against an S&P 500 fund, and into the autopilot\'s running total',
           len(tr) == 1 and tr[0]['symbol'] == 'XLE' and abs(tr[0]['pct'] - (((1 - m.TRADE_COST / 100) ** 2 * 1.1 - 1) * 100)) < 0.05 and tr[0]['vs'] is not None
           and abs(float(rec['state']['realizedUsd']) - was_real - sum(t['usd'] for t in rec['history'] if t.get('sold') == tr[0]['sold']) - tr[0]['usd']) < 0.05, tr)
-    check('the funds kept are not sold and bought again', len([e for e in rec['log'] if 'Themes part' in e['text'] and e['type'] == 'buy']) == 4)
+    check('the funds kept are not sold and bought again', len([e for e in rec['log'] if ('Themes part' in e['text'] or 'Sector funds' in e['text']) and e['type'] == 'buy']) == 4)
     MODEL['answer'] = {'theme': 'Oil prices jump on supply fears.', 'calls': [{'symbol': 'XLE', 'view': 'better', 'why': 'oil'}, {'symbol': 'TLT', 'view': 'worse', 'why': 'rates'},
                        {'symbol': 'NOPE', 'view': 'better', 'why': 'not a fund'}, {'symbol': 'XLK', 'view': 'none', 'why': ''}]}
     if hasattr(m, 'theme_review_lines'):
@@ -1309,7 +1309,7 @@ if THEMES_ON:
               and all(x in rl[0].split('(')[1] + rl[0] for x in ('GLD', 'SMH', 'XLK')) and 'holds ' in rl[0] and 'put in' in rl[0] and ' now)' in rl[0] and '1 fund sold' in rl[0] and 'against an S&P 500 fund' in rl[0]
               and 'recorded and not acted on' in rl[0] and 'not counted in the share trades above' in rl[0], rl)
         adm = m.write_review({'proposals': [], 'review': None, 'health': None, 'seq': 0}, rec, portfolio(), Open.utcnow() + dt.timedelta(days=28), tq)
-        check('and the review the Admin page shows carries it', any(l.startswith('Themes part (a trial since') for l in adm['review']['lines']), adm['review']['lines'])
+        check('and the review the Admin page shows carries it', any(l.startswith(('Themes part (a trial since', 'Sector funds (a trial since')) for l in adm['review']['lines']), adm['review']['lines'])
         check('an account that never ran the trial gets no such line', m.theme_review_lines({'settings': dict(rec['settings'], selfTune=False), 'state': {}}, portfolio(), Open.utcnow()) == [])
     th = rec['state']['themes']; th['aiAt'] = m.iso(Open.utcnow() - dt.timedelta(days=30)); port = portfolio(); MODEL['prompts'].clear()
     m.run_themes(rec, port, Open.utcnow() + dt.timedelta(days=29), tq, model, headlines=['Oil jumps', 'Rates rise'])
@@ -1330,6 +1330,22 @@ if THEMES_ON:
     shut = Open.utcnow() + dt.timedelta(days=2, hours=12)
     while m.market_open('us', shut): shut += dt.timedelta(hours=3)
     check('nothing is done while the US market is shut', m.run_themes(rec, port, shut, tq, model) == (0, 0, []))
+    if hasattr(m, 'wind_down_themes'):          # the sector funds ticked off like a market (23 Oct 2026)
+        back = Open.utcnow() + dt.timedelta(days=29)
+        m.run_themes(rec, port, back, tq, model, headlines=[])
+        check('(set-up) the funds are bought again', len([h for h in port['holdings'] if m.is_theme(h)]) == 3)
+        off = dict(rec['settings'], themes=False)
+        check('unticked, the sector funds are off and the shares get the whole budget', not m.themes_on(off) and m.share_part(off)['budgetUsd'] == off['budgetUsd'] and m.themes_on(dict(off, themes=True)))
+        check('the setting is kept by the settings cleaner, on by default', m.clean_settings(dict(off), U)['themes'] is False and m.clean_settings({}, U)['themes'] is True)
+        rec['settings'] = off
+        check('while funds are still held after unticking, the US market is still looked at', 'us' in m.its_markets(dict(rec, settings=dict(off, screeners=['7-1']))))
+        check('nothing is sold while the US market is shut', m.run_themes(rec, port, shut, tq, model) == (0, 0, []) and len([h for h in port['holdings'] if m.is_theme(h)]) == 3)
+        before = len(rec['state']['themes']['trades'])
+        got = m.run_themes(rec, port, back, tq, model, headlines=[])
+        check('at the next check-in with the US market open, every fund is sold, into the trial\'s record, and the activity list says why',
+              got[1] == 3 and not any(m.is_theme(h) for h in port['holdings']) and len(rec['state']['themes']['trades']) == before + 3
+              and all('Sector funds switched off: sold' in e['text'] for e in got[2]) and not (rec['state']['themes'].get('open') or {}), got)
+        check('and then nothing more is done, and the US market is no longer needed for them', m.run_themes(rec, port, back, tq, model) == (0, 0, []) and 'us' not in m.its_markets(dict(rec, settings=dict(off, screeners=['7-1']))))
     m.theme_ranking = real_rank; m.THEMES = False; m.CENTRAL = was_central; m.datetime = clock; D.t.clear(); m._BRAIN.clear(); MODEL['answer'] = None
 # ---- a build-up that begins again paces out only what is not invested yet
 if hasattr(m, 'already_in'):

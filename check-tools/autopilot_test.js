@@ -664,12 +664,12 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const tplans = st.plans.concat([{ id: 't1', label: 'SMH', boughtAt: '2026-10-15T15:10:00Z', auto: true, theme: true, sellBy: T.next, name: 'Chips' }]);
     const tw = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPT, ...st, plans: tplans, themes: T, holding: { count: 3, investedUsd: 2400 } } })); await sleep(30); const tt = tw.text();
     check('the themes part has its own section: what it holds, the next change, its result so far and the AI model\'s weekly calls (recorded, not acted on)',
-      /Themes part a trial: 20% of the budget \(\$2,000\)/.test(tt) && /Holds: SMH Chips \(semiconductors\)/.test(tt) && /Next monthly change/.test(tt) && /No fund sold yet/.test(tt)
-      && /recorded and scored, not acted on/.test(tt) && /3 of 4 of its calls scored so far were right \(too few to read under 30\)/.test(tt) && /Oil prices jump/.test(tt), tt.slice(tt.indexOf('Themes part'), tt.indexOf('Themes part') + 500));
+      /(Themes part|Sector funds) a trial: 20% of the budget \(\$2,000\)/.test(tt) && /Holds: SMH Chips \(semiconductors\)/.test(tt) && /Next monthly change/.test(tt) && /No fund sold yet/.test(tt)
+      && /recorded and scored, not acted on/.test(tt) && /3 of 4 of its calls scored so far were right \(too few to read under 30\)/.test(tt) && /Oil prices jump/.test(tt), tt.slice(tt.indexOf('a trial: 20%') - 20, tt.indexOf('a trial: 20%') + 500));
     check('a fund is not listed under "Holding now" with the shares', !/ap-held-name">SMH</.test(tw.container.innerHTML));
-    check('the share part\'s sizes and the description use the other 80% of the budget, and say why', /20% of the \$10,000 budget \(\$2,000\) is the themes part/.test(tt) && /of the \$8,000 for shares is invested/.test(tt), (tt.match(/It checks in[^.]*\.[^.]*\./) || [''])[0]);
+    check('the share part\'s sizes and the description use the other 80% of the budget, and say why', /20% of the \$10,000 budget \(\$2,000\) (is the themes part|goes to the sector funds)/.test(tt) && /of the \$8,000 for shares is invested/.test(tt), (tt.match(/It checks in[^.]*\.[^.]*\./) || [''])[0]);
     if (/ap-themes-note/.test(tw.container.innerHTML)) check('the screeners card says the themes part is not a screener and links to it under Activity', /(Besides these screeners, 20% of the budget|The other 20% of the \$10,000 budget) \(\$2,000\) is the themes part/.test(tt) && /data-ap-goto="ap-themes"/.test(tw.container.innerHTML) && /id="ap-themes"/.test(tw.container.innerHTML));
-    if (/function ofWhat/.test(src)) check('while the themes part runs, the market shares say they are of the money for shares, and the card says the themes part is the other 20%', /Share of the \$8,000 for shares/.test(tt) && /How the \$8,000 for shares is spread/.test(tt) && /so the shares below add up to 100% of it/.test(tt) && /The percentages above are of the \$8,000 for shares\. The other 20% of the \$10,000 budget \(\$2,000\) is the themes part/.test(tt), (tt.match(/How the[^.]*\./) || [''])[0]);
+    if (/function ofWhat/.test(src)) check('while the themes part runs, the market shares say they are of the money for shares, and the card says the themes part is the other 20%', /Share of the \$8,000 for shares/.test(tt) && /How the \$8,000 for shares is spread/.test(tt) && /so the shares below add up to 100% of it/.test(tt) && (/The percentages above are of the \$8,000 for shares\. The other 20% of the \$10,000 budget \(\$2,000\) is the themes part/.test(tt) || !/ap-themes-note/.test(tw.container.innerHTML)), (tt.match(/How the[^.]*\./) || [''])[0]);
     if (/Euro Stoxx 50 is not one country/.test(tt)) check('the first shortcut says why the Euro Stoxx 50 is left out', /47 of its 50 shares are already in the DAX, CAC, AEX, FTSE MIB and IBEX lists/.test(tt));
     if (/function gaugeHtml/.test(src)) {
       const G = { level: 3, name: 'high', spy: 600, avg50: 620, avg200: 610, vix: 24.5, at: '2026-10-19T15:00:00Z' };
@@ -682,12 +682,19 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       check('without a gauge in the answer nothing is shown', !/Market risk now/.test(ng.text()));
     }
     if (/function themesLine/.test(src)) {
-      check('the Activity part opens on a summary: the themes part, the bar, progress and how it improves are each a row that opens in place (19 Oct 2026)', /Themes part a trial, 20% of the budget ?: holds SMH/.test(tt) && /<details class="ap-part" data-ap-fold="part-themes"[^>]*><summary><strong>Themes part/.test(tw.container.innerHTML) && !/data-ap-fold="more-all"/.test(tw.container.innerHTML)
+      check('the Activity part opens on a summary: the themes part, the bar, progress and how it improves are each a row that opens in place (19 Oct 2026)', /(Themes part|Sector funds) a trial, 20% of the budget ?: holds SMH/.test(tt) && /<details class="ap-part" data-ap-fold="part-themes"[^>]*><summary><strong>(Themes part|Sector funds)/.test(tw.container.innerHTML) && !/data-ap-fold="more-all"/.test(tw.container.innerHTML)
         && tw.container.innerHTML.indexOf('data-ap-fold="part-themes"') < tw.container.innerHTML.indexOf('id="ap-themes"'), tw.container.innerHTML.slice(tw.container.innerHTML.indexOf('part-themes') - 60, tw.container.innerHTML.indexOf('part-themes') + 160));
     }
-    check('the chat is told about the themes part', /Themes part \(a trial since 18 Oct 2026\): 20% of the budget/.test(tw.ctx.practiceAutopilot.summary()));
+    check('the chat is told about the themes part', /(Themes part|Sector funds) \(a trial since 18 Oct 2026\): 20% of the budget/.test(tw.ctx.practiceAutopilot.summary()));
     const off = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPT, ...st, themes: Object.assign({}, T, { on: false, held: [] }) } })); await sleep(30);
-    check('while it is not running the section says when it would', /It runs while "Try changes to its own rules" is on and at least one share screener is ticked/.test(off.text()) && !/of the \$8,000 for shares/.test(off.text()));
+    if (/ap-themes-on/.test(src)) {       // the sector funds ticked like a market (23 Oct 2026)
+      const on = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPT, ...st, settings: Object.assign({}, st.settings, { themes: true }), plans: tplans, themes: T } })); await sleep(30);
+      check('the screeners card has the sector funds as a row of their own, ticked, saying what unticking does', /<input type="checkbox" id="ap-themes-on" checked>/.test(on.container.innerHTML) && /Untick it to leave it out: what it holds of them is sold at the next check-in while the US market is open/.test(on.text()));
+      const un = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPT, ...st, settings: Object.assign({}, st.settings, { themes: false }), themes: Object.assign({}, T, { on: false }) } })); await sleep(30);
+      check('unticked, the box is clear, the shares get the whole budget, and the section says it was left out', /<input type="checkbox" id="ap-themes-on" >/.test(un.container.innerHTML) && /Left out: ticked off in the screeners card/.test(un.text()) && !/of the \$8,000 for shares/.test(un.text()));
+      check('an older answer without the setting shows no box', !/ap-themes-on/.test(tw.container.innerHTML));
+    }
+    check('while it is not running the section says when it would', /It runs while (it is ticked in the screeners card, )?"Try changes to its own rules" is on and at least one share screener is ticked/.test(off.text()) && !/of the \$8,000 for shares/.test(off.text()));
   }
   check('no broken values', !/undefined|NaN|\[object/.test(p.container.innerHTML), (p.container.innerHTML.match(/.{30}(undefined|NaN|\[object).{30}/) || [])[0]);
   console.log(ok ? 'ALL PASS' : 'SOME FAILED');
