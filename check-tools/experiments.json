@@ -240,6 +240,13 @@
    "status": "running",
    "started": "2026-10-19",
    "decide": "2026-11-30"
+  },
+  {
+   "id": "gap-sell-wait",
+   "what": "A share that opens through its loss limit is sold at the next check-in, not at the first one after the open",
+   "angle": "profit",
+   "measure": "Replay first (questions.md 39); then live: limit sales after a gap, sold at the open against one check-in later, the money got back against the limit",
+   "status": "idea"
   }
  ]
 }

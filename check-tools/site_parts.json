@@ -5,7 +5,13 @@
    "id": "home-hero",
    "part": "Home page: the top, its four numbers, the two buttons",
    "where": "index.html, top",
-   "last": null
+   "last": "2026-10-23",
+   "log": [
+    {
+     "at": "2026-10-23",
+     "found": "The four numbers are true (33 screeners, 1,829 in the largest, 540 coins, $100,000); the footer's 'Professional Investment Research Platform' and 'Powered by AI' taken off every page"
+    }
+   ]
   },
   {
    "id": "home-features",
@@ -53,7 +59,13 @@
    "id": "signals",
    "part": "Trading signals: live signals and auto-detect",
    "where": "analysis.html option 2; signals/",
-   "last": null
+   "last": "2026-10-23",
+   "log": [
+    {
+     "at": "2026-10-23",
+     "found": "42 of 42 tests pass on saved prices; not run live (the daily update was running and Yahoo limits this Mac)"
+    }
+   ]
   },
   {
    "id": "presets",
@@ -149,7 +161,13 @@
    "id": "signup-login",
    "part": "Sign up, log in, activation",
    "where": "signup.html, login.html",
-   "last": null
+   "last": "2026-10-23",
+   "log": [
+    {
+     "at": "2026-10-23",
+     "found": "The sign-up page says what the trial is in three lines; the old footer claim taken off; idea: a shorter form (questions.md 41)"
+    }
+   ]
   },
   {
    "id": "plans",

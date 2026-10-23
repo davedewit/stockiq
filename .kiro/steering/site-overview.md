@@ -3182,6 +3182,10 @@ buying-order trial finished and was not kept; the AI review's early sales switch
     trades kept in `history`, or store the record compressed.
 13b. The screeners' top-10 lines still call the one-year change "YTD" (four writers in `analysis-functions.js`, one in the
     coordinator; the CSV column `YTD_Change_%` too): "1 yr". Words only; do it with the next change to those files.
+13c. **Regenerate the stock pages once** (`generate-stock-pages.py`, tested on a copy first: section 12; then
+    `update_stock_analysis.py`): the 3,467 pages still carry the old footer ("Powered by AI • Real-time Data"), the old two
+    menu labels, the older top-strip wording and the empty `sidebar.js` tag; the template has all of them right. The nightly
+    site check counts the old footer (`claims`, an idea until then). Away from the daily run.
 14. Both GitHub repositories are public (section 11). The personal file in one is the owner's own business ("that youtube
     stuff is mine only focus on the repo for stockiq", 12 Oct): leave it alone and out of these lists.
 15. Ideas offered and not built are in the next part ("Ideas offered and not built"); section 11 has the rest of the site.
@@ -5052,3 +5056,17 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - **`check-tools/web_deploy.sh`**: the shared website deploy (fingerprint checks, upload with the right cache rules, CloudFront,
     compare with the live file). A one-off website deploy is now `pending-<name>/deploy.sh` of three lines: `ROWS="file:was:new …"
     exec bash /Users/dave/VSCODE/stockiq/check-tools/web_deploy.sh <its folder>`.
+
+- **23 Oct 2026** (the owner: "hi"):
+  - **The account:** $97,103, behind the same $100,000 in an S&P 500 fund ($98,123) by $1,021. On 22 Oct it fell 2.06%, the fund
+    1.18%: fully invested (1% cash, where it was a quarter on 17 Oct), the themes part in tech (SMH and XLK the two largest losses
+    held), and overnight falls in Asia. 97 finished trades, -0.21% a trade (inside the margin of error); the 44 of the last four
+    days +$211. Shares against the fund over the same days: +0.68% a trade (76 trades, inside the margin of error).
+  - **The loss limit is passed overnight:** 7 of the 8 sales at the limit were Asian shares sold at the first check-in after the
+    open at -14.3% on average (ZIP.AX -5% at the close, -31% at the next open). A stop cannot act while a market is shut; whether
+    selling at the open is the worst moment is questions.md 39 and the idea `gap-sell-wait` (replay first).
+  - **Words:** the footer's "Professional Investment Research Platform" and "Powered by AI • Market Data • Comprehensive Analysis"
+    on 19 pages, two blog lines ("in real-time", "Professional stock analysis powered by AI"), the research-tools guide's
+    description and a guide's button heading: reworded, words only (website `1dafe26d`; uploaded by the daily update of 23 Oct,
+    which was running). The stock pages' template likewise (13c above). The nightly site check has a new check, `claims`.
+

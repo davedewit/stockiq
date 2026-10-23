@@ -2,6 +2,10 @@
  "about": "What the sessions changed on the site, newest first, in plain words for the owner's Admin page ('What changed lately'). Add with: python3 check-tools/admin.py change \"<what>\". Nothing private: both repositories are public.",
  "changes": [
   {
+   "at": "2026-10-23",
+   "what": "Took the old boast off the bottom of every page ('Professional Investment Research Platform', 'Powered by AI') and three similar lines; the nightly check now catches such wording"
+  },
+  {
    "at": "2026-10-19",
    "what": "The AI autopilot's breakdown now starts with shares against coins, and every line shows the dollars made or lost"
   },
