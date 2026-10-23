@@ -41,6 +41,15 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await send('Page.navigate', { url: 'https://stockiq.tech/dashboard.html?practicecheck=' + Date.now() + '#practice' });
     for (let i = 0; i < 40; i++) { await sleep(500); if (await run(`!!document.querySelector('#practice-portfolio .pp-top')`) === true) break; }
     await sleep(6000);          // the prices arrive after the portfolio
+    // MARKETS=<file of the screeners as the autopilot sends them> [MARKET=<g:… or s:…>]: hand the page the screener list (the
+    // autopilot's answer is withheld here) and choose one market in its menu, to see the menu and a market's view (23 Oct 2026)
+    if (process.env.MARKETS) {
+      const info = fs.readFileSync(process.env.MARKETS, 'utf8');
+      await run(`window.practicePortfolio.setPlans([], { realizedUsd: null, screeners: ${info} }); true`); await sleep(500);
+      const menu = await run(`JSON.stringify(Array.from(document.querySelectorAll('#pp-market option')).map(o => (o.parentNode.tagName === 'OPTGROUP' ? '[' + o.parentNode.label + '] ' : '') + o.textContent))`);
+      console.log('market menu:', hide(menu));
+      if (process.env.MARKET) { await run(`(() => { const m = document.getElementById('pp-market'); m.value = ${JSON.stringify(process.env.MARKET)}; m.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`); await sleep(500); }
+    }
     const report = await run(`(async () => {
       const box = document.getElementById('practice-portfolio'), t = (el) => el ? el.textContent.replace(/\\s+/g, ' ').trim() : null, q = (s) => box.querySelector(s);
       if (!box) return JSON.stringify({ fault: 'no practice portfolio on the page', at: location.href });
@@ -69,6 +78,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     console.log('range asked for the fund: ' + (passed.filter(p => /SPY/.test(p)).join(' , ') || 'SPY not seen in the shortened addresses'));
     console.log('answered here, never reached the site: ' + answered.length + ' (' + [...new Set(answered.map(a => a.split(' ')[0]))].join(', ') + ')');
     if (process.env.SHOT) {
+      if (process.env.MARKET) { console.log('chosen before the picture: ' + await run(`(() => { const m = document.getElementById('pp-market'); if (!m) return 'no menu'; m.value = ${JSON.stringify(process.env.MARKET)}; m.dispatchEvent(new Event('change', { bubbles: true })); return document.getElementById('pp-market').value; })()`)); await sleep(500); }
       await run(`(() => { const c = document.querySelector('#practice-portfolio'); if (${process.env.OPEN_MORE ? 1 : 0}) { const m = document.querySelector('#pp-more'); if (m) m.open = true; } c.scrollIntoView(); window.scrollBy(0, -80); return 1; })()`); await sleep(400);
       const rect = JSON.parse(await run(`(() => { const r = document.querySelector('#practice-portfolio').getBoundingClientRect(); return JSON.stringify({ x: 0, y: Math.max(0, r.top + window.scrollY - 70), width: window.innerWidth, height: Math.min(1500, r.height + 90) }); })()`));
       const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip: Object.assign(rect, { scale: 1 }) });

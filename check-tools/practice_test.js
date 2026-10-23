@@ -51,6 +51,26 @@ if (pure.valueSeries) {      // the graph of the account over time (a copy of th
   // how long until the US stock market opens (New York was on summer time, four hours behind UTC, on these days)
   check('US market: nine and a half hours before a Monday opening, as the sidebar counts it', pure.usOpensIn(Date.parse('2026-10-12T04:00:00Z')) === '9h 30m', pure.usOpensIn(Date.parse('2026-10-12T04:00:00Z')));
   check('US market: open during the session, and Friday evening counts to Monday morning', pure.usOpensIn(Date.parse('2026-10-12T15:00:00Z')) === null && pure.usOpensIn(Date.parse('2026-10-09T21:00:00Z')) === '64h 30m' && pure.usOpensIn(Date.parse('2026-10-10T13:30:00Z')) === '48h 0m', [pure.usOpensIn(Date.parse('2026-10-09T21:00:00Z')), pure.usOpensIn(Date.parse('2026-10-10T13:30:00Z'))]);
+  if (pure.marketResults) {      // results by market, against the same dollars in an S&P 500 fund on the same days (23 Oct 2026)
+    const info = { '3-3': { name: 'S&P 500', group: 'US markets' }, '5-dax40': { name: 'Germany DAX 40', group: 'Europe markets' }, '5-cac40': { name: 'France CAC 40', group: 'Europe markets' } };
+    const mk = pure.newState('2026-10-01T00:00:00Z');
+    const u = pure.applyBuy(mk, { symbol: 'AAA', currency: 'USD', price: 100, fx: 1, spy: 500, amountUsd: 1000, now: '2026-10-02T00:00:00Z' }); u.by = 'ai'; u.screener = '3-3';
+    pure.applySell(mk, u.id, { price: 120, fx: 1, spy: 550, now: '2026-10-05T00:00:00Z' });
+    const d = pure.applyBuy(mk, { symbol: 'SAP.DE', currency: 'USD', price: 50, fx: 1, spy: 500, amountUsd: 2000, now: '2026-10-03T00:00:00Z' }); d.by = 'ai'; d.screener = '5-dax40';
+    const c = pure.applyBuy(mk, { symbol: 'OR.PA', currency: 'USD', price: 10, fx: 1, spy: 500, amountUsd: 500, now: '2026-10-03T00:00:00Z' }); c.by = 'ai'; c.screener = '5-cac40';
+    const f = pure.applyBuy(mk, { symbol: 'SMH', currency: 'USD', price: 10, fx: 1, spy: 500, amountUsd: 400, now: '2026-10-03T00:00:00Z' }); f.by = 'ai'; f.screener = 'themes';
+    const mine = pure.applyBuy(mk, { symbol: 'KO', currency: 'USD', price: 10, fx: 1, spy: 500, amountUsd: 300, now: '2026-10-03T00:00:00Z' });
+    const mq = { 'SAP.DE': { price: 45 }, 'OR.PA': { price: 11 }, SMH: { price: 10 }, KO: { price: 12 }, SPY: { price: 510 } };
+    const r = pure.marketResults(mk, mq, info), near = (a, b, e) => Math.abs(a - b) < (e || 0.01);
+    check('by market: a sold holding counts its result against the fund from its buy to its sale', near(r['g:US markets'].gainUsd, 1200 - 1000) && near(r['g:US markets'].fundUsd, 100) && near(r['g:US markets'].aheadUsd, 100) && near(r['g:US markets'].aheadPct, 10) && r['g:US markets'].sold === 1, r['g:US markets']);
+    check('a market adds up its screeners, sold and still held, each against the fund up to now', r['g:Europe markets'].trades === 2 && r['g:Europe markets'].held === 2 && near(r['g:Europe markets'].gainUsd, r['s:5-dax40'].gainUsd + r['s:5-cac40'].gainUsd) && near(r['g:Europe markets'].fundUsd, 2500 * 0.02) && r['s:5-dax40'].aheadUsd < 0 && r['s:5-cac40'].label === 'France CAC 40', r);
+    check('the sector funds are a market of their own; what was bought by hand is in none', !!r['g:Sector funds'] && Object.values(r).every(x => x.trades <= 3) && !Object.values(r).some(x => x.label === 'KO'));
+    check('a market filters the lists to the autopilot\'s holdings from it, a screener to its own', pure.partOf(mk.holdings, 'g:Europe markets', info).length === 2 && pure.partOf(mk.holdings, 's:5-dax40', info).map(h => h.symbol).join() === 'SAP.DE' && pure.partOf(mk.closed, 'g:US markets', info).length === 1 && pure.partOf(mk.holdings, 'g:US markets', info).length === 0);
+    const ps = pure.valueSeries(mk, mq, Date.parse('2026-10-08T00:00:00Z'), null, 0, pure.pickOf('g:Europe markets', info)), pl = ps.points[ps.points.length - 1];
+    check('the graph of one market ends on its result and on the fund\'s for the same money', near(pl.part, r['g:Europe markets'].gainUsd) && near(pl.pfund, r['g:Europe markets'].fundUsd) && ps.pfundAll === true && ps.points[0].part === 0, pl);
+    const pic = pure.chartSvg(ps, 'part', 600, 200);
+    check('its picture is against zero with the fund\'s line, and the whole account\'s graph is unchanged', pic.base === 0 && pic.fund === true && /pp-fund/.test(pic.svg) && !/NaN|undefined/.test(pic.svg) && pure.valueSeries(mk, mq, Date.parse('2026-10-08T00:00:00Z'), null).points.every(p => !('part' in p)), pic.svg.slice(0, 120));
+  }
   if (pure.fundKnots) {      // the S&P 500 fund beside the account (13 Oct 2026): the starting amount put into the fund when the account began
     // the account began on a Saturday; the fund closed at 700 on the Friday, 707 on the Monday, 714 on the Tuesday and is at 721 now (Wednesday, in the session)
     const sat = '2026-10-10T03:00:00Z', wed = T('2026-10-14T15:00:00Z');
