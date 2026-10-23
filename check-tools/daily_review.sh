@@ -51,4 +51,7 @@ mkdir -p "$ROOT/check-tools/reviews/daily"
   wait "$PID"; STATUS=$?
   kill "$WATCH" 2>/dev/null
   echo "=== $(date): daily review ended (exit $STATUS); report: $(ls -t check-tools/reviews/daily/*.md 2>/dev/null | head -1)"
+  # its report's date onto the Admin page ("What runs by itself"): the daily update sends the date before this review has run
+  # (23 Oct 2026: the page said "last 4 days ago" on the day of a review)
+  /opt/homebrew/bin/python3 check-tools/admin.py audit 2>&1 | tail -1
 } >> "$LOG" 2>&1
