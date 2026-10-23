@@ -1,30 +1,27 @@
-FULL CHECK OF THE SITE, 2026-10-23 (everything): 50 of 54 passed
+FULL CHECK OF THE SITE, 2026-10-23 (everything): 54 of 54 passed
 It covers 42 of the 44 parts of the site. Left to a person: The screeners' trend score itself: does it still beat its lists?; Sign up, log in, activation.
 
 1. Test suites on the live code
-  PASS  the autopilot function (537 checks)
-  PASS  the autopilot panel (227 checks)
-  PASS  the practice portfolio (157 checks)
+  PASS  the autopilot function (554 checks)
+  PASS  the autopilot panel (229 checks)
+  PASS  the practice portfolio (160 checks)
   PASS  the Admin page (38 checks)
   PASS  the notification bell (21 checks)
-  PASS  the AI chat (25 checks)
+  PASS  the AI chat (24 checks)
   PASS  the trading signals (42 checks)
   PASS  the home page news list (4 checks)
   PASS  the panel works out the budget, the spread and the check-ins as the function does
   PASS  the AI autopilot tab and the Admin page read clearly (clarity check)
   PASS  the nightly site check's tests (0 problems)
   PASS  the screeners' stock lists (page and coordinator alike, no duplicates)
-  FAIL  every index the site compares with has daily prices (29 checks)
-        FAIL 000300.SS: 1 daily prices in the last month (needs 10 or more to compare with); FAIL ^KS200: 1 daily prices in the last month (needs 10 or more to compare with); FAIL ^SP1000: 1 daily prices in the last month (needs 10 or more to compare with)
+  PASS  every index the site compares with has daily prices (32 checks)
   PASS  every share-screener worker runs the one package
-  FAIL  the market panel and live figures
-        ['Node.js v26.11.0']
+  PASS  the market panel and live figures
   PASS  the two sliding panels on a phone
-  FAIL  the header and the room under it
-        ['Node.js v26.11.0']
+  PASS  the header and the room under it
 
 2. The figures agree across the site
-  PASS  the account value: the Admin page's $96,963 and the Practice portfolio tab's $96,956 (prices a few seconds apart)
+  PASS  the account value: the Admin page's $96,988 and the Practice portfolio tab's $96,988 (prices a few seconds apart)
   PASS  the S&P 500 fund since the start: the weekly review and the graph agree
   PASS  every holding of the autopilot (51) has its remembered buy (the plan and the record need it)
   PASS  no remembered buy is left for a holding already sold
@@ -34,7 +31,7 @@ It covers 42 of the 44 parts of the site. Left to a person: The screeners' trend
   PASS  the bill on the Admin page adds up ($3.33 = StockIQ $3.20 + other $0.13)
   PASS  StockIQ's running cost within the cost rule ($0.55 this month, under $1)
   PASS  Lambda calls on course for 764,451 of the free 1,000,000
-  PASS  the sitemap lists every indexed stock page (953 in it, 953 indexed)
+  PASS  the sitemap lists every indexed stock page (950 in it, 950 indexed)
   PASS  every improvement on trial past its decision day has been decided (the Improvements tab stays true)
   PASS  the autopilot's last scheduled run reported no failed check-in
 
@@ -64,5 +61,4 @@ It covers 42 of the 44 parts of the site. Left to a person: The screeners' trend
   PASS  the home page's "View Pricing Plans" lands on the plans, clear of the header
   PASS  your Practice portfolio tab, opened as your account (read-only): it draws, with your holdings
   PASS  the notification bell on the home page, as your account (read-only): one list, no errors
-  FAIL  the last daily update finished cleanly (0 days ago)
-        0.0 days old
+  PASS  the last daily update finished cleanly (0 days ago)
