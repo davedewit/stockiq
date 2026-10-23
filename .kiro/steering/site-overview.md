@@ -145,6 +145,32 @@ the page. His requests are judged, not obeyed word for word: say when an idea is
 on 18 Oct 2026 (its report: `check-tools/reviews/daily/2026-10-18.md`), and **installed its schedule the same evening**
 (`~/Library/LaunchAgents/com.stockiq.review.plist`, every 30 minutes, once a day after the daily deploy; log `~/stockiq-review.log`). Its proposals land under "Decisions for you"; a session acts on them without waiting.
 
+**THE SESSION DECIDES HOW THE SITE IMPROVES, INCLUDING PRODUCT-WIDE CHANGES (the owner, 23 Oct 2026):** "this whole site is your
+thing and i'm testing you to make right decisions to make profit. rather than confusing you and changing what you think is best, as
+that often leads to a confusion in analytics with mixed ideas and a confusing website." So: the screeners' scoring, the autopilot's
+rules, what the pages say, all decided on the evidence by the session, without asking (older notes below that say "the owner's
+decision" or "his yes" for scoring are replaced by this). Tell him afterwards, in plain words, what changed and why. Ask him only
+about what the "Still never" list keeps for him (real money, costs above the rule, deletions that cannot be undone, his own
+settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
+warns about; one change at a time, measured, with its experiment entry.
+
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 23 Oct 2026, 03:30 UTC)**
+- The account: about $97,000, about $1,130 behind the same $100,000 in an S&P 500 fund (-1.1%); 97 finished trades, -0.21% a
+  trade; share trades about level with the fund trade for trade; month 1 goal ($101,000 by 12 Nov) out of reach. Claude's forecast
+  on the Admin page: 25% (was 30%).
+- Full check 23 Oct: 54 of 54. Weekly review done early on 23 Oct (`check-tools/reviews/review-2026-10-23.txt`); the next due
+  around 30 Oct.
+- Running and to read at the next session: **gap-wait** (`gw` on trades: what waiting a check-in after an overnight fall gave
+  back; decide at 30 cases), **rank-pick** (`rp`: the AI model's choice against the top by rank; decide at 30 each way),
+  **crypto-no-chasing** (the coin score: a jump is no longer rewarded; compare the entry study's entries after 03:15 UTC 23 Oct
+  with those before), **theme-sleeve** (the sector funds; the owner can now untick them), stop-watch, patient-shares,
+  market-gauge, company-figures, trend-score. `python3 check-tools/experiments.py` lists them with their dates.
+- Coins: unticked by the owner; the crypto screener rests until 29 Oct.
+- Not yet seen for real: a gap-wait case (the first Asian overnight fall through a limit), a rank-pick swap's note in the
+  activity list, the sector funds' tick box being used, the first monthly change of the sector funds (around 16 Nov).
+- Open ideas worth a session: questions.md 45 (one night in Asia cost six loss limits: fewer or smaller Asian holdings
+  overnight?), the coin study's other jump points (breakout +2, volume surge +2), the stock pages' regeneration (13c).
+
 **THE SEARCH FOR IMPROVEMENTS NEVER ENDS (the owner, 17 Oct 2026): "this needs to be continual never ending new ways to
 improve, espeically as your AI gets smarter!"** Every session, not only the weekly review:
 - Read "Improvements to come" (section 8c, the end of "Start here when resuming") and `check-tools/reviews/questions.md`:
@@ -1315,7 +1341,7 @@ whether the top 10 is even in the right order (the 11th coin had the same score 
 - **The score** (`stockiq-option-7-1-worker-N`, in the code after "ADVANCED SCORING SYSTEM") is a whole number of points
   from yes/no rules: MACD (strong bull +3, bull +2, bear -2, strong bear -3), RSI (extremely oversold +3, oversold +2,
   overbought -2, extremely overbought -3), Bollinger band (oversold +2, bullish +1, bearish -1, overbought -2),
-  stochastic (±1), volume (±1), momentum (strong ±2, ±1), the day's change (over 10% +2, over 5% +1, and the reverse),
+  stochastic (±1), volume (±1), momentum (strong ±2, ±1), the day's change (since 23 Oct 2026: a rise over 10% -2, 5 to 10% nothing, a fall over 10% -2, over 5% -1; it was +2 and +1 for rises, rewarding the jumps after which coins fell 12% on average), a week's rise over 20% -1 (new on 23 Oct),
   a breakout above the last 20 days' high (+2), a volume surge on a rising day (+2), 3- and 5-day rise together (+1),
   a +1 for ten named large coins, and penalties (RSI over 75 and falling -3; down more than 15% in a week -2). Labels by
   score: 7 or more Strongly positive, 4 Positive, 2 Slightly positive, -1 Mixed, -3 Slightly negative, -5 Negative.
@@ -2866,7 +2892,7 @@ edge**, actively, every time. How, without fooling ourselves:
   that has just risen fast" (the level's limit on
   the 30-day move is the nearest thing there is now; nothing looks at the last day or week). It would also say
   something about the crypto screener itself, whose score rewards exactly such a rise (section 8b, "How a coin is
-  scored"): the owner's to decide, with the evidence.
+  scored"): **done on 23 Oct 2026** (section 8b: a day's rise over 10% now scores -2, a week's over 20% -1).
 - **What the search needs and does not have yet:** prices for more than the 101 shares on this machine (a list of
   today's members flatters every "buy what rose" rule; download a wider and older list slowly, away from the daily
   run, section 8b on Yahoo's limits), saved coin prices, and company figures over time.
@@ -3156,7 +3182,7 @@ buying-order trial finished and was not kept; the AI review's early sales switch
 - **Prepare as tested options for his decision: (D)** a market-mood rule: hold fewer shares, or none, while the S&P 500 is
   below its 200-day average (question 9; replay first, the four tests of "THE MANDATE"); **(E)** the screeners' own scoring:
   the three factors that use no real data replaced by company figures, and momentum over months given its due (the part
-  "EXPECT THIS AT THE NEXT SESSION" above). (E) changes every ranking on the site: his yes, after the evidence.
+  "EXPECT THIS AT THE NEXT SESSION" above). (E) changes every ranking on the site: the session's call on the evidence (the owner, 23 Oct 2026).
 - **Watch, do not act yet:** shares bought at rank 1 to 3 did better (-0.6% a trade, 24 trades) than at rank 4 to 10 (-1.8%,
   10); with 50 holdings it buys further down each ranking (question 20).
 *Waiting on finished trades (each has its trigger; nothing is adopted from hindsight, a trading idea goes live as a trial):*
@@ -3182,7 +3208,7 @@ buying-order trial finished and was not kept; the AI review's early sales switch
    them) and the record split by them: a measurement first, as for the 52-week low and the headlines.
 8. **What each level sets by itself** (holding time, check-in gap), the stop's distances, the wait for a coin to stay:
    each needs a tag on the buy and a trial. **A small fitted model** scoring a candidate once the shared record holds
-   thousands of trades (no new AWS service). The screener scoring itself is the owner's decision (section 7b).
+   thousands of trades (no new AWS service). The screener scoring is the session's to change on the evidence (the owner, 23 Oct 2026).
 *Housekeeping, any session:*
 0c. A sale's story says "chosen by rank" for a share that was the buying-order trial's pick (`sale_detail`: HPE on 12 Oct;
    the buy's own line and the record say it rightly: "bought as the share furthest above its 52-week low"). One line.
@@ -5011,7 +5037,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     S&P 500 with $100,000 of fake money", updated weekly, losses included (describe, don't advise; past results only): something
     others link to; (4) a weekly screener-highlights email to the signup list (nothing has ever been sent). Told him plainly: SEO
     takes 3-6 months from 25 Sep; for his own money an S&P 500 fund is the sensible choice; the autopilot runs on as a test to 12 Jan.
-  - **NEXT SESSION, AROUND 26 OCT 2026 (the owner will open it when the Admin page's "Do you need to check in?" says so, or on the 26th):**
+  - **(Done on 23 Oct 2026: see "WHERE THINGS STAND" at the top.) NEXT SESSION, AROUND 26 OCT 2026 (the owner will open it when the Admin page's "Do you need to check in?" says so, or on the 26th):**
     (1) say the steering files were loaded in full; (2) the opening check, then the Admin page as he sees it: the check-in card and
     "Coming up", the first automatic full check (due 26 Oct with the daily update; the expanded run of 19 Oct finished after the session
     closed: read `check-tools/weekly_check.json` and `reviews/weekly/`), its email; (3) the weekly review (`autopilot_review.py --days 7`):
@@ -5119,6 +5145,17 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     the dashboard's Top 10 tracker; `index_check.js` in the weekly check. `practice-portfolio.js?v=49` (the list: "All markets",
     rows that add up to the account's gap, each screener against its own index), `practice-autopilot.js?v=67`, `live-market.js`
     version 4 (a small chart's colour follows the change beside it). Estimate 30% → 25%.
+  - **Later the same session:** the "money not invested" row explained (cash does not move; the fund fell, so it is ahead) and
+    "Put in" renamed "Total bought" (it grows with every buy, win or lose); **the Admin page's "so far" dial had a fault**: its
+    day-by-day gaps left out the first and the latest stretch, so they added up to +0.39% while the account was 1.13% behind, and
+    it read 57%; fixed (`versusDays` takes the start and now), and under 30 trading days it shows no percentage at all, only the gap
+    now; Claude's forecast is labelled a forecast. **"A scheduled check-in has not happened" was a false alarm** (Taiwan's holiday:
+    a market with only old prices stays due on purpose); `missed_check` now counts a check-in that ran (`state.lastRun`),
+    `stockiq-ai-trader` `nYpDZOlT…` (rollback `…_before_autopilot_missed_20261023.zip`). The Improvements list newest first, every
+    line dated (`added` on every entry from now on). **The crypto screener no longer rewards a jump** (`stockiq-option-7-1-worker-*`,
+    all 54 `N9DCsDJ5…`, rollback `stockiq-option-7-1-worker_before_chase_20261023.zip`; the owner: "just do what you think is
+    best"); the top 10 changed at once (AKE +11 to +7). The four guides' "Last updated" dates (February, April) set to 23 Oct;
+    `site_audit.py` `stale-dates`. Full check rerun: 54 of 54.
   - **Words:** the footer's "Professional Investment Research Platform" and "Powered by AI • Market Data • Comprehensive Analysis"
     on 19 pages, two blog lines ("in real-time", "Professional stock analysis powered by AI"), the research-tools guide's
     description and a guide's button heading: reworded, words only (website `1dafe26d`; uploaded by the daily update of 23 Oct,
