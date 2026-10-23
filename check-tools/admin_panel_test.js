@@ -50,9 +50,10 @@ async function page(status, uid) {
   { const q = await page(200, 'dave@x.com'); const pl = () => q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
     check('the Overview no longer repeats the improvements (19 Oct 2026): they are on the Improvements tab only', !/See every improvement/.test(pl()) && !/1 being tested · 1 next · 3 kept · 1 taken out/.test(pl()) && /Improvements/.test(pl()), pl().slice(0, 400));
     await q.click({ 'data-ad-view': 'improvements' });
-    check('the Improvements view has the whole list: next, every one done, the parts reviewed, and which users see', /Next, in order/.test(pl()) && /Hold fewer/.test(pl()) && /Old one C/.test(pl()) && /Parts of the site reviewed lately/.test(pl()) && /users see it/.test(pl()) && !/Needs your yes/.test(pl()));
+    if (/Being tested now, newest first/.test(pl())) check('each line is dated: being tested says when it started and when it is decided, newest first (23 Oct 2026)', /Started \d{1,2} \w{3}/.test(pl()) && /decided by \d{1,2} \w{3}/.test(pl()));
+    check('the Improvements view has the whole list: next, every one done, the parts reviewed, and which users see', /(Next, in order|Ideas not started yet, newest first)/.test(pl()) && /Hold fewer/.test(pl()) && /Old one C/.test(pl()) && /Parts of the site reviewed lately/.test(pl()) && /users see it/.test(pl()) && !/Needs your yes/.test(pl()));
     await q.click({ 'data-ad-view': 'overview' });
-    check('and back to the Overview', /Decisions for you/.test(pl()) && !/Next, in order/.test(pl())); }
+    check('and back to the Overview', /Decisions for you/.test(pl()) && !/(Next, in order|Ideas not started yet)/.test(pl())); }
   p = await page(200, 'dave@x.com');
   const plain = () => p.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
   check('before the Practice portfolio has its prices the account is not shown as a figure that changes a second later: "…" while the prices come', /The practice account \(getting the latest prices\) …/.test(plain()) && !/\$99,334/.test(plain()), plain().slice(0, 300));

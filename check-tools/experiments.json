@@ -9,7 +9,8 @@
    "started": "2026-10-17",
    "decide": "2026-11-14",
    "public": true,
-   "publicText": "The screeners rank shares by a new trend score (how far a share is above its 52-week low, its rise over the year, its long-term averages). On four years of prices in nine markets it did clearly better than the old score. Its trades are being compared with those bought before."
+   "publicText": "The screeners rank shares by a new trend score (how far a share is above its 52-week low, its rise over the year, its long-term averages). On four years of prices in nine markets it did clearly better than the old score. Its trades are being compared with those bought before.",
+   "added": "2026-10-17"
   },
   {
    "id": "ai-review-off",
@@ -22,7 +23,8 @@
    "decided": "2026-10-17",
    "result": "Taken out: 31 trades, -1.46% a trade, against -0.62% for every other kind of sale; the shares it sold early mostly went on rising. It can only return as a trial with a newer model.",
    "public": true,
-   "publicText": "The AI model no longer sells holdings early: those sales lost money (31 trades, -1.46% a trade, against -0.62% for the other sales). The fixed rules sell."
+   "publicText": "The AI model no longer sells holdings early: those sales lost money (31 trades, -1.46% a trade, against -0.62% for the other sales). The fixed rules sell.",
+   "added": "2026-10-17"
   },
   {
    "id": "patient-shares",
@@ -33,7 +35,8 @@
    "started": "2026-10-12",
    "decide": "2026-11-12",
    "public": true,
-   "publicText": "Every second pair of shares is \"patient\": sold only by its limits or its time, not when the screener signal turns. The two kinds are being compared."
+   "publicText": "Every second pair of shares is \"patient\": sold only by its limits or its time, not when the screener signal turns. The two kinds are being compared.",
+   "added": "2026-10-17"
   },
   {
    "id": "headlines",
@@ -44,7 +47,8 @@
    "started": "2026-10-12",
    "decide": "2026-11-12",
    "public": true,
-   "publicText": "Whether the news headlines it reads when choosing a buy help: buys with headlines are compared with buys without."
+   "publicText": "Whether the news headlines it reads when choosing a buy help: buys with headlines are compared with buys without.",
+   "added": "2026-10-17"
   },
   {
    "id": "polling-cut",
@@ -53,7 +57,8 @@
    "measure": "Lambda calls a day on the Admin page: about 66,000 before, 5,182 the first day after",
    "status": "running",
    "started": "2026-10-17",
-   "decide": "2026-10-31"
+   "decide": "2026-10-31",
+   "added": "2026-10-17"
   },
   {
    "id": "longer-holds",
@@ -63,7 +68,8 @@
    "status": "idea",
    "order": 1,
    "public": true,
-   "publicText": "Next: a trial of holding shares longer, beside the current holding time."
+   "publicText": "Next: a trial of holding shares longer, beside the current holding time.",
+   "added": "2026-10-17"
   },
   {
    "id": "company-figures",
@@ -73,7 +79,8 @@
    "status": "running",
    "order": 2,
    "started": "2026-10-19",
-   "decide": "2026-11-30"
+   "decide": "2026-11-30",
+   "added": "2026-10-17"
   },
   {
    "id": "market-mood",
@@ -83,7 +90,8 @@
    "status": "idea",
    "order": 3,
    "public": true,
-   "publicText": "Later: holding fewer shares while the S&P 500 is below its long-term average, if it passes a test on past prices first."
+   "publicText": "Later: holding fewer shares while the S&P 500 is below its long-term average, if it passes a test on past prices first.",
+   "added": "2026-10-17"
   },
   {
    "id": "newer-model",
@@ -91,7 +99,8 @@
    "angle": "AI use, profit",
    "measure": "every second choice by the newer model, the record split by model, the cost a month stated (under $1)",
    "status": "idea",
-   "order": 4
+   "order": 4,
+   "added": "2026-10-17"
   },
   {
    "id": "chat-model",
@@ -99,7 +108,8 @@
    "angle": "AI use, ease of use",
    "measure": "the same 20 real questions to both, read side by side; the cost a month",
    "status": "idea",
-   "order": 5
+   "order": 5,
+   "added": "2026-10-17"
   },
   {
    "id": "weekly-email",
@@ -107,7 +117,8 @@
    "angle": "ease of use",
    "measure": "does he read and act on it (ask him after a month)",
    "status": "idea",
-   "order": 6
+   "order": 6,
+   "added": "2026-10-17"
   },
   {
    "id": "trend-score-study",
@@ -118,7 +129,8 @@
    "decided": "2026-10-17",
    "result": "Kept: the old score lost to its own list in 17 of 18 half-periods; the study led to the trend score (now being tested live)",
    "public": true,
-   "publicText": "The screeners' old score was tested on 1,750 shares in nine markets: its top 10 did worse than simply holding the whole list, which led to the new trend score."
+   "publicText": "The screeners' old score was tested on 1,750 shares in nine markets: its top 10 did worse than simply holding the whole list, which led to the new trend score.",
+   "added": "2026-10-17"
   },
   {
    "id": "admin-value",
@@ -127,7 +139,8 @@
    "measure": "",
    "status": "kept",
    "decided": "2026-10-17",
-   "result": "Kept: $99,643.23 on both, where the Admin page had said $99,411"
+   "result": "Kept: $99,643.23 on both, where the Admin page had said $99,411",
+   "added": "2026-10-17"
   },
   {
    "id": "fund-line",
@@ -136,7 +149,8 @@
    "measure": "",
    "status": "kept",
    "decided": "2026-10-17",
-   "result": "Kept"
+   "result": "Kept",
+   "added": "2026-10-17"
   },
   {
    "id": "aws-on-admin",
@@ -145,7 +159,8 @@
    "measure": "",
    "status": "kept",
    "decided": "2026-10-17",
-   "result": "Kept: read for free from the AWS budget and CloudWatch (Cost Explorer, $0.01 a reading, is no longer used); the page shows the whole bill, StockIQ's part and its running cost by service ($0.48 on 19 Oct)"
+   "result": "Kept: read for free from the AWS budget and CloudWatch (Cost Explorer, $0.01 a reading, is no longer used); the page shows the whole bill, StockIQ's part and its running cost by service ($0.48 on 19 Oct)",
+   "added": "2026-10-17"
   },
   {
    "id": "plain-summary",
@@ -154,7 +169,8 @@
    "measure": "",
    "status": "kept",
    "decided": "2026-10-17",
-   "result": "Kept: \"+0.7 on a scale of about -3 to +3 (Slightly positive on average)\""
+   "result": "Kept: \"+0.7 on a scale of about -3 to +3 (Slightly positive on average)\"",
+   "added": "2026-10-17"
   },
   {
    "id": "lists-check",
@@ -163,7 +179,8 @@
    "measure": "",
    "status": "kept",
    "decided": "2026-10-17",
-   "result": "Kept: clean on 17 Oct; the Nikkei report said 210 for 225 (fixed)"
+   "result": "Kept: clean on 17 Oct; the Nikkei report said 210 for 225 (fixed)",
+   "added": "2026-10-17"
   },
   {
    "id": "six-markets",
@@ -174,7 +191,8 @@
    "decided": "2026-10-17",
    "result": "Kept: 33 screeners, none Coming Soon; all in the autopilot",
    "public": true,
-   "publicText": "It can buy from six more markets: Euro Stoxx 50, Sweden, China, Taiwan, New Zealand and Mexico (33 screeners in all)."
+   "publicText": "It can buy from six more markets: Euro Stoxx 50, Sweden, China, Taiwan, New Zealand and Mexico (33 screeners in all).",
+   "added": "2026-10-17"
   },
   {
    "id": "two-suffix-tracker",
@@ -183,7 +201,8 @@
    "measure": "",
    "status": "kept",
    "decided": "2026-10-17",
-   "result": "Kept: Sweden's top 10 read in full, the 47 saved reports as before"
+   "result": "Kept: Sweden's top 10 read in full, the 47 saved reports as before",
+   "added": "2026-10-17"
   },
   {
    "id": "session-start",
@@ -192,7 +211,8 @@
    "measure": "",
    "status": "kept",
    "decided": "2026-10-17",
-   "result": "Kept"
+   "result": "Kept",
+   "added": "2026-10-17"
   },
   {
    "id": "theme-sleeve",
@@ -203,7 +223,8 @@
    "started": "2026-10-18",
    "decide": "2027-10-19",
    "public": true,
-   "publicText": "A themes part (since 18 Oct 2026): a fifth of the budget is held in the three strongest of 14 sector and theme funds, changed once a month, and compared with an S&P 500 fund. Every trading day the AI model also reads the market's headlines and makes calls on the funds, which are scored but not acted on."
+   "publicText": "A themes part (since 18 Oct 2026): a fifth of the budget is held in the three strongest of 14 sector and theme funds, changed once a month, and compared with an S&P 500 fund. Every trading day the AI model also reads the market's headlines and makes calls on the funds, which are scored but not acted on.",
+   "added": "2026-10-18"
   },
   {
    "id": "market-gauge",
@@ -214,7 +235,8 @@
    "started": "2026-10-18",
    "decide": "2027-01-18",
    "public": true,
-   "publicText": "A market-risk gauge (since 18 Oct 2026), from very low to very high, shown on the autopilot's Activity and recorded with every buy. It does not hold cash: tested on past prices, that made less than staying invested. The record will show whether buys made at a high reading do worse."
+   "publicText": "A market-risk gauge (since 18 Oct 2026), from very low to very high, shown on the autopilot's Activity and recorded with every buy. It does not hold cash: tested on past prices, that made less than staying invested. The record will show whether buys made at a high reading do worse.",
+   "added": "2026-10-18"
   },
   {
    "id": "daily-review",
@@ -223,14 +245,16 @@
    "measure": "whether its reports find real faults a session acts on (the first, 18 and 19 Oct, found stale stock pages, wrong news dates, a hidden phone button: all fixed); it ends by itself on 1 Nov unless kept",
    "status": "running",
    "started": "2026-10-18",
-   "decide": "2026-11-01"
+   "decide": "2026-11-01",
+   "added": "2026-10-18"
   },
   {
    "id": "crypto-no-chasing",
    "what": "The crypto screener stops rewarding a coin that jumped 10% or more in the last day (it gives +2 for it now); entries after such a jump fell 13.8% on average over the next days (123 entries over 9 days, every day negative), others about flat",
    "angle": "analysis, profit",
    "measure": "the entry log: the top 10's average change in the days after entering, before and after the change, against the whole coin list",
-   "status": "idea"
+   "status": "idea",
+   "added": "2026-10-19"
   },
   {
    "id": "stop-watch",
@@ -239,14 +263,8 @@
    "measure": "of trailing-stop sales, the share of the best gain kept and the average result, sales marked w against those at check-ins; the 8 of 54 trades that had been up 2% and ended down",
    "status": "running",
    "started": "2026-10-19",
-   "decide": "2026-11-30"
-  },
-  {
-   "id": "gap-sell-wait",
-   "what": "A share that opens through its loss limit is sold at the next check-in, not at the first one after the open",
-   "angle": "profit",
-   "measure": "Replay first (questions.md 39); then live: limit sales after a gap, sold at the open against one check-in later, the money got back against the limit",
-   "status": "idea"
+   "decide": "2026-11-30",
+   "added": "2026-10-19"
   },
   {
    "id": "gap-wait",
@@ -257,7 +275,8 @@
    "started": "2026-10-23",
    "decide": "2026-12-22",
    "public": true,
-   "publicText": "When a share has fallen through its loss limit while its market was shut, it is kept for one more check-in instead of being sold at the opening: on five years of prices, a share that opens far down has tended to recover a little during the day. Every case records what waiting gave back or cost."
+   "publicText": "When a share has fallen through its loss limit while its market was shut, it is kept for one more check-in instead of being sold at the opening: on five years of prices, a share that opens far down has tended to recover a little during the day. Every case records what waiting gave back or cost.",
+   "added": "2026-10-23"
   },
   {
    "id": "rank-pick",
@@ -268,7 +287,8 @@
    "started": "2026-10-23",
    "decide": "2027-01-06",
    "public": true,
-   "publicText": "Every second share the AI model would buy is swapped for the top-ranked share of the same market, to learn whether the model's choice does better than simply taking the top of the ranking."
+   "publicText": "Every second share the AI model would buy is swapped for the top-ranked share of the same market, to learn whether the model's choice does better than simply taking the top of the ranking.",
+   "added": "2026-10-23"
   }
  ]
 }

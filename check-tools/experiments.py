@@ -38,7 +38,7 @@ if __name__ == '__main__':
     elif a[0] == 'due':
         for e in due(d): print(f"{e['id']}: {e['what']} (started {e['started']}, measured by: {e['measure']})")
     elif a[0] in ('add', 'idea') and len(a) >= 5:
-        e = {'id': a[1], 'what': a[2], 'angle': a[3], 'measure': a[4], 'status': 'running' if a[0] == 'add' else 'idea'}
+        e = {'id': a[1], 'what': a[2], 'angle': a[3], 'measure': a[4], 'status': 'running' if a[0] == 'add' else 'idea', 'added': today.isoformat()}
         if a[0] == 'add': e.update(started=today.isoformat(), decide=(today + datetime.timedelta(days=int(a[5]) if len(a) > 5 else 28)).isoformat())
         d['experiments'] = [x for x in d['experiments'] if x['id'] != a[1]] + [e]; save(d); print(f"{a[1]}: {e['status']}")
     elif a[0] == 'decide' and len(a) >= 4:

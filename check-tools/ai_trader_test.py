@@ -760,6 +760,9 @@ check('too little practice cash for one more holding: that needs the user', [n['
 rec = m.load_item(U); due_at = dt.datetime(2026, 10, 11, 9, 10)
 check('a check-in is not "missed" before it is due, nor a few minutes after', m.missed_check(rec, due_at - dt.timedelta(minutes=30)) is None and m.missed_check(rec, due_at + dt.timedelta(minutes=20)) is None)
 check('two scheduled check-ins in a row not happening is noticed, and needs the user', m.missed_check(rec, due_at + dt.timedelta(minutes=37)) == due_at and [n['kind'] for n in m.needs(rec, portfolio(), due_at + dt.timedelta(minutes=37))] == ['missed'] and m.needs(rec, portfolio(), due_at + dt.timedelta(minutes=37))[0]['at'] == '2026-10-11T09:10:00Z')
+if 'ran = parse_time' in open(sys.argv[1]).read():
+    ran_rec = json.loads(json.dumps(rec)); ran_rec['state']['lastRun'] = m.iso(due_at + dt.timedelta(minutes=30))
+    check('not when the check-ins did run and a market stays due because it showed only old prices (a public holiday there, Taiwan 23 Oct 2026)', m.missed_check(ran_rec, due_at + dt.timedelta(minutes=37)) is None)
 rec['state']['savedAt'] = m.iso(due_at + dt.timedelta(minutes=10))
 check('but not when the settings were changed since (the timetable changed with them)', m.missed_check(rec, due_at + dt.timedelta(minutes=37)) is None)
 m.datetime = at(sun + dt.timedelta(minutes=30)); code_, b = call(action='save', userId=U, settings=dict(m.load_item(U)['settings'], budgetUsd=9000.0)); m.datetime = clock

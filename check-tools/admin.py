@@ -52,7 +52,7 @@ elif args[0] == 'sync':
     ex = json.load(open(os.path.join(here, 'experiments.json')))['experiments']
     parts = json.load(open(os.path.join(here, 'site_parts.json')))['parts']
     reviews = sorted(({'part': p['part'], 'at': l['at'], 'found': l['found']} for p in parts for l in p.get('log', [])), key=lambda x: x['at'], reverse=True)[:8]
-    keep = ('id', 'what', 'angle', 'measure', 'status', 'started', 'decide', 'decided', 'result', 'order', 'public', 'publicText')
+    keep = ('id', 'what', 'angle', 'measure', 'status', 'added', 'started', 'decide', 'decided', 'result', 'order', 'public', 'publicText')
     kept = (admin.get('plan') or {}).get('audit')                  # the nightly site check stays when the improvements are synced
     kept_weekly = (admin.get('plan') or {}).get('weekly')          # and so does the last full check
     kept_daily = (admin.get('plan') or {}).get('dailyReview')
