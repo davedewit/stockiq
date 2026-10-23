@@ -20,6 +20,26 @@ TABLE, KEY = 'stockiq-ai-trader', '_admin'
 table = boto3.Session(profile_name='default', region_name='us-east-1').resource('dynamodb').Table(TABLE)
 
 
+def questions(here):
+    """The questions asked so far (check-tools/reviews/questions.md, its table), for the Admin page's Improvements tab: each with its
+    status and answer, so that what was already tried is seen and not tried again (23 Oct 2026, the owner)."""
+    import re
+    out = []
+    try:
+        for line in open(os.path.join(here, 'reviews', 'questions.md'), encoding='utf-8'):
+            c = [x.strip() for x in line.strip().strip('|').split('|')]
+            if len(c) < 5 or not c[0].isdigit():
+                continue
+            ans = c[-1]; m = re.match(r'\*\*([^*]+)\*\*', ans)
+            word = (m.group(1) if m else ans).strip().rstrip('.:').lower()
+            status = 'answered' if word.startswith('answered') else 'trial' if 'trial' in word or word.startswith('running') else 'waiting' if word.startswith('waiting') else 'open'
+            clean = lambda t: re.sub(r'\*\*|`', '', t)
+            out.append({'n': int(c[0]), 'asked': c[1][:40], 'q': clean(c[2])[:300], 'status': status, 'answer': clean(ans)[:420]})
+    except OSError:
+        pass
+    return out
+
+
 def load():
     item = table.get_item(Key={'userId': KEY}).get('Item')
     return dict({'proposals': [], 'review': None, 'health': None, 'seq': 0}, **(json.loads(item['data']) if item else {}))
@@ -59,7 +79,7 @@ elif args[0] == 'sync':
     kept_est = (admin.get('plan') or {}).get('estimates')
     changes = json.load(open(os.path.join(here, 'changes.json')))['changes'][:12]
     admin['plan'] = {'at': now(), 'items': [{k: e[k] for k in keep if k in e} for e in ex], 'reviews': reviews,
-                     'parts': len(parts), 'reviewed': sum(1 for p in parts if p.get('last'))}
+                     'parts': len(parts), 'reviewed': sum(1 for p in parts if p.get('last')), 'questions': questions(here)}
     if kept:
         admin['plan']['audit'] = kept
     if kept_weekly:

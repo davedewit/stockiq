@@ -64,7 +64,7 @@
    "id": "longer-holds",
    "what": "A longer holding time for shares, beside the current one, as a trial in the autopilot",
    "angle": "profit",
-   "measure": "trial_figures, 10 finished each way, then 30",
+   "measure": "Starts when the patient-shares trial is decided (12 Nov 2026): both are about how long shares are kept, and running them together would muddy both. Every second share kept twice the level's holding time (the owner's pace has been left to the level since 23 Oct, so it overrides nothing he set); 30 finished each way, after costs, against an S&P 500 fund. The replay: 5 days +92%, 20 days +103 to +106% over four years",
    "status": "idea",
    "order": 1,
    "public": true,
@@ -303,6 +303,39 @@
    "added": "2026-10-23",
    "started": "2026-10-23",
    "decide": "2027-01-21"
+  },
+  {
+   "id": "low52-order",
+   "what": "Buy shares in the order of how far above their 52-week low they are, instead of the screener ranking (every second share buy)",
+   "angle": "profit",
+   "measure": "10 finished each way, the average a trade against the other group",
+   "status": "removed",
+   "added": "2026-10-11",
+   "started": "2026-10-11",
+   "decided": "2026-10-15",
+   "result": "Taken out by the autopilot itself: -2.64% a trade against -0.68% as ranked (10 each way). The replay had said yes; the live record said no, so it is not tried again in this form"
+  },
+  {
+   "id": "compound",
+   "what": "The budget follows its results: what its sales made or lost is added to the budget at each check-in",
+   "angle": "profit",
+   "measure": "A rule rather than a trial: it makes good and bad runs larger alike and cannot make a losing strategy win; judged with the account against an S&P 500 fund",
+   "status": "kept",
+   "added": "2026-10-19",
+   "started": "2026-10-19",
+   "decided": "2026-10-19",
+   "result": "Kept as the owner asked (19 Oct): before it, the budget shrank after losses but never grew after profits"
+  },
+  {
+   "id": "batch-prices",
+   "what": "The Practice portfolio asks for its prices in six requests, not one per holding",
+   "angle": "ease of use, cost",
+   "measure": "Seconds until \"Prices as of\" shows (live_practice_check.js TIME=1)",
+   "status": "kept",
+   "added": "2026-10-23",
+   "started": "2026-10-23",
+   "decided": "2026-10-23",
+   "result": "Kept: a return visit 7.5 s to 2.7 s (the owner saw about 15 s); about 60 fewer Lambda calls a page load"
   }
  ]
 }

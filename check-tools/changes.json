@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-23",
+   "what": "The Improvements tab now also lists every question asked about making it better (46), with what was found, so an idea already tried is not tried again; three missing entries added"
+  },
+  {
+   "at": "2026-10-23",
    "what": "The Practice portfolio's prices load in about 3 seconds instead of about 15: they are asked for six requests at a time instead of one request per holding"
   },
   {
