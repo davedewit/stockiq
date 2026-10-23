@@ -120,7 +120,9 @@ improvements and wait for his yes. The routine, every session:
    compares the account with an S&P 500 fund and an all-world fund day by day (`check-tools/versus_market.js`): read it.
    **Keep a "hi" light unless the weekly review is due** (the owner, 19 Oct 2026: "each week ... do a big check ... to not
    un-necessary take my session usage"): the opening check, act on its findings and on the daily review's proposals, report.
-   The big review, new studies and new builds belong to the weekly session.
+   The big review, new studies and new builds belong to the weekly session. **Exception: what the owner said yes to on the Admin
+   page is built at the next session, whatever its kind** (the opening check lists it as a finding); it is his decision, already
+   made. If it is too big for one session, build it in stages, each one finished and live, and say which stage comes next.
 2. If the newest file in `check-tools/reviews/` is a week old or more, the full review (section 8c, "The diary, and the review
    every week or two"); `python3 check-tools/admin.py` and do what is open there, then `admin.py done <id> "<what>"`.
 3. Improve, in this order: what loses visitors or money now (a fault, a stale or untrue page, a broken path to sign up or pay);
@@ -198,9 +200,11 @@ warns about; one change at a time, measured, with its experiment entry.
   when one passes, it becomes the AI mode's rule through an experiment.
 - Also from 23 Oct: the owner reads 25% as "awful". It is the honest forecast; tell him what would move it (the trials above, and
   this market selection if replayed evidence supports it), not a softer number.
-- **Decisions waiting on the Admin page (raised 23 Oct by the daily review):** #8 the autopilot's learning (one score at a time,
-  groups of 30, the resting rule replayed: the AI market mode leans on it) and #9 the daily public screener pages; both marked
-  "Claude recommends: Yes", #8 first. If he says yes, build #8 next session; #7 (the unsubscribe page) was fixed on 23 Oct. Decisions
+- **NEXT SESSION'S FIRST JOBS: the owner said YES (23 Oct, 07:47 UTC) to #8 and #9 on the Admin page.** #8 first: the autopilot's
+  learning (a score-version tag on buys and learning only from the current score; notes and scorecard lines from 30 trades a group;
+  chosen=rank when rp=1; one night's correlated losses counted once; replay `review_resting` on the wide price set, since the AI
+  market mode leans on it). Then #9: the daily public screener pages (the traffic plan's first build). Mark each done with
+  `admin.py done <id> "<what>"`. #7 (the unsubscribe page) was fixed on 23 Oct. Decisions
   now show the day raised and a recommended answer (`admin.py recommend <id> yes|no "<why>"`); every new one gets a recommendation.
 - Open ideas worth a session: questions.md 45 (one night in Asia cost six loss limits: fewer or smaller Asian holdings
   overnight?), the coin study's other jump points (breakout +2, volume surge +2), the stock pages' regeneration (13c).
