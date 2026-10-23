@@ -117,6 +117,24 @@ def main():
         if n:
             find('loading-text', 'idea', f'{n} "Loading..." placeholders a search engine reads before the scripts run', p)
 
+    # claims: wording about StockIQ that the rewrite of 13 Oct 2026 took out, found again by hand on 23 Oct 2026 in the footer of
+    # 19 pages ("Professional Investment Research Platform", "Powered by AI") and on the blog ("in real-time")
+    claims = re.compile(r'(?i:Professional Investment Research Platform|Powered by AI|Professional stock analysis|institutional[- ]grade|'
+                        r'professional[- ]grade|\bin real-time\b)|Real-time Data\b')   # the last as the old footer wrote it ("no real-time data" is a denial)
+    for p in pages:
+        if p == 'news.html':
+            continue                                                       # headlines of other people's articles
+        hits = sorted(set(m.group(0) for m in claims.finditer(strip_scripts(src[p]))))
+        if hits:
+            find('claims', 'problem', f'says {", ".join(repr(h) for h in hits)} about the site (claims the site does not make any more)', p)
+    gen = read(os.path.join(HERE, '..', 'generate-stock-pages.py'))
+    if claims.search(gen):
+        find('claims', 'problem', 'the stock pages\' template still has wording the site does not use any more', 'generate-stock-pages.py')
+    stale = sum(1 for p in glob.glob(os.path.join(WEB, 'stocks', '*.html'))[:200] if claims.search(read(p)))
+    if stale and not claims.search(gen):
+        find('claims', 'idea', f'{stale} of 200 stock pages looked at still carry the old footer ("Real-time Data"): the template is right, '
+             'they change at the next regeneration (generate-stock-pages.py, then update_stock_analysis.py)', 'stocks/*.html')
+
     # broken-links
     for p in pages:
         body = src[p]

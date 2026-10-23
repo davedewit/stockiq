@@ -355,8 +355,7 @@ if (hasPaid) {{
     </main>
 
     <footer class="footer">
-        <p>&copy; 2026 StockIQ - Professional Investment Research Platform</p>
-        <p>Powered by AI • Market Data • Comprehensive Analysis</p>
+        <p>&copy; 2026 StockIQ - Research tools for individual investors</p>
         <p>
             <a href="../terms.html" style="color: #007bff; text-decoration: none;">Terms of Service</a> • 
             <a href="../privacy-policy.html" style="color: #007bff; text-decoration: none;">Privacy Policy</a> • 
