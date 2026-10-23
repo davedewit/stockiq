@@ -165,7 +165,7 @@ about what the "Still never" list keeps for him (real money, costs above the rul
 settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
 warns about; one change at a time, measured, with its experiment entry.
 
-**WHERE THINGS STAND (rewrite this block at the end of every session; last: 23 Oct 2026, 13:45 UTC)**
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 23 Oct 2026, 14:30 UTC, end of the session)**
 - **The account:** about $97,100, about $1,000 behind the same $100,000 in an S&P 500 fund; 100 finished trades, about -0.2% a trade;
   the picks +0.21% a trade against their own markets (not clearly different from luck, every region under 30). Month 1 goal ($101,000
   by 12 Nov) out of reach. Claude's forecast on the Admin page: 25% (the owner reads it as "awful": it is the honest figure; tell him
@@ -187,10 +187,14 @@ warns about; one change at a time, measured, with its experiment entry.
   parts `session_start` names (pricing, plans, stock pages first): each must end in an improvement. (5) Decide `daily-review` by
   1 Nov: Claude recommended keeping it (`touch check-tools/reviews/daily/KEEP`), as the only thinking between sessions; it uses his
   Claude allowance, not AWS.
-- **How the session works now (23 Oct):** the opening check makes findings of every "Needs you" item, the lists against what is live
-  (`registers_check.py`), the parts to improve (ranked: never looked at, changed since, profit) and the experiments due; the weekly
-  review explains every trade (part 4b, `trade_causes.py`) and lists gains as well as losses; each change line says who found the
-  problem (`admin.py change "..." --found owner|check|session`); the Improvements tab is six closed rows. Four entry points only.
+- **How the session works now (23 Oct, end of the session):** read "THE GOAL OF ALL OF IT" below first. The opening check makes
+  findings of every "Needs you" item, the lists against what is live (`registers_check.py`), what the owner had to point out in the last
+  7 days (15 this week: close each gap, not only the fault; step 5c), the experiments due, and three parts to improve, at least two of
+  them profit parts, ranked by never looked at and changed since (a profit part must end in an improvement; others may end "fine" with
+  a reason). The weekly review explains every trade (part 4b, `trade_causes.py`) and lists the gains as well as the losses; every
+  pattern becomes a question or an idea, never fooled by a few cases. Each change line says who found the problem (`admin.py change
+  "..." --found owner|check|session`); each experiment's result is written with its figures, or it does not show as proof. The
+  Improvements tab opens with the story (the score, proven by testing, testing now, next), then six closed rows. Four entry points only.
 - Open ideas: `asia-overnight` (fewer or smaller Asian holdings overnight; 22-23 Oct cost six loss limits), `market-hours-checkins`,
   the coin study's other jump points (breakout +2, volume surge +2), the stock pages' regeneration (13c). A small one from him: a
   "View report" link on the "Analysis complete" note after a background analysis.
