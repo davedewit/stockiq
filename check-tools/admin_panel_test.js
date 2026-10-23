@@ -56,6 +56,7 @@ async function page(status, uid) {
     check('the Improvements view has the whole list: next, every one done, the parts reviewed, and which users see', /(Next, in order|Ideas not started yet, newest first)/.test(pl()) && /Hold fewer/.test(pl()) && /Old one C/.test(pl()) && /Parts of the site reviewed lately/.test(pl()) && /users see it/.test(pl()) && !/Needs your yes/.test(pl()));
     check('the Improvements view lists the questions asked, the answered ones open with their answer, so that nothing is tried twice (23 Oct 2026)', /Questions asked \(2\)/.test(pl()) && /1 answered · 0 being tried live · 1 waiting/.test(pl()) && /Do fast risers drop\?/.test(pl()) && /Answered: no, on four years of prices/.test(pl()) && /Waiting for enough trades or data \(1\)/.test(pl()), pl().slice(-600));
     check('the Improvements view lists the fixes, newest first, with who found each and the 30-day count (23 Oct 2026)', /Fixes and changes, newest first \(2\)/.test(pl()) && /pointed out by you, 1 found by a check/.test(pl()) && /Fixed a false warning you pointed it out/.test(pl()), pl().slice(-900));
+    check('the Improvements view starts with jump links to each section, the questions among them (23 Oct 2026)', /Jump to: .*Questions asked \(2\)/.test(pl()), pl().slice(0, 400));
     await q.click({ 'data-ad-view': 'overview' });
     check('and back to the Overview', /Decisions for you/.test(pl()) && !/(Next, in order|Ideas not started yet)/.test(pl())); }
   p = await page(200, 'dave@x.com');

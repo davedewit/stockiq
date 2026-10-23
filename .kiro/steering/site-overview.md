@@ -5256,6 +5256,15 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     buying-order trial (15 Oct) and the day's price change; six rows of questions.md were stale (two trials already live read
     "open"). All put right; the tab now lists the 46 questions with their answers (`admin-panel.js?v=37`, `admin.py` `questions`).
     The next profit trial is `longer-holds`, from 12 Nov when patient-shares is decided (both are about how long shares are kept).
+  - **The cost of the day's changes, checked at the owner's question** ("confirm nothing we have done will significantly increase
+    cost ... more than 5c a month" is his line for being told first): Lambda calls fell (the price function's batches); its memory
+    went 128 -> 256 MB (compute well inside the free 400,000 GB-seconds); emails fewer; the scripts run on the Mac. **Found: the
+    scheduled run rewrote the whole Admin record (61 KB after the day's additions, 39 KB before) every 30 minutes, about 88,000 write
+    units a month, about 5.5 US cents** (DynamoDB on demand, $0.625 a million). Since 12:44 UTC the run's status goes into its own
+    item `_health` (`HEALTH_KEY`; `load_admin` and `admin.py load` merge it in) and the Admin record is written only when something in
+    it changes (`stockiq-ai-trader` `LpaN3fzS…`, rollback `…_before_autopilot_health_20261023.zip`). **Before adding to the Admin
+    record, remember it is read at every scheduled run and every Admin page load; keep it lean.** The bill on 23 Oct: $3.39 so far,
+    $2.65 of it the one-off Cost Explorer charge of 17 Oct, about $0.12 other projects: StockIQ about $0.61 so far, about $0.85 a month.
   - **"Needs you" counts the sector funds** (the owner saw "the cash is less than one holding", then "its budget is more than the money
     it can reach", both untrue): `needs` compared the shares' 80% of the budget with money that left the funds out. Now the share part
     against the shares, the whole budget against `money_of` (funds included), and no budget warning when the budget is automatic.

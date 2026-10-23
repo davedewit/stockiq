@@ -1573,6 +1573,10 @@ check('a proposal already answered cannot be answered again', code_ == 400)
 m.save_admin(dict(m.load_admin(), review=None)); rec = m.load_item(U); rec['state']['savedAt'] = m.iso(ta - dt.timedelta(hours=2)); rec['state']['visit'] = m.iso(ta); m.save_item(U, rec)
 m.datetime = at(ta + dt.timedelta(minutes=10)); m.lambda_handler({'source': 'aws.events'}, None); adm1 = m.load_admin()
 m.datetime = at(ta + dt.timedelta(minutes=40)); m.lambda_handler({'source': 'aws.events'}, None); adm2 = m.load_admin(); m.datetime = before
+if hasattr(m, 'HEALTH_KEY'):                        # 23 Oct 2026: a quiet run writes only its small status item, not the whole Admin record
+    tbl = m.db().Table(m.SETTINGS_TABLE); big0, small0 = copy.deepcopy(tbl.rows.get('_admin')), copy.deepcopy(tbl.rows.get(m.HEALTH_KEY))
+    m.datetime = at(ta + dt.timedelta(minutes=70)); m.lambda_handler({'source': 'aws.events'}, None); m.datetime = before
+    check('a quiet scheduled run leaves the Admin record as it was and writes only its small status item, which the Admin page reads', tbl.rows.get('_admin') == big0 and tbl.rows.get(m.HEALTH_KEY) != small0 and m.load_admin()['health']['at'] > adm2['health']['at'], [len(json.dumps(tbl.rows.get('_admin') or {})), m.load_admin()['health']])
 check('the scheduled run records how it went every time and writes the review itself once a week', adm1['health'] and adm1['health']['on'] >= 1 and adm1['review'] and adm2['review']['at'] == adm1['review']['at'] and adm2['health']['at'] > adm1['health']['at'], [adm1.get('health'), (adm1.get('review') or {}).get('at'), (adm2.get('review') or {}).get('at')])
 
 # --- 17 Oct 2026: the Admin page's account value at the latest prices, and the S&P 500 fund since the start in the review

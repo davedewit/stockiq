@@ -43,7 +43,11 @@ def questions(here):
 
 def load():
     item = table.get_item(Key={'userId': KEY}).get('Item')
-    return dict({'proposals': [], 'review': None, 'health': None, 'seq': 0}, **(json.loads(item['data']) if item else {}))
+    data = json.loads(item['data']) if item else {}
+    run = table.get_item(Key={'userId': '_health'}).get('Item')      # how the last scheduled run went: its own small item since 23 Oct 2026
+    if run:
+        data['health'] = json.loads(run['data'])
+    return dict({'proposals': [], 'review': None, 'health': None, 'seq': 0}, **data)
 
 
 def save(admin):
