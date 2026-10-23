@@ -185,7 +185,13 @@
    "id": "tracker",
    "part": "The 🎯 Top 10 performance popup and badges",
    "where": "dashboard.html parseScreenerTop10",
-   "last": null
+   "last": "2026-10-23",
+   "log": [
+    {
+     "at": "2026-10-23",
+     "found": "Four index symbols (S&P 1000, S&P 1500, KOSPI 200, CSI 300) had no price history, so the Top 10 popup's index comparison was empty for those screeners: replaced with stand-ins that have it; index_check.js in the weekly check"
+    }
+   ]
   },
   {
    "id": "pp-top",
@@ -293,7 +299,13 @@
    "id": "ap-buying",
    "part": "Autopilot engine: what it buys (shortlist, the AI choice, headlines)",
    "where": "stockiq-ai-trader shortlist, choose",
-   "last": null
+   "last": "2026-10-23",
+   "log": [
+    {
+     "at": "2026-10-23",
+     "found": "Deep dive on the live record and five years of prices: buys below rank 10 trail (no change needed with 22 screeners ticked); RSI under 50 not worse (no change); a trial now tests whether the AI model's choice beats the top by rank (rank-pick)"
+    }
+   ]
   },
   {
    "id": "ap-selling",
@@ -359,7 +371,13 @@
    "id": "guides",
    "part": "The guides",
    "where": "*-guide.html, investment-research-tools.html",
-   "last": null
+   "last": "2026-10-23",
+   "log": [
+    {
+     "at": "2026-10-23",
+     "found": "All four link to 8 indexed stock pages each; their 'Last updated' said February and April after changes on 13, 18 and 23 Oct: dated today, and the nightly site check now flags a date more than 30 days behind the page's last change (stale-dates)"
+    }
+   ]
   },
   {
    "id": "about-faq",

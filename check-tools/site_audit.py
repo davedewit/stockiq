@@ -135,6 +135,21 @@ def main():
         find('claims', 'idea', f'{stale} of 200 stock pages looked at still carry the old footer ("Real-time Data"): the template is right, '
              'they change at the next regeneration (generate-stock-pages.py, then update_stock_analysis.py)', 'stocks/*.html')
 
+    # stale-dates: a page that says "Last updated: <date>" more than 30 days before its last real change in git (23 Oct 2026: the
+    # four guides said February and April after being reworded on 13 Oct and given stock examples on 18 Oct)
+    import subprocess
+    for p in pages:
+        m = re.search(r'Last updated: ([A-Za-z]+ \d{1,2}, \d{4})', src[p])
+        if not m:
+            continue
+        try:
+            said = _dt.strptime(m.group(1), '%B %d, %Y').date()
+            last = subprocess.run(['git', '-C', WEB, 'log', '-1', '--format=%ad', '--date=short', '--', p], capture_output=True, text=True, timeout=20).stdout.strip()
+            if last and (_dt.strptime(last, '%Y-%m-%d').date() - said).days > 30:
+                find('stale-dates', 'idea', f'says "Last updated: {m.group(1)}" but was last changed on {last}', p)
+        except Exception:
+            pass
+
     # broken-links
     for p in pages:
         body = src[p]
