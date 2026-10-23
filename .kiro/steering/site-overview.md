@@ -218,6 +218,7 @@ warns about; one change at a time, measured, with its experiment entry.
   and the market list's index prices added on 23 Oct are Lambda calls (free up to a million; on course for about 760,000 before them,
   so watch it in the opening check). Decisions
   now show the day raised and a recommended answer (`admin.py recommend <id> yes|no "<why>"`); every new one gets a recommendation.
+- Small idea from the owner (23 Oct): the "Analysis complete" note after a background analysis could carry a "View report" link that opens it (today it fades and the report is reached through the bell or Reports). Easy; do it with the next dashboard change.
 - Open ideas worth a session: questions.md 45 (one night in Asia cost six loss limits: fewer or smaller Asian holdings
   overnight?), the coin study's other jump points (breakout +2, volume surge +2), the stock pages' regeneration (13c).
 
