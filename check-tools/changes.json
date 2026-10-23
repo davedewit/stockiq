@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-23",
+   "what": "Admin page: 'So far' (the record) and 'Claude's forecast' are now clearly two different things; the so-far reading had a fault (it left out the first and latest days) and leaned the wrong way"
+  },
+  {
+   "at": "2026-10-23",
    "what": "Small charts in the market panel now always match the colour of the change beside them"
   },
   {
