@@ -195,6 +195,14 @@ warns about; one change at a time, measured, with its experiment entry.
   the coin study's other jump points (breakout +2, volume surge +2), the stock pages' regeneration (13c). A small one from him: a
   "View report" link on the "Analysis complete" note after a background analysis.
 
+**THE GOAL OF ALL OF IT, in the owner's words (23 Oct 2026):** "it figures something out thats a problem or a profit tries to remove it
+or continue it more ... AI driven to react based on data and show improvement that gets exponential over time". So: every finding in
+the data (a group that loses, a pattern that pays, a cause behind a trade) leads to an action (remove or reduce what loses, do more of
+what pays), each action is a test with its figures, and what passes is kept and built on. The Improvements tab shows that chain (the
+score, proven by testing, testing now, next); a session that leaves no new link in it has not done its job. He throws in ideas as they
+come to him ("just throwing a ton of info at you to think put it all together and create something smart"): judge them, combine them,
+build the best of them; do not take each one literally.
+
 **THE SEARCH FOR IMPROVEMENTS NEVER ENDS (the owner, 17 Oct 2026): "this needs to be continual never ending new ways to
 improve, espeically as your AI gets smarter!"** Every session, not only the weekly review:
 - **When the owner finds something a session should have found, fixing it is half the job** (23 Oct 2026, after he looked at the

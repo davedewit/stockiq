@@ -211,6 +211,11 @@ for repo in (ROOT, WEB):
     if dirty: finding(f"{os.path.basename(repo)}: uncommitted: {', '.join(l[3:] for l in dirty[:6])} (another session's work? look before committing)")
 kept = {'pending-cleanup-undo', 'pending-banners-undo', 'pending-panel-undo'}
 left = [os.path.basename(d) for d in glob.glob(os.path.join(HERE, 'pending-*')) if os.path.basename(d) not in kept]
+# a folder that holds nothing but Python's cache (left by a test run after the folder was removed from git) is cleared, not reported
+for d in list(left):
+    real = [f for dp, _, fs in os.walk(os.path.join(HERE, d)) for f in fs if '__pycache__' not in dp]
+    if not real:
+        import shutil; shutil.rmtree(os.path.join(HERE, d), ignore_errors=True); left.remove(d)
 if left: finding(f"staging folders left over: {', '.join(left)} (a deploy not finished, or another session's)")
 print(f"  staging folders: {', '.join(sorted(kept & set(os.listdir(HERE))))} (kept on purpose)" + (f"; others: {', '.join(left)}" if left else ''))
 
