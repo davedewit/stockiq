@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-23",
+   "what": "Clearer ticks for the screeners the AI chooses; the autopilot emails only when something changes how it trades (not its daily notes); prices update as soon as you return to the Practice portfolio"
+  },
+  {
+   "at": "2026-10-23",
    "what": "The number of holdings and the budget are now automatic: 42 holdings (about 2 for each screener ticked, each from the top 10 of its list) and all the practice money it can reach. The improvement lists are checked against what is live at every session"
   },
   {

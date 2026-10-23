@@ -1737,7 +1737,9 @@ with `document.querySelector('h3')`.
   Practice portfolio tab is on screen and the page was used in the last 10 minutes (`autoRefresh`, `AUTO_MS`, `IDLE_MS`). The
   price function is asked once a symbol (about 60 for the owner's account), so a price that has not traded for half an hour (its
   market shut) is asked for again only every 15 minutes (`SHUT_EVERY_MS`, `askedAt`); not while the pointer is on the graph.
-  The button stays. Since 23 Oct 2026 a refresh is six requests (`fetchQuotes`, above), not one a symbol.
+  The button stays. Since 23 Oct 2026 a refresh is six requests (`fetchQuotes`, above), not one a symbol, and **the prices are asked
+  for at once when the tab comes back into view** (another dashboard tab or browser tab; a check every 5 seconds, `wasShown`), then
+  once a minute; after 10 minutes without a touch, click or key nothing is asked even with the page in front.
 - **What is typed in the buy row survives a refresh of prices** (it was wiped: only a completed buy or a reset clears it now).
 - The cards have small capital labels and a green or red top edge on Account value; table headings are small capitals,
   rows highlight under the pointer, figures use tabular numerals.
@@ -2355,7 +2357,10 @@ same code; read "its record" below as the shared record, or the shared record at
     two sides' figures and "Stop this trial", then kept with "put it back", or not kept).
   - Honest limits: ten trades a side is little; the study's edge was modest, from one rising
     market and today's index members. That is why it is a trial and not a rule.
-- **Emails** (`send_mail`, if `emails` is on): one at each review (no change / trial started /
+- **Emails** (`send_mail`, if `emails` is on). **Since 23 Oct 2026 only what changes how it trades is emailed**: a screener rested, a
+  trial started or ended, a progress report every 20 finished trades (the shared record's notes that start "Learned from every
+  account" or name a level). The AI model's own notes ("Reviewed the record of every account…", every 5 finished trades) go into
+  the activity list only: they had made the email near-daily. Before (per account, when `CENTRAL` was off): one at each review (no change / trial started /
   trial finished) with the record so far and suggestions about settings only the owner can change.
   `aws lambda invoke --function-name stockiq-ai-trader --payload '{"mail_test": true}' …` sends one
   test email to every account that has the autopilot on.
@@ -5245,6 +5250,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     buying-order trial (15 Oct) and the day's price change; six rows of questions.md were stale (two trials already live read
     "open"). All put right; the tab now lists the 46 questions with their answers (`admin-panel.js?v=37`, `admin.py` `questions`).
     The next profit trial is `longer-holds`, from 12 Nov when patient-shares is decided (both are about how long shares are kept).
+  - **Small things from the owner's look at the autopilot tab** (evening of 23 Oct): the screeners the AI ticks show a solid blue tick
+    (a browser's own disabled tick was pale); emails only for what changes how it trades; prices at once on returning to the
+    Practice portfolio. `stockiq-ai-trader` `PbBzV+oy…`, `stockiq-ai-chat` `FGkIhvjp…` (its guide: emails, the coin score),
+    `practice-autopilot.js?v=70`, `practice-portfolio.js?v=57`. The market-share menus stay usable under AI on purpose: automatic
+    already follows the AI's ticks, and a share by hand is the user's way to lean the budget.
   - **The number of holdings and the budget automatic** (the owner: "you decide the number ... i want it all to be automatic"):
     `stockiq-ai-trader` `nHBDYxpm…` (rollback `…_before_autopilot_autosettings_20261023.zip`), `stockiq-ai-chat` `ZeIoqtbC…`,
     `practice-autopilot.js?v=69`; his account switched through the function's save at 12:2x UTC (42 holdings, $97,687). It held 50

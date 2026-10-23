@@ -1116,6 +1116,10 @@ check('a whole check-in with shared learning: it buys, the AI model is shown thi
 check('what has been learned since its last check-in goes into its activity list and one email; nothing is reviewed per account any more',
       any(e.get('text') == 'Learned from every account: a screener was rested.' for e in s2.get('entries', [])) and len([x for x in MAILS if 'learned from every account' in x[0]]) == 1
       and rec['state'].get('rest') == pool['state']['rest'] and not (rec['state'].get('progress') or {}).get('reports'), (s2.get('entries'), [x[0] for x in MAILS]))
+m.tell_all(pool, ['Reviewed the record of every account (12 finished trades): rank 1 to 3 did best.'], Open.utcnow()); m.save_brain(pool); MAILS.clear(); m.DB_NOW = None
+rec = m.load_item(U); rec['state']['lastRun'] = None; rec['state']['brainSeen'] = pool['seq'] - 1; s3 = m.run_user(U, rec, Open.utcnow() + dt.timedelta(hours=2), snapshot=snapshot, quote=quote, model=model, mail=lambda subject, lines: MAILS.append((subject, lines)), headlines=lambda h, now: [])
+check('the AI model\'s notes alone go into the activity list but are not emailed (23 Oct 2026: only what changes how it trades is)',
+      any(str(e.get('text', '')).startswith('Reviewed the record of every account') for e in s3.get('entries', [])) and not [x for x in MAILS if 'learned from every account' in x[0]], (s3.get('entries'), [x[0] for x in MAILS]))
 m.ask_model = real_model; m.datetime = clock; m._BRAIN.clear(); m.CENTRAL = SHARED
 
 # --- the notification bell on every page: the latest buys and sells, read-only
