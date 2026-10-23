@@ -17,7 +17,13 @@
    "id": "home-features",
    "part": "Home page: \"What you can do with StockIQ\" cards, \"What StockIQ is and is not\"",
    "where": "index.html #features",
-   "last": null
+   "last": "2026-10-23",
+   "log": [
+    {
+     "at": "2026-10-23",
+     "found": "all true; S&P 400+600 missing from the list; cards link to nothing; 'company figures' true of the report, not the screeners"
+    }
+   ]
   },
   {
    "id": "home-pricing",
@@ -41,7 +47,13 @@
    "id": "home-email",
    "part": "Home page: the email signup",
    "where": "index.html, \"Get Screener Highlights by Email\"",
-   "last": null
+   "last": "2026-10-23",
+   "log": [
+    {
+     "at": "2026-10-23",
+     "found": "unsubscribe page fakes success and sends the address to Google Analytics; no unsubscribe action exists; needless ipify call; dead captureEmail (proposal #7)"
+    }
+   ]
   },
   {
    "id": "report",
@@ -323,7 +335,13 @@
    "id": "ap-learning",
    "part": "Autopilot engine: shared learning, trials, notes, emails",
    "where": "stockiq-ai-trader think, review_tuning",
-   "last": null
+   "last": "2026-10-23",
+   "log": [
+    {
+     "at": "2026-10-23",
+     "found": "pools old-score and trend-score trades; notes from groups under 30 and self-contradicting; rank-pick buys labelled chosen by AI; resting rule untested (proposal #8)"
+    }
+   ]
   },
   {
    "id": "admin",
