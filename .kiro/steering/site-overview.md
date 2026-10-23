@@ -168,6 +168,23 @@ warns about; one change at a time, measured, with its experiment entry.
 - Coins: unticked by the owner; the crypto screener rests until 29 Oct.
 - Not yet seen for real: a gap-wait case (the first Asian overnight fall through a limit), a rank-pick swap's note in the
   activity list, the sector funds' tick box being used, the first monthly change of the sector funds (around 16 Nov).
+- **FIRST JOB NEXT SESSION, asked for on 23 Oct 2026 (the session ran out before it could be built well): "AI" or "Manual" for
+  which screeners it buys from.** The owner: "i think the tick boxes should be greyed out and ticked or unticked decided by AI, if
+  the AI option is selected, if manual it stays as it is now ... if i were to switch to manual it would keep how AI set it ... if
+  one country is doing horrible for reasons outside our control, it would be stupid to continue investing in it ... you should
+  continue to monitor boxes you don't tick to decide whether to get back into it ... a review to determine if it was a smart move
+  later on ... possibly the decisions depend on the risk level ... we have 6-12 months". Design to build (decide the details on
+  the evidence): a setting `pickMode` ('ai' default for him once built, 'manual'); in 'ai' the screeners card shows the boxes
+  ticked or not by the autopilot and greyed; switching to manual keeps them as they are. The choosing must not chase noise:
+  judge a market on what it did against its own index AND the S&P 500 over weeks (the "By market" sums: sold and held together),
+  with at least ~30 trades or several weeks before dropping one, and re-admit when its own index's trend (e.g. above its 200-day
+  average, or the trend score of the index) recovers; every drop and re-entry logged with its reason and later judged (what the
+  dropped market did afterwards) - that is the review he asked for. A first version can be simple: the existing resting rule
+  (`review_resting`) widened to markets and made visible as ticks, plus a market-trend filter replayed first on the wide price set
+  (`research-data/prices/`: does leaving a market while its index is below its 200-day average beat staying, in both halves?).
+  Risk level may set how quickly it drops and re-admits. Tests, the panel copy (`autopilot_plan_check.py`), the chat's guide.
+- Also from 23 Oct: the owner reads 25% as "awful". It is the honest forecast; tell him what would move it (the trials above, and
+  this market selection if replayed evidence supports it), not a softer number.
 - Open ideas worth a session: questions.md 45 (one night in Asia cost six loss limits: fewer or smaller Asian holdings
   overnight?), the coin study's other jump points (breakout +2, volume surge +2), the stock pages' regeneration (13c).
 
