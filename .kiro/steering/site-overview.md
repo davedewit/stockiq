@@ -168,8 +168,12 @@ warns about; one change at a time, measured, with its experiment entry.
 - Coins: unticked by the owner; the crypto screener rests until 29 Oct.
 - Not yet seen for real: a gap-wait case (the first Asian overnight fall through a limit), a rank-pick swap's note in the
   activity list, the sector funds' tick box being used, the first monthly change of the sector funds (around 16 Nov).
-- **FIRST JOB NEXT SESSION, asked for on 23 Oct 2026 (the session ran out before it could be built well): "AI" or "Manual" for
-  which screeners it buys from.** The owner: "i think the tick boxes should be greyed out and ticked or unticked decided by AI, if
+- **(BUILT and live at 07:27 UTC on 23 Oct 2026, the same session: `pickMode` 'ai' default / 'manual', `MAIN_PICK`, `apply_pick` at a
+  check-in, on page load and on save; `state.picks` logs every tick and untick with its reason; the panel's `pickHtml`, boxes greyed
+  out on AI; on the owner's account it unticked NASDAQ 100 and keeps 21. `stockiq-ai-trader` `jbeL5G+q…`, experiment `ai-markets`.
+  Settings was shortened at the same time: the pace button above the budget, the profits tick box off the page (compound stays
+  on), the long descriptions folded under "What these settings will do".) The request:** "AI" or "Manual" for
+  which screeners it buys from. The owner: "i think the tick boxes should be greyed out and ticked or unticked decided by AI, if
   the AI option is selected, if manual it stays as it is now ... if i were to switch to manual it would keep how AI set it ... if
   one country is doing horrible for reasons outside our control, it would be stupid to continue investing in it ... you should
   continue to monitor boxes you don't tick to decide whether to get back into it ... a review to determine if it was a smart move

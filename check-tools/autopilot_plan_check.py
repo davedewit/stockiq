@@ -9,6 +9,7 @@ N (optional, e.g. 150): also run that many of the combinations as whole check-in
 import importlib.util, json, subprocess, datetime as dt, itertools, os, math, sys, copy, random, tempfile
 os.environ['AI_TRADER_USERS'] = 'tester@x.com'
 spec = importlib.util.spec_from_file_location('tr', sys.argv[1]); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+if 'pickMode' in m.DEFAULTS: m.DEFAULTS['pickMode'] = 'manual'   # the replays tick their own screeners (the AI's choice of markets is tested in ai_trader_test.py)
 if hasattr(m, 'THEMES'): m.THEMES = False      # the themes part (a trial) takes its own 20%; this check compares the share rules alone
 HERE = os.path.dirname(os.path.abspath(__file__)) + '/'
 class T:

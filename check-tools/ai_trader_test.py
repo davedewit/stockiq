@@ -40,6 +40,8 @@ SHARED = m.CENTRAL; m.CENTRAL = False
 NOTES = getattr(m, 'LESSONS_MIN', 0); m.LESSONS_MIN = 5
 # And every share is sold by the ordinary rules here; the trial in which some are "patient" is tested on its own (PATIENT).
 PATIENT_ON = getattr(m, 'PATIENT', False); m.PATIENT = False
+PICK_DEFAULT = m.DEFAULTS.get('pickMode')
+if PICK_DEFAULT: m.DEFAULTS['pickMode'] = 'manual'   # the older tests tick their own screeners; the AI's choice of markets has its own tests
 RANK_ON = getattr(m, 'RANK_PICK', False); m.RANK_PICK = False   # the trial of the model's choice against the top by rank has its own tests
 GAP_ON = getattr(m, 'GAP_WAIT', False); m.GAP_WAIT = False      # the wait after an overnight fall through the loss limit has its own tests
 THEMES_ON = getattr(m, 'THEMES', False); m.THEMES = False    # the themes part (a trial) has its own tests; the older ones give the whole budget to shares
@@ -87,7 +89,7 @@ check('someone not on the list and not on a paid plan is refused, and pointed to
 check('not on the list cannot switch it on', m.clean_settings({'enabled': True}, 'stranger@y.com')['enabled'] is False)
 s, b = call(action='get', userId=U); check('defaults', b['allowed'] and b['settings'] == dict(m.DEFAULTS) and '3-100' in b['options']['screeners'], b)
 s, b = call(action='save', userId=U, settings={'enabled': True, 'risk': 9, 'budgetUsd': 'lots', 'periodDays': 0.2, 'everyHours': 7, 'maxHoldDays': 5, 'screeners': ['3-100', 'nope'], 'x': 1})
-check('settings are cleaned', b['settings'] == {'enabled': True, 'risk': 5, 'budgetUsd': 10000.0, 'periodDays': 1, 'everyHours': 24, 'maxHoldDays': 5, 'screeners': ['3-100'], 'aiSell': True, 'selfTune': True, 'emails': True, 'stopPct': None, 'takePct': None, 'auto': [], 'trailMode': 'gains', 'shares': {}, **({'holdings': None} if hasattr(m, 'holdings_of') else {}), **({'compound': True} if hasattr(m, 'follow_results') else {}), **({'themes': True} if hasattr(m, 'wind_down_themes') else {})} and b['state'].get('startedAt') and b['log'][-1]['text'].startswith('Autopilot on'), b['settings'])
+check('settings are cleaned', b['settings'] == {'enabled': True, 'risk': 5, 'budgetUsd': 10000.0, 'periodDays': 1, 'everyHours': 24, 'maxHoldDays': 5, 'screeners': ['3-100'], 'aiSell': True, 'selfTune': True, 'emails': True, 'stopPct': None, 'takePct': None, 'auto': [], 'trailMode': 'gains', 'shares': {}, **({'holdings': None} if hasattr(m, 'holdings_of') else {}), **({'compound': True} if hasattr(m, 'follow_results') else {}), **({'themes': True} if hasattr(m, 'wind_down_themes') else {}), **({'pickMode': 'manual'} if hasattr(m, 'apply_pick') else {})} and b['state'].get('startedAt') and b['log'][-1]['text'].startswith('Autopilot on'), b['settings'])
 check('run before switching on is refused', call(action='run', userId='dave@x.com')[0] == 400)
 check('garbage requests', m.lambda_handler({'requestContext': {}, 'body': 'x'}, None)['statusCode'] == 400 and call(action='zzz', userId=U)[0] == 400 and call(action='get')[0] == 400)
 
@@ -1291,6 +1293,20 @@ if GAP_ON:
     m.settle(recg, {'holdings': [], 'closed': [dict(hg, sellPrice=89.5, sellFx=1, proceedsUsd=895.0, soldAt=m.iso(t0g + dt.timedelta(hours=3)), spyAtBuy=500, spyAtSell=500)]})
     check('the finished trade says what waiting gave back (+1.7%: 88.00 to 89.50), and it goes to the shared record', recg['history'][-1].get('gw') == 1.7 and 'gw' in m.POOL_FIELDS, recg['history'][-1].get('gw'))
     m.GAP_WAIT = False
+# ---- who ticks the screeners: AI or Manual (23 Oct 2026)
+if hasattr(m, 'apply_pick'):
+    st_ = {'settings': dict(m.DEFAULTS, pickMode='ai', enabled=True, screeners=['3-3', '3-7', '7-1', '5-dax40']), 'state': {'rest': {'5-dax40': '2026-11-06T00:00:00Z'}}}
+    out = m.apply_pick(st_, Open.utcnow())
+    check('on AI: the main index of every country is ticked, a resting one and the lists that overlap or coins are not, and it says why',
+          st_['settings']['screeners'] == sorted(k for k in m.MAIN_PICK if k != '5-dax40') and len(out) == 1 and 'The AI chose the markets' in out[0]['text']
+          and 'Germany DAX 40 (resting until 2026-11-06' in out[0]['text'] and any(x['k'] == '3-7' and x['do'] == 'out' for x in st_['state']['picks']), out and out[0]['text'][:300])
+    check('nothing more is said while nothing changes', m.apply_pick(st_, Open.utcnow()) == [])
+    st_['state']['rest'] = {}
+    back = m.apply_pick(st_, Open.utcnow())
+    check('when the rest is over the market is ticked again, and that is said', '5-dax40' in st_['settings']['screeners'] and 'its rest is over' in back[0]['text'], back and back[0]['text'][:200])
+    man = {'settings': dict(m.DEFAULTS, pickMode='manual', screeners=['7-1']), 'state': {}}
+    check('on Manual nothing is changed: the user ticks', m.apply_pick(man, Open.utcnow()) == [] and man['settings']['screeners'] == ['7-1'])
+    check('the setting is kept, AI unless Manual is chosen', m.clean_settings({'pickMode': 'manual'}, U)['pickMode'] == 'manual' and PICK_DEFAULT == 'ai' and m.clean_settings({'pickMode': 'x'}, U)['pickMode'] == m.DEFAULTS['pickMode'])
 # ---- the AI model's choice against the top by rank (23 Oct 2026)
 if hasattr(m, 'apply_rank_pick'):
     m.RANK_PICK = True

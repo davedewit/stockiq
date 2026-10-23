@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-23",
+   "what": "New: 'Who chooses the markets' on the AI autopilot's Settings: AI (the boxes are greyed out and the autopilot keeps the main index of every country, leaving a market out only while its own trades lag) or Manual. Settings is also much shorter"
+  },
+  {
+   "at": "2026-10-23",
    "what": "The crypto screener no longer gives extra points to a coin that has just jumped (on its own record such coins fell back 12% on average); the 'check-in has not happened' warning no longer fires on a market holiday; the Improvements list is newest first, every line dated"
   },
   {

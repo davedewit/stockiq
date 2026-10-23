@@ -293,6 +293,16 @@
    "public": true,
    "publicText": "Every second share the AI model would buy is swapped for the top-ranked share of the same market, to learn whether the model's choice does better than simply taking the top of the ranking.",
    "added": "2026-10-23"
+  },
+  {
+   "id": "ai-markets",
+   "what": "Who chooses the markets: on AI the autopilot keeps the main index of every country ticked and leaves a market out only while its own trades rest it",
+   "angle": "profit",
+   "measure": "Each tick and untick is logged (state.picks) with what the market's index did afterwards against the S&P 500; a better market rule replaces this one only after it passes both halves of a replay (market_trend_study.py: the index trend and the lagging rule did not)",
+   "status": "running",
+   "added": "2026-10-23",
+   "started": "2026-10-23",
+   "decide": "2027-01-21"
   }
  ]
 }
