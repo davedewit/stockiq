@@ -23,6 +23,10 @@ Do this, in order (about 30 minutes at most):
 6. Put at most three proposals on the Admin page, the most valuable ones that need a change only a session can make:
    `python3 check-tools/admin.py add session "<short title>" "<why, with the evidence, and what would be built>"`.
    Not one that is already open there. A wrong fact is worth a proposal; a matter of taste is not.
+   Then give each your recommended answer (the owner, 23 Oct 2026: "put your preference"):
+   `python3 check-tools/admin.py recommend <id> yes|no "<one plain sentence: why, and what it does for profit>"`.
+   Profit comes first (the owner: the site will be closed if it does not make money within 6 to 12 months): rank what improves the
+   autopilot's results against an S&P 500 fund, then what brings visitors and paying sign-ups, before tidying the site.
 7. For each part you reviewed: `python3 check-tools/site_parts.py done <id> "<what you found, in one line>"`.
 
 Rules that stand (from the notes, `.kiro/steering/site-overview.md`): describe, do not advise (no buy or sell calls, no "picks");

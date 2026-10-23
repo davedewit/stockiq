@@ -13,7 +13,7 @@ const ADMIN = { usage: { at: new Date().toISOString(), cost: 0.56, calls: 451952
     { id: 'old2', what: 'Old one B', angle: 'cost', measure: 'x', status: 'kept', decided: '2026-10-11', result: 'ok' },
     { id: 'old3', what: 'Old one C', angle: 'cost', measure: 'x', status: 'kept', decided: '2026-10-10', result: 'ok' }] },
   health: { at: new Date().toISOString(), ran: 1, on: 1, accounts: 2, paused: 0, waiting: 0, failed: 0 },
-  open: [{ id: 3, key: 'aiSell-off', title: 'Switch off "Sell early on the AI model\'s review"', why: 'Its sales lose money.', kind: 'setting', status: 'open' }, { id: 4, key: 'goal-x', title: 'Month 1 at risk', why: 'Look at it.', kind: 'session', status: 'open' }],
+  open: [{ id: 3, key: 'aiSell-off', title: 'Switch off "Sell early on the AI model\'s review"', why: 'Its sales lose money.', kind: 'setting', status: 'open' }, { id: 4, key: 'goal-x', title: 'Month 1 at risk', why: 'Look at it.', kind: 'session', status: 'open', at: '2026-10-23T06:18:31Z', recommend: 'yes', recommendWhy: 'It is about profit.' }],
   answered: [], settings: { enabled: true, risk: 3, holdings: 50, budgetUsd: 92786, everyHours: 3, maxHoldDays: 10, aiSell: true, selfTune: true }, screeners: ['S&P 500', 'ASX 200'] };
 async function page(status, uid) {
   const els = {}, sent = [], listeners = {}; let clickHandler = null;
@@ -39,6 +39,8 @@ async function page(status, uid) {
   check('it shows the month\'s goal with each figure against its target', /Month 1: in profit/.test(text) && /Finished trades in all 51/.test(text) && /target 100/.test(text) && /-1\.19%/.test(text) && (/\$99,334/.test(text) || /The practice account \(getting the latest prices\)/.test(text)) && /not forecasts/.test(text));
   check('what needs a yes: each proposal with its reason, what a yes does, and the two buttons', /Decisions for you/.test(text) && !/Needs your yes/.test(text) && /applied the moment you say yes/.test(text) && /done in your next session/.test(text) && (h.match(/data-ad-answer="yes"/g) || []).length === 2 && (h.match(/data-ad-answer="no"/g) || []).length === 2);
   check('the weekly review and how it is running', /Weekly review/.test(text) && /Clearly losing: sales by the AI review/.test(text) && /Write a fresh one now/.test(text) && /You never need to press this/.test(text) && /No errors\./.test(text) && /AWS bill this month so far: \$0\.56/.test(text) && /Lambda calls: 451,952 of 1,000,000 free \(45%\)/.test(text) && /on course for about 853k this month/.test(text) && /Show the 2 screeners it buys from/.test(text) && /probably between -2\.03% and -0\.35%/.test(text));
+  if (/function propsHtml/.test(fs.readFileSync(process.argv[2], 'utf8')) && /recommendWhy/.test(fs.readFileSync(process.argv[2], 'utf8')))
+    check('each decision says when it was raised and, where given, Claude\'s recommended answer, with that button marked', /raised \d{1,2} \w{3}|raised \w{3} \d{1,2}/.test(text) && /Claude recommends: Yes · It is about profit\./.test(text) && /Yes \(recommended\)/.test(text) && /class="ad-btn yes rec"/.test(h));
   await p.click({ 'data-ad-answer': 'yes', 'data-ad-id': '3' });
   check('"Yes" to a setting sends the answer, says it is done, and the autopilot panel is reloaded', p.sent.at(-1).op === 'answer' && p.sent.at(-1).id === 3 && p.sent.at(-1).answer === 'yes' && /Done: Switch off/.test(p.panel.innerHTML) && p.shown.includes('reloaded'), p.sent.at(-1));
   await p.click({ 'data-ad-answer': 'yes', 'data-ad-id': '4' });
@@ -102,14 +104,14 @@ async function page(status, uid) {
   if (/function confidenceHtml/.test(fs.readFileSync(process.argv[2], 'utf8'))) { // the confidence line (19 Oct 2026)
     const show = async (versus) => { const q = await page(200, 'dave@x.com'); q.ctx.window.practicePortfolio = { figures: () => ({ accountValue: 99856, gainUsd: -144, gainPct: -0.14, startingCash: 100000, versus, fundValue: 98032, topGains: 700, createdAt: new Date(Date.now() - 9 * 86400000).toISOString() }) }; q.fire('practice-portfolio:figures'); return q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' '); };
     let pl = await show({ days: 4, ahead: 3, avg: 0.63, se: 0.48 });
-    check('under 30 trading days it says too early to tell, with the days so far and no percentage', /So far: has it beaten an S&P 500 fund\? \(the record, not a forecast\) Too early to tell 4 of 30 trading days/.test(pl) && /beaten the fund on 3 of 4 days/.test(pl) && !/\d+% is how sure/.test(pl), pl.slice(pl.indexOf("So far: has it"), pl.indexOf("So far: has it") + 300));
+    check('under 30 trading days it says too early to tell, with the days so far and no percentage', /So far against an S&P 500 fund \(what has happened\) Too early to tell 4 of 30 trading days/.test(pl) && /Days it beat the fund: 3 of 4/.test(pl) && /It is not the share of days it won/.test(pl) && !/\d+% is how sure/.test(pl), pl.slice(pl.indexOf("So far against"), pl.indexOf("So far against") + 300));
     { const q = await page(200, 'dave@x.com'); q.ctx.window.practicePortfolio = { figures: () => ({ accountValue: 99856, gainUsd: -144, gainPct: -0.14, startingCash: 100000, fundValue: 98032, topGains: 700, createdAt: new Date(Date.now() - 9 * 86400000).toISOString(), versus: { days: 4, ahead: 3, avg: 0.63, se: 0.48, gaps: [0.5, 1.4, -0.4, 1.0] } }) }; q.fire('practice-portfolio:figures');
       const h = q.panel.innerHTML;
-      if (/function dialSvg/.test(fs.readFileSync(process.argv[2], 'utf8'))) check('before 30 trading days the dial is faded, with the gap now', /<svg viewBox="0 0 220 136"[^>]*an early reading/.test(h) && /the dial is faded until 30 trading days/.test(h), h.slice(0, 300)); }
+      if (/function dialSvg/.test(fs.readFileSync(process.argv[2], 'utf8'))) check('before 30 trading days the dial is faded, with the gap now', /<svg viewBox="0 0 220 136"[^>]*an early reading/.test(h) && /faded until then/.test(h), h.slice(0, 300)); }
     pl = await show({ days: 40, ahead: 26, avg: 0.2, se: 0.08 });
-    check('with 30 days or more a level and how sure, said to be about the past only', /the record, not a forecast\) Clearly ahead 9[6-9]%/.test(pl) && /on 26 of 40 trading days, by \+0\.20% a day on average/.test(pl) && /not a forecast/.test(pl), pl.slice(pl.indexOf("So far: has it"), pl.indexOf("So far: has it") + 400));
+    check('with 30 days or more a level and how sure, said to be about the past only', /\(what has happened\) Clearly ahead 9[6-9]%/.test(pl) && /on 26 of 40 trading days, by \+0\.20% a day on average/.test(pl) && /not a forecast/.test(pl), pl.slice(pl.indexOf("So far against"), pl.indexOf("So far against") + 400));
     pl = await show({ days: 40, ahead: 18, avg: -0.05, se: 0.1 });
-    check('a record behind the fund reads Low', /the record, not a forecast\) More likely behind 3\d%/.test(pl), pl.slice(pl.indexOf("So far: has it"), pl.indexOf("So far: has it") + 200));
+    check('a record behind the fund reads Low', /\(what has happened\) More likely behind 3\d%/.test(pl), pl.slice(pl.indexOf("So far against"), pl.indexOf("So far against") + 200));
   }
   if (/const START = 100000/.test(fs.readFileSync(process.argv[2], 'utf8'))) { // the account's bar runs from the start to the target (19 Oct 2026)
     const q = await page(200, 'dave@x.com'); q.ctx.window.practicePortfolio = { figures: () => ({ accountValue: 99847, gainUsd: -153, gainPct: -0.15, startingCash: 100000 }) }; q.fire('practice-portfolio:figures');
@@ -124,7 +126,7 @@ async function page(status, uid) {
     check('before the judging day: "Not yet", the date, and each of the four checks as it stands', /Real money: the decision Not yet 1 of 4 so far/.test(t) && /Decided on 11 Oct 2027/.test(t) && /✗ A full year of results \(9 of 365 days\)/.test(t) && /✗ Confidence dial at 90% or more \(\d+%, early reading\)/.test(t) && /ahead by \$1,824 so far; a yearly rate from 30 days/.test(t) && /✓ Still ahead without its 3 biggest winning trades \(ahead by \$1,124 without them\)/.test(t), t);
     t = await card(Object.assign({}, base, { topGains: 2500 }));
     check('a lead carried by its three biggest winners fails that check', /✗ Still ahead without its 3 biggest winning trades \(behind by \$676 without them\)/.test(t), t);
-    check('the confidence dial sits inside the real-money card (19 Oct 2026), once on the page', /So far: has it beaten an S&P 500 fund/.test(t) && (fs.readFileSync(process.argv[2], 'utf8').match(/confidenceHtml\(/g) || []).length === 2);
+    check('the confidence dial sits inside the real-money card (19 Oct 2026), once on the page', /So far against an S&P 500 fund/.test(t) && (fs.readFileSync(process.argv[2], 'utf8').match(/confidenceHtml\(/g) || []).length === 2);
     check('it never says more than a small trial, and says it is not advice', /about 10% of what you would invest/.test(fs.readFileSync(process.argv[2], 'utf8')) && /Not financial advice/.test(t));
   }
   if (/function needMeHtml/.test(fs.readFileSync(process.argv[2], 'utf8'))) { // "Do you need to check in?" and the full check (19 Oct 2026)
@@ -144,7 +146,7 @@ async function page(status, uid) {
   }
   if (/function comingUp/.test(fs.readFileSync(process.argv[2], 'utf8'))) {
     const q = await page(200, 'dave@x.com'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
-    check('"Coming up" under the check-in answer: the next check-in and the dates ahead, soonest first, with the real-money decision', /Coming up/.test(pl) && /Real money: the decision/.test(pl.slice(pl.indexOf('Coming up'))) && (/Your next check-in/.test(pl)), pl.slice(pl.indexOf('Coming up'), pl.indexOf('Coming up') + 400));
+    check('"Coming up" under the check-in answer: the next check-in and the dates ahead, soonest first, with the real-money decision', /Coming up/.test(pl) && /Further off: .*real money: the decision/.test(pl.slice(pl.indexOf('Coming up'))) && (/Your next check-in/.test(pl)), pl.slice(pl.indexOf('Coming up'), pl.indexOf('Coming up') + 400));
   }
   if (/function selfRunHtml/.test(fs.readFileSync(process.argv[2], 'utf8'))) {
     const q = await page(200, 'dave@x.com'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');

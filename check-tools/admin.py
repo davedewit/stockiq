@@ -129,6 +129,15 @@ elif args[0] == 'done' and len(args) >= 3:
     p.update(status='done', done=args[2], doneAt=now())
     save(admin)
     print(f"#{p['id']} marked done: {args[2]}")
+elif args[0] == 'recommend' and len(args) >= 4 and args[2] in ('yes', 'no'):
+    # the session's own answer to a decision, shown beside it on the Admin page (23 Oct 2026, the owner: "put your preference")
+    #   python3 check-tools/admin.py recommend <id> yes|no "<why, one plain sentence, profit first>"
+    hit = [p for p in admin['proposals'] if str(p['id']) == args[1]]
+    if not hit:
+        sys.exit('no such decision')
+    hit[0]['recommend'], hit[0]['recommendWhy'] = args[2], args[3][:300]
+    save(admin)
+    print(f"#{args[1]}: recommends {args[2]}")
 elif args[0] == 'add' and len(args) >= 4 and args[1] in ('session', 'setting'):
     change = json.loads(args[4]) if args[1] == 'setting' and len(args) > 4 else None
     if args[1] == 'setting' and not change:
