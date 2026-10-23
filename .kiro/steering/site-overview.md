@@ -5229,7 +5229,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     The next profit trial is `longer-holds`, from 12 Nov when patient-shares is decided (both are about how long shares are kept).
   - **The Improvements tab is six closed rows** (the owner: "a mess of scrolling with no idea what i'm looking at"): Being tested, Ideas
     waiting, Decided, Fixes and changes, Questions asked, Parts of the site, each with its count and the one fact worth knowing (the next
-    decision and its day, how many problems he pointed out, what comes next); the detail opens inside. `admin-panel.js?v=43`. **Keep it
+    decision and its day, how many problems he pointed out, what comes next); the detail opens inside. Above them, always open, three
+    plain lines (the owner: "how do i see ... what its going to focus on next, what it improved"): working on next (the three parts and
+    the next trial decided), what the last session improved (its change lines), what is being tested. `admin-panel.js?v=44`. **Keep it
     that way: new detail goes inside a row, never as a new section on show.** The backend is three files (`experiments.json`,
     `reviews/questions.md`, `site_parts.json`) kept in step by `registers_check.py`.
   - **Why each trade ended as it did** (the owner: "a stock drops in price, why? ... and same for it increasing same for it staying
