@@ -141,7 +141,7 @@ def flags(name, text, selects, settings):
     for l in lines:
         m = re.search(r'\b([A-Z][a-z]+ [a-z]{3,})\b.{0,80}\b\1\b', l)
         if m: out.append(f'{name}: "{m.group(1)}" twice in one line: "{l[:110]}"')
-    for m in re.finditer(r'\b(undefined|NaN|null|\[object Object\]|Infinity)\b', text):
+    for m in re.finditer(r"(?<!')\b(undefined|NaN|null|\[object Object\]|Infinity)\b(?!')", text):      # a word in quotes is named, not shown (the full check's test names, 23 Oct 2026)
         out.append(f'{name}: "{m.group(0)}" on the page: "{text[max(0, m.start() - 50):m.end() + 30]}"')
     return list(dict.fromkeys(out))
 
