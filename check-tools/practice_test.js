@@ -120,9 +120,10 @@ const container = mkEl('practice-portfolio');
 const document = { readyState: 'complete', getElementById: id => id === 'practice-portfolio' ? container : (els[id] || (els[id] = mkEl(id))), addEventListener: (t, f) => { (handlers[t] = handlers[t] || []).push(f); }, querySelector: () => null };
 // The tests trade on any day: a real price's last-trade time is set to now (since 17 Oct 2026 a share whose price is older
 // than three hours cannot be bought or sold by hand). SHUT.AX is made up: its market is open or shut as shutHours says.
-let shutHours = 0;
+let shutHours = 0; const priceAsked = [];
 async function fakeFetch(url, opts = {}) {
   const u = String(url);
+  { const m = u.match(/[?&]symbol=([^&]+)/); if (m && /lambda-url/.test(u)) priceAsked.push(decodeURIComponent(m[1])); }
   if (/[?&]symbol=SHUT\.AX/.test(u)) { const t = Math.floor(Date.now() / 1000 - shutHours * 3600);
     return { ok: true, status: 200, json: async () => ({ chart: { result: [{ meta: { regularMarketPrice: 10, currency: 'AUD', longName: 'Shut Test Ltd', regularMarketTime: t }, timestamp: [t - 86400], indicators: { quote: [{ close: [9.9] }] } }] } }) }; }
   if (/lambda-url/.test(u) && /[?&]symbol=/.test(u) && !u.includes('__PRACTICE_API_URL__')) {
@@ -345,6 +346,20 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
     click('refresh'); await sleep(50); await waitIdle();
     check('a refresh of prices keeps the choice', rowsShown() === n);
     click('held-all'); await sleep(20); check('and back to the latest 10', rowsShown() === 10); }
+  if (ctx.window.practicePortfolio.autoRefresh) {      // the prices refresh by themselves every minute while the page is in use (23 Oct 2026)
+    const held = JSON.parse(store['tester@example.com'].data).holdings.map(h => h.symbol);
+    priceAsked.length = 0; const ran = await ctx.window.practicePortfolio.autoRefresh(); await waitIdle();
+    check('the refresh by itself asks again for the price of every holding that is trading', ran === true && held.every(sym => sym === 'SHUT.AX' || priceAsked.includes(sym)), [ran, held, priceAsked]);
+    if (!held.includes('SHUT.AX')) { shutHours = 0; await buy('SHUT.AX', 100); await waitIdle(); held.push('SHUT.AX'); }
+    if (JSON.parse(store['tester@example.com'].data).holdings.some(h => h.symbol === 'SHUT.AX')) {
+      shutHours = 6; await ctx.window.practicePortfolio.autoRefresh(); await waitIdle(); priceAsked.length = 0;
+      await ctx.window.practicePortfolio.autoRefresh(); await waitIdle();
+      check('a price whose market is shut is not asked for again within 15 minutes; the others are', !priceAsked.includes('SHUT.AX') && priceAsked.length > 0, priceAsked);
+      shutHours = 0; }
+    document.hidden = true; priceAsked.length = 0;
+    check('nothing is asked while the tab is not on screen', await ctx.window.practicePortfolio.autoRefresh() === false && priceAsked.length === 0, priceAsked);
+    document.hidden = false;
+    check('the page still has its refresh button', /↻ Refresh prices/.test(container.innerHTML)); }
   click('reset'); await sleep(50); await waitIdle(); check('reset', !store['tester@example.com'] && /Account value \$100,000\.00/.test(text()) && /Practice portfolio reset/.test(text()));
   check('no broken values anywhere', !bad().length, bad());
   { const real = (() => { const m = { exports: {} }; vm.runInNewContext(src, { module: m, console }); return m.exports; })();      // as on the site: with the trading cost
