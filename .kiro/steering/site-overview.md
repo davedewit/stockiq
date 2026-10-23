@@ -139,8 +139,9 @@ improvements and wait for his yes. The routine, every session:
    this ... it tells me through the site"): `python3 check-tools/admin.py estimate <pct> "<why, plain words>"`, the chance the account
    is ahead of an S&P 500 fund after a year, honest, from the record (started at 30% on 19 Oct). It shows in the Real money card with
    its history, so he sees it rise or fall without asking.
-5. **One plain line on the Admin page for each change**: `python3 check-tools/admin.py change "<what, in his words>"` ("What
-   changed lately"; `check-tools/changes.json`). That list is how he sees what happened without asking.
+5. **One plain line on the Admin page for each change**: `python3 check-tools/admin.py change "<what, in his words>" --found
+   owner|check|session` (who found the problem behind it: the Improvements tab counts how many he pointed out, the number to bring
+   down; anything he points out also becomes a check). That list is how he sees what happened without asking.
 6. End with a short report: the account in dollars against the month's goal and against an S&P 500 fund, what was changed, what
    comes next. **Rewrite "WHERE THINGS STAND"** (below) so the next session starts from the real state. If the reviews keep showing no edge, say so plainly and change what it buys from, or recommend stopping it.
 **Still never, even now:** anything with real money; costs above the cost rule; deleting what cannot be restored (Lambda functions,
@@ -159,74 +160,35 @@ about what the "Still never" list keeps for him (real money, costs above the rul
 settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
 warns about; one change at a time, measured, with its experiment entry.
 
-**WHERE THINGS STAND (rewrite this block at the end of every session; last: 23 Oct 2026, 12:00 UTC)**
-- Evening of 23 Oct: the number of holdings and the budget are automatic (his account: 42 holdings, top 10 of each list, budget =
-  all the practice money it reaches; experiment `auto-holdings`); `registers_check.py` in the opening check; the Improvements tab
-  lists the questions. Next profit trial `longer-holds` from 12 Nov.
-- Evening of 23 Oct, a short session: the practice portfolio's prices load in six requests ("Prices as of" about 2.7 s on a return
-  visit, was about 15). Waiting for a session: the owner's two yeses on the Admin page, #8 (learning one score at a time) and #9
-  (the daily public screener pages, before the AI/Manual mode).
-- The account: $97,115, $1,008 behind the same $100,000 in an S&P 500 fund (-1.0%); 98 finished trades, about -0.17% a trade; the
-  last 7 days +$767 over 55 trades (+0.74% a trade); share trades about level with the fund; month 1 goal ($101,000 by 12 Nov) out
-  of reach. Claude's forecast on the Admin page: 25% (was 30%). Settings: AI chooses the markets (21 main indexes), Balanced, 50
-  holdings, the pace left to the level since the owner pressed it on 23 Oct (every 6 h, holdings up to 5 days).
-- Full check 23 Oct: 54 of 54. Weekly review done early on 23 Oct (`check-tools/reviews/review-2026-10-23.txt`); the next due
-  around 30 Oct.
-- Running and to read at the next session: **gap-wait** (`gw` on trades: what waiting a check-in after an overnight fall gave
-  back; decide at 30 cases), **rank-pick** (`rp`: the AI model's choice against the top by rank; decide at 30 each way),
-  **crypto-no-chasing** (the coin score: a jump is no longer rewarded; compare the entry study's entries after 03:15 UTC 23 Oct
-  with those before), **theme-sleeve** (the sector funds; the owner can now untick them), stop-watch, patient-shares,
-  market-gauge, company-figures, trend-score. `python3 check-tools/experiments.py` lists them with their dates.
-- Coins: unticked by the owner; the crypto screener rests until 29 Oct.
-- Not yet seen for real: a gap-wait case (the first Asian overnight fall through a limit), a rank-pick swap's note in the
-  activity list, the sector funds' tick box being used, the first monthly change of the sector funds (around 16 Nov).
-- **(BUILT and live at 07:27 UTC on 23 Oct 2026, the same session: `pickMode` 'ai' default / 'manual', `MAIN_PICK`, `apply_pick` at a
-  check-in, on page load and on save; `state.picks` logs every tick and untick with its reason; the panel's `pickHtml`, boxes greyed
-  out on AI; on the owner's account it unticked NASDAQ 100 and keeps 21. `stockiq-ai-trader` `jbeL5G+q…`, experiment `ai-markets`.
-  Settings was shortened at the same time: the pace button above the budget, the profits tick box off the page (compound stays
-  on), the long descriptions folded under "What these settings will do".) The request:** "AI" or "Manual" for
-  which screeners it buys from. The owner: "i think the tick boxes should be greyed out and ticked or unticked decided by AI, if
-  the AI option is selected, if manual it stays as it is now ... if i were to switch to manual it would keep how AI set it ... if
-  one country is doing horrible for reasons outside our control, it would be stupid to continue investing in it ... you should
-  continue to monitor boxes you don't tick to decide whether to get back into it ... a review to determine if it was a smart move
-  later on ... possibly the decisions depend on the risk level ... we have 6-12 months". Design to build (decide the details on
-  the evidence): a setting `pickMode` ('ai' default for him once built, 'manual'); in 'ai' the screeners card shows the boxes
-  ticked or not by the autopilot and greyed; switching to manual keeps them as they are. The choosing must not chase noise:
-  judge a market on what it did against its own index AND the S&P 500 over weeks (the "By market" sums: sold and held together),
-  with at least ~30 trades or several weeks before dropping one, and re-admit when its own index's trend (e.g. above its 200-day
-  average, or the trend score of the index) recovers; every drop and re-entry logged with its reason and later judged (what the
-  dropped market did afterwards) - that is the review he asked for. A first version can be simple: the existing resting rule
-  (`review_resting`) widened to markets and made visible as ticks, plus a market-trend filter replayed first on the wide price set
-  (`research-data/prices/`: does leaving a market while its index is below its 200-day average beat staying, in both halves?).
-  Risk level may set how quickly it drops and re-admits. Tests, the panel copy (`autopilot_plan_check.py`), the chat's guide.
-- **Tested the same evening, before building (`check-tools/scoring/market_trend_study.py`, `results-market-trend-2026-10-23.txt`;
-  five years, nine markets, the trend score's top 10 against SPY over 20 days): leaving a market while its own index is below its
-  200-day average does NOT help (worse when below in 5 of 9 lists, then 3 of 9); leaving a market whose picks lagged the S&P over
-  the last 12 weeks does NOT pass either (1 of 9, then 7 of 9: luck). So the AI mode must not drop markets on those signals.
-  Build the switch with the evidence-backed rule: on AI, the main index of every country stays ticked (spreading over markets is
-  what the data supports), a screener is unticked only while the existing resting rule rests it on its own live results
-  (`review_resting`), and is ticked again when the rest ends; each change logged and later judged. Keep looking for a market rule
-  that passes both halves (ideas: the market's own trend score against the others', a currency's trend, a longer test window);
-  when one passes, it becomes the AI mode's rule through an experiment.
-- Also from 23 Oct: the owner reads 25% as "awful". It is the honest forecast; tell him what would move it (the trials above, and
-  this market selection if replayed evidence supports it), not a softer number.
-- **NEXT SESSION'S FIRST JOBS: the owner said YES (23 Oct, 07:47 UTC) to #8 and #9 on the Admin page.** #8 first: the autopilot's
-  learning (a score-version tag on buys and learning only from the current score; notes and scorecard lines from 30 trades a group;
-  chosen=rank when rp=1; one night's correlated losses counted once; replay `review_resting` on the wide price set, since the AI
-  market mode leans on it). Then #9: the daily public screener pages (the traffic plan's first build). Mark each done with
-  `admin.py done <id> "<what>"`. #7 (the unsubscribe page) was fixed on 23 Oct.
-- **Cost, checked 23 Oct 2026:** every StockIQ table together is about 7 MB (storage is free up to 25 GB: deleting data saves
-  nothing, and the record is what the autopilot learns from). This month: whole bill $3.39 = Cost Explorer $2.65 (the one-off of
-  17 Oct) + other projects $0.13 + StockIQ running about $0.60 (DynamoDB $0.36, S3 $0.22), on course for about $0.85; next month,
-  without the one-off, near $0.90, close to the $1 aim. **What costs is writing the owner's autopilot record** (one ~190 KB item,
-  written at most check-ins; DynamoDB charges a write unit per KB): **a job for a coming session, after #8: store the record
-  compressed, as `_brain` already is** (about a fifth of the size, so most of the $0.36 goes). The minute-by-minute price refresh
-  and the market list's index prices added on 23 Oct are Lambda calls (free up to a million; on course for about 760,000 before them,
-  so watch it in the opening check). Decisions
-  now show the day raised and a recommended answer (`admin.py recommend <id> yes|no "<why>"`); every new one gets a recommendation.
-- Small idea from the owner (23 Oct): the "Analysis complete" note after a background analysis could carry a "View report" link that opens it (today it fades and the report is reached through the bell or Reports). Easy; do it with the next dashboard change.
-- Open ideas worth a session: questions.md 45 (one night in Asia cost six loss limits: fewer or smaller Asian holdings
-  overnight?), the coin study's other jump points (breakout +2, volume surge +2), the stock pages' regeneration (13c).
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 23 Oct 2026, 13:45 UTC)**
+- **The account:** about $97,100, about $1,000 behind the same $100,000 in an S&P 500 fund; 100 finished trades, about -0.2% a trade;
+  the picks +0.21% a trade against their own markets (not clearly different from luck, every region under 30). Month 1 goal ($101,000
+  by 12 Nov) out of reach. Claude's forecast on the Admin page: 25% (the owner reads it as "awful": it is the honest figure; tell him
+  what would move it). Full check 23 Oct: 54 of 54. The weekly review is next due around **30 Oct**.
+- **His autopilot is automatic** (his wish, 23 Oct: "i want it all to be automatic"): the markets chosen by the AI (`pickMode` 'ai',
+  21 main indexes, experiment `ai-markets`), the pace left to the level (a check-in every 6 h, holdings up to 5 days), **42 holdings
+  (2 a ticked screener, each from the top 10 of its list) and the budget = all the practice money it reaches** (experiment
+  `auto-holdings`). It held 50 shares on the day: none is sold for it, it buys less until the count falls. Coins unticked; the crypto
+  screener rests until 29 Oct. Do not write his settings while he is on the page.
+- **Trials running** (`python3 check-tools/experiments.py` for the dates): gap-wait, rank-pick, crypto-no-chasing, theme-sleeve,
+  stop-watch, patient-shares (decided 12 Nov; then `longer-holds` starts, the strongest replay finding for shares), market-gauge,
+  company-figures, trend-score, ai-markets, auto-holdings. Not yet seen for real: a gap-wait case, a rank-pick swap's note, the first
+  monthly change of the sector funds (around 16 Nov).
+- **First jobs, in order:** (1) #8 and #9, which he said yes to on the Admin page: #8 the autopilot's learning (a score-version tag on
+  buys, learning only from the current score, notes from 30 trades a group, one night's correlated losses counted once, replay
+  `review_resting` on the wide price set); #9 the daily public screener pages (the traffic plan's first build). (2) **Store his
+  autopilot record compressed, as `_brain` is**: about 190 KB written at most check-ins is now the largest cost (DynamoDB is about
+  $0.36 of the month's running $0.60). (3) `loss-news`: headlines at each sale, at the next change of the function. (4) The three
+  parts `session_start` names (pricing, plans, stock pages first): each must end in an improvement. (5) Decide `daily-review` by
+  1 Nov: Claude recommended keeping it (`touch check-tools/reviews/daily/KEEP`), as the only thinking between sessions; it uses his
+  Claude allowance, not AWS.
+- **How the session works now (23 Oct):** the opening check makes findings of every "Needs you" item, the lists against what is live
+  (`registers_check.py`), the parts to improve (ranked: never looked at, changed since, profit) and the experiments due; the weekly
+  review explains every trade (part 4b, `trade_causes.py`) and lists gains as well as losses; each change line says who found the
+  problem (`admin.py change "..." --found owner|check|session`); the Improvements tab is six closed rows. Four entry points only.
+- Open ideas: `asia-overnight` (fewer or smaller Asian holdings overnight; 22-23 Oct cost six loss limits), `market-hours-checkins`,
+  the coin study's other jump points (breakout +2, volume surge +2), the stock pages' regeneration (13c). A small one from him: a
+  "View report" link on the "Analysis complete" note after a background analysis.
 
 **THE SEARCH FOR IMPROVEMENTS NEVER ENDS (the owner, 17 Oct 2026): "this needs to be continual never ending new ways to
 improve, espeically as your AI gets smarter!"** Every session, not only the weekly review:
@@ -2796,13 +2758,17 @@ function's log; the size of the record and of the diary.
 3. **Faults before figures** (parts 7 and 8): a fault is fixed whatever the sample size.
 4. **The dollars** (part 2) against the bar. Say the number of finished trades with every figure. Under 30 in a group
    there is nothing to read; that is not a reason to invent something to change.
-5. **The losses** (parts 3 and 4): is there a group of 30 or more that is clearly down (beyond twice its margin of
-   error)? Did holdings go on rising after one kind of sale (sold too early) or falling (the sale saved money)? How many
-   had been up and ended down (a stop only acts at a check-in)?
+5. **The losses and the gains** (parts 3, 4 and 4b): is there a group of 30 or more that is clearly down or up (beyond twice its
+   margin of error)? Why did each trade end as it did (part 4b: its market, one event, or the share; each against its own index)?
+   Did holdings go on rising after one kind of sale (sold too early) or falling (the sale saved money)? How many had been up and
+   ended down? **Every pattern seen becomes a question or an idea in the register** (the owner, 23 Oct 2026: "a stock drops in
+   price, why? has this happened before? is there a pattern? ... the more patterns you find that have a probablity over 50% is
+   possible profit"): it counts as profit only when it beats holding the index fund after costs over 30+ cases.
 6. **The trials and the progress reports** (part 6): verdicts since the last review; anything that has not moved.
 7. **The settings** (part 1): trades made under different settings are different experiments; do not pool them blindly.
-8. **Decide, at most one or two things.** Each names the group and the figures it rests on; a trading rule is replayed
-   first and built as a trial; a fault or a wording goes straight in. "Nothing to change yet" is a full answer.
+8. **Decide, at most one or two trading-rule changes** (more at once muddies the record). Each names the group and the figures it
+   rests on; a trading rule is replayed first and built as a trial; a fault or a wording goes straight in. **A review never ends
+   empty**: if no rule should change yet, it still leaves new questions and ideas from the record, and the due trials decided.
 9. Write the findings and the decision into the change log (section 13) and "Start here when resuming"; commit the
    review file.
 10. Tell the owner in plain words: the dollars, what was found, what was changed, what waits for more trades. Section
