@@ -5256,6 +5256,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     buying-order trial (15 Oct) and the day's price change; six rows of questions.md were stale (two trials already live read
     "open"). All put right; the tab now lists the 46 questions with their answers (`admin-panel.js?v=37`, `admin.py` `questions`).
     The next profit trial is `longer-holds`, from 12 Nov when patient-shares is decided (both are about how long shares are kept).
+  - **The Improvements tab is six closed rows** (the owner: "a mess of scrolling with no idea what i'm looking at"): Being tested, Ideas
+    waiting, Decided, Fixes and changes, Questions asked, Parts of the site, each with its count and the one fact worth knowing (the next
+    decision and its day, how many problems he pointed out, what comes next); the detail opens inside. `admin-panel.js?v=43`. **Keep it
+    that way: new detail goes inside a row, never as a new section on show.** The backend is three files (`experiments.json`,
+    `reviews/questions.md`, `site_parts.json`) kept in step by `registers_check.py`.
   - **Why each trade ended as it did** (the owner: "a stock drops in price, why? ... and same for it increasing same for it staying
     stagnant ... the more patterns you find that have a probablity over 50% is possible profit"): `check-tools/trade_causes.py`, part 4b of
     `autopilot_review.py`: every finished trade put down to its market, one event (3+ sales set off by the price in a region within a
