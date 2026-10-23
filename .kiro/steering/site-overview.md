@@ -1618,6 +1618,17 @@ with `document.querySelector('h3')`.
   rejected: a market whose losers are still held looks good in a sold list. Not built, on purpose: moving the budget toward the
   markets that look best (with 14 to 22 trades a market it would chase luck; the autopilot already rests a screener that lags).
   `live_practice_check.js MARKETS=<screeners json> MARKET=g:…` shows it on the live tab, read-only.
+  **Since the evening of 23 Oct 2026 it is a list of its own, not a plain menu** (a plain one cannot colour part of a line): a
+  row each with Put in, Result and the S&P 500 badge (green ahead, red behind; ahead first), and under the rows "How they add up
+  to the whole account": the markets together, the owner's own buys, **money not invested** (cash and the time before each buy,
+  while the fund moved; the remainder, checked independently on his account: $327.13 both ways) and the whole account, which
+  equals the card at the top. **A grey line under each badge: the holdings against their own index, in their own currency**
+  (`HOME_INDEX`, `homeGap`; the owner asked whether to compare with the ASX 200 rather than the S&P: the S&P says whether a market
+  was worth the money, its own index whether the picks were good in it; currency moves left out). The indexes are fetched only
+  when the list is opened, at most every 15 minutes. **Four index symbols have only today's price at the price source** (^SP1000,
+  ^SP1500, ^KS200, 000300.SS): the S&P 400, the S&P 500, the KOSPI (^KS11) and the CSI 300 fund (510300.SS) stand in, here and
+  in the dashboard's Top 10 tracker (`TOP10_BENCHMARKS`), whose comparison had been empty for those four screeners.
+  `check-tools/index_check.js` (in the weekly full check) fails if any index the site uses has fewer than 10 daily prices.
 - **Prices refresh by themselves every minute** (23 Oct 2026; the owner: "i have to click ↻ Refresh prices often"): while the
   Practice portfolio tab is on screen and the page was used in the last 10 minutes (`autoRefresh`, `AUTO_MS`, `IDLE_MS`). The
   price function is asked once a symbol (about 60 for the owner's account), so a price that has not traded for half an hour (its
