@@ -357,9 +357,10 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
       const open = (container.innerHTML.match(/Can be sold now (\d+)/) || [])[1], all = (container.innerHTML.match(/>All (\d+)</) || [])[1];
       check('with one market closed the list offers "All" and "Can be sold now", all shown first', open && all && +open === +all - 1 && /SHUT\.AX/.test(text()), { open, all });
       click('held-filter', { 'data-id': 'open' }); await sleep(30);
-      check('"Can be sold now" leaves out the share whose market is closed', !/<strong[^>]*>SHUT\.AX<\/strong>/.test(container.innerHTML) && /Can be sold now/.test(text()));
+      check('"Can be sold now" leaves out the share whose market is closed', !/(<strong[^>]*>|data-symbol=")SHUT\.AX(<\/strong>|")/.test(container.innerHTML) && /Can be sold now/.test(text()));
       click('held-filter', { 'data-id': 'all' }); await sleep(30);
-      check('and "All" shows it again', /<strong[^>]*>SHUT\.AX<\/strong>/.test(container.innerHTML)); }
+      check('and "All" shows it again', /(<strong[^>]*>|data-symbol=")SHUT\.AX(<\/strong>|")/.test(container.innerHTML)); }
+      if (/data-pp="analyse"/.test(container.innerHTML)) check('each holding is a button that runs its analysis (it carries the price-source symbol)', /<button type="button" class="pp-sym" data-pp="analyse" data-symbol="SHUT\.AX"/.test(container.innerHTML));
     click('sell', { 'data-id': shut.id }); await sleep(50); await waitIdle();
     check('and a sale asked for anyway is refused with the reason, the holding kept', /SHUT\.AX cannot be sold now: its market is closed/.test(text()) && JSON.parse(store['tester@example.com'].data).holdings.some(h => h.id === shut.id), (text().match(/SHUT\.AX cannot[^.]*\./) || [''])[0]);
     shutHours = 0; click('refresh'); await sleep(50); await waitIdle(); click('sell', { 'data-id': shut.id }); await sleep(50); await waitIdle();

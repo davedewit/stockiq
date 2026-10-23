@@ -71,6 +71,10 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       for (const key of ['own', 'ai', 'value']) { const b = Array.from(box.querySelectorAll('.pp-chart-tabs button')).find(x => x.getAttribute('data-id') === key); if (!b) continue; b.click(); await new Promise(r => setTimeout(r, 250)); out['view_' + key] = { title: t(q('.pp-chart-title')), above: t(q('#pp-chart-read')), fundLine: !!q('#pp-chart-svg .pp-fund'), oneLine: t(q('.pp-facts')).replace(/^.*In holdings \\S+ · /, '') }; }
       out.chat = window.practicePortfolio && practicePortfolio.summary ? practicePortfolio.summary().split('\\n').filter(l => !/^Bought by/.test(l)) : null;
       out.remembered = Object.keys(localStorage).filter(k => /^stockiqPractice/.test(k)).map(k => k.replace(/_.*$/, '_…') + '=' + (/FundRange/.test(k) ? JSON.stringify(localStorage.getItem(k)) : '…'));
+      { const sold = q('#pp-sold'); if (sold) sold.open = true; const btns = Array.from(box.querySelectorAll('[data-pp="analyse"]')); out.analyseButtons = btns.length;
+        out.analyseInSold = sold ? sold.querySelectorAll('[data-pp="analyse"]').length : 0;
+        const was = window.runSidebarAnalysis; let asked = null; window.runSidebarAnalysis = (sym) => { asked = sym; };      // stood in: nothing is run
+        if (btns[0]) btns[0].click(); out.analyseClick = asked; window.runSidebarAnalysis = was; }
       out.errors = window.__errors; return JSON.stringify(out, null, 1);
     })()`);
     console.log(hide(report));
