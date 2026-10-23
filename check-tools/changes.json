@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-23",
+   "what": "Admin page: each decision shows when it was raised and Claude's recommended answer; 'Coming up' is one line a day with the real-money date apart; the 'so far' and forecast lines say plainly what each means. The unsubscribe page now really unsubscribes"
+  },
+  {
+   "at": "2026-10-23",
    "what": "New: 'Who chooses the markets' on the AI autopilot's Settings: AI (the boxes are greyed out and the autopilot keeps the main index of every country, leaving a market out only while its own trades lag) or Manual. Settings is also much shorter"
   },
   {

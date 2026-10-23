@@ -198,6 +198,10 @@ warns about; one change at a time, measured, with its experiment entry.
   when one passes, it becomes the AI mode's rule through an experiment.
 - Also from 23 Oct: the owner reads 25% as "awful". It is the honest forecast; tell him what would move it (the trials above, and
   this market selection if replayed evidence supports it), not a softer number.
+- **Decisions waiting on the Admin page (raised 23 Oct by the daily review):** #8 the autopilot's learning (one score at a time,
+  groups of 30, the resting rule replayed: the AI market mode leans on it) and #9 the daily public screener pages; both marked
+  "Claude recommends: Yes", #8 first. If he says yes, build #8 next session; #7 (the unsubscribe page) was fixed on 23 Oct. Decisions
+  now show the day raised and a recommended answer (`admin.py recommend <id> yes|no "<why>"`); every new one gets a recommendation.
 - Open ideas worth a session: questions.md 45 (one night in Asia cost six loss limits: fewer or smaller Asian holdings
   overnight?), the coin study's other jump points (breakout +2, volume surge +2), the stock pages' regeneration (13c).
 
