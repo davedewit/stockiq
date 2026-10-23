@@ -8,7 +8,11 @@ LENSES below, fixes what is plainly wrong, and brings the rest as numbered impro
 
     python3 check-tools/site_parts.py                    the parts, oldest review first
     python3 check-tools/site_parts.py next [n]           the n (3) to look at now
-    python3 check-tools/site_parts.py done <id> "<what was found or changed>"     record a review
+    python3 check-tools/site_parts.py done <id> fixed|improved|simplified|idea|question "<what>"     record a look: it must end in an
+            improvement (23 Oct 2026, the owner: "each time around you have to find an improvement, not say ok i did a check its ok
+            done"). fixed: a fault put right; improved: clearer, faster or more useful; simplified: something removed or merged (often
+            the best one: the site must not just grow); idea: a profit idea in experiments.py (give its id); question: a new question in
+            reviews/questions.md (give its number). "It is fine" is not accepted.
     python3 check-tools/site_parts.py add <id> "<part>" "<where to look>"          a part that is missing from the list
 
 The list is research-data-free and in git (check-tools/site_parts.json): add a part whenever the site gains one.
@@ -38,6 +42,7 @@ def save(d):
 # The parts that matter most for profit and sign-ups come up sooner (the priority since 19 Oct 2026: visitors and sign-ups first).
 PROFIT = {'funnel', 'home-hero', 'home-pricing', 'plans', 'signup-login', 'usage-chip', 'seo', 'stock-pages', 'screener-score',
           'ap-buying', 'ap-selling', 'ap-learning', 'ap-themes', 'speed'}
+KINDS = {'fixed': 'Fixed', 'improved': 'Improved', 'simplified': 'Simplified', 'idea': 'New idea to test', 'question': 'New question'}
 ROOT = os.path.dirname(HERE); WEB = os.path.join(os.path.dirname(ROOT), 'website')
 
 def files_of(part):
@@ -95,12 +100,22 @@ if __name__ == '__main__':
         for _, p, why in ranked(d)[:int(a[1]) if len(a) > 1 else 3]:
             before = (p.get('log') or [])[-1:]
             print(f"{p['id']}: {p['part']} (where: {p['where']}; {why})" + (f" | last time: {before[0]['found'][:220]}" if before else ''))
-        print('Start from what was found last time and what changed since; look only for what is new (new code, new data, a newer model, '
-              'something left open). If nothing is new, say so in one line and move on: do not repeat a review. Ask of each: ' + ' / '.join(LENSES))
-    elif a[0] == 'done' and len(a) >= 3:
+        print('Start from what was found last time and what changed since. Each look MUST end in an improvement: fixed, improved, simplified '
+              '(remove or merge something), idea (a profit idea in experiments.py) or question (in questions.md); "it is fine" is not an answer. '
+              'Real ones only: nothing added for show. Ask of each: ' + ' / '.join(LENSES))
+    elif a[0] == 'done' and len(a) >= 4 and a[2] in KINDS:
+        import re
+        if a[2] == 'idea':                       # an idea must be in the register, a question in the list: no empty promises
+            ids = {e['id'] for e in json.load(open(os.path.join(HERE, 'experiments.json')))['experiments']}
+            if not any(w in ids for w in re.findall(r'[a-z0-9-]+', a[3])): sys.exit('Name the idea\'s id in experiments.py (add it first: experiments.py idea <id> ...)')
+        if a[2] == 'question':
+            nums = set(re.findall(r'^\| (\d+) \|', open(os.path.join(HERE, 'reviews', 'questions.md'), encoding='utf-8').read(), re.M))
+            if not any(n in nums for n in re.findall(r'\d+', a[3])): sys.exit('Name the question\'s number in reviews/questions.md (add it first)')
         p = next(x for x in d['parts'] if x['id'] == a[1])
-        p['last'] = datetime.date.today().isoformat(); p.setdefault('log', []).append({'at': p['last'], 'found': a[2]}); p['log'] = p['log'][-10:]
+        p['last'] = datetime.date.today().isoformat(); p.setdefault('log', []).append({'at': p['last'], 'kind': a[2], 'found': f"{KINDS[a[2]]}: {a[3]}"}); p['log'] = p['log'][-10:]
         save(d); print(f"{a[1]}: recorded")
+    elif a[0] == 'done':
+        sys.exit('A look must end in an improvement: site_parts.py done <id> fixed|improved|simplified|idea|question "<what>" ("it is fine" is not one)')
     elif a[0] == 'add' and len(a) >= 4:
         d['parts'].append({'id': a[1], 'part': a[2], 'where': a[3], 'last': None}); save(d); print(f"{a[1]}: added")
     else:

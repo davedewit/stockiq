@@ -5259,7 +5259,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - **The parts are ranked, not rotated** (the owner: "going through those parts more than once ... probably won't make it better"):
     `site_parts.py` `ranked` puts first a part never looked at, then one whose files changed since its last look (git history of both
     repositories, the function copies' dates), the parts in `PROFIT` sooner, age last; a part unchanged since a recent look waits.
-    `next` shows what was found the time before and says: look only for what is new, and if nothing is, say so in one line. The
+    `next` shows what was found the time before. **Every look must end in an improvement** (the owner: "each time around you have to
+    find an improvement, not say ok i did a check its ok done"): `site_parts.py done <id> fixed|improved|simplified|idea|question
+    "<what>"`; "it is fine" is refused, an idea must be in the register and a question in the list. Simplified (removing or merging) counts and is
+    often the best: nothing is added for show. The
     Improvements tab names the same next three with the reason (`plan.partsNext`). The ideas that move profit come from the data
     (the trades, the visitors), through the questions and the trials: the parts sweep is the hygiene.
   - **The parts list made complete** (the owner: "only 45 parts ... nothing else can be improved?"): 13 parts added (the path from
