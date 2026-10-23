@@ -2675,7 +2675,10 @@ unless you need me to make a big decision. i'd prefer it all run without me". Bu
   **The Improvements card** (since 17 Oct 2026, the owner: "put the list of future improvements to track them so i know which was
   run which is next ... easily see if something was improved in the past"): being tested now (each with a bar to its decision
   day and how it is measured), next in order, and done (✓ kept / ✗ taken out, with the result), and the parts of the site
-  reviewed lately. It is `check-tools/experiments.json` and `site_parts.json`, copied into `_admin['plan']` by
+  reviewed lately. It is `check-tools/experiments.json` and `site_parts.json` **and, since 23 Oct 2026, every question of
+  `check-tools/reviews/questions.md` with its status and answer** (a section "Questions asked": answered first, then being tried
+  live, waiting, not tested yet; the owner: "i'm guessing history is kept so its not repeated"). **Keep questions.md's status column
+  current**: it is what the tab shows, and a question that became a trial says "**On trial**" with its experiment's id. Copied into `_admin['plan']` by
   `python3 check-tools/admin.py sync` (experiments.py and site_parts.py run it after every change; one small write). **The
   bill's colours:** green under $1, amber to $1.50, red beyond (the owner's warning and limit).
   **What the bill shows (19 Oct 2026; the owner: "i'd like to see my full aws bill, as well as that specific stockiq bill ... make it
@@ -5224,6 +5227,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     all 54 `N9DCsDJ5…`, rollback `stockiq-option-7-1-worker_before_chase_20261023.zip`; the owner: "just do what you think is
     best"); the top 10 changed at once (AKE +11 to +7). The four guides' "Last updated" dates (February, April) set to 23 Oct;
     `site_audit.py` `stale-dates`. Full check rerun: 54 of 54.
+  - **The Improvements tab checked at the owner's question** ("is this all accurate and up to date ... history is kept so its not
+    repeated"): nothing was past its decision day, but the register lacked the budget that follows results (19 Oct), the failed
+    buying-order trial (15 Oct) and the day's price change; six rows of questions.md were stale (two trials already live read
+    "open"). All put right; the tab now lists the 46 questions with their answers (`admin-panel.js?v=37`, `admin.py` `questions`).
+    The next profit trial is `longer-holds`, from 12 Nov when patient-shares is decided (both are about how long shares are kept).
   - **"Prices as of" in about 2.7 s instead of about 15** (the owner's question, the evening of 23 Oct): the price function answers many
     symbols in one request (`stockiq-price-proxy` `B4nRruWf…`, 256 MB, rollback `stockiq-price-proxy_before_batch_20261023.zip`);
     the practice portfolio asks in six requests (`practice-portfolio.js?v=56`). Also about 60 fewer Lambda calls a page load and a
