@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-23",
+   "what": "Every weekly session now also questions its own process: for each problem you had to point out, why no check caught it first, and that gap is closed too",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-23",
    "what": "The Improvements tab is tidied into six short rows (being tested, ideas, decided, fixes, questions, parts of the site), each with its count and the one thing worth knowing; open a row for the detail",
    "found": "owner"
   },

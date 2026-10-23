@@ -135,6 +135,11 @@ improvements and wait for his yes. The routine, every session:
 4. **Clean up in the same session**: whatever a change replaces goes (old code, a card that now repeats another, a superseded
    note, the `pending-*` folder once deployed, a script nothing loads). The site and these notes must get simpler, not longer:
    when a part of this file is out of date, rewrite it rather than add a correction under it.
+5c. **Question the process itself, every weekly session** (the owner, 23 Oct 2026: "i say a few things you figure out more
+   improvements. so will me saying hi in a week continue this"): the opening check lists what he had to point out in the last 7 days
+   (`--found owner`); for each, find why no check and no session caught it first, and close that gap, not only the fault. Then ask:
+   would the next session know what to do from these notes and the findings alone? What was done by hand that a script should do?
+   What has nobody looked at? Fix the answers in the same session. The aim is that he never has to lead.
 5b. **At every weekly session, update Claude's estimate on the Admin page** (19 Oct 2026, the owner: "strange i have to still ask you
    this ... it tells me through the site"): `python3 check-tools/admin.py estimate <pct> "<why, plain words>"`, the chance the account
    is ahead of an S&P 500 fund after a year, honest, from the record (started at 30% on 19 Oct). It shows in the Real money card with

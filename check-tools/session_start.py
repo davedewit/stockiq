@@ -265,6 +265,17 @@ try:
     if not out: finding('clarity_check.py printed nothing: ' + (r.stderr.strip().splitlines() or ['no error'])[-1][:150])
 except Exception as e:
     finding(f'clarity_check.py did not run: {type(e).__name__}: {e}')
+# what the owner had to point out this week (changes.json, found: owner): each is a gap in the checks or in how the sessions work, to be
+# closed, not only fixed (23 Oct 2026, the owner: "i say a few things you figure out more improvements. so will me saying hi in a week
+# continue this"). With none, the session still asks itself the question below.
+try:
+    cj = json.load(open(os.path.join(HERE, 'changes.json')))['changes']
+    mine = [c for c in cj if c.get('found') == 'owner' and (now - datetime.datetime.fromisoformat(c['at'] + 'T12:00:00')).days <= 7]
+    if mine:
+        finding(f"THE OWNER POINTED OUT {len(mine)} PROBLEM(S) IN THE LAST 7 DAYS: for each, why did no check and no session find it first? Close the gap (a check, a lens, a rule in the notes), not only the fault: " + '; '.join(c['what'][:70] for c in mine[:6]))
+except Exception as e:
+    finding(f'changes.json not read: {type(e).__name__}')
+finding('every session, and in full at the weekly one: question the process itself. Would the next session know what to do from the notes and this list alone? What did a session do by hand that a script should do? What part of the site, the record or the notes has nobody looked at? Fix the answer in the same session')
 finding('every session: anything the owner points out on a page is also a check to add (registers_check, site_audit, clarity_check, weekly_check): mark the fix with admin.py change --found owner')
 finding('every session: read at least one tab of the dashboard as the owner would (clarity_check.py --keep gives its text) and fix whatever reads confusingly, without being asked')
 
