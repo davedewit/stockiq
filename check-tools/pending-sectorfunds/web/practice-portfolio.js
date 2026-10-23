@@ -117,9 +117,9 @@
         };
         const one = (h, sold) => {
             const m = marketOf(h, info);
-            if (!m) return;
             const gain = sold ? h.proceedsUsd - h.costUsd : valueOf(h, quotes).gainUsd;
             const end = sold ? h.spyAtSell : spyNow, fund = h.spyAtBuy > 0 && end > 0 ? h.costUsd * (end / h.spyAtBuy - 1) : null;
+            if (!m) { add('own', 'Your own buys', '', h, gain, fund); return; }      // bought by hand: in no market, but part of the account's sum
             add('g:' + m.group, m.group, m.group, h, gain, fund);
             add('s:' + m.key, m.name, m.group, h, gain, fund);
         };
@@ -515,6 +515,9 @@
         #practice-portfolio .pp-mkt-btn strong { color: var(--text-primary); }
         #practice-portfolio .pp-mkt-panel { margin-top: 6px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--card-bg, var(--bg-color, #fff)); padding: 8px; max-height: 420px; overflow-y: auto; }
         #practice-portfolio .pp-mkt-sum { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45; margin: 2px 4px 8px; }
+        #practice-portfolio .pp-mkt-tally { margin-top: 8px; border-top: 2px solid var(--border-color); }
+        #practice-portfolio .pp-mkt-tally .pp-mkt-row { cursor: default; } #practice-portfolio .pp-mkt-tally button.pp-mkt-row { cursor: pointer; }
+        #practice-portfolio .pp-mkt-tally .pp-mkt-row:last-child .pp-mkt-name { font-weight: 700; }
         #practice-portfolio .pp-mkt-how { margin-top: 4px; } #practice-portfolio .pp-mkt-how summary { cursor: pointer; }
         #practice-portfolio .pp-mkt-head, #practice-portfolio .pp-mkt-row { display: grid; grid-template-columns: minmax(0, 1fr) 90px 150px 170px; gap: 8px; align-items: center; }
         #practice-portfolio .pp-mkt-head { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); padding: 0 8px 4px; }
@@ -1030,18 +1033,32 @@
         const order = (a, b) => (b.aheadUsd === null ? -1e12 : b.aheadUsd) - (a.aheadUsd === null ? -1e12 : a.aheadUsd);
         const menu = !results ? '' : (() => {
             const groups = Object.values(results).filter(r => r.key[0] === 'g').sort(order);
+            // How the rows add up to the account's own gap to the fund (the owner checked the sum, 23 Oct 2026): the markets, the
+            // user's own buys, and money not invested while the fund moved (cash, and the time before a buy) make the account's gap.
+            const vs = versusStart(state, quotes, Date.now()), own = results.own;
+            const parts = groups.concat(own ? [own] : []);
+            const covered = parts.every(r => r.aheadUsd !== null && r.compared >= r.cost - 0.01);
+            const idle = vs && covered ? vs.gapUsd - parts.reduce((n, r) => n + r.aheadUsd, 0) : null;
+            const sumRow = (label, sub, amount, key) => `<${key !== undefined ? `button type="button" data-pp="market" data-id="${key}"` : 'div'} class="pp-mkt-row sumrow${key === 'value' && !isMarket(chartKey) && chartKey === 'value' ? ' on' : ''}"><span class="pp-mkt-name">${label}<small>${sub}</small></span><span class="pp-mkt-in"></span><span class="pp-mkt-res"></span><span class="pp-mkt-vs">${vsHtml({ aheadUsd: amount, aheadPct: Math.abs(amount) / (state.startingCash || STARTING_CASH) * 100 })}</span></${key !== undefined ? 'button' : 'div'}>`;
+            const tally = vs && idle !== null ? `<div class="pp-mkt-tally"><div class="pp-mkt-sum" style="margin-top: 6px;"><strong>How they add up to the whole account</strong> (the percentages against the S&amp;P 500 here are of the ${usd(state.startingCash).replace(/\.00$/, '')} it started with)</div>`
+                + sumRow('The autopilot’s markets together', 'the rows above', groups.reduce((n, r) => n + r.aheadUsd, 0))
+                + (own ? row(Object.assign({}, own, { label: 'Your own buys', aheadPct: own.aheadUsd / (state.startingCash || STARTING_CASH) * 100 }), false) : '')
+                + sumRow('Money not invested', 'cash, and the time before each buy, while the fund moved', idle)
+                + sumRow('The whole account', `against the same ${usd(state.startingCash).replace(/\.00$/, '')} in an S&amp;P 500 fund since the start: the three lines above added up`, vs.gapUsd, 'value')
+                + `</div>` : '';
             const subs = (g) => Object.values(results).filter(r => r.key[0] === 's' && r.group === g.group).sort(order);
             const all = Object.values(results).filter(r => r.key[0] === 's' && r.aheadUsd !== null), up = all.filter(r => Math.round(r.aheadUsd) > 0), down = all.filter(r => Math.round(r.aheadUsd) < 0);
             const total = (list) => usd(Math.abs(list.reduce((n, r) => n + r.aheadUsd, 0))).replace(/\.\d\d$/, '');
             const few = Object.values(results).filter(r => r.trades < 30).length;
             const now = isMarket(chartKey) && results[chartKey] ? results[chartKey] : null;
             return `<div class="pp-mkt${mktOpen ? ' open' : ''}" id="pp-mkt">
-                <button type="button" class="pp-mkt-btn" data-pp="mkt-toggle" aria-expanded="${mktOpen}">By market: <strong>${now ? esc(now.label) : 'All of the account'}</strong>${now ? ' ' + vsHtml(now) : ''} <span aria-hidden="true">▾</span></button>
+                <button type="button" class="pp-mkt-btn" data-pp="mkt-toggle" aria-expanded="${mktOpen}">By market: <strong>${now ? esc(now.label) : chartKey === 'own' ? 'Your own buys' : 'All of the account'}</strong>${now ? ' ' + vsHtml(now) : ''} <span aria-hidden="true">▾</span></button>
                 <div class="pp-mkt-panel"${mktOpen ? '' : ' hidden'}>
                     <div class="pp-mkt-sum">Against the S&amp;P 500, screener by screener: <span class="pp-vs up">${up.length} ahead, by ${total(up)} together</span> · <span class="pp-vs down">${down.length} behind, by ${total(down)}</span>.${few ? ` <strong>Under 30 holdings is too few to tell skill from luck.</strong>` : ''} <details class="pp-mkt-how"><summary>How it is worked out</summary>Each holding is set against the same money put into an S&amp;P 500 fund the day it was bought and taken out the day it was sold (or now), with no trading cost taken off the fund; sold and still held together, ahead first. "Put in" is the total of its buys (money is used again after a sale), and the result's percent is of that.</details></div>
                     <div class="pp-mkt-head" aria-hidden="true"><span>Market and screener</span><span>Put in</span><span>Result</span><span>Against the S&amp;P 500</span></div>
                     <button type="button" class="pp-mkt-row all${isMarket(chartKey) ? '' : ' on'}" data-pp="market" data-id="" aria-pressed="${!isMarket(chartKey)}"><span class="pp-mkt-name">All of the account</span></button>
                     ${groups.map(g => row(g, false) + (subs(g).length > 1 ? subs(g).map(r => row(r, true)).join('') : '')).join('')}
+                    ${tally}
                 </div></div>`;
         })();
         const chosen = isMarket(chartKey) && results ? results[chartKey] : null;
@@ -1132,7 +1149,7 @@
         if (!t) { const sug = document.getElementById('pp-suggest'); if (sug && !e.target.closest('#pp-suggest, #pp-symbol')) sug.style.display = 'none'; return; }
         const action = t.getAttribute('data-pp');
         if (action === 'mkt-toggle') { mktOpen = !mktOpen; redraw(); return; }
-        if (action === 'market') { chartKey = t.getAttribute('data-id') || 'value'; mktOpen = false; redraw(); return; }
+        if (action === 'market') { chartKey = t.getAttribute('data-id') || 'value'; mktOpen = false; redraw(); return; }      // '', 'value', 'own' or a market
         if (t.tagName === 'A') e.preventDefault();
         if (action === 'held-all') { allHeld = !allHeld; redraw(); return; }
         if (action === 'held-filter') { heldOpenOnly = t.getAttribute('data-id') === 'open'; redraw(); return; }
