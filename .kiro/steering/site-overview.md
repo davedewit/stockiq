@@ -5100,6 +5100,25 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     was behind staying invested in both halves, only the falls were smaller); the account's early lead over the fund was mostly the
     quarter it held in cash in a falling week. The two emails he gets are by design: the shared notes (every 5 finished trades) and
     the progress report (every 20).
+  - **The weekly review, done early at the owner's word** ("perhaps do the full weekly check in now"; his question: does the new
+    reporting make the buying and selling smarter, or is it random?). Honest answer given: the "By market" list is for him; the
+    autopilot learns from its record. The full check: 50 of 54 (the four: the index symbols below, two checks that collided with a
+    test run at the same moment and passed alone, the daily update still running). **The 15 trades since the trend score went live
+    (17 Oct) average -3.84%; six of the seven large losses were Asian shares through their loss limits on one night (22-23 Oct):
+    one correlated event, not six signals.** `check-tools/scoring/depth_rsi_study.py` (five years, 1,750 shares, written down
+    first; `results-depth-rsi-2026-10-23.txt`): ranks 11-30 trail ranks 1-10 (6 of 7 lists, both halves; but with 22 screeners
+    ticked 49 of 51 holdings are already top 10, so nothing changed); **RSI under 50 is not worse** (the live -3% on 20 trades was
+    chance: not acted on); **after an 8%+ gap down the same day's close is +0.3 to +0.6% above the open and the next day's ~+1%,
+    both halves** (3,425 cases). **Live at 02:44 UTC, `stockiq-ai-trader` `QdixLwj2…` (rollback
+    `…_before_autopilot_sectorfunds_20261023.zip`), `stockiq-ai-chat` `jV14tHFG…`:** `GAP_WAIT` (a holding through its loss limit
+    at the first check-in after its market was shut, `GAP_HOURS` 8, waits one check-in; `gap` on the holding, `gw` on the trade,
+    experiment `gap-wait`), `RANK_PICK` (every second share the model picks is swapped for the top-ranked of its market,
+    `apply_rank_pick`, `rp`; experiment `rank-pick`: if the model is not clearly ahead after 30 each way, buy by rank and drop it
+    from choosing), the sector funds' tick box (`themes` setting, `wind_down_themes`), the review tool's splits for both trials.
+    **Four index symbols have only today's price** (^SP1000, ^SP1500, ^KS200, 000300.SS): replaced in the "By market" list and in
+    the dashboard's Top 10 tracker; `index_check.js` in the weekly check. `practice-portfolio.js?v=49` (the list: "All markets",
+    rows that add up to the account's gap, each screener against its own index), `practice-autopilot.js?v=67`, `live-market.js`
+    version 4 (a small chart's colour follows the change beside it). Estimate 30% → 25%.
   - **Words:** the footer's "Professional Investment Research Platform" and "Powered by AI • Market Data • Comprehensive Analysis"
     on 19 pages, two blog lines ("in real-time", "Professional stock analysis powered by AI"), the research-tools guide's
     description and a guide's button heading: reworded, words only (website `1dafe26d`; uploaded by the daily update of 23 Oct,
