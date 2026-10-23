@@ -107,6 +107,9 @@ signups"). The AI autopilot keeps running on fake money as a test until the 12 J
 fixed, no new trading features unless the record asks for them. Session effort goes to the traffic plan (section 13, 19 Oct: daily
 screener pages first) and to what turns a visitor into a sign-up and a sign-up into a paying plan.
 
+**WHATEVER THE OWNER'S FIRST MESSAGE SAYS ("hi", a question, anything), THE SESSION RUNS THIS ROUTINE FIRST** (23 Oct 2026, the
+owner: "can be hi or whatever i want really, you basically figure out when things were last done what needs doing"); then it
+answers the message.
 **WHEN THE OWNER SAYS "HI": TAKE CARE OF THE SITE. NO PERMISSION NEEDED (the standing mandate, 18 Oct 2026).** His words: "i don't
 think you need to ask me permission i just want you actively making this site profitable ... when i say hi here you take care of the
 site make sure its doing well and getting better everyday. it shouldn't just keep building shit making it more confusing either which
@@ -204,7 +207,15 @@ warns about; one change at a time, measured, with its experiment entry.
   learning (a score-version tag on buys and learning only from the current score; notes and scorecard lines from 30 trades a group;
   chosen=rank when rp=1; one night's correlated losses counted once; replay `review_resting` on the wide price set, since the AI
   market mode leans on it). Then #9: the daily public screener pages (the traffic plan's first build). Mark each done with
-  `admin.py done <id> "<what>"`. #7 (the unsubscribe page) was fixed on 23 Oct. Decisions
+  `admin.py done <id> "<what>"`. #7 (the unsubscribe page) was fixed on 23 Oct.
+- **Cost, checked 23 Oct 2026:** every StockIQ table together is about 7 MB (storage is free up to 25 GB: deleting data saves
+  nothing, and the record is what the autopilot learns from). This month: whole bill $3.39 = Cost Explorer $2.65 (the one-off of
+  17 Oct) + other projects $0.13 + StockIQ running about $0.60 (DynamoDB $0.36, S3 $0.22), on course for about $0.85; next month,
+  without the one-off, near $0.90, close to the $1 aim. **What costs is writing the owner's autopilot record** (one ~190 KB item,
+  written at most check-ins; DynamoDB charges a write unit per KB): **a job for a coming session, after #8: store the record
+  compressed, as `_brain` already is** (about a fifth of the size, so most of the $0.36 goes). The minute-by-minute price refresh
+  and the market list's index prices added on 23 Oct are Lambda calls (free up to a million; on course for about 760,000 before them,
+  so watch it in the opening check). Decisions
   now show the day raised and a recommended answer (`admin.py recommend <id> yes|no "<why>"`); every new one gets a recommendation.
 - Open ideas worth a session: questions.md 45 (one night in Asia cost six loss limits: fewer or smaller Asian holdings
   overnight?), the coin study's other jump points (breakout +2, volume surge +2), the stock pages' regeneration (13c).
