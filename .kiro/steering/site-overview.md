@@ -1689,6 +1689,10 @@ with `document.querySelector('h3')`.
   ^SP1500, ^KS200, 000300.SS): the S&P 400, the S&P 500, the KOSPI (^KS11) and the CSI 300 fund (510300.SS) stand in, here and
   in the dashboard's Top 10 tracker (`TOP10_BENCHMARKS`), whose comparison had been empty for those four screeners.
   `check-tools/index_check.js` (in the weekly full check) fails if any index the site uses has fewer than 10 daily prices.
+  **The All markets row carries the totals** (the owner's main view): every buy, the account's result since the start, and the
+  account against the same $100,000 in an S&P 500 fund since the start (equals the graph's gap). The graph's ranges are 1d, 1w,
+  1m, 3m, 6m, 1y, 2y, 5y, 10y and All (those longer than the account's life greyed); its first button is "All markets" (it was
+  "Account"). Opening or closing the list redraws only the graph, and every redraw keeps the page's and the list's scroll.
 - **Prices refresh by themselves every minute** (23 Oct 2026; the owner: "i have to click ↻ Refresh prices often"): while the
   Practice portfolio tab is on screen and the page was used in the last 10 minutes (`autoRefresh`, `AUTO_MS`, `IDLE_MS`). The
   price function is asked once a symbol (about 60 for the owner's account), so a price that has not traded for half an hour (its
