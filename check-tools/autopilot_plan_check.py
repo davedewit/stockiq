@@ -86,7 +86,13 @@ if hasattr(m, 'market_slots'):
     if 'resting' in inspect.signature(m.market_slots).parameters:   # a market whose every ticked screener is resting gets no share (17 Oct 2026)
         split += [dict(c, resting={c['screeners'][0]: '2026-10-29T00:00:00Z'}) for c in split[::5] if len(c['screeners']) > 1]
         split += [dict(c, resting={k: '2026-10-29T00:00:00Z' for k in c['screeners']}) for c in split[::40]]
+    if hasattr(m, 'auto_holdings'):                     # the automatic number of holdings (23 Oct 2026): many screeners ticked, every level, small budgets
+        many = sorted(m.SCREENERS)
+        split += [dict(risk=r, screeners=many[:n], shares={}, budgetUsd=b) for r in m.RISK for n in (1, 4, 5, 9, 13, 21, 27, len(many)) for b in (300, 2000, 10000, 97371)]
+    split = [dict(c, budgetUsd=c.get('budgetUsd', m.DEFAULTS['budgetUsd'])) for c in split]
     opts = {'groups': list(m.GROUPS), 'screeners': {k: {'group': v[5]} for k, v in m.SCREENERS.items()}, 'risk': {str(k): {'positions': v['positions'], 'crypto': v['crypto']} for k, v in m.RISK.items()}}
+    if hasattr(m, 'HOLDINGS_PER_SCREENER'):
+        opts['holdings'] = {'min': m.HOLDINGS_RANGE[0], 'max': m.HOLDINGS_RANGE[1], 'perScreener': {str(k): v for k, v in m.HOLDINGS_PER_SCREENER.items()}}
     with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False) as f: json.dump({'options': opts, 'cases': split}, f)
     theirs = json.loads(subprocess.run(['node', HERE + 'autopilot_plan_check.js', sys.argv[2], f.name, 'slots'], capture_output=True, text=True, check=True).stdout); os.unlink(f.name)
     slots_of = lambda c: m.market_slots(dict(m.DEFAULTS, **{k: v for k, v in c.items() if k != 'resting'}), c['resting']) if 'resting' in c else m.market_slots(dict(m.DEFAULTS, **c))

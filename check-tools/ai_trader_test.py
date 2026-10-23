@@ -464,7 +464,7 @@ pace = lambda **k: {f: m.clean_settings(dict(k), U)[f] for f in ('periodDays', '
 check('a new user leaves the pace to the level: Balanced builds up over 5 days, checks in every 6 hours, keeps a holding 5 days', pace() == {'periodDays': 5, 'everyHours': 6, 'maxHoldDays': 5, 'auto': ['periodDays', 'everyHours', 'maxHoldDays']} and m.clean_settings({}, U) == dict(REAL), pace())
 check('moving the level moves all three', pace(risk=1, auto=['periodDays', 'everyHours', 'maxHoldDays']) == {'periodDays': 10, 'everyHours': 24, 'maxHoldDays': 20, 'auto': ['periodDays', 'everyHours', 'maxHoldDays']} and [pace(risk=r, auto=list(m.PACE_FIELDS))['everyHours'] for r in (1, 2, 3, 4, 5)] == [24, 12, 6, 3, 1] and [pace(risk=r, auto=list(m.PACE_FIELDS))['maxHoldDays'] for r in (1, 2, 3, 4, 5)] == [20, 10, 5, 2, 1] and [pace(risk=r, auto=list(m.PACE_FIELDS))['periodDays'] for r in (1, 2, 3, 4, 5)] == [10, 7, 5, 2, 1])
 check('what the user sets himself stays put when the level moves; the rest still follows', pace(risk=5, periodDays=3, everyHours=0.5, maxHoldDays=0.25, auto=['maxHoldDays']) == {'periodDays': 3, 'everyHours': 0.5, 'maxHoldDays': 1, 'auto': ['maxHoldDays']} and pace(risk=5, periodDays=3, everyHours=0.5, maxHoldDays=0.25, auto=[]) == {'periodDays': 3, 'everyHours': 0.5, 'maxHoldDays': 0.25, 'auto': []})
-check('settings saved before this existed keep what was chosen by hand', pace(risk=3, periodDays=1, everyHours=0.5, maxHoldDays=0.25) == {'periodDays': 1, 'everyHours': 0.5, 'maxHoldDays': 0.25, 'auto': []} and pace(risk=3, periodDays=1, everyHours=0.5, maxHoldDays=0.25, auto='everything') == {'periodDays': 1, 'everyHours': 0.5, 'maxHoldDays': 0.25, 'auto': []} and pace(risk=3, auto=['periodDays', 'budgetUsd', 7])['auto'] == ['periodDays'])
+check('settings saved before this existed keep what was chosen by hand', pace(risk=3, periodDays=1, everyHours=0.5, maxHoldDays=0.25) == {'periodDays': 1, 'everyHours': 0.5, 'maxHoldDays': 0.25, 'auto': []} and pace(risk=3, periodDays=1, everyHours=0.5, maxHoldDays=0.25, auto='everything') == {'periodDays': 1, 'everyHours': 0.5, 'maxHoldDays': 0.25, 'auto': []} and pace(risk=3, auto=['periodDays', 'budgetUsd', 7])['auto'] == ['periodDays', 'budgetUsd'])   # the budget may be left automatic since 23 Oct 2026
 check('every level\'s pace is one the dashboard offers', all(v['everyHours'] in m.EVERY_HOURS and any(abs(v['maxHoldDays'] - d) < 1e-9 for d in m.HOLD_DAYS) and 1 <= v['periodDays'] <= 90 for v in m.PACE.values()))
 D.t.clear(); code_, b = call(action='get', userId=U)
 check('the dashboard is sent each level\'s pace and which settings are left to it', b['options']['pace']['4'] == {'periodDays': 2, 'everyHours': 3, 'maxHoldDays': 2} and b['settings']['auto'] == ['periodDays', 'everyHours', 'maxHoldDays'] and b['settings']['maxHoldDays'] == 5)
@@ -814,7 +814,7 @@ check('a budget within the practice money is saved as typed', b['settings']['bud
 m.datetime = clock
 
 # --- the budget is spread over the markets ticked: evenly unless the owner sets a share, coins never above the level's on automatic
-m.datetime = clock; S = lambda risk, screeners, **shares: m.market_slots(dict(m.DEFAULTS, risk=risk, screeners=screeners, shares=shares))
+m.datetime = clock; S = lambda risk, screeners, **shares: m.market_slots(dict(m.DEFAULTS, risk=risk, screeners=screeners, shares=shares, holdings=m.RISK[risk]['positions']))   # the spread at the level's own number
 check('one market ticked gets every holding of the level, coins too', [S(r, ['7-1']) for r in (1, 3, 5)] == [{'Coins': 12}, {'Coins': 8}, {'Coins': 4}] and S(3, ['3-100', '3-8']) == {'US markets': 8})
 check('shares and coins: coins get the level\'s share at most, the rest goes to the shares', [S(r, ['3-100', '7-1']) for r in (1, 2, 3, 4, 5)] == [{'US markets': 12, 'Coins': 0}, {'US markets': 10, 'Coins': 0}, {'US markets': 6, 'Coins': 2}, {'US markets': 3, 'Coins': 3}, {'US markets': 2, 'Coins': 2}], [S(r, ['3-100', '7-1']) for r in (1, 2, 3, 4, 5)])
 check('three markets: an even spread in whole holdings, coins held to the level', S(3, ['3-100', '4-200', '7-1']) == {'US markets': 3, 'Asia-Pacific markets': 3, 'Coins': 2} and S(5, ['3-100', '4-200', '7-1']) == {'US markets': 2, 'Asia-Pacific markets': 1, 'Coins': 1} and S(1, ['3-100', '4-200', '5-ftse100']) == {'US markets': 4, 'Asia-Pacific markets': 4, 'Europe markets': 4}, (S(3, ['3-100', '4-200', '7-1']), S(5, ['3-100', '4-200', '7-1'])))
@@ -823,6 +823,24 @@ check('a share set by hand stands, and the others share what is left', S(3, ['3-
 check('shares set by hand that use the whole budget leave nothing for an automatic market; ones that use less leave the rest in cash', S(3, ['3-100', '4-200', '7-1'], **{'US markets': 62.5, 'Coins': 37.5}) == {'US markets': 5, 'Asia-Pacific markets': 0, 'Coins': 3} and S(3, ['3-100'], **{'US markets': 50}) == {'US markets': 4})
 check('a share for a market that is not ticked is ignored', S(3, ['3-100'], Coins=50) == {'US markets': 8})
 check('the holdings always add up to the level\'s number at most', all(sum(S(r, list(k), **sh).values()) <= m.RISK[r]['positions'] for r in (1, 2, 3, 4, 5) for k in (('3-100',), ('3-100', '7-1'), ('3-100', '4-200', '5-ftse100', '5-nikkei225', '7-1')) for sh in ({}, {'Coins': 33.3}, {'US markets': 10, 'Coins': 10})) and all(sum(S(r, ['3-100', '4-200', '5-ftse100', '5-nikkei225', '7-1']).values()) == m.RISK[r]['positions'] for r in (1, 2, 3, 4, 5)))
+# The automatic number of holdings and the automatic budget (23 Oct 2026; the owner: "you decide the number ... i want it all to be automatic")
+if hasattr(m, 'auto_holdings'):
+    import datetime as _dt
+    A = lambda risk, n, budget=50000: m.holdings_of(dict(m.DEFAULTS, risk=risk, screeners=sorted(m.SCREENERS)[:n], budgetUsd=budget, holdings=None))
+    check('automatic holdings: 2 a ticked screener at Balanced, never fewer than the level\'s own, at most 50', [A(3, 1), A(3, 4), A(3, 5), A(3, 21), A(3, 30)] == [8, 8, 10, 42, 50], [A(3, 1), A(3, 4), A(3, 5), A(3, 21), A(3, 30)])
+    check('and per level: 3 at Cautious, 2.5, 2, 1.5, 1 at Adventurous (21 screeners: 50, 50, 42, 32, 21)', [A(r, 21) for r in (1, 2, 3, 4, 5)] == [50, 50, 42, 32, 21], [A(r, 21) for r in (1, 2, 3, 4, 5)])
+    check('never so many that a holding is under the $25 smallest buy (a $300 budget: 12)', A(3, 21, budget=300) == 12, A(3, 21, budget=300))
+    st = dict(m.DEFAULTS, risk=3, screeners=sorted(m.SCREENERS)[:21], budgetUsd=50000, holdings=None)
+    check('automatic holdings keep to the level\'s depth in each ranking; a number set by hand still looks further down', m.rules_for(st)['positions'] == 42 and m.rules_for(st)['top'] == m.RISK[3]['top'] and m.rules_for(dict(st, holdings=42))['top'] == 30, [m.rules_for(st)['positions'], m.rules_for(st)['top'], m.rules_for(dict(st, holdings=42))['top']])
+    check('the spread over markets adds up to the automatic number', sum(m.market_slots(st).values()) == 42, m.market_slots(st))
+    rec = {'settings': m.clean_settings(dict(st, auto=['budgetUsd']), U), 'state': {'realizedUsd': 0.0, 'budgetMark': 0.0}, 'log': []}
+    pf = {'cash': 30000.0, 'holdings': [dict(by='ai', costUsd=40000.0, symbol='AAPL', screener='3-100')]}
+    check('an automatic budget is kept in the settings', 'budgetUsd' in rec['settings']['auto'], rec['settings']['auto'])
+    m.fit_budget(rec, pf, _dt.datetime.now(_dt.timezone.utc)); up = rec['settings']['budgetUsd']
+    pf['cash'] = 20000.0; m.fit_budget(rec, pf, _dt.datetime.now(_dt.timezone.utc)); down = rec['settings']['budgetUsd']
+    check('an automatic budget is all the practice money it can reach, upward as well as down, with no line in the list', (up, down) == (70000.0, 60000.0) and not rec['log'], [up, down, rec['log']])
+    rec['state']['realizedUsd'] = 500.0
+    check('and the results are not added on top of it (it follows the money already)', m.follow_results(rec, _dt.datetime.now(_dt.timezone.utc)) == 0 and rec['settings']['budgetUsd'] == 60000.0)
 cs = m.clean_settings({'shares': {'US markets': 80, 'Coins': 50, 'Mars': 10, 'Europe markets': ''}}, U)['shares']
 check('shares saved: unknown markets dropped, and together never more than 100%', cs == {'US markets': 80.0, 'Coins': 20.0} and m.clean_settings({'shares': 'x'}, U)['shares'] == {} and m.clean_settings({'shares': {'Coins': -5}}, U)['shares'] == {'Coins': 0.0}, cs)
 
@@ -1209,7 +1227,7 @@ if hasattr(m, 'holdings_of'):
     s, rec = run(t0); held20 = portfolio()['holdings']
     check('a check-in with 20 holdings set: four buys of a twentieth of the budget each', s['bought'] == 4 and len(held20) == 4 and all(abs(h['costUsd'] - 1000.0) < 0.01 for h in held20), [s, [h['costUsd'] for h in held20]])
     code_, b = call(action='get', userId=U)
-    check('the page is told the number in force and its bounds', code_ == 200 and b['settings']['holdings'] == 20 and b['rules']['positions'] == 20 and b['options']['holdings'] == {'min': 2, 'max': 50, 'buysEach': 3}, [b['settings'].get('holdings'), b['rules'].get('positions'), b['options'].get('holdings')])
+    check('the page is told the number in force and its bounds', code_ == 200 and b['settings']['holdings'] == 20 and b['rules']['positions'] == 20 and {k: v for k, v in b['options']['holdings'].items() if k != 'perScreener'} == {'min': 2, 'max': 50, 'buysEach': 3} and b['options']['holdings'].get('perScreener', {}).get('3') == 2, [b['settings'].get('holdings'), b['rules'].get('positions'), b['options'].get('holdings')])
     code_, b = call(action='save', userId=U, settings=dict(rec['settings'], holdings=None))
     check('emptied again, it goes back to the level\'s', code_ == 200 and b['settings']['holdings'] is None and b['rules']['positions'] == 8, [b['settings'].get('holdings'), b['rules'].get('positions')])
 m.TRADE_COST = 0

@@ -233,6 +233,17 @@ r = subprocess.run([sys.executable, os.path.join(HERE, 'experiments.py'), 'due']
 due_now = [l for l in r.stdout.splitlines() if l.strip()]
 print(f"  due for a decision: {len(due_now)}" + ''.join('\n    ' + l for l in due_now))
 for l in due_now: finding('DECIDE an experiment (keep or remove, on the figures): ' + l.split(' (started')[0])
+# 6d2. do the lists match what is live? (registers_check.py; 23 Oct 2026, the owner found the Improvements tab missing a live rule and
+#      questions marked open whose trials were running: "it seems you aren't asking the right questions to auto action and fix these")
+r = subprocess.run([sys.executable, os.path.join(HERE, 'registers_check.py')], capture_output=True, text=True)
+for l in r.stdout.splitlines():
+    print('  ' + l)
+    if l.startswith('PROBLEM '): finding('LISTS: ' + l[8:])
+synced = m.parse_time(((admin.get('plan') or {}).get('at')) or '')
+for f in ('experiments.json', os.path.join('reviews', 'questions.md')):
+    changed = datetime.datetime.fromtimestamp(os.path.getmtime(os.path.join(HERE, f)), datetime.timezone.utc)
+    if synced and synced.tzinfo is None: changed = changed.replace(tzinfo=None)      # the function's parse_time gives UTC without a zone
+    if synced and changed > synced + datetime.timedelta(minutes=2): finding(f'LISTS: {f} changed after the Admin page last copied it: python3 check-tools/admin.py sync')
 finding('every session: add at least one new idea of your own to check-tools/experiments.py (any angle: profit, ease of use, appearance, analysis, AI use, cost)')
 
 # 6e. the page as the owner reads it (clarity_check.py; the owner, 17 Oct 2026: "anything else confusing you want to optimise?

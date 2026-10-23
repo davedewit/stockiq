@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-23",
+   "what": "The number of holdings and the budget are now automatic: 42 holdings (about 2 for each screener ticked, each from the top 10 of its list) and all the practice money it can reach. The improvement lists are checked against what is live at every session"
+  },
+  {
+   "at": "2026-10-23",
    "what": "The Improvements tab now also lists every question asked about making it better (46), with what was found, so an idea already tried is not tried again; three missing entries added"
   },
   {

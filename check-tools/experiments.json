@@ -336,6 +336,16 @@
    "started": "2026-10-23",
    "decided": "2026-10-23",
    "result": "Kept: a return visit 7.5 s to 2.7 s (the owner saw about 15 s); about 60 fewer Lambda calls a page load"
+  },
+  {
+   "id": "auto-holdings",
+   "what": "Automatic number of holdings (2 a ticked screener at Balanced, at least the level's own, at most 50), each bought from the level's own depth in its ranking, and an automatic budget (all the practice money it can reach)",
+   "angle": "profit, analysis",
+   "measure": "Shares bought from 23 Oct 2026 (42 holdings, top 10 of each list) against those before (50 holdings, up to rank 30), after costs, each against an S&P 500 fund, 30 finished a side; the depth study (scoring/depth_rsi_study.py) said ranks 11-30 trail the top 10",
+   "status": "running",
+   "added": "2026-10-23",
+   "started": "2026-10-23",
+   "decide": "2026-12-07"
   }
  ]
 }
