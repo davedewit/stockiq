@@ -3,6 +3,14 @@
  "changes": [
   {
    "at": "2026-10-23",
+   "what": "Small charts in the market panel now always match the colour of the change beside them"
+  },
+  {
+   "at": "2026-10-23",
+   "what": "Weekly check done early: 50 of 54 passed (the 4 are fixed and waiting to go live). Two new trials for the autopilot: wait one check-in after an overnight fall through the loss limit, and test whether the AI model's picks beat simply taking the top-ranked share"
+  },
+  {
+   "at": "2026-10-23",
    "what": "The Practice portfolio's prices now refresh by themselves every minute while you're on the tab (the button stays)"
   },
   {
