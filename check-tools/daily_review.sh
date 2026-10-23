@@ -41,7 +41,7 @@ mkdir -p "$ROOT/check-tools/reviews/daily"
       "Bash(python3 check-tools/session_start.py)" "Bash(python3 check-tools/site_audit.py)" "Bash(python3 check-tools/admin.py)" \
       "Bash(python3 check-tools/clarity_check.py --keep)" "Bash(python3 check-tools/clarity_check.py)" \
       "Bash(python3 check-tools/autopilot_review.py:*)" "Bash(python3 check-tools/site_parts.py:*)" \
-      "Bash(python3 check-tools/admin.py add session:*)" \
+      "Bash(python3 check-tools/admin.py add session:*)" "Bash(python3 check-tools/admin.py recommend:*)" \
       "Bash(git log:*)" "Bash(git diff:*)" "Bash(git status:*)" \
       "Edit(check-tools/reviews/daily/**)" \
     --disallowedTools "NotebookEdit" "Bash(bash:*)" "Bash(sh:*)" "Bash(aws:*)" "Bash(git push:*)" "Bash(git commit:*)" "Bash(rm:*)" &
