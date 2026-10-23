@@ -3,23 +3,33 @@
  "changes": [
   {
    "at": "2026-10-23",
-   "what": "Fixed a false 'Needs you' warning (it left the sector funds out of its sums); the screeners the AI chooses are greyed out and locked again, with a clearer tick"
+   "what": "The Improvements tab now lists every fix and change with who found the problem behind it, and counts how many you pointed out: the checks should find them first. Two more automatic checks: every 'Needs you' warning is verified at each session, and the weekly check times how fast your prices load",
+   "found": "owner"
   },
   {
    "at": "2026-10-23",
-   "what": "Clearer ticks for the screeners the AI chooses; the autopilot emails only when something changes how it trades (not its daily notes); prices update as soon as you return to the Practice portfolio"
+   "what": "Fixed a false 'Needs you' warning (it left the sector funds out of its sums); the screeners the AI chooses are greyed out and locked again, with a clearer tick",
+   "found": "owner"
   },
   {
    "at": "2026-10-23",
-   "what": "The number of holdings and the budget are now automatic: 42 holdings (about 2 for each screener ticked, each from the top 10 of its list) and all the practice money it can reach. The improvement lists are checked against what is live at every session"
+   "what": "Clearer ticks for the screeners the AI chooses; the autopilot emails only when something changes how it trades (not its daily notes); prices update as soon as you return to the Practice portfolio",
+   "found": "owner"
   },
   {
    "at": "2026-10-23",
-   "what": "The Improvements tab now also lists every question asked about making it better (46), with what was found, so an idea already tried is not tried again; three missing entries added"
+   "what": "The number of holdings and the budget are now automatic: 42 holdings (about 2 for each screener ticked, each from the top 10 of its list) and all the practice money it can reach. The improvement lists are checked against what is live at every session",
+   "found": "owner"
   },
   {
    "at": "2026-10-23",
-   "what": "The Practice portfolio's prices load in about 3 seconds instead of about 15: they are asked for six requests at a time instead of one request per holding"
+   "what": "The Improvements tab now also lists every question asked about making it better (46), with what was found, so an idea already tried is not tried again; three missing entries added",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-23",
+   "what": "The Practice portfolio's prices load in about 3 seconds instead of about 15: they are asked for six requests at a time instead of one request per holding",
+   "found": "owner"
   },
   {
    "at": "2026-10-23",

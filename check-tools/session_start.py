@@ -54,6 +54,13 @@ for uid in (owner or on)[:3]:
     if up + down > 0:   # the owner's standing target (19 Oct 2026): gains 70% or more of the money moved, in dollars
         print(f"  gains as a share of the money moved: {100 * up / (up + down):.0f}% in all, {100 * sup / (sup + sdn) if sup + sdn else 0:.0f}% for shares (target 70% or more; $7 made for every $3 lost)")
     if vs and vs[1] < 0: finding(f"BEHIND THE S&P 500 FUND by ${abs(vs[1]):,.0f}: say so first, find which groups lost, bring changes")
+    # what the owner sees in "Needs you" (23 Oct 2026: it showed two warnings in a row that were not true): each is a finding, to be
+    # checked against the figures before anything else, and the check is taught whatever was wrong
+    try:
+        for n in m.needs(rec, pf, now):
+            finding(f"NEEDS YOU on the owner's autopilot tab ({n['kind']}): \"{n['text'][:160]}\" - is it true? check it against the figures; if not, fix needs() and add a test")
+    except Exception as e:
+        finding(f'needs() could not be worked out: {type(e).__name__}: {e}')
     if g['n'] >= 30 and g['avg'] + 2 * g['se'] < 0: finding(f"finished trades clearly losing this month ({g['avg']:+.2f}% a trade over {g['n']}): which groups? what changes?")
     if g['daysLeft'] <= 10 and not g['met']: finding(f"{g['name']} due in {g['daysLeft']} days and not met")
     print(f"  settings: level {rec['settings'].get('risk')}, holdings {rec['settings'].get('holdings')}, every {rec['settings'].get('everyHours')} h, keeps up to {rec['settings'].get('maxHoldDays')} days, "
@@ -258,6 +265,7 @@ try:
     if not out: finding('clarity_check.py printed nothing: ' + (r.stderr.strip().splitlines() or ['no error'])[-1][:150])
 except Exception as e:
     finding(f'clarity_check.py did not run: {type(e).__name__}: {e}')
+finding('every session: anything the owner points out on a page is also a check to add (registers_check, site_audit, clarity_check, weekly_check): mark the fix with admin.py change --found owner')
 finding('every session: read at least one tab of the dashboard as the owner would (clarity_check.py --keep gives its text) and fix whatever reads confusingly, without being asked')
 
 # 7. the improvements list

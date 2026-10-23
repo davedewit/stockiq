@@ -236,6 +236,12 @@ improve, espeically as your AI gets smarter!"** Every session, not only the week
   the state before the fix to prove it fires, and add the lens to `site_parts.py` if no review would have looked. **The improvement
   lists are checked against what is live every session** (`registers_check.py`: every autopilot switch and on/off setting has a
   register entry, every running profit trial is named by its question, nothing sits open 21 days without a decision).
+  **Scripted, so that no session spends the owner's credits looking for the same things by hand** (23 Oct 2026, the owner: "repetitive
+  checking via claude costing money, that should be scripted"): every "Needs you" item on his autopilot tab is a finding in the opening
+  check, to be verified as true (`needs()` had shown two false warnings); the weekly full check times his Practice portfolio's prices
+  (`live_practice_check.js TIME=1`, a return visit within 6 s; it had been 15). **Each change line says who found the problem**
+  (`admin.py change "<what>" --found owner|check|session`), and the Improvements tab counts, over 30 days, how many he pointed out: the
+  number to bring down. Judgement (does it look clickable, is it clear) stays a session's job: read the page with `clarity_check.py --keep`.
 - **Everything the autopilot can decide is automatic, and the session tunes it without asking** (the owner, 23 Oct 2026: "you
   don't need to ask me to modify and improve things ... i want it all to be automatic really so you can update it as needed"). His
   account has the pace, the number of holdings and the budget on automatic; a session changes the automatic rules on the evidence,
