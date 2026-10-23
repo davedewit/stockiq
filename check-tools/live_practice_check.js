@@ -37,7 +37,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await send('Emulation.setDeviceMetricsOverride', { width: WIDTH, height: 1000, deviceScaleFactor: 1, mobile: WIDTH < 700 });
     await send('Fetch.enable', { patterns: [...(process.env.LOCAL_PP ? [{ urlPattern: '*practice-portfolio.js*' }] : []), { urlPattern: '*lambda-url*' }, { urlPattern: '*amazoncognito*' }, { urlPattern: '*cognito-idp*' }, { urlPattern: '*execute-api*' }] });
     await send('Page.addScriptToEvaluateOnNewDocument', { source: `try { if (location.hostname === 'stockiq.tech') { localStorage.setItem('userId', '${REAL}'); window.__errors = []; window.addEventListener('error', function (e) { window.__errors.push(String(e.message).slice(0, 160)); }); } } catch (e) {}` });
-    const run = async (expression) => { const r = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true }); return r && r.result ? r.result.value : JSON.stringify(r); };
+    const run = async (expression) => { const r = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true }); if (r && r.exceptionDetails) return 'PAGE ERROR: ' + ((r.exceptionDetails.exception || {}).description || r.exceptionDetails.text); return r && r.result ? r.result.value : JSON.stringify(r); };
     await send('Page.navigate', { url: 'https://stockiq.tech/dashboard.html?practicecheck=' + Date.now() + '#practice' });
     for (let i = 0; i < 40; i++) { await sleep(500); if (await run(`!!document.querySelector('#practice-portfolio .pp-top')`) === true) break; }
     await sleep(6000);          // the prices arrive after the portfolio
@@ -46,9 +46,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     if (process.env.MARKETS) {
       const info = fs.readFileSync(process.env.MARKETS, 'utf8');
       await run(`window.practicePortfolio.setPlans([], { realizedUsd: null, screeners: ${info} }); true`); await sleep(500);
-      const menu = await run(`JSON.stringify(Array.from(document.querySelectorAll('#pp-market option')).map(o => (o.parentNode.tagName === 'OPTGROUP' ? '[' + o.parentNode.label + '] ' : '') + o.textContent))`);
+      const menu = await run(`(() => { const b = document.querySelector('[data-pp="mkt-toggle"]'); if (!b) return 'no menu'; b.click(); return JSON.stringify(Array.from(document.querySelectorAll('.pp-mkt-sum, .pp-mkt-row')).map(o => (o.classList.contains('sub') ? '   ' : '') + o.textContent.replace(/\\s+/g, ' ').trim())); })()`);
       console.log('market menu:', hide(menu));
-      if (process.env.MARKET) { await run(`(() => { const m = document.getElementById('pp-market'); m.value = ${JSON.stringify(process.env.MARKET)}; m.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`); await sleep(500); }
+      if (process.env.MARKET) { await run(`(() => { const r = document.querySelector('[data-pp="market"][data-id=' + JSON.stringify(${JSON.stringify(process.env.MARKET)}) + ']'); if (!r) { const b = document.querySelector('[data-pp="mkt-toggle"]'); if (b) b.click(); } const q = document.querySelector('[data-pp="market"][data-id=' + JSON.stringify(${JSON.stringify(process.env.MARKET)}) + ']'); if (q) q.click(); return !!q; })()`); await sleep(500); }
     }
     const report = await run(`(async () => {
       const box = document.getElementById('practice-portfolio'), t = (el) => el ? el.textContent.replace(/\\s+/g, ' ').trim() : null, q = (s) => box.querySelector(s);
@@ -64,7 +64,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
         svg.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: r.left + r.width * 0.5, clientY: r.top + 40 })); out.pointerAtHalf = t(q('#pp-chart-read'));
         svg.dispatchEvent(new MouseEvent('mouseout', { bubbles: true, relatedTarget: document.body })); out.afterLeaving = t(q('#pp-chart-read')) === out.above; }
       out.note = t(q('.pp-chart-note'));
-      const fig = q('.pp-chart details'); if (fig) { fig.open = true; out.figuresTable = Array.from(fig.querySelectorAll('tr')).slice(0, 5).map(tr => Array.from(tr.children).filter(c => getComputedStyle(c).display !== 'none').map(t).join(' | ')); out.tableScrolls = fig.querySelector('div').scrollWidth > fig.querySelector('div').clientWidth + 1; fig.open = false; }
+      const fig = q('.pp-chart > details'); if (fig) { fig.open = true; out.figuresTable = Array.from(fig.querySelectorAll('tr')).slice(0, 5).map(tr => Array.from(tr.children).filter(c => getComputedStyle(c).display !== 'none').map(t).join(' | ')); out.tableScrolls = fig.querySelector('div').scrollWidth > fig.querySelector('div').clientWidth + 1; fig.open = false; }
       const more = q('#pp-more'); if (more) { more.open = true; out.breakdownCard = Array.from(more.querySelectorAll('.pp-card')).map(t).find(x => /For comparison/.test(x)); out.breakdown = Array.from(more.querySelectorAll('tr, .pp-pl-line')).map(t); more.open = false; }
       out.holdings = (t(Array.from(box.querySelectorAll('th')).find(th => /^Holding/.test(th.textContent))) || ''); out.sold = t(q('#pp-sold summary')); out.rowsShown = box.querySelectorAll('td[data-label="Bought"]').length; out.heldMore = t(q('#pp-held-more'));
       out.bad = (box.innerHTML.match(/NaN|undefined|Infinity/g) || []).length; out.sticksOut = document.documentElement.scrollWidth > window.innerWidth + 1;
@@ -78,7 +78,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     console.log('range asked for the fund: ' + (passed.filter(p => /SPY/.test(p)).join(' , ') || 'SPY not seen in the shortened addresses'));
     console.log('answered here, never reached the site: ' + answered.length + ' (' + [...new Set(answered.map(a => a.split(' ')[0]))].join(', ') + ')');
     if (process.env.SHOT) {
-      if (process.env.MARKET) { console.log('chosen before the picture: ' + await run(`(() => { const m = document.getElementById('pp-market'); if (!m) return 'no menu'; m.value = ${JSON.stringify(process.env.MARKET)}; m.dispatchEvent(new Event('change', { bubbles: true })); return document.getElementById('pp-market').value; })()`)); await sleep(500); }
+      if (process.env.MARKET) { console.log('chosen before the picture: ' + await run(`(() => { const b = document.querySelector('[data-pp="mkt-toggle"]'); if (!b) return 'no menu'; if (!document.querySelector('.pp-mkt.open')) b.click(); ${process.env.MARKET_OPEN ? '' : `const q = document.querySelector('[data-pp="market"][data-id=' + JSON.stringify(${JSON.stringify(process.env.MARKET)}) + ']'); if (q) q.click();`} return (document.querySelector('.pp-mkt-btn') || {}).textContent; })()`)); await sleep(500); }
       await run(`(() => { const c = document.querySelector('#practice-portfolio'); if (${process.env.OPEN_MORE ? 1 : 0}) { const m = document.querySelector('#pp-more'); if (m) m.open = true; } c.scrollIntoView(); window.scrollBy(0, -80); return 1; })()`); await sleep(400);
       const rect = JSON.parse(await run(`(() => { const r = document.querySelector('#practice-portfolio').getBoundingClientRect(); return JSON.stringify({ x: 0, y: Math.max(0, r.top + window.scrollY - 70), width: window.innerWidth, height: Math.min(1500, r.height + 90) }); })()`));
       const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip: Object.assign(rect, { scale: 1 }) });

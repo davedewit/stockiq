@@ -16,7 +16,7 @@ FUNCS=(
 )
 # file : what it was : what it becomes : type : how long a copy may be kept
 FILES=(
- "practice-portfolio.js:7390f295fe92bd4cfcea193d30f86b633b68604a5e715ccb917340dbe947ef05:2758fb0db16d9bc0124e88504c0f93a7e194498007b2a091a198926247c43774:application/javascript:public, max-age=300, s-maxage=86400"
+ "practice-portfolio.js:7390f295fe92bd4cfcea193d30f86b633b68604a5e715ccb917340dbe947ef05:94c9dcc6357dc47a6a70e83fb113c4e87ce6dbcccd584dc7016c3b1f0a627466:application/javascript:public, max-age=300, s-maxage=86400"
  "practice-autopilot.js:8063a2ce146fc61813f336d46a7d0f74996fd21dacfec6b513c513f6ee95c233:16e8996897c3ec705b7e627811d28e033d0e6980c0193e09545b90a28f6bd490:application/javascript:public, max-age=300, s-maxage=86400"
  "dashboard.html:bc843d9e864979350e3b26a781f99d9d8a862bbd62440b58415d51c9abb16e2a:80e353dff3d5bad32eafa775826f8ceb93592865dde979c1bcc50d98df0d766f:text/html; charset=utf-8:public, max-age=0, s-maxage=3600, must-revalidate"
 )

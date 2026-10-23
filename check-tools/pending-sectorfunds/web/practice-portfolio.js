@@ -510,9 +510,34 @@
         #practice-portfolio .pp-chart-read { font-size: 0.9rem; color: var(--text-primary); font-variant-numeric: tabular-nums; min-height: 1.3em; }
         #practice-portfolio .pp-chart-read .pp-chart-when { color: var(--text-secondary); margin-right: 8px; }
         #practice-portfolio .pp-chart-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
-        #practice-portfolio .pp-market { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 0.78rem; color: var(--text-secondary); flex-basis: 100%; min-width: 0; margin-top: 6px; }
-        #practice-portfolio .pp-market select { width: 100%; max-width: 100%; min-width: 0; font-size: 16px; padding: 4px 6px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--card-bg, transparent); color: var(--text-primary); }
-        @media (min-width: 700px) { #practice-portfolio .pp-market { flex-wrap: nowrap; } #practice-portfolio .pp-market select { width: auto; font-size: 0.82rem; max-width: 460px; } }
+        #practice-portfolio .pp-mkt { position: relative; flex-basis: 100%; min-width: 0; margin-top: 6px; }
+        #practice-portfolio .pp-mkt-btn { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; max-width: 100%; text-align: left; background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 10px; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; }
+        #practice-portfolio .pp-mkt-btn strong { color: var(--text-primary); }
+        #practice-portfolio .pp-mkt-panel { margin-top: 6px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--card-bg, var(--bg-color, #fff)); padding: 8px; max-height: 420px; overflow-y: auto; }
+        #practice-portfolio .pp-mkt-sum { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45; margin: 2px 4px 8px; }
+        #practice-portfolio .pp-mkt-how { margin-top: 4px; } #practice-portfolio .pp-mkt-how summary { cursor: pointer; }
+        #practice-portfolio .pp-mkt-head, #practice-portfolio .pp-mkt-row { display: grid; grid-template-columns: minmax(0, 1fr) 90px 150px 170px; gap: 8px; align-items: center; }
+        #practice-portfolio .pp-mkt-head { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); padding: 0 8px 4px; }
+        #practice-portfolio .pp-mkt-head span:not(:first-child), #practice-portfolio .pp-mkt-row > span:not(:first-child) { text-align: right; }
+        #practice-portfolio .pp-mkt-row { width: 100%; background: none; border: 0; border-top: 1px solid var(--border-color); padding: 7px 8px; font-size: 0.85rem; color: var(--text-primary); cursor: pointer; text-align: left; }
+        #practice-portfolio .pp-mkt-row:hover, #practice-portfolio .pp-mkt-row.on { background: rgba(127, 127, 127, 0.1); }
+        #practice-portfolio .pp-mkt-row.all { grid-template-columns: 1fr; font-weight: 600; }
+        #practice-portfolio .pp-mkt-row:not(.sub):not(.all) .pp-mkt-name { font-weight: 700; }
+        #practice-portfolio .pp-mkt-row.sub .pp-mkt-name { padding-left: 16px; }
+        #practice-portfolio .pp-mkt-name small { display: block; font-weight: 400; font-size: 0.72rem; color: var(--text-secondary); }
+        #practice-portfolio .pp-vs { font-weight: 700; white-space: nowrap; color: var(--text-secondary); }
+        #practice-portfolio .pp-vs.up { color: #16a34a; } #practice-portfolio .pp-vs.down { color: #ef4444; }
+        #practice-portfolio .pp-mkt-row .pp-vs { display: inline-block; padding: 1px 7px; border-radius: 999px; }
+        #practice-portfolio .pp-mkt-row .pp-vs.up { background: rgba(22, 163, 74, 0.12); } #practice-portfolio .pp-mkt-row .pp-vs.down { background: rgba(239, 68, 68, 0.12); }
+        @media (max-width: 640px) {
+            #practice-portfolio .pp-mkt-head { display: none; }
+            #practice-portfolio .pp-mkt-row { grid-template-columns: minmax(0, 1fr) auto; row-gap: 2px; }
+            #practice-portfolio .pp-mkt-row .pp-mkt-name { grid-column: 1 / -1; }
+            #practice-portfolio .pp-mkt-row .pp-mkt-in, #practice-portfolio .pp-mkt-row .pp-mkt-res { text-align: left !important; font-size: 0.8rem; }
+            #practice-portfolio .pp-mkt-row .pp-mkt-in::before { content: 'Put in '; color: var(--text-secondary); }
+            #practice-portfolio .pp-mkt-row .pp-mkt-vs { grid-column: 1 / -1; text-align: left !important; }
+            #practice-portfolio .pp-mkt-row.sub .pp-mkt-in, #practice-portfolio .pp-mkt-row.sub .pp-mkt-res, #practice-portfolio .pp-mkt-row.sub .pp-mkt-vs { padding-left: 16px; }
+        }
         #practice-portfolio .pp-chart-tabs button { background: none; color: var(--text-secondary); border: 1px solid var(--border-color); border-radius: 999px; padding: 3px 11px; font-size: 0.78rem; cursor: pointer; }
         #practice-portfolio .pp-chart-tabs button[aria-pressed="true"] { color: var(--text-primary); border-color: var(--text-secondary); font-weight: 600; }
         #practice-portfolio .pp-chart-svg { display: block; width: 100%; height: auto; touch-action: pan-y; cursor: crosshair; }
@@ -944,7 +969,7 @@
     let chartKey = 'value', chartRange = 'all';
     // 'g:<market>' / 's:<screener>': one market's part of the autopilot (the menu beside the buttons, 23 Oct 2026). screenerInfo:
     // the screeners' names and markets, handed over by the autopilot panel (setPlans); without it there is no menu.
-    let screenerInfo = null;
+    let screenerInfo = null, mktOpen = false;
     const isMarket = (k) => /^[gs]:/.test(String(k || ''));
     const marketLabel = (k) => { const r = state ? marketResults(state, quotes, screenerInfo)[k] : null; return r ? r.label : String(k).slice(2); };
     let chartNow = null;                             // where each point sits in the picture on show: the pointer reads values off it
@@ -990,13 +1015,34 @@
         const title = chartKey === 'value' ? 'Account value over time' : chartKey === 'ai' ? 'The autopilot’s result over time' : isMarket(chartKey) ? esc(marketLabel(chartKey)) + ': result over time' : 'Your own buys: result over time';
         // The menu of markets and their screeners, each with its result against the same dollars in an S&P 500 fund on the same days
         const results = series.anyAi && screenerInfo ? marketResults(state, quotes, screenerInfo) : null;
-        const vsText = (r) => r.aheadUsd === null ? `${r.gainUsd >= 0 ? '+' : '-'}${usd(Math.abs(r.gainUsd))}` : Math.abs(r.aheadUsd) < 0.5 ? 'level with the S&P 500'
-            : `${r.aheadUsd > 0 ? 'ahead of' : 'behind'} the S&P 500 by ${usd(Math.abs(r.aheadUsd)).replace(/\.\d\d$/, '')} (${Math.abs(r.aheadPct).toFixed(1)}%)`;
-        const opt = (r, indent) => `<option value="${esc(r.key)}"${chartKey === r.key ? ' selected' : ''}>${indent ? '\u00a0\u00a0' : ''}${esc(r.label)}: ${esc(vsText(r))}, ${r.trades} ${r.trades === 1 ? 'holding' : 'holdings'}</option>`;
+        // Its own list, not a plain menu: a plain one cannot colour part of a line, and phones and Macs show it without colour. Each row:
+        // what was put in, the result since then, and against the same money in an S&P 500 fund on the same days, the last coloured
+        // (green ahead, red behind: the owner's goal is to beat the S&P 500). Ahead first, the largest lead at the top (23 Oct 2026).
+        const vsHtml = (r) => {
+            if (r.aheadUsd === null) return '<span class="pp-vs">–</span>';
+            const a = Math.round(r.aheadUsd);
+            return a === 0 ? '<span class="pp-vs">level</span>' : `<span class="pp-vs ${a > 0 ? 'up' : 'down'}">${a > 0 ? '▲' : '▼'} ${usd(Math.abs(a)).replace(/\.00$/, '')} (${Math.abs(r.aheadPct).toFixed(1)}%) ${a > 0 ? 'ahead' : 'behind'}</span>`;
+        };
+        const row = (r, sub) => `<button type="button" class="pp-mkt-row${sub ? ' sub' : ''}${chartKey === r.key ? ' on' : ''}" data-pp="market" data-id="${esc(r.key)}" aria-pressed="${chartKey === r.key}">`
+            + `<span class="pp-mkt-name">${esc(r.label)}<small>${r.trades} ${r.trades === 1 ? 'holding' : 'holdings'}${r.held ? `, ${r.held} still held` : ''}</small></span>`
+            + `<span class="pp-mkt-in" data-label="Put in">${usd(r.cost).replace(/\.\d\d$/, '')}</span><span class="pp-mkt-res" data-label="Result">${movedHtml(r.gainUsd, r.cost ? r.gainUsd / r.cost * 100 : null)}</span>`
+            + `<span class="pp-mkt-vs" data-label="Against the S&amp;P 500">${vsHtml(r)}</span></button>`;
+        const order = (a, b) => (b.aheadUsd === null ? -1e12 : b.aheadUsd) - (a.aheadUsd === null ? -1e12 : a.aheadUsd);
         const menu = !results ? '' : (() => {
-            const groups = Object.values(results).filter(r => r.key[0] === 'g').sort((a, b) => (b.aheadUsd === null ? -1e9 : b.aheadUsd) - (a.aheadUsd === null ? -1e9 : a.aheadUsd));
-            const subs = (g) => Object.values(results).filter(r => r.key[0] === 's' && r.group === g.group).sort((a, b) => (b.aheadUsd || 0) - (a.aheadUsd || 0));
-            return `<label class="pp-market"><span>By market</span><select id="pp-market" aria-label="Show one market or screener of the autopilot"><option value=""${isMarket(chartKey) ? '' : ' selected'}>All of the account</option>${groups.map(g => `<optgroup label="${esc(g.label)}">${opt(g, false)}${subs(g).length > 1 ? subs(g).map(r => opt(r, true)).join('') : ''}</optgroup>`).join('')}</select></label>`;
+            const groups = Object.values(results).filter(r => r.key[0] === 'g').sort(order);
+            const subs = (g) => Object.values(results).filter(r => r.key[0] === 's' && r.group === g.group).sort(order);
+            const all = Object.values(results).filter(r => r.key[0] === 's' && r.aheadUsd !== null), up = all.filter(r => Math.round(r.aheadUsd) > 0), down = all.filter(r => Math.round(r.aheadUsd) < 0);
+            const total = (list) => usd(Math.abs(list.reduce((n, r) => n + r.aheadUsd, 0))).replace(/\.\d\d$/, '');
+            const few = Object.values(results).filter(r => r.trades < 30).length;
+            const now = isMarket(chartKey) && results[chartKey] ? results[chartKey] : null;
+            return `<div class="pp-mkt${mktOpen ? ' open' : ''}" id="pp-mkt">
+                <button type="button" class="pp-mkt-btn" data-pp="mkt-toggle" aria-expanded="${mktOpen}">By market: <strong>${now ? esc(now.label) : 'All of the account'}</strong>${now ? ' ' + vsHtml(now) : ''} <span aria-hidden="true">▾</span></button>
+                <div class="pp-mkt-panel"${mktOpen ? '' : ' hidden'}>
+                    <div class="pp-mkt-sum">Against the S&amp;P 500, screener by screener: <span class="pp-vs up">${up.length} ahead, by ${total(up)} together</span> · <span class="pp-vs down">${down.length} behind, by ${total(down)}</span>.${few ? ` <strong>Under 30 holdings is too few to tell skill from luck.</strong>` : ''} <details class="pp-mkt-how"><summary>How it is worked out</summary>Each holding is set against the same money put into an S&amp;P 500 fund the day it was bought and taken out the day it was sold (or now), with no trading cost taken off the fund; sold and still held together, ahead first. "Put in" is the total of its buys (money is used again after a sale), and the result's percent is of that.</details></div>
+                    <div class="pp-mkt-head" aria-hidden="true"><span>Market and screener</span><span>Put in</span><span>Result</span><span>Against the S&amp;P 500</span></div>
+                    <button type="button" class="pp-mkt-row all${isMarket(chartKey) ? '' : ' on'}" data-pp="market" data-id="" aria-pressed="${!isMarket(chartKey)}"><span class="pp-mkt-name">All of the account</span></button>
+                    ${groups.map(g => row(g, false) + (subs(g).length > 1 ? subs(g).map(r => row(r, true)).join('') : '')).join('')}
+                </div></div>`;
         })();
         const chosen = isMarket(chartKey) && results ? results[chartKey] : null;
         const partNote = !chosen ? '' : ` This market: ${chosen.sold} sold and ${chosen.held} still held, ${usd(chosen.cost).replace(/\.\d\d$/, '')} put in, ${moved(chosen.gainUsd)} in all${chosen.aheadUsd === null ? '' : `; the same dollars in an S&amp;P 500 fund, bought and sold on the same days, would have ${chosen.fundUsd >= 0 ? 'made' : 'lost'} ${usd(Math.abs(chosen.fundUsd))}`}. The gold line is that fund money.${chosen.trades < 30 ? ` <strong>${chosen.trades} ${chosen.trades === 1 ? 'holding is' : 'holdings are'} too few to tell skill from luck</strong> (about 30 are needed).` : ''}`;
@@ -1082,13 +1128,16 @@
 
     document.addEventListener('click', (e) => {
         const t = e.target.closest && e.target.closest('[data-pp]');
+        if (mktOpen && !(e.target.closest && e.target.closest('#pp-mkt'))) { mktOpen = false; redraw(); if (!t) return; }
         if (!t) { const sug = document.getElementById('pp-suggest'); if (sug && !e.target.closest('#pp-suggest, #pp-symbol')) sug.style.display = 'none'; return; }
         const action = t.getAttribute('data-pp');
+        if (action === 'mkt-toggle') { mktOpen = !mktOpen; redraw(); return; }
+        if (action === 'market') { chartKey = t.getAttribute('data-id') || 'value'; mktOpen = false; redraw(); return; }
         if (t.tagName === 'A') e.preventDefault();
         if (action === 'held-all') { allHeld = !allHeld; redraw(); return; }
         if (action === 'held-filter') { heldOpenOnly = t.getAttribute('data-id') === 'open'; redraw(); return; }
         if (action === 'chart-key' || action === 'chart-range') {
-            if (action === 'chart-key') { chartKey = t.getAttribute('data-id'); redraw(); return; }      // the lists follow the graph
+            if (action === 'chart-key') { chartKey = t.getAttribute('data-id'); mktOpen = false; redraw(); return; }      // the lists follow the graph
             chartRange = t.getAttribute('data-id');
             try { localStorage.setItem('stockiqPracticeChartRange', chartRange); } catch (err) { /* not remembered */ }
             drawChart();
@@ -1152,8 +1201,8 @@
         if (ppQuote && ppQuote.symbol === code) fillOther(); else if (code) priceFor(code);
     });
     document.addEventListener('change', (e) => { if (e.target && e.target.id === 'pp-symbol' && e.target.value.trim()) priceFor(e.target.value); });
-    // the market menu: the graph, the holdings and the sold list follow it; "All of the account" goes back to the whole account
-    document.addEventListener('change', (e) => { if (e.target && e.target.id === 'pp-market') { chartKey = e.target.value || 'value'; redraw(); } });
+    // the market list: open and shut by its button, shut by a click elsewhere or Escape; a row chooses (the graph and both lists follow)
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && mktOpen) { mktOpen = false; redraw(); } });
     // Company-name / ticker lookup, the same service and behaviour as the search box on the home page
     document.addEventListener('input', (e) => {
         if (!e.target || e.target.id !== 'pp-symbol') return;
