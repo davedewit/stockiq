@@ -6,6 +6,7 @@
 // Without the autopilot's answer the holdings carry no plan lines and the autopilot tab is empty: that is this tool, not a fault.
 //   REAL_USER=<address> node check-tools/live_practice_check.js            (the address is never printed)
 //   WIDTH=390 ...      a phone's width            SHOT=<file.png> ...   a picture of the tab (OPEN_MORE=1: with the breakdown unfolded)
+//   TIME=1 ...        only the seconds until "Prices as of" shows and the number of price requests
 //   LOCAL_PP=<file> ... the page is given that file as practice-portfolio.js: a staged copy tried on the live page before deploying
 const { spawn } = require('child_process'); const os = require('os'), fs = require('fs'), path = require('path');
 const REAL = process.env.REAL_USER || '', PORT = 9338, WIDTH = parseInt(process.env.WIDTH || '1400', 10);
@@ -39,6 +40,13 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await send('Page.addScriptToEvaluateOnNewDocument', { source: `try { if (location.hostname === 'stockiq.tech') { localStorage.setItem('userId', '${REAL}'); window.__errors = []; window.addEventListener('error', function (e) { window.__errors.push(String(e.message).slice(0, 160)); }); } } catch (e) {}` });
     const run = async (expression) => { const r = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true }); if (r && r.exceptionDetails) return 'PAGE ERROR: ' + ((r.exceptionDetails.exception || {}).description || r.exceptionDetails.text); return r && r.result ? r.result.value : JSON.stringify(r); };
     await send('Page.navigate', { url: 'https://stockiq.tech/dashboard.html?practicecheck=' + Date.now() + '#practice' });
+    // TIME=1: only how long after the page starts loading "Prices as of" appears, and how many price requests it took (23 Oct 2026)
+    // It is timed twice: a first visit, then a second in the same browser, which already knows the symbols it needs (a return visit).
+    if (process.env.TIME) { for (const visit of ['first visit', 'second visit']) { const t0 = Date.now(), n0 = passed.length; let txt = '';
+      if (visit === 'second visit') await send('Page.navigate', { url: 'https://stockiq.tech/dashboard.html?practicecheck=' + Date.now() + '#practice' });
+      for (let i = 0; i < 160 && !/Prices as of/.test(txt); i++) { await sleep(250); txt = await run(`(document.getElementById('pp-updated') || {}).textContent || ''`); }
+      console.log(`${visit}: "${txt || 'no Prices as of line'}" after ${((Date.now() - t0) / 1000).toFixed(1)} s, ${passed.slice(n0).filter(r => /^GET .*dohdeb/.test(r)).length} price requests`); } if (process.env.TIME === '2') console.log(await run(`JSON.stringify({ html: Math.round(performance.getEntriesByType('navigation')[0].responseEnd), domReady: Math.round(performance.getEntriesByType('navigation')[0].domContentLoadedEventEnd), loaded: Math.round(performance.getEntriesByType('navigation')[0].loadEventEnd), calls: performance.getEntriesByType('resource').filter(e => /lambda-url|practice-portfolio/.test(e.name)).map(e => e.name.replace(/^https:\\/\\/(.{6}).*?(\\?.{0,24}|practice-portfolio.*)$/, '$1 $2') + ' ' + Math.round(e.startTime) + '-' + Math.round(e.responseEnd)) })`));
+      ws.close(); return; }
     for (let i = 0; i < 40; i++) { await sleep(500); if (await run(`!!document.querySelector('#practice-portfolio .pp-top')`) === true) break; }
     await sleep(6000);          // the prices arrive after the portfolio
     // MARKETS=<file of the screeners as the autopilot sends them> [MARKET=<g:… or s:…>]: hand the page the screener list (the

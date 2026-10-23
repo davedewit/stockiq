@@ -150,9 +150,16 @@ const container = mkEl('practice-portfolio');
 const document = { readyState: 'complete', getElementById: id => id === 'practice-portfolio' ? container : (els[id] || (els[id] = mkEl(id))), addEventListener: (t, f) => { (handlers[t] = handlers[t] || []).push(f); }, querySelector: () => null };
 // The tests trade on any day: a real price's last-trade time is set to now (since 17 Oct 2026 a share whose price is older
 // than three hours cannot be bought or sold by hand). SHUT.AX is made up: its market is open or shut as shutHours says.
-let shutHours = 0; const priceAsked = [];
+let shutHours = 0; const priceAsked = [], batchAsked = [];
 async function fakeFetch(url, opts = {}) {
   const u = String(url);
+  // many symbols in one request (?symbols=A,B,C, since 23 Oct 2026): each answered as its own request would be. NO_BATCH=1 plays
+  // an older price function that does not know this form (it answers 400), so the page's fallback to single requests is tested.
+  { const m = u.match(/[?&]symbols=([^&]+)/); if (m && /lambda-url/.test(u)) { batchAsked.push(m[1]);
+    if (process.env.NO_BATCH) return { ok: false, status: 400, json: async () => ({ error: 'Symbol required' }) };
+    const results = {};
+    for (const sym of decodeURIComponent(m[1]).split(',')) { const r = await fakeFetch(u.replace(/[?&]symbols=[^&]+/, '?symbol=' + encodeURIComponent(sym))); results[sym] = r.ok ? await r.json() : null; }
+    return { ok: true, status: 200, json: async () => ({ results }) }; } }
   { const m = u.match(/[?&]symbol=([^&]+)/); if (m && /lambda-url/.test(u)) priceAsked.push(decodeURIComponent(m[1])); }
   if (/[?&]symbol=SHUT\.AX/.test(u)) { const t = Math.floor(Date.now() / 1000 - shutHours * 3600);
     return { ok: true, status: 200, json: async () => ({ chart: { result: [{ meta: { regularMarketPrice: 10, currency: 'AUD', longName: 'Shut Test Ltd', regularMarketTime: t }, timestamp: [t - 86400], indicators: { quote: [{ close: [9.9] }] } }] } }) }; }
@@ -332,7 +339,7 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
   check('a result is put in words: up, down or level, never a bare sign', pure.moved(144.12) === 'up $144.12' && pure.moved(-202.6) === 'down $202.60' && pure.moved(0) === 'level' && pure.moved(-0.004) === 'level' && pure.moved(1234.5) === 'up $1,234.50');
   if (/class="pp-top"/.test(src)) { const top = (container.innerHTML.match(/<div class="pp-top">[\s\S]*?<details id="pp-more"/) || [''])[0].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
     check('the top is three figures (what it is worth with its change since the start, today, against the S&P 500) and one line (cash, holdings); the rest is folded under "The breakdown"', /Account value \$[\d,.]+ [▲▼–] \$[\d,.]+ (?:\([\d.]+%\) )?since the start · fake money, it started with \$100,000\.00 Today (–|[▲▼–] \$[\d,.]+) [^$]*(?:Against the S&(?:amp;)?P 500|If in the S&(?:amp;)?P 500 instead) .*? Cash \$[\d,.]+ · In holdings \$[\d,.]+ *$/.test(top.replace(/ ?<details.*$/, '')) && !/Against the same/.test(top) && !/Sold|Still held|Whose result/i.test(top) && /<details id="pp-more"><summary>The breakdown:[^<]*<\/summary>[\s\S]*(Practice cash left|Where the money is: cash)[\s\S]*<\/details>/.test(container.innerHTML), top.slice(0, 260)); }
-  if (/class="pp-wait"/.test(src)) check('while it loads it shows the site\'s spinner, not the word Loading; and it remembers which prices it needed, to ask for them at once next time', /if \(!loaded\) \{ el\.innerHTML = '<div class="pp-wait" role="status" aria-label="Loading"[^']*<div class="spinner"><\/div><\/div>'; return; \}/.test(src) && /knownSymbols\(\)\.map\(sym => fetchQuote\(sym[,)]/.test(src) && /localStorage\.setItem\(symbolsKey\(\)/.test(src) && /refreshQuotes\(have\)/.test(src));
+  if (/class="pp-wait"/.test(src)) check('while it loads it shows the site\'s spinner, not the word Loading; and it remembers which prices it needed, to ask for them at once next time', /if \(!loaded\) \{ el\.innerHTML = '<div class="pp-wait" role="status" aria-label="Loading"[^']*<div class="spinner"><\/div><\/div>'; return; \}/.test(src) && /knownSymbols\(\)\.map\(sym => fetchQuote\(sym[,)]|fetchQuotes\(knownSymbols\(\)/.test(src) && /localStorage\.setItem\(symbolsKey\(\)/.test(src) && /refreshQuotes\(have\)/.test(src));
   if (/class="pp-note"/.test(src)) check('a note is on a line of its own under the company ("Note: …" for the user\'s, the autopilot\'s reason as it is), not run on after the name', /\$\{esc\(h\.name\)\}<\/div>\$\{h\.note \? `<div class="pp-note"[^`]*\$\{h\.by === 'ai' \? '' : 'Note: '\}\$\{esc\(h\.note\)\}<\/div>` : ''\}/.test(src));
   if (/function breakdownHtml/.test(src)) check('the account\'s change since the start is an arrow, an amount and a percentage at the top, and the table splits it into what was sold and what is still held', /[▲▼–] \$[\d,.]+ \([\d.]+%\) since the start/.test(text()) && /Sold made or lost for good[^]*?Still held on paper, at the latest prices/.test(text()) && /class="pp-card(?: up| down)?"/.test(container.innerHTML), (text().match(/.{0,40}since the start.{0,40}/) || [''])[0]);
   else check('the account card shows how the account stands as an arrow, an amount and a percentage, and how much of it is from sales and how much on holdings still held', /Account value \$[\d,.]+ (?:Today [▲▼–] \$[\d,.]+(?: \([\d.]+%\))? )?[▲▼–] \$[\d,.]+ \([\d.]+%\) since the start (?:Sold, yours and the autopilot’s together [▲▼–] \$[\d,.]+ Still held, together|Sold [▲▼–] \$[\d,.]+ · Still held) [▲▼–] \$[\d,.]+/.test(text()) && /class="pp-card(?: up| down)?"/.test(container.innerHTML), (text().match(/Account value.{0,160}/) || [text().slice(0, 200)])[0]);
@@ -392,6 +399,7 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
     document.hidden = false;
     check('the page still has its refresh button', /↻ Refresh prices/.test(container.innerHTML)); }
   click('reset'); await sleep(50); await waitIdle(); check('reset', !store['tester@example.com'] && /Account value \$100,000\.00/.test(text()) && /Practice portfolio reset/.test(text()));
+  check('prices are asked for many at a time, at most 20 a request' + (process.env.NO_BATCH ? ' (an older price function: single requests instead)' : ''), process.env.NO_BATCH ? batchAsked.length > 0 && /Prices as of/.test(text()) : batchAsked.length > 0 && batchAsked.every(b => decodeURIComponent(b).split(',').length <= 20), batchAsked.slice(0, 3));
   check('no broken values anywhere', !bad().length, bad());
   { const real = (() => { const m = { exports: {} }; vm.runInNewContext(src, { module: m, console }); return m.exports; })();      // as on the site: with the trading cost
     const st = real.newState(); const h = real.applyBuy(st, { symbol: 'KO', price: 50, fx: 1, amountUsd: 1000, now: '2026-10-12T15:00:00Z', spy: 500 });

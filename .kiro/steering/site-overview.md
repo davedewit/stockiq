@@ -159,7 +159,10 @@ about what the "Still never" list keeps for him (real money, costs above the rul
 settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
 warns about; one change at a time, measured, with its experiment entry.
 
-**WHERE THINGS STAND (rewrite this block at the end of every session; last: 23 Oct 2026, 08:10 UTC, end of the big session)**
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 23 Oct 2026, 12:00 UTC)**
+- Evening of 23 Oct, a short session: the practice portfolio's prices load in six requests ("Prices as of" about 2.7 s on a return
+  visit, was about 15). Waiting for a session: the owner's two yeses on the Admin page, #8 (learning one score at a time) and #9
+  (the daily public screener pages, before the AI/Manual mode).
 - The account: $97,115, $1,008 behind the same $100,000 in an S&P 500 fund (-1.0%); 98 finished trades, about -0.17% a trade; the
   last 7 days +$767 over 55 trades (+0.74% a trade); share trades about level with the fund; month 1 goal ($101,000 by 12 Nov) out
   of reach. Claude's forecast on the Admin page: 25% (was 30%). Settings: AI chooses the markets (21 main indexes), Balanced, 50
@@ -1565,9 +1568,13 @@ with `document.querySelector('h3')`.
   "Loading…", since 13 Oct 2026**: `.spinner` of `styles.css` inside `.pp-wait`, in `dashboard.html`'s first markup and in
   the script's `render`; and the wait is shorter: the symbols it needed last time are kept in the browser,
   `stockiqPracticeSymbols_<address>`, and their prices are asked for at once, alongside the portfolio, `knownSymbols`.
-  Measured on the owner's account: 3.5 s → 2.3 s on a first load, 1.4 s → 1.1 s after. What is left is the prices
-  themselves, fifteen calls to the price function: one call that answers for a list of symbols with their daily
-  prices would be the next gain): before 10 Oct the page
+  Measured on the owner's account: 3.5 s → 2.3 s on a first load, 1.4 s → 1.1 s after. **Since 23 Oct 2026 the prices come in
+  six requests, not one a symbol** (`fetchQuotes`; the price function's `?symbols=A,B,C`): the owner saw "Prices as of" take
+  about 15 seconds with about 60 holdings, because the function's address speaks HTTP/1.1 and a browser sends only six
+  requests at a time to one address (60 calls of about 1.3 s each = 10 rounds). The function takes about a second longer for
+  every ten symbols it fetches at once, so the list is cut into six parts that run side by side. A return visit: 7.5 s → 2.7 s
+  (`TIME=1 REAL_USER=… node check-tools/live_practice_check.js`, which times a first and a second visit). A failed batch falls
+  back to single requests): before 10 Oct the page
   first showed holdings at what was paid, which the owner took for a second, "correct" account value.
 - **"Today"** (12 Oct 2026, evening; the owner: "say i jump on in the middle of the day ideally what i probably want to know is
   how much has it gained or lost today"). The Account value and In holdings cards show "Today ▲ $198.49 (0.27%)" above the
@@ -1717,7 +1724,7 @@ with `document.querySelector('h3')`.
   Practice portfolio tab is on screen and the page was used in the last 10 minutes (`autoRefresh`, `AUTO_MS`, `IDLE_MS`). The
   price function is asked once a symbol (about 60 for the owner's account), so a price that has not traded for half an hour (its
   market shut) is asked for again only every 15 minutes (`SHUT_EVERY_MS`, `askedAt`); not while the pointer is on the graph.
-  The button stays. `practice-portfolio.js?v=47`. A list call that answers many symbols at once would cut this further.
+  The button stays. Since 23 Oct 2026 a refresh is six requests (`fetchQuotes`, above), not one a symbol.
 - **What is typed in the buy row survives a refresh of prices** (it was wiped: only a completed buy or a reset clears it now).
 - The cards have small capital labels and a green or red top edge on Account value; table headings are small capitals,
   rows highlight under the pointer, figures use tabular numerals.
@@ -3496,6 +3503,9 @@ more finished trades than there are, and would chase noise before then.
   evening while a session was mid-task; its git step swept seven unfinished files into an "Auto-update" commit and
   pushed them (harmless that time). It also moved the 23-hour push marker. Another reason to commit finished stages
   promptly, and to check `git log` for an "Auto-update" when a file is unexpectedly already committed.
+- **A Lambda function's address speaks HTTP/1.1, so a browser sends it only six requests at a time** (23 Oct 2026: 60 single
+  price calls took 15 seconds). A page that needs many answers from one function should ask for them in a few requests
+  (the price function's `?symbols=`), never one request each.
 - **Lambda code is not in git** (`lambda-sync/` is a gitignored mirror; the one exception since 11 Oct 2026 is the
   share-screener workers' code, which lives in `stockiq/workers/`). The only history of a
   Lambda is whatever zip you keep before changing it.
@@ -5214,6 +5224,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     all 54 `N9DCsDJ5…`, rollback `stockiq-option-7-1-worker_before_chase_20261023.zip`; the owner: "just do what you think is
     best"); the top 10 changed at once (AKE +11 to +7). The four guides' "Last updated" dates (February, April) set to 23 Oct;
     `site_audit.py` `stale-dates`. Full check rerun: 54 of 54.
+  - **"Prices as of" in about 2.7 s instead of about 15** (the owner's question, the evening of 23 Oct): the price function answers many
+    symbols in one request (`stockiq-price-proxy` `B4nRruWf…`, 256 MB, rollback `stockiq-price-proxy_before_batch_20261023.zip`);
+    the practice portfolio asks in six requests (`practice-portfolio.js?v=56`). Also about 60 fewer Lambda calls a page load and a
+    minute's refresh: the price function was the largest user of the free million. Tests: 162 portfolio both ways (`NO_BATCH=1`
+    plays the old function).
   - **Words:** the footer's "Professional Investment Research Platform" and "Powered by AI • Market Data • Comprehensive Analysis"
     on 19 pages, two blog lines ("in real-time", "Professional stock analysis powered by AI"), the research-tools guide's
     description and a guide's button heading: reworded, words only (website `1dafe26d`; uploaded by the daily update of 23 Oct,
