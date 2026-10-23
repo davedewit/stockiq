@@ -5122,7 +5122,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     compact and at the bottom of the home page** (`update_home_stock_links.py` writes the smaller markup; the markers moved, the
     script follows them); **`market-panel.js` v2: a list row runs the analysis again (the owner preferred that to opening the stock
     page; reverses version 3 of 18 Oct), and a market tab's item runs in the background on the dashboard** (it opened the analysis
-    page). `stock-pages.js` is still written daily but nothing loads it now: delete it and its writer's part at the next clean-up.
+    page). `stock-pages.js` is still written daily and **is still used**: `market-panel.js` loads it to know which shares have a page (corrected 23 Oct 2026; this note had said nothing loads it, and the lists check showed otherwise).
     Live `stockiq-ai-trader` `wZI+J09ds3y/twMuk2qnAfMdJaVuOnENYjLCltt7JCo=` (rollback `…_before_autopilot_goals_20261019.zip`).
   - **TRAFFIC PLAN (the owner, 19 Oct 2026: "nobody sees this site ... posting on sites doesn't work, i tried that for months").
     Agreed order, mostly session work:** (1) **daily public screener pages**, one per screener (33), each the day's top 10 with
@@ -5256,6 +5256,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     buying-order trial (15 Oct) and the day's price change; six rows of questions.md were stale (two trials already live read
     "open"). All put right; the tab now lists the 46 questions with their answers (`admin-panel.js?v=37`, `admin.py` `questions`).
     The next profit trial is `longer-holds`, from 12 Nov when patient-shares is decided (both are about how long shares are kept).
+  - **The parts list made complete** (the owner: "only 45 parts ... nothing else can be improved?"): 13 parts added (the path from
+    a first visit to a sign-up and a paid plan, the analysis page itself, what every page shares, contact and support, the blog, speed,
+    security, every email, the sector funds, the By market list, the checks themselves, the automatic jobs, backups): 58 now. Every page
+    and script of the site must be named by a part: `registers_check.py` part 5 (19 of 41 files were not). A part is an area, not a
+    limit: each review looks through every lens in `site_parts.py`.
   - **The Admin page read row by row at the owner's question** ("is this sort of a duplicate ... check all these things"): no duplicates,
     names made to say what each covers ("Full check (every test, run on the live site)", "Page scan (links, descriptions, stale or
     broken pages)", "The autopilot's weekly review"), "Decision due" for a trial's decision day, and **every part of the site with when

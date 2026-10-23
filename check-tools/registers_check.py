@@ -13,6 +13,7 @@ It compares:
      decided (write the answer).
   4. how long things sit: a running experiment with no decision day; an idea not started for 21 days or more; questions open for 21
      days or more (test it, schedule it, or close it with the reason it is not worth testing). Lists that only grow are the failure.
+  5. every page and script of the site (website/*.html, *.js, js/*.js) is named by a part of site_parts.json.
 
     python3 check-tools/registers_check.py            prints OK lines and PROBLEM lines
 """
@@ -85,6 +86,16 @@ def main():
             if not d: problem(f'idea "{e["id"]}" has no date it was added')
             elif (today - d).days >= STALE_DAYS and not re.search(r'[Ss]tarts (when|on|after)', e.get('measure', '')):
                 problem(f'idea "{e["id"]}" has waited {(today - d).days} days: start it, give it a start condition ("Starts when ..."), or drop it with the reason')
+    # 5: every page and script of the site belongs to a part of the review list (site_parts.json), so that no area is never looked at
+    # (23 Oct 2026: 19 of 41 files were named by no part, the owner asked whether 45 parts were all there is)
+    import glob
+    parts = json.load(open(os.path.join(HERE, 'site_parts.json')))['parts']
+    named = ' '.join((p['part'] + ' ' + p.get('where', '')).lower() for p in parts)
+    web = os.path.join(os.path.dirname(ROOT), 'website')
+    files = sorted(os.path.basename(f) for f in glob.glob(web + '/*.html') + glob.glob(web + '/*.js') + glob.glob(web + '/js/*.js'))
+    loose = [f for f in files if f.lower() not in named]
+    for f in loose: problem(f'{f} belongs to no part of site_parts.json: add it to a part\'s "where" (or a new part), so that it is reviewed in turn')
+    out.append(f'OK {len(files) - len(loose)} of {len(files)} pages and scripts of the site belong to a part ({len(parts)} parts)')
     print('\n'.join(out))
     return sum(1 for l in out if l.startswith('PROBLEM'))
 

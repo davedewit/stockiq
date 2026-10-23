@@ -34,7 +34,7 @@
   {
    "id": "home-widgets",
    "part": "Home page: market widgets, movers lists, news panel",
-   "where": "index.html, the widgets and the right-hand panel",
+   "where": "index.html, the widgets and the right-hand panel; market-panel.js, live-market.js; stock-pages.js (written daily by update_home_stock_links.py, loaded by market-panel.js)",
    "last": "2026-10-18",
    "log": [
     {
@@ -380,7 +380,7 @@
   {
    "id": "stock-pages",
    "part": "Stock pages: snapshot, news, people also watch, SEO",
-   "where": "stocks/*.html; generate-stock-pages.py",
+   "where": "stocks/*.html; generate-stock-pages.py; stock-prices.js, timezone-converter.js",
    "last": null
   },
   {
@@ -392,7 +392,7 @@
   {
    "id": "guides",
    "part": "The guides",
-   "where": "*-guide.html, investment-research-tools.html",
+   "where": "*-guide.html, investment-research-tools.html; stock-analysis-guide.html, stock-screener-guide.html, technical-analysis-guide.html, investment-research-tools.html",
    "last": "2026-10-23",
    "log": [
     {
@@ -410,7 +410,7 @@
   {
    "id": "legal",
    "part": "Terms, privacy, disclaimers, the no-advice wording",
-   "where": "terms.html, privacy.html, footers",
+   "where": "terms.html, privacy.html, footers; terms.html, privacy-policy.html, refunds.html, data-deletion.html, unsubscribe.html",
    "last": null
   },
   {
@@ -478,6 +478,97 @@
      "found": "23 Oct 2026: three register entries missing, six questions stale, answered questions not shown: all fixed; registers_check.py now checks it every session"
     }
    ]
+  },
+  {
+   "id": "funnel",
+   "part": "From first visit to sign-up and to a paid plan: where visitors come from (GA4, Search Console), what they do, where they leave",
+   "where": "GA4, Search Console; index.html, stock pages, analysis.html, signup.html, the plans",
+   "last": null,
+   "log": []
+  },
+  {
+   "id": "analysis-page",
+   "part": "The analysis page itself: its layout, buttons, the order of the options",
+   "where": "analysis.html, analysis-functions.js, js/analysis-core.js, screeners.js, crypto-filter-buttons.js",
+   "last": null,
+   "log": []
+  },
+  {
+   "id": "site-wide",
+   "part": "What every page shares: the header and menu, the footer, light and dark, the cache-clear page",
+   "where": "theme.js, styles.css, clear-cache.html, the header and footer of every page",
+   "last": null,
+   "log": []
+  },
+  {
+   "id": "contact-support",
+   "part": "Contact and support",
+   "where": "contact.html, support.html",
+   "last": null,
+   "log": []
+  },
+  {
+   "id": "blog",
+   "part": "The blog page",
+   "where": "blog.html",
+   "last": null,
+   "log": []
+  },
+  {
+   "id": "speed",
+   "part": "How fast the main pages and the dashboard tabs load and update",
+   "where": "live_practice_check.js TIME=1; page weight in site_audit.py",
+   "last": null,
+   "log": []
+  },
+  {
+   "id": "security",
+   "part": "Security and abuse: the open function addresses, the userId the browser sends, scrapers, keys, the public repositories",
+   "where": "the Lambda function URLs, auth.js, the anonymous usage tracker, GitHub",
+   "last": null,
+   "log": []
+  },
+  {
+   "id": "emails",
+   "part": "Every email the site sends: activation, the autopilot, the weekly check, sign-up alerts",
+   "where": "stockiq-cognito-email-sender, stockiq-ai-trader send_mail, weekly_check.py --email, stockiq-email-capture",
+   "last": null,
+   "log": []
+  },
+  {
+   "id": "ap-themes",
+   "part": "Autopilot: the sector funds (the themes part) and the AI read of the headlines",
+   "where": "practice-autopilot.js themesHtml; stockiq-ai-trader run_themes",
+   "last": null,
+   "log": []
+  },
+  {
+   "id": "pp-markets",
+   "part": "Practice portfolio: the By market list (each market against the S&P 500 and its own index)",
+   "where": "practice-portfolio.js marketResults",
+   "last": null,
+   "log": []
+  },
+  {
+   "id": "checks",
+   "part": "The checks themselves: do they find problems before the owner does? (Improvements tab: how many he pointed out)",
+   "where": "session_start.py, site_audit.py, weekly_check.py, clarity_check.py, registers_check.py",
+   "last": null,
+   "log": []
+  },
+  {
+   "id": "jobs",
+   "part": "What runs by itself: the daily update, the daily review by Claude, the weekly check, the schedules",
+   "where": "deploy-to-s3.sh, daily_review.sh, launchd, EventBridge",
+   "last": null,
+   "log": []
+  },
+  {
+   "id": "backups",
+   "part": "Backups, the ways back, and what is in git",
+   "where": "~/VSCODE/backup/, rollback zips, both repositories",
+   "last": null,
+   "log": []
   }
  ]
 }
