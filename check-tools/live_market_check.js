@@ -112,6 +112,8 @@ function anyAnswer() {
         check('a tab shows its own figures', (await names())[0] === 'europe S&P 500' && await tabNow() === 'europe', [await tabNow(), await names()]);
         const drawn = await js(`(function () { var l = document.querySelectorAll('#market-data-sidebar-container .market-item-sidebar-chart polyline'); return Array.from(l).filter(function (x) { return x.getAttribute('data-lm') && x.getAttribute('points'); }).length; })()`);
         check('a tab chosen later shows its small charts at once (every tab\'s lines were fetched in the background)', drawn === 6, drawn);
+        const mismatch = await js(`(function () { return Array.from(document.querySelectorAll('#market-data-sidebar-container .market-item')).filter(function (r) { var l = r.querySelector('polyline[data-lm]'), c = r.querySelector('.market-item-sidebar-change'); if (!l || !c) return false; var down = c.classList.contains('negative') || /^\\s*[-\\u2212]/.test(c.textContent); return (l.getAttribute('stroke') === '#ef4444') !== down; }).map(function (r) { return r.textContent.replace(/\\s+/g, ' ').trim().slice(0, 60); }); })()`);
+        if (/function shownUp/.test(fs.readFileSync(path.join(WEB || SITE, 'live-market.js'), 'utf8'))) check('every small chart is red or green as the change shown beside it is (a green line under -3.20% was seen, 23 Oct 2026)', Array.isArray(mismatch) && !mismatch.length, mismatch);
         const kept = await js(`Object.keys(JSON.parse(localStorage.getItem('lmSparks') || '{}')).length`);
         check('the lines are kept in the browser, so a reload shows them before any request (the stand-in tabs share their 6 symbols)', kept >= 6, kept);
         await click('#nav-right-sidebar'); await sleep(300);
