@@ -3,6 +3,10 @@
  "changes": [
   {
    "at": "2026-10-23",
+   "what": "Fixed a false 'Needs you' warning (it left the sector funds out of its sums); the screeners the AI chooses are greyed out and locked again, with a clearer tick"
+  },
+  {
+   "at": "2026-10-23",
    "what": "Clearer ticks for the screeners the AI chooses; the autopilot emails only when something changes how it trades (not its daily notes); prices update as soon as you return to the Practice portfolio"
   },
   {

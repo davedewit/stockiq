@@ -5250,6 +5250,13 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     buying-order trial (15 Oct) and the day's price change; six rows of questions.md were stale (two trials already live read
     "open"). All put right; the tab now lists the 46 questions with their answers (`admin-panel.js?v=37`, `admin.py` `questions`).
     The next profit trial is `longer-holds`, from 12 Nov when patient-shares is decided (both are about how long shares are kept).
+  - **"Needs you" counts the sector funds** (the owner saw "the cash is less than one holding", then "its budget is more than the money
+    it can reach", both untrue): `needs` compared the shares' 80% of the budget with money that left the funds out. Now the share part
+    against the shares, the whole budget against `money_of` (funds included), and no budget warning when the budget is automatic.
+    `stockiq-ai-trader` `jfmfQHGp…` (rollback `…_before_autopilot_needsfix_20261023.zip`). **The automatic budget is not the account
+    value, by design**: it is the autopilot's own money (cash + what it holds, at cost); the account value adds the owner's own
+    holdings and every holding at today's price. The AI's ticked boxes: greyed, dashed and locked, a white tick on solid grey
+    (`practice-autopilot.js?v=71`; the blue of v70 looked clickable).
   - **Small things from the owner's look at the autopilot tab** (evening of 23 Oct): the screeners the AI ticks show a solid blue tick
     (a browser's own disabled tick was pale); emails only for what changes how it trades; prices at once on returning to the
     Practice portfolio. `stockiq-ai-trader` `PbBzV+oy…`, `stockiq-ai-chat` `FGkIhvjp…` (its guide: emails, the coin score),

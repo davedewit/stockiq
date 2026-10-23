@@ -841,6 +841,17 @@ if hasattr(m, 'auto_holdings'):
     check('an automatic budget is all the practice money it can reach, upward as well as down, with no line in the list', (up, down) == (70000.0, 60000.0) and not rec['log'], [up, down, rec['log']])
     rec['state']['realizedUsd'] = 500.0
     check('and the results are not added on top of it (it follows the money already)', m.follow_results(rec, _dt.datetime.now(_dt.timezone.utc)) == 0 and rec['settings']['budgetUsd'] == 60000.0)
+    # "Needs you" with the sector funds held and the budget automatic (23 Oct 2026: it said the budget was too large, then the cash too small)
+    if hasattr(m, 'share_part') and getattr(m, 'THEME_SHARE', 0):
+        was_themes = m.THEMES; m.THEMES = True
+        pf2 = {'cash': 3702.0, 'holdings': [dict(by='ai', costUsd=74344.0 / 50, symbol=f'S{i}', screener='3-100', id=f'h{i}') for i in range(50)]
+               + [dict(by='ai', costUsd=19641.0 / 3, symbol=f, screener='themes', id='t' + f) for f in ('SMH', 'XLE', 'XLK')]}
+        r2 = {'settings': m.clean_settings(dict(st, enabled=True, budgetUsd=97687, auto=['budgetUsd'], selfTune=True), U), 'state': {}, 'log': [], 'history': []}
+        kinds = [n['kind'] for n in m.needs(r2, pf2, _dt.datetime.utcnow())]
+        check('with the sector funds held and an automatic budget, nothing is wrong: no "budget too large", no "cash too small"', 'budget' not in kinds and 'cash' not in kinds, kinds)
+        r2['settings'] = m.clean_settings(dict(st, enabled=True, budgetUsd=150000, auto=[], selfTune=True), U)
+        check('a budget typed above all the money it can reach (the funds counted) is still said', 'budget' in [n['kind'] for n in m.needs(r2, pf2, _dt.datetime.utcnow())], m.needs(r2, pf2, _dt.datetime.utcnow()))
+        m.THEMES = was_themes
 cs = m.clean_settings({'shares': {'US markets': 80, 'Coins': 50, 'Mars': 10, 'Europe markets': ''}}, U)['shares']
 check('shares saved: unknown markets dropped, and together never more than 100%', cs == {'US markets': 80.0, 'Coins': 20.0} and m.clean_settings({'shares': 'x'}, U)['shares'] == {} and m.clean_settings({'shares': {'Coins': -5}}, U)['shares'] == {'Coins': 0.0}, cs)
 
