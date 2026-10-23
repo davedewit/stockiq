@@ -26,7 +26,7 @@ def parts_next(here):
     try:
         import importlib.util
         spec = importlib.util.spec_from_file_location('site_parts', os.path.join(here, 'site_parts.py')); sp = importlib.util.module_from_spec(spec); spec.loader.exec_module(sp)
-        return [{'part': p['part'][:80], 'why': why} for _, p, why in sp.ranked(sp.load())[:3]]
+        return [{'part': p['part'][:80], 'why': why} for _, p, why in sp.pick(sp.load(), 3)]
     except Exception:
         return []
 

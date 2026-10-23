@@ -5241,6 +5241,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     (`session_start.py` every session, `site_audit.py` daily, `weekly_check.py` weekly, `autopilot_review.py` at each review): a new
     check becomes a part of one of them, never a fifth thing to remember (the owner: "don't make a mess creating hundreds of single item
     checks").
+  - **Two of every three parts a session takes are profit and growth parts** (`site_parts.py` `pick`; the owner: "you cycle through
+    everything that is related to profit ... and it should.... profit"): the session chooses the area itself, as he did, and must come
+    away with an improvement there.
   - **The parts are ranked, not rotated** (the owner: "going through those parts more than once ... probably won't make it better"):
     `site_parts.py` `ranked` puts first a part never looked at, then one whose files changed since its last look (git history of both
     repositories, the function copies' dates), the parts in `PROFIT` sooner, age last; a part unchanged since a recent look waits.

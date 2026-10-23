@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-23",
+   "what": "At least two of the three parts each session works on are now profit and growth areas, so most of each session goes where the money is",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-23",
    "what": "Every weekly session now also questions its own process: for each problem you had to point out, why no check caught it first, and that gap is closed too",
    "found": "owner"
   },

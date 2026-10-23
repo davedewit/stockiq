@@ -91,16 +91,24 @@ def ranked(d):
         out.append((score, p, why + (', matters for profit and sign-ups' if p['id'] in PROFIT else '')))
     return sorted(out, key=lambda x: -x[0])
 
+def pick(d, n=3):
+    """The next n to look at: by ranked(), but at least two of every three a profit and growth part (23 Oct 2026, the owner: "you cycle
+    through everything that is related to profit ... and it should.... profit"), so that most of each session goes where the money is."""
+    r = ranked(d); want = max(0, n - n // 3)
+    prof = [x for x in r if x[1]['id'] in PROFIT][:want]
+    rest = [x for x in r if x not in prof][:n - len(prof)]
+    return sorted(prof + rest, key=lambda x: -x[0])
+
 def oldest(d, n=3):
-    """The next parts to look at, by ranked() (the name is kept for the scripts that call it)."""
-    return [p for _, p, _ in ranked(d)[:n]]
+    """The next parts to look at, by pick() (the name is kept for the scripts that call it)."""
+    return [p for _, p, _ in pick(d, n)]
 
 if __name__ == '__main__':
     d, a = load(), sys.argv[1:]
     if not a:
         for score, p, why in ranked(d): print(f"{score:6.1f}  {p.get('last') or 'never':10s}  {p['id']:20s} {why}")
     elif a[0] == 'next':
-        for _, p, why in ranked(d)[:int(a[1]) if len(a) > 1 else 3]:
+        for _, p, why in pick(d, int(a[1]) if len(a) > 1 else 3):
             before = (p.get('log') or [])[-1:]
             print(f"{p['id']}: {p['part']} (where: {p['where']}; {why})" + (f" | last time: {before[0]['found'][:220]}" if before else ''))
         print('Start from what was found last time and what changed since. A profit and growth part must end in an improvement: fixed, improved, '
