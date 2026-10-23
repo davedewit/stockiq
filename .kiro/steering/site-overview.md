@@ -137,7 +137,7 @@ improvements and wait for his yes. The routine, every session:
 5. **One plain line on the Admin page for each change**: `python3 check-tools/admin.py change "<what, in his words>"` ("What
    changed lately"; `check-tools/changes.json`). That list is how he sees what happened without asking.
 6. End with a short report: the account in dollars against the month's goal and against an S&P 500 fund, what was changed, what
-   comes next. If the reviews keep showing no edge, say so plainly and change what it buys from, or recommend stopping it.
+   comes next. **Rewrite "WHERE THINGS STAND"** (below) so the next session starts from the real state. If the reviews keep showing no edge, say so plainly and change what it buys from, or recommend stopping it.
 **Still never, even now:** anything with real money; costs above the cost rule; deleting what cannot be restored (Lambda functions,
 tables, users' data, the autopilot's records: those need his yes to an exact list); writing his autopilot settings while he is on
 the page. His requests are judged, not obeyed word for word: say when an idea is wrong and do the better thing.
