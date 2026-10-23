@@ -5256,6 +5256,15 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     buying-order trial (15 Oct) and the day's price change; six rows of questions.md were stale (two trials already live read
     "open"). All put right; the tab now lists the 46 questions with their answers (`admin-panel.js?v=37`, `admin.py` `questions`).
     The next profit trial is `longer-holds`, from 12 Nov when patient-shares is decided (both are about how long shares are kept).
+  - **Why each trade ended as it did** (the owner: "a stock drops in price, why? ... and same for it increasing same for it staying
+    stagnant ... the more patterns you find that have a probablity over 50% is possible profit"): `check-tools/trade_causes.py`, part 4b of
+    `autopilot_review.py`: every finished trade put down to its market, one event (3+ sales set off by the price in a region within a
+    day) or the share itself, and set against its own index over the same days. First reading: 35 of 48 losses the share alone, the
+    picks +0.21% a trade against their own markets, not clearly different from luck. A pattern counts as profit only when it beats the
+    alternative after costs over 30+ cases, not when it is right more than half the time. **The checks stay four entry points**
+    (`session_start.py` every session, `site_audit.py` daily, `weekly_check.py` weekly, `autopilot_review.py` at each review): a new
+    check becomes a part of one of them, never a fifth thing to remember (the owner: "don't make a mess creating hundreds of single item
+    checks").
   - **The parts are ranked, not rotated** (the owner: "going through those parts more than once ... probably won't make it better"):
     `site_parts.py` `ranked` puts first a part never looked at, then one whose files changed since its last look (git history of both
     repositories, the function copies' dates), the parts in `PROFIT` sooner, age last; a part unchanged since a recent look waits.

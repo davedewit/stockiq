@@ -362,6 +362,14 @@
    "measure": "A 6-hour session can be looked at twice, then not for 19 hours; replay the stops passed between check-ins with and without; then a trial. Question 40",
    "status": "idea",
    "added": "2026-10-23"
+  },
+  {
+   "id": "loss-news",
+   "what": "Record the headlines at every sale, up or down, so that a move of the share itself can be told apart: news (results, a downgrade, a takeover) or no news",
+   "angle": "analysis, profit",
+   "measure": "Starts when: the next change of the function. One free news request a sale; trade_causes.py then splits 'the share' by news or none, 30 a side, and asks whether shares that fell on news go on falling (sell sooner) or recover (wait)",
+   "status": "idea",
+   "added": "2026-10-23"
   }
  ]
 }

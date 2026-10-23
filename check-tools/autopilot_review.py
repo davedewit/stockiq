@@ -210,6 +210,13 @@ def main():
         for t in rows_l: groups.setdefault(EXITS.get(t.get('exit'), str(t.get('exit'))), []).append(t[field] - (t.get(field + 'm') or 0.0))
         for g, v in sorted(groups.items()): n, avg, se = stats(v); say(f"    sold {g:<42} {n:>3} trades  {avg:+.2f}% (± {se:.2f})" + ('   too few to read' if n < 30 else ''))
 
+    say("\n4b. WHY EACH TRADE ENDED AS IT DID: its market, one event, or the share itself; and each against its own index (trade_causes.py)")
+    try:
+        import subprocess
+        r = subprocess.run([sys.executable, '-W', 'ignore', os.path.join(HERE, 'trade_causes.py'), '--days', str(int(a.days)), '--account', account], capture_output=True, text=True, timeout=300)
+        for l in (r.stdout or r.stderr).splitlines(): say('  ' + l)
+    except Exception as e:
+        say(f'  not worked out: {type(e).__name__}: {e}')
     say("\n5. WHAT IT DID AND DID NOT DO (activity lines in the period)")
     kinds = {k: sum(1 for e in lines if e.get('type') == k) for k in ('buy', 'sell', 'note')}
     say(f"  {kinds['buy']} buys, {kinds['sell']} sales, {kinds['note']} notes" + ('' if rows('log') else ' (from the record: only its last 80 lines; the diary fills from 12 Oct 2026)'))
