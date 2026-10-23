@@ -1606,6 +1606,18 @@ with `document.querySelector('h3')`.
   only that the last trade is old. In the first minutes of a Sydney or Tokyo session (the price source is about 20 minutes
   behind there) a share also waits, as the autopilot's do. `practice_test.js`'s stand-in treats every real price as fresh,
   so the tests trade on any day; its made-up `SHUT.AX` opens and shuts on demand (7 checks).
+- **"By market" menu on the graph** (23 Oct 2026, the owner's idea: "the goal is to understand where the profit or loss is coming
+  from ... my goal is to beat the S&P"; `practice-portfolio.js?v=48`): beside the graph's buttons, "All of the account", then each
+  market the autopilot buys from and its screeners (and the sector funds), each with its result, **sold and still held together**,
+  against the same dollars put into an S&P 500 fund the day each was bought and taken out the day it was sold or now
+  (`marketResults`; uses the `spyAtBuy` / `spyAtSell` every holding keeps). Choosing one sets `chartKey` to `g:<market>` or
+  `s:<screener>`: the graph draws that part's result against zero and, in gold, the fund money for it (`valueSeries(..., pick)` →
+  `part`, `pfund`; `chartSvg(series, 'part')`), and the Holding and Sold lists follow (`partOf(list, key, info)`). Under 30
+  holdings it says that is too few to tell skill from luck. The names and markets come from the autopilot's `options.screeners`,
+  handed over by `setPlans(..., { screeners })`; without them there is no menu. Sold-only was the owner's first thought and was
+  rejected: a market whose losers are still held looks good in a sold list. Not built, on purpose: moving the budget toward the
+  markets that look best (with 14 to 22 trades a market it would chase luck; the autopilot already rests a screener that lags).
+  `live_practice_check.js MARKETS=<screeners json> MARKET=g:…` shows it on the live tab, read-only.
 - **Prices refresh by themselves every minute** (23 Oct 2026; the owner: "i have to click ↻ Refresh prices often"): while the
   Practice portfolio tab is on screen and the page was used in the last 10 minutes (`autoRefresh`, `AUTO_MS`, `IDLE_MS`). The
   price function is asked once a symbol (about 60 for the owner's account), so a price that has not traded for half an hour (its
@@ -3191,12 +3203,6 @@ buying-order trial finished and was not kept; the AI review's early sales switch
     `update_stock_analysis.py`): the 3,467 pages still carry the old footer ("Powered by AI • Real-time Data"), the old two
     menu labels, the older top-strip wording and the empty `sidebar.js` tag; the template has all of them right. The nightly
     site check counts the old footer (`claims`, an idea until then). Away from the daily run.
-13d. **Results by market, against the S&P 500 (the owner's idea, 23 Oct 2026; proposed, not built).** One menu beside the graph's
-    buttons (All markets, each region, each screener inside it), each entry with its result against the same dollars in an S&P 500
-    fund over the same days, sold and still held together ("too few to read" under 30 trades); choosing one filters the graph (its
-    gain and the fund's), the holdings and the sold list. The themes part renamed "Sector funds", shown in the same menu, and a tick
-    box of its own in the screeners card so that it can be left out without switching off every trial. Waiting for his word on the
-    design (one menu, or his two with tick boxes).
 14. Both GitHub repositories are public (section 11). The personal file in one is the owner's own business ("that youtube
     stuff is mine only focus on the repo for stockiq", 12 Oct): leave it alone and out of these lists.
 15. Ideas offered and not built are in the next part ("Ideas offered and not built"); section 11 has the rest of the site.
@@ -5076,6 +5082,13 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - **The loss limit is passed overnight:** 7 of the 8 sales at the limit were Asian shares sold at the first check-in after the
     open at -14.3% on average (ZIP.AX -5% at the close, -31% at the next open). A stop cannot act while a market is shut; whether
     selling at the open is the worst moment is questions.md 39 and the idea `gap-sell-wait` (replay first).
+  - **From the owner's questions the same morning:** prices refresh by themselves every minute; the "By market" menu (section 8c,
+    "What the owner sees"); the themes part renamed **Sector funds**, a row in the screeners card that can be unticked like a market
+    (setting `themes`, default on; `wind_down_themes` sells what it holds of them at the next check-in while the US market is open;
+    `its_markets` keeps the US market while any are held). Cash for dips: answered no from the cash study of 18 Oct (holding cash
+    was behind staying invested in both halves, only the falls were smaller); the account's early lead over the fund was mostly the
+    quarter it held in cash in a falling week. The two emails he gets are by design: the shared notes (every 5 finished trades) and
+    the progress report (every 20).
   - **Words:** the footer's "Professional Investment Research Platform" and "Powered by AI • Market Data • Comprehensive Analysis"
     on 19 pages, two blog lines ("in real-time", "Professional stock analysis powered by AI"), the research-tools guide's
     description and a guide's button heading: reworded, words only (website `1dafe26d`; uploaded by the daily update of 23 Oct,
