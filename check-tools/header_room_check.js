@@ -53,13 +53,15 @@ const server = http.createServer((q, r) => {
     };
     const js = async (expression) => { const r = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true }); return r.result ? r.result.value : undefined; };
     await send('Page.enable'); await send('Runtime.enable'); await send('Fetch.enable', { patterns: [{ urlPattern: '*' }] });
+    // the menu must not move while the page loads (24 Oct 2026: the bell, shown late by the page's code, shifted the centred menu 31px)
+    await send('Page.addScriptToEvaluateOnNewDocument', { source: "window.__navx=[];(function rec(){var d=document.querySelector('.desktop-nav > .nav-item');if(d){var x=Math.round(d.getBoundingClientRect().left);if(window.__navx[window.__navx.length-1]!==x)window.__navx.push(x);}if(performance.now()<3000)requestAnimationFrame(rec);})();" });
     const look = () => js(`(function () {
       var shown = function (e) { if (!e) return null; var c = getComputedStyle(e), r = e.getBoundingClientRect(); return c.display !== 'none' && c.visibility !== 'hidden' && r.height > 0 && r.bottom > 0 ? r : null; };
       var strip = shown(document.getElementById('promo-banner')) || shown(document.getElementById('sticky-banner')) || shown(document.getElementById('site-strip')), nav = shown(document.querySelector('.top-nav'));
       var header = Math.max(strip ? strip.bottom : 0, nav ? nav.bottom : 0), first = null, hs = document.querySelectorAll('h1, h2');
       for (var i = 0; i < hs.length && !first; i++) { var r = shown(hs[i]); if (r && !hs[i].closest('.top-nav, #mobile-menu, #mobile-sidebar-modal, .modal, [role=dialog]') && getComputedStyle(hs[i]).position !== 'fixed') first = { top: r.top, text: hs[i].textContent.trim().slice(0, 28) }; }
       return { at: location.pathname, y: Math.round(scrollY), strip: strip ? Math.round(strip.bottom) : 0, navTop: nav ? Math.round(nav.top) : null, navBottom: nav ? Math.round(nav.bottom) : null, header: Math.round(header),
-        pad: Math.round(parseFloat(getComputedStyle(document.body).paddingTop) || 0), first: first ? Math.round(first.top) : null, text: first ? first.text : '' };
+        pad: Math.round(parseFloat(getComputedStyle(document.body).paddingTop) || 0), first: first ? Math.round(first.top) : null, text: first ? first.text : '', navx: window.__navx || [] };
     })()`);
     for (const page of PAGES) {
       for (const [size, w, h, mobile] of SIZES) {
@@ -80,6 +82,7 @@ const server = http.createServer((q, r) => {
         // the bar has always covered the strip's last 4px (the strip is 45px tall, the bar starts at 41): noted, not a fault
         there.forEach(r => { const flush = r.navTop - r.strip; if (flush > 1 || flush < -5) why.push(`${r.who}: the menu bar is ${flush > 0 ? flush + 'px below ' + (r.strip ? 'the strip' : 'the top of the window') : (-flush) + 'px under the strip'}`); });
         there.forEach(r => { if (r.first !== null && r.first < r.header - 1) why.push(`${r.who}: "${r.text}" starts ${r.header - r.first}px under the header`); });
+        if (size === 'desktop') there.forEach(r => { if (r.navx && r.navx.length > 1) why.push(`${r.who}: the menu moved while the page loaded (its first item at ${r.navx.join(' then ')}px)`); });
         const rooms = there.filter(r => r.first !== null).map(r => r.first - r.header);
         if (rooms.length > 1 && Math.max(...rooms) - Math.min(...rooms) > 3) why.push('the first heading starts ' + there.filter(r => r.first !== null).map(r => `${r.first - r.header}px under the header for ${r.who}`).join(', '));
         if (why.length) failed++;

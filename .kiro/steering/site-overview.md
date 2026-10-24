@@ -979,6 +979,11 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   and its card carry the offer). **The check:** `phone_check.js` (weekly) fails a page without the ☰ button on show and opening the
   menu, the bell (not on sign-in pages) or the usage chip. **Next, an idea in the register (`nav-simpler`):** the desktop menu written
   once and simpler (Crypto as a plain link, Pricing / Dashboard in the bar).
+- **Nothing in the menu may appear late** (24 Oct 2026; the owner: the menu "moves to left briefly then back" on Today's top 10s): the
+  menu is centred, so an item shown by a page's code after the first frame (the bell, which `auth.js` shows; on pages that load
+  `auth.js` late through `site-header.js` that was 0.4 s) moves every item. The bell is shown from the first frame by `html.signed-in`
+  (`styles.css`). `header_room_check.js` records the menu's position frame by frame while each page loads, for each kind of visitor,
+  and fails one that moves (a one-off in the test browser has happened: a real shift repeats on every run).
 - **`theme.js` is loaded in every page's head without `defer` or `async`** (the home page had `defer`, so a signed-in visitor saw "Sign up free"
   flash on every visit; the nightly site check's `theme-early` reports it).
 - **Who is looking, marked before the page is drawn** (24 Oct 2026; `theme.js`, top): `html.signed-in` and `html.paid-user` from the
