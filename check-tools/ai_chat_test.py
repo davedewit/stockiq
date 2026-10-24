@@ -64,4 +64,14 @@ if '"Themes part"' in m.DASHBOARD_GUIDE: check('it knows the themes part: its sh
       and all(x in m.DASHBOARD_GUIDE for x in ('changed once a month', 'only recorded and scored a week later', 'buy and sell nothing', '30 or more scored calls')))
 if '"Market risk now"' in m.DASHBOARD_GUIDE: check('it knows the market-risk gauge: what makes it up, that it is for information and holds no cash', all(x in m.DASHBOARD_GUIDE for x in ('below its 200-day average', 'VIX is over 20 and over 30', 'it does not make the autopilot hold cash')) and 'Every trading day the AI model also reads' in m.DASHBOARD_GUIDE)
 check('nothing in the guide gives advice or promises a result', not any(w in m.DASHBOARD_GUIDE.lower() for w in ('you should', 'recommend', 'will make money', 'guarantee', 'picks')))
+# stock links in a reply only to pages that exist (24 Oct 2026: a visitor was sent to FPH.html and A2M.html, which do not exist)
+if hasattr(m, 'fix_stock_links'):
+    pg = {'FPH.AX', 'AAPL', 'ABC.AX', 'ABC.L'}
+    out = m.fix_stock_links('[F&P](https://stockiq.tech/stocks/FPH.html) [a2](https://stockiq.tech/stocks/A2M.html) [AAPL](https://stockiq.tech/stocks/AAPL.html) [ABC](https://stockiq.tech/stocks/ABC.html) https://stockiq.tech/stocks/fph.html', pg)
+    check('a stock link goes to the listing that has a page (FPH to FPH.AX)', '[F&P](https://stockiq.tech/stocks/FPH.AX.html)' in out, out)
+    check('a share with no page is plain text, not a broken link', 'a2' in out and 'A2M.html' not in out, out)
+    check('a page that exists keeps its link', '[AAPL](https://stockiq.tech/stocks/AAPL.html)' in out, out)
+    check('a symbol listed in two markets is not guessed', 'ABC.html' not in out and 'stocks/ABC.' not in out, out)
+    check('a bare address is corrected too', 'https://stockiq.tech/stocks/FPH.AX.html' in out.split(' ')[-1], out)
+    check('with no list, a reply is left as it was', m.fix_stock_links('[x](https://stockiq.tech/stocks/X.html)', set()) == '[x](https://stockiq.tech/stocks/X.html)')
 print('ALL PASS' if ok else 'SOME FAILED')

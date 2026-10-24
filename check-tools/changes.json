@@ -3,6 +3,23 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Each change on this list can now carry a view link to where it can be seen",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
+   "what": "The AI chat types its replies out, and links only to stock pages that exist (it had linked Fisher & Paykel and a2 Milk to pages that do not exist)",
+   "found": "owner",
+   "link": "https://stockiq.tech/"
+  },
+  {
+   "at": "2026-10-24",
+   "what": "Signed-out visitors now see Log in and a blue Sign up free button in the menu; Pricing is hidden for paying members; the free-trial strip is on every page with the same wording (the stock pages had old wording)",
+   "found": "owner",
+   "link": "https://stockiq.tech/screeners-today.html"
+  },
+  {
+   "at": "2026-10-24",
    "what": "The menu and footer are now one design on every page, defined in one place: Screeners now includes crypto, Pricing is in the menu bar, and the footer has three tidy columns with the disclaimer on every page (it was missing on some). Code copied across pages is down from 219 to 106 lines",
    "found": "owner"
   },
@@ -268,18 +285,6 @@
   {
    "at": "2026-10-19",
    "what": "Under the month's goal on this page: how sure the record is that the account has been ahead of an S&P 500 fund so far (too early to tell until 30 trading days)"
-  },
-  {
-   "at": "2026-10-19",
-   "what": "The autopilot's holdings are listed once, on the Practice portfolio tab, each with its tags (market closed until…, its stop, patient share) and a 'Can be sold now' choice; the autopilot tab links there instead of listing them again"
-  },
-  {
-   "at": "2026-10-19",
-   "what": "Month targets raised above break-even; the home page's first sentence is clearer and its stock links sit compactly at the bottom; market panel clicks run the analysis (in the background on the dashboard)"
-  },
-  {
-   "at": "2026-10-19",
-   "what": "The autopilot's budget now grows with the profit of its sales and shrinks with its losses (a tick box under the budget, on by default), always within the practice money there is"
   }
  ]
 }

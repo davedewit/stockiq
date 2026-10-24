@@ -7,7 +7,7 @@ keeps its proposals in item `_admin` of table stockiq-ai-trader. A session start
     python3 check-tools/admin.py add session "<title>" "<why>"   put a question to the owner that needs code
     python3 check-tools/admin.py add setting "<title>" "<why>" '<json change>'   e.g. '{"aiSell": false}' or '{"untick": "7-1"}'
     python3 check-tools/admin.py audit               the nightly site check's findings (audit/latest.json) onto the page
-    python3 check-tools/admin.py change "<what>" [--found owner|check|session]     add a line to "What changed lately" (check-tools/changes.json),
+    python3 check-tools/admin.py change "<what>" [--found owner|check|session] [--link https://stockiq.tech/<page>]     add a line to "What changed lately" (check-tools/changes.json),
                                                      in plain words, with who found what it fixes (owner: he pointed at it; check: a script did)
 
 A "setting" proposal is applied by the function itself the moment the owner presses "Yes"; a "session" one waits for a
@@ -150,12 +150,15 @@ elif args[0] == 'estimate' and len(args) >= 3:
     print(f"the Admin page's estimate: {args[1]}% ({len(plan['estimates'])} kept)")
 elif args[0] == 'change' and len(args) >= 2:
     found = args[args.index('--found') + 1] if '--found' in args and args.index('--found') + 1 < len(args) else None
-    args = [a for i, a in enumerate(args) if a != '--found' and (i == 0 or args[i - 1] != '--found')]
+    link = args[args.index('--link') + 1] if '--link' in args and args.index('--link') + 1 < len(args) else None   # where to see it (24 Oct 2026)
+    if link and not link.startswith('https://stockiq.tech/'):
+        sys.exit('--link must be a page of the site (https://stockiq.tech/...)')
+    args = [a for i, a in enumerate(args) if a not in ('--found', '--link') and (i == 0 or args[i - 1] not in ('--found', '--link'))]
     # A line for "What changed lately" on the Admin page (18 Oct 2026, the owner: "easy for me to read on admin page what is
     # going on"); then the page's copy is brought up to date.
     here = os.path.dirname(os.path.abspath(__file__)); path = os.path.join(here, 'changes.json')
     doc = json.load(open(path))
-    doc['changes'] = ([dict({'at': now()[:10], 'what': args[1]}, **({'found': found} if found in ('owner', 'check', 'session') else {}))] + doc['changes'])[:60]
+    doc['changes'] = ([dict({'at': now()[:10], 'what': args[1]}, **({'found': found} if found in ('owner', 'check', 'session') else {}), **({'link': link} if link else {}))] + doc['changes'])[:60]
     json.dump(doc, open(path, 'w'), indent=1, ensure_ascii=False)
     admin.setdefault('plan', {})['changes'] = doc['changes']
     save(admin)

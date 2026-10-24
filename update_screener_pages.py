@@ -340,7 +340,8 @@ def shell_parts():
     guide = os.path.join(OUT, 'stock-screener-guide.html')
     with open(guide if os.path.exists(guide) else os.path.join(WEBSITE, 'stock-screener-guide.html'), encoding='utf-8') as f:
         page = f.read()
-    nav = page[page.index('<nav class="top-nav">'):page.index('</nav>') + len('</nav>')]
+    strip = page.find('<!-- SHARED_STRIP_START')        # the trial strip (shared_parts.py) comes just before the menu
+    nav = page[strip if strip >= 0 else page.index('<nav class="top-nav">'):page.index('</nav>') + len('</nav>')]
     start = page.find('<!-- SHARED_FOOTER_START')      # the shared footer (shared_parts.py) with its markers, or an older footer
     foot = page[start if start >= 0 else page.index('<footer'):page.index('</body>')] + PANEL
     return nav, foot

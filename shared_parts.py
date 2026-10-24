@@ -17,8 +17,9 @@ pages, "Blog" pointing at two different pages, the stock pages with old wording)
     SHARED_OUT=<folder> python3 ...      write into copies in that folder instead (website/ pages only; for staging)
 
 Markers: <!-- SHARED_MENU_START/END --> inside .desktop-nav, <!-- SHARED_PHONE_MENU_START/END --> inside .mobile-menu-content,
-<!-- SHARED_FOOTER_START/END --> around the footer. On a page without them yet, the existing block is replaced and the markers put in.
-Keep the markup free of curly braces: the stock-page template is a Python f-string.
+<!-- SHARED_FOOTER_START/END --> around the footer, <!-- SHARED_STRIP_START/END --> after <body> (the trial strip; not on the pages
+with a strip of their own: home, analysis, dashboard, sign-up). On a page without them yet, the existing block is replaced and the markers put in.
+The stock-page template is a Python f-string: the parts' braces are doubled there (BRACES), single in the pages it writes.
 """
 import glob, os, re, sys
 
@@ -39,9 +40,14 @@ MENU = [
                                                  ('🌏 Asia-Pacific Markets', 'analysis.html?option=5'),
                                                  ('🌎 Americas Markets', 'analysis.html?option=6'),
                                                  ('🪙 Crypto (540 coins)', 'analysis.html?option=7')]),
-    ('link', 'Pricing', 'index.html#pricing', '💳'),
-    ('menu', 'Account', 'account-dropdown', [('Register', 'signup.html'), ('Login', 'login.html')]),
+    ('link', 'Pricing', 'index.html#pricing', '💳'),           # hidden for a paying member (html.paid-user, theme.js)
+    ('menu', 'Account', 'account-dropdown', [('Register', 'signup.html'), ('Login', 'login.html')]),   # shown once signed in
 ]
+# What a signed-out visitor sees in place of the Account menu (styles.css hides one or the other by html.signed-in, theme.js)
+SIGNED_OUT = [('Log in', 'login.html', 'nav-item home-link nav-login'), ('Sign up free', 'signup.html', 'nav-signup')]
+# The strip across the top on a desktop, for anyone not on a paid plan: the same words as the home page's
+STRIP_ANON = 'Free 3-day trial: <strong>15 analyses</strong>, no credit card needed'
+STRIP_SIGNED = 'Plans from <strong>$4.99/month</strong>: more analyses a day, and the AI autopilot (Beta) for your practice portfolio'
 FOOTER_COLUMNS = [
     ('Tools', [('Stock analysis', 'analysis.html?option=1'), ('Today&rsquo;s top 10s', 'screeners-today.html'),
                ('All screeners', 'analysis.html?option=3'), ('Pricing', 'index.html#pricing')]),
@@ -60,11 +66,16 @@ def menu_html(p):
     out = [f'<!-- SHARED_MENU_START: the menu, {NOTE} -->']
     for item in MENU:
         if item[0] == 'link':
-            out.append(f'<a href="{p}{item[2]}" class="nav-item home-link" style="{PLAIN}">{item[1]}</a>')
+            cls = ' nav-pricing' if item[1] == 'Pricing' else ''
+            out.append(f'<a href="{p}{item[2]}" class="nav-item home-link{cls}" style="{PLAIN}">{item[1]}</a>')
         else:
             _, title, mid, links = item
-            extra = ' style="margin-left: auto;"' if mid == 'account-dropdown' else ''
-            out.append(f'<div class="nav-item dropdown" onclick="showDropdown(\'{mid}\', event)"{extra}>{title} <span class="dropdown-arrow">▼</span>'
+            extra = ''
+            if mid == 'account-dropdown':
+                out.extend(f'<a href="{p}{u}" class="{c}">{t}</a>' for t, u, c in SIGNED_OUT)
+                extra = ' style="margin-left: auto;"'
+            cls = ' nav-account' if mid == 'account-dropdown' else ''
+            out.append(f'<div class="nav-item dropdown{cls}" onclick="showDropdown(\'{mid}\', event)"{extra}>{title} <span class="dropdown-arrow">▼</span>'
                        f'<div class="dropdown-menu" id="{mid}">' + ''.join(f'<a href="{p}{u}">{t}</a>' for t, u in links) + '</div></div>')
     out.append('<!-- SHARED_MENU_END -->')
     return '\n'.join(out)
@@ -74,7 +85,8 @@ def phone_menu_html(p):
     out = [f'<!-- SHARED_PHONE_MENU_START: the phone menu, {NOTE} -->']
     for item in MENU:
         if item[0] == 'link':
-            out.append(f'<div class="mobile-section"><a href="{p}{item[2]}">{item[3]} {item[1]}</a></div>')
+            cls = ' mobile-pricing' if item[1] == 'Pricing' else ''
+            out.append(f'<div class="mobile-section{cls}"><a href="{p}{item[2]}">{item[3]} {item[1]}</a></div>')
             if item[1] == 'Home':      # shown to a signed-in visitor (site-header.js, the pages' own code)
                 out.append(f'<div class="mobile-section" id="mobile-dashboard-section" style="display: none;"><a href="{p}dashboard.html">📊 Dashboard</a></div>')
         else:
@@ -102,6 +114,19 @@ def footer_html(p):
         '<!-- SHARED_FOOTER_END -->'])
 
 
+def strip_html(p):
+    js = ("(function () { try { var d = document.documentElement, s = document.getElementById('site-strip'), u = localStorage.getItem('userId'), "
+          "signed = !!u && u !== 'anonymous'; "
+          "if (window.innerWidth <= 768 || (signed && localStorage.getItem('userPaidStatus_' + u) === 'paid')) { s.remove(); d.style.setProperty('--nav-top', '0px'); return; } "
+          "s.innerHTML = '<span>' + (signed ? '" + STRIP_SIGNED + "' : '" + STRIP_ANON + "') + '</span>'; "
+          "if (signed) s.href = '" + p + "index.html#pricing'; "
+          "s.hidden = false; d.classList.add('has-strip'); d.style.setProperty('--nav-top', '41px'); } catch (e) { } })();")
+    return '\n'.join([f'<!-- SHARED_STRIP_START: the strip across the top on a desktop, {NOTE} -->',
+                      f'<a id="site-strip" class="site-strip" href="{p}signup.html" hidden></a>',
+                      f'<script>{js}</script>',
+                      '<!-- SHARED_STRIP_END -->'])
+
+
 # ---------------------------------------------------------------- writing it into a page
 def between(s, name, new):
     """Replace what is between the markers; None when the page has no such markers."""
@@ -119,45 +144,68 @@ def div_end(s, start):
     return -1
 
 
+BRACES = False          # True while writing into the stock-page template (a Python f-string): { and } are doubled there
+
+
+def braced(html):
+    return html.replace('{', '{{').replace('}', '}}') if BRACES else html
+
+
 def apply(s, p):
     """The page with the shared parts written in. Returns (text, what was done)."""
     done = []
     if '<nav class="top-nav"' not in s:
         return s, done
     # the desktop menu: from the Home link to the end of the Account menu (or the Home link alone)
-    t = between(s, 'MENU', menu_html(p))
+    t = between(s, 'MENU', braced(menu_html(p)))
     if t is None:
         home = re.search(r'<a [^>]*class="nav-item[^"]*"[^>]*>\s*Home\s*</a>', s)
         if home:
             acc = re.search(r'<div class="nav-item dropdown" onclick="showDropdown\(\'account-dropdown\'', s[home.end():])
             end = div_end(s, home.end() + acc.start()) if acc else home.end()
-            t = s[:home.start()] + menu_html(p) + s[end:]
+            t = s[:home.start()] + braced(menu_html(p)) + s[end:]
             done.append('menu (markers put in)')
     elif t != s:
         done.append('menu')
     s = t if t is not None else s
     # the phone menu's content, on pages that have their own phone menu
-    t = between(s, 'PHONE_MENU', phone_menu_html(p))
+    t = between(s, 'PHONE_MENU', braced(phone_menu_html(p)))
     if t is None:
         m = re.search(r'<div class="mobile-menu-content">', s)
         if m:
             end = div_end(s, m.start())
-            t = s[:m.end()] + '\n' + phone_menu_html(p) + '\n</div>' + s[end:]
+            t = s[:m.end()] + '\n' + braced(phone_menu_html(p)) + '\n</div>' + s[end:]
             done.append('phone menu (markers put in)')
     elif t != s:
         done.append('phone menu')
     s = t if t is not None else s
     # the footer (a usage counter some pages kept inside it stays, just after it)
-    t = between(s, 'FOOTER', footer_html(p))
+    t = between(s, 'FOOTER', braced(footer_html(p)))
     if t is None:
         m = re.search(r'<footer\b[^>]*>.*?</footer>', s, re.S)
         if m:
             keep = re.search(r'<div id="usage-counter"[^>]*>.*?</div>', m.group(0), re.S)
-            t = s[:m.start()] + footer_html(p) + ('\n' + keep.group(0) if keep else '') + s[m.end():]
+            t = s[:m.start()] + braced(footer_html(p)) + ('\n' + keep.group(0) if keep else '') + s[m.end():]
             done.append('footer (markers put in)')
     elif t != s:
         done.append('footer')
     s = t if t is not None else s
+    # the strip: on the pages without one of their own (the home page, analysis, dashboard and sign-up keep theirs for now);
+    # the stock pages' old one (#sticky-banner, older wording) is replaced
+    if not re.search(r'id="promo-banner"', s):
+        t = between(s, 'STRIP', braced(strip_html(p)))
+        if t is None:
+            old = re.search(r'<div id="sticky-banner"[^>]*></div>\s*<script>.*?</script>\n?', s, re.S)
+            if old:
+                t = s[:old.start()] + braced(strip_html(p)) + '\n' + s[old.end():]
+            else:
+                body = re.search(r'<body[^>]*>\n?', s)
+                t = s[:body.end()] + braced(strip_html(p)) + '\n' + s[body.end():] if body else None
+            if t is not None:
+                done.append('strip (markers put in)')
+        elif t != s:
+            done.append('strip')
+        s = t if t is not None else s
     return s, done
 
 
@@ -173,6 +221,8 @@ def main():
     differ, changed = [], 0
     for f, p in pages + ([] if out else stocks) + ([] if out else [(TEMPLATE, '../')]):
         s = open(f, encoding='utf-8').read()
+        global BRACES
+        BRACES = f == TEMPLATE
         t, done = apply(s, p)
         if t == s:
             continue
@@ -182,8 +232,6 @@ def main():
             if len(differ) <= 12 or not rel.startswith('website/stocks/'):
                 print(f'{"differs" if check else "would change"}: {rel} ({", ".join(done) or "changed"})')
             continue
-        if f == TEMPLATE and '{' in menu_html(p) + phone_menu_html(p) + footer_html(p):
-            sys.exit('the shared markup holds a curly brace: the stock-page template is an f-string')
         dest = os.path.join(out, os.path.basename(f)) if out else f
         open(dest, 'w', encoding='utf-8').write(t)
         changed += 1

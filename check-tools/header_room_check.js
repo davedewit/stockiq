@@ -55,7 +55,7 @@ const server = http.createServer((q, r) => {
     await send('Page.enable'); await send('Runtime.enable'); await send('Fetch.enable', { patterns: [{ urlPattern: '*' }] });
     const look = () => js(`(function () {
       var shown = function (e) { if (!e) return null; var c = getComputedStyle(e), r = e.getBoundingClientRect(); return c.display !== 'none' && c.visibility !== 'hidden' && r.height > 0 && r.bottom > 0 ? r : null; };
-      var strip = shown(document.getElementById('promo-banner')) || shown(document.getElementById('sticky-banner')), nav = shown(document.querySelector('.top-nav'));
+      var strip = shown(document.getElementById('promo-banner')) || shown(document.getElementById('sticky-banner')) || shown(document.getElementById('site-strip')), nav = shown(document.querySelector('.top-nav'));
       var header = Math.max(strip ? strip.bottom : 0, nav ? nav.bottom : 0), first = null, hs = document.querySelectorAll('h1, h2');
       for (var i = 0; i < hs.length && !first; i++) { var r = shown(hs[i]); if (r && !hs[i].closest('.top-nav, #mobile-menu, #mobile-sidebar-modal, .modal, [role=dialog]') && getComputedStyle(hs[i]).position !== 'fixed') first = { top: r.top, text: hs[i].textContent.trim().slice(0, 28) }; }
       return { at: location.pathname, y: Math.round(scrollY), strip: strip ? Math.round(strip.bottom) : 0, navTop: nav ? Math.round(nav.top) : null, navBottom: nav ? Math.round(nav.bottom) : null, header: Math.round(header),

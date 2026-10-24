@@ -191,32 +191,10 @@ def generate_stock_page(stock, robots="noindex, follow", date_modified="2026-09-
     <script>if(document.body)document.body.classList.add('stock-page');else document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('stock-page'));</script>
 </head>
 <body>
-    <div id="sticky-banner" style="display: none; position: fixed; top: 0; left: 0; right: 0; background: var(--card-bg); color: var(--text-primary); text-align: center; padding: 10px 20px; z-index: 9999; font-size: 0.95rem; font-weight: 500; border-bottom: 1px solid var(--border-color);"></div>
-<script>
-(function() {{
-if (window.innerWidth > 768) {{
-const userId = localStorage.getItem('userId');
-const cacheKey = 'userPaidStatus_' + (userId || 'anonymous');
-const hasPaid = localStorage.getItem(cacheKey) === 'paid';
-const banner = document.getElementById('sticky-banner');
-if (hasPaid) {{
-  banner.remove();
-  document.documentElement.style.setProperty('--nav-top', '0');
-}} else if (userId && userId !== 'anonymous') {{
-  banner.style.display = 'block';
-  banner.innerHTML = 'Plans from <strong style="color: #22c55e;">$4.99/month</strong>: more analyses a day, and the AI autopilot (Beta) for your practice portfolio';
-  document.documentElement.style.setProperty('--nav-top', '41px');
-}} else {{
-  banner.style.display = 'block';
-  banner.innerHTML = 'Free 3-day trial: <strong style="color: #22c55e;">15 analyses</strong>, no credit card needed';
-  document.documentElement.style.setProperty('--nav-top', '41px');
-}}
-}} else {{
-  document.getElementById('sticky-banner').remove();
-  document.documentElement.style.setProperty('--nav-top', '0');
-}}
-}})();
-</script>
+    <!-- SHARED_STRIP_START: the strip across the top on a desktop, written by stockiq/shared_parts.py: change it there, not here -->
+<a id="site-strip" class="site-strip" href="../signup.html" hidden></a>
+<script>(function () {{ try {{ var d = document.documentElement, s = document.getElementById('site-strip'), u = localStorage.getItem('userId'), signed = !!u && u !== 'anonymous'; if (window.innerWidth <= 768 || (signed && localStorage.getItem('userPaidStatus_' + u) === 'paid')) {{ s.remove(); d.style.setProperty('--nav-top', '0px'); return; }} s.innerHTML = '<span>' + (signed ? 'Plans from <strong>$4.99/month</strong>: more analyses a day, and the AI autopilot (Beta) for your practice portfolio' : 'Free 3-day trial: <strong>15 analyses</strong>, no credit card needed') + '</span>'; if (signed) s.href = '../index.html#pricing'; s.hidden = false; d.classList.add('has-strip'); d.style.setProperty('--nav-top', '41px'); }} catch (e) {{ }} }})();</script>
+<!-- SHARED_STRIP_END -->
     <nav class="top-nav" style="top: var(--nav-top, 41px);">
         <div class="nav-container">
             <div class="nav-brand">
@@ -231,8 +209,10 @@ if (hasPaid) {{
 <a href="../index.html" class="nav-item home-link" style="text-decoration: none !important; color: inherit; display: flex; align-items: center;">Home</a>
 <div class="nav-item dropdown" onclick="showDropdown('analysis-dropdown', event)">Analysis <span class="dropdown-arrow">▼</span><div class="dropdown-menu" id="analysis-dropdown"><a href="../analysis.html?option=1">Stock &amp; ETF Analysis</a><a href="../analysis.html?option=2">Trading Signals</a></div></div>
 <div class="nav-item dropdown" onclick="showDropdown('screeners-dropdown', event)">Screeners <span class="dropdown-arrow">▼</span><div class="dropdown-menu" id="screeners-dropdown"><a href="../screeners-today.html">📊 Today&rsquo;s top 10s</a><a href="../analysis.html?option=3">🇺🇸 US Markets</a><a href="../analysis.html?option=4">🇪🇺 Europe Markets</a><a href="../analysis.html?option=5">🌏 Asia-Pacific Markets</a><a href="../analysis.html?option=6">🌎 Americas Markets</a><a href="../analysis.html?option=7">🪙 Crypto (540 coins)</a></div></div>
-<a href="../index.html#pricing" class="nav-item home-link" style="text-decoration: none !important; color: inherit; display: flex; align-items: center;">Pricing</a>
-<div class="nav-item dropdown" onclick="showDropdown('account-dropdown', event)" style="margin-left: auto;">Account <span class="dropdown-arrow">▼</span><div class="dropdown-menu" id="account-dropdown"><a href="../signup.html">Register</a><a href="../login.html">Login</a></div></div>
+<a href="../index.html#pricing" class="nav-item home-link nav-pricing" style="text-decoration: none !important; color: inherit; display: flex; align-items: center;">Pricing</a>
+<a href="../login.html" class="nav-item home-link nav-login">Log in</a>
+<a href="../signup.html" class="nav-signup">Sign up free</a>
+<div class="nav-item dropdown nav-account" onclick="showDropdown('account-dropdown', event)" style="margin-left: auto;">Account <span class="dropdown-arrow">▼</span><div class="dropdown-menu" id="account-dropdown"><a href="../signup.html">Register</a><a href="../login.html">Login</a></div></div>
 <!-- SHARED_MENU_END -->
                 <button class="notification-bell" id="notification-bell" onclick="goToNotifications(event)" title="Notifications" aria-label="View notifications" style="display: none; position: relative; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-primary); margin-right: 10px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -271,7 +251,7 @@ if (hasPaid) {{
 <div class="mobile-section" id="mobile-dashboard-section" style="display: none;"><a href="../dashboard.html">📊 Dashboard</a></div>
 <div class="mobile-section"><div class="mobile-section-title">Analysis</div><a href="../analysis.html?option=1">Stock &amp; ETF Analysis</a><a href="../analysis.html?option=2">Trading Signals</a></div>
 <div class="mobile-section"><div class="mobile-section-title">Screeners</div><a href="../screeners-today.html">📊 Today&rsquo;s top 10s</a><a href="../analysis.html?option=3">🇺🇸 US Markets</a><a href="../analysis.html?option=4">🇪🇺 Europe Markets</a><a href="../analysis.html?option=5">🌏 Asia-Pacific Markets</a><a href="../analysis.html?option=6">🌎 Americas Markets</a><a href="../analysis.html?option=7">🪙 Crypto (540 coins)</a></div>
-<div class="mobile-section"><a href="../index.html#pricing">💳 Pricing</a></div>
+<div class="mobile-section mobile-pricing"><a href="../index.html#pricing">💳 Pricing</a></div>
 <div class="mobile-section"><div class="mobile-section-title">Account</div><a href="../signup.html">Register</a><a href="../login.html">Login</a></div>
 <div class="mobile-section"><div class="mobile-section-title">Theme</div><a href="#" onclick="event.preventDefault(); toggleTheme()" id="mobile-theme-toggle">🌙 Dark Mode</a></div>
 <!-- SHARED_PHONE_MENU_END -->
