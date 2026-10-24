@@ -192,7 +192,9 @@ warns about; one change at a time, measured, with its experiment entry.
   patient-shares (decided 12 Nov; then `longer-holds`), market-gauge, company-figures, trend-score, ai-markets, auto-holdings,
   screener-pages (Search Console, 8 weeks). Ideas, each with its start condition: earnings-hold, ai-market-tilt, public-record,
   screener-email, results-week, crypto-page, home-show, asia-overnight, market-hours-checkins, loss-news and the older ones.
-- **Next session, in order:** (1) **#8** (he said yes on the Admin page): a score-version tag on buys and learning only from the
+- **Next session, in order:** (0) **FIRST: the stock pages for the 1,257 listed shares without one (item 1b below)**: the owner, 24 Oct
+  2026, wants the daily pages' links to go to a stock page for 90% or more ("i prefer going to the html page"); the analysis link only
+  where no page can be made. (1) **#8** (he said yes on the Admin page): a score-version tag on buys and learning only from the
   current score, notes and scorecard lines from 30 a group, `chosen` rank when `rp`, one night's correlated losses counted once,
   replay `review_resting` on the wide price set. (1b) **A stock page for every share the daily pages list** (the owner, 24 Oct 2026:
   "consistency that is professional ... a stock site"): 1,257 of the 2,197 have none (CSI 300 300, KOSPI 200 200, Nikkei 143, Bovespa 76,
