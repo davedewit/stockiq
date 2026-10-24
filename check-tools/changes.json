@@ -3,6 +3,16 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Home page: a new section near the top, This week in the markets: the big scheduled announcements coming up (in the visitor's own time) and how the trend stands across 24 markets today, rewritten every day",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
+   "what": "Practice portfolio: Show the figures (and every other fold) stays open when prices refresh; the figures list shows the latest 14 days (7 on a phone) with Show all; the graph opens on All after a page refresh",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
    "what": "The autopilot now knows the market's calendar: big scheduled announcements (Fed, ECB, inflation, jobs) for the next two days and what came out in the last day go to its AI with the market's headlines when it chooses; they show in What happens next; every buy records how close it was to one and to its company's results; the month's OpenAI cost is on the Admin page",
    "found": "owner"
   },
@@ -257,14 +267,6 @@
   {
    "at": "2026-10-18",
    "what": "Reports no longer say 'real-time' (the site's prices can be delayed): they say 'latest available prices'."
-  },
-  {
-   "at": "2026-10-18",
-   "what": "Home page: the four index cards draw the day's real line (it was a fixed up or down shape) and no longer show January 2024 figures when the data fails."
-  },
-  {
-   "at": "2026-10-18",
-   "what": "Search: descriptions on nine pages that had none; the sign-in and unsubscribe pages kept out of Google; the four guides link to 32 stock pages."
   }
  ]
 }

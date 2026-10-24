@@ -165,7 +165,12 @@ about what the "Still never" list keeps for him (real money, costs above the rul
 settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
 warns about; one change at a time, measured, with its experiment entry.
 
-**WHERE THINGS STAND (rewrite this block at the end of every session; last: 24 Oct 2026, 01:45 UTC, a short "hi" session)**
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 24 Oct 2026, 02:45 UTC)**
+- **Built 24 Oct:** #9 (24 daily screener pages and a hub, live), the home page's "This week in the markets", the autopilot's market calendar
+  (live `Tr7DR5W6…`; the first calendar rows and `ev` on buys from Sunday's rollover; `ed` as the weekly refresh reaches each company), the
+  OpenAI cost on the Admin page (from the next scheduled runs). **Next: #8** (learning only from the current score, notes from 30 a group,
+  `chosen` rank when `rp`, one night's correlated losses once, replay `review_resting`). **To see Monday:** the daily run rebuilds the
+  screener pages and the home section by itself; its email carries the duration (and ⚠️ if a step failed).
 - **24 Oct:** the account $97,967, **$356 ahead** of the same $100,000 in an S&P 500 fund (the fund fell more on 22-23 Oct); 105
   finished trades, -0.07% a trade this month (inside the margin of error). That day: the daily update's crash fixed (open-file limit),
   its email gives the duration and ⚠️ on an error line, Fed days studied (no rule, question 50), each company's results date kept
@@ -489,6 +494,11 @@ git pull --rebase && git push
   sitemap (`update_sitemap.py` adds every one, daily) and named to IndexNow daily (`website/notify_search_engines.py`). Linked
   from the home page's screeners card. Experiment `screener-pages`, decided on Search Console's figures. Not yet: crypto, the
   email box's sample.
+- **"This week in the markets" on the home page** (24 Oct 2026, the owner: the home page should show an active site): straight after the
+  top block, between `<!-- MARKET_WEEK_START/END -->`, written by the same script each day: the week's high-impact announcements (the
+  ForexFactory calendar; times turned into the visitor's zone by a few lines of script) and the trend across the 24 markets (the share of
+  stocks rising, the three strongest and weakest with their leader). On a Saturday the week's are past ("Out this week"); next week's
+  file appears on Sunday.
 - `robots.txt` allows all and points to the sitemap. Canonicals are set on all pages.
 - Bot checks in `auth.js` / `js/analysis-core.js` only skip login redirects and auto-run for
   crawlers; they do not hide content.
@@ -1614,7 +1624,7 @@ with `document.querySelector('h3')`.
   since it began against a dashed line at the $100,000 it started with. Buttons switch the line to "Your own buys" or
   "🤖 AI autopilot" (that part's gain or loss against zero; shown once the autopilot has traded) and, once the account is
   old enough, to the last week or month. The pointer (or a finger) reads off the moment and the figure; "Show the
-  figures" unfolds a line a day. Remembered in the browser: `stockiqPracticeChartRange` (how far back) only.
+  figures" unfolds a line a day. Nothing is remembered since 24 Oct 2026: a page opened afresh shows All (the owner); ranges longer than the account are hidden until it is old enough. "Show the figures" lists the latest 14 days (7 on a phone), then "Show all" (`figsAll`); **every fold of the tab with an id stays open through a redraw** (`openFolds`, `restoreFolds`), so a new fold needs only an id.
   - **The same three buttons choose whose holdings are listed** (13 Oct 2026, the owner's idea; he wanted no second row of
     buttons): with "Your own buys" or "AI autopilot" pressed, the Holding table and the Sold list show only that party's
     (`partOf(list, key)`, exported for tests), the headings count "Holding (11 of 12)" / "Sold (3 of 4)", and a line above
@@ -5248,6 +5258,13 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     buys or AI autopilot moves nothing (a fixed-width title; the read-out keeps its tallest height). `live_practice_check.js MOVES=1`.
   - **The autopilot knows the market's calendar** (section 8c, "The market's calendar"): announcements before and results after go to the
     AI model; `ev` and `ed` recorded with every buy; the month's OpenAI cost on the Admin page.
+  - Later the same day (the owner): every fold of the Practice portfolio stays open through a refresh, the figures show 14 days then
+    "Show all", the graph opens on All; the home page's "This week in the markets"; the AI chat, FAQ and About describe the calendar
+    and the daily pages (the chat had told a home-page visitor the autopilot could not know about the Fed). New checks: `phone_check.js`
+    (every public page at 390 and 360px, weekly), FOLDS and MOVES in `live_practice_check.js` (weekly), the daily pages' count and the
+    chat's screener count in `site_audit.py`; three new lenses in `site_parts.py`; the daily Claude review checks each recent change is
+    described the same everywhere. Ideas added: `ai-market-tilt` (the owner's: lean the budget to markets by news, calls first),
+    `public-record`, `screener-email`, `results-week`, `crypto-page`.
 
 - **23 Oct 2026** (the owner: "hi"):
   - **The account:** $97,103, behind the same $100,000 in an S&P 500 fund ($98,123) by $1,021. On 22 Oct it fell 2.06%, the fund
