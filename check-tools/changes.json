@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Daily market pages: the headings over numbers are right-aligned; the hub's 'Scoring above zero' is now 'In a rising trend' with its percentage and a line explaining it, the columns line up across regions, and each leader is clickable",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
    "what": "Home page: the intro's middle button is now Today's top 10s (the daily market pages, free for every visitor) in place of US Stock Screener, which stays in the menu",
    "found": "owner"
   },
@@ -266,10 +271,6 @@
   {
    "at": "2026-10-18",
    "what": "A daily review by Claude now runs by itself every afternoon after the daily update: it checks the site and puts what it finds under Decisions for you; the next session acts on it."
-  },
-  {
-   "at": "2026-10-18",
-   "what": "The 'Answered' list now sits right under 'Decisions for you'; the contact page says StockIQ is a sole trader (it said Pty Ltd)."
   }
  ]
 }
