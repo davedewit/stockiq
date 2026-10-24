@@ -191,7 +191,7 @@ warns about; one change at a time, measured, with its experiment entry.
 - **24 Oct, afternoon:** every page has the whole header (`site-header.js`, section 8; the owner found the daily screener pages
   without it); `phone_check.js` checks it weekly. Next for the header: idea `nav-simpler` (the desktop menu once and simpler).
   The daily screener pages have the market panel (trial `market-panel-pages`, decided around 21 Nov on GA4 figures from the owner).
-  The phone panels open without a dark shade (iPhone Safari flicker); `web_deploy.sh` now uploads a `.css` file as CSS.
+  The phone panels open without a dark shade (iPhone Safari flicker); `web_deploy.sh` now uploads a `.css` file as CSS. They glide on at the finger's speed when let go.
 - **Trials running** (`python3 check-tools/experiments.py`): gap-wait, rank-pick, crypto-no-chasing, theme-sleeve, stop-watch,
   patient-shares (decided 12 Nov; then `longer-holds`), market-gauge, company-figures, trend-score, ai-markets, auto-holdings,
   screener-pages (Search Console, 8 weeks). Ideas, each with its start condition: earnings-hold, ai-market-tilt, public-record,
@@ -989,6 +989,11 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
     out, or pulls out the one on that side when both are in (`choose`). A swipe is left to what is under the finger
     when that is a text box, the portfolio graph (`#pp-chart-svg`), a slider of the analysis page, anything marked
     `data-no-swipe`, or a row that scrolls sideways and has room to go; and to the page while one of its pop-ups is up.
+  - **Let go, a panel glides on at the finger's own speed** (24 Oct 2026, version 3; the owner on his iPhone: "when i let it go it isn't
+    smooth the way it pops out"): `glideTime` gives the glide 3 x the distance left over the finger's speed (160 to 380 ms; a button or a
+    stopped finger: by the distance), on a gentler curve (`EASE`), so its first frames match the finger; it had always taken 260 ms on a
+    sharp curve, jumping ahead of the finger and then braking. The menu now moves by a transform (left 0 held inline while it moves)
+    instead of `left`, which an iPhone animates choppily. Measured frame by frame in headless Chrome, judged on his iPhone.
   - **No dark shade behind either panel** (24 Oct 2026; `styles.css`, the rule above `body.menu-open`): iPhone Safari tints its own
     toolbar and status bar from a full-screen fixed dark layer and re-tints when the panel stops, so the owner saw the shade darken
     twice and a darker strip at the bottom. The layers stay, see-through, to catch a tap beside the panel; the panels keep their shadow.
