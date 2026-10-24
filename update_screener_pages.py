@@ -176,7 +176,7 @@ def stock_link(sym, names, pages):
     # no stock page on the site: the share's full analysis instead (24 Oct 2026, the owner: some shares were not clickable). nofollow, so
     # that a search engine's crawler does not set off an analysis
     q = urllib.parse.quote(sym)
-    return f'<a href="analysis.html?option=1&amp;symbol={q}&amp;autorun=true" rel="nofollow" title="Run the full analysis of {esc(sym)}"><strong>{esc(sym)}</strong></a>', name
+    return f'<a href="analysis.html?symbol={q}&amp;option=1&amp;subOption=custom&amp;autorun=true" rel="nofollow" title="Run the full analysis of {esc(sym)}"><strong>{esc(sym)}</strong></a>', name
 
 
 HEAD = '''<!DOCTYPE html>
@@ -475,9 +475,9 @@ def home_section(summary, events, now, today, names=None, overall=None):
     return f'''{HOME_START}
 <section id="market-week" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px 22px; margin: 30px 0; text-align: left;">
 <style>#market-week h2{{margin:0 0 4px;font-size:1.4rem;color:var(--text-primary);}}#market-week h3{{font-size:1rem;margin:14px 0 8px;color:var(--text-primary);}}#market-week h4{{font-size:.85rem;margin:10px 0 6px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;}}#market-week .mw-grid{{display:grid;grid-template-columns:1fr 1fr;gap:10px 30px;}}#market-week .mw-list{{list-style:none;padding:0;margin:0;}}#market-week .mw-list li{{padding:5px 0;border-bottom:1px solid var(--border-color);color:var(--text-primary);font-size:.92rem;line-height:1.45;}}#market-week a{{color:#3b82f6;text-decoration:none;}}#market-week .sp-muted{{color:var(--text-secondary);}}#market-week time{{color:var(--text-secondary);}}@media(max-width:700px){{#market-week .mw-grid{{grid-template-columns:1fr;}}}}</style>
-<h2>This week in the markets</h2>
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;"><h2>This week in the markets</h2><a href="screeners-today.html" style="display:inline-block;background:#007bff;color:#fff;padding:9px 16px;border-radius:8px;font-weight:700;font-size:.92rem;">See every market&rsquo;s top 10 today &rarr;</a></div>
 <p class="sp-muted" style="margin:0 0 6px;font-size:.88rem;">Updated {esc(today)}: the scheduled announcements that can move whole markets, and where the trend stands in 24 markets today. General information, not advice.</p>
-<div class="mw-grid"><div>{cal}</div><div><h3>Today across the markets</h3>{breadth}{strong}{weak}<p style="margin:10px 0 0;"><a href="screeners-today.html"><strong>Every market's top 10 today &rarr;</strong></a></p></div></div>
+<div class="mw-grid"><div>{cal}</div><div><h3>Today across the markets</h3>{breadth}{strong}{weak}</div></div>
 <script>(function(){{try{{document.querySelectorAll('#market-week time[datetime]').forEach(function(t){{var d=new Date(t.getAttribute('datetime'));if(!isNaN(d))t.textContent=d.toLocaleString(undefined,{{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}});}});}}catch(e){{}}}})();</script>
 </section>
 {HOME_END}'''
