@@ -439,7 +439,7 @@
   },
   {
    "id": "pages-at-close",
-   "what": "The daily market pages built on AWS after each region closes (Asia-Pacific about 08:00 UTC, Europe about 16:30, the Americas about 21:00), each market's page labelled 'as of the close of <day>', every day including Sundays and whether or not the Mac is on (the owner asked when they update, 24 Oct 2026: today they are built once a day by the Mac's daily run, around midnight UTC, a mix of yesterday's closes and Asian sessions just opening). A small function with an EventBridge schedule, uploading to S3 and invalidating the pages; the cost worked out before (about 25 screener runs a day, as now). Starts after the stock pages for every listed share",
+   "what": "The daily market pages and the home page's 'This week in the markets' built on AWS once a day, every day, whether or not the Mac is on (the owner, 24 Oct 2026: 'better to get it complete than miss it': the point is that it never misses a day; the hour matters less). A small function on an EventBridge schedule writes the pages to S3 and invalidates them; the home section goes into its own small file so that the Mac's daily upload of index.html cannot overwrite it (or the other way round). A run after each region's close is a later refinement. Cost worked out first (about 25 screener runs a day, as now). Starts after the stock pages for every listed share",
    "angle": "growth",
    "measure": "pages always show closing figures (checked by the site check); Search Console impressions against the weeks before",
    "status": "idea",
