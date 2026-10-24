@@ -196,6 +196,13 @@ warns about; one change at a time, measured, with its experiment entry.
   patient-shares (decided 12 Nov; then `longer-holds`), market-gauge, company-figures, trend-score, ai-markets, auto-holdings,
   screener-pages (Search Console, 8 weeks). Ideas, each with its start condition: earnings-hold, ai-market-tilt, public-record,
   screener-email, results-week, crypto-page, home-show, asia-overnight, market-hours-checkins, loss-news and the older ones.
+- **Next session, FIRST BUILD WITH THE STOCK PAGES: the public record page** (idea `public-record`; the owner, 24 Oct 2026: "they can have
+  the 100,000 portfolio for me to illustrate it actually makes money ... signup watch it if it gains you get a plan"). A public page,
+  written by the daily update from his autopilot record (no new public access to the data, no running cost): the AI's practice account
+  against the same $100,000 in an S&P 500 fund since it began (the graph), what it holds, every trade with its reason, losses included,
+  updated daily. Only the autopilot's side (not his own buys, no address). Framed as an experiment to follow, never "it will make you
+  money" (no licence; a few weeks prove nothing). Linked from the sign-up page, the home page's autopilot card and the strip. Measured
+  as an experiment on sign-ups and return visits.
 - **Next session, in order:** (0) **FIRST: the stock pages for the 1,257 listed shares without one (item 1b below)**: the owner, 24 Oct
   2026, wants the daily pages' links to go to a stock page for 90% or more ("i prefer going to the html page"); the analysis link only
   where no page can be made. (1) **#8** (he said yes on the Admin page): a score-version tag on buys and learning only from the
