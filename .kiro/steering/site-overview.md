@@ -2249,6 +2249,25 @@ answer can only pick from a list or say hold / sell. Small coins usually have no
 figures alone. Only the deployed function fetches (`AWS_LAMBDA_FUNCTION_NAME`); a test run never
 calls out.
 
+### The market's calendar (24 Oct 2026)
+
+The owner: "if you aren't aware of big market changes upcoming or just happened that effect global markets such as interest rate rises or
+cuts via fed ... then you aren't much good". `market_events` reads the week's **high-impact** scheduled announcements (central-bank
+decisions, inflation, jobs, growth) from the free ForexFactory file `nfs.faireconomy.media/ff_calendar_thisweek.json` (no key; about 12 KB;
+at most every 4 hours a warm container; the week rolls over on Sunday, and no next-week file is published before the weekend), in UTC
+(`read_events`). An event of the US dollar concerns every market, the others their own (`EVENT_MARKETS`; plain names in `EVENT_WORDS`).
+- **Before:** what is due in the next 48 hours for the shortlist's markets, and **after:** what came out in the last 24, go to the AI model
+  when it chooses, with 8 of the market's general headlines (`market_heads`, kept 2 hours), in a section "The market now" of its prompt
+  (`build_prompt(..., market=)`); the prompt tells it to judge risk from them, never a direction. "What happens next" lists the week's
+  announcements for its markets (kind `event`).
+- **Measured, not acted on:** each buy keeps `ev` (hours to the next such event for its market, within 7 days) and, for shares, `ed` (days
+  to its company's results date from `company_figures.json`'s `earnings`, negative when it just reported); both in `POOL_FIELDS`; the review
+  tool splits by both (part 3). Five years of Fed days (`replay/fed_study.py`, question 50) showed no direction around a decision, only
+  larger moves: so nothing is bought or sold by the calendar. Idea `earnings-hold` if buys reporting within their holding do clearly worse.
+- **The AI's cost:** `ask_model` counts the tokens each answer reports (`_TOKENS`); the scheduled run adds them up by month at
+  `AI_PRICES` (`ai_cost_month`) into `_health['openai']`; the Admin page shows it in the bill card (`openaiHtml`). OpenAI's own usage report
+  needs an organisation admin key, which the function should not hold. Not counted: the AI chat and the daily news summaries.
+
 ### Learning from its own results
 
 **Since 11 Oct 2026 these reviews run once, on every account's finished trades together** (next part, "Learning is shared
@@ -5225,6 +5244,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - **#9 built and live: the daily public screener pages** (section 6). On the way: `web_deploy.sh` takes a new file
     ("none" as its old fingerprint) and uploads `.xml` as XML; `site_audit.py` with `AUDIT_WEB` reads pages new in the
     staging folder; `registers_check.py` accepts a pattern in a part's "where"; IndexNow's 202 is no longer printed as a warning.
+  - **The practice graph** (the owner): ranges longer than the account are hidden until it is old enough; pressing All markets, Your own
+    buys or AI autopilot moves nothing (a fixed-width title; the read-out keeps its tallest height). `live_practice_check.js MOVES=1`.
+  - **The autopilot knows the market's calendar** (section 8c, "The market's calendar"): announcements before and results after go to the
+    AI model; `ev` and `ed` recorded with every buy; the month's OpenAI cost on the Admin page.
 
 - **23 Oct 2026** (the owner: "hi"):
   - **The account:** $97,103, behind the same $100,000 in an S&P 500 fund ($98,123) by $1,021. On 22 Oct it fell 2.06%, the fund

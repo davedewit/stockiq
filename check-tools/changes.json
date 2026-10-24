@@ -3,6 +3,16 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "The autopilot now knows the market's calendar: big scheduled announcements (Fed, ECB, inflation, jobs) for the next two days and what came out in the last day go to its AI with the market's headlines when it chooses; they show in What happens next; every buy records how close it was to one and to its company's results; the month's OpenAI cost is on the Admin page",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
+   "what": "Practice portfolio graph: the 3m, 6m, 1y and longer buttons are hidden until the account is old enough, and pressing Your own buys or AI autopilot no longer moves the buttons or the graph",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
    "what": "New public pages, one for each of 24 markets plus a hub: the day's top 10 by trend with why each ranks there, updated every day, for visitors from Google (stockiq.tech/screeners-today.html)",
    "found": "session"
   },
@@ -255,14 +265,6 @@
   {
    "at": "2026-10-18",
    "what": "Search: descriptions on nine pages that had none; the sign-in and unsubscribe pages kept out of Google; the four guides link to 32 stock pages."
-  },
-  {
-   "at": "2026-10-18",
-   "what": "Clean-up: three unused scripts and report writers removed (script.js, sidebar.js emptied, the old CoinSpot report)."
-  },
-  {
-   "at": "2026-10-18",
-   "what": "The site is checked every night (site_audit.py): its findings are the Site check card below; it now also catches stale stock pages and made-up figures."
   }
  ]
 }
