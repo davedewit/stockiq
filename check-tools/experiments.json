@@ -462,6 +462,16 @@
    "added": "2026-10-24",
    "started": "2026-10-24",
    "decide": "2026-11-21"
+  },
+  {
+   "id": "signup-simpler",
+   "what": "The sign-up page with three short lines instead of four long ones, and Google and Facebook above the email form",
+   "angle": "sign-ups",
+   "measure": "GA4: accounts created per visit to signup.html, 4 weeks against the 4 before (the owner sends the figures; the Admin page's registrations count as a cross-check)",
+   "status": "running",
+   "added": "2026-10-24",
+   "started": "2026-10-24",
+   "decide": "2026-11-21"
   }
  ]
 }
