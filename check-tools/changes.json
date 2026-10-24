@@ -3,6 +3,12 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Ask the chat on the home page opens the chat (it opened and closed at once); the sign-up and sign-in boxes sit closer under the header",
+   "found": "owner",
+   "link": "https://stockiq.tech/#features"
+  },
+  {
+   "at": "2026-10-24",
    "what": "Home page: Sign up free no longer flashes in the menu for a signed-in visitor (the page marked who was looking only after drawing); the nightly check now catches a page that does that",
    "found": "owner",
    "link": "https://stockiq.tech/"
@@ -287,10 +293,6 @@
   {
    "at": "2026-10-19",
    "what": "The Admin page is calmer: your two questions first (do you need to check in; real money with the confidence dial and the month's goal), then what changed, and the rest as rows you open"
-  },
-  {
-   "at": "2026-10-19",
-   "what": "At the top of this page: Real money, the decision. One verdict from four checks, decided on 11 Oct 2027; until then it shows how each check stands"
   }
  ]
 }
