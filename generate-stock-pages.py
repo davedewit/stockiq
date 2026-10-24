@@ -227,39 +227,13 @@ if (hasPaid) {{
             </div>
 
             <div class="desktop-nav">
-                <a href="../index.html" class="nav-item home-link">Home</a>
-                <div class="nav-item dropdown" onclick="showDropdown('analysis-dropdown', event)">
-                    Analysis <span class="dropdown-arrow">▼</span>
-                    <div class="dropdown-menu" id="analysis-dropdown">
-                        <a href="../analysis.html?option=1">Stock & ETF Analysis</a>
-                        <a href="../analysis.html?option=2">Trading Signals</a>
-                    </div>
-                </div>
-                <div class="nav-item dropdown" onclick="showDropdown('screeners-dropdown', event)">
-                    Screeners <span class="dropdown-arrow">▼</span>
-                    <div class="dropdown-menu" id="screeners-dropdown">
-                        <a href="../analysis.html?option=3">🇺🇸 US Markets</a>
-                        <a href="../analysis.html?option=4">🇪🇺 Europe Markets</a>
-                        <a href="../analysis.html?option=5">🌏 Asia-Pacific Markets</a>
-                        <a href="../analysis.html?option=6">🌎 Americas Markets</a>
-                        <a href="../screeners-today.html">📊 Today&rsquo;s top 10s</a>
-                    </div>
-                </div>
-                <div class="nav-item dropdown" onclick="showDropdown('crypto-dropdown', event)">
-                    Crypto <span class="dropdown-arrow">▼</span>
-                    <div class="dropdown-menu" id="crypto-dropdown">
-                        <a href="../analysis.html?option=7">Crypto Universe Screener</a>
-                    </div>
-                </div>
-                <div class="nav-item dropdown" onclick="showDropdown('account-dropdown', event)" style="margin-left: auto;">
-                    Account <span class="dropdown-arrow">▼</span>
-                    <div class="dropdown-menu" id="account-dropdown">
-                        <a href="../signup.html" class="auth-link signup-link">Register</a>
-                        <a href="../login.html" class="auth-link login-link">Login</a>
-                        <a href="../dashboard.html" class="auth-link dashboard-link" style="display: none;">Dashboard</a>
-                        <a href="#" class="auth-link signout-link" style="display: none;" onclick="signOut(event)">Sign Out</a>
-                    </div>
-                </div>
+                <!-- SHARED_MENU_START: the menu, written by stockiq/shared_parts.py: change it there, not here -->
+<a href="../index.html" class="nav-item home-link" style="text-decoration: none !important; color: inherit; display: flex; align-items: center;">Home</a>
+<div class="nav-item dropdown" onclick="showDropdown('analysis-dropdown', event)">Analysis <span class="dropdown-arrow">▼</span><div class="dropdown-menu" id="analysis-dropdown"><a href="../analysis.html?option=1">Stock &amp; ETF Analysis</a><a href="../analysis.html?option=2">Trading Signals</a></div></div>
+<div class="nav-item dropdown" onclick="showDropdown('screeners-dropdown', event)">Screeners <span class="dropdown-arrow">▼</span><div class="dropdown-menu" id="screeners-dropdown"><a href="../screeners-today.html">📊 Today&rsquo;s top 10s</a><a href="../analysis.html?option=3">🇺🇸 US Markets</a><a href="../analysis.html?option=4">🇪🇺 Europe Markets</a><a href="../analysis.html?option=5">🌏 Asia-Pacific Markets</a><a href="../analysis.html?option=6">🌎 Americas Markets</a><a href="../analysis.html?option=7">🪙 Crypto (540 coins)</a></div></div>
+<a href="../index.html#pricing" class="nav-item home-link" style="text-decoration: none !important; color: inherit; display: flex; align-items: center;">Pricing</a>
+<div class="nav-item dropdown" onclick="showDropdown('account-dropdown', event)" style="margin-left: auto;">Account <span class="dropdown-arrow">▼</span><div class="dropdown-menu" id="account-dropdown"><a href="../signup.html">Register</a><a href="../login.html">Login</a></div></div>
+<!-- SHARED_MENU_END -->
                 <button class="notification-bell" id="notification-bell" onclick="goToNotifications(event)" title="Notifications" aria-label="View notifications" style="display: none; position: relative; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-primary); margin-right: 10px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -292,36 +266,16 @@ if (hasPaid) {{
             </div>
         </div>
         <div class="mobile-menu-content">
-            <div class="mobile-section">
-                <a href="../index.html">🏠 Home</a>
-            </div>
-            <div class="mobile-section">
-                <div class="mobile-section-title">Analysis</div>
-                <a href="../analysis.html?option=1">Stock & ETF Analysis</a>
-                <a href="../analysis.html?option=2">Trading Signals</a>
-            </div>
-            <div class="mobile-section">
-                <div class="mobile-section-title">Screeners</div>
-                <a href="../analysis.html?option=3">🇺🇸 US Markets</a>
-                <a href="../analysis.html?option=4">🇪🇺 Europe Markets</a>
-                <a href="../analysis.html?option=5">🌏 Asia-Pacific Markets</a>
-                <a href="../analysis.html?option=6">🌎 Americas Markets</a>
-                <a href="../screeners-today.html">📊 Today&rsquo;s top 10s</a>
-            </div>
-            <div class="mobile-section">
-                <div class="mobile-section-title">Crypto</div>
-                <a href="../analysis.html?option=7">Crypto Universe Screener</a>
-            </div>
-            <div class="mobile-section">
-                <div class="mobile-section-title">Account</div>
-                <a href="../signup.html">Register</a>
-                <a href="../login.html">Login</a>
-            </div>
-            <div class="mobile-section">
-                <div class="mobile-section-title">Theme</div>
-                <a href="#" onclick="toggleTheme()" id="mobile-theme-toggle">🌙 Dark Mode</a>
-            </div>
-        </div>
+<!-- SHARED_PHONE_MENU_START: the phone menu, written by stockiq/shared_parts.py: change it there, not here -->
+<div class="mobile-section"><a href="../index.html">🏠 Home</a></div>
+<div class="mobile-section" id="mobile-dashboard-section" style="display: none;"><a href="../dashboard.html">📊 Dashboard</a></div>
+<div class="mobile-section"><div class="mobile-section-title">Analysis</div><a href="../analysis.html?option=1">Stock &amp; ETF Analysis</a><a href="../analysis.html?option=2">Trading Signals</a></div>
+<div class="mobile-section"><div class="mobile-section-title">Screeners</div><a href="../screeners-today.html">📊 Today&rsquo;s top 10s</a><a href="../analysis.html?option=3">🇺🇸 US Markets</a><a href="../analysis.html?option=4">🇪🇺 Europe Markets</a><a href="../analysis.html?option=5">🌏 Asia-Pacific Markets</a><a href="../analysis.html?option=6">🌎 Americas Markets</a><a href="../analysis.html?option=7">🪙 Crypto (540 coins)</a></div>
+<div class="mobile-section"><a href="../index.html#pricing">💳 Pricing</a></div>
+<div class="mobile-section"><div class="mobile-section-title">Account</div><a href="../signup.html">Register</a><a href="../login.html">Login</a></div>
+<div class="mobile-section"><div class="mobile-section-title">Theme</div><a href="#" onclick="event.preventDefault(); toggleTheme()" id="mobile-theme-toggle">🌙 Dark Mode</a></div>
+<!-- SHARED_PHONE_MENU_END -->
+</div>
     </div>
 
     <main style="max-width: 1200px; margin: 0 auto; padding: 5px 20px 20px;">
@@ -356,28 +310,16 @@ if (hasPaid) {{
 
     </main>
 
-    <footer class="footer">
-        <p>&copy; 2026 StockIQ - Research tools for individual investors</p>
-        <p>
-            <a href="../terms.html" style="color: #007bff; text-decoration: none;">Terms of Service</a> • 
-            <a href="../privacy-policy.html" style="color: #007bff; text-decoration: none;">Privacy Policy</a> • 
-            <a href="../refunds.html" style="color: #007bff; text-decoration: none;">Refund Policy</a> • 
-            <a href="../support.html" style="color: #007bff; text-decoration: none;">Support</a> • 
-            <a href="../contact.html" style="color: #007bff; text-decoration: none;">Contact</a> • 
-            <a href="../data-deletion.html" style="color: #007bff; text-decoration: none;">Data Deletion</a> • 
-            <a href="../news.html" style="color: #007bff; text-decoration: none;">News</a> • 
-            <a href="../blog.html" style="color: #007bff; text-decoration: none;">Blog</a> • 
-            <a href="../about.html" style="color: #007bff; text-decoration: none;">About</a> • 
-            <a href="../faq.html" style="color: #007bff; text-decoration: none;">FAQ</a>
-        </p>
-        <p style="margin-top: 15px;">
-            <a href="https://instagram.com/stockiq.tech" target="_blank" style="color: #E4405F; text-decoration: none; font-size: 24px;" title="Follow us on Instagram">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
-            </a>
-        </p>
-    </footer>
+    <!-- SHARED_FOOTER_START: the footer, written by stockiq/shared_parts.py: change it there, not here -->
+<footer class="footer site-footer">
+<div class="sf-cols">
+<div class="sf-brand"><a href="../index.html" class="sf-logo"><img src="../stockiq-logo.png" alt="" width="20" height="20" loading="lazy">StockIQ</a><p>Research tools for individual investors: scores, screeners and a practice portfolio.</p></div>
+<div class="sf-col"><div class="sf-head">Tools</div><a href="../analysis.html?option=1">Stock analysis</a><a href="../screeners-today.html">Today&rsquo;s top 10s</a><a href="../analysis.html?option=3">All screeners</a><a href="../index.html#pricing">Pricing</a></div><div class="sf-col"><div class="sf-head">Learn</div><a href="../news.html">Market news</a><a href="../blog.html">Blog</a><a href="../faq.html">FAQ</a><a href="../about.html">About</a></div><div class="sf-col"><div class="sf-head">Help</div><a href="../support.html">Support</a><a href="../contact.html">Contact</a><a href="../terms.html">Terms of Service</a><a href="../privacy-policy.html">Privacy Policy</a><a href="../refunds.html">Refund Policy</a><a href="../data-deletion.html">Data Deletion</a></div>
+</div>
+<p class="sf-legal">General information only, not financial advice. Scores and signals are automated model outputs that do not take your personal circumstances into account, and past performance does not indicate future results. Market data comes from third parties (Yahoo Finance, Finnhub) and may be delayed or inaccurate.</p>
+<p class="sf-copy">&copy; 2026 StockIQ &middot; <a href="https://instagram.com/stockiq.tech" target="_blank" rel="noopener noreferrer">Instagram</a></p>
+</footer>
+<!-- SHARED_FOOTER_END -->
     
     <script>
     function toggleMobileMenu() {{

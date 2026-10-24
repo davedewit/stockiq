@@ -503,13 +503,18 @@
   {
    "id": "site-wide",
    "part": "What every page shares: the header and menu, the footer, light and dark, the cache-clear page",
-   "where": "theme.js, site-header.js, styles.css, clear-cache.html, the header and footer of every page",
+   "where": "theme.js, site-header.js, shared_parts.py, styles.css, clear-cache.html, the header and footer of every page",
    "last": "2026-10-24",
    "log": [
     {
      "at": "2026-10-24",
      "kind": "fixed",
      "found": "Fixed: Guides, legal and the 25 daily screener pages lacked the phone menu, bell, swipe, auth.js (usage count, signed-in name); site-header.js fills in what a page lacks; phone_check.js checks every page's header; idea nav-simpler for the desktop menu"
+    },
+    {
+     "at": "2026-10-24",
+     "kind": "simplified",
+     "found": "Simplified: Menu and footer were 9 and 13 hand copies (disclaimer missing on some, Blog pointing two ways): now one definition in shared_parts.py written into every page; the menu tidied (crypto under Screeners, Pricing in the bar), the footer redesigned; the light pages' own menu script removed (theme.js has one showDropdown). Copies 219 to 106 lines"
     }
    ]
   },

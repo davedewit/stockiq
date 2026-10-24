@@ -227,9 +227,9 @@ warns about; one change at a time, measured, with its experiment entry.
   (3) **Store his autopilot record compressed**, as `_brain` is (about 190 KB written at most check-ins: the largest running cost).
   (4) Decide `daily-review` by 1 Nov (Claude recommends keeping it: `touch check-tools/reviews/daily/KEEP`). (5) The walk of step 5d.
   (6) A small one from him: a "View report" link on the "Analysis complete" note after a background analysis.
-  (7) **Built once, first job** (at the weekly review, ~30 Oct): the hand-edited pages' header and footer from one source each, written into
-  every page between markers by one script (as `update_home_stock_links.py` does; static HTML stays for search engines), with the desktop
-  menu simplified at the same time (idea `nav-simpler`). It removes most of the 219 copied lines (`site_audit.py` "copies").
+  (7) **Built once, next:** the copies count was 219 lines in the morning of 24 Oct and 106 after the shared menu and footer
+  (`shared_parts.py`) and the one `showDropdown` in `theme.js`; what is left is mostly the notification bell's code in index, blog and
+  news (merge with a real signed-in browser to check) and the pages' own copies of the phone-menu functions. Bring it down, never up.
 - **How the session works:** the routine at the top (steps 0 to 6, with 5b, 5c, 5d); "THE GOAL OF ALL OF IT" below; four entry points
   for checks (`session_start.py`, `site_audit.py` daily, `weekly_check.py` weekly, `autopilot_review.py`); one register each for parts,
   experiments and questions, kept in step by `registers_check.py`. A new check goes into one of the four, never a fifth thing.
@@ -335,6 +335,7 @@ Lambdas ──> Yahoo Finance + Finnhub (data), OpenAI gpt-4o-mini (AI chat), Dy
 
 | File | Owner | How to change it |
 |---|---|---|
+| **The menu (desktop and phone) and the footer of every page**, between `<!-- SHARED_MENU/PHONE_MENU/FOOTER_START/END -->` | **`shared_parts.py`** (`MENU`, `FOOTER_COLUMNS`, `DISCLAIMER`; since 24 Oct 2026) | Change the definition, run `python3 shared_parts.py` (hand-edited pages, the 3,467 stock pages and the stock-page template; the daily screener pages copy the screener guide's). `--check` says which page drifted; the nightly site check runs it (`shared-parts`). The footer's look is `.site-footer` in `styles.css`; the dropdowns' code is one `showDropdown` in `theme.js` (a page's own overrides it) |
 | `stocks/*.html` layout, head, footer | `generate-stock-pages.py` template | Edit the template, run the script (manual, not daily). It keeps the NEWS/RELATED/ANALYSIS sections, robots value, data descriptions and dateModified |
 | `stocks/*.html` NEWS section | `update_stock_news.py` (daily) | Script only |
 | `stocks/*.html` RELATED section ("People also watch") | `people_also_watch_stocks.py --missing` (daily) | Script only |
@@ -5316,6 +5317,14 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     compare with the live file). A one-off website deploy is now `pending-<name>/deploy.sh` of three lines: `ROWS="file:was:new …"
     exec bash /Users/dave/VSCODE/stockiq/check-tools/web_deploy.sh <its folder>`.
 
+- **24 Oct 2026, late: the menu and the footer written from one definition** (the owner: the menu and account dropdown "done a very
+  long time ago via a very old AI", the footer "doesn't look that great"). The desktop menu had 9 versions and the footer 13 (the
+  disclaimer missing on About and Sign in, "Blog" pointing at two pages, the stock pages' old wording). `shared_parts.py` now writes both
+  into every page: Home · Analysis · Screeners (Today's top 10s first; crypto moved in, its own menu held one item) · Pricing (new, one
+  click from everywhere) · Account; the footer in three columns (Tools, Learn, Help) with the disclaimer on every page, styled once
+  (`.site-footer`). The guides' and legal pages' own menu script (with a "Logout" that cleared everything the browser kept for the
+  site) went: `theme.js` has the one `showDropdown`. Copies 219 → 106 lines. Checked: every inline script parses, phone fit and header
+  on 16 pages at 390 and 360px, 386 swipe checks, the visitor test (1,906), the menu opening on six pages; live after the deploy.
 - **24 Oct 2026** (the owner: news before buying and selling, e.g. the Fed's decision next week; the deploy email's duration):
   - **The daily update's stock-page step crashed** ("Too many open files": the Mac's scheduler gives a job 256): no stock page got
     that day's figures. `deploy-to-s3.sh` now raises the limit (section 5). Found by the opening check ("Traceback" in the log).

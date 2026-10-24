@@ -25,6 +25,7 @@ For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-s
 | Script | When to use |
 |---|---|
 | `fetch_stock_data.py` | After adding new stocks — fetches names/sectors from Yahoo, updates stocks.txt and NUMERIC_COMPANY_NAMES |
+| `shared_parts.py` | The menu (desktop and phone) and the footer of every page, defined once: change it there, run it, deploy. `--check` (read-only) lists pages that drifted; `--dry-run` |
 | `generate-stock-pages.py` | After template changes — regenerates all 3,467 HTML pages (preserves NEWS/RELATED/ANALYSIS sections) |
 | `Sync_stock_to_news.py` | When news.html is out of sync — pushes stock page news → news.html |
 | `sync_news_to_stock_pages.py` | When stock pages are missing news that's in news.html |

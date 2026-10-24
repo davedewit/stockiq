@@ -8,6 +8,7 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
   broken-links    a link or a script on a page whose file is not on the site
   duplicate-code  the same function defined in several pages or scripts (the market panel was three copies)
   copies          a block of 8+ lines (code, style or markup) word for word in 3+ hand-edited files; a problem when a change adds one
+  shared-parts    a page whose menu or footer differs from the one definition in shared_parts.py
   made-up-visuals Math.random() used to draw something (the side panel's charts were random lines), a fixed line written into a
                   chart, or figures written into the code to show when the data fails
   stale-stock-pages indexed stock pages whose "Data as of" is more than 4 days behind the newest
@@ -302,7 +303,8 @@ def main():
     for f in pages + scripts:
         if generated.match(f):
             continue
-        rows = [l.strip() for l in src[f].split('\n')]
+        text = re.sub(r'<!-- SHARED_(\w+)_START.*?<!-- SHARED_\1_END -->', '', src[f], flags=re.S)   # written from one definition (shared_parts.py)
+        rows = [l.strip() for l in text.split('\n')]
         rows = [l for l in rows if len(l) > 3 and not re.fullmatch(r'[{}()\[\];,]*|</?[a-z0-9]+>', l)]
         for i in range(len(rows) - W + 1):
             seen_in.setdefault(hash('\n'.join(rows[i:i + W])), (set(), rows[i]))[0].add(f)
@@ -325,6 +327,14 @@ def main():
         else:
             find('copies', 'idea', f'{copied} lines are copied word for word into 3 or more hand-edited files' + (f' ({prev} at the last check)' if prev is not None else '') + f'. The largest: {said}',
                  'one shared file each, a part at a time, at the weekly review (lens "Built once")')
+
+    # shared-parts: every page's menu and footer as defined once in shared_parts.py (24 Oct 2026); a page edited by hand drifts
+    if not STAGE:
+        r = subprocess.run([sys.executable, os.path.join(os.path.dirname(HERE), 'shared_parts.py'), '--check'], capture_output=True, text=True)
+        if r.returncode:
+            lines = [l for l in r.stdout.splitlines() if l.startswith('differs')]
+            find('shared-parts', 'problem', f'{len(lines)} page(s) have a menu or footer that differs from the one definition: ' + '; '.join(l[9:] for l in lines[:5]),
+                 'change shared_parts.py, not the page, then run it: python3 shared_parts.py')
 
     # this run against the last
     os.makedirs(OUT, exist_ok=True)

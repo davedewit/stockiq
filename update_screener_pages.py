@@ -341,7 +341,8 @@ def shell_parts():
     with open(guide if os.path.exists(guide) else os.path.join(WEBSITE, 'stock-screener-guide.html'), encoding='utf-8') as f:
         page = f.read()
     nav = page[page.index('<nav class="top-nav">'):page.index('</nav>') + len('</nav>')]
-    foot = page[page.index('<footer class="footer">'):page.index('</body>')] + PANEL
+    start = page.find('<!-- SHARED_FOOTER_START')      # the shared footer (shared_parts.py) with its markers, or an older footer
+    foot = page[start if start >= 0 else page.index('<footer'):page.index('</body>')] + PANEL
     return nav, foot
 
 
