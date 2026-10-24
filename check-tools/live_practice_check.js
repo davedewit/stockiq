@@ -90,6 +90,15 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     console.log('range asked for the fund: ' + (passed.filter(p => /SPY/.test(p)).join(' , ') || 'SPY not seen in the shortened addresses'));
     console.log('answered here, never reached the site: ' + answered.length + ' (' + [...new Set(answered.map(a => a.split(' ')[0]))].join(', ') + ')');
     if (process.env.SHOT) {
+      // MOVES=1 (24 Oct 2026): press All markets, Your own buys and AI autopilot in turn; where the range buttons, the By-market
+      // button and the picture sit each time, and which ranges are offered (the owner: "when i click ... things move alot")
+      if (process.env.MOVES) {
+        for (const key of ['value', 'own', 'ai', 'value']) {
+          console.log('moves ' + key + ': ' + await run(`(() => { const b = document.querySelector('[data-pp="chart-key"][data-id="${key}"]'); if (!b) return 'no button'; b.click();
+            return new Promise(r => setTimeout(() => { const y = (q) => { const e = document.querySelector(q); return e ? Math.round(e.getBoundingClientRect().top + window.scrollY) : '-'; };
+              r('tabs ' + y('.pp-chart-tabs') + ', by-market ' + y('.pp-mkt-btn') + ', read ' + y('#pp-chart-read') + ', picture ' + y('#pp-chart svg') + '; ranges: ' + [...document.querySelectorAll('[data-pp="chart-range"]')].map(x => x.textContent).join(' ')); }, 400)); })()`));
+        }
+      }
       if (process.env.MARKET) { console.log('chosen before the picture: ' + await run(`(() => { const b = document.querySelector('[data-pp="mkt-toggle"]'); if (!b) return 'no menu'; if (!document.querySelector('.pp-mkt.open')) b.click(); ${process.env.MARKET_OPEN ? '' : `const q = document.querySelector('[data-pp="market"][data-id=' + JSON.stringify(${JSON.stringify(process.env.MARKET)}) + ']'); if (q) q.click();`} return (document.querySelector('.pp-mkt-btn') || {}).textContent; })()`)); await sleep(500); }
       await run(`(() => { const c = document.querySelector('#practice-portfolio'); if (${process.env.OPEN_MORE ? 1 : 0}) { const m = document.querySelector('#pp-more'); if (m) m.open = true; } c.scrollIntoView(); window.scrollBy(0, -80); return 1; })()`); await sleep(400);
       const rect = JSON.parse(await run(`(() => { const r = document.querySelector('#practice-portfolio').getBoundingClientRect(); return JSON.stringify({ x: 0, y: Math.max(0, r.top + window.scrollY - 70), width: window.innerWidth, height: Math.min(1500, r.height + 90) }); })()`));
