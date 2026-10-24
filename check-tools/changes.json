@@ -3,6 +3,12 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Sign-up page now leads with 'Trade $100,000 of practice money: yourself, with your own AI trader, or both'",
+   "found": "owner",
+   "link": "https://stockiq.tech/signup.html"
+  },
+  {
+   "at": "2026-10-24",
    "what": "Sign-up page now reads 'Set up your own AI trader': make it yours (its markets and risk, or let it pick; switch to trading by hand any time), and can you and the AI beat the S&P 500",
    "found": "owner",
    "link": "https://stockiq.tech/signup.html"
@@ -301,10 +307,6 @@
   {
    "at": "2026-10-23",
    "what": "Admin page: 'So far' (the record) and 'Claude's forecast' are now clearly two different things; the so-far reading had a fault (it left out the first and latest days) and leaned the wrong way"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "Small charts in the market panel now always match the colour of the change beside them"
   }
  ]
 }
