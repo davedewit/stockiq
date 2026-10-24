@@ -92,6 +92,15 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     if (process.env.SHOT) {
       // MOVES=1 (24 Oct 2026): press All markets, Your own buys and AI autopilot in turn; where the range buttons, the By-market
       // button and the picture sit each time, and which ranges are offered (the owner: "when i click ... things move alot")
+      // FOLDS=1 (24 Oct 2026): open every fold of the tab, redraw it as the minute's refresh does, and say which stayed open (the owner:
+      // "Show the figures" closed on him); and how many days the figures list shows before "Show all"
+      if (process.env.FOLDS) {
+        console.log('folds: ' + await run(`(() => { const box = document.querySelector('#practice-portfolio'); const ids = [...box.querySelectorAll('details[id]')].map(d => { d.open = true; return d.id; });
+          return new Promise(r => setTimeout(() => { const b = document.querySelector('[data-pp="chart-key"][data-id="value"]'); if (b) b.click(); const c = document.querySelector('[data-pp="chart-range"][data-id="all"]'); if (c) c.click();
+            setTimeout(() => { const shut = ids.filter(id => { const d = document.getElementById(id); return !d || !d.open; }); const f = document.getElementById('pp-figs');
+              const more = document.querySelector('[data-pp="figs-all"]');
+              r('opened ' + ids.join(', ') + '; closed after the redraw: ' + (shut.length ? shut.join(', ') : 'none') + '; figures rows ' + (f ? f.querySelectorAll('tr').length - 1 : '-') + (more ? ', button: ' + more.textContent : '')); }, 600); }, 300)); })()`));
+      }
       if (process.env.MOVES) {
         for (const key of ['value', 'own', 'ai', 'value']) {
           console.log('moves ' + key + ': ' + await run(`(() => { const b = document.querySelector('[data-pp="chart-key"][data-id="${key}"]'); if (!b) return 'no button'; b.click();

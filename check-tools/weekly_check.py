@@ -219,6 +219,10 @@ if not QUICK:
         note('4. Background run and visitors', "the Practice portfolio graph: pressing All markets, Your own buys and AI autopilot moves nothing (1100 wide)", len(spots) == 1, sorted(spots)[:3] or out.strip().splitlines()[-2:])
     except Exception as e:
         note('4. Background run and visitors', "the Practice portfolio graph: pressing its view buttons moves nothing", False, str(e)[:200])
+    # every fold of the Practice portfolio stays open when the tab is drawn again (24 Oct 2026, the owner: "Show the figures" closed at the refresh)
+    code, out = run(['node', 'live_practice_check.js'], 300, env={'REAL_USER': OWNER, 'FOLDS': '1', 'SHOT': os.path.join(tempfile.gettempdir(), 'stockiq-folds.png')})
+    line = next((l for l in out.splitlines() if l.startswith('folds: ')), '')
+    note('4. Background run and visitors', "the Practice portfolio's folds stay open through a refresh (the breakdown, the figures, the sold list)", 'closed after the redraw: none' in line and 'pp-figs' in line, line or out.strip().splitlines()[-2:])
     # how long "Prices as of" takes to show (23 Oct 2026: the owner waited about 15 seconds; six requests instead of 60 made it about 3)
     code, out = run(['node', 'live_practice_check.js'], 300, env={'REAL_USER': OWNER, 'TIME': '1'})
     secs = re.search(r'second visit: .*? after ([\d.]+) s', out)
