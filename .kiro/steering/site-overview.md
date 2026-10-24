@@ -201,6 +201,10 @@ warns about; one change at a time, measured, with its experiment entry.
   money", four short lines, Google first** (left alone now: it is what `signup-simpler` measures). New checks: the header on every
   phone page, the menu not moving while a page loads, the glide on release, the copies count (`site_audit.py` `copies`: 219 → 106
   lines), shared-parts drift, `theme-early`. New tools: `stage_web.py`, `lambda_deploy.sh` (a deploy is one command).
+  Last, the same evening: the phone menu puts Sign up free / Log in first for a signed-out visitor and is one menu on every page; the
+  daily pages' run buttons run their screener in the right section (`run-links`); the room for the market panel is set in the head
+  (`late-layout`); the dashboard's notices sit under the header; the Admin card's verdict is read by the checks (`CHECKIN`) and must
+  say "No, all good" before a session ends; `weekly_check.py --recheck` and `--ack-daily`. The card said "No, all good" at the close.
 - **To be seen for real:** Monday's daily run rebuilding the daily pages with the panel and the strip by itself, and the stock pages'
   shared parts surviving it; the first trial account switching the autopilot on, and its pause when the trial ends; `M&M.NS`, the
   market's calendar (`ev`, `ed`) and the other items from earlier days.
