@@ -75,7 +75,9 @@ Report `check-tools/reviews/weekly/check-<date>.txt`, `weekly_check.json`, a car
 passed** (`--if-due`, end of `deploy-to-s3.sh`, log `~/stockiq-weekly-check.log`); session_start part 1d makes a failure or a check
 7+ days old a finding. **A session acts on every failure first, then reads a dashboard tab in full (`clarity_check.py --keep`) and
 tells the owner in plain words what was checked and what was fixed. When a fault is found by hand, add a check for it here.**
-The script is the floor; the daily Claude review and the sessions are the eyes. **"🤖 Do you need to check in?"** heads the Admin page
+**When a session fixes a failed daily update by hand** (as on 24 Oct 2026, the crash on "Too many open files"), it says so with
+`python3 check-tools/weekly_check.py --ack-daily "<what was done>"`, tied to that log, and re-runs the full check; otherwise the Admin page's
+"Do you need to check in?" stays red until the next daily run (the owner asked why it said so). The script is the floor; the daily Claude review and the sessions are the eyes. **"🤖 Do you need to check in?"** heads the Admin page
 (`needMeHtml`; the owner: "then i can go there on my phone see if you need me"): **Yes, please check in** (red: a failed check-in,
 the autopilot not run for 2 hours, a failed full check, the bill), **When you can** (amber: the last session 7+ days ago, going by
 "What changed lately", so the weekly review and new improvements are due; decisions waiting; site-check problems; a full check 8+

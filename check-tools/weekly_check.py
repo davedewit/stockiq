@@ -19,6 +19,13 @@ and reports in plain words what was checked and what was fixed (site-overview.md
 import os, sys, json, re, subprocess, tempfile, datetime, importlib.util, shutil
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE); WEB = os.path.join(os.path.dirname(ROOT), 'website')
 QUICK = '--quick' in sys.argv
+if '--ack-daily' in sys.argv:              # a session fixed the last daily update's failure: say so against that very log (24 Oct 2026)
+    _log = os.path.expanduser('~/stockiq-daily.log'); _i = sys.argv.index('--ack-daily')
+    _what = sys.argv[_i + 1] if _i + 1 < len(sys.argv) else 'fixed by a session'
+    os.makedirs(os.path.join(HERE, 'reviews', 'weekly'), exist_ok=True)
+    json.dump({'log_mtime': round(os.path.getmtime(_log)), 'what': _what, 'at': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')},
+              open(os.path.join(HERE, 'reviews', 'weekly', 'daily_ack.json'), 'w'), indent=1)
+    print('acknowledged: the daily update log of', datetime.datetime.fromtimestamp(os.path.getmtime(_log)).strftime('%d %b %H:%M'), '-', _what); sys.exit(0)
 EMAIL = '--email' in sys.argv               # send the owner a short summary (SES, from autopilot@stockiq.tech; free at this volume)
 if '--if-due' in sys.argv:                  # the daily update calls it every day; it runs when the last full check is 7 days old or more
     try:
@@ -236,7 +243,16 @@ if not QUICK:
     log = os.path.expanduser('~/stockiq-daily.log')
     if os.path.exists(log):
         t = open(log, errors='replace').read(); age = (datetime.datetime.now().timestamp() - os.path.getmtime(log)) / 86400
-        note('4. Background run and visitors', f"the last daily update finished cleanly ({age:.0f} day{'' if round(age) == 1 else 's'} ago)", 'All done' in t and not re.search(r'could not rebase|push failed|Traceback', t) and age < 3, [l for l in t.splitlines() if re.search('could not|failed|Traceback', l)][:3] or f'{age:.1f} days old')
+        # the reason shown is the real one (24 Oct 2026: it quoted three harmless "Cookie/crumb fetch failed" lines, not the crash);
+        # a failure a session has fixed is acknowledged against that very log (its time), so the alarm clears until the next run:
+        #   python3 check-tools/weekly_check.py --ack-daily "<what was done>"
+        bad = [l for l in t.splitlines() if re.search(r'Traceback|Error:|could not rebase|push failed', l) and 'crumb' not in l][:3]
+        ack_p = os.path.join(HERE, 'reviews', 'weekly', 'daily_ack.json')
+        ack = json.load(open(ack_p)) if os.path.exists(ack_p) else {}
+        acked = bool(bad) and ack.get('log_mtime') == round(os.path.getmtime(log))
+        clean = 'All done' in t and (not bad or acked) and age < 3
+        note('4. Background run and visitors', f"the last daily update finished cleanly ({age:.0f} day{'' if round(age) == 1 else 's'} ago)" + (f"; its failure was fixed by a session: {ack.get('what', '')}" if acked else ''),
+             clean, bad or f'{age:.1f} days old')
 
 shutil.rmtree(tmp, ignore_errors=True)
 passed, total = sum(1 for r in results if r[2]), len(results)
