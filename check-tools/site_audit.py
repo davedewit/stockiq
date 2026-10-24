@@ -229,6 +229,23 @@ def main():
         want = keys + 1                                    # the share screeners, and the crypto screener
         if int(m.group(1)) != want:
             find('stale-counts', 'problem', f'the home page says {m.group(1)} screeners; screeners.js has {keys} share screeners and there is crypto: {want}', 'index.html')
+        # the AI chat's own count, which it tells visitors (24 Oct 2026: the counts are kept the same everywhere)
+        chat = read(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'lambda-sync', 'stockiq-ai-chat', 'lambda_function.py'))
+        cm = re.search(r'\((\d+) in all, under Screeners', chat)
+        if cm and int(cm.group(1)) != want:
+            find('stale-counts', 'problem', f'the AI chat tells visitors there are {cm.group(1)} screeners; there are {want}', 'stockiq-ai-chat')
+    # the number of daily screener pages, as the hub, the home page and the AI chat give it
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('sp', os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'update_screener_pages.py'))
+        sp = importlib.util.module_from_spec(spec); spec.loader.exec_module(sp); pages_n = len(sp.SCREENERS)
+        chat = read(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'lambda-sync', 'stockiq-ai-chat', 'lambda_function.py'))
+        for where, text in (('screeners-today.html', src.get('screeners-today.html', '')), ('index.html', src.get('index.html', '')), ('stockiq-ai-chat', chat)):
+            for n in set(re.findall(r'(?:for|of|across|each of) (\d+) (?:major indexes|markets)', text)):
+                if int(n) != pages_n:
+                    find('stale-counts', 'problem', f'says {n} markets have a daily page; update_screener_pages.py makes {pages_n}', where)
+    except Exception as e:
+        find('stale-counts', 'idea', f'the daily pages\' count could not be compared ({type(e).__name__})', 'update_screener_pages.py')
 
     # seo-basics
     titles = {}
