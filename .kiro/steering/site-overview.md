@@ -203,6 +203,11 @@ warns about; one change at a time, measured, with its experiment entry.
   updated daily. Only the autopilot's side (not his own buys, no address). Framed as an experiment to follow, never "it will make you
   money" (no licence; a few weeks prove nothing). Linked from the sign-up page, the home page's autopilot card and the strip. Measured
   as an experiment on sign-ups and return visits.
+  **With it, a first-visit "Start here" for a new account** (24 Oct 2026, the owner: visitors must not think "they are just going to login
+  and watch an AI trader do everything"): the sign-up page now promises "Trade $100,000 of practice money: yourself, with your own AI
+  trader, or both", so a new account's dashboard should open on the Practice portfolio with three steps (buy your first stock; switch
+  on your AI trader, one switch; watch the graph against the S&P 500), until done. Measured with `signup-simpler` (accounts that make
+  a first trade within their trial).
 - **Next session, in order:** (0) **FIRST: the stock pages for the 1,257 listed shares without one (item 1b below)**: the owner, 24 Oct
   2026, wants the daily pages' links to go to a stock page for 90% or more ("i prefer going to the html page"); the analysis link only
   where no page can be made. (1) **#8** (he said yes on the Admin page): a score-version tag on buys and learning only from the
