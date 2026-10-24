@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Stock pages with no news at all (49 of the 946 in Google, all outside the US, e.g. Ramsay Health Care) now take the newest article clearly about the company, even if it is not 'critical' news; from Monday's run",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
    "what": "The stock pages showed Thursday's figures on Saturday (this morning's update had crashed before writing them): refreshed by hand to Friday's close and uploaded; the crash itself is fixed for Monday's run",
    "found": "owner"
   },
@@ -268,10 +273,6 @@
   {
    "at": "2026-10-19",
    "what": "The Admin page's AWS figure now shows what StockIQ itself costs to run ($0.48 this month, on course for about $0.80), with the one-off $2.65 Cost Explorer charge of 17 Oct and your other projects ($0.11) listed apart, so the red $3.24 is gone"
-  },
-  {
-   "at": "2026-10-18",
-   "what": "Made for a laptop that is often off for days: stock news now looks back a week, stock pages keep their figures up to three weeks before leaving Google, and the first daily update after a gap catches up by itself."
   }
  ]
 }
