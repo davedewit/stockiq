@@ -407,7 +407,7 @@
   },
   {
    "id": "screener-email",
-   "what": "The home page's email box offers last week's top 5 of one market from the daily pages, and a weekly email of the daily pages' highlights to the signup list (nothing has ever been sent): a reason to come back. Starts when the screener pages have run 2 weeks",
+   "what": "The home page's email box offers last week's top 5 of one market from the daily pages, and a weekly email of the daily pages' highlights to the signup list (nothing has ever been sent): a reason to come back. Starts when the screener pages have run 2 weeks Then by interest (the owner, 24 Oct 2026): a signed-in subscriber gets the markets they ticked or looked at, an anonymous one picks markets when subscribing, or all of them",
    "angle": "growth",
    "measure": "sign-ups to the list a week before and after; opens and clicks of the first emails",
    "status": "idea",
@@ -426,6 +426,14 @@
    "what": "A daily public page for the crypto screener's top 10, as the 24 market pages are (it has the most searches of any list)",
    "angle": "growth",
    "measure": "Search Console impressions and clicks on it after 8 weeks",
+   "status": "idea",
+   "added": "2026-10-24"
+  },
+  {
+   "id": "home-show",
+   "what": "The owner's idea (24 Oct 2026): show what the site does with pictures, not only words: one or two real screenshots (the practice portfolio's graph against the S&P 500, a daily market page) in the home page's 'What you can do' section, replacing text rather than adding to it; a short screen recording later. Starts after the daily pages have run a week (they make the best picture)",
+   "angle": "growth",
+   "measure": "GA4: the share of home-page visitors who go on to the analysis page or sign up, two weeks before and after",
    "status": "idea",
    "added": "2026-10-24"
   }

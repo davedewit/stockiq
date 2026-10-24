@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Every share on the daily market pages can be clicked: one without a stock page opens its full analysis; the Screeners menu on every page has a new entry, Today's top 10s",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
    "what": "Home page: a new section near the top, This week in the markets: the big scheduled announcements coming up (in the visitor's own time) and how the trend stands across 24 markets today, rewritten every day",
    "found": "owner"
   },
@@ -263,10 +268,6 @@
   {
    "at": "2026-10-18",
    "what": "Stock pages: 596 of the 958 in Google still showed 8 or 9 Oct figures, and would have started dropping out of Google this week. Prices now come through our own price function on AWS whenever Yahoo refuses this Mac; all 596 refreshed (online with Monday's daily run)."
-  },
-  {
-   "at": "2026-10-18",
-   "what": "Reports no longer say 'real-time' (the site's prices can be delayed): they say 'latest available prices'."
   }
  ]
 }

@@ -171,6 +171,9 @@ warns about; one change at a time, measured, with its experiment entry.
   OpenAI cost on the Admin page (from the next scheduled runs). **Next: #8** (learning only from the current score, notes from 30 a group,
   `chosen` rank when `rp`, one night's correlated losses once, replay `review_resting`). **To see Monday:** the daily run rebuilds the
   screener pages and the home section by itself; its email carries the duration (and ⚠️ if a step failed).
+- **Search Console** still showed 966 discovered on 24 Oct: Google reads the sitemap on its own schedule (the live one has 991). The owner
+  may press Resubmit under Sitemaps; nothing else is needed. Ideas from the day's last talk: `home-show` (screenshots, replacing text),
+  `screener-email` by interest.
 - **24 Oct:** the account $97,967, **$356 ahead** of the same $100,000 in an S&P 500 fund (the fund fell more on 22-23 Oct); 105
   finished trades, -0.07% a trade this month (inside the margin of error). That day: the daily update's crash fixed (open-file limit),
   its email gives the duration and ⚠️ on an error line, Fed days studied (no rule, question 50), each company's results date kept
@@ -490,7 +493,10 @@ git pull --rebase && git push
   `update_screener_pages.py` in the daily run from the coordinator on AWS (no account, nothing saved; about 25 calls a day, 30 s): the
   top 10 by the trend score with each share's breakdown, how the whole list stands, new in and out since the day before, the lowest 5,
   the full ranking folded, links to the stock pages. A market that fails keeps yesterday's page; fewer than half answering writes
-  nothing. Names: `stocks.txt`, the analysis page's name tables, then the price function once (`screener_names.json`). In the
+  nothing. Names: `stocks.txt`, the analysis page's name tables, then the price function once (`screener_names.json`). **Every share is a link**: to its stock page,
+  or, with none on the site, to its analysis (`analysis.html?option=1&symbol=…&autorun=true`, `rel="nofollow"` so crawlers set nothing off).
+  The **Screeners menu of every page has "📊 Today's top 10s"** (the hand-edited pages, the stock-page template for its next
+  regeneration; the daily pages copy the screener guide's menu each run). The site check leaves the daily pages out of its growth alarm. In the
   sitemap (`update_sitemap.py` adds every one, daily) and named to IndexNow daily (`website/notify_search_engines.py`). Linked
   from the home page's screeners card. Experiment `screener-pages`, decided on Search Console's figures. Not yet: crypto, the
   email box's sample.
