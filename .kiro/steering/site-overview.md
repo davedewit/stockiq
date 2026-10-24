@@ -3795,6 +3795,12 @@ more finished trades than there are, and would chase noise before then.
   exact replacement and confirm with a diff or a line count that nothing else changed.
 - **When the owner says a change does not show, ask where he is looking at the site and reproduce that** before changing
   anything; never address the site's own files as "/file" (section 9, the bell).
+- **A browser test against the live site answers every POST itself** (24 Oct 2026: a one-off screenshot script, signed in as the
+  made-up `someone@example.com`, let the site's calls through; the usage tracker creates a "registration" for any email it is sent,
+  and the owner's daily email then listed it as a new social-login user). Use the kept tools (they block POSTs), never a quick script
+  that lets requests through. `session_start.py` part 3b flags any new made-up account in the user table. Three are on record and
+  explained (`testuser_csv@`, `trial-user@`, `someone@example.com`); deleting them waits for the owner's yes. The chat's daily report
+  likewise shows the session's own test questions (`nobody-deploy-check@example.com`, `anon-test-links`).
 - **Both GitHub repositories are public** (checked 11 Oct 2026): nothing private belongs in a commit, in a commit message
   or in these notes: no keys, no customer addresses, nothing personal. An account is "the owner's account" here, not
   an address.

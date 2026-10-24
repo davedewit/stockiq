@@ -149,6 +149,23 @@ age = (time.time() - os.path.getmtime(files[-1])) / 86400 if files else 99
 print(f"  newest: {os.path.basename(files[-1]) if files else 'none'}, {age:.1f} days old")
 if age >= 7: finding(f"THE WEEKLY REVIEW IS DUE (the newest is {age:.0f} days old): run the routine in site-overview.md section 8c before anything else")
 
+# 3b. made-up test accounts in the user table (24 Oct 2026: a session's one-off browser script, signed in as someone@example.com,
+# reached the live usage tracker; any call with an email creates a "registration", which the owner's daily email lists as a new
+# social-login user). Tests must answer the site's POSTs locally; a row found here is ours to explain and, with his yes, delete.
+try:
+    fake, kw = [], dict(FilterExpression='contains(user_date, :e) AND contains(user_date, :r)',
+                        ExpressionAttributeValues={':e': '@example.', ':r': '#registration'}, ProjectionExpression='user_date')
+    t = db.Table('stockiq-user-tracking')
+    while True:
+        r = t.scan(**kw); fake += [i['user_date'].split('#')[0] for i in r.get('Items', [])]
+        if 'LastEvaluatedKey' not in r: break
+        kw['ExclusiveStartKey'] = r['LastEvaluatedKey']
+    known = {'testuser_csv@example.com', 'trial-user@example.com', 'someone@example.com'}      # explained to the owner on 24 Oct 2026
+    new = sorted(set(fake) - known)
+    if new: finding(f"Made-up test accounts in the user table ({', '.join(new)}): a test reached a live function; find which, make it answer locally, and ask the owner before deleting the rows")
+except Exception as e:
+    print('   user table not read:', e)
+
 # 4. faults
 head('4. Faults in the last 48 hours')
 logs = boto3.client('logs'); since = int((time.time() - 48 * 3600) * 1000)
