@@ -370,6 +370,14 @@
    "measure": "Starts when: the next change of the function. One free news request a sale; trade_causes.py then splits 'the share' by news or none, 30 a side, and asks whether shares that fell on news go on falling (sell sooner) or recover (wait)",
    "status": "idea",
    "added": "2026-10-23"
+  },
+  {
+   "id": "earnings-hold",
+   "what": "Record days to each share's results date with every buy (from company_figures.json), split the record by it; if shares that report during the holding do clearly worse after 30 each way, hold back a buy within 2 days of its results (a trial beside the current rule)",
+   "angle": "profit",
+   "measure": "average a trade against the S&P 500 fund: reporting during the holding against not, 30 each way",
+   "status": "idea",
+   "added": "2026-10-24"
   }
  ]
 }

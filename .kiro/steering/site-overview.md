@@ -165,8 +165,12 @@ about what the "Still never" list keeps for him (real money, costs above the rul
 settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
 warns about; one change at a time, measured, with its experiment entry.
 
-**WHERE THINGS STAND (rewrite this block at the end of every session; last: 23 Oct 2026, 14:30 UTC, end of the session)**
-- **The account:** about $97,100, about $1,000 behind the same $100,000 in an S&P 500 fund; 100 finished trades, about -0.2% a trade;
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 24 Oct 2026, 01:45 UTC, a short "hi" session)**
+- **24 Oct:** the account $97,967, **$356 ahead** of the same $100,000 in an S&P 500 fund (the fund fell more on 22-23 Oct); 105
+  finished trades, -0.07% a trade this month (inside the margin of error). That day: the daily update's crash fixed (open-file limit),
+  its email gives the duration and ⚠️ on an error line, Fed days studied (no rule, question 50), each company's results date kept
+  in `company_figures.json` (`earnings`; fills in over a week as the weekly refresh reaches each company).
+- **23 Oct:** about $97,100, about $1,000 behind the same $100,000 in an S&P 500 fund; 100 finished trades, about -0.2% a trade;
   the picks +0.21% a trade against their own markets (not clearly different from luck, every region under 30). Month 1 goal ($101,000
   by 12 Nov) out of reach. Claude's forecast on the Admin page: 25% (the owner reads it as "awful": it is the honest figure; tell him
   what would move it). Full check 23 Oct: 54 of 54. The weekly review is next due around **30 Oct**.
@@ -181,7 +185,9 @@ warns about; one change at a time, measured, with its experiment entry.
   monthly change of the sector funds (around 16 Nov).
 - **First jobs, in order:** (1) #8 and #9, which he said yes to on the Admin page: #8 the autopilot's learning (a score-version tag on
   buys, learning only from the current score, notes from 30 trades a group, one night's correlated losses counted once, replay
-  `review_resting` on the wide price set); #9 the daily public screener pages (the traffic plan's first build). (2) **Store his
+  `review_resting` on the wide price set; **and, in the same change of the function, `ed` with every share bought: days to its
+  results date from `company_figures()` (the file's `earnings`; negative when it just reported), in `POOL_FIELDS`, split in the
+  review tool: idea `earnings-hold`, question 51**); #9 the daily public screener pages (the traffic plan's first build). (2) **Store his
   autopilot record compressed, as `_brain` is**: about 190 KB written at most check-ins is now the largest cost (DynamoDB is about
   $0.36 of the month's running $0.60). (3) `loss-news`: headlines at each sale, at the next change of the function. (4) The three
   parts `session_start` names (pricing, plans, stock pages first): each must end in an improvement. (5) Decide `daily-review` by
@@ -320,11 +326,16 @@ Stock page order: header, **ANALYSIS snapshot**, "Full report" CTA card, NEWS, R
 ## 5. Daily pipeline
 
 launchd `com.stockiq.reminder` fires every 10 min → `~/stockiq-daily.sh` runs once a day
-**Mon–Sat, 11am–10pm** (lock `/tmp/stockiq-deploy-YYYYMMDD.lock`) → `deploy.sh` →
+**Mon–Sat, 7am–10pm** (lock `/tmp/stockiq-deploy-YYYYMMDD.lock`) → `deploy.sh` →
 `deploy-to-s3.sh` with `UPDATE_STOCK_NEWS=true`. Log: `~/stockiq-daily.log` (cleared each run).
 The hours are the **machine's own clock** (`date` in `~/stockiq-daily.sh`). On 11 Oct 2026 this Mac was
-set to UTC+7, not Sydney time, so "11am–10pm" was 04:00–15:00 UTC; check `date` before working
-out when the next run is.
+set to UTC+7, not Sydney time; check `date` before working out when the next run is.
+**The email at the end** (Mail.app, to `deploy@stockiq.tech`; `~/stockiq-daily.sh`, not in git) says when the run started and
+how long it took, and its subject carries ⚠️ instead of ✅ when the log holds an error line (`Traceback`, `Error:`, a failed push)
+although the run finished (24 Oct 2026; the owner asked for the duration, and that day's "successfully" hid a crashed step).
+**The Mac's scheduler gives a job only 256 open files** (`launchctl limit maxfiles`); `deploy-to-s3.sh` raises it to 10,240 at
+its top. Without that, `update_stock_analysis.py` crashed on 24 Oct 2026 ("Too many open files", Yahoo's library leaving files
+open on a flaky network) before writing a page: the stock pages kept the day before's figures.
 
 Order inside `deploy-to-s3.sh`:
 1. `update_news.py`: Yahoo/Google RSS → OpenAI summaries → news.html + news.js (2-hour cooldown)
@@ -397,13 +408,13 @@ The git step runs last, after S3, CloudFront and the Lambda sync. If the deploy 
 
 ### Timing in practice
 
-- The daily run happens once a day, **Mon–Sat, between 11am and 10pm** (whenever the 10-minute
+- The daily run happens once a day, **Mon–Sat, between 7am and 10pm** (whenever the 10-minute
   launchd check first lands in that window). **There is no run on Sunday.**
 - On normal days the runs are ~24h apart, so each daily run clears the 23h cooldown and pushes.
 - **Whichever deploy first runs after the cooldown clears does the push.** Any other deploy
   inside the 23h skips the git step and only does S3.
 - **A push from a deploy at an unusual time delays the next automatic push.** Example: a
-  manual deploy pushes on Friday at 6pm → Saturday's 11am run is only 17h later and skips →
+  manual deploy pushes on Friday at 6pm → Saturday's morning run is only about 15h later and skips →
   there is no Sunday run → Monday's run pushes. Commits made in between wait until then.
 - A plain `git push` typed by hand does **not** touch the marker, so it doesn't delay anything.
   Only the deploy script's git step (or someone writing the file) updates it.
@@ -3557,7 +3568,7 @@ more finished trades than there are, and would chase noise before then.
   match). Lambda code is not in git, so keep the previous zip in `~/VSCODE/backup/` with a clear
   name as the rollback. After deploying, smoke-test the live function. If the daily run's Lambda
   sync is about to run, deploy straight after editing `lambda-sync/` so it does not overwrite you.
-- **The daily deploy starts at 11:00** (Mon–Sat) and publishes and commits whatever is in
+- **The daily deploy starts from 7:00** (Mon–Sat, the Mac's clock) and publishes and commits whatever is in
   `website/`. Near that time, stage edits in a scratch folder and copy them in only when
   verified. If the job's own files (news.html, news.js, sitemap.xml) are dirty, commit only your
   files by name, never `git add -A`.
@@ -5192,6 +5203,15 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - **`check-tools/web_deploy.sh`**: the shared website deploy (fingerprint checks, upload with the right cache rules, CloudFront,
     compare with the live file). A one-off website deploy is now `pending-<name>/deploy.sh` of three lines: `ROWS="file:was:new …"
     exec bash /Users/dave/VSCODE/stockiq/check-tools/web_deploy.sh <its folder>`.
+
+- **24 Oct 2026** (the owner: news before buying and selling, e.g. the Fed's decision next week; the deploy email's duration):
+  - **The daily update's stock-page step crashed** ("Too many open files": the Mac's scheduler gives a job 256): no stock page got
+    that day's figures. `deploy-to-s3.sh` now raises the limit (section 5). Found by the opening check ("Traceback" in the log).
+  - **The email after the daily update** gives the start time and the duration, and ⚠️ with the first error line when a step
+    failed inside a run that finished (`~/stockiq-daily.sh`, not in git; section 5). The notes' run hours corrected: 7am–10pm.
+  - **Fed days** (`replay/fed_study.py`, question 50): no direction around a decision, moves about a third larger: no rule.
+    Commentators' transcripts: no (question 52). **Company results dates** are kept and published (question 51): the
+    measurement in the function comes with #8.
 
 - **23 Oct 2026** (the owner: "hi"):
   - **The account:** $97,103, behind the same $100,000 in an S&P 500 fund ($98,123) by $1,021. On 22 Oct it fell 2.06%, the fund

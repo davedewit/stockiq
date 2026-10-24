@@ -38,7 +38,7 @@ Detailed docs live in separate files — check these first:
 ## Scheduled Task (Automated Daily Deploy)
 
 ### Files
-- **Bash script:** `/Users/dave/stockiq-daily.sh` (logic: Mon-Sat, 11am-10pm, once/day)
+- **Bash script:** `/Users/dave/stockiq-daily.sh` (logic: Mon-Sat, 7am-10pm by the Mac's clock, once/day; its email gives the run's duration and ⚠️ on an error line)
 - **Launchd plist:** `~/Library/LaunchAgents/com.stockiq.reminder.plist` (StartInterval 600 = checks every 10 min)
 - **Lock file:** `/tmp/stockiq-deploy-YYYYMMDD.lock` (prevents duplicate runs)
 - **Log:** `~/stockiq-daily.log`
