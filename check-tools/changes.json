@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Typing BTC in the practice buy box now offers Bitcoin the coin first; BTC on its own is a fund, and the box says so",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
    "what": "Dashboard: the 'Running background analyses' notice now appears just under the header instead of over your usage count",
    "found": "owner",
    "link": "https://stockiq.tech/dashboard.html"
@@ -313,10 +318,6 @@
    "at": "2026-10-23",
    "what": "The Practice portfolio's prices load in about 3 seconds instead of about 15: they are asked for six requests at a time instead of one request per holding",
    "found": "owner"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "Practice portfolio: click any holding or sold line (the name with 🔍) to run its full analysis in the background; it lands in your Reports"
   }
  ]
 }

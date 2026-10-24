@@ -208,11 +208,19 @@ const waitIdle = async () => { for (let i = 0; i < 120; i++) { await sleep(250);
   await type('apple'); await sleep(600); const checking = /Checking exchanges/.test(sug.innerHTML); for (let i = 0; i < 80 && /Checking/.test(sug.innerHTML); i++) await sleep(250);
   check('lookup: typing a company name lists codes', checking && sug.style.display === 'block' && /data-symbol="AAPL"/.test(sug.innerHTML) && /US Market/.test(sug.innerHTML) && document.getElementById('pp-clear').style.display === 'block', sug.innerHTML.slice(0, 300));
   click('pick', { 'data-symbol': 'AAPL' }); for (let i = 0; i < 80 && !/Apple/.test(document.getElementById('pp-notice').textContent || ''); i++) await sleep(250);
-  check('lookup: picking shows the company and price', document.getElementById('pp-symbol').value === 'AAPL' && sug.style.display === 'none' && /^AAPL: Apple Inc\., latest price \$\d/.test(document.getElementById('pp-notice').textContent), document.getElementById('pp-notice').textContent);
+  check('lookup: picking shows the company and price', document.getElementById('pp-symbol').value === 'AAPL' && sug.style.display === 'none' && /^AAPL: Apple Inc\.(?: \(a share\))?, latest price \$\d/.test(document.getElementById('pp-notice').textContent), document.getElementById('pp-notice').textContent);
   await type('qzqzqzq'); await sleep(600); for (let i = 0; i < 80 && /Checking/.test(sug.innerHTML); i++) await sleep(250);
   check('lookup: no match says so', /No matches found/.test(sug.innerHTML), sug.innerHTML);
   await type('BHP.AX'); await sleep(700); check('lookup: a full code needs no lookup', sug.style.display === 'none');
   click('clear'); check('lookup: clear button empties the box', document.getElementById('pp-symbol').value === '');
+  // a code that is both a fund and a coin (24 Oct 2026: BTC is the Grayscale Bitcoin Mini Trust; Bitcoin is BTC-USD)
+  if (/coinTwin/.test(src)) {
+    await type('BTC'); await sleep(600); for (let i = 0; i < 80 && /Checking/.test(sug.innerHTML); i++) await sleep(250);
+    const first = (sug.innerHTML.match(/data-symbol="([^"]+)"/) || [])[1];
+    check('lookup: BTC offers the coin first, the fund named as a fund', first === 'BTC-USD' && /Bitcoin, the coin/.test(sug.innerHTML) && /a fund/.test(sug.innerHTML), sug.innerHTML.slice(0, 400));
+    await buy('BTC', 100);
+    check('typing BTC without picking asks which is meant, buys nothing', /BTC is two different things/.test(text()) && /BTC-USD for the coin/.test(text()) && JSON.parse(store['tester@example.com'].data).holdings.length === 5, (text().match(/BTC is two[^.]*\./) || [''])[0]);
+  }
   // dollars or quantity: no default amount, and each fills in the other from the latest price
   check('no amount is pre-filled', /id="pp-amount"[^>]*placeholder="Enter \$"/.test(container.innerHTML) && !/id="pp-amount"[^>]*value=/.test(container.innerHTML) && /id="pp-qty"[^>]*placeholder="or quantity"/.test(container.innerHTML));
   const typeIn = (id, v) => { document.getElementById(id).value = String(v); handlers.input.forEach(f => f({ target: document.getElementById(id) })); };
