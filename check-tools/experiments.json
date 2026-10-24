@@ -465,7 +465,7 @@
   },
   {
    "id": "signup-simpler",
-   "what": "The sign-up page with three short lines instead of four long ones, and Google and Facebook above the email form",
+   "what": "The sign-up page as of the evening of 24 Oct 2026: 'Trade $100,000 of practice money', 'Free for 3 days. No credit card.', four short lines (any stock, ETF or coin; your own AI trader (Beta) to trade beside you; see if you beat the S&P 500; 15 analyses), Google and Facebook above the email form. Before: 'Create Your Account' with three ticks and the social buttons under the form",
    "angle": "sign-ups",
    "measure": "GA4: accounts created per visit to signup.html, 4 weeks against the 4 before (the owner sends the figures; the Admin page's registrations count as a cross-check)",
    "status": "running",
