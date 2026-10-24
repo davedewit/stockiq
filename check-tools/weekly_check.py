@@ -219,6 +219,10 @@ if not QUICK:
         note('4. Background run and visitors', "the Practice portfolio graph: pressing All markets, Your own buys and AI autopilot moves nothing (1100 wide)", len(spots) == 1, sorted(spots)[:3] or out.strip().splitlines()[-2:])
     except Exception as e:
         note('4. Background run and visitors', "the Practice portfolio graph: pressing its view buttons moves nothing", False, str(e)[:200])
+    # every public page fits a phone (24 Oct 2026, the owner: "make sure mobile version of the site is good too")
+    for size in ('390x844', '360x740'):
+        code, out = run(['node', 'phone_check.js'], 600, env={'SIZE': size})
+        note('4. Background run and visitors', f"every public page fits a {size.split('x')[0]}px phone (no sideways scroll, nothing cut off at the edge)", code == 0 and 'ALL PASS' in out, [l for l in out.splitlines() if l.startswith('FAIL')][:4] or out.strip().splitlines()[-1:])
     # every fold of the Practice portfolio stays open when the tab is drawn again (24 Oct 2026, the owner: "Show the figures" closed at the refresh)
     code, out = run(['node', 'live_practice_check.js'], 300, env={'REAL_USER': OWNER, 'FOLDS': '1', 'SHOT': os.path.join(tempfile.gettempdir(), 'stockiq-folds.png')})
     line = next((l for l in out.splitlines() if l.startswith('folds: ')), '')
