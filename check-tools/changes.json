@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "New public pages, one for each of 24 markets plus a hub: the day's top 10 by trend with why each ranks there, updated every day, for visitors from Google (stockiq.tech/screeners-today.html)",
+   "found": "session"
+  },
+  {
+   "at": "2026-10-24",
    "what": "Fed decision days studied on five years of prices: no direction, only larger moves, so no rule; each company's results date is now kept so the autopilot can learn whether holding through results helps or hurts",
    "found": "owner"
   },
@@ -258,10 +263,6 @@
   {
    "at": "2026-10-18",
    "what": "The site is checked every night (site_audit.py): its findings are the Site check card below; it now also catches stale stock pages and made-up figures."
-  },
-  {
-   "at": "2026-10-18",
-   "what": "Admin page: Answered sits under Decisions for you; this list of changes added."
   }
  ]
 }

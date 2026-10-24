@@ -42,7 +42,7 @@ def save(d):
         pass
 
 # The parts that matter most for profit and sign-ups come up sooner (the priority since 19 Oct 2026: visitors and sign-ups first).
-PROFIT = {'funnel', 'home-hero', 'home-pricing', 'plans', 'signup-login', 'usage-chip', 'seo', 'stock-pages', 'screener-score',
+PROFIT = {'funnel', 'screener-pages', 'home-hero', 'home-pricing', 'plans', 'signup-login', 'usage-chip', 'seo', 'stock-pages', 'screener-score',
           'ap-buying', 'ap-selling', 'ap-learning', 'ap-themes', 'speed'}
 KINDS = {'fixed': 'Fixed', 'improved': 'Improved', 'simplified': 'Simplified', 'idea': 'New idea to test', 'question': 'New question', 'fine': 'Fine as it is'}
 ROOT = os.path.dirname(HERE); WEB = os.path.join(os.path.dirname(ROOT), 'website')

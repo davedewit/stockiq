@@ -569,6 +569,18 @@
    "where": "~/VSCODE/backup/, rollback zips, both repositories",
    "last": null,
    "log": []
+  },
+  {
+   "id": "screener-pages",
+   "part": "Daily public screener pages: each market's top 10 by trend, the hub (for visitors from search)",
+   "where": "screener-*.html, screeners-today.html; update_screener_pages.py (daily deploy); the link in index.html #features",
+   "last": "2026-10-24",
+   "log": [
+    {
+     "at": "2026-10-24",
+     "found": "Built (#9 on the Admin page): 24 markets and a hub, live, in the sitemap, named to IndexNow, refreshed by the daily update"
+    }
+   ]
   }
  ]
 }

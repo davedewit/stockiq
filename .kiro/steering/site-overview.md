@@ -185,7 +185,7 @@ warns about; one change at a time, measured, with its experiment entry.
   monthly change of the sector funds (around 16 Nov).
 - **First jobs, in order:** (1) #8 and #9, which he said yes to on the Admin page: #8 the autopilot's learning (a score-version tag on
   buys, learning only from the current score, notes from 30 trades a group, one night's correlated losses counted once, replay
-  `review_resting` on the wide price set; **and, in the same change of the function, `ed` with every share bought: days to its
+  `review_resting` on the wide price set (**#9 done 24 Oct 2026**: the daily screener pages; #8 is next); **and, in the same change of the function, `ed` with every share bought: days to its
   results date from `company_figures()` (the file's `earnings`; negative when it just reported), in `POOL_FIELDS`, split in the
   review tool: idea `earnings-hold`, question 51**); #9 the daily public screener pages (the traffic plan's first build). (2) **Store his
   autopilot record compressed, as `_brain` is**: about 190 KB written at most check-ins is now the largest cost (DynamoDB is about
@@ -314,6 +314,7 @@ Lambdas ──> Yahoo Finance + Finnhub (data), OpenAI gpt-4o-mini (AI chat), Dy
 | `news.js` (sidebar, 100-item pool) | `update_news.py`, `update_stock_news.py` | Script only. **The file holds its own display code** (`renderNewsItems`, written into it by both scripts: change the two alike). It shows the newest general article and the four newest stock articles **by each item's `timestamp`**, whatever order the file is in. Check: `node check-tools/news_sidebar_test.js` |
 | `sitemap.xml` | `update_sitemap.py` (daily), `generate_sitemap.py` (manual) | Scripts only |
 | `index.html` "Stock Pages" section (between `<!-- STOCK_LINKS_START/END -->`) and `stock-pages.js` | `update_home_stock_links.py` (daily, after the snapshot step; since 18 Oct 2026) | Script only. The rest of `index.html` is hand-edited |
+| `screener-<market>.html` (24) and `screeners-today.html` | `update_screener_pages.py` (daily, since 24 Oct 2026) | Script only; out of git (`.gitignore`), like `stocks/`. The shell (menu, footer) is copied from `stock-screener-guide.html` each run |
 | `stocks.txt` (3,467 symbols, CSV) | Hand-edited + `fetch_stock_data.py` | See `stocks-txt-csv-format.md` |
 | `index.html`, `about.html`, `faq.html`, `analysis.html`, `dashboard.html`, guides, legal pages, `*.js`, `styles.css` | Hand-edited, no generator | Edit directly |
 
@@ -340,7 +341,7 @@ open on a flaky network) before writing a page: the stock pages kept the day bef
 Order inside `deploy-to-s3.sh`:
 1. `update_news.py`: Yahoo/Google RSS → OpenAI summaries → news.html + news.js (2-hour cooldown)
 2. `update_stock_news.py`: per-stock news into stock pages + news.html/news.js (23-hour cooldown per stock)
-3. `update_stock_analysis.py` (**daily run only**: it sits inside the `UPDATE_STOCK_NEWS=true` block, so a plain `./deploy-to-s3.sh` prints "Skipping stock data snapshots"): data snapshots on all 3,467 stocks, sets index/noindex on large caps (≥$10B), writes `indexable_stocks.txt`. ~20 min, no API cost. 404s for delisted stocks are normal/cached. When Yahoo has no price for a stock it keeps yesterday's snapshot and does not de-index it. Then `update_home_stock_links.py` rewrites the home page's "Stock Pages" section and `stock-pages.js` (section 6). Straight after it, in the same block, `publish_company_figures.py` publishes the company figures the single-stock report uses for shares outside the US (section 7, "The single-stock report"); it never stops the deploy.
+3. `update_stock_analysis.py` (**daily run only**: it sits inside the `UPDATE_STOCK_NEWS=true` block, so a plain `./deploy-to-s3.sh` prints "Skipping stock data snapshots"): data snapshots on all 3,467 stocks, sets index/noindex on large caps (≥$10B), writes `indexable_stocks.txt`. ~20 min, no API cost. 404s for delisted stocks are normal/cached. When Yahoo has no price for a stock it keeps yesterday's snapshot and does not de-index it. Then `update_home_stock_links.py` rewrites the home page's "Stock Pages" section and `stock-pages.js` (section 6), and `update_screener_pages.py` the daily public screener pages (section 6). In the same block, `publish_company_figures.py` publishes the company figures the single-stock report uses for shares outside the US (section 7, "The single-stock report"); it never stops the deploy.
 4. Backups (website + stockiq; prod_scripts every 23h)
 5. `people_also_watch_stocks.py --missing`
 6. `update_sitemap.py`: **rebuilds** stock URLs from `indexable_stocks.txt` (not all HTML files), updates lastmod on site pages. Refuses if list < 200 entries.
@@ -479,6 +480,15 @@ git pull --rebase && git push
   fewer than 20 links and leaves the page as it was). On the home page a share in the four market lists links to its stock page
   (`market-panel.js`, from `stock-pages.js`); on the dashboard the click runs the analysis as before. Not done: links from the
   Google Analytics events. (Done 18 Oct 2026: links from the four guides, eight stock pages each; the home page's "Loading..." placeholders.)
+- **Daily public screener pages (24 Oct 2026; #9 on the Admin page, the traffic plan's first build):** `screener-<market>.html` for 24
+  markets (the main index of each country, the Dow 30, NASDAQ 100, Euro Stoxx 50) and the hub `screeners-today.html`, written by
+  `update_screener_pages.py` in the daily run from the coordinator on AWS (no account, nothing saved; about 25 calls a day, 30 s): the
+  top 10 by the trend score with each share's breakdown, how the whole list stands, new in and out since the day before, the lowest 5,
+  the full ranking folded, links to the stock pages. A market that fails keeps yesterday's page; fewer than half answering writes
+  nothing. Names: `stocks.txt`, the analysis page's name tables, then the price function once (`screener_names.json`). In the
+  sitemap (`update_sitemap.py` adds every one, daily) and named to IndexNow daily (`website/notify_search_engines.py`). Linked
+  from the home page's screeners card. Experiment `screener-pages`, decided on Search Console's figures. Not yet: crypto, the
+  email box's sample.
 - `robots.txt` allows all and points to the sitemap. Canonicals are set on all pages.
 - Bot checks in `auth.js` / `js/analysis-core.js` only skip login redirects and auto-run for
   crawlers; they do not hide content.
@@ -5212,6 +5222,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - **Fed days** (`replay/fed_study.py`, question 50): no direction around a decision, moves about a third larger: no rule.
     Commentators' transcripts: no (question 52). **Company results dates** are kept and published (question 51): the
     measurement in the function comes with #8.
+  - **#9 built and live: the daily public screener pages** (section 6). On the way: `web_deploy.sh` takes a new file
+    ("none" as its old fingerprint) and uploads `.xml` as XML; `site_audit.py` with `AUDIT_WEB` reads pages new in the
+    staging folder; `registers_check.py` accepts a pattern in a part's "where"; IndexNow's 202 is no longer printed as a warning.
 
 - **23 Oct 2026** (the owner: "hi"):
   - **The account:** $97,103, behind the same $100,000 in an S&P 500 fund ($98,123) by $1,021. On 22 Oct it fell 2.06%, the fund

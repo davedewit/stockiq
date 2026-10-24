@@ -378,6 +378,16 @@
    "measure": "average a trade against the S&P 500 fund: reporting during the holding against not, 30 each way",
    "status": "idea",
    "added": "2026-10-24"
+  },
+  {
+   "id": "screener-pages",
+   "what": "Daily public screener pages: 24 markets' top 10 by trend and a hub, indexable, refreshed by the daily update (the traffic plan's first build)",
+   "angle": "growth",
+   "measure": "Search Console: impressions and clicks on screener-*.html and screeners-today.html; GA4 visits to them and sign-ups that start on them. Keep and extend (crypto, more lists, a weekly email of them) if they draw impressions; rework titles if they are indexed but not shown; remove if not indexed after 8 weeks",
+   "status": "running",
+   "added": "2026-10-24",
+   "started": "2026-10-24",
+   "decide": "2026-12-19"
   }
  ]
 }

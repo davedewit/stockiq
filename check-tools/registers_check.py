@@ -93,7 +93,9 @@ def main():
     named = ' '.join((p['part'] + ' ' + p.get('where', '')).lower() for p in parts)
     web = os.path.join(os.path.dirname(ROOT), 'website')
     files = sorted(os.path.basename(f) for f in glob.glob(web + '/*.html') + glob.glob(web + '/*.js') + glob.glob(web + '/js/*.js'))
-    loose = [f for f in files if f.lower() not in named]
+    import fnmatch
+    patterns = [w for w in re.split(r'[\s,;()]+', named) if '*' in w]     # a part may name generated pages by a pattern (screener-*.html)
+    loose = [f for f in files if f.lower() not in named and not any(fnmatch.fnmatch(f.lower(), w) for w in patterns)]
     for f in loose: problem(f'{f} belongs to no part of site_parts.json: add it to a part\'s "where" (or a new part), so that it is reviewed in turn')
     out.append(f'OK {len(files) - len(loose)} of {len(files)} pages and scripts of the site belong to a part ({len(parts)} parts)')
     print('\n'.join(out))
