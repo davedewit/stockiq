@@ -29,6 +29,9 @@ LENSES = ['Ease of use and understanding: could a first-time visitor use it with
           'Analysis of information: is the data behind it right, current and enough? Is there a better source or a better measure?',
           'AI use: would the AI model (ChatGPT) do this part better with a better prompt, more context, or a newer model version? Test it, do not assume',
           'Comparison over time: can it be tried as an experiment beside what is there now and kept only if it measurably helps? (experiments.py)',
+          'Phone: at 390px wide, does every part fit, can every button be tapped, does a long list fold away? Most visitors are on a phone (the owner, 24 Oct 2026)',
+          'What the viewer chose stays chosen: does an open fold, a ticked view or a typed value survive the page refreshing itself? Does a choice that should not outlive the visit (a range, a filter) reset on a fresh page? (24 Oct 2026: a fold closed at the minute\'s refresh)',
+          'Said the same everywhere: after a change, do the FAQ, About, the AI chat\'s guide, the home page and the Admin page all say what is now true? (24 Oct 2026: the chat told a visitor the autopilot could not know about the Fed)',
           'New ideas: what would a smart competitor add here? Write the idea down as an experiment even if it waits']
 
 def load():

@@ -16,6 +16,12 @@ Do this, in order (about 30 minutes at most):
    concrete things a person would otherwise have to spot: something that does not work, says something untrue, is copied in
    several places, is made up, confuses, is slow, or misses an easy gain (search, sign-ups, profit against the S&P 500).
 3. `python3 check-tools/clarity_check.py --keep` and read the text it keeps of the AI autopilot tab as the owner would.
+3b. Said the same everywhere (24 Oct 2026, the owner: "make sure the site is up to date with the changes anywhere necessary ... we want
+   everything consistent"). Read the newest lines of "What changed lately" (`python3 check-tools/admin.py` lists them, or
+   `check-tools/changes.json`). For each change of the last two days, look in every place that describes that part of the site
+   (`website/faq.html`, `website/about.html`, `website/index.html`, the AI chat's prompt and `DASHBOARD_GUIDE` in
+   `lambda-sync/stockiq-ai-chat/lambda_function.py`, the dashboard's own wording) and list each place that still says the old thing, or
+   says nothing where a visitor would ask. A place that contradicts the site is a fault: report it first.
 4. Look at what `site_audit.py` found and say, for each problem, what the fix would be.
 5. Write your report to `check-tools/reviews/daily/<today's date, YYYY-MM-DD>.md`: what you looked at; each finding with its
    evidence (file and line, or the figure), how sure you are, and the change you would make; the faults first, then what would
