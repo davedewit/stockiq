@@ -341,7 +341,9 @@ def shell_parts():
     with open(guide if os.path.exists(guide) else os.path.join(WEBSITE, 'stock-screener-guide.html'), encoding='utf-8') as f:
         page = f.read()
     strip = page.find('<!-- SHARED_STRIP_START')        # the trial strip (shared_parts.py) comes just before the menu
-    nav = page[strip if strip >= 0 else page.index('<nav class="top-nav">'):page.index('</nav>') + len('</nav>')]
+    end = page.find('<!-- SHARED_PHONE_BLOCK_END -->')         # the phone menu (shared_parts.py) follows the header bar
+    end = end + len('<!-- SHARED_PHONE_BLOCK_END -->') if end >= 0 else page.index('</nav>') + len('</nav>')
+    nav = page[strip if strip >= 0 else page.index('<nav class="top-nav">'):end]
     start = page.find('<!-- SHARED_FOOTER_START')      # the shared footer (shared_parts.py) with its markers, or an older footer
     foot = page[start if start >= 0 else page.index('<footer'):page.index('</body>')] + PANEL
     return nav, foot

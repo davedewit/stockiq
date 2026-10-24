@@ -990,6 +990,12 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   `auth.js` late through `site-header.js` that was 0.4 s) moves every item. The bell is shown from the first frame by `html.signed-in`
   (`styles.css`). `header_room_check.js` records the menu's position frame by frame while each page loads, for each kind of visitor,
   and fails one that moves (a one-off in the test browser has happened: a real shift repeats on every run).
+- **The phone menu, one for every page** (`shared_parts.py` `phone_menu_html`; 24 Oct 2026, the owner: "register and login is down the
+  bottom?"): a signed-out visitor sees "Sign up free" and "Log in" first (`.mobile-join`, `only-signed-out`), then Home, Analysis,
+  Screeners, Pricing; a signed-in one Home, Dashboard, the menus, Pricing (not when paying) and Account (`only-signed-in`; `auth.js`
+  fills in the name and Sign Out). Pages that had none get the whole block after the header bar (between `SHARED_PHONE_BLOCK_START/END`;
+  the daily screener pages copy the guide's), so `site-header.js`'s builder is only a fallback now. The round buttons (market data,
+  trial, chat) are hidden while the menu is open (`body.menu-open`, `styles.css`).
 - **`theme.js` is loaded in every page's head without `defer` or `async`** (the home page had `defer`, so a signed-in visitor saw "Sign up free"
   flash on every visit; the nightly site check's `theme-early` reports it).
 - **Who is looking, marked before the page is drawn** (24 Oct 2026; `theme.js`, top): `html.signed-in` and `html.paid-user` from the

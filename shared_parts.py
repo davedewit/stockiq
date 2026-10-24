@@ -82,19 +82,34 @@ def menu_html(p):
 
 
 def phone_menu_html(p):
-    out = [f'<!-- SHARED_PHONE_MENU_START: the phone menu, {NOTE} -->']
+    """The phone menu, in the order a phone visitor needs it (24 Oct 2026, the owner: "register and login is down the bottom?"):
+    a signed-out visitor sees Sign up free and Log in first; a signed-in one sees Home, Dashboard, the menus, Pricing (not when
+    paying) and Account (auth.js puts the name and Sign Out in it). The classes are shown or hidden by styles.css from theme.js's marks."""
+    out = [f'<!-- SHARED_PHONE_MENU_START: the phone menu, {NOTE} -->',
+           f'<div class="mobile-section mobile-join only-signed-out"><a href="{p}signup.html" class="mobile-signup">Sign up free</a><a href="{p}login.html" class="mobile-login">Log in</a></div>']
     for item in MENU:
         if item[0] == 'link':
             cls = ' mobile-pricing' if item[1] == 'Pricing' else ''
             out.append(f'<div class="mobile-section{cls}"><a href="{p}{item[2]}">{item[3]} {item[1]}</a></div>')
-            if item[1] == 'Home':      # shown to a signed-in visitor (site-header.js, the pages' own code)
-                out.append(f'<div class="mobile-section" id="mobile-dashboard-section" style="display: none;"><a href="{p}dashboard.html">📊 Dashboard</a></div>')
+            if item[1] == 'Home':
+                out.append(f'<div class="mobile-section only-signed-in" id="mobile-dashboard-section"><a href="{p}dashboard.html">📊 Dashboard</a></div>')
         else:
             _, title, _, links = item
-            out.append(f'<div class="mobile-section"><div class="mobile-section-title">{title}</div>' + ''.join(f'<a href="{p}{u}">{t}</a>' for t, u in links) + '</div>')
+            cls = ' only-signed-in' if title == 'Account' else ''
+            out.append(f'<div class="mobile-section{cls}"><div class="mobile-section-title">{title}</div>' + ''.join(f'<a href="{p}{u}">{t}</a>' for t, u in links) + '</div>')
     out.append('<div class="mobile-section"><div class="mobile-section-title">Theme</div><a href="#" onclick="event.preventDefault(); toggleTheme()" id="mobile-theme-toggle">🌙 Dark Mode</a></div>')
     out.append('<!-- SHARED_PHONE_MENU_END -->')
     return '\n'.join(out)
+
+
+def phone_block_html(p):
+    """The whole phone menu (overlay, header, content) for a page that has none of its own; the screener guide's is copied by the
+    daily screener pages, so it ends in a marker they look for."""
+    return '\n'.join([f'<!-- SHARED_PHONE_BLOCK_START: the phone menu, {NOTE} -->', '<div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="closeMobileMenu()"></div>',
+                      '<div class="mobile-menu" id="mobile-menu">',
+                      '<div class="mobile-menu-header"><span class="mobile-brand"><img src="' + p + 'stockiq-logo.png" alt="StockIQ" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;" width="20" height="20">StockIQ.tech</span>'
+                      '<div class="mobile-header-controls"><button class="close-btn" onclick="closeMobileMenu()" aria-label="Close menu">×</button></div></div>',
+                      '<div class="mobile-menu-content">', phone_menu_html(p), '</div>', '</div>', '<!-- SHARED_PHONE_BLOCK_END -->'])
 
 
 def footer_html(p):
@@ -176,6 +191,10 @@ def apply(s, p):
             end = div_end(s, m.start())
             t = s[:m.end()] + '\n' + braced(phone_menu_html(p)) + '\n</div>' + s[end:]
             done.append('phone menu (markers put in)')
+        elif '</nav>' in s:                                  # no phone menu at all: the whole one, just after the header bar
+            i = s.index('</nav>') + len('</nav>')
+            t = s[:i] + '\n' + braced(phone_block_html(p)) + s[i:]
+            done.append('phone menu (the whole menu put in)')
     elif t != s:
         done.append('phone menu')
     s = t if t is not None else s

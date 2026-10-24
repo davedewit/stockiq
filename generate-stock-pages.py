@@ -247,12 +247,13 @@ def generate_stock_page(stock, robots="noindex, follow", date_modified="2026-09-
         </div>
         <div class="mobile-menu-content">
 <!-- SHARED_PHONE_MENU_START: the phone menu, written by stockiq/shared_parts.py: change it there, not here -->
+<div class="mobile-section mobile-join only-signed-out"><a href="../signup.html" class="mobile-signup">Sign up free</a><a href="../login.html" class="mobile-login">Log in</a></div>
 <div class="mobile-section"><a href="../index.html">🏠 Home</a></div>
-<div class="mobile-section" id="mobile-dashboard-section" style="display: none;"><a href="../dashboard.html">📊 Dashboard</a></div>
+<div class="mobile-section only-signed-in" id="mobile-dashboard-section"><a href="../dashboard.html">📊 Dashboard</a></div>
 <div class="mobile-section"><div class="mobile-section-title">Analysis</div><a href="../analysis.html?option=1">Stock &amp; ETF Analysis</a><a href="../analysis.html?option=2">Trading Signals</a></div>
 <div class="mobile-section"><div class="mobile-section-title">Screeners</div><a href="../screeners-today.html">📊 Today&rsquo;s top 10s</a><a href="../analysis.html?option=3">🇺🇸 US Markets</a><a href="../analysis.html?option=4">🇪🇺 Europe Markets</a><a href="../analysis.html?option=5">🌏 Asia-Pacific Markets</a><a href="../analysis.html?option=6">🌎 Americas Markets</a><a href="../analysis.html?option=7">🪙 Crypto (540 coins)</a></div>
 <div class="mobile-section mobile-pricing"><a href="../index.html#pricing">💳 Pricing</a></div>
-<div class="mobile-section"><div class="mobile-section-title">Account</div><a href="../signup.html">Register</a><a href="../login.html">Login</a></div>
+<div class="mobile-section only-signed-in"><div class="mobile-section-title">Account</div><a href="../signup.html">Register</a><a href="../login.html">Login</a></div>
 <div class="mobile-section"><div class="mobile-section-title">Theme</div><a href="#" onclick="event.preventDefault(); toggleTheme()" id="mobile-theme-toggle">🌙 Dark Mode</a></div>
 <!-- SHARED_PHONE_MENU_END -->
 </div>
