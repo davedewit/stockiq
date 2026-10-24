@@ -209,6 +209,8 @@ warns about; one change at a time, measured, with its experiment entry.
   (the script's name matching filters them). **Cost to weigh first:** the step summarises articles with OpenAI, so 1,257 more shares
   means more summaries a day: measure the articles per share on a sample and price it before adding them all; pages for shares with
   no news are allowed (the snapshot is the page's substance; noindex under $10B, as now).
+  (1c) **The daily pages built on AWS after each region's close** (idea `pages-at-close`; today the Mac's daily run builds them once, around
+  midnight UTC, a mix of yesterday's closes and Asian sessions just opening, and not on Sundays).
   (2) The parts `session_start` names (home pricing and the plans: never looked at).
   (3) **Store his autopilot record compressed**, as `_brain` is (about 190 KB written at most check-ins: the largest running cost).
   (4) Decide `daily-review` by 1 Nov (Claude recommends keeping it: `touch check-tools/reviews/daily/KEEP`). (5) The walk of step 5d.
