@@ -219,7 +219,8 @@ def main():
         weights[p] = round(kb, 1)
         if kb > 250:
             find('page-weight', 'idea', f'{kb:.0f} KB of HTML (over 250 KB: slower on a phone, and search engines read less of it)', p)
-        if p in last and last[p] and kb > last[p] * 1.15 and kb - last[p] > 10:
+        # the daily screener pages change every day by design: only the 250 KB limit above applies to them (24 Oct 2026)
+        if p in last and last[p] and kb > last[p] * 1.15 and kb - last[p] > 10 and not p.startswith('screener'):
             find('page-weight', 'problem', f'{kb:.0f} KB, up from {last[p]:.0f} KB at the last check', p)
 
     # stale-counts

@@ -173,7 +173,10 @@ def stock_link(sym, names, pages):
     name = names.get(sym.upper(), '')
     if sym.upper() in pages:
         return f'<a href="stocks/{esc(sym)}.html"><strong>{esc(sym)}</strong></a>', name
-    return f'<strong>{esc(sym)}</strong>', name
+    # no stock page on the site: the share's full analysis instead (24 Oct 2026, the owner: some shares were not clickable). nofollow, so
+    # that a search engine's crawler does not set off an analysis
+    q = urllib.parse.quote(sym)
+    return f'<a href="analysis.html?option=1&amp;symbol={q}&amp;autorun=true" rel="nofollow" title="Run the full analysis of {esc(sym)}"><strong>{esc(sym)}</strong></a>', name
 
 
 HEAD = '''<!DOCTYPE html>
@@ -235,7 +238,8 @@ HEAD = '''<!DOCTYPE html>
 
 def shell_parts():
     """The menu and the footer (with its scripts), taken from the screener guide so the pages look like the rest of the site."""
-    with open(os.path.join(WEBSITE, 'stock-screener-guide.html'), encoding='utf-8') as f:
+    guide = os.path.join(OUT, 'stock-screener-guide.html')
+    with open(guide if os.path.exists(guide) else os.path.join(WEBSITE, 'stock-screener-guide.html'), encoding='utf-8') as f:
         page = f.read()
     nav = page[page.index('<nav class="top-nav">'):page.index('</nav>') + len('</nav>')]
     foot = page[page.index('<footer class="footer">'):page.index('</body>')]
