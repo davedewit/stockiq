@@ -12,7 +12,7 @@ FUNCS=(
  "stockiq-ai-trader:lambda:lambda_function.py:LpaN3fzSPMe8ZE/2Bq8Z1SFN5K2NZRfDDABKeT6o9rQ=:e5b798b33bf6aca46d7c29f1e4f381fcb59af22250740e886bc2c88e57457f69:e834e10ae3ac9109e7d640b41de41da247660e7464d693206bbaeee038cc9d0c:before_autopilot_events_20261024"
 )
 # file : what it was : what it becomes : type : how long a copy may be kept
-FILES=()
+FILES=("admin-panel.js:11145feebfca6b21ad606cf08b99af55588ccaa2a078674f37d48313da46b3e8:d0e11fd05de645765fd590817ef49fb0d75c23d4235a0e25cb4b6e67d3bfef38:application/javascript:public, max-age=300, s-maxage=86400" "dashboard.html:c384df4551293623d3c7f3856a160cc596fca896deea3b6e34c98b8665ed41f9:035343e854ef5c1394a6948854dfdafaf3842b22590b5c17db2d822beaecf860:text/html; charset=utf-8:public, max-age=0, s-maxage=3600, must-revalidate")
 say()  { printf '\n== %s\n' "$*"; }
 stop() { printf '\nSTOPPED: %s\nNothing further was changed.\n' "$*"; exit 1; }
 filesha() { shasum -a 256 "$1" | cut -d' ' -f1; }
@@ -71,6 +71,6 @@ done
 if [ ${#PATHS[@]} -gt 0 ]; then
     INV="$("${AWS[@]}" cloudfront create-invalidation --distribution-id "$DIST" --paths "${PATHS[@]}" --query Invalidation.Id --output text)"
     "${AWS[@]}" cloudfront wait invalidation-completed --distribution-id "$DIST" --id "$INV"
-    for p in "/practice-autopilot.js" "/dashboard.html"; do curl -s -o "$TMP/after" "https://stockiq.tech$p"; cmp -s "$TMP/after" "$WEB${p%%\?*}" && echo "live $p equals the local file" || stop "the live $p is not the file that was uploaded"; done
+    for p in "/admin-panel.js" "/dashboard.html"; do curl -s -o "$TMP/after" "https://stockiq.tech$p"; cmp -s "$TMP/after" "$WEB${p%%\?*}" && echo "live $p equals the local file" || stop "the live $p is not the file that was uploaded"; done
 fi
 say "FINISHED$([ "$DRY" = "true" ] && echo ' (dry run, nothing changed)')"

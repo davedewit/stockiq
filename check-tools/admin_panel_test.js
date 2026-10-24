@@ -12,7 +12,7 @@ const ADMIN = { usage: { at: new Date().toISOString(), cost: 0.56, calls: 451952
     { id: 'old1', what: 'Old one A', angle: 'cost', measure: 'x', status: 'kept', decided: '2026-10-12', result: 'ok' },
     { id: 'old2', what: 'Old one B', angle: 'cost', measure: 'x', status: 'kept', decided: '2026-10-11', result: 'ok' },
     { id: 'old3', what: 'Old one C', angle: 'cost', measure: 'x', status: 'kept', decided: '2026-10-10', result: 'ok' }] },
-  health: { at: new Date().toISOString(), ran: 1, on: 1, accounts: 2, paused: 0, waiting: 0, failed: 0 },
+  health: { at: new Date().toISOString(), ran: 1, on: 1, accounts: 2, paused: 0, waiting: 0, failed: 0, openai: { month: '2026-10', calls: 412, in: 610000, out: 52000, usd: 0.1227 } },
   open: [{ id: 3, key: 'aiSell-off', title: 'Switch off "Sell early on the AI model\'s review"', why: 'Its sales lose money.', kind: 'setting', status: 'open' }, { id: 4, key: 'goal-x', title: 'Month 1 at risk', why: 'Look at it.', kind: 'session', status: 'open', at: '2026-10-23T06:18:31Z', recommend: 'yes', recommendWhy: 'It is about profit.' }],
   answered: [], settings: { enabled: true, risk: 3, holdings: 50, budgetUsd: 92786, everyHours: 3, maxHoldDays: 10, aiSell: true, selfTune: true }, screeners: ['S&P 500', 'ASX 200'] };
 async function page(status, uid) {
@@ -156,6 +156,10 @@ async function page(status, uid) {
   if (/function selfRunHtml/.test(fs.readFileSync(process.argv[2], 'utf8'))) {
     const q = await page(200, 'dave@x.com'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
     check('a row says what runs by itself, how often, and when each last ran', /What runs by itself , and when each last ran/.test(pl) && /The autopilot: trades, with the half-hourly stop watch/.test(pl) && /every 30 minutes/.test(pl) && /The full check of the site/.test(pl) && /Nothing changes the site's code by itself/.test(pl), pl.slice(pl.indexOf('What runs by itself'), pl.indexOf('What runs by itself') + 300));
+  }
+  {
+    const q = await page(200, 'dave@x.com'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    check("the month's OpenAI cost of the autopilot's AI calls is shown, with what it does not include", /OpenAI, the autopilot's AI calls this month: about \$0\.12/.test(pl) && /412 calls/.test(pl) && /not AWS/.test(pl), pl.slice(pl.indexOf('OpenAI') - 20, pl.indexOf('OpenAI') + 260));
   }
   console.log(ok ? 'ALL PASS' : 'SOME FAILED'); process.exit(ok ? 0 : 1);
 })();

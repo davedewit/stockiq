@@ -170,6 +170,11 @@ def main():
     breakdown('the market-risk gauge when bought (from 18 Oct 2026; 0 very low .. 4 very high; for information, it holds no cash)', [t for t in trades if t.get('mg') is not None], lambda t: f"{t['mg']} {('very low', 'low', 'medium', 'high', 'very high')[t['mg']]}")
     # company figures when bought (recorded from 19 Oct 2026; shares only): the measurement behind replacing the screeners' empty
     # "financial" factors one day. A group says something only from 30 trades and beyond twice its margin of error, as everywhere.
+    # the market's calendar and the company's results (24 Oct 2026, question 51 and idea earnings-hold): measurements, nothing acts on them
+    breakdown('by the next high-impact announcement for its market when bought (Fed, inflation, jobs...; recorded from 24 Oct 2026)', [t for t in trades if t.get('ev') is not None],
+              lambda t: 'within 24 hours' if t['ev'] <= 24 else '1 to 3 days' if t['ev'] <= 72 else 'more than 3 days')
+    breakdown("by its company's results date when bought (shares; recorded from 24 Oct 2026; negative: it had just reported)", [t for t in trades if t.get('ed') is not None],
+              lambda t: 'just reported (last 10 days)' if -10 <= t['ed'] < 0 else 'reports within its holding time' if 0 <= t['ed'] <= (t.get('hold') or 5) else 'results further off')
     shares_cf = [t for t in trades if t.get('pm') is not None or t.get('de') is not None or t.get('rg') is not None]
     if shares_cf:
         breakdown('by profit margin when bought (shares; recorded from 19 Oct 2026)', [t for t in shares_cf if t.get('pm') is not None], lambda t: 'losing money (margin under 0%)' if t['pm'] < 0 else 'margin 0% to 10%' if t['pm'] < 10 else 'margin 10% or more')
