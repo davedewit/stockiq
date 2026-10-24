@@ -1783,4 +1783,34 @@ if "'kind': split(" in open(sys.argv[1]).read():
     card = m.scorecard([{'symbol': 'AAPL', 'screener': '3-3', 'pct': 2.0, 'usd': 40.0}, {'symbol': 'SUI-USD', 'screener': '7-1', 'pct': -3.0, 'usd': -60.0}, {'symbol': 'BHP.AX', 'screener': '4-200', 'pct': 1.0, 'usd': 20.0}])
     kinds = {g['label']: (g['n'], round(g.get('usd', 0), 2)) for g in card['groups']['kind']}
     check('the breakdown splits shares from coins, shares first', kinds == {'shares': (2, 60.0), 'coins': (1, -60.0)} and card['groups']['kind'][0]['label'] == 'shares', kinds)
+# ---- the market's calendar, results dates, and the AI's cost (24 Oct 2026)
+if hasattr(m, 'market_events'):
+    raw = [{'title': 'Federal Funds Rate', 'country': 'USD', 'date': '2026-10-28T14:00:00-04:00', 'impact': 'High', 'forecast': '3.75%', 'previous': '4.00%'},
+           {'title': 'CPI y/y', 'country': 'GBP', 'date': '2026-10-27T02:00:00-04:00', 'impact': 'High', 'forecast': '3.3%', 'previous': '3.4%'},
+           {'title': 'Retail Sales', 'country': 'AUD', 'date': '2026-10-27T20:30:00-04:00', 'impact': 'Medium', 'forecast': '', 'previous': ''},
+           {'title': 'BOJ Policy Rate', 'country': 'JPY', 'date': 'not a date', 'impact': 'High'}]
+    ev = m.read_events(raw)
+    check('the calendar keeps high-impact rows only, in UTC, in time order', [(e['cur'], e['t']) for e in ev] == [('GBP', '2026-10-27T06:00:00Z'), ('USD', '2026-10-28T18:00:00Z')], ev)
+    ET = dt.datetime(2026, 10, 26, 18, 0)
+    check('a US event concerns every market, a British one only London', m.event_concerns(ev[1], 'au') and m.event_concerns(ev[0], 'uk') and not m.event_concerns(ev[0], 'jp'))
+    check('hours to the next event for a market (London: the UK inflation figure first; Tokyo: the Fed)', m.hours_to_event(ev, ET, 'uk') == 12.0 and m.hours_to_event(ev, ET, 'jp') == 48.0, (m.hours_to_event(ev, ET, 'uk'), m.hours_to_event(ev, ET, 'jp')))
+    txt = m.events_text(ev, ET, ['us'])
+    check('the model is shown the Fed decision in plain words, its time and forecast, and not a UK figure for a US-only shortlist', 'US: Fed interest-rate decision' in txt and '18:00 UTC' in txt and 'forecast 3.75%' in txt and 'UK' not in txt, txt)
+    check('an event that came out in the last day is shown as past', '18 hours ago' in m.events_text(ev, dt.datetime(2026, 10, 29, 12, 0), ['us']) or 'hours ago' in m.events_text(ev, dt.datetime(2026, 10, 29, 12, 0), ['us']), m.events_text(ev, dt.datetime(2026, 10, 29, 12, 0), ['us']))
+    p = m.build_prompt(m.clean_settings({}, 'x@y.z'), [], '', 2, market='Scheduled announcements due:\n- US: Fed interest-rate decision')
+    check('the prompt carries the market now, marked untrusted, and tells the model never to read a direction into the calendar', 'The market now (untrusted' in p['user'] and 'never to assume a direction' in p['system'])
+    m._EVENTS.update(list=ev, at=m._clock.time()); m._FIGURES.update(f={'MSFT': {'earnings': '2026-10-28'}, 'SAP.DE': {'earnings': '2026-10-21'}}, at=m._clock.time())
+    check('days to a company\'s results: ahead positive, just reported negative, none when far', m.earnings_days('MSFT', ET) == 1.2 and m.earnings_days('sap.de', ET) == -5.8 and m.earnings_days('XYZ', ET) is None, (m.earnings_days('MSFT', ET), m.earnings_days('SAP.DE', ET)))
+    st = {}; c = {'symbol': 'MSFT', 'label': 'MSFT', 'screener': '3-3', 'rank': 1, 'score': 2.0, 'rsi': 55.0, 'd7': 1.0, 'd30': 3.0, 'volume': 1.1, 'kind': 'stock', 'from_low': 40.0}
+    facts = m.remember_buy(st, {'id': 'e1', 'boughtAt': m.iso(ET)}, c, m.clean_settings({}, 'x@y.z'), 'ai')
+    check('a share bought keeps the days to its results and the hours to the next big announcement for its market', facts.get('ed') == 1.2 and facts.get('ev') == 48.0, facts)
+    check('both go into the shared record', 'ed' in m.POOL_FIELDS and 'ev' in m.POOL_FIELDS)
+    rec_e = {'settings': dict(m.clean_settings({'screeners': ['3-3']}, 'x@y.z'), enabled=True), 'state': {'startedAt': m.iso(ET)}, 'log': [], 'history': []}
+    rows = [r for r in m.coming(rec_e, m.new_portfolio(ET), ET) if r.get('kind') == 'event']
+    check('What happens next lists the announcements due this week for its markets', len(rows) == 1 and 'Fed interest-rate decision' in rows[0]['text'] and rows[0]['at'] == '2026-10-28T18:00:00Z', rows)
+    m._EVENTS.update(list=None, at=-1e12); m._FIGURES.update(f=None, at=0)
+    m._TOKENS.clear(); m._TOKENS.update({'gpt-4o-mini': [1_000_000, 100_000, 40], 'gpt-4o': [10_000, 1_000, 2]})
+    cm = m.ai_cost_month({'month': '2026-10', 'calls': 10, 'in': 5, 'out': 5, 'usd': 0.5}, ET)
+    check('the month\'s AI cost adds this container\'s calls at the published prices, and empties the count', cm == {'month': '2026-10', 'calls': 52, 'in': 1010005, 'out': 101005, 'usd': 0.745} and not m._TOKENS, cm)
+    check('a new month starts at nothing', m.ai_cost_month({'month': '2026-09', 'calls': 9, 'in': 9, 'out': 9, 'usd': 9.0}, ET)['calls'] == 0)
 print('ALL PASS' if ok else 'SOME FAILED')
