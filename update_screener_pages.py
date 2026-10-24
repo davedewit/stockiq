@@ -440,7 +440,7 @@ def week_events():
     return sorted(out, key=lambda e: e['t'])
 
 
-def home_section(summary, events, now, today, names=None):
+def home_section(summary, events, now, today, names=None, overall=None):
     names = names or {}
     def ev_line(e):
         name = f"{PLACES.get(e['cur'], e['cur'])}: {WORDS.get(e['title'], e['title'])}"
@@ -464,8 +464,12 @@ def home_section(summary, events, now, today, names=None):
         k, v = kv
         return (f"<li><a href=\"screener-{SCREENERS[k][0]}.html\"><strong>{esc(SCREENERS[k][1])}</strong></a> "
                 f"{round(100 * v['pos'] / v['n'])}% rising <span class=\"sp-muted\">· leader {esc(short(names.get(v['lead'].upper(), v['lead'])))}</span></li>")
-    breadth = (f"<p style=\"margin:0 0 8px;\">Across {len(rows)} markets, <strong>{round(100 * total_pos / total_n) if total_n else 0}%</strong> of "
-               f"{total_n:,} shares are in a rising trend by StockIQ's trend score.</p>") if rows else ''
+    # each share counted once (24 Oct 2026, the owner queried the total: the Dow 30 sits inside the S&P 500, the Euro Stoxx 50 inside the
+    # national lists, so adding the markets up counted about 160 shares twice)
+    if overall and overall[1]:
+        total_pos, total_n = overall[0], overall[1]
+    breadth = (f"<p style=\"margin:0 0 8px;\"><strong>{round(100 * total_pos / total_n) if total_n else 0}%</strong> of the {total_n:,} shares in "
+               f"{len(rows)} main indexes are in a rising trend by StockIQ's trend score.</p>") if rows else ''
     strong = f"<h4>Strongest trend</h4><ul class=\"mw-list\">{''.join(mk(kv) for kv in rows[:3])}</ul>" if rows else ''
     weak = f"<h4>Weakest trend</h4><ul class=\"mw-list\">{''.join(mk(kv) for kv in rows[-3:][::-1])}</ul>" if len(rows) > 5 else ''
     return f'''{HOME_START}
@@ -485,13 +489,13 @@ def short(name):
     return n[:28]
 
 
-def write_home(summary, now, today, dry, names=None):
+def write_home(summary, now, today, dry, names=None, overall=None):
     path = os.path.join(OUT, 'index.html') if os.path.exists(os.path.join(OUT, 'index.html')) else os.path.join(WEBSITE, 'index.html')
     page = open(path, encoding='utf-8').read()
     if HOME_START not in page or HOME_END not in page:
         print('⚠️  index.html has no MARKET_WEEK markers: the home page section is not written')
         return
-    block = home_section(summary, week_events(), now, today, names)
+    block = home_section(summary, week_events(), now, today, names, overall)
     new = page[:page.index(HOME_START)] + block + page[page.index(HOME_END) + len(HOME_END):]
     if dry:
         print(f'   (dry run) index.html: This week in the markets, {len(block) // 1024} KB')
@@ -551,7 +555,12 @@ def main():
         with open(STATE, 'w') as f:
             json.dump(state, f)
         print(f'✅ Screener pages written: {len(ok)} and the hub')
-    write_home(summary, now, today, dry, names)
+    shares = {}
+    for d in ok.values():
+        for r in ranked(d['results']):
+            shares[r['symbol']] = r['score'] > 0
+    overall = (sum(shares.values()), len(shares)) if len(ok) == len(keys) == len(SCREENERS) else None
+    write_home(summary, now, today, dry, names, overall)
     return 0
 
 
