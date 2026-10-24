@@ -140,6 +140,17 @@ improvements and wait for his yes. The routine, every session:
    (`--found owner`); for each, find why no check and no session caught it first, and close that gap, not only the fault. Then ask:
    would the next session know what to do from these notes and the findings alone? What was done by hand that a script should do?
    What has nobody looked at? Fix the answers in the same session. The aim is that he never has to lead.
+5d. **Walk the site as he does, every weekly session, and ask his questions before he does** (the owner, 24 Oct 2026: "see how simple it
+   is the questions i ask to make improvements, you should be doing this moving forward ... think outside the box a little"). In one
+   sitting, on the live site, at desktop and at phone width (the scripts are only the floor): the home page top to bottom as a first-time
+   visitor; one daily market page; the dashboard's three tabs as his account (`live_practice_check.js`, `clarity_check.py --keep`);
+   the Admin page. At each, the questions he asked on 24 Oct, which are the kind to keep asking: *Is that number right, and what does it
+   count?* (2,359 was places, not shares) *Can I click it, and where does it take me?* (shares with no stock page were dead text) *Does
+   what I opened stay open, and does a fresh page start from the default?* *Does everything I can see still say what is true after this
+   week's changes?* (the chat said the autopilot could not know about the Fed) *Would a visitor see that the site is alive today?*
+   *What would make them sign up, and what is clutter to take away?* *Does the autopilot know what is happening in the world?* Write
+   what is found as fixes, questions or ideas; a question that recurs becomes a check in a script, at no cost. Repetitive work is
+   scripted; this walk and the ideas are the session's.
 5b. **At every weekly session, update Claude's estimate on the Admin page** (19 Oct 2026, the owner: "strange i have to still ask you
    this ... it tells me through the site"): `python3 check-tools/admin.py estimate <pct> "<why, plain words>"`, the chance the account
    is ahead of an S&P 500 fund after a year, honest, from the record (started at 30% on 19 Oct). It shows in the Real money card with
@@ -165,53 +176,31 @@ about what the "Still never" list keeps for him (real money, costs above the rul
 settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
 warns about; one change at a time, measured, with its experiment entry.
 
-**WHERE THINGS STAND (rewrite this block at the end of every session; last: 24 Oct 2026, 02:45 UTC)**
-- **Built 24 Oct:** #9 (24 daily screener pages and a hub, live), the home page's "This week in the markets", the autopilot's market calendar
-  (live `Tr7DR5W6…`; the first calendar rows and `ev` on buys from Sunday's rollover; `ed` as the weekly refresh reaches each company), the
-  OpenAI cost on the Admin page (from the next scheduled runs). **Next: #8** (learning only from the current score, notes from 30 a group,
-  `chosen` rank when `rp`, one night's correlated losses once, replay `review_resting`). **To see Monday:** the daily run rebuilds the
-  screener pages and the home section by itself; its email carries the duration (and ⚠️ if a step failed).
-- **Search Console** still showed 966 discovered on 24 Oct: Google reads the sitemap on its own schedule (the live one has 991). The owner
-  may press Resubmit under Sitemaps; nothing else is needed. Ideas from the day's last talk: `home-show` (screenshots, replacing text),
-  `screener-email` by interest.
-- **24 Oct:** the account $97,967, **$356 ahead** of the same $100,000 in an S&P 500 fund (the fund fell more on 22-23 Oct); 105
-  finished trades, -0.07% a trade this month (inside the margin of error). That day: the daily update's crash fixed (open-file limit),
-  its email gives the duration and ⚠️ on an error line, Fed days studied (no rule, question 50), each company's results date kept
-  in `company_figures.json` (`earnings`; fills in over a week as the weekly refresh reaches each company).
-- **23 Oct:** about $97,100, about $1,000 behind the same $100,000 in an S&P 500 fund; 100 finished trades, about -0.2% a trade;
-  the picks +0.21% a trade against their own markets (not clearly different from luck, every region under 30). Month 1 goal ($101,000
-  by 12 Nov) out of reach. Claude's forecast on the Admin page: 25% (the owner reads it as "awful": it is the honest figure; tell him
-  what would move it). Full check 23 Oct: 54 of 54. The weekly review is next due around **30 Oct**.
-- **His autopilot is automatic** (his wish, 23 Oct: "i want it all to be automatic"): the markets chosen by the AI (`pickMode` 'ai',
-  21 main indexes, experiment `ai-markets`), the pace left to the level (a check-in every 6 h, holdings up to 5 days), **42 holdings
-  (2 a ticked screener, each from the top 10 of its list) and the budget = all the practice money it reaches** (experiment
-  `auto-holdings`). It held 50 shares on the day: none is sold for it, it buys less until the count falls. Coins unticked; the crypto
-  screener rests until 29 Oct. Do not write his settings while he is on the page.
-- **Trials running** (`python3 check-tools/experiments.py` for the dates): gap-wait, rank-pick, crypto-no-chasing, theme-sleeve,
-  stop-watch, patient-shares (decided 12 Nov; then `longer-holds` starts, the strongest replay finding for shares), market-gauge,
-  company-figures, trend-score, ai-markets, auto-holdings. Not yet seen for real: a gap-wait case, a rank-pick swap's note, the first
-  monthly change of the sector funds (around 16 Nov).
-- **First jobs, in order:** (1) #8 and #9, which he said yes to on the Admin page: #8 the autopilot's learning (a score-version tag on
-  buys, learning only from the current score, notes from 30 trades a group, one night's correlated losses counted once, replay
-  `review_resting` on the wide price set (**#9 done 24 Oct 2026**: the daily screener pages; #8 is next); **and, in the same change of the function, `ed` with every share bought: days to its
-  results date from `company_figures()` (the file's `earnings`; negative when it just reported), in `POOL_FIELDS`, split in the
-  review tool: idea `earnings-hold`, question 51**); #9 the daily public screener pages (the traffic plan's first build). (2) **Store his
-  autopilot record compressed, as `_brain` is**: about 190 KB written at most check-ins is now the largest cost (DynamoDB is about
-  $0.36 of the month's running $0.60). (3) `loss-news`: headlines at each sale, at the next change of the function. (4) The three
-  parts `session_start` names (pricing, plans, stock pages first): each must end in an improvement. (5) Decide `daily-review` by
-  1 Nov: Claude recommended keeping it (`touch check-tools/reviews/daily/KEEP`), as the only thinking between sessions; it uses his
-  Claude allowance, not AWS.
-- **How the session works now (23 Oct, end of the session):** read "THE GOAL OF ALL OF IT" below first. The opening check makes
-  findings of every "Needs you" item, the lists against what is live (`registers_check.py`), what the owner had to point out in the last
-  7 days (15 this week: close each gap, not only the fault; step 5c), the experiments due, and three parts to improve, at least two of
-  them profit parts, ranked by never looked at and changed since (a profit part must end in an improvement; others may end "fine" with
-  a reason). The weekly review explains every trade (part 4b, `trade_causes.py`) and lists the gains as well as the losses; every
-  pattern becomes a question or an idea, never fooled by a few cases. Each change line says who found the problem (`admin.py change
-  "..." --found owner|check|session`); each experiment's result is written with its figures, or it does not show as proof. The
-  Improvements tab opens with the story (the score, proven by testing, testing now, next), then six closed rows. Four entry points only.
-- Open ideas: `asia-overnight` (fewer or smaller Asian holdings overnight; 22-23 Oct cost six loss limits), `market-hours-checkins`,
-  the coin study's other jump points (breakout +2, volume surge +2), the stock pages' regeneration (13c). A small one from him: a
-  "View report" link on the "Analysis complete" note after a background analysis.
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 24 Oct 2026, end of a long session)**
+- **The account (24 Oct):** $97,967, **$356 ahead** of the same $100,000 in an S&P 500 fund (the fund fell more on 22-23 Oct); 105
+  finished trades, -0.07% a trade this month, inside the margin of error. Month 1 goal ($101,000 by 12 Nov) out of reach. Claude's
+  forecast on the Admin page: 25%. The weekly review is next due around **30 Oct**. Full check 24 Oct: **58 of 59**, the one failure this morning's crashed
+  daily update (fixed; clears with Monday's run); today's new checks (phones at 390 and 360px, folds, the graph's buttons) all pass.
+- **His autopilot is automatic:** markets chosen by the AI (21 main indexes), the pace left to the level, the number of holdings and the
+  budget automatic. Coins unticked; the crypto screener rests until 29 Oct. Do not write his settings while he is on the page.
+- **Live since 24 Oct, to be seen for real:** the market's calendar in the AI's choices and in "What happens next" (rows and `ev` from
+  Sunday's rollover; `ed` as the weekly refresh reaches each company), the OpenAI cost on the Admin page; the 24 daily market pages,
+  the hub and the home page's "This week in the markets" rebuilt by **Monday's** daily run by itself (its email gives the duration, ⚠️ on
+  an error line); the open-file fix for the stock-page step (the "Traceback" finding clears with that run). Search Console showed 966
+  (Google re-reads the sitemap on its own schedule; the live one has 991).
+- **Trials running** (`python3 check-tools/experiments.py`): gap-wait, rank-pick, crypto-no-chasing, theme-sleeve, stop-watch,
+  patient-shares (decided 12 Nov; then `longer-holds`), market-gauge, company-figures, trend-score, ai-markets, auto-holdings,
+  screener-pages (Search Console, 8 weeks). Ideas, each with its start condition: earnings-hold, ai-market-tilt, public-record,
+  screener-email, results-week, crypto-page, home-show, asia-overnight, market-hours-checkins, loss-news and the older ones.
+- **Next session, in order:** (1) **#8** (he said yes on the Admin page): a score-version tag on buys and learning only from the
+  current score, notes and scorecard lines from 30 a group, `chosen` rank when `rp`, one night's correlated losses counted once,
+  replay `review_resting` on the wide price set. (2) The parts `session_start` names (home pricing and the plans: never looked at).
+  (3) **Store his autopilot record compressed**, as `_brain` is (about 190 KB written at most check-ins: the largest running cost).
+  (4) Decide `daily-review` by 1 Nov (Claude recommends keeping it: `touch check-tools/reviews/daily/KEEP`). (5) The walk of step 5d.
+  (6) A small one from him: a "View report" link on the "Analysis complete" note after a background analysis.
+- **How the session works:** the routine at the top (steps 0 to 6, with 5b, 5c, 5d); "THE GOAL OF ALL OF IT" below; four entry points
+  for checks (`session_start.py`, `site_audit.py` daily, `weekly_check.py` weekly, `autopilot_review.py`); one register each for parts,
+  experiments and questions, kept in step by `registers_check.py`. A new check goes into one of the four, never a fifth thing.
 
 **THE GOAL OF ALL OF IT, in the owner's words (23 Oct 2026):** "it figures something out thats a problem or a profit tries to remove it
 or continue it more ... AI driven to react based on data and show improvement that gets exponential over time". So: every finding in

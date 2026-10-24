@@ -381,7 +381,14 @@
    "id": "stock-pages",
    "part": "Stock pages: snapshot, news, people also watch, SEO",
    "where": "stocks/*.html; generate-stock-pages.py; stock-prices.js, timezone-converter.js",
-   "last": null
+   "last": "2026-10-24",
+   "log": [
+    {
+     "at": "2026-10-24",
+     "kind": "improved",
+     "found": "Improved: The template's Screeners menu links the daily market pages (Today's top 10s), live at the next regeneration (13c); the daily pages link every indexed stock page they rank, so Google reaches stock pages from 25 pages updated daily"
+    }
+   ]
   },
   {
    "id": "news",
