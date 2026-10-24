@@ -896,10 +896,14 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   Practice portfolio, AI autopilot** (section 8c). The plan sections ("Upgrade Your Plan", "Manage
   Subscription") stay below every tab, because other pages link to `dashboard.html#upgrade` and
   code scrolls there.
-- `index.html`: market overview widgets, guides, "How StockIQ Works", **Pricing section**
-  (`#pricing`, three plans in USD), email signup ("Get Screener Highlights by Email", details in
-  `stockiq.md`), **"What you can do with StockIQ"** (`#features`: eight cards, one for each thing the site does) and, last,
-  "What StockIQ is, and what it is not". **The page's wording was rewritten on 13 Oct 2026** (section 13): keep to it.
+- `index.html`, top to bottom: the search and four index cards, the intro with its four numbers, "This week in the markets", the
+  guides as one row of links, **"What you can do with StockIQ"** (`#features`: eight cards, each ending in a button: for the practice
+  portfolio, the autopilot and the dashboard a signed-out visitor is offered a free account, `.only-signed-in` / `.only-signed-out`),
+  **Pricing** (`#pricing`, three plans in USD), the email signup (`stockiq.md`), the stock page links. **24 Oct 2026, the owner: "too
+  long ... on a phone its never ending"**: "How StockIQ Works" and "What StockIQ is, and what it is not" went (they repeated the
+  intro, the cards and the footer's disclaimer; the cards' line now says a high score is not a forecast), the phone layout of the
+  intro and the stock links made compact: 12,675px to about 9,000px on a phone, 6,292 to 5,147 on a desktop. Keep it from growing:
+  a new thing on the home page replaces or folds into something there. The wording of 13 Oct 2026 (section 13) stands.
 - **Practice portfolio and AI autopilot** (dashboard, built 10 Oct 2026): a fake-money portfolio the
   owner buys and sells in by hand, and an autopilot that trades it from the screeners' results,
   reviews its holdings with the AI model and recent headlines, and tries bounded changes to its own

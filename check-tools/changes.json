@@ -3,6 +3,18 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Sign-up page lists what you really get; the sign-in and sign-up prompts sit under the form instead of pinned near the header; no bell for a signed-out visitor",
+   "found": "owner",
+   "link": "https://stockiq.tech/signup.html"
+  },
+  {
+   "at": "2026-10-24",
+   "what": "Home page about 30% shorter on a phone: the repeated 'How it works' and 'what it is not' sections removed, the guides one row of links, the intro and the numbers compact; every feature card now has a button (a free account offered where you need one)",
+   "found": "owner",
+   "link": "https://stockiq.tech/#features"
+  },
+  {
+   "at": "2026-10-24",
    "what": "Each change on this list can now carry a view link to where it can be seen",
    "found": "owner"
   },
@@ -277,14 +289,6 @@
   {
    "at": "2026-10-19",
    "what": "The confidence line on this page is now a dial: red under 50%, yellow to 90%, green from 90%, with a line of how it has moved day by day (faded until 30 trading days)"
-  },
-  {
-   "at": "2026-10-19",
-   "what": "On the AI autopilot's Activity part, the themes part, the bar, progress and how it improves are each a row that opens and closes where it is"
-  },
-  {
-   "at": "2026-10-19",
-   "what": "Under the month's goal on this page: how sure the record is that the account has been ahead of an S&P 500 fund so far (too early to tell until 30 trading days)"
   }
  ]
 }
