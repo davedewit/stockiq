@@ -3,6 +3,12 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "The free 3-day trial now includes the AI autopilot: a new account can switch it on and watch it trade its practice portfolio; when the trial ends it pauses by itself (a note and an email say so) and switches back on with any paid plan. The sign-up page now leads with it; the FAQ, About, home page and the AI chat say the same",
+   "found": "owner",
+   "link": "https://stockiq.tech/signup.html"
+  },
+  {
+   "at": "2026-10-24",
    "what": "Sign-up page: three short lines instead of four long ones, and one-click Google or Facebook sign-up above the email form (a 4-week trial measured on sign-ups)",
    "found": "owner",
    "link": "https://stockiq.tech/signup.html"
@@ -295,10 +301,6 @@
   {
    "at": "2026-10-23",
    "what": "The Practice portfolio's prices now refresh by themselves every minute while you're on the tab (the button stays)"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "Took the old boast off the bottom of every page ('Professional Investment Research Platform', 'Powered by AI') and three similar lines; the nightly check now catches such wording"
   }
  ]
 }

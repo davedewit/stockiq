@@ -1063,6 +1063,16 @@ broken = D.Table(m.USERS_TABLE); real_get = broken.get_item; m.PLAN_CACHE.clear(
 def fail(Key): raise RuntimeError('database away')
 broken.get_item = fail; code_, b = call(action='get', userId='pay@z.com'); code2, b2 = call(action='run', userId='pay@z.com'); r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); broken.get_item = real_get; m.PLAN_CACHE.clear()
 check('if the plan cannot be read, nobody is locked out for good or paused: the page says to try again and the schedule leaves the account for its next run', b == {'success': True, 'allowed': False, 'locked': 'unknown'} and code2 == 503 and r['paused'] == 0 and r['waiting'] == 1 and json.loads(D.Table(m.SETTINGS_TABLE).rows['pay@z.com']['data'])['settings']['enabled'] is True, (b, code2, r))
+# the free trial includes the autopilot (24 Oct 2026): up to and including its last day; then it pauses like an ended plan, saying so
+m.datetime = at(sun + dt.timedelta(days=3)); m.PLAN_CACHE.clear(); day = m.datetime.utcnow().date()
+plan('tri@z.com', subscriptionStatus='trial', planType='trial', trialEndDate=str(day + dt.timedelta(days=2))); plan('old@z.com', subscriptionStatus='trial', planType='trial', trialEndDate=str(day - dt.timedelta(days=1)))
+check('a free trial may use the autopilot up to its last day; one that has ended may not', [m.plan_of('tri@z.com'), m.allowed('tri@z.com'), m.plan_of('old@z.com'), m.allowed('old@z.com')] == ['trial', True, 'free', False])
+code_, b = call(action='save', userId='tri@z.com', settings=dict(m.DEFAULTS, enabled=True, screeners=['7-1'], pickMode='manual'))
+check('a trial account can switch it on, and the page is told the day its trial ends', code_ == 200 and b['allowed'] is True and b['settings']['enabled'] is True and b.get('trialEnds') == str(day + dt.timedelta(days=2)), (code_, b.get('trialEnds')))
+code_, b = call(action='get', userId='pay@z.com'); check('a paid account is not told of any trial', 'trialEnds' not in b)
+plan('tri@z.com', subscriptionStatus='trial', planType='trial', trialEndDate=str(day - dt.timedelta(days=1))); m.PLAN_CACHE.clear()
+r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); rec = json.loads(D.Table(m.SETTINGS_TABLE).rows['tri@z.com']['data'])
+check('when the trial has ended the schedule pauses it and says the trial ended and how to keep it', D.Table(m.SETTINGS_TABLE).rows['tri@z.com']['enabled'] is False and any('your free trial has ended' in e['text'] and '$4.99' in e['text'] for e in rec['log']), [e['text'][:90] for e in rec['log'][-2:]])
 m.send_mail = real_send; m.datetime = clock; m.PLAN_CACHE.clear()
 
 # --- learning shared by every account: one record that every account's finished trades go into and every autopilot uses

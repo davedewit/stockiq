@@ -3461,6 +3461,14 @@ buying-order trial finished and was not kept; the AI review's early sales switch
   `stockiq-user-tracking`, item `<email>#registration`: paid = `subscriptionStatus` `active`, or `cancelled` with
   `expiryDate` not yet past; a free trial is `free`; a read that fails is `unknown` (cached 60 seconds). On 11 Oct: 66
   registered accounts, 1 paid (the owner's); one autopilot record besides his (the deploy test account's, off).
+- **The free 3-day trial includes the autopilot** (24 Oct 2026; the owner: "what about the whole AI thing that auto runs" for the sign-up
+  page, then "so long as if they don't buy after 3 days ... it should switch off"): `plan_of` answers `'trial'` for `subscriptionStatus`
+  `trial` up to and including its `trialEndDate`, and `allowed` accepts it. The page is sent `trialEnds` and shows "Included in your free
+  trial: it runs until the end of <day>, then pauses. To keep it running, choose a plan" (`trialHtml`). After the last day the scheduled
+  run pauses it with `pause_for_plan` in the trial's own words (`TRIAL_ENDS`), emails once, leaves its holdings; any paid plan switches
+  it back on at the next visit. A new account's defaults let the AI pick the markets, so one switch starts it. Limits: the daily cap
+  of 120 AI calls per account (`AI_CALLS_PER_DAY`) for everyone; nothing else. Cost: a few cents a trial account (shared screener
+  results, small AI calls, its record's writes). The sign-up page leads with it; FAQ, About, the home page and the chat's guide say so.
 - **Without a paid plan:** `get` answers `{allowed: false, locked: 'plan', upgrade}` and no record is made; every other
   action is refused with HTTP 402 and the same pointer; the panel shows `lockedHtml` (what it is, that it is in every paid
   plan, that buying by hand stays free, "See the plans") and its tab a 🔒. `locked: 'unknown'`: "could not be checked,
