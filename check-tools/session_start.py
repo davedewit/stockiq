@@ -267,6 +267,8 @@ try:
     for l in out: print('  ' + l)
     for l in out:
         if l.startswith('FLAG '): finding('CLARITY (fix it, or teach clarity_check.py that it is fine): ' + l[5:])
+        if l.startswith('CHECKIN ') and not l[8:].startswith('No, all good'):
+            finding('THE ADMIN PAGE ASKS THE OWNER TO CHECK IN (fix the cause, or it stays so after the session): ' + l[8:][:240])
     if not out: finding('clarity_check.py printed nothing: ' + (r.stderr.strip().splitlines() or ['no error'])[-1][:150])
 except Exception as e:
     finding(f'clarity_check.py did not run: {type(e).__name__}: {e}')

@@ -156,6 +156,14 @@ if __name__ == '__main__':
     t2, sel2, _ = render(admin_page(adm), 'admin-panel', 5000)
     if len(t2) < 200: found.append('the Admin page could not be drawn for the check: look at clarity_check.py')
     found += flags('Admin page', t2, sel2, ap.get('settings'))
+    # the card the owner opens the Admin page for, read as the page itself draws it (24 Oct 2026: a stale failure kept it at
+    # "Yes, please check in" after a session had said all was well): the verdict and its reason, for session_start and the close-out
+    lines = t2.splitlines()
+    if 'Do you need to check in?' in t2:
+        i = next(k for k, l in enumerate(lines) if 'Do you need to check in?' in l)
+        print('CHECKIN ' + ' | '.join(lines[i + 1:i + 3]))
+    else:
+        print('CHECKIN not found on the Admin page')
     print(f'read: the AI autopilot tab ({len(t):,} characters on show) and the Admin page ({len(t2):,})')
     for f in found: print('FLAG ' + f)
     print('nothing reads badly by these tests' if not found else f'{len(found)} to look at')

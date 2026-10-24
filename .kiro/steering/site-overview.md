@@ -161,7 +161,12 @@ improvements and wait for his yes. The routine, every session:
    owner|check|session` (who found the problem behind it: the Improvements tab counts how many he pointed out, the number to bring
    down; anything he points out also becomes a check). That list is how he sees what happened without asking.
 6. End with a short report: the account in dollars against the month's goal and against an S&P 500 fund, what was changed, what
-   comes next. **Rewrite "WHERE THINGS STAND"** (below) so the next session starts from the real state. If the reviews keep showing no edge, say so plainly and change what it buys from, or recommend stopping it.
+   comes next.
+   **Before saying the session is done, or "all good": `python3 check-tools/clarity_check.py` and read its `CHECKIN` line** (the Admin
+   page's "Do you need to check in?" as the page draws it). Anything but "No, all good" is unfinished work: fix its cause in the session
+   (a failure already fixed by hand is acknowledged and the full check re-run), or tell the owner plainly that it needs him and why.
+   On 24 Oct 2026 a session said all was well while the card still said "Yes, please check in" for a fault fixed that morning; the owner
+   found it: "i don't really trust you when you say things are good then i find problems as obvious as that". **Rewrite "WHERE THINGS STAND"** (below) so the next session starts from the real state. If the reviews keep showing no edge, say so plainly and change what it buys from, or recommend stopping it.
 **Still never, even now:** anything with real money; costs above the cost rule; deleting what cannot be restored (Lambda functions,
 tables, users' data, the autopilot's records: those need his yes to an exact list); writing his autopilot settings while he is on
 the page. His requests are judged, not obeyed word for word: say when an idea is wrong and do the better thing.
