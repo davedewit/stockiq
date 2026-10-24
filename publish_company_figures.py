@@ -76,6 +76,12 @@ def build(info_dir=INFO_DIR, now=None):
         if entry.get('failed') or not fetched or fetched < oldest:
             continue
         row = to_score_units(entry)
+        ets = entry.get('earnings_ts')
+        if isinstance(ets, (int, float)) and ets > 1e9:
+            # The company's results date (next once set, else the last): the autopilot records how far a buy was from it
+            row['earnings'] = datetime.fromtimestamp(ets, timezone.utc).strftime('%Y-%m-%d')
+            if entry.get('earnings_estimate'):
+                row['earnings_est'] = True
         if row:
             row['as_of'] = fetched[:10]
             figures[os.path.basename(path)[:-5].upper()] = row

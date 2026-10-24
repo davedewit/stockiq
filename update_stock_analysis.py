@@ -143,6 +143,9 @@ def fetch_info(symbol):
         'current_ratio': clean(i.get('currentRatio')),
         'return_on_equity': clean(i.get('returnOnEquity')),
         'price_to_book': clean(i.get('priceToBook')),
+        # The company's results date (24 Oct 2026): Yahoo gives the next one once it is set, otherwise the last one
+        'earnings_ts': clean(i.get('earningsTimestampStart') or i.get('earningsTimestamp')),
+        'earnings_estimate': bool(i.get('isEarningsDateEstimate')) if i.get('isEarningsDateEstimate') is not None else None,
     }
     previous = read_info(symbol) or {}
     if previous.get('last_mcap_usd') is not None:
