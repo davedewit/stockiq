@@ -200,6 +200,13 @@ warns about; one change at a time, measured, with its experiment entry.
   names and sectors slowly (Yahoo limits this Mac: through the price function where it can), one `generate-stock-pages.py` run tested
   on a copy first (it also brings the waiting template changes, 13c), `update_stock_analysis.py` (indexed only from $10B, as now), then
   the daily pages link them by themselves. Its own staged session; check the sitemap and the page count after.
+  **Found on 24 Oct (a quick look, at the owner's question whether news exists outside the US):** the existing pages outside the US do get
+  news (Toronto 93%, London 88%, DAX 90%, Tokyo 63%, ASX 58%, Hong Kong 50% of pages have articles; the US 97%), all from Yahoo's
+  per-symbol feed (`update_stock_news.py`, `feeds.finance.yahoo.com/rss/2.0/headline?s=…&region=US`), and that feed answers for the
+  new markets too (2330.TW 16 items, 600519.SS 6, 005930.KS 15, VALE3.SA 19, 2359.HK 18), though some items are not about the share
+  (the script's name matching filters them). **Cost to weigh first:** the step summarises articles with OpenAI, so 1,257 more shares
+  means more summaries a day: measure the articles per share on a sample and price it before adding them all; pages for shares with
+  no news are allowed (the snapshot is the page's substance; noindex under $10B, as now).
   (2) The parts `session_start` names (home pricing and the plans: never looked at).
   (3) **Store his autopilot record compressed**, as `_brain` is (about 190 KB written at most check-ins: the largest running cost).
   (4) Decide `daily-review` by 1 Nov (Claude recommends keeping it: `touch check-tools/reviews/daily/KEEP`). (5) The walk of step 5d.

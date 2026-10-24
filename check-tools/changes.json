@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Home page: the intro's middle button is now Today's top 10s (the daily market pages, free for every visitor) in place of US Stock Screener, which stays in the menu",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
    "what": "Shares without a stock page on the daily market pages now open and run their analysis (the link lacked one setting); the home page's link to every market's top 10 is a button at the top of its section; the Admin page's questions show the live ones first, answered ones folded as history",
    "found": "owner"
   },
@@ -265,10 +270,6 @@
   {
    "at": "2026-10-18",
    "what": "The 'Answered' list now sits right under 'Decisions for you'; the contact page says StockIQ is a sole trader (it said Pty Ltd)."
-  },
-  {
-   "at": "2026-10-18",
-   "what": "The 0-100 score on the stock pages and in the stock report was marking down shares that were rising, and on five years of prices it picked worse than chance. It now counts a strong rise and a price near the year's high for a share, as the screeners do (tested: better in 15 of 18 market-halves). Stock pages update with Monday's daily run."
   }
  ]
 }
