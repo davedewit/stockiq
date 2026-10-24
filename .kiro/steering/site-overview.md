@@ -948,6 +948,20 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
     browser an ordinary name** (`Emulation.setUserAgentOverride`). After any change to `analysis-functions.js` also
     run `anon_run.js` and `trial_run.js` (they take `FUNCS=<file>`): same results and redirects as before.
   - **Not checked: a real phone, a real signed-in account, a real paying account** (all were made-up sessions).
+- **The whole header on every page: `website/site-header.js`** (24 Oct 2026; the owner found the daily screener pages with no ☰
+  button, no bell, no swipe and no usage count). The home page, the analysis page, the dashboard and the stock pages carry the whole
+  header in their own markup; the guides, the legal pages, contact, support and the 25 daily screener pages (which copy the screener
+  guide's shell) had only the desktop menu and never loaded `auth.js`, so a signed-in visitor saw "Register / Login" there. Loaded
+  by `theme.js` (between `SITE_HEADER_START` and `SITE_HEADER_END`: take those lines out to switch it off everywhere), it fills in
+  **only what a page lacks**: the phone bar (☰ and the bell), the phone menu **built from the page's own desktop menu** (so the two
+  cannot differ), `toggleMobileMenu` / `closeMobileMenu`, on those pages a bell that opens the one list (`autopilot-bell.js` fills
+  it; it used to go to the dashboard), `auth.js` (name in the Account menu, the bell, the usage chip through `visitor-bar.js`), and
+  `mobile-sidebar.js` (the menu follows a swipe; now on the blog, news and stock pages too). It also adds the missing phone bell to the
+  stock pages' own bar and centres a list opened from a phone bell. `window.siteHeader.added` says what it filled in on a page. **Not
+  added on purpose: the trial strip across the top on those pages** (it must be laid out before the page is drawn; the usage chip
+  and its card carry the offer). **The check:** `phone_check.js` (weekly) fails a page without the ☰ button on show and opening the
+  menu, the bell (not on sign-in pages) or the usage chip. **Next, an idea in the register (`nav-simpler`):** the desktop menu written
+  once and simpler (Crypto as a plain link, Pricing / Dashboard in the bar).
 - **The header bar on a narrow desktop window or a tablet** (769 to 1150px; `styles.css`, the two `@media` blocks above
   "Home link specific styling"): the menu sits in the row beside the name, with tighter spacing below 900px. On a wide
   screen it is centred on the page (`.desktop-nav` is `position: absolute; left: 50%`), and until 13 Oct 2026 it stayed
@@ -5285,6 +5299,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     chat's screener count in `site_audit.py`; three new lenses in `site_parts.py`; the daily Claude review checks each recent change is
     described the same everywhere. Ideas added: `ai-market-tilt` (the owner's: lean the budget to markets by news, calls first),
     `public-record`, `screener-email`, `results-week`, `crypto-page`.
+  - **The header made the same on every page** (the owner: on a phone the daily screener pages had no ☰ button, bell or swipe; on a
+    desktop no usage count): `site-header.js`, section 8. `phone_check.js` now checks every page's header (it failed the live site
+    before the fix, as he saw it, and passes after). Idea `nav-simpler` for the desktop menu itself.
 
 - **23 Oct 2026** (the owner: "hi"):
   - **The account:** $97,103, behind the same $100,000 in an S&P 500 fund ($98,123) by $1,021. On 22 Oct it fell 2.06%, the fund

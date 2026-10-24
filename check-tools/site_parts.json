@@ -503,7 +503,7 @@
   {
    "id": "site-wide",
    "part": "What every page shares: the header and menu, the footer, light and dark, the cache-clear page",
-   "where": "theme.js, styles.css, clear-cache.html, the header and footer of every page",
+   "where": "theme.js, site-header.js, styles.css, clear-cache.html, the header and footer of every page",
    "last": null,
    "log": []
   },

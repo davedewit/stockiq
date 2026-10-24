@@ -1,6 +1,8 @@
 // Does every public page fit a phone? (24 Oct 2026, the owner: "make sure mobile version of the site is good too ... most people do use
 // mobile over desktop".) Opens each page in headless Chrome at a phone's size under an ordinary browser name, waits for it to fill in,
-// and says whether the page can be scrolled sideways and which elements stick out past the screen. An element inside a box that scrolls
+// and says whether the page can be scrolled sideways and which elements stick out past the screen. Since 24 Oct 2026 it also checks
+// the header every page should have on a phone (the owner found the daily screener pages without it): the ☰ button on show and
+// opening the menu, the bell, and the usage chip (site-header.js fills these in where a page's own markup lacks them). An element inside a box that scrolls
 // sideways by itself (a wide table in its own scroller) does not count; nor do the panels that slide in from the side.
 // Read-only: the site's own files and GETs go through, and the functions that only read market data; every other request is answered
 // here with an empty reply, so nothing is written.
@@ -14,7 +16,7 @@ const { spawn } = require('child_process'); const os = require('os'), fs = requi
 const SITE = path.join(__dirname, '..', '..', 'website'), WEB = process.env.WEB || '', PORT = 9355, HTTP = 8795;
 const [W, H] = (process.env.SIZE || '390x844').split('x').map(Number);
 const PAGES = process.argv.slice(2).length ? process.argv.slice(2) : ['index.html', 'analysis.html', 'screeners-today.html', 'screener-asx-200.html',
-  'about.html', 'faq.html', 'blog.html', 'news.html', 'signup.html', 'login.html', 'stock-screener-guide.html', 'stocks/AAPL.html', 'contact.html'];
+  'about.html', 'faq.html', 'blog.html', 'news.html', 'signup.html', 'login.html', 'stock-screener-guide.html', 'stocks/AAPL.html', 'contact.html', 'terms.html', 'screener-dax-40.html'];
 const BASE = WEB ? `http://127.0.0.1:${HTTP}/` : 'https://stockiq.tech/';
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -67,13 +69,25 @@ const server = http.createServer((q, r) => {
         return { sideways: document.documentElement.scrollWidth > vw + 1, width: document.documentElement.scrollWidth, vw: vw, outside: out.length, examples: deepest, title: document.title.slice(0, 50) };
       })()`);
       if (!r) { console.log(`FAIL ${page}: did not load`); bad++; continue; }
-      const ok = !r.sideways && r.outside === 0;
+      const head = await js(`(async function () {
+        var miss = [], btn = document.querySelector('.hamburger-btn'), b = btn && btn.getBoundingClientRect();
+        if (!btn || !b.width || !b.height) miss.push('no ☰ button on show');
+        if (!/(login|signup)\\.html/.test(location.pathname) && !document.getElementById('mobile-notification-bell')) miss.push('no bell');   // nobody is signed in on the sign-in pages
+        if (!document.getElementById('vb-chip')) miss.push('no usage chip');
+        if (!document.querySelector('.mobile-section-title')) miss.push('no phone menu');
+        if (btn && b.width) { btn.click(); await new Promise(function (r) { setTimeout(r, 500); });
+          var m = document.getElementById('mobile-menu'), mb = m && m.getBoundingClientRect();
+          if (!m || !m.classList.contains('open') || mb.right < 50) miss.push('the ☰ button does not open the menu');
+          if (typeof closeMobileMenu === 'function') closeMobileMenu(); }
+        return miss;
+      })()`) || ['the header could not be read'];
+      const ok = !r.sideways && r.outside === 0 && !head.length;
       if (!ok) bad++;
-      console.log(`${ok ? 'PASS' : 'FAIL'} ${page}: ${r.sideways ? `scrolls sideways (${r.width}px on a ${r.vw}px screen)` : 'no sideways scroll'}${r.outside ? `; ${r.outside} element(s) past the edge, e.g. ${r.examples.join('; ')}` : ''}`);
+      console.log(`${ok ? 'PASS' : 'FAIL'} ${page}: ${r.sideways ? `scrolls sideways (${r.width}px on a ${r.vw}px screen)` : 'no sideways scroll'}${r.outside ? `; ${r.outside} element(s) past the edge, e.g. ${r.examples.join('; ')}` : ''}${head.length ? '; header: ' + head.join(', ') : '; header complete'}`);
       if (process.env.SHOTS) { const p = await send('Page.captureScreenshot', { format: 'png' }); fs.mkdirSync(process.env.SHOTS, { recursive: true }); fs.writeFileSync(path.join(process.env.SHOTS, page.replace(/\//g, '_') + '.png'), Buffer.from(p.data, 'base64')); }
     }
   } catch (e) { console.log('FAIL the check could not run: ' + e.message); bad++; }
   chrome.kill(); if (WEB) server.close();
-  console.log(bad ? `${bad} page(s) do not fit a ${W}px phone` : `ALL PASS: every page fits a ${W}px phone`);
+  console.log(bad ? `${bad} page(s) fail on a ${W}px phone (fit or header)` : `ALL PASS: every page fits a ${W}px phone and has the whole header`);
   process.exit(bad ? 1 : 0);
 })();

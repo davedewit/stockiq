@@ -444,6 +444,14 @@
    "measure": "pages always show closing figures (checked by the site check); Search Console impressions against the weeks before",
    "status": "idea",
    "added": "2026-10-24"
+  },
+  {
+   "id": "nav-simpler",
+   "what": "The desktop menu written once and simpler: Crypto as a plain link (its menu holds one item), Today's top 10s first under Screeners, Pricing in the bar for a signed-out visitor and Dashboard for a signed-in one. Today the menu markup is copied into 45 pages and the stock-page template; site-header.js could draw it from one definition (the links stay in each page's HTML for search engines)",
+   "angle": "ease of use, sign-ups",
+   "measure": "Clicks on Pricing and on the screener pages from the menu (GA4), sign-ups per visit, over 4 weeks against the 4 before",
+   "status": "idea",
+   "added": "2026-10-24"
   }
  ]
 }
