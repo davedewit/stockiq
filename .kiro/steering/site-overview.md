@@ -188,6 +188,8 @@ warns about; one change at a time, measured, with its experiment entry.
   the hub and the home page's "This week in the markets" rebuilt by **Monday's** daily run by itself (its email gives the duration, ⚠️ on
   an error line); the open-file fix for the stock-page step (the "Traceback" finding clears with that run). Search Console showed 966
   (Google re-reads the sitemap on its own schedule; the live one has 991).
+- **24 Oct, afternoon:** every page has the whole header (`site-header.js`, section 8; the owner found the daily screener pages
+  without it); `phone_check.js` checks it weekly. Next for the header: idea `nav-simpler` (the desktop menu once and simpler).
 - **Trials running** (`python3 check-tools/experiments.py`): gap-wait, rank-pick, crypto-no-chasing, theme-sleeve, stop-watch,
   patient-shares (decided 12 Nov; then `longer-holds`), market-gauge, company-figures, trend-score, ai-markets, auto-holdings,
   screener-pages (Search Console, 8 weeks). Ideas, each with its start condition: earnings-hold, ai-market-tilt, public-record,

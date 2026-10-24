@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Every page now has the same header: on a phone the guides, legal pages and daily screener pages get the menu button, bell, swipe and usage count; on a desktop the usage count and your name in the Account menu. The weekly phone check now tests every page's header",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
    "what": "Stock pages with no news at all (49 of the 946 in Google, all outside the US, e.g. Ramsay Health Care) now take the newest article clearly about the company, even if it is not 'critical' news; from Monday's run",
    "found": "owner"
   },
@@ -269,10 +274,6 @@
   {
    "at": "2026-10-19",
    "what": "Every share the autopilot buys now keeps its profit margin, debt and revenue growth, so the reviews can tell whether healthier companies do better (a measurement; it buys nothing differently)"
-  },
-  {
-   "at": "2026-10-19",
-   "what": "The Admin page's AWS figure now shows what StockIQ itself costs to run ($0.48 this month, on course for about $0.80), with the one-off $2.65 Cost Explorer charge of 17 Oct and your other projects ($0.11) listed apart, so the red $3.24 is gone"
   }
  ]
 }
