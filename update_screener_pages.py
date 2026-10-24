@@ -207,7 +207,8 @@ HEAD = '''<!DOCTYPE html>
         .sp-table {{ width: 100%; border-collapse: collapse; font-size: 0.92rem; font-variant-numeric: tabular-nums; }}
         .sp-table th, .sp-table td {{ padding: 8px 6px; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: top; }}
         .sp-table th {{ font-size: 0.75rem; text-transform: uppercase; letter-spacing: .04em; color: var(--text-secondary); }}
-        .sp-table td.n {{ text-align: right; white-space: nowrap; }}
+        .sp-table td.n, .sp-table th.n {{ text-align: right; white-space: nowrap; }}
+        .sp-hub {{ table-layout: fixed; }} .sp-hub col.c1 {{ width: 30%; }} .sp-hub col.c3 {{ width: 30%; }}
         .sp-table a {{ color: #3b82f6; text-decoration: none; }}
         .sp-up {{ color: #16a34a; }} .sp-down {{ color: #dc2626; }}
         .sp-why {{ margin: 4px 0 0; padding-left: 18px; color: var(--text-secondary); font-size: 0.85rem; }}
@@ -297,7 +298,7 @@ def page_for(key, data, names, pages, prev, today, made):
                f'<strong>{esc(today)}</strong> with the latest available prices. Updated every trading day.</p>')
 
     # how the whole list stands, in words
-    s = [f'<strong>{pos} of {n}</strong> shares score above zero (a rising trend by this measure)',
+    s = [f'<strong>{pos} of {n}</strong> shares are in a rising trend (a trend score above zero)',
          f'{above200} trade above their 200-day average', f'{near_high} are within 5% of their 52-week high',
          f'{up_day} rose on the latest trading day']
     if med is not None:
@@ -375,7 +376,7 @@ def page_for(key, data, names, pages, prev, today, made):
     return '\n'.join(out), {'top': [r['symbol'] for r in top], 'streak': new_streak, 'day': today}
 
 
-def hub(results, names, today, made):
+def hub(results, names, today, made, pages=frozenset()):
     url = f'{SITE}screeners-today.html'
     title = "Today's stock rankings for 24 markets: top 10 by trend | StockIQ"
     desc = ('Every trading day, the shares of 24 major indexes (S&P 500, NASDAQ 100, FTSE 100, DAX 40, ASX 200, Nikkei 225 and '
@@ -387,16 +388,22 @@ def hub(results, names, today, made):
     out.append(f'<p class="sp-muted">Updated <strong>{esc(today)}</strong>. Each index\'s shares ranked by StockIQ\'s trend score: '
                'what stands above its lowest price of the year, has risen over the year and holds above its long average. '
                'Open a market for its top 10, why each ranks there and the full list.</p>')
+    out.append('<p class="sp-muted" style="font-size:.9rem;">"In a rising trend" counts the shares whose trend score is above zero: '
+               'more of them means more of that market is trending up today.</p>')
     for region in REGIONS:
-        out.append(f'<h2>{esc(region)}</h2><div class="sp-scroll"><table class="sp-table"><thead><tr><th>Market</th>'
-                   '<th>Leader today</th><th class="n">Scoring above zero</th></tr></thead><tbody>')
+        out.append(f'<h2>{esc(region)}</h2><div class="sp-scroll"><table class="sp-table sp-hub"><colgroup><col class="c1"><col class="c2"><col class="c3"></colgroup>'
+                   '<thead><tr><th>Market</th><th>Leader today</th><th class="n">In a rising trend</th></tr></thead><tbody>')
         for k, (slug, name, reg, _) in SCREENERS.items():
             if reg != region:
                 continue
             info = results.get(k) or {}
             lead = info.get('lead')
-            leader = f"{esc(lead)} <span class='sp-muted'>{esc(names.get(lead.upper(), ''))}</span>" if lead else '<span class="sp-muted">–</span>'
-            share = f"{info['pos']} of {info['n']}" if info.get('n') else '–'
+            if lead:
+                link, nm = stock_link(lead, names, pages)
+                leader = f"{link} <span class='sp-muted'>{esc(nm)}</span>"
+            else:
+                leader = '<span class="sp-muted">–</span>'
+            share = f"{info['pos']} of {info['n']} ({round(100 * info['pos'] / info['n'])}%)" if info.get('n') else '–'
             out.append(f'<tr><td><a href="screener-{slug}.html"><strong>{esc(name)}</strong></a></td><td>{leader}</td><td class="n">{share}</td></tr>')
         out.append('</tbody></table></div>')
     out.append('<p class="sp-muted" style="font-size:.85rem;margin-top:24px;">General information only, not financial advice.</p></main>')
@@ -548,7 +555,7 @@ def main():
         if k not in ok:
             print(f'⚠️  {SCREENERS[k][1]}: no answer, yesterday\'s page kept')
     state['_hub'] = summary
-    text = hub(summary, names, today, made).replace('{nav}', nav).replace('{foot}', foot)
+    text = hub(summary, names, today, made, pages).replace('{nav}', nav).replace('{foot}', foot)
     if not dry:
         with open(os.path.join(OUT, 'screeners-today.html'), 'w', encoding='utf-8') as f:
             f.write(text)
