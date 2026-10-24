@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Shares without a stock page on the daily market pages now open and run their analysis (the link lacked one setting); the home page's link to every market's top 10 is a button at the top of its section; the Admin page's questions show the live ones first, answered ones folded as history",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
    "what": "Every share on the daily market pages can be clicked: one without a stock page opens its full analysis; the Screeners menu on every page has a new entry, Today's top 10s",
    "found": "owner"
   },
@@ -264,10 +269,6 @@
   {
    "at": "2026-10-18",
    "what": "The 0-100 score on the stock pages and in the stock report was marking down shares that were rising, and on five years of prices it picked worse than chance. It now counts a strong rise and a price near the year's high for a share, as the screeners do (tested: better in 15 of 18 market-halves). Stock pages update with Monday's daily run."
-  },
-  {
-   "at": "2026-10-18",
-   "what": "Stock pages: 596 of the 958 in Google still showed 8 or 9 Oct figures, and would have started dropping out of Google this week. Prices now come through our own price function on AWS whenever Yahoo refuses this Mac; all 596 refreshed (online with Monday's daily run)."
   }
  ]
 }

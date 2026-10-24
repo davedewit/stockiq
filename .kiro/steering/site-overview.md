@@ -194,7 +194,13 @@ warns about; one change at a time, measured, with its experiment entry.
   screener-email, results-week, crypto-page, home-show, asia-overnight, market-hours-checkins, loss-news and the older ones.
 - **Next session, in order:** (1) **#8** (he said yes on the Admin page): a score-version tag on buys and learning only from the
   current score, notes and scorecard lines from 30 a group, `chosen` rank when `rp`, one night's correlated losses counted once,
-  replay `review_resting` on the wide price set. (2) The parts `session_start` names (home pricing and the plans: never looked at).
+  replay `review_resting` on the wide price set. (1b) **A stock page for every share the daily pages list** (the owner, 24 Oct 2026:
+  "consistency that is professional ... a stock site"): 1,257 of the 2,197 have none (CSI 300 300, KOSPI 200 200, Nikkei 143, Bovespa 76,
+  ASX 53, Hang Seng 51 ...), so they link to their analysis meanwhile. `add-new-stocks.md`'s steps in bulk: the symbols into `stocks.txt`,
+  names and sectors slowly (Yahoo limits this Mac: through the price function where it can), one `generate-stock-pages.py` run tested
+  on a copy first (it also brings the waiting template changes, 13c), `update_stock_analysis.py` (indexed only from $10B, as now), then
+  the daily pages link them by themselves. Its own staged session; check the sitemap and the page count after.
+  (2) The parts `session_start` names (home pricing and the plans: never looked at).
   (3) **Store his autopilot record compressed**, as `_brain` is (about 190 KB written at most check-ins: the largest running cost).
   (4) Decide `daily-review` by 1 Nov (Claude recommends keeping it: `touch check-tools/reviews/daily/KEEP`). (5) The walk of step 5d.
   (6) A small one from him: a "View report" link on the "Analysis complete" note after a background analysis.
