@@ -335,7 +335,7 @@ Lambdas ──> Yahoo Finance + Finnhub (data), OpenAI gpt-4o-mini (AI chat), Dy
 
 | File | Owner | How to change it |
 |---|---|---|
-| **The menu (desktop and phone) and the footer of every page**, between `<!-- SHARED_MENU/PHONE_MENU/FOOTER_START/END -->` | **`shared_parts.py`** (`MENU`, `FOOTER_COLUMNS`, `DISCLAIMER`; since 24 Oct 2026) | Change the definition, run `python3 shared_parts.py` (hand-edited pages, the 3,467 stock pages and the stock-page template; the daily screener pages copy the screener guide's). `--check` says which page drifted; the nightly site check runs it (`shared-parts`). The footer's look is `.site-footer` in `styles.css`; the dropdowns' code is one `showDropdown` in `theme.js` (a page's own overrides it) |
+| **The menu (desktop and phone), the footer and the trial strip of every page**, between `<!-- SHARED_MENU/PHONE_MENU/FOOTER/STRIP_START/END -->` (the strip not on the home, analysis, dashboard and sign-up pages, which keep their own) | **`shared_parts.py`** (`MENU`, `FOOTER_COLUMNS`, `DISCLAIMER`; since 24 Oct 2026) | Change the definition, run `python3 shared_parts.py` (hand-edited pages, the 3,467 stock pages and the stock-page template; the daily screener pages copy the screener guide's). `--check` says which page drifted; the nightly site check runs it (`shared-parts`). The footer's look is `.site-footer` in `styles.css`; the dropdowns' code is one `showDropdown` in `theme.js` (a page's own overrides it) |
 | `stocks/*.html` layout, head, footer | `generate-stock-pages.py` template | Edit the template, run the script (manual, not daily). It keeps the NEWS/RELATED/ANALYSIS sections, robots value, data descriptions and dateModified |
 | `stocks/*.html` NEWS section | `update_stock_news.py` (daily) | Script only |
 | `stocks/*.html` RELATED section ("People also watch") | `people_also_watch_stocks.py --missing` (daily) | Script only |
@@ -975,6 +975,11 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   and its card carry the offer). **The check:** `phone_check.js` (weekly) fails a page without the ☰ button on show and opening the
   menu, the bell (not on sign-in pages) or the usage chip. **Next, an idea in the register (`nav-simpler`):** the desktop menu written
   once and simpler (Crypto as a plain link, Pricing / Dashboard in the bar).
+- **Who is looking, marked before the page is drawn** (24 Oct 2026; `theme.js`, top): `html.signed-in` and `html.paid-user` from the
+  browser's own notes. The shared menu shows a signed-out visitor "Log in" and a blue "Sign up free" in place of the Account menu, and
+  hides Pricing from a paying member (`styles.css`, "The shared menu by who is looking"). The trial strip across the top (desktop
+  only, anyone not on a paid plan, the home page's wording) is a shared part (`shared_parts.py`, `.site-strip`) on every page but the
+  four that keep their own (home, analysis, dashboard, sign-up: their copies are the next step for "Built once").
 - **The header bar on a narrow desktop window or a tablet** (769 to 1150px; `styles.css`, the two `@media` blocks above
   "Home link specific styling"): the menu sits in the row beside the name, with tighter spacing below 900px. On a wide
   screen it is centred on the page (`.desktop-nav` is `position: absolute; left: 50%`), and until 13 Oct 2026 it stayed
@@ -2579,6 +2584,12 @@ there. Setting things up for the user by chat was judged too much for now and is
 - When a dashboard feature changes, **update `DASHBOARD_GUIDE` and the two `summary()` functions**,
   or the chat will describe the old dashboard.
 - Cost: about 1,600 tokens a dashboard question instead of 650 elsewhere, roughly $0.0003 each.
+- **A reply types itself out** over 0.5 to 1.4 seconds (`typeOut` in `ai-chat.js`, 24 Oct 2026; the owner: all at once "feels cheap"):
+  the whole reply has arrived, only its text is revealed. Real streaming would need the function rewritten for Lambda's streaming
+  (Node): not worth it for a chat used about once a month.
+- **Stock links only to pages that exist** (`fix_stock_links`, 24 Oct 2026; the chat had sent a visitor to FPH.html, Fisher & Paykel's
+  page being FPH.AX.html, and to A2M.html, which does not exist): every link to a stock page is checked against `stock-pages.js`
+  (read once a warm container, 6 hours), moved to the one listing with that symbol, or left as plain text. No tokens added.
 - Rollback zips: `~/VSCODE/backup/stockiq-ai-chat_before_dashboard_20261011.zip`, `…_wording_…`, `…_levels_…`, `…_before_sweep_…`, and 12 Oct `…_before_guide_20261012.zip`, `…_guide2_…`.
 - **12 Oct 2026:** the guide was brought up to date (graph, buttons beside the heading, the split of both parties' results, Number of holdings, the 3-hour price rule); the numbers it quotes for those are compared with the autopilot's own by the test (19 checks). A number of holdings set by the user is said outright in the panel's `summary()`: the guide alone did not stop the model answering with the level's number.
 
@@ -2955,7 +2966,7 @@ last part). An idea that is not ahead on both parts of the period, or that rando
 5. **Try the staged function on a copy of the real record**: read the owner's item from both tables
    (read-only), load it into stand-in storage under another name, run `run_user` / `public` with
    stand-in prices. This catches a record written by older code. Redact the email when printing.
-6. **Deploy with `pending-<name>/deploy.sh`** (the owner's permission rule only allows that form:
+6. **Deploy with `pending-<name>/deploy.sh`**, built by the shared tools since 24 Oct 2026: `python3 check-tools/stage_web.py <name> <files>` (or `--changed`, or `--from <folder>`) writes the folder and its three-line script for website files (`web_deploy.sh`); a Lambda's is three lines handing `check-tools/lambda_deploy.sh` its `FUNCS` row, and does all the checks listed here (the owner's permission rule only allows that form:
    `bash /Users/dave/VSCODE/stockiq/check-tools/pending-<name>/deploy.sh`, absolute path, nothing
    else on the line). The script must: stop if the daily deploy is running; download the live
    function and stop unless its `CodeSha256` and its file equal what the change was built from;
@@ -5317,6 +5328,13 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     compare with the live file). A one-off website deploy is now `pending-<name>/deploy.sh` of three lines: `ROWS="file:was:new …"
     exec bash /Users/dave/VSCODE/stockiq/check-tools/web_deploy.sh <its folder>`.
 
+- **24 Oct 2026, evening: who sees what in the header, the chat's links, the tools** (from the owner's questions): Log in / Sign up free
+  for a signed-out visitor, Pricing hidden from a paying member, the trial strip on every page (shared part; the stock pages' old
+  "institutional-grade" wording went with it); the chat types its replies out and links only to stock pages that exist; "view ↗"
+  links on the Admin page's changes (`admin.py change ... --link`); `stage_web.py` and `lambda_deploy.sh` so a deploy is one command.
+  Checked: 2,866 visitor checks at six widths, header room for three kinds of visitor on 12 pages, 164 live swipe checks, the chat
+  asked the owner's question live (FPH.AX linked, a2 Milk plain). The market panel shows on every daily page from 1,401px wide, as on
+  the home page; the owner's narrower window showed none.
 - **24 Oct 2026, late: the menu and the footer written from one definition** (the owner: the menu and account dropdown "done a very
   long time ago via a very old AI", the footer "doesn't look that great"). The desktop menu had 9 versions and the footer 13 (the
   disclaimer missing on About and Sign in, "Blog" pointing at two pages, the stock pages' old wording). `shared_parts.py` now writes both
