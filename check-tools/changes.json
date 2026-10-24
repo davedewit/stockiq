@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "New ongoing check: the nightly site check counts code copied into several pages (219 lines today, mostly the header and footer) and flags any change that adds more; each weekly part review asks whether anything is built more than once. First job at the next weekly review: the header and footer from one source",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
    "what": "On a phone the menu and the market panel no longer pop when let go: they glide on at the finger's speed and slow down gently, and the menu slides more smoothly on an iPhone",
    "found": "owner"
   },
@@ -273,10 +278,6 @@
   {
    "at": "2026-10-19",
    "what": "Stock pages' news shows the right dates again (6,931 wrong date stamps corrected), and about 600 unchanged pages a day are no longer re-uploaded"
-  },
-  {
-   "at": "2026-10-19",
-   "what": "On a phone the dashboard's market-data button is no longer hidden under the AI chat button, and the chat window fits small screens"
   }
  ]
 }

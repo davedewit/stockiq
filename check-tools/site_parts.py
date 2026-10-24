@@ -32,6 +32,7 @@ LENSES = ['Ease of use and understanding: could a first-time visitor use it with
           'Phone: at 390px wide, does every part fit, can every button be tapped, does a long list fold away? Most visitors are on a phone (the owner, 24 Oct 2026)',
           'What the viewer chose stays chosen: does an open fold, a ticked view or a typed value survive the page refreshing itself? Does a choice that should not outlive the visit (a range, a filter) reset on a fresh page? (24 Oct 2026: a fold closed at the minute\'s refresh)',
           'Said the same everywhere: after a change, do the FAQ, About, the AI chat\'s guide, the home page and the Admin page all say what is now true? (24 Oct 2026: the chat told a visitor the autopilot could not know about the Fed)',
+          'Built once: is anything here written in more than one place, so that one change would have to be made in each (a function, a style, a menu, a footer, a list, a number)? Move it to one shared file or one generator and delete the copies; nothing new is copied (site_audit.py "copies" counts them nightly). (24 Oct 2026, the owner: "make sure we don\'t create silly code that requires us having to update the same thing on multiple pages")',
           'New ideas: what would a smart competitor add here? Write the idea down as an experiment even if it waits']
 
 def load():

@@ -227,6 +227,9 @@ warns about; one change at a time, measured, with its experiment entry.
   (3) **Store his autopilot record compressed**, as `_brain` is (about 190 KB written at most check-ins: the largest running cost).
   (4) Decide `daily-review` by 1 Nov (Claude recommends keeping it: `touch check-tools/reviews/daily/KEEP`). (5) The walk of step 5d.
   (6) A small one from him: a "View report" link on the "Analysis complete" note after a background analysis.
+  (7) **Built once, first job** (at the weekly review, ~30 Oct): the hand-edited pages' header and footer from one source each, written into
+  every page between markers by one script (as `update_home_stock_links.py` does; static HTML stays for search engines), with the desktop
+  menu simplified at the same time (idea `nav-simpler`). It removes most of the 219 copied lines (`site_audit.py` "copies").
 - **How the session works:** the routine at the top (steps 0 to 6, with 5b, 5c, 5d); "THE GOAL OF ALL OF IT" below; four entry points
   for checks (`session_start.py`, `site_audit.py` daily, `weekly_check.py` weekly, `autopilot_review.py`); one register each for parts,
   experiments and questions, kept in step by `registers_check.py`. A new check goes into one of the four, never a fifth thing.
@@ -3638,6 +3641,15 @@ more finished trades than there are, and would chase noise before then.
   i talk smarts its more in the backend"). The smarts go into how it buys and sells. What a user sees changes only when it helps
   them; figures for the owner go on the Admin page or into the opening check and the review tool, not onto the public pages or
   the dashboard. Whatever a change replaces goes in the same session.
+- **Built once: one change in one place** (the owner, 24 Oct 2026: "make sure we don't create silly code that requires us having to update
+  the same thing on multiple pages ... whatever makes your life easier to make updates"). Anything that appears on more than one page
+  (a function, a style, a menu, a footer, a list, a number) lives in one shared file (`site-header.js`, `market-panel.js`,
+  `mobile-sidebar.js`, `styles.css`) or is written into the pages by one generator; never paste it into each page. **How it is kept:**
+  `site_audit.py` counts the copies nightly (`copies`: blocks of 8+ lines word for word in 3+ hand-edited files; a problem, so a finding
+  at the next session, when a change adds one, naming the files), and every part review asks the lens "Built once" (`site_parts.py`);
+  parts whose files have not changed wait, so no credits go on re-reading what is still. **Start: 219 copied lines on 24 Oct 2026**,
+  nearly all the hand-edited pages' header (desktop menu) and footer; bring the number down, never up. Not extreme: a copy of a few
+  lines that will never change is not worth a shared file.
 - **Correct the owner when he is wrong, and say so plainly** (his standing instruction, 17 Oct 2026: "ignore me if it makes
   no sense and is fine as is. same for everything i ask your in control here to make a good site and correct me when wrong
   ... no issue with hearing i'm wrong and you suggesting another option or skipping it completely"). For every request:

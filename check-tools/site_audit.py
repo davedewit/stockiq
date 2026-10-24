@@ -7,6 +7,7 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
   loading-text    "Loading..." in the HTML of an indexed page: what a search engine reads before any script runs
   broken-links    a link or a script on a page whose file is not on the site
   duplicate-code  the same function defined in several pages or scripts (the market panel was three copies)
+  copies          a block of 8+ lines (code, style or markup) word for word in 3+ hand-edited files; a problem when a change adds one
   made-up-visuals Math.random() used to draw something (the side panel's charts were random lines), a fixed line written into a
                   chart, or figures written into the code to show when the data fails
   stale-stock-pages indexed stock pages whose "Data as of" is more than 4 days behind the newest
@@ -291,6 +292,40 @@ def main():
     if total > 80:
         find('console-noise', 'idea', f'{total} console.log lines in the pages and scripts (the most: ' + ', '.join(f'{f} {n}' for f, n in sorted(logs.items(), key=lambda x: -x[1])[:4]) + ')', '')
 
+    # copies: one block of code or markup in 3 or more hand-edited files, so that one change has to be made in each (24 Oct 2026, the
+    # owner: "make sure we don't create silly code that requires us having to update the same thing on multiple pages"). Pages written
+    # from one template (the stock pages, the daily screener pages) and the generated scripts are left out. A window of 8 lines that
+    # count (not a bare brace or tag) found word for word in 3+ files is one copied line; the total is the number to bring down, and a
+    # run that finds clearly more than the last says which block a change copied.
+    generated = re.compile(r'^(screener-.+|screeners-today)\.html$|^(news|stock-pages)\.js$')
+    W, seen_in = 8, {}
+    for f in pages + scripts:
+        if generated.match(f):
+            continue
+        rows = [l.strip() for l in src[f].split('\n')]
+        rows = [l for l in rows if len(l) > 3 and not re.fullmatch(r'[{}()\[\];,]*|</?[a-z0-9]+>', l)]
+        for i in range(len(rows) - W + 1):
+            seen_in.setdefault(hash('\n'.join(rows[i:i + W])), (set(), rows[i]))[0].add(f)
+    groups = {}
+    for files, first in seen_in.values():
+        if len(files) >= 3:
+            g = groups.setdefault(frozenset(files), [0, first]); g[0] += 1
+    copied = sum(g[0] for g in groups.values())
+    copy_keys = sorted(f'{first[:60]}|{len(fs)}' for fs, (n, first) in groups.items())
+    if copied:
+        top = sorted(groups.items(), key=lambda x: -x[1][0] * len(x[0]))[:5]
+        said = '; '.join(f'{n} lines in {len(fs)} files ({", ".join(sorted(fs)[:3])}{"…" if len(fs) > 3 else ""}), from "{first[:50]}"' for fs, (n, first) in top)
+        prev = next((h['copies'] for h in reversed(hist) if h.get('copies') is not None), None)
+        if prev is not None and copied > prev + W:
+            known = set(next((h['copy_keys'] for h in reversed(hist) if h.get('copy_keys') is not None), []))
+            fresh = [(fs, g) for fs, g in groups.items() if f'{g[1][:60]}|{len(fs)}' not in known] or top
+            said = '; '.join(f'{n} lines in {len(fs)} files ({", ".join(sorted(fs)[:4])}{"…" if len(fs) > 4 else ""}), from "{first[:50]}"' for fs, (n, first) in sorted(fresh, key=lambda x: -x[1][0])[:3])
+            find('copies', 'problem', f'a change copied code into several files: {copied} copied lines, {prev} at the last check. New: {said}',
+                 'put it in one shared file (as site-header.js and market-panel.js) instead of in each page')
+        else:
+            find('copies', 'idea', f'{copied} lines are copied word for word into 3 or more hand-edited files' + (f' ({prev} at the last check)' if prev is not None else '') + f'. The largest: {said}',
+                 'one shared file each, a part at a time, at the weekly review (lens "Built once")')
+
     # this run against the last
     os.makedirs(OUT, exist_ok=True)
     key = lambda f: f"{f['check']}|{f['where']}|{re.sub(r'[0-9]+', '#', f['text'])}"
@@ -306,7 +341,7 @@ def main():
         print(f'(staged files read from {STAGE}: nothing saved)')
     else:
         json.dump(out, open(os.path.join(OUT, 'latest.json'), 'w'), indent=1, ensure_ascii=False)
-    hist = (hist + [{'at': at, 'keys': now_keys, 'weights': weights}])[-60:]
+    hist = (hist + [{'at': at, 'keys': now_keys, 'weights': weights, 'copies': copied, 'copy_keys': copy_keys}])[-60:]
     if not STAGE:
         json.dump(hist, open(hist_p, 'w'))
     print(f"site check {at}: {len(pages)} pages, {len(scripts)} scripts; {out['problems']} problems, {out['ideas']} ideas"
