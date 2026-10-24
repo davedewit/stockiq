@@ -209,6 +209,12 @@ warns about; one change at a time, measured, with its experiment entry.
   (the script's name matching filters them). **Cost to weigh first:** the step summarises articles with OpenAI, so 1,257 more shares
   means more summaries a day: measure the articles per share on a sample and price it before adding them all; pages for shares with
   no news are allowed (the snapshot is the page's substance; noindex under $10B, as now).
+  **And a snapshot on every page with prices, not only the 946 indexed ones** (the owner, 24 Oct 2026, comparing KO.html with CPB.html:
+  pages under $10B have an empty snapshot section by design since 25 Sep, and visitors now reach them from the daily pages). The
+  figures cost nothing (`update_stock_analysis.py` already downloads every share's prices); the uploads do: daily for 2,500 more pages
+  is about 75,000 S3 writes a month, about $0.37, too much against the cost rule for pages nobody visits yet. So: **daily for the
+  indexed pages, weekly for the rest** (rewrite a non-indexed page's snapshot only when its block is 7 days old or missing; its line says
+  "updated weekly"; about $0.05 a month), noindex under $10B as now. Do it with the new pages, which will mostly be under $10B.
   (1c) **The daily pages built on AWS once a day, every day** (idea `pages-at-close`; the owner: never miss a day, the hour matters less).
   Today the Mac's daily run builds them, so a day with the Mac off is missed; the home section must then go into its own file so the
   Mac's upload of index.html and the AWS run cannot overwrite each other. With it, the hub also shows the week's big announcements (the owner likes
