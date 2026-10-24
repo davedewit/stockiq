@@ -3,6 +3,12 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Sign-up page pitch: test your own ideas with $100,000 of practice money, and see if you can beat the AI and the S&P 500 (instead of 'your own AI runs your portfolio')",
+   "found": "owner",
+   "link": "https://stockiq.tech/signup.html"
+  },
+  {
+   "at": "2026-10-24",
    "what": "The free 3-day trial now includes the AI autopilot: a new account can switch it on and watch it trade its practice portfolio; when the trial ends it pauses by itself (a note and an email say so) and switches back on with any paid plan. The sign-up page now leads with it; the FAQ, About, home page and the AI chat say the same",
    "found": "owner",
    "link": "https://stockiq.tech/signup.html"
@@ -297,10 +303,6 @@
   {
    "at": "2026-10-23",
    "what": "Weekly check done early: 50 of 54 passed (the 4 are fixed and waiting to go live). Two new trials for the autopilot: wait one check-in after an overnight fall through the loss limit, and test whether the AI model's picks beat simply taking the top-ranked share"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "The Practice portfolio's prices now refresh by themselves every minute while you're on the tab (the button stays)"
   }
  ]
 }
