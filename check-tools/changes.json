@@ -3,6 +3,12 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Home page, dashboard and daily screener pages no longer jump sideways on a first visit on a wide screen (the room for the right-hand market panel was set at the end of the page); the daily site check now catches that kind of fault",
+   "found": "owner",
+   "link": "https://stockiq.tech/screeners-today.html"
+  },
+  {
+   "at": "2026-10-24",
    "what": "Daily screener pages: 'Run the … screener' now runs that market's screener straight away, in the right section (Mexico went to Asia-Pacific and ran nothing); the free-trial button there shows only to signed-out visitors; 'Shares in a rising trend' as the column heading. The nightly check now tests every page's run button",
    "found": "owner",
    "link": "https://stockiq.tech/screener-mexico-ipc.html"
@@ -309,10 +315,6 @@
   {
    "at": "2026-10-23",
    "what": "Practice portfolio: the All markets row of the market list now shows the totals (total bought, result, against the S&P 500); the graph has 1d to 10y; 'Account' is 'All markets'; the list no longer jumps to the top"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "Admin page: each decision shows when it was raised and Claude's recommended answer; 'Coming up' is one line a day with the real-money date apart; the 'so far' and forecast lines say plainly what each means. The unsubscribe page now really unsubscribes"
   }
  ]
 }

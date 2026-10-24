@@ -8,6 +8,7 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
   broken-links    a link or a script on a page whose file is not on the site
   duplicate-code  the same function defined in several pages or scripts (the market panel was three copies)
   run-links       a daily screener page whose run button opens the wrong section or runs no screener
+  late-layout     a page whose own padding or width is set by a style inside the body (it moves after the first draw)
   theme-early     a page that loads theme.js late (defer/async), so the menu flashes before the page is marked signed in
   copies          a block of 8+ lines (code, style or markup) word for word in 3+ hand-edited files; a problem when a change adds one
   shared-parts    a page whose menu or footer differs from the one definition in shared_parts.py
@@ -313,6 +314,13 @@ def main():
                 find('run-links', 'problem', f'its run button ({m.group(1)}) does not open the right section and run its screener', f)
     except Exception as e:
         find('run-links', 'idea', f'the run buttons could not be checked: {e}')
+
+    # late-layout: the page's own width or padding set by a style inside the body, so a first visit is drawn without it and then
+    # moves (24 Oct 2026, the owner: the daily pages "load without the right side bar ... then adjust")
+    for f in pages:
+        b = src[f].find('<body')
+        if b >= 0 and any(re.search(r'(^|[\s,}])body\s*\{[^}]*(padding|margin|width)', m.group(0)) for m in re.finditer(r'<style[^>]*>.*?</style>', src[f][b:], re.S)):
+            find('late-layout', 'problem', "sets the page's own padding or width in a style inside the body: put it in the head, or the page moves after it is first drawn", f)
 
     # theme-early: theme.js marks the page (signed in, paid, light or dark) before it is drawn; loaded with defer or async it runs
     # after, and the menu shows "Sign up free" for a moment to a signed-in visitor (24 Oct 2026, the owner on the home page)

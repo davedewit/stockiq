@@ -65,7 +65,7 @@ the Admin page; 50 minutes at most; a trial that ends by itself on 1 Nov 2026 un
 check of everything ... consistency and confidence everything is good ... i want you to say hey i checked everything ... i checked
 xyz"). One command, read-only, about 15 minutes: (1) every test suite against the LIVE code (the autopilot function, the panel, the
 practice portfolio, the Admin page, the bell, the chat, the signals, the news list, the panel-versus-function comparison, the
-clarity check, the nightly site check's tests, the screener lists, the worker packages, the market panel, the phone panels, the
+clarity check, the daily site check's tests, the screener lists, the worker packages, the market panel, the phone panels, the
 header); (2) the figures agreeing across the site (the account value on the Admin page and on the Practice portfolio tab, the
 S&P 500 fund both ways, every holding with its remembered buy, the budget within the money, the autopilot's running total against
 its trades, the diary against the record, the bill's parts, the cost rule, Lambda calls, the sitemap against the indexed pages,
@@ -350,7 +350,7 @@ Lambdas ──> Yahoo Finance + Finnhub (data), OpenAI gpt-4o-mini (AI chat), Dy
 
 | File | Owner | How to change it |
 |---|---|---|
-| **The menu (desktop and phone), the footer and the trial strip of every page**, between `<!-- SHARED_MENU/PHONE_MENU/FOOTER/STRIP_START/END -->` (the strip not on the home, analysis, dashboard and sign-up pages, which keep their own) | **`shared_parts.py`** (`MENU`, `FOOTER_COLUMNS`, `DISCLAIMER`; since 24 Oct 2026) | Change the definition, run `python3 shared_parts.py` (hand-edited pages, the 3,467 stock pages and the stock-page template; the daily screener pages copy the screener guide's). `--check` says which page drifted; the nightly site check runs it (`shared-parts`). The footer's look is `.site-footer` in `styles.css`; the dropdowns' code is one `showDropdown` in `theme.js` (a page's own overrides it) |
+| **The menu (desktop and phone), the footer and the trial strip of every page**, between `<!-- SHARED_MENU/PHONE_MENU/FOOTER/STRIP_START/END -->` (the strip not on the home, analysis, dashboard and sign-up pages, which keep their own) | **`shared_parts.py`** (`MENU`, `FOOTER_COLUMNS`, `DISCLAIMER`; since 24 Oct 2026) | Change the definition, run `python3 shared_parts.py` (hand-edited pages, the 3,467 stock pages and the stock-page template; the daily screener pages copy the screener guide's). `--check` says which page drifted; the daily site check runs it (`shared-parts`). The footer's look is `.site-footer` in `styles.css`; the dropdowns' code is one `showDropdown` in `theme.js` (a page's own overrides it) |
 | `stocks/*.html` layout, head, footer | `generate-stock-pages.py` template | Edit the template, run the script (manual, not daily). It keeps the NEWS/RELATED/ANALYSIS sections, robots value, data descriptions and dateModified |
 | `stocks/*.html` NEWS section | `update_stock_news.py` (daily) | Script only |
 | `stocks/*.html` RELATED section ("People also watch") | `people_also_watch_stocks.py --missing` (daily) | Script only |
@@ -998,6 +998,10 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   and its card carry the offer). **The check:** `phone_check.js` (weekly) fails a page without the ☰ button on show and opening the
   menu, the bell (not on sign-in pages) or the usage chip. **Next, an idea in the register (`nav-simpler`):** the desktop menu written
   once and simpler (Crypto as a plain link, Pricing / Dashboard in the bar).
+- **A page's own layout (its padding, its width) is set in its head, never in a style inside the body** (24 Oct 2026, the owner: the daily
+  pages loaded "without the right side bar ... then adjust" on a first visit; the home page and dashboard had the same rule late). The
+  daily pages' panel styles are `PANEL_CSS`, put in the head by `update_screener_pages.py`. `site_audit.py` `late-layout` checks every page.
+  The test browser does not show the jump (it draws only once the page is in); a real browser on a first visit does.
 - **Nothing in the menu may appear late** (24 Oct 2026; the owner: the menu "moves to left briefly then back" on Today's top 10s): the
   menu is centred, so an item shown by a page's code after the first frame (the bell, which `auth.js` shows; on pages that load
   `auth.js` late through `site-header.js` that was 0.4 s) moves every item. The bell is shown from the first frame by `html.signed-in`
@@ -1010,7 +1014,7 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   the daily screener pages copy the guide's), so `site-header.js`'s builder is only a fallback now. The round buttons (market data,
   trial, chat) are hidden while the menu is open (`body.menu-open`, `styles.css`).
 - **`theme.js` is loaded in every page's head without `defer` or `async`** (the home page had `defer`, so a signed-in visitor saw "Sign up free"
-  flash on every visit; the nightly site check's `theme-early` reports it).
+  flash on every visit; the daily site check's `theme-early` reports it).
 - **Who is looking, marked before the page is drawn** (24 Oct 2026; `theme.js`, top): `html.signed-in` and `html.paid-user` from the
   browser's own notes. The shared menu shows a signed-out visitor "Log in" and a blue "Sign up free" in place of the Account menu, and
   hides Pricing from a paying member (`styles.css`, "The shared menu by who is looking"). The trial strip across the top (desktop
@@ -5238,7 +5242,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     Ltd" with an ABN, while the terms and these notes say StockIQ is run by an individual with no company; `refunds.html`
     and `privacy-policy.html` say "Last updated: December 2024".
   - **The owner ran the daily review by hand** (11:33 UTC, `daily_review.sh --now`; the schedule is still not installed). It
-    worked and found three things the nightly check had missed, with three proposals on the Admin page: **596 of the 958
+    worked and found three things the daily site check had missed, with three proposals on the Admin page: **596 of the 958
     indexed stock pages still show 8 or 9 Oct data** although each says "Updated daily" (the snapshot step gets no prices
     from Yahoo on most days: section 9; proposal 1, prices through the price function on AWS); every report's "(REAL-TIME
     DATA)" heading against the FAQ's "no real-time data" (proposal 3); the stock pages' 0-100 score penalises the rise the
@@ -5247,7 +5251,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     `Edit(check-tools/reviews/daily/**)` only, and the report was saved from `~/stockiq-review.log`
     (`check-tools/reviews/daily/2026-10-18.md`). Done from it the same hour (`pending-fixes2`, 11:58 UTC): the home page's
     index cards no longer show January 2024 figures when the market data fails ("Not available just now", until
-    `live-market.js` fills them), and `login.html` is noindex and out of the sitemap. The nightly check learned both new kinds
+    `live-market.js` fills them), and `login.html` is noindex and out of the sitemap. The daily site check learned both new kinds
     of fault (`stale-stock-pages`, fallback figures), and now reads 1 problem (the stale pages) and 3 ideas.
 
 - **19 Oct 2026** (the owner: "its only been a day but hi how we doing"):
@@ -5270,7 +5274,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     taps it where it is) and the chat window was taller than a small screen (`min(500px, 100dvh - 120px)`, `ai-chat.js`); the stop
     watch (above, "Improvements to come"). The opening check judges the daily run by its prices through AWS, not Yahoo's misses,
     and counts lost-internet news failures (1,964 that day).
-  - The nightly site check runs after the sitemap step (it had reported sitemap pages that the step was about to drop).
+  - The daily site check runs after the sitemap step (it had reported sitemap pages that the step was about to drop).
     Two London stock pages (BEZ.L, SDR.L: taken over, last traded 1 Oct) leave the index by themselves around 22 Oct.
   - **Coins:** the entry study over 9 days: coins entering the top 10 after a 10%+ day fell 13.8% on average afterwards (123
     entries, every day negative); slow risers about flat (`check-tools/crypto/results/entry-study-2026-10-19.txt`). The score gives
@@ -5542,5 +5546,5 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   - **Words:** the footer's "Professional Investment Research Platform" and "Powered by AI • Market Data • Comprehensive Analysis"
     on 19 pages, two blog lines ("in real-time", "Professional stock analysis powered by AI"), the research-tools guide's
     description and a guide's button heading: reworded, words only (website `1dafe26d`; uploaded by the daily update of 23 Oct,
-    which was running). The stock pages' template likewise (13c above). The nightly site check has a new check, `claims`.
+    which was running). The stock pages' template likewise (13c above). The daily site check has a new check, `claims`.
 

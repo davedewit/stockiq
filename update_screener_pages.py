@@ -260,28 +260,6 @@ HEAD = '''<!DOCTYPE html>
 # swipe from the right brings it out (mobile-sidebar.js). market-panel.js fills it; live-market.js (loaded by theme.js) keeps it moving.
 PANEL = """
     <!-- MARKET_PANEL_START -->
-    <style>
-        #news-panel { position: fixed; right: 20px; top: 84px; bottom: 20px; width: 330px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 99; overflow-y: auto; }
-        @media (max-width: 1400px) { #news-panel { display: none; } }
-        @media (min-width: 1401px) { body { padding-right: 350px; } }
-        @media (max-width: 768px) { #news-panel { display: none !important; } #mobile-sidebar-toggle { display: flex !important; } }
-        @media (min-width: 769px) { #mobile-sidebar-toggle { display: none !important; } }
-        #mobile-sidebar-content #news-panel { display: block !important; position: static !important; width: 100% !important; box-shadow: none; border: none; padding: 0; }
-        #market-tabs-sidebar { scrollbar-width: none; }
-        #market-tabs-sidebar::-webkit-scrollbar { display: none; }
-        @media (min-width: 1401px) { #market-tabs-sidebar { mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%); -webkit-mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%); padding-right: 40px; } }
-        .market-tab-sidebar { padding: 4px 10px; background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; border-radius: 4px; font-size: 11px; white-space: nowrap; transition: all 0.2s; }
-        .market-tab-sidebar:hover { background: rgba(255,255,255,0.05); }
-        .market-tab-sidebar.active { background: #3b82f6; color: white; border-color: #3b82f6; }
-        .market-item-sidebar { padding: 6px 4px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 6px; display: flex; flex-direction: column; min-width: 0; transition: background 0.2s; }
-        .market-item-sidebar:hover { background: var(--hover-bg); }
-        .market-item-sidebar-name { font-size: 10px; color: var(--text-secondary); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .market-item-sidebar-value { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
-        .market-item-sidebar-chart { height: 24px; margin: 2px 0; width: 100%; }
-        .market-item-sidebar-change { font-size: 10px; font-weight: 500; white-space: nowrap; overflow: hidden; }
-        .market-item-sidebar-change.positive { color: #22c55e; }
-        .market-item-sidebar-change.negative { color: #ef4444; }
-    </style>
     <div id="news-panel" style="position: fixed; right: 20px; top: 84px; bottom: 20px; width: 330px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 99; overflow-y: auto;">
         <div style="border-radius: 8px; padding: 8px 4px; margin-bottom: 20px;">
             <div style="text-align: center; padding: 8px; background: #000; border-radius: 6px; margin-bottom: 10px;">
@@ -348,6 +326,34 @@ PANEL = """
     <script src="mobile-sidebar.js?v=2"></script>
     <!-- MARKET_PANEL_END -->
 """
+# The panel's layout, in the page's head (24 Oct 2026, the owner: on a first visit the page "loads without the right side bar for
+# extremely brief period then adjust[s]": the room for the panel was made by a style at the end of the page, so the content was
+# first drawn at full width and then moved left)
+PANEL_CSS = """
+    <style>
+        #news-panel { position: fixed; right: 20px; top: 84px; bottom: 20px; width: 330px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 99; overflow-y: auto; }
+        @media (max-width: 1400px) { #news-panel { display: none; } }
+        @media (min-width: 1401px) { body { padding-right: 350px; } }
+        @media (max-width: 768px) { #news-panel { display: none !important; } #mobile-sidebar-toggle { display: flex !important; } }
+        @media (min-width: 769px) { #mobile-sidebar-toggle { display: none !important; } }
+        #mobile-sidebar-content #news-panel { display: block !important; position: static !important; width: 100% !important; box-shadow: none; border: none; padding: 0; }
+        #market-tabs-sidebar { scrollbar-width: none; }
+        #market-tabs-sidebar::-webkit-scrollbar { display: none; }
+        @media (min-width: 1401px) { #market-tabs-sidebar { mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%); -webkit-mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%); padding-right: 40px; } }
+        .market-tab-sidebar { padding: 4px 10px; background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; border-radius: 4px; font-size: 11px; white-space: nowrap; transition: all 0.2s; }
+        .market-tab-sidebar:hover { background: rgba(255,255,255,0.05); }
+        .market-tab-sidebar.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+        .market-item-sidebar { padding: 6px 4px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 6px; display: flex; flex-direction: column; min-width: 0; transition: background 0.2s; }
+        .market-item-sidebar:hover { background: var(--hover-bg); }
+        .market-item-sidebar-name { font-size: 10px; color: var(--text-secondary); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .market-item-sidebar-value { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+        .market-item-sidebar-chart { height: 24px; margin: 2px 0; width: 100%; }
+        .market-item-sidebar-change { font-size: 10px; font-weight: 500; white-space: nowrap; overflow: hidden; }
+        .market-item-sidebar-change.positive { color: #22c55e; }
+        .market-item-sidebar-change.negative { color: #ef4444; }
+    </style>
+"""
+
 
 
 def shell_parts():
@@ -657,7 +663,7 @@ def main():
     state = dict(prev)
     for k, d in ok.items():
         text, st = page_for(k, d, names, pages, prev, today, made)
-        text = text.replace('{nav}', nav).replace('{foot}', foot)
+        text = text.replace('{nav}', nav).replace('{foot}', foot).replace('</head>', PANEL_CSS + '</head>', 1)
         rows = ranked(d['results'])
         summary[k] = {'lead': rows[0]['symbol'], 'pos': sum(1 for r in rows if r['score'] > 0), 'n': len(rows)}
         state[k] = st
@@ -671,7 +677,7 @@ def main():
         if k not in ok:
             print(f'⚠️  {SCREENERS[k][1]}: no answer, yesterday\'s page kept')
     state['_hub'] = summary
-    text = hub(summary, names, today, made, pages).replace('{nav}', nav).replace('{foot}', foot)
+    text = hub(summary, names, today, made, pages).replace('{nav}', nav).replace('{foot}', foot).replace('</head>', PANEL_CSS + '</head>', 1)
     if not dry:
         with open(os.path.join(OUT, 'screeners-today.html'), 'w', encoding='utf-8') as f:
             f.write(text)
