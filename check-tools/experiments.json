@@ -388,6 +388,46 @@
    "added": "2026-10-24",
    "started": "2026-10-24",
    "decide": "2026-12-19"
+  },
+  {
+   "id": "ai-market-tilt",
+   "what": "The owner's idea (24 Oct 2026): the AI leans the budget toward the markets it expects to do better, from the news and the calendar. First as calls only: each trading day it names the regions it expects to beat or trail an S&P 500 fund over the next week, scored a week later (as the sector-fund calls are). Starts when the sector-fund calls have 30 scored: if the market calls are then right clearly more often than chance over 30+, a trial of shifting the shares between regions by them",
+   "angle": "profit",
+   "measure": "share of calls right against 50%, beyond twice the margin of error; then the trial's result against the current even split",
+   "status": "idea",
+   "added": "2026-10-24"
+  },
+  {
+   "id": "public-record",
+   "what": "A public page, the AI autopilot against the S&P 500 with $100,000 of fake money, updated weekly, losses included (the traffic plan's third step): something other sites link to and visitors trust. Starts when the account has 30 trading days",
+   "angle": "growth",
+   "measure": "Search Console impressions and links to the page; sign-ups that start on it (GA4)",
+   "status": "idea",
+   "added": "2026-10-24"
+  },
+  {
+   "id": "screener-email",
+   "what": "The home page's email box offers last week's top 5 of one market from the daily pages, and a weekly email of the daily pages' highlights to the signup list (nothing has ever been sent): a reason to come back. Starts when the screener pages have run 2 weeks",
+   "angle": "growth",
+   "measure": "sign-ups to the list a week before and after; opens and clicks of the first emails",
+   "status": "idea",
+   "added": "2026-10-24"
+  },
+  {
+   "id": "results-week",
+   "what": "The daily pages and the home page name the big companies reporting results that week, from the results dates now kept (company_figures.json): searchers look for 'earnings this week'. Starts when the results dates cover most large companies (about 1 Nov 2026)",
+   "angle": "growth",
+   "measure": "Search Console impressions on the pages that carry it",
+   "status": "idea",
+   "added": "2026-10-24"
+  },
+  {
+   "id": "crypto-page",
+   "what": "A daily public page for the crypto screener's top 10, as the 24 market pages are (it has the most searches of any list)",
+   "angle": "growth",
+   "measure": "Search Console impressions and clicks on it after 8 weeks",
+   "status": "idea",
+   "added": "2026-10-24"
   }
  ]
 }
