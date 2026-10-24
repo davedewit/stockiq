@@ -979,6 +979,8 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   and its card carry the offer). **The check:** `phone_check.js` (weekly) fails a page without the ☰ button on show and opening the
   menu, the bell (not on sign-in pages) or the usage chip. **Next, an idea in the register (`nav-simpler`):** the desktop menu written
   once and simpler (Crypto as a plain link, Pricing / Dashboard in the bar).
+- **`theme.js` is loaded in every page's head without `defer` or `async`** (the home page had `defer`, so a signed-in visitor saw "Sign up free"
+  flash on every visit; the nightly site check's `theme-early` reports it).
 - **Who is looking, marked before the page is drawn** (24 Oct 2026; `theme.js`, top): `html.signed-in` and `html.paid-user` from the
   browser's own notes. The shared menu shows a signed-out visitor "Log in" and a blue "Sign up free" in place of the Account menu, and
   hides Pricing from a paying member (`styles.css`, "The shared menu by who is looking"). The trial strip across the top (desktop

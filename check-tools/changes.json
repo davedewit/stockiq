@@ -3,6 +3,12 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Home page: Sign up free no longer flashes in the menu for a signed-in visitor (the page marked who was looking only after drawing); the nightly check now catches a page that does that",
+   "found": "owner",
+   "link": "https://stockiq.tech/"
+  },
+  {
+   "at": "2026-10-24",
    "what": "Sign-up page lists what you really get; the sign-in and sign-up prompts sit under the form instead of pinned near the header; no bell for a signed-out visitor",
    "found": "owner",
    "link": "https://stockiq.tech/signup.html"
@@ -285,10 +291,6 @@
   {
    "at": "2026-10-19",
    "what": "At the top of this page: Real money, the decision. One verdict from four checks, decided on 11 Oct 2027; until then it shows how each check stands"
-  },
-  {
-   "at": "2026-10-19",
-   "what": "The confidence line on this page is now a dial: red under 50%, yellow to 90%, green from 90%, with a line of how it has moved day by day (faded until 30 trading days)"
   }
  ]
 }

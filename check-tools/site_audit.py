@@ -7,6 +7,7 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
   loading-text    "Loading..." in the HTML of an indexed page: what a search engine reads before any script runs
   broken-links    a link or a script on a page whose file is not on the site
   duplicate-code  the same function defined in several pages or scripts (the market panel was three copies)
+  theme-early     a page that loads theme.js late (defer/async), so the menu flashes before the page is marked signed in
   copies          a block of 8+ lines (code, style or markup) word for word in 3+ hand-edited files; a problem when a change adds one
   shared-parts    a page whose menu or footer differs from the one definition in shared_parts.py
   made-up-visuals Math.random() used to draw something (the side panel's charts were random lines), a fixed line written into a
@@ -292,6 +293,12 @@ def main():
     total = sum(logs.values())
     if total > 80:
         find('console-noise', 'idea', f'{total} console.log lines in the pages and scripts (the most: ' + ', '.join(f'{f} {n}' for f, n in sorted(logs.items(), key=lambda x: -x[1])[:4]) + ')', '')
+
+    # theme-early: theme.js marks the page (signed in, paid, light or dark) before it is drawn; loaded with defer or async it runs
+    # after, and the menu shows "Sign up free" for a moment to a signed-in visitor (24 Oct 2026, the owner on the home page)
+    for f in pages:
+        if re.search(r'<script[^>]*theme\.js[^>]*\b(defer|async)\b', src[f]):
+            find('theme-early', 'problem', 'loads theme.js with defer or async: the page is drawn before it is marked signed in, paid or dark (the menu flashes)', f)
 
     # copies: one block of code or markup in 3 or more hand-edited files, so that one change has to be made in each (24 Oct 2026, the
     # owner: "make sure we don't create silly code that requires us having to update the same thing on multiple pages"). Pages written
