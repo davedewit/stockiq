@@ -20,6 +20,7 @@ PATHS=()
 for row in $ROWS; do IFS=: read -r f was new <<< "$row"
   cp "$HERE/web/$f" "$WEB/$f"
   case "$f" in *.js) "${AWS[@]}" s3 cp "$WEB/$f" "s3://$BUCKET/$f" --cache-control "public, max-age=300, s-maxage=86400" --content-type application/javascript --only-show-errors; PATHS+=("/$f*");;
+    *.css) "${AWS[@]}" s3 cp "$WEB/$f" "s3://$BUCKET/$f" --cache-control "public, max-age=300, s-maxage=86400" --content-type "text/css" --only-show-errors; PATHS+=("/$f*");;
     *.xml) "${AWS[@]}" s3 cp "$WEB/$f" "s3://$BUCKET/$f" --cache-control "public, max-age=0, s-maxage=3600, must-revalidate" --content-type "application/xml" --only-show-errors; PATHS+=("/$f");;
     *) "${AWS[@]}" s3 cp "$WEB/$f" "s3://$BUCKET/$f" --cache-control "public, max-age=0, s-maxage=3600, must-revalidate" --content-type "text/html; charset=utf-8" --only-show-errors; PATHS+=("/$f");; esac
 done
