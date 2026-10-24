@@ -455,11 +455,13 @@
   },
   {
    "id": "market-panel-pages",
-   "what": "The market panel (right side on a desktop 1401px and wider, a swipe or the green button on a phone) on the 25 daily screener pages only, not on guides, legal, sign-in or stock pages",
+   "what": "The market panel (right side from 1401px wide, the green button or a swipe on a phone) on the 25 daily screener pages only; the tables made to fit a phone with it",
    "angle": "sign-ups, ease of use",
-   "measure": "GA4 over 4 weeks against the 4 before: time on page and analyses started from the daily pages, and sign-ups that began there",
-   "status": "idea",
-   "added": "2026-10-24"
+   "measure": "GA4: engagement time and pages a visit on the daily pages, and sign-ups that start there, 4 weeks against the 4 before (the owner sends the figures at the decision)",
+   "status": "running",
+   "added": "2026-10-24",
+   "started": "2026-10-24",
+   "decide": "2026-11-21"
   }
  ]
 }

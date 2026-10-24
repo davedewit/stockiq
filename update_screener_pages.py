@@ -216,7 +216,10 @@ HEAD = '''<!DOCTYPE html>
         .sp-links a {{ display: inline-block; margin: 0 8px 8px 0; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 6px; text-decoration: none; color: #3b82f6; font-size: 0.9rem; }}
         .sp-cta {{ display: inline-block; background: #007bff; color: #fff !important; padding: 12px 26px; border-radius: 8px; text-decoration: none; font-weight: 700; margin: 6px 8px 6px 0; }}
         .sp-scroll {{ overflow-x: auto; }}
-        @media (max-width: 640px) {{ .sp-hide {{ display: none; }} .sp-wrap h1 {{ font-size: 1.5rem; }} }}
+        @media (max-width: 640px) {{ .sp-hide {{ display: none; }} .sp-wrap h1 {{ font-size: 1.5rem; }}
+            /* the tables fit a phone, so they do not shift sideways and a swipe brings out the market panel (24 Oct 2026) */
+            .sp-table {{ font-size: 0.85rem; }} .sp-table th, .sp-table td {{ padding: 7px 4px; }}
+            .sp-table th {{ letter-spacing: 0; white-space: normal !important; }} .sp-hub td.n {{ white-space: normal; }} }}
     </style>
     <script>
         const savedTheme = localStorage.getItem('theme');
@@ -237,13 +240,108 @@ HEAD = '''<!DOCTYPE html>
 '''
 
 
+# The market panel on the right (24 Oct 2026; experiment market-panel-pages): the dashboard's arrangement, without its news
+# section. On a desktop 1401px and wider it stays in view beside the list and scrolls by itself; on a phone the green button or a
+# swipe from the right brings it out (mobile-sidebar.js). market-panel.js fills it; live-market.js (loaded by theme.js) keeps it moving.
+PANEL = """
+    <!-- MARKET_PANEL_START -->
+    <style>
+        #news-panel { position: fixed; right: 20px; top: 84px; bottom: 20px; width: 330px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 99; overflow-y: auto; }
+        @media (max-width: 1400px) { #news-panel { display: none; } }
+        @media (min-width: 1401px) { body { padding-right: 350px; } }
+        @media (max-width: 768px) { #news-panel { display: none !important; } #mobile-sidebar-toggle { display: flex !important; } }
+        @media (min-width: 769px) { #mobile-sidebar-toggle { display: none !important; } }
+        #mobile-sidebar-content #news-panel { display: block !important; position: static !important; width: 100% !important; box-shadow: none; border: none; padding: 0; }
+        #market-tabs-sidebar { scrollbar-width: none; }
+        #market-tabs-sidebar::-webkit-scrollbar { display: none; }
+        @media (min-width: 1401px) { #market-tabs-sidebar { mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%); -webkit-mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%); padding-right: 40px; } }
+        .market-tab-sidebar { padding: 4px 10px; background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; border-radius: 4px; font-size: 11px; white-space: nowrap; transition: all 0.2s; }
+        .market-tab-sidebar:hover { background: rgba(255,255,255,0.05); }
+        .market-tab-sidebar.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+        .market-item-sidebar { padding: 6px 4px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 6px; display: flex; flex-direction: column; min-width: 0; transition: background 0.2s; }
+        .market-item-sidebar:hover { background: var(--hover-bg); }
+        .market-item-sidebar-name { font-size: 10px; color: var(--text-secondary); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .market-item-sidebar-value { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+        .market-item-sidebar-chart { height: 24px; margin: 2px 0; width: 100%; }
+        .market-item-sidebar-change { font-size: 10px; font-weight: 500; white-space: nowrap; overflow: hidden; }
+        .market-item-sidebar-change.positive { color: #22c55e; }
+        .market-item-sidebar-change.negative { color: #ef4444; }
+    </style>
+    <div id="news-panel" style="position: fixed; right: 20px; top: 84px; bottom: 20px; width: 330px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 99; overflow-y: auto;">
+        <div style="border-radius: 8px; padding: 8px 4px; margin-bottom: 20px;">
+            <div style="text-align: center; padding: 8px; background: #000; border-radius: 6px; margin-bottom: 10px;">
+                <span style="color: #4ade80; font-size: 12px;"><span id="market-status-sidebar">● U.S. markets open in</span> <span id="market-countdown-sidebar">--</span></span>
+            </div>
+            <div id="market-tabs-sidebar" style="display: flex; gap: 5px; margin-bottom: 10px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; scrollbar-width: thin;">
+                <button class="market-tab-sidebar active" data-tab="us">US</button>
+                <button class="market-tab-sidebar" data-tab="europe">Europe</button>
+                <button class="market-tab-sidebar" data-tab="asia">Asia</button>
+                <button class="market-tab-sidebar" data-tab="cryptocurrencies">Crypto</button>
+                <button class="market-tab-sidebar" data-tab="rates">Rates</button>
+                <button class="market-tab-sidebar" data-tab="commodities">Commodities</button>
+                <button class="market-tab-sidebar" data-tab="currencies">Currencies</button>
+            </div>
+            <div id="market-data-sidebar-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; max-width: 100%;"></div>
+            <div style="display: flex; justify-content: center; gap: 10px; margin-top: 10px;">
+                <button id="nav-left-sidebar" aria-label="Previous market" style="background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; touch-action: manipulation;">&lsaquo;</button>
+                <button id="nav-right-sidebar" aria-label="Next market" style="background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; touch-action: manipulation;">&rsaquo;</button>
+            </div>
+            <div id="loading-sidebar" style="padding: 20px;" aria-label="Getting the market data"><div class="spinner" style="width: 24px; height: 24px; border-width: 3px; margin: 0 auto;"></div></div>
+        </div>
+        <div style="padding: 8px; margin-bottom: 20px;"><h4 style="color: var(--text-primary); margin: 0 0 6px 0; font-size: 0.8rem;">🔥 Trending Tickers</h4><div id="trending-tickers-container"></div></div>
+        <div style="padding: 20px 8px 8px; margin-bottom: 20px; border-top: 2px solid var(--border-color);"><h4 style="color: var(--text-primary); margin: 0 0 6px 0; font-size: 0.8rem;">🚀 Top Gainers</h4><div id="gainers-tickers-container"></div></div>
+        <div style="padding: 20px 8px 8px; margin-bottom: 20px; border-top: 2px solid var(--border-color);"><h4 style="color: var(--text-primary); margin: 0 0 6px 0; font-size: 0.8rem;">📉 Top Losers</h4><div id="losers-tickers-container"></div></div>
+        <div style="padding: 20px 8px 8px; border-top: 2px solid var(--border-color);"><h4 style="color: var(--text-primary); margin: 0 0 6px 0; font-size: 0.8rem;">🔥 Most Active</h4><div id="active-tickers-container"></div></div>
+    </div>
+    <button id="mobile-sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Market data" style="display: none; position: fixed; bottom: 20px; right: 20px; background: #22c55e; color: white; border: none; border-radius: 50%; width: 56px; height: 56px; box-shadow: 0 4px 12px rgba(34,197,94,0.4); z-index: 9999; cursor: pointer; align-items: center; justify-content: center;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+    </button>
+    <div id="mobile-sidebar-overlay" onclick="closeMobileSidebar()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; opacity: 0; transition: opacity 0.3s ease;"></div>
+    <div id="mobile-sidebar-modal" style="display: none; position: fixed; top: 0; right: -100%; width: 90%; max-width: 400px; height: 100%; background: var(--card-bg); z-index: 10001; overflow-y: auto; -webkit-overflow-scrolling: touch; transition: right 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.3);">
+        <div style="position: sticky; top: 0; background: var(--card-bg); padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; z-index: 1;">
+            <h3 style="margin: 0; color: var(--text-primary);">Market Data</h3>
+            <button onclick="closeMobileSidebar()" aria-label="Close" style="background: none; border: none; font-size: 28px; cursor: pointer; color: var(--text-primary);">&times;</button>
+        </div>
+        <div id="mobile-sidebar-content" style="padding: 15px;"></div>
+    </div>
+    <script>
+        // The panel moves into the phone sidebar and back (mobile-sidebar.js calls these; it replaces the two below it).
+        function fillMobileSidebar() {
+            var content = document.getElementById('mobile-sidebar-content'), panel = document.getElementById('news-panel');
+            if (!content || !panel || panel.parentElement === content) return;
+            content.appendChild(panel);
+            if (window.marketPanel) window.marketPanel.refresh();
+        }
+        function emptyMobileSidebar() {
+            var content = document.getElementById('mobile-sidebar-content'), panel = document.getElementById('news-panel'), modal = document.getElementById('mobile-sidebar-modal');
+            if (!panel || panel.parentElement !== content) return;
+            document.body.insertBefore(panel, modal);
+            if (window.marketPanel) window.marketPanel.refresh();
+        }
+        function toggleMobileSidebar() {
+            var overlay = document.getElementById('mobile-sidebar-overlay'), modal = document.getElementById('mobile-sidebar-modal');
+            fillMobileSidebar(); overlay.style.display = 'block'; modal.style.display = 'block';
+            requestAnimationFrame(function () { overlay.style.opacity = '1'; modal.style.right = '0'; });
+        }
+        function closeMobileSidebar() {
+            var overlay = document.getElementById('mobile-sidebar-overlay'), modal = document.getElementById('mobile-sidebar-modal');
+            overlay.style.opacity = '0'; modal.style.right = '-100%';
+            setTimeout(function () { overlay.style.display = 'none'; modal.style.display = 'none'; emptyMobileSidebar(); }, 300);
+        }
+    </script>
+    <script src="market-panel.js?v=2"></script>
+    <script src="mobile-sidebar.js?v=2"></script>
+    <!-- MARKET_PANEL_END -->
+"""
+
+
 def shell_parts():
     """The menu and the footer (with its scripts), taken from the screener guide so the pages look like the rest of the site."""
     guide = os.path.join(OUT, 'stock-screener-guide.html')
     with open(guide if os.path.exists(guide) else os.path.join(WEBSITE, 'stock-screener-guide.html'), encoding='utf-8') as f:
         page = f.read()
     nav = page[page.index('<nav class="top-nav">'):page.index('</nav>') + len('</nav>')]
-    foot = page[page.index('<footer class="footer">'):page.index('</body>')]
+    foot = page[page.index('<footer class="footer">'):page.index('</body>')] + PANEL
     return nav, foot
 
 

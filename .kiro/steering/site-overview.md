@@ -190,6 +190,7 @@ warns about; one change at a time, measured, with its experiment entry.
   (Google re-reads the sitemap on its own schedule; the live one has 991).
 - **24 Oct, afternoon:** every page has the whole header (`site-header.js`, section 8; the owner found the daily screener pages
   without it); `phone_check.js` checks it weekly. Next for the header: idea `nav-simpler` (the desktop menu once and simpler).
+  The daily screener pages have the market panel (trial `market-panel-pages`, decided around 21 Nov on GA4 figures from the owner).
 - **Trials running** (`python3 check-tools/experiments.py`): gap-wait, rank-pick, crypto-no-chasing, theme-sleeve, stop-watch,
   patient-shares (decided 12 Nov; then `longer-holds`), market-gauge, company-figures, trend-score, ai-markets, auto-holdings,
   screener-pages (Search Console, 8 weeks). Ideas, each with its start condition: earnings-hold, ai-market-tilt, public-record,
@@ -516,6 +517,11 @@ git pull --rebase && git push
   sitemap (`update_sitemap.py` adds every one, daily) and named to IndexNow daily (`website/notify_search_engines.py`). Linked
   from the home page's screeners card. Experiment `screener-pages`, decided on Search Console's figures. Not yet: crypto, the
   email box's sample.
+  **Since 24 Oct 2026 they carry the market panel** (`PANEL` in `update_screener_pages.py`, added to the footer part that `shell_parts()`
+  copies; experiment `market-panel-pages`, decided on GA4 after 4 weeks): the dashboard's arrangement without its news (fixed on the
+  right from 1401px wide, scrolling inside itself; on a phone the green button or a swipe from the right), filled by `market-panel.js`.
+  Not on the guides, legal, sign-in or stock pages, on purpose (clutter, and on a stock page it would compete with "Full report").
+  Their tables were 10 to 25px wider than a phone and swallowed the swipe; on a phone they now use tighter cells and wrapping headings.
 - **"This week in the markets" on the home page** (24 Oct 2026, the owner: the home page should show an active site): straight after the
   top block, between `<!-- MARKET_WEEK_START/END -->`, written by the same script each day: the week's high-impact announcements (the
   ForexFactory calendar; times turned into the visitor's zone by a few lines of script) and the trend across the 24 markets (the share of

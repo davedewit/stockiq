@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "The 25 daily screener pages now have the market panel on the right (desktop) and the green button or a swipe on a phone, as a 4-week trial; their tables also fit a phone now. Not added to guides, legal or stock pages, to keep them uncluttered",
+   "found": "session"
+  },
+  {
+   "at": "2026-10-24",
    "what": "Every page now has the same header: on a phone the guides, legal pages and daily screener pages get the menu button, bell, swipe and usage count; on a desktop the usage count and your name in the Account menu. The weekly phone check now tests every page's header",
    "found": "owner"
   },
@@ -270,10 +275,6 @@
   {
    "at": "2026-10-19",
    "what": "The Admin page's bill now shows your whole AWS bill first, then StockIQ's part of it (the one-off Cost Explorer charge included), then what running the site costs, service by service"
-  },
-  {
-   "at": "2026-10-19",
-   "what": "Every share the autopilot buys now keeps its profit margin, debt and revenue growth, so the reviews can tell whether healthier companies do better (a measurement; it buys nothing differently)"
   }
  ]
 }
