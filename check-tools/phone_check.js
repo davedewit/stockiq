@@ -70,6 +70,7 @@ const server = http.createServer((q, r) => {
       })()`);
       if (!r) { console.log(`FAIL ${page}: did not load`); bad++; continue; }
       const head = await js(`(async function () {
+        for (var w = 0; w < 30 && !document.getElementById('vb-chip'); w++) await new Promise(function (r) { setTimeout(r, 100); });   // the chip comes after three scripts in turn
         var miss = [], btn = document.querySelector('.hamburger-btn'), b = btn && btn.getBoundingClientRect();
         if (!btn || !b.width || !b.height) miss.push('no ☰ button on show');
         if (!/(login|signup)\\.html/.test(location.pathname) && !document.getElementById('mobile-notification-bell')) miss.push('no bell');   // nobody is signed in on the sign-in pages
