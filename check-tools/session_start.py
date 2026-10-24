@@ -160,8 +160,7 @@ try:
         r = t.scan(**kw); fake += [i['user_date'].split('#')[0] for i in r.get('Items', [])]
         if 'LastEvaluatedKey' not in r: break
         kw['ExclusiveStartKey'] = r['LastEvaluatedKey']
-    known = {'testuser_csv@example.com', 'trial-user@example.com', 'someone@example.com'}      # explained to the owner on 24 Oct 2026
-    new = sorted(set(fake) - known)
+    new = sorted(set(fake))                       # the three of 24 Oct 2026 were deleted at the owner's yes
     if new: finding(f"Made-up test accounts in the user table ({', '.join(new)}): a test reached a live function; find which, make it answer locally, and ask the owner before deleting the rows")
 except Exception as e:
     print('   user table not read:', e)

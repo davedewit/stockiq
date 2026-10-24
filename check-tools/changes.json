@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Deleted the three made-up test accounts from the user table",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
    "what": "The 'someone@example.com' sign-up in the daily email was a test of ours, not a person; the opening check now flags made-up accounts",
    "found": "owner"
   },
@@ -312,11 +317,6 @@
   {
    "at": "2026-10-23",
    "what": "The number of holdings and the budget are now automatic: 42 holdings (about 2 for each screener ticked, each from the top 10 of its list) and all the practice money it can reach. The improvement lists are checked against what is live at every session",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "The Improvements tab now also lists every question asked about making it better (46), with what was found, so an idea already tried is not tried again; three missing entries added",
    "found": "owner"
   }
  ]

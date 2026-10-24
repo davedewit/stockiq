@@ -3798,8 +3798,8 @@ more finished trades than there are, and would chase noise before then.
 - **A browser test against the live site answers every POST itself** (24 Oct 2026: a one-off screenshot script, signed in as the
   made-up `someone@example.com`, let the site's calls through; the usage tracker creates a "registration" for any email it is sent,
   and the owner's daily email then listed it as a new social-login user). Use the kept tools (they block POSTs), never a quick script
-  that lets requests through. `session_start.py` part 3b flags any new made-up account in the user table. Three are on record and
-  explained (`testuser_csv@`, `trial-user@`, `someone@example.com`); deleting them waits for the owner's yes. The chat's daily report
+  that lets requests through. `session_start.py` part 3b flags any new made-up account in the user table. The three found that day
+  (`testuser_csv@`, `trial-user@`, `someone@example.com`) were deleted at the owner's yes. The chat's daily report
   likewise shows the session's own test questions (`nobody-deploy-check@example.com`, `anon-test-links`).
 - **Both GitHub repositories are public** (checked 11 Oct 2026): nothing private belongs in a commit, in a commit message
   or in these notes: no keys, no customer addresses, nothing personal. An account is "the owner's account" here, not
