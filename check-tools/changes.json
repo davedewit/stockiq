@@ -2,6 +2,21 @@
  "about": "What the sessions changed on the site, newest first, in plain words for the owner's Admin page ('What changed lately'). Add with: python3 check-tools/admin.py change \"<what>\". Nothing private: both repositories are public.",
  "changes": [
   {
+   "at": "2026-10-24",
+   "what": "Fed decision days studied on five years of prices: no direction, only larger moves, so no rule; each company's results date is now kept so the autopilot can learn whether holding through results helps or hurts",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
+   "what": "The daily update's email says when it started, how long it took, and warns (⚠️) when a step failed inside a run that still finished",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
+   "what": "The daily update had stopped refreshing the stock pages' figures on 24 Oct (too many open files under the Mac's scheduler): the limit is raised, from the next run",
+   "found": "check"
+  },
+  {
    "at": "2026-10-23",
    "what": "The Improvements tab now opens with the story: the score against an S&P 500 fund, what testing has proven (with its figures), what is being tested for profit and how far along, and what is next",
    "found": "owner"
