@@ -20,7 +20,7 @@ Wording rule (site-overview.md section 8b): describe, never advise. No "buy", "s
 """
 import csv, html, json, os, re, sys, time, urllib.parse, urllib.request
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 WEBSITE = '/Users/dave/VSCODE/website'
@@ -400,6 +400,103 @@ def hub(results, names, today, made):
     return '\n'.join(out)
 
 
+# ---- the home page's "This week in the markets" (24 Oct 2026, the owner: the home page should show it is an active site, aware of what
+# is happening today and what big things are coming). Written between <!-- MARKET_WEEK_START/END --> in index.html, from the same day's
+# screener results and the week's high-impact announcements (the free ForexFactory calendar the autopilot also reads).
+CALENDARS = ('https://nfs.faireconomy.media/ff_calendar_thisweek.json', 'https://nfs.faireconomy.media/ff_calendar_nextweek.json')
+PLACES = {'USD': 'US', 'EUR': 'Euro area', 'GBP': 'UK', 'JPY': 'Japan', 'AUD': 'Australia', 'CAD': 'Canada', 'NZD': 'New Zealand', 'CNY': 'China', 'CHF': 'Switzerland'}
+WORDS = {'Federal Funds Rate': 'Fed interest-rate decision', 'FOMC Statement': 'Fed statement', 'FOMC Press Conference': 'Fed press conference',
+         'Main Refinancing Rate': 'ECB interest-rate decision', 'Official Bank Rate': 'Bank of England rate decision', 'BOJ Policy Rate': 'Bank of Japan rate decision',
+         'Cash Rate': 'RBA rate decision', 'Overnight Rate': 'Bank of Canada rate decision', 'Non-Farm Employment Change': 'jobs report',
+         'CPI m/m': 'inflation (month)', 'CPI y/y': 'inflation (year)', 'CPI q/q': 'inflation (quarter)', 'Trimmed Mean CPI q/q': 'core inflation (quarter)', 'Core CPI m/m': 'core inflation (month)', 'Advance GDP q/q': 'growth (GDP)'}
+HOME_START, HOME_END = '<!-- MARKET_WEEK_START -->', '<!-- MARKET_WEEK_END -->'
+
+
+def week_events():
+    out, seen = [], set()
+    for url in CALENDARS:
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (compatible; StockIQ)'})
+            with urllib.request.urlopen(req, timeout=15) as r:
+                rows = json.loads(r.read())
+        except Exception:
+            continue
+        for e in rows if isinstance(rows, list) else []:
+            if not isinstance(e, dict) or e.get('impact') != 'High':
+                continue
+            try:
+                t = datetime.fromisoformat(str(e.get('date'))).astimezone(timezone.utc)
+            except ValueError:
+                continue
+            key = (t.isoformat(), e.get('country'), e.get('title'))
+            if key not in seen:
+                seen.add(key)
+                out.append({'t': t, 'cur': str(e.get('country') or '')[:3], 'title': str(e.get('title') or '')[:60],
+                            'forecast': str(e.get('forecast') or '')[:12], 'previous': str(e.get('previous') or '')[:12]})
+    return sorted(out, key=lambda e: e['t'])
+
+
+def home_section(summary, events, now, today, names=None):
+    names = names or {}
+    def ev_line(e):
+        name = f"{PLACES.get(e['cur'], e['cur'])}: {WORDS.get(e['title'], e['title'])}"
+        was = 'was ' if e['t'] < now else ''
+        figs = f" <span class=\"sp-muted\">forecast {was}{esc(e['forecast'])}, previous {esc(e['previous'])}</span>" if e['forecast'] and e['previous'] else ''
+        when = e['t'].strftime('%a %d %b, %H:%M UTC')
+        return f"<li><time datetime=\"{e['t'].strftime('%Y-%m-%dT%H:%M:%SZ')}\">{esc(when)}</time> · <strong>{esc(name)}</strong>{figs}</li>"
+    ahead = [e for e in events if now <= e['t'] <= now + timedelta(days=8)][:6]
+    past = [e for e in events if now - timedelta(days=4) <= e['t'] < now][-4:]
+    if ahead:
+        cal = f"<h3>Coming up</h3><ul class=\"mw-list\">{''.join(ev_line(e) for e in ahead)}</ul>"
+    elif past:
+        cal = (f"<h3>Out this week</h3><ul class=\"mw-list\">{''.join(ev_line(e) for e in past)}</ul>"
+               "<p class=\"sp-muted\" style=\"font-size:.85rem;\">Next week's calendar is published at the weekend.</p>")
+    else:
+        cal = '<h3>Coming up</h3><p class="sp-muted">No high-impact announcement in the calendar for the next few days.</p>'
+    rows = [(k, v) for k, v in summary.items() if isinstance(v, dict) and v.get('n') and k in SCREENERS]
+    total_pos, total_n = sum(v['pos'] for _, v in rows), sum(v['n'] for _, v in rows)
+    rows.sort(key=lambda kv: -kv[1]['pos'] / kv[1]['n'])
+    def mk(kv):
+        k, v = kv
+        return (f"<li><a href=\"screener-{SCREENERS[k][0]}.html\"><strong>{esc(SCREENERS[k][1])}</strong></a> "
+                f"{round(100 * v['pos'] / v['n'])}% rising <span class=\"sp-muted\">· leader {esc(short(names.get(v['lead'].upper(), v['lead'])))}</span></li>")
+    breadth = (f"<p style=\"margin:0 0 8px;\">Across {len(rows)} markets, <strong>{round(100 * total_pos / total_n) if total_n else 0}%</strong> of "
+               f"{total_n:,} shares are in a rising trend by StockIQ's trend score.</p>") if rows else ''
+    strong = f"<h4>Strongest trend</h4><ul class=\"mw-list\">{''.join(mk(kv) for kv in rows[:3])}</ul>" if rows else ''
+    weak = f"<h4>Weakest trend</h4><ul class=\"mw-list\">{''.join(mk(kv) for kv in rows[-3:][::-1])}</ul>" if len(rows) > 5 else ''
+    return f'''{HOME_START}
+<section id="market-week" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px 22px; margin: 30px 0; text-align: left;">
+<style>#market-week h2{{margin:0 0 4px;font-size:1.4rem;color:var(--text-primary);}}#market-week h3{{font-size:1rem;margin:14px 0 8px;color:var(--text-primary);}}#market-week h4{{font-size:.85rem;margin:10px 0 6px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;}}#market-week .mw-grid{{display:grid;grid-template-columns:1fr 1fr;gap:10px 30px;}}#market-week .mw-list{{list-style:none;padding:0;margin:0;}}#market-week .mw-list li{{padding:5px 0;border-bottom:1px solid var(--border-color);color:var(--text-primary);font-size:.92rem;line-height:1.45;}}#market-week a{{color:#3b82f6;text-decoration:none;}}#market-week .sp-muted{{color:var(--text-secondary);}}#market-week time{{color:var(--text-secondary);}}@media(max-width:700px){{#market-week .mw-grid{{grid-template-columns:1fr;}}}}</style>
+<h2>This week in the markets</h2>
+<p class="sp-muted" style="margin:0 0 6px;font-size:.88rem;">Updated {esc(today)}: the scheduled announcements that can move whole markets, and where the trend stands in 24 markets today. General information, not advice.</p>
+<div class="mw-grid"><div>{cal}</div><div><h3>Today across the markets</h3>{breadth}{strong}{weak}<p style="margin:10px 0 0;"><a href="screeners-today.html"><strong>Every market's top 10 today &rarr;</strong></a></p></div></div>
+<script>(function(){{try{{document.querySelectorAll('#market-week time[datetime]').forEach(function(t){{var d=new Date(t.getAttribute('datetime'));if(!isNaN(d))t.textContent=d.toLocaleString(undefined,{{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}});}});}}catch(e){{}}}})();</script>
+</section>
+{HOME_END}'''
+
+
+def short(name):
+    """A company name without its legal form, 28 characters at most."""
+    n = re.sub(r'[,.]?\s+(Inc|Incorporated|Corporation|Corp|Ltd|Limited|plc|PLC|SE|S\.A|SA|AG|N\.V|NV|AB|Co|Company|Group Limited|Holdings Limited)\.?$', '', str(name)).strip()
+    return n[:28]
+
+
+def write_home(summary, now, today, dry, names=None):
+    path = os.path.join(OUT, 'index.html') if os.path.exists(os.path.join(OUT, 'index.html')) else os.path.join(WEBSITE, 'index.html')
+    page = open(path, encoding='utf-8').read()
+    if HOME_START not in page or HOME_END not in page:
+        print('⚠️  index.html has no MARKET_WEEK markers: the home page section is not written')
+        return
+    block = home_section(summary, week_events(), now, today, names)
+    new = page[:page.index(HOME_START)] + block + page[page.index(HOME_END) + len(HOME_END):]
+    if dry:
+        print(f'   (dry run) index.html: This week in the markets, {len(block) // 1024} KB')
+    elif new != page:
+        with open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8') as f:
+            f.write(new)
+        print('✅ Home page: This week in the markets written')
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
     dry = '--dry-run' in sys.argv or os.environ.get('DRY_RUN') == 'true'
@@ -450,6 +547,7 @@ def main():
         with open(STATE, 'w') as f:
             json.dump(state, f)
         print(f'✅ Screener pages written: {len(ok)} and the hub')
+    write_home(summary, now, today, dry, names)
     return 0
 
 
