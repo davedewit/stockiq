@@ -247,6 +247,11 @@ warns about; one change at a time, measured, with its experiment entry.
   (3) **Store his autopilot record compressed**, as `_brain` is (about 190 KB written at most check-ins: the largest running cost).
   (4) Decide `daily-review` by 1 Nov (Claude recommends keeping it: `touch check-tools/reviews/daily/KEEP`). (5) The walk of step 5d.
   (6) A small one from him: a "View report" link on the "Analysis complete" note after a background analysis.
+  (6b) **"BTC" in the Practice portfolio's buy row is the Grayscale Bitcoin Mini Trust ETF** (NYSE Arca, $35.89), not the coin
+  (`BTC-USD`, $79,844): the owner typed BTC on a Saturday meaning Bitcoin and was told its market was closed. The search
+  (`SEARCH_API`) offers only exchange listings labelled "US Market", "London (LSE)". Fix: when the typed code is one of the
+  site's coins, offer the coin first ("Bitcoin, the coin: BTC-USD") and name the fund for what it is; show the picked name and
+  type (fund / share / coin) under the row before buying. Use the coin list the site already has (`COINS` / `CRYPTO_TICKER_MAP`), no new copy.
   (7) **Built once, next:** copies 106 lines: mostly the bell's code in index, blog and news (merge with a real signed-in browser to
   check), the pages' own phone-menu functions, the four pages' own trial strips. Bring it down, never up.
 - **How the session works:** the routine at the top (steps 0 to 6, with 5b, 5c, 5d); "THE GOAL OF ALL OF IT" below; four entry points
