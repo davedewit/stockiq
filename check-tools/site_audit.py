@@ -7,6 +7,7 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
   loading-text    "Loading..." in the HTML of an indexed page: what a search engine reads before any script runs
   broken-links    a link or a script on a page whose file is not on the site
   duplicate-code  the same function defined in several pages or scripts (the market panel was three copies)
+  run-links       a daily screener page whose run button opens the wrong section or runs no screener
   theme-early     a page that loads theme.js late (defer/async), so the menu flashes before the page is marked signed in
   copies          a block of 8+ lines (code, style or markup) word for word in 3+ hand-edited files; a problem when a change adds one
   shared-parts    a page whose menu or footer differs from the one definition in shared_parts.py
@@ -293,6 +294,25 @@ def main():
     total = sum(logs.values())
     if total > 80:
         find('console-noise', 'idea', f'{total} console.log lines in the pages and scripts (the most: ' + ', '.join(f'{f} {n}' for f, n in sorted(logs.items(), key=lambda x: -x[1])[:4]) + ')', '')
+
+    # run-links: every daily screener page's "Run the … screener" button opens the analysis page on that market's section and runs
+    # that very screener (24 Oct 2026: they opened the Asia-Pacific section for every market outside the US, and ran nothing)
+    try:
+        sj = read(os.path.join(WEB, 'screeners.js')); ah = read(os.path.join(WEB, 'analysis.html'))
+        known = set(re.findall(r"^\s*'(\d+-[\w]+)':\s*\{", sj, re.M))
+        for f in pages:
+            if not f.startswith('screener-'):
+                continue
+            m = re.search(r'href="(analysis\.html\?option=[^"]*)">Run the ', src[f])
+            if not m:
+                find('run-links', 'problem', 'has no "Run the … screener" button that opens the analysis page', f); continue
+            q = dict(x.split('=', 1) for x in html.unescape(m.group(1)).split('?', 1)[1].split('&'))
+            run, sub, sec = q.get('run', q.get('option')), q.get('subOption'), q.get('option')
+            part = re.search(rf'id="option-{sec}".*?(?=id="option-\d|$)', ah, re.S)
+            if q.get('autorun') != 'true' or f'{run}-{sub}' not in known or not part or f"runAnalysis({run}, '{sub}'" not in part.group(0):
+                find('run-links', 'problem', f'its run button ({m.group(1)}) does not open the right section and run its screener', f)
+    except Exception as e:
+        find('run-links', 'idea', f'the run buttons could not be checked: {e}')
 
     # theme-early: theme.js marks the page (signed in, paid, light or dark) before it is drawn; loaded with defer or async it runs
     # after, and the menu shows "Sign up free" for a moment to a signed-in visitor (24 Oct 2026, the owner on the home page)

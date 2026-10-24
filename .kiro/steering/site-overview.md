@@ -75,7 +75,9 @@ Report `check-tools/reviews/weekly/check-<date>.txt`, `weekly_check.json`, a car
 passed** (`--if-due`, end of `deploy-to-s3.sh`, log `~/stockiq-weekly-check.log`); session_start part 1d makes a failure or a check
 7+ days old a finding. **A session acts on every failure first, then reads a dashboard tab in full (`clarity_check.py --keep`) and
 tells the owner in plain words what was checked and what was fixed. When a fault is found by hand, add a check for it here.**
-**When a session fixes a failed daily update by hand** (as on 24 Oct 2026, the crash on "Too many open files"), it says so with
+**When only a part failed, re-check that part, not everything:** `python3 check-tools/weekly_check.py --recheck` re-runs the failed
+phone checks alone and updates the result and the Admin page (24 Oct 2026, the owner: a full re-run the same day was "zero point").
+**Never run two browser checks at once**: they share ports and fail each other (two false failures on 24 Oct 2026). **When a session fixes a failed daily update by hand** (as on 24 Oct 2026, the crash on "Too many open files"), it says so with
 `python3 check-tools/weekly_check.py --ack-daily "<what was done>"`, tied to that log, and re-runs the full check; otherwise the Admin page's
 "Do you need to check in?" stays red until the next daily run (the owner asked why it said so). The script is the floor; the daily Claude review and the sessions are the eyes. **"🤖 Do you need to check in?"** heads the Admin page
 (`needMeHtml`; the owner: "then i can go there on my phone see if you need me"): **Yes, please check in** (red: a failed check-in,
@@ -523,6 +525,10 @@ git pull --rebase && git push
   fewer than 20 links and leaves the page as it was). On the home page a share in the four market lists links to its stock page
   (`market-panel.js`, from `stock-pages.js`); on the dashboard the click runs the analysis as before. Not done: links from the
   Google Analytics events. (Done 18 Oct 2026: links from the four guides, eight stock pages each; the home page's "Loading..." placeholders.)
+- **Each daily screener page's "Run the … screener" button opens that market's section and runs it** (`run_link`, `SECTION`, `RUN_AS` in
+  `update_screener_pages.py`; `run=` in `js/analysis-core.js` when the screener's number differs from its section, as Mexico's 5 in the
+  Americas' 6). Until 24 Oct 2026 it opened the Asia-Pacific section for every market outside the US and ran nothing; the owner found
+  it. `site_audit.py` `run-links` checks every page's button nightly; the trial button beside it is for signed-out visitors only.
 - **Daily public screener pages (24 Oct 2026; #9 on the Admin page, the traffic plan's first build):** `screener-<market>.html` for 24
   markets (the main index of each country, the Dow 30, NASDAQ 100, Euro Stoxx 50) and the hub `screeners-today.html`, written by
   `update_screener_pages.py` in the daily run from the coordinator on AWS (no account, nothing saved; about 25 calls a day, 30 s): the
@@ -3014,7 +3020,8 @@ last part). An idea that is not ahead on both parts of the period, or that rando
    (the staging folder too, marked "work in progress, not live yet"), remove the folder after the
    deploy, commit the website files by name. The owner's sessions can stop mid-task.
 
-Traps met on 10 Oct: a deploy script checking `pgrep -f deploy-to-s3.sh` finds its own text when it
+**A check piped into `tail` does not stop an `&&` chain when it fails** (24 Oct 2026: an upload went ahead after a failed phone check;
+the failure turned out to be two checks colliding, but the habit was wrong): use `set -o pipefail`, or run the check on its own line first. Traps met on 10 Oct: a deploy script checking `pgrep -f deploy-to-s3.sh` finds its own text when it
 is written and run in one command (run it on its own, or match the process as the last script
 does); in zsh write `"${C}:path"` for `git show` (`$C:c…` is read as a modifier and left an empty
 file once); a stand-in page that does not finish has a syntax error in its own script (check each

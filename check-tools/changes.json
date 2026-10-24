@@ -3,6 +3,12 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "Daily screener pages: 'Run the … screener' now runs that market's screener straight away, in the right section (Mexico went to Asia-Pacific and ran nothing); the free-trial button there shows only to signed-out visitors; 'Shares in a rising trend' as the column heading. The nightly check now tests every page's run button",
+   "found": "owner",
+   "link": "https://stockiq.tech/screener-mexico-ipc.html"
+  },
+  {
+   "at": "2026-10-24",
    "what": "Phone menu: Sign up free and Log in at the top for a signed-out visitor (they were last); Dashboard straight after Home when signed in; the same menu written into every page; the round buttons no longer sit on top of the open menu",
    "found": "owner",
    "link": "https://stockiq.tech/"
@@ -307,10 +313,6 @@
   {
    "at": "2026-10-23",
    "what": "Admin page: each decision shows when it was raised and Claude's recommended answer; 'Coming up' is one line a day with the real-money date apart; the 'so far' and forecast lines say plainly what each means. The unsubscribe page now really unsubscribes"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "New: 'Who chooses the markets' on the AI autopilot's Settings: AI (the boxes are greyed out and the autopilot keeps the main index of every country, leaving a market out only while its own trades lag) or Manual. Settings is also much shorter"
   }
  ]
 }

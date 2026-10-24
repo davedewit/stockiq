@@ -19,6 +19,27 @@ and reports in plain words what was checked and what was fixed (site-overview.md
 import os, sys, json, re, subprocess, tempfile, datetime, importlib.util, shutil
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE); WEB = os.path.join(os.path.dirname(ROOT), 'website')
 QUICK = '--quick' in sys.argv
+if '--recheck' in sys.argv:                # only what failed last time, where that part can be run alone (24 Oct 2026: two failures
+    # were the session's own test runs colliding on the same ports, and a 40-minute full run to clear them was waste; the owner:
+    # "probably zero point doing it now as it was so recently done"). The phone checks can; anything else needs the full run.
+    _p = os.path.join(HERE, 'weekly_check.json'); _w = json.load(open(_p)); _left = []
+    for _f in _w['failed']:
+        _m = re.search(r'fits a (\d+)px phone', _f['name'])
+        if not _m:
+            _left.append(_f); print('cannot be re-checked alone (run the full check):', _f['name']); continue
+        _size = {'390': '390x844', '360': '360x740'}.get(_m.group(1), _m.group(1) + 'x800')
+        _r = subprocess.run(['node', os.path.join(HERE, 'phone_check.js')], capture_output=True, text=True, timeout=900, env=dict(os.environ, SIZE=_size), cwd=HERE)
+        if _r.returncode == 0 and 'ALL PASS' in _r.stdout:
+            print('passes now:', _f['name'])
+            for _it in _w.get('items', []):
+                if _it['name'] == _f['name']: _it['ok'] = True; _it['rechecked'] = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+        else:
+            _left.append(_f); print('still fails:', _f['name'], [l for l in _r.stdout.splitlines() if l.startswith('FAIL')][:3])
+    _w['passed'] += len(_w['failed']) - len(_left); _w['failed'] = _left
+    _w['rechecked'] = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+    json.dump(_w, open(_p, 'w'), indent=1)
+    subprocess.run([sys.executable, os.path.join(HERE, 'admin.py'), 'weekly'], capture_output=True, timeout=300)
+    print(f"full check now {_w['passed']} of {_w['total']}"); sys.exit(0)
 if '--ack-daily' in sys.argv:              # a session fixed the last daily update's failure: say so against that very log (24 Oct 2026)
     _log = os.path.expanduser('~/stockiq-daily.log'); _i = sys.argv.index('--ack-daily')
     _what = sys.argv[_i + 1] if _i + 1 < len(sys.argv) else 'fixed by a session'

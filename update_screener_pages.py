@@ -57,6 +57,21 @@ SCREENERS = {
     '5-nzx50': ('nzx-50', 'NZX 50', 'Asia-Pacific', "New Zealand's 50 largest listed companies"),
 }
 REGIONS = ('US', 'Americas', 'Europe', 'Asia-Pacific')
+SECTION = {'US': 3, 'Europe': 4, 'Asia-Pacific': 5, 'Americas': 6}      # the analysis page's section for each region (its Screeners menu)
+# the number runAnalysis knows a screener by, where it is not the coordinator key's first part (the ASX is 4-… there and 5 on the page,
+# the FTSE 100 the other way round)
+RUN_AS = {'4-200': 5, '5-ftse100': 4}
+
+
+def run_link(key):
+    """The analysis page, opened on the screener's own section and running it at once (24 Oct 2026, the owner: the button "just
+    takes me to the page where i can click to run it", and to the Asia-Pacific section for Mexico)."""
+    option, sub = key.split('-', 1)
+    run = RUN_AS.get(key, int(option))
+    section = SECTION[SCREENERS[key][2]]
+    return f'analysis.html?option={section}' + (f'&run={run}' if run != section else '') + f'&subOption={sub}&autorun=true'
+
+
 
 LABELS = {'STRONG_BUY': 'Strongly positive', 'BUY': 'Positive', 'MODERATE_BUY': 'Slightly positive', 'HOLD': 'Mixed',
           'MODERATE_SELL': 'Slightly negative', 'SELL': 'Negative', 'STRONG_SELL': 'Strongly negative'}
@@ -450,11 +465,10 @@ def page_for(key, data, names, pages, prev, today, made):
         out.append('</tbody></table></div>')
 
     # call to action
-    option, sub = key.split('-', 1)
     out.append(f'<div class="sp-card" style="border:2px solid #007bff;text-align:center;"><p style="margin:0 0 10px;">'
                f'The full screener adds each share\'s RSI, MACD, volume, reference levels and a CSV of all {size}.</p>'
-               f'<a class="sp-cta" href="analysis.html?option={esc(option)}">Run the {esc(name)} screener</a>'
-               f'<a class="sp-cta" href="signup.html" style="background:#16a34a;">Free 3-day trial (15 analyses)</a></div>')
+               f'<a class="sp-cta" href="{esc(run_link(key))}">Run the {esc(name)} screener</a>'
+               f'<a class="sp-cta only-signed-out" href="signup.html" style="background:#16a34a;">Free 3-day trial (15 analyses)</a></div>')
 
     # the full ranking
     out.append(f'<h2>The full ranking ({n} shares)</h2><details><summary style="cursor:pointer;color:#3b82f6;">Show all {n}</summary>'
@@ -494,7 +508,7 @@ def hub(results, names, today, made, pages=frozenset()):
                'more of them means more of that market is trending up today.</p>')
     for region in REGIONS:
         out.append(f'<h2>{esc(region)}</h2><div class="sp-scroll"><table class="sp-table sp-hub"><colgroup><col class="c1"><col class="c2"><col class="c3"></colgroup>'
-                   '<thead><tr><th>Market</th><th>Leader today</th><th class="n">In a rising trend</th></tr></thead><tbody>')
+                   '<thead><tr><th>Market</th><th>Leader today</th><th class="n">Shares in a rising trend</th></tr></thead><tbody>')
         for k, (slug, name, reg, _) in SCREENERS.items():
             if reg != region:
                 continue

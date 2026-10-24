@@ -40,6 +40,7 @@ def main(a):
     folder = os.path.join(HERE, f'pending-{name}'); os.makedirs(os.path.join(folder, 'web'), exist_ok=True)
     rows = []
     for f in rest:
+        os.makedirs(os.path.dirname(os.path.join(folder, 'web', f)), exist_ok=True)      # a file in a folder (js/...)
         shutil.copy2(os.path.join(src, f), os.path.join(folder, 'web', f))
         was, new = before(f), sha(os.path.join(folder, 'web', f))
         if was == new and src == WEB:
