@@ -452,6 +452,14 @@
    "measure": "Clicks on Pricing and on the screener pages from the menu (GA4), sign-ups per visit, over 4 weeks against the 4 before",
    "status": "idea",
    "added": "2026-10-24"
+  },
+  {
+   "id": "market-panel-pages",
+   "what": "The market panel (right side on a desktop 1401px and wider, a swipe or the green button on a phone) on the 25 daily screener pages only, not on guides, legal, sign-in or stock pages",
+   "angle": "sign-ups, ease of use",
+   "measure": "GA4 over 4 weeks against the 4 before: time on page and analyses started from the daily pages, and sign-ups that began there",
+   "status": "idea",
+   "added": "2026-10-24"
   }
  ]
 }
