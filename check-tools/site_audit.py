@@ -73,8 +73,10 @@ def inline_scripts(s):
 
 
 def main():
-    pages = sorted(os.path.basename(p) for p in glob.glob(os.path.join(WEB, '*.html')))
-    scripts = sorted(os.path.basename(p) for p in glob.glob(os.path.join(WEB, '*.js')))
+    # with AUDIT_WEB, a page or script that is new in the staging folder counts too (24 Oct 2026: a new page read as a broken link)
+    roots = [WEB] + ([STAGE] if STAGE else [])
+    pages = sorted({os.path.basename(p) for r in roots for p in glob.glob(os.path.join(r, '*.html'))})
+    scripts = sorted({os.path.basename(p) for r in roots for p in glob.glob(os.path.join(r, '*.js'))})
     src = {p: read(os.path.join(WEB, p)) for p in pages + scripts}
     indexed = [p for p in pages if 'noindex' not in (re.search(r'<meta name="robots" content="([^"]*)"', src[p]) or [None, ''])[1] and p not in ('clear-cache.html',)]
 
@@ -157,7 +159,7 @@ def main():
             if re.match(r'^(https?:|mailto:|tel:|javascript:|data:|//)', ref) or '${' in ref or ref.startswith('{') or not ref.strip():
                 continue
             target = os.path.normpath(os.path.join(WEB, ref.lstrip('/')))
-            if not os.path.exists(target):
+            if not os.path.exists(target) and not (STAGE and os.path.exists(os.path.join(STAGE, ref.lstrip('/')))):
                 find('broken-links', 'problem', f'links to "{ref}", which is not on the site', p)
     for p in random.Random(len(pages)).sample(sorted(glob.glob(os.path.join(WEB, 'stocks', '*.html'))), 5):
         for ref in set(re.findall(r'(?:href|src)="(\.\./[^"#?]+)', read(p))):

@@ -149,6 +149,9 @@ if [ "$UPDATE_STOCK_NEWS" = "true" ]; then
     DRY_RUN="$DRY_RUN" $PYTHON "/Users/dave/VSCODE/stockiq/publish_company_figures.py" || echo "⚠️  Company figures not published (the report then scores those shares on price and volume only)"
     # Links to the largest companies' stock pages on the home page, and stock-pages.js (the shares with a page), from the snapshot just made
     $PYTHON "/Users/dave/VSCODE/stockiq/update_home_stock_links.py" $([ "$DRY_RUN" = "true" ] && echo --dry-run) || echo "⚠️  Home page stock links not updated (the page keeps yesterday's)"
+    # The daily public screener pages (24 Oct 2026): each market's top 10 by trend, from the screeners on AWS; a market that
+    # fails keeps yesterday's page
+    $PYTHON "/Users/dave/VSCODE/stockiq/update_screener_pages.py" $([ "$DRY_RUN" = "true" ] && echo --dry-run) || echo "⚠️  Screener pages not updated (yesterday's stay)"
 else
     echo "⏭️  Skipping stock data snapshots"
 fi

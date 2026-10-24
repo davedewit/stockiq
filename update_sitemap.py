@@ -98,6 +98,13 @@ for match in re.finditer(r'<(?:ns0:)?url>.*?</(?:ns0:)?url>', existing, re.DOTAL
         if '/stocks/' not in url:
             site_page_blocks.append(url)
 
+# The daily public screener pages (24 Oct 2026): every one that exists is listed, changed daily
+import glob as _glob
+for _p in sorted(_glob.glob(os.path.join(WEBSITE_DIR, 'screener-*.html')) + _glob.glob(os.path.join(WEBSITE_DIR, 'screeners-today.html'))):
+    _u = 'https://stockiq.tech/' + os.path.basename(_p)
+    if _u not in site_page_blocks:
+        site_page_blocks.append(_u)
+
 # --- Build new sitemap ---
 today = datetime.now().strftime('%Y-%m-%d')
 lines = ['<?xml version=\'1.0\' encoding=\'utf-8\'?>']   # plain tags (18 Oct 2026; it wrote an ns0: prefix, valid but not the usual form)
@@ -107,7 +114,7 @@ lines.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
 for url in site_page_blocks:
     lastmod = get_site_page_lastmod(url) or today
     priority = '1.0' if url == 'https://stockiq.tech/' else '0.9' if 'analysis' in url else '0.8'
-    changefreq = 'daily' if url == 'https://stockiq.tech/' else 'weekly'
+    changefreq = 'daily' if url == 'https://stockiq.tech/' or '/screener' in url else 'weekly'
     lines.append(f'  <url>')
     lines.append(f'    <loc>{url}</loc>')
     lines.append(f'    <lastmod>{lastmod}</lastmod>')
