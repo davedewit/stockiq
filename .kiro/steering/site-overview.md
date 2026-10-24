@@ -211,7 +211,8 @@ warns about; one change at a time, measured, with its experiment entry.
   no news are allowed (the snapshot is the page's substance; noindex under $10B, as now).
   (1c) **The daily pages built on AWS once a day, every day** (idea `pages-at-close`; the owner: never miss a day, the hour matters less).
   Today the Mac's daily run builds them, so a day with the Mac off is missed; the home section must then go into its own file so the
-  Mac's upload of index.html and the AWS run cannot overwrite each other.
+  Mac's upload of index.html and the AWS run cannot overwrite each other. With it, the hub also shows the week's big announcements (the owner likes
+  the hub as the one place for everything daily).
   (2) The parts `session_start` names (home pricing and the plans: never looked at).
   (3) **Store his autopilot record compressed**, as `_brain` is (about 190 KB written at most check-ins: the largest running cost).
   (4) Decide `daily-review` by 1 Nov (Claude recommends keeping it: `touch check-tools/reviews/daily/KEEP`). (5) The walk of step 5d.
