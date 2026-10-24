@@ -29,6 +29,11 @@
 #   - deploy.sh: Update news + deploy (API calls, ~$1-2, 15-20 min)
 
 # Load OpenAI API key if available
+# The Mac's scheduler starts this with room for only 256 open files. Yahoo's download library
+# leaves files and connections open when the network is flaky, and on 24 Oct 2026 the stock-page
+# step crashed with "Too many open files" before writing a single page. Give every step room.
+ulimit -n 10240 2>/dev/null || ulimit -n 4096 2>/dev/null || true
+
 if [ -f "$HOME/.openai_key" ]; then
     export OPENAI_API_KEY=$(tr -d '\n' < "$HOME/.openai_key")
     if [ -z "$OPENAI_API_KEY" ]; then
