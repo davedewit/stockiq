@@ -292,8 +292,9 @@ def business_days_since(last_update_str):
     
     return business_days
 
-def fetch_stock_news(symbol):
-    """Fetch recent news for a stock symbol"""
+def fetch_stock_news(symbol, fallback=False):
+    """Fetch recent news for a stock symbol. Only "critical" news (CRITICAL_KEYWORDS), except that with `fallback` (a page that has no
+    news at all; 24 Oct 2026, the owner found RHC.AX empty) the newest article clearly about the company is taken when none is critical."""
     try:
         # Use Yahoo Finance RSS feed
         url = f"https://feeds.finance.yahoo.com/rss/2.0/headline?s={symbol}&region=US&lang=en-US"
@@ -311,7 +312,7 @@ def fetch_stock_news(symbol):
         from dateutil import parser as date_parser
         cutoff_date = datetime.now() - timedelta(days=7)
         
-        news = []
+        news, others = [], []
         for item in items[:30]:  # Check first 30 articles
             title = item.find('title').text if item.find('title') else ''
             link = item.find('link').text if item.find('link') else ''
@@ -373,17 +374,14 @@ def fetch_stock_news(symbol):
             # Check if news is critical
             is_critical = any(keyword in title.lower() for keyword in CRITICAL_KEYWORDS)
             
-            if is_critical:
-                # Clean up link - remove RSS tracking parameter
-                clean_link = link.split('?.tsrc=')[0] if '?.tsrc=' in link else link
-                news.append({
-                    'title': title,
-                    'link': clean_link,
-                    'date': pub_date,
-                    'critical': True
-                })
+            clean_link = link.split('?.tsrc=')[0] if '?.tsrc=' in link else link     # without the RSS tracking parameter
+            entry = {'title': title, 'link': clean_link, 'date': pub_date, 'critical': is_critical}
+            (news if is_critical else others).append(entry)
         
-        return news
+        if news or not fallback or not others:
+            return news
+        # the newest of the articles that are about the company (the feed is not always in date order)
+        return sorted(others, key=lambda e: date_parser.parse(e['date']).timestamp(), reverse=True)[:1]
     except Exception as e:
         print(f"Error fetching news for {symbol}: {e}")
         return []
@@ -995,8 +993,15 @@ def main():
         
         print(f"⏳ [{checked}/{total}] Checking {symbol}...", end='\r', flush=True)
         
+        # A page with no news at all may take an article that is not on the critical list (fetch_stock_news, `fallback`)
+        file_path = os.path.join(STOCKS_DIR, f"{symbol}.html")
+        empty = False
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as f:
+                section = re.search(r'<!-- NEWS_SECTION_START -->(.*?)<!-- NEWS_SECTION_END -->', f.read(), re.DOTALL)
+            empty = bool(section) and 'Read full article' not in section.group(1)
         # Fetch news (only returns articles that clearly match this stock)
-        news = fetch_stock_news(symbol)
+        news = fetch_stock_news(symbol, fallback=empty)
         
         if not news:
             continue  # No critical news
