@@ -176,48 +176,34 @@ about what the "Still never" list keeps for him (real money, costs above the rul
 settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
 warns about; one change at a time, measured, with its experiment entry.
 
-**WHERE THINGS STAND (rewrite this block at the end of every session; last: 24 Oct 2026, end of a long session)**
-- **The account (24 Oct):** $97,967, **$356 ahead** of the same $100,000 in an S&P 500 fund (the fund fell more on 22-23 Oct); 105
-  finished trades, -0.07% a trade this month, inside the margin of error. Month 1 goal ($101,000 by 12 Nov) out of reach. Claude's
-  forecast on the Admin page: 25%. The weekly review is next due around **30 Oct**. Full check 24 Oct: **58 of 59**, the one failure this morning's crashed
-  daily update (fixed; clears with Monday's run); today's new checks (phones at 390 and 360px, folds, the graph's buttons) all pass.
-- **His autopilot is automatic:** markets chosen by the AI (21 main indexes), the pace left to the level, the number of holdings and the
-  budget automatic. Coins unticked; the crypto screener rests until 29 Oct. Do not write his settings while he is on the page.
-- **Live since 24 Oct, to be seen for real:** the market's calendar in the AI's choices and in "What happens next" (rows and `ev` from
-  Sunday's rollover; `ed` as the weekly refresh reaches each company), the OpenAI cost on the Admin page; the 24 daily market pages,
-  the hub and the home page's "This week in the markets" rebuilt by **Monday's** daily run by itself (its email gives the duration, ⚠️ on
-  an error line); the open-file fix for the stock-page step (the "Traceback" finding clears with that run). Search Console showed 966
-  (Google re-reads the sitemap on its own schedule; the live one has 991).
-- **24 Oct, afternoon:** every page has the whole header (`site-header.js`, section 8; the owner found the daily screener pages
-  without it); `phone_check.js` checks it weekly. Next for the header: idea `nav-simpler` (the desktop menu once and simpler).
-  The daily screener pages have the market panel (trial `market-panel-pages`, decided around 21 Nov on GA4 figures from the owner).
-  The phone panels open without a dark shade (iPhone Safari flicker); `web_deploy.sh` now uploads a `.css` file as CSS. They glide on at the finger's speed when let go.
-- **Trials running** (`python3 check-tools/experiments.py`): gap-wait, rank-pick, crypto-no-chasing, theme-sleeve, stop-watch,
-  patient-shares (decided 12 Nov; then `longer-holds`), market-gauge, company-figures, trend-score, ai-markets, auto-holdings,
-  screener-pages (Search Console, 8 weeks). Ideas, each with its start condition: earnings-hold, ai-market-tilt, public-record,
-  screener-email, results-week, crypto-page, home-show, asia-overnight, market-hours-checkins, loss-news and the older ones.
-- **Next session, FIRST BUILD WITH THE STOCK PAGES: the public record page** (idea `public-record`; the owner, 24 Oct 2026: "they can have
-  the 100,000 portfolio for me to illustrate it actually makes money ... signup watch it if it gains you get a plan"). A public page,
-  written by the daily update from his autopilot record (no new public access to the data, no running cost): the AI's practice account
-  against the same $100,000 in an S&P 500 fund since it began (the graph), what it holds, every trade with its reason, losses included,
-  updated daily. Only the autopilot's side (not his own buys, no address). Framed as an experiment to follow, never "it will make you
-  money" (no licence; a few weeks prove nothing). Linked from the sign-up page, the home page's autopilot card and the strip. Measured
-  as an experiment on sign-ups and return visits.
-  **With it, a first-visit "Start here" for a new account** (24 Oct 2026, the owner: visitors must not think "they are just going to login
-  and watch an AI trader do everything"): the sign-up page now promises "Trade $100,000 of practice money: yourself, with your own AI
-  trader, or both", so a new account's dashboard should open on the Practice portfolio with three steps (buy your first stock; switch
-  on your AI trader, one switch; watch the graph against the S&P 500), until done. Measured with `signup-simpler` (accounts that make
-  a first trade within their trial).
-- **Next session, in order:** (0) **FIRST: the stock pages for the 1,257 listed shares without one (item 1b below)**: the owner, 24 Oct
-  2026, wants the daily pages' links to go to a stock page for 90% or more ("i prefer going to the html page"); the analysis link only
-  where no page can be made. (1) **#8** (he said yes on the Admin page): a score-version tag on buys and learning only from the
-  current score, notes and scorecard lines from 30 a group, `chosen` rank when `rp`, one night's correlated losses counted once,
-  replay `review_resting` on the wide price set. (1b) **A stock page for every share the daily pages list** (the owner, 24 Oct 2026:
-  "consistency that is professional ... a stock site"): 1,257 of the 2,197 have none (CSI 300 300, KOSPI 200 200, Nikkei 143, Bovespa 76,
-  ASX 53, Hang Seng 51 ...), so they link to their analysis meanwhile. `add-new-stocks.md`'s steps in bulk: the symbols into `stocks.txt`,
-  names and sectors slowly (Yahoo limits this Mac: through the price function where it can), one `generate-stock-pages.py` run tested
-  on a copy first (it also brings the waiting template changes, 13c), `update_stock_analysis.py` (indexed only from $10B, as now), then
-  the daily pages link them by themselves. Its own staged session; check the sitemap and the page count after.
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 24 Oct 2026, evening, end of a very long session)**
+- **The account (24 Oct):** $97,967, **$356 ahead** of the same $100,000 in an S&P 500 fund; 105 finished trades, -0.07% a trade this
+  month, inside the margin of error. Month 1 goal ($101,000 by 12 Nov) out of reach. Claude's forecast on the Admin page: 25%. The
+  weekly review is next due around **30 Oct**; the owner looks in most days for small things. His autopilot is automatic (markets by
+  the AI, pace, holdings and budget automatic; coins unticked, the crypto screener rests until 29 Oct). Do not write his settings
+  while he is on the page.
+- **Built on 24 Oct, all live and checked** (section 13 has the detail): every page's header is the same (`site-header.js`; menu,
+  bell, usage chip, swipe); **the menu, footer and trial strip are written from one definition** (`shared_parts.py`; menu: Home ·
+  Analysis · Screeners (with crypto) · Pricing · Log in + Sign up free or Account; footer in three columns; the strip on every page but
+  the four with their own); who is looking is marked before drawing (`theme.js`: `html.signed-in`, `html.paid-user`); the home page
+  about 30% shorter on a phone, a button on every feature card; sign-in and sign-up cards fixed; the phone panels glide and have no
+  shade; the market panel on the daily screener pages; the chat types its replies and links only to stock pages that exist; **the free
+  trial includes the AI autopilot** (paused when the trial ends, back on with a plan); **the sign-up page: "Trade $100,000 of practice
+  money", four short lines, Google first** (left alone now: it is what `signup-simpler` measures). New checks: the header on every
+  phone page, the menu not moving while a page loads, the glide on release, the copies count (`site_audit.py` `copies`: 219 → 106
+  lines), shared-parts drift, `theme-early`. New tools: `stage_web.py`, `lambda_deploy.sh` (a deploy is one command).
+- **To be seen for real:** Monday's daily run rebuilding the daily pages with the panel and the strip by itself, and the stock pages'
+  shared parts surviving it; the first trial account switching the autopilot on, and its pause when the trial ends; `M&M.NS`, the
+  market's calendar (`ev`, `ed`) and the other items from earlier days.
+- **Trials running** (`python3 check-tools/experiments.py`): signup-simpler and market-panel-pages (decided around 21 Nov on GA4
+  figures the owner sends), gap-wait, rank-pick, crypto-no-chasing, theme-sleeve, stop-watch, patient-shares (12 Nov; then
+  `longer-holds`), market-gauge, company-figures, trend-score, ai-markets, auto-holdings, screener-pages. Ideas: public-record (next),
+  nav-simpler (done in part: the menu is one definition), paper-trading-words, earnings-hold, ai-market-tilt, screener-email and others.
+- **Next session, in order:**
+  (0) **The stock pages for the 1,257 listed shares without one** (the owner wants the daily pages to link stock pages, not the
+  analysis; a2 Milk and most of New Zealand have none, which the chat also met): `add-new-stocks.md`'s steps in bulk, names slowly,
+  one `generate-stock-pages.py` run tested on a copy first (the template now carries the shared parts), `update_stock_analysis.py`;
+  the daily pages then link them by themselves; check the sitemap and the page count.
   **Found on 24 Oct (a quick look, at the owner's question whether news exists outside the US):** the existing pages outside the US do get
   news (Toronto 93%, London 88%, DAX 90%, Tokyo 63%, ASX 58%, Hong Kong 50% of pages have articles; the US 97%), all from Yahoo's
   per-symbol feed (`update_stock_news.py`, `feeds.finance.yahoo.com/rss/2.0/headline?s=…&region=US`), and that feed answers for the
@@ -231,6 +217,15 @@ warns about; one change at a time, measured, with its experiment entry.
   is about 75,000 S3 writes a month, about $0.37, too much against the cost rule for pages nobody visits yet. So: **daily for the
   indexed pages, weekly for the rest** (rewrite a non-indexed page's snapshot only when its block is 7 days old or missing; its line says
   "updated weekly"; about $0.05 a month), noindex under $10B as now. Do it with the new pages, which will mostly be under $10B.
+  (0b) **The public record page** (idea `public-record`; the owner: "signup watch it if it gains you get a plan"): a public page written by
+  the daily update from his autopilot record (no new public access to data, no running cost): the AI's practice account against the
+  same $100,000 in an S&P 500 fund, what it holds, every trade with its reason, losses included, daily. Only the autopilot's side, no
+  address. An experiment to follow, never "it will make you money" (no licence; weeks prove nothing). Linked from the sign-up page,
+  the home page's autopilot card and the strip. **With it, a first-visit "Start here"** for a new account (the owner: visitors must
+  not think they just watch an AI): the dashboard opens on the Practice portfolio with three steps (buy a first stock; switch on your
+  AI trader; watch the graph against the S&P 500) until done.
+  (1) **#8** (his yes on the Admin page): a score-version tag on buys and learning only from the current score, notes and scorecard
+  lines from 30 a group, `chosen` rank when `rp`, one night's correlated losses counted once, replay `review_resting` on the wide set.
   (1c) **The daily pages built on AWS once a day, every day** (idea `pages-at-close`; the owner: never miss a day, the hour matters less).
   Today the Mac's daily run builds them, so a day with the Mac off is missed; the home section must then go into its own file so the
   Mac's upload of index.html and the AWS run cannot overwrite each other. With it, the hub also shows the week's big announcements (the owner likes
@@ -239,9 +234,8 @@ warns about; one change at a time, measured, with its experiment entry.
   (3) **Store his autopilot record compressed**, as `_brain` is (about 190 KB written at most check-ins: the largest running cost).
   (4) Decide `daily-review` by 1 Nov (Claude recommends keeping it: `touch check-tools/reviews/daily/KEEP`). (5) The walk of step 5d.
   (6) A small one from him: a "View report" link on the "Analysis complete" note after a background analysis.
-  (7) **Built once, next:** the copies count was 219 lines in the morning of 24 Oct and 106 after the shared menu and footer
-  (`shared_parts.py`) and the one `showDropdown` in `theme.js`; what is left is mostly the notification bell's code in index, blog and
-  news (merge with a real signed-in browser to check) and the pages' own copies of the phone-menu functions. Bring it down, never up.
+  (7) **Built once, next:** copies 106 lines: mostly the bell's code in index, blog and news (merge with a real signed-in browser to
+  check), the pages' own phone-menu functions, the four pages' own trial strips. Bring it down, never up.
 - **How the session works:** the routine at the top (steps 0 to 6, with 5b, 5c, 5d); "THE GOAL OF ALL OF IT" below; four entry points
   for checks (`session_start.py`, `site_audit.py` daily, `weekly_check.py` weekly, `autopilot_review.py`); one register each for parts,
   experiments and questions, kept in step by `registers_check.py`. A new check goes into one of the four, never a fifth thing.

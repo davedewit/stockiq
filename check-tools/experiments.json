@@ -472,6 +472,14 @@
    "added": "2026-10-24",
    "started": "2026-10-24",
    "decide": "2026-11-21"
+  },
+  {
+   "id": "paper-trading-words",
+   "what": "Use 'paper trading' (what people search for) in the titles, descriptions and headings of the practice portfolio's mentions (home card, sign-up, FAQ, About, a guide), keeping 'practice money' in the friendly wording",
+   "angle": "visitors, search",
+   "measure": "Search Console: impressions and clicks for queries with 'paper trading' over 8 weeks",
+   "status": "idea",
+   "added": "2026-10-24"
   }
  ]
 }

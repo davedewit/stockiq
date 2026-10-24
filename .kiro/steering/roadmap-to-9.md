@@ -15,7 +15,7 @@
   rebuilt from current members; crypto coin list and matching replaced; neutral "describe, don't advise"
   wording across the site, AI chat and all report/CSV output; pricing section and working email signup
   on the home page. Detail: `site-overview.md` sections 8, 8b and 13
-- ✅ Practice portfolio (fake money, free for every account) and its AI autopilot (Beta, part of every paid plan) on the
+- ✅ Practice portfolio (fake money, free for every account) and its AI autopilot (Beta, part of every paid plan and, since 24 Oct 2026, of the free trial) on the
   dashboard, with tabs; the autopilot learns from every account's finished trades together; the notification bell lists
   its buys and sells with the reports on every page; the dashboard works on a phone (10–11 Oct 2026).
   Detail: `site-overview.md` section 8c
