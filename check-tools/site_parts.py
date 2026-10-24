@@ -13,7 +13,7 @@ LENSES below, fixes what is plainly wrong, and brings the rest as numbered impro
             done"). fixed: a fault put right; improved: clearer, faster or more useful; simplified: something removed or merged (often
             the best one: the site must not just grow); idea: a profit idea in experiments.py (give its id); question: a new question in
             reviews/questions.md (give its number); fine (refined the same day: "some areas may just not need a change"): only for a part
-            not in PROFIT, with its reason; it then waits until its code changes. A profit and growth part (PROFIT) must always end in an
+            not in PROFIT, with its reason; it then rests a month, or until its code changes (2, 4, 8 months after each further "fine" in a row). A profit and growth part (PROFIT) must always end in an
             improvement: "a topic like figuring out how to make better profit ... can go on forever".
     python3 check-tools/site_parts.py add <id> "<part>" "<where to look>"          a part that is missing from the list
 
@@ -89,9 +89,21 @@ def ranked(d):
     for p in d['parts']:
         age = (today - datetime.date.fromisoformat(p['last'])).days if p.get('last') else None
         ch = changes_since(p)
-        fine = ((p.get('log') or [{}])[-1].get('kind') == 'fine') and not ch      # "fine" and unchanged since: it waits (age counts a third)
-        score = (100 if age is None else 0) + (30 + 5 * min(ch, 6) if ch else 0) + (15 if p['id'] in PROFIT else 0) + (age or 0) / (21 if fine else 7)
+        # "fine" and unchanged since: it rests, a month after one "fine", then 2, 4, 8 months after each further "fine" in a row (24 Oct
+        # 2026, the owner: "after 1 checks and no changes needed then it stops for something like a month ... then 2 months ... 4 months").
+        # A change to its files wakes it at once; a profit part never ends "fine", so it never rests.
+        fines = rest_days = 0
+        for e in reversed(p.get('log') or []):
+            if e.get('kind') != 'fine': break
+            fines += 1
+        resting = bool(fines) and not ch and age is not None and age < 30 * 2 ** (fines - 1)
+        if fines and not ch: rest_days = 30 * 2 ** (fines - 1)
+        score = (100 if age is None else 0) + (30 + 5 * min(ch, 6) if ch else 0) + (15 if p['id'] in PROFIT else 0) + (age or 0) / 7 - (1000 if resting else 0)
         why = 'never looked at' if age is None else (f'{ch} change{"s" if ch != 1 else ""} since its last look {age} days ago' if ch else f'unchanged since its last look {age} days ago')
+        if resting:
+            why += f', resting until {datetime.date.fromisoformat(p["last"]) + datetime.timedelta(days=rest_days)} ("fine" {fines} time{"s" if fines > 1 else ""} in a row; a change to its files wakes it)'
+        elif rest_days:
+            why += f', its rest of {rest_days} days is over: due a fresh look'
         out.append((score, p, why + (', matters for profit and sign-ups' if p['id'] in PROFIT else '')))
     return sorted(out, key=lambda x: -x[0])
 

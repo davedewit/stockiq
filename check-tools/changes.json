@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-24",
+   "what": "On the home page the menu now glides when let go, like the dashboard (a leftover style line stopped it); the swipe test now checks the glide on every page. Part reviews that find nothing rest a month, then 2, 4, 8 months, or until the part's code changes",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-24",
    "what": "New ongoing check: the nightly site check counts code copied into several pages (219 lines today, mostly the header and footer) and flags any change that adds more; each weekly part review asks whether anything is built more than once. First job at the next weekly review: the header and footer from one source",
    "found": "owner"
   },
@@ -274,10 +279,6 @@
   {
    "at": "2026-10-19",
    "what": "A holding's trailing stop is now watched every half hour between check-ins, so a gain is not handed back while waiting up to 3 hours for the next check-in"
-  },
-  {
-   "at": "2026-10-19",
-   "what": "Stock pages' news shows the right dates again (6,931 wrong date stamps corrected), and about 600 unchanged pages a day are no longer re-uploaded"
   }
  ]
 }

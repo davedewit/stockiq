@@ -119,7 +119,11 @@ const server = http.createServer((q, r) => {
         await swipe(300, Y, 300 - W / 4 - 10, Y, 500, { pause: 150 }); s = await look();
         check('a quarter out and let go: it slides back', !s.shown, s); still('after that', s);
         // 3. Well over a third and let go: it comes out fully
-        await swipe(320, Y, 320 - W * 0.6, Y, 500, { pause: 150 }); s = await look();
+        await swipe(320, Y, 320 - W * 0.6, Y, 500, { pause: 150, rest: 70 }); s = await look();
+        // let go, it glides the rest of the way: a moment later it is between where the finger left it and fully out (24 Oct 2026:
+        // an !important "transition: none" on a page made it jump there; the owner saw it as not smooth)
+        check('let go: it glides the rest of the way, it does not jump', s.shown && s.onScreen > W * 0.6 + 2 && s.onScreen < W - 2, s);
+        await sleep(450); s = await look();
         check('60% out and let go: it comes out fully', s.shown && near(s.onScreen, W, 3) && s.dim > 0.95, s); still('with the sidebar out', s);
         // 4. Out: a finger moving up and down on the dark part does not scroll the page
         await swipe(15, 300, 15, 650, 300, { rest: 300 }); await swipe(15, 650, 15, 250, 300, { rest: 300 }); s = await look();
@@ -165,7 +169,9 @@ const server = http.createServer((q, r) => {
         await swipe(60, Y, 60 + M / 4 + 10, Y, 500, { pause: 150 }); s = await look();
         check('a quarter out and let go: it slides back', !s.menu && s.menuOnScreen <= 0, s); still('after that', s);
         // 3. Well over a third and let go: it comes out fully
-        await swipe(40, Y, 40 + M * 0.6, Y, 500, { pause: 150 }); s = await look();
+        await swipe(40, Y, 40 + M * 0.6, Y, 500, { pause: 150, rest: 70 }); s = await look();
+        check('let go: the menu glides the rest of the way, it does not jump', s.menuOnScreen > M * 0.6 + 2 && s.menuOnScreen < M - 2, s);
+        await sleep(450); s = await look();
         check('60% out and let go: it comes out fully', s.menu && s.locked && near(s.menuOnScreen, M, 3) && s.menuDim > 0.95 && s.menuInline === '', s); still('with the menu out', s);
         // 4. Out: a finger moving up and down on the dark part does not scroll the page
         await swipe(370, 300, 370, 650, 300, { rest: 300 }); await swipe(370, 650, 370, 250, 300, { rest: 300 }); s = await look();

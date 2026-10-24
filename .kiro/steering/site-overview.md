@@ -992,6 +992,9 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
     out, or pulls out the one on that side when both are in (`choose`). A swipe is left to what is under the finger
     when that is a text box, the portfolio graph (`#pp-chart-svg`), a slider of the analysis page, anything marked
     `data-no-swipe`, or a row that scrolls sideways and has room to go; and to the page while one of its pop-ups is up.
+  - **No page may set `transition` with `!important` on `.mobile-menu`, `#mobile-sidebar-modal` or their overlays**: it overrides the
+    swipe script and the panel jumps instead of gliding (the home page had `.mobile-menu { transition: none !important }` until 24 Oct
+    2026). `mobile_sidebar_check.js` checks that a panel let go is still between where the finger left it and fully out 70 ms later.
   - **Let go, a panel glides on at the finger's own speed** (24 Oct 2026, version 3; the owner on his iPhone: "when i let it go it isn't
     smooth the way it pops out"): `glideTime` gives the glide 3 x the distance left over the finger's speed (160 to 380 ms; a button or a
     stopped finger: by the distance), on a gentler curve (`EASE`), so its first frames match the finger; it had always taken 260 ms on a
@@ -3641,7 +3644,7 @@ more finished trades than there are, and would chase noise before then.
   i talk smarts its more in the backend"). The smarts go into how it buys and sells. What a user sees changes only when it helps
   them; figures for the owner go on the Admin page or into the opening check and the review tool, not onto the public pages or
   the dashboard. Whatever a change replaces goes in the same session.
-- **Built once: one change in one place** (the owner, 24 Oct 2026: "make sure we don't create silly code that requires us having to update
+- **Built once ("DRY": don't repeat yourself): one change in one place** (the owner, 24 Oct 2026: "make sure we don't create silly code that requires us having to update
   the same thing on multiple pages ... whatever makes your life easier to make updates"). Anything that appears on more than one page
   (a function, a style, a menu, a footer, a list, a number) lives in one shared file (`site-header.js`, `market-panel.js`,
   `mobile-sidebar.js`, `styles.css`) or is written into the pages by one generator; never paste it into each page. **How it is kept:**
@@ -3650,6 +3653,12 @@ more finished trades than there are, and would chase noise before then.
   parts whose files have not changed wait, so no credits go on re-reading what is still. **Start: 219 copied lines on 24 Oct 2026**,
   nearly all the hand-edited pages' header (desktop menu) and footer; bring the number down, never up. Not extreme: a copy of a few
   lines that will never change is not worth a shared file.
+- **Touching a file means looking it over** (the owner, 24 Oct 2026: "notice you find bugs alot when i ask to check or change
+  something"): the faults are found because a change makes someone read the code closely, and older code was built in copies. So
+  every change also reads the code around it (the same function, its callers, the page's other copy of it) for faults and copies, and
+  fixes what it finds in the same session ("leave it better than found"); each fault found that way also becomes a check, as any
+  fault the owner finds does (today: the phone header, the copies count, the glide on release). Part reviews rest when they find
+  nothing: a month after one "fine", then 2, 4, 8 months (`site_parts.py`), or until the part's files change.
 - **Correct the owner when he is wrong, and say so plainly** (his standing instruction, 17 Oct 2026: "ignore me if it makes
   no sense and is fine as is. same for everything i ask your in control here to make a good site and correct me when wrong
   ... no issue with hearing i'm wrong and you suggesting another option or skipping it completely"). For every request:
