@@ -201,6 +201,14 @@ warns about; one change at a time, measured, with its experiment entry.
   placeholder that still took room, unsubscribe had no bell: `header_room_check.js` now fails a page whose menu stands elsewhere). Left
   as is, at his word: a private window or another browser can still get a second free run ("simple is fine"). Not done this session:
   #8, the daily log's Traceback, the bill at $1.14 (over the $1 target, under $1.50).
+  **Most of the DynamoDB bill found and fixed the same day:** `stockiq-auto-delete-cleanup` ignored the `userId` the daily scheduler sends
+  for each account (64 a day) and scanned the whole report-history table each time, applying that one account's setting to every
+  account's reports: about 130,000 read units a day (about $0.50 a month, most of DynamoDB's share; AWS's anomaly email of 24 Oct was its
+  growth). Now only that user's reports, no scan (live 25 Oct ~13:20 UTC, rollback `stockiq-auto-delete-cleanup_before_oneuser_20261025.zip`).
+  Damage: one report of one account hidden although its own setting would keep it (the owner's setting is 1 day, so his were his own
+  setting's doing); restoring it was refused by the session's safety check, the owner's call. The opening check now flags any table
+  over 40,000 read units in a day (it will still show this one until about 28 Oct, from the days before the fix). `lambda_deploy.sh` now
+  replaces one file in a package that holds others.
 - **The account (24 Oct):** $97,967, **$356 ahead** of the same $100,000 in an S&P 500 fund; 105 finished trades, -0.07% a trade this
   month, inside the margin of error. Month 1 goal ($101,000 by 12 Nov) out of reach. Claude's forecast on the Admin page: 25%. The
   weekly review is next due around **30 Oct**; the owner looks in most days for small things. His autopilot is automatic (markets by

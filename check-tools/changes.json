@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-25",
+   "what": "Found most of the AWS database bill: the daily report clean-up read the whole report table 64 times a day (once per account) and applied one account's setting to everyone's reports. It now reads only that account's reports: about $0.50 a month saved, and no account's reports are hidden by another's setting",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-25",
    "what": "The daily email now says 'Nothing needs you' or lists exactly what failed (with the error line), then what the run did; the day's log is kept so a session can read it without you copying anything",
    "found": "owner"
   },
@@ -312,11 +317,6 @@
   {
    "at": "2026-10-23",
    "what": "Parts of the site are no longer just rotated: next come those never looked at, then those whose code changed since their last look, profit-related ones sooner; each look starts from what was found before, and an unchanged part waits",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "The list of site parts reviewed in turn is complete: 58 parts, now including the path from first visit to sign-up and paying, speed, security, every email and the checks themselves; every page and script must belong to a part, checked at every session",
    "found": "owner"
   }
  ]
