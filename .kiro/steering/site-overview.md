@@ -42,6 +42,12 @@ function's role has no Cost Explorer permission any more, and `ai_trader_test.py
 AWS service: stand it in.** To see who asked Cost Explorer: `aws cloudtrail lookup-events --lookup-attributes
 AttributeKey=EventSource,AttributeValue=ce.amazonaws.com` (free; the AWS website's own billing pages show as "AWS Internal"
 or the console, and are free). About $0.09 a month is the owner's other projects' buckets (Sydney region): not StockIQ's, leave them.
+**AWS cost is checked every day, free: `check-tools/cost_check.py`**, part of the daily site check (25 Oct 2026, the owner: "a quick
+check on the scripted runs daily ... anomolies or higher cost"): from CloudWatch's billing and usage figures only (about 40 requests a
+day, free; never Cost Explorer), a service whose spend yesterday jumped, the month over $1 (a note) or $1.50 (a problem), any new Cost
+Explorer charge, a table whose reads or writes jumped or exceed 40,000 / 20,000 units a day, Lambda calls jumping or on course for the
+free million. Findings reach the daily email and the Admin page. A finding already fixed can wait out its old days in `FIXED_UNTIL`.
+AWS's own Cost Anomaly Detection emails the owner as well (free); when he forwards one, this check should already have named it.
 **Before adding anything that runs on a timer or on every page view, work out its requests a month and its cost.** Data is kept
 when it helps the learning (the record, the diary, the shared record, the coin entry log, the research prices on this Mac);
 delete only with his yes to an exact list, and only when it costs something.
@@ -206,8 +212,8 @@ warns about; one change at a time, measured, with its experiment entry.
   account's reports: about 130,000 read units a day (about $0.50 a month, most of DynamoDB's share; AWS's anomaly email of 24 Oct was its
   growth). Now only that user's reports, no scan (live 25 Oct ~13:20 UTC, rollback `stockiq-auto-delete-cleanup_before_oneuser_20261025.zip`).
   Damage: one report of one account hidden although its own setting would keep it (the owner's setting is 1 day, so his were his own
-  setting's doing); restoring it was refused by the session's safety check, the owner's call. The opening check now flags any table
-  over 40,000 read units in a day (it will still show this one until about 28 Oct, from the days before the fix). `lambda_deploy.sh` now
+  setting's doing); restoring it was refused by the session's safety check, the owner's call. The daily site check now looks at
+  AWS cost every day (`cost_check.py`, below). `lambda_deploy.sh` now
   replaces one file in a package that holds others.
 - **The account (24 Oct):** $97,967, **$356 ahead** of the same $100,000 in an S&P 500 fund; 105 finished trades, -0.07% a trade this
   month, inside the margin of error. Month 1 goal ($101,000 by 12 Nov) out of reach. Claude's forecast on the Admin page: 25%. The

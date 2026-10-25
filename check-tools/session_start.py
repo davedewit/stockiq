@@ -204,20 +204,7 @@ for w in sorted(_g.glob(os.path.expanduser('~/stockiq-logs/daily-*-warn.log'))):
         finding(f"the daily email of {os.path.basename(w)[6:16]} listed something to look at: python3 check-tools/daily_report.py --show {w} "
                 f"lists it, fix it, then rename the file to …-done.log")
 
-# database reads per table (CloudWatch, free): reads are what DynamoDB charges for. 25 Oct 2026: the auto-delete cleanup read the whole
-# report-history table 64 times a day (about 130,000 read units a day, most of the DynamoDB bill) and nothing flagged it
-try:
-    import boto3 as _b3, datetime as _dt
-    _cw = _b3.Session(profile_name='default', region_name='us-east-1').client('cloudwatch'); _end = _dt.datetime.now(_dt.timezone.utc)
-    for _t in ('stockiq-dashboard-analysis-history', 'stockiq-ai-trader', 'stockiq-user-tracking', 'stockiq-paper-portfolios',
-               'stockiq-ai-trader-journal', 'stockiq-coinspot-prediction-status', 'stockiq-usage-tracker'):
-        _pts = _cw.get_metric_statistics(Namespace='AWS/DynamoDB', MetricName='ConsumedReadCapacityUnits', Dimensions=[{'Name': 'TableName', 'Value': _t}],
-                                        StartTime=_end - _dt.timedelta(days=3), EndTime=_end, Period=86400, Statistics=['Sum'])['Datapoints']
-        _hi = max([p['Sum'] for p in _pts] or [0])
-        if _hi > 40000:
-            finding(f"table {_t} used {_hi:,.0f} read units in one day (about ${_hi * 30 * 0.125 / 1e6:.2f} a month at that rate): find what reads it (a scan in a loop?)")
-except Exception as e:
-    print(f"  table reads not read ({type(e).__name__})")
+# AWS cost and usage day by day: the daily site check's cost part (cost_check.py); its findings are shown with the site check's
 
 # 5. drift
 head('5. Live against local')

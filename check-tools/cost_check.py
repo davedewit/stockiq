@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""What AWS costs, looked at every day, for free (25 Oct 2026; the owner: "if no cost probably no harm you doing a quick check on the
+scripted runs daily? just to see if we have anomolies or higher cost"). Run by site_audit.py in the daily update, so a finding reaches
+the daily email and the Admin page; also by hand: python3 check-tools/cost_check.py
+
+Only CloudWatch's figures (GetMetricStatistics and ListMetrics: about 40 requests a day, inside its free million). NEVER Cost Explorer
+(a cent a question: the owner's rule). What it flags:
+  - a service whose spend yesterday was well above its usual day (the bill's own figures, by service)
+  - the month's running cost over, or on course for over, the owner's $1 (Cost Explorer's known charge of 17 Oct left out)
+  - any new Cost Explorer charge
+  - a table whose reads or writes jumped, or that reads more than 40,000 units a day (25 Oct: a cleanup scanning a table 64 times a day)
+  - Lambda calls jumping, or on course for the free million a month
+"""
+import datetime as dt
+import statistics
+
+ACCOUNT = '114366766218'
+LIMIT, HARD = 1.00, 1.50              # the owner's monthly target for StockIQ's running cost, and his most in a heavy month
+KNOWN_CE = {'2026-10': 2.65}          # Cost Explorer charge already explained (the session's tests of 17 Oct 2026)
+# a finding already fixed, left out until its old days have passed (then checked again as usual)
+FIXED_UNTIL = {'stockiq-dashboard-analysis-history': '2026-10-27'}   # the cleanup's 64 scans a day, fixed 25 Oct 13:20 UTC
+TABLES = ['stockiq-dashboard-analysis-history', 'stockiq-ai-trader', 'stockiq-user-tracking', 'stockiq-paper-portfolios',
+          'stockiq-ai-trader-journal', 'stockiq-coinspot-prediction-status', 'stockiq-coinspot-predictions', 'stockiq-usage-tracker',
+          'stockiq-email-subscribers', 'stockiq-ai-chat-limits', 'stockiq-ai-chat-stats']
+
+
+def daily(cw, ns, metric, dims, days=9, stat='Sum'):
+    end = dt.datetime.now(dt.timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    pts = cw.get_metric_statistics(Namespace=ns, MetricName=metric, Dimensions=dims, StartTime=end - dt.timedelta(days=days),
+                                   EndTime=end, Period=86400, Statistics=[stat])['Datapoints']
+    return [p[stat] for p in sorted(pts, key=lambda p: p['Timestamp'])]     # whole days, oldest first, yesterday last
+
+
+def jumped(series, floor):
+    """yesterday against the days before: True when well above the usual and above a floor that matters"""
+    if len(series) < 4:
+        return False
+    last, usual = series[-1], statistics.median(series[:-1])
+    return last >= floor and last > max(2.5 * usual, usual + floor)
+
+
+def run():
+    import boto3
+    cw = boto3.Session(profile_name='default', region_name='us-east-1').client('cloudwatch')
+    out = []
+    now = dt.datetime.now(dt.timezone.utc)
+
+    # 1. the bill by service (cumulative over the month, so a day's spend is the rise from one day to the next)
+    running, ce = 0.0, 0.0
+    for mt in cw.list_metrics(Namespace='AWS/Billing', MetricName='EstimatedCharges')['Metrics']:
+        d = {x['Name']: x['Value'] for x in mt['Dimensions']}
+        if d.get('LinkedAccount') != ACCOUNT or 'ServiceName' not in d:
+            continue
+        cum = daily(cw, 'AWS/Billing', 'EstimatedCharges', mt['Dimensions'], days=10, stat='Maximum')
+        if not cum:
+            continue
+        latest = cw.get_metric_statistics(Namespace='AWS/Billing', MetricName='EstimatedCharges', Dimensions=mt['Dimensions'],
+                                          StartTime=now - dt.timedelta(days=2), EndTime=now, Period=21600, Statistics=['Maximum'])['Datapoints']
+        latest = max(latest, key=lambda p: p['Timestamp'])['Maximum'] if latest else cum[-1]   # the month so far, as the opening check reads it
+        if d['ServiceName'] == 'AWSCostExplorer':
+            ce = latest
+            continue
+        running += latest
+        rises = [b - a for a, b in zip(cum, cum[1:]) if b >= a]          # a fall is the month starting again
+        if jumped(rises, 0.02):
+            out.append(('problem', f"{d['ServiceName']} cost ${rises[-1]:.2f} yesterday, against about ${statistics.median(rises[:-1]):.2f} a day "
+                                   f"before: find what changed (CloudWatch usage of that service, the day's deploys)"))
+    known = KNOWN_CE.get(now.strftime('%Y-%m'), 0)
+    if ce > known + 0.01:
+        out.append(('problem', f"Cost Explorer has been charged ${ce - known:.2f} this month beyond the known amount: something asks it "
+                               f"(aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventSource,AttributeValue=ce.amazonaws.com)"))
+    days_in = now.day + now.hour / 24
+    month_days = ((now.replace(day=28) + dt.timedelta(days=4)).replace(day=1) - dt.timedelta(days=1)).day
+    on_course = running / max(days_in, 1) * month_days
+    if running >= HARD:
+        out.append(('problem', f"StockIQ's running AWS cost this month is ${running:.2f}, over the owner's ${HARD:.2f} at most"))
+    elif running >= LIMIT:
+        out.append(('idea', f"StockIQ's running AWS cost this month is ${running:.2f}, over the owner's ${LIMIT:.2f} target (his most is ${HARD:.2f})"))
+    elif now.day >= 7 and on_course > LIMIT * 1.1:
+        out.append(('idea', f"StockIQ's running AWS cost is on course for about ${on_course:.2f} this month (${running:.2f} so far), over the owner's ${LIMIT:.2f}"))
+
+    # 2. the database, table by table
+    for t in TABLES:
+        for metric, word in (('ConsumedReadCapacityUnits', 'read'), ('ConsumedWriteCapacityUnits', 'write')):
+            s = daily(cw, 'AWS/DynamoDB', metric, [{'Name': 'TableName', 'Value': t}])
+            if not s or now.strftime('%Y-%m-%d') < FIXED_UNTIL.get(t, ''):
+                continue
+            if jumped(s, 5000) or (word == 'read' and s[-1] > 40000) or (word == 'write' and s[-1] > 20000):
+                price = 0.125 if word == 'read' else 0.625
+                out.append(('problem', f"table {t}: {s[-1]:,.0f} {word} units yesterday (usual about {statistics.median(s[:-1] or [0]):,.0f}), "
+                                       f"about ${s[-1] * 30 * price / 1e6:.2f} a month at that rate: find what does it (a scan in a loop?)"))
+
+    # 3. Lambda calls for the whole account (one figure, no dimension)
+    s = daily(cw, 'AWS/Lambda', 'Invocations', [], days=9)
+    if s:
+        if jumped(s, 5000):
+            out.append(('problem', f"Lambda calls jumped to {s[-1]:,.0f} yesterday (usual about {statistics.median(s[:-1]):,.0f}): find which function"))
+        if statistics.mean(s[-3:]) * 30 > 900000:
+            out.append(('problem', f"Lambda calls on course for about {statistics.mean(s[-3:]) * 30:,.0f} a month, near the free million"))
+    return out, running
+
+
+if __name__ == '__main__':
+    found, running = run()
+    print(f"StockIQ's running AWS cost this month: ${running:.2f}")
+    for level, text in found:
+        print(f'  [{level}] {text}')
+    if not found:
+        print('  nothing unusual')

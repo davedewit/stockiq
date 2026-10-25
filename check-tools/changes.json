@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-25",
+   "what": "AWS cost is now checked every day for free: a service's spend jumping, a database table or Lambda calls spiking, the month over your $1 target or $1.50 limit; anything found goes in the daily email",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-25",
    "what": "Found most of the AWS database bill: the daily report clean-up read the whole report table 64 times a day (once per account) and applied one account's setting to everyone's reports. It now reads only that account's reports: about $0.50 a month saved, and no account's reports are hidden by another's setting",
    "found": "owner"
   },
@@ -312,11 +317,6 @@
   {
    "at": "2026-10-23",
    "what": "Every look at a part of the site must now end in an improvement (fixed, improved, simplified, a new idea to test, or a new question): 'it's fine' is not accepted",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "Parts of the site are no longer just rotated: next come those never looked at, then those whose code changed since their last look, profit-related ones sooner; each look starts from what was found before, and an unchanged part waits",
    "found": "owner"
   }
  ]
