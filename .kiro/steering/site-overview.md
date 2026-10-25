@@ -398,6 +398,8 @@ set to UTC+7, not Sydney time; check `date` before working out when the next run
 **The email at the end** (Mail.app, to `deploy@stockiq.tech`; `~/stockiq-daily.sh`, not in git) says when the run started and
 how long it took, and its subject carries ⚠️ instead of ✅ when the log holds an error line (`Traceback`, `Error:`, a failed push)
 although the run finished (24 Oct 2026; the owner asked for the duration, and that day's "successfully" hid a crashed step).
+Since 25 Oct 2026 it also carries ⚠️ and names the first one when the daily site check found a problem it had not found before
+(`[problem, new]` in the log); until then those reached only the Admin page.
 **The Mac's scheduler gives a job only 256 open files** (`launchctl limit maxfiles`); `deploy-to-s3.sh` raises it to 10,240 at
 its top. Without that, `update_stock_analysis.py` crashed on 24 Oct 2026 ("Too many open files", Yahoo's library leaving files
 open on a flaky network) before writing a page: the stock pages kept the day before's figures.
