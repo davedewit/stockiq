@@ -480,6 +480,14 @@
    "measure": "Search Console: impressions and clicks for queries with 'paper trading' over 8 weeks",
    "status": "idea",
    "added": "2026-10-24"
+  },
+  {
+   "id": "graph-drag",
+   "what": "Practice portfolio graph: press and drag across it (or two fingers on a phone) to read the change between two moments, in dollars and %, for the account and the S&P 500 fund together, as the Mac Stocks app does (the owner, 25 Oct 2026). Small: the graph already has the daily values and a pointer read-out",
+   "angle": "ease of use",
+   "measure": "does the owner use it; no sign-up or profit effect expected, so build it alongside a profit change, not instead of one",
+   "status": "idea",
+   "added": "2026-10-25"
   }
  ]
 }
