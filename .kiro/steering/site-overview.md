@@ -188,7 +188,8 @@ warns about; one change at a time, measured, with its experiment entry.
 **WHERE THINGS STAND (rewrite this block at the end of every session; last: 25 Oct 2026, a short session on the owner's finds)**
 - **25 Oct 2026 (short, the owner's finds on his phone):** the anonymous free analysis is one a day on a phone too (the server counted
   by exact IP, and mobile addresses change: the browser now keeps the day's count, `auth.js`; the dashboard's own copy of the count
-  removed; nightly check `one-count`; weekly test `RUNS=2 NEW_IP=1`); the register page's empty band on a phone (`signup.html`). Left
+  removed; nightly check `one-count`; weekly test `RUNS=2 NEW_IP=1`); the register page's empty band on a phone (`signup.html`); the menu in the same place on every page (sign-up had a hidden 20px bell
+  placeholder that still took room, unsubscribe had no bell: `header_room_check.js` now fails a page whose menu stands elsewhere). Left
   as is, at his word: a private window or another browser can still get a second free run ("simple is fine"). Not done this session:
   #8, the daily log's Traceback, the bill at $1.14 (over the $1 target, under $1.50).
 - **The account (24 Oct):** $97,967, **$356 ahead** of the same $100,000 in an S&P 500 fund; 105 finished trades, -0.07% a trade this
