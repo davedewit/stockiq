@@ -574,6 +574,11 @@ git pull --rebase && git push
   `SUBNET_DAILY_LIMIT` (5) anonymous analyses per day (DynamoDB keys `subnet_<net>@<date>`, "@" so the daily email ignores them),
   and adds headless/automation words to the user-agent check. Blocked requests are answered
   with usage = 1, so the page stops by itself.
+- **The server's count is per exact IP address, and a phone on mobile data changes address often** (25 Oct 2026: the owner ran two
+  free analyses on his phone; the table showed six addresses in 14 minutes from one Thai carrier). So the browser keeps the day's count
+  too (`localStorage.stockiqAnonUsed`, `localAnonymousUsage` / `noteAnonymousUsage` in `auth.js`) and the larger of the two counts.
+  A private window on mobile data can still get more; acceptable for one free analysis. Test: `RUNS=2 NEW_IP=1 node anon_run.js 3 8` (weekly).
+  The tracker function has no log group: read its rows (`fp_…#<date>` in `stockiq-user-tracking`) to see what it counted.
 - Registration abuse is handled separately by `stockiq-ip-blocking-service` (5 attempts/hour,
   one account per IP per 4 days).
 - Daily usage email: `stockiq-usage-report-emailed` (03:00 AEST).
