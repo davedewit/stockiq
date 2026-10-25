@@ -49,6 +49,7 @@ Rules:
 ### 2026-10-25 · The daily email written from the log
 - **Changed:** `~/stockiq-daily.sh` (NOT in git) now calls `check-tools/daily_report.py` and sends its body; logs kept in `~/stockiq-logs/`.
   `site_audit.py` gained `news-stale`, `one-count` and `cost` (`check-tools/cost_check.py`, CloudWatch only).
+  Each run also writes one line to the Admin record (`admin.py runs`): "What runs by itself" shows the last three, "Coming up" the next.
 - **Could break:** no daily email at all, or one that says "the report could not be written" (Monday 26 Oct is the first real one);
   a false ⚠️ from a routine line (add it to `BENIGN` in `daily_report.py`); a false cost alarm (thresholds in `cost_check.py`).
 - **Undo:** `cp ~/VSCODE/backup/stockiq-daily.sh_before_report_20261025 ~/stockiq-daily.sh`.

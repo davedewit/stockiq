@@ -161,5 +161,13 @@ async function page(status, uid) {
     const q = await page(200, 'dave@x.com'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
     check("the month's OpenAI cost of the autopilot's AI calls is shown, with what it does not include", /OpenAI, the autopilot's AI calls this month: about \$0\.12/.test(pl) && /412 calls/.test(pl) && /not AWS/.test(pl), pl.slice(pl.indexOf('OpenAI') - 20, pl.indexOf('OpenAI') + 260));
   }
+  { // the daily update's last runs, and who does each thing in "Coming up" (25 Oct 2026)
+    ADMIN.plan.dailyRuns = [{ date: '2026-10-23', ok: true, took: '31 min', issue: '' }, { date: '2026-10-24', ok: false, took: '29 min', issue: 'A step crashed' }];
+    ADMIN.open = ADMIN.open.map(x => Object.assign({}, x, { kind: 'session', at: new Date().toISOString() }));
+    const q = await page(200, 'dave@x.com'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    check('"What runs by itself" lists the daily update with its last runs, a warning with its issue', /The daily update: .*Last runs: ⚠️ .*: A step crashed · ✅/.test(pl), pl.slice(pl.indexOf('daily update'), pl.indexOf('daily update') + 300));
+    check('"Coming up" says who does each thing', /a session with Claude/.test(pl) && /The daily update \(automatic, on your Mac Mon to Sat/.test(pl), pl.slice(pl.indexOf('Coming up'), pl.indexOf('Coming up') + 500));
+    check('proposals for a session are not counted as decisions waiting for the owner', !/decisions? waiting for your yes or no/.test(pl), pl.slice(0, 400));
+  }
   console.log(ok ? 'ALL PASS' : 'SOME FAILED'); process.exit(ok ? 0 : 1);
 })();

@@ -92,6 +92,7 @@ elif args[0] == 'sync':
     kept_weekly = (admin.get('plan') or {}).get('weekly')          # and so does the last full check
     kept_daily = (admin.get('plan') or {}).get('dailyReview')
     kept_est = (admin.get('plan') or {}).get('estimates')
+    kept_runs = (admin.get('plan') or {}).get('dailyRuns')         # the daily update's last runs (daily_report.py)
     changes = json.load(open(os.path.join(here, 'changes.json')))['changes']
     admin['plan'] = {'at': now(), 'items': [{k: e[k] for k in keep if k in e} for e in ex], 'reviews': reviews,
                      'parts': len(parts), 'reviewed': sum(1 for p in parts if p.get('last')), 'questions': questions(here),
@@ -104,6 +105,8 @@ elif args[0] == 'sync':
         admin['plan']['dailyReview'] = kept_daily
     if kept_est:
         admin['plan']['estimates'] = kept_est
+    if kept_runs:
+        admin['plan']['dailyRuns'] = kept_runs
     admin['plan']['changes'] = changes
     save(admin)
     print(f"the Admin page's improvements: {len(ex)} items, {len(reviews)} recent reviews")
@@ -122,6 +125,17 @@ elif args[0] == 'audit':
         admin['plan']['dailyReview'] = daily[-1][:10]          # the latest report of the daily review by Claude, for "What runs by itself"
     save(admin)
     print(f"the Admin page's site check: {a['problems']} problems, {a['ideas']} ideas")
+elif args[0] == 'runs' and len(args) >= 5:
+    # one line per daily update for "What runs by itself" (daily_report.py, after the email; 25 Oct 2026): runs <date> ok|warn <took> "<first issue>"
+    import time
+    while datetime.now(timezone.utc).minute % 30 in (9, 10, 11, 12, 13):
+        time.sleep(20)
+    admin = load()
+    runs = [r for r in (admin.setdefault('plan', {}).get('dailyRuns') or []) if r.get('date') != args[1]]
+    runs.append({'date': args[1], 'ok': args[2] == 'ok', 'took': args[3][:20], 'issue': (args[4] if len(args) > 4 else '')[:160], 'at': now()})
+    admin['plan']['dailyRuns'] = sorted(runs, key=lambda r: r['date'])[-5:]
+    save(admin)
+    print(f"the Admin page's daily runs: {len(admin['plan']['dailyRuns'])} kept")
 elif args[0] == 'weekly':
     # The full check (weekly_check.py, every 7 days or more): its result onto the Admin page, clear of :10 and :40 past the hour
     import time

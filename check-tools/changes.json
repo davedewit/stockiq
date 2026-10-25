@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-25",
+   "what": "The Admin page now says who does each thing in 'Coming up' (you with Claude, your Mac, or AWS by itself), lists the next daily update, and shows the last three daily updates with a tick or a warning",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-25",
    "what": "The 'Do you need to check in?' card no longer turns amber for proposals the next session builds anyway; it does if one waits over a week",
    "found": "owner"
   },
@@ -312,11 +317,6 @@
   {
    "at": "2026-10-23",
    "what": "The Improvements tab is tidied into six short rows (being tested, ideas, decided, fixes, questions, parts of the site), each with its count and the one thing worth knowing; open a row for the detail",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "The weekly review now asks why every trade ended as it did (its whole market, one event, or the share itself) and sets each against its own market; the first answer: most losses were single shares, and the picks are not yet clearly better than their markets. Next: record the news at each sale",
    "found": "owner"
   }
  ]

@@ -104,6 +104,10 @@ def main():
                   'To have it fixed: open a session and say "the daily email has a warning". The session reads that file itself;',
                   'nothing needs copying. (The next session\'s opening check lists it anyway.)']
     open(body_path, 'w', encoding='utf-8').write('\n'.join(lines) + '\n')
+    if not os.environ.get('DAILY_LOGS'):            # the Admin page's "What runs by itself" (one small write; not from a test)
+        import subprocess
+        subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'admin.py'), 'runs', day,
+                        'ok' if not look else 'warn', took, look[0] if look else ''], capture_output=True, timeout=120)
     print(f'StockIQ Daily {icon} - {datetime.now().strftime("%a %b %d")} ({took})' + (f' - {len(look)} to look at' if look else ''))
 
 
