@@ -20,3 +20,4 @@ renamed, update this list.
 @.kiro/steering/roadmap-to-9.md
 @.kiro/steering/backlinks-progress.md
 @.kiro/steering/future-work.md
+@.kiro/steering/watch-list.md

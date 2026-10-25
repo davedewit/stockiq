@@ -204,6 +204,15 @@ for w in sorted(_g.glob(os.path.expanduser('~/stockiq-logs/daily-*-warn.log'))):
         finding(f"the daily email of {os.path.basename(w)[6:16]} listed something to look at: python3 check-tools/daily_report.py --show {w} "
                 f"lists it, fix it, then rename the file to …-done.log")
 
+# the watch list (.kiro/steering/watch-list.md): entries past their "remove after" date are checked and removed (25 Oct 2026)
+try:
+    _wl = open(os.path.join(HERE, '..', '.kiro', 'steering', 'watch-list.md')).read()
+    for _title, _date in re.findall(r'^### (.+?)\n(?:.*\n)*?- \*\*Remove after:\*\* (\d{4}-\d\d-\d\d)', _wl, re.M):
+        if _date <= time.strftime('%Y-%m-%d'):
+            finding(f"watch-list.md: \"{_title.strip()}\" is past its date ({_date}): check nothing in its 'could break' happened, then delete the entry (or fix and move the lesson to site-overview.md)")
+except Exception as e:
+    print(f"  watch list not read ({type(e).__name__})")
+
 # AWS cost and usage day by day: the daily site check's cost part (cost_check.py); its findings are shown with the site check's
 
 # 5. drift

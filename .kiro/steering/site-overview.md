@@ -16,7 +16,7 @@ and crypto path established; section 7b the backtests and the factor study of th
 is the dashboard (practice portfolio, AI autopilot, notification bell): to resume that work, read it from
 "Start here when resuming"**.
 
-Detailed references: `stockiq.md` (AWS resources, Cognito, Lambdas, AI chat),
+Detailed references: **`watch-list.md` (recent changes that could still break something: read it when anything misbehaves)**, `stockiq.md` (AWS resources, Cognito, Lambdas, AI chat),
 `script-reference.md` (every script), `add-new-stocks.md`, `stock-matching-system.md`,
 `stocks-txt-csv-format.md`, `roadmap-to-9.md`, `backlinks-progress.md`, `future-work.md`.
 
@@ -134,7 +134,7 @@ think you need to ask me permission i just want you actively making this site pr
 site make sure its doing well and getting better everyday. it shouldn't just keep building shit making it more confusing either which
 is why i say cleanup old crap ... its YOU to make decisions ... profit is the number 1 priority." It replaces the older rule to list
 improvements and wait for his yes. The routine, every session:
-0. **Open the first reply by confirming that the steering files were loaded in full** (CLAUDE.md loads all eleven, this one
+0. **Open the first reply by confirming that the steering files were loaded in full** (CLAUDE.md loads all twelve, this one
    included, before the first reply; the owner asked on 19 Oct 2026 to be told so at every session's opening). If they were not
    (the session started without CLAUDE.md), read this file in full before anything else. A Mac has no `timeout` command: do not
    wrap commands in it (it cost a confusing error at the opening of 19 Oct).
@@ -174,6 +174,8 @@ improvements and wait for his yes. The routine, every session:
    this ... it tells me through the site"): `python3 check-tools/admin.py estimate <pct> "<why, plain words>"`, the chance the account
    is ahead of an S&P 500 fund after a year, honest, from the record (started at 30% on 19 Oct). It shows in the Real money card with
    its history, so he sees it rise or fall without asking.
+5a. **A change to live behaviour gets an entry in `watch-list.md`** (what changed, what could break and how it shows, how to undo it,
+   a date to remove it), so a later session knows where to look; the opening check lists entries past their date for removal.
 5. **One plain line on the Admin page for each change**: `python3 check-tools/admin.py change "<what, in his words>" --found
    owner|check|session` (who found the problem behind it: the Improvements tab counts how many he pointed out, the number to bring
    down; anything he points out also becomes a check). That list is how he sees what happened without asking.
@@ -201,20 +203,11 @@ settings while he is on the page). Do not change one idea after another on thin 
 warns about; one change at a time, measured, with its experiment entry.
 
 **WHERE THINGS STAND (rewrite this block at the end of every session; last: 25 Oct 2026, a short session on the owner's finds)**
-- **25 Oct 2026 (short, the owner's finds on his phone):** the anonymous free analysis is one a day on a phone too (the server counted
-  by exact IP, and mobile addresses change: the browser now keeps the day's count, `auth.js`; the dashboard's own copy of the count
-  removed; nightly check `one-count`; weekly test `RUNS=2 NEW_IP=1`); the register page's empty band on a phone (`signup.html`); the menu in the same place on every page (sign-up had a hidden 20px bell
-  placeholder that still took room, unsubscribe had no bell: `header_room_check.js` now fails a page whose menu stands elsewhere). Left
-  as is, at his word: a private window or another browser can still get a second free run ("simple is fine"). Not done this session:
-  #8, the daily log's Traceback, the bill at $1.14 (over the $1 target, under $1.50).
-  **Most of the DynamoDB bill found and fixed the same day:** `stockiq-auto-delete-cleanup` ignored the `userId` the daily scheduler sends
-  for each account (64 a day) and scanned the whole report-history table each time, applying that one account's setting to every
-  account's reports: about 130,000 read units a day (about $0.50 a month, most of DynamoDB's share; AWS's anomaly email of 24 Oct was its
-  growth). Now only that user's reports, no scan (live 25 Oct ~13:20 UTC, rollback `stockiq-auto-delete-cleanup_before_oneuser_20261025.zip`).
-  Damage: one report of one account hidden although its own setting would keep it (the owner's setting is 1 day, so his were his own
-  setting's doing); restoring it was refused by the session's safety check, the owner's call. The daily site check now looks at
-  AWS cost every day (`cost_check.py`, below). `lambda_deploy.sh` now
-  replaces one file in a package that holds others.
+- **25 Oct 2026 (a short session on the owner's finds):** anonymous free analysis one a day on a phone too; register page spacing and
+  the menu's place; the auto-delete cleanup's 64 table scans a day (most of the DynamoDB bill, and one account's setting applied to all);
+  checks before every website deploy (`pre_deploy.py`); the daily email written from the log (`daily_report.py`); AWS cost checked daily
+  (`cost_check.py`); news freshness checked. **Each is in `watch-list.md` with what could break and how to undo it.** Not done: #8, the bill
+  at $1.14 (over the $1 target, under $1.50; most of it the cleanup bug).
 - **The account (24 Oct):** $97,967, **$356 ahead** of the same $100,000 in an S&P 500 fund; 105 finished trades, -0.07% a trade this
   month, inside the margin of error. Month 1 goal ($101,000 by 12 Nov) out of reach. Claude's forecast on the Admin page: 25%. The
   weekly review is next due around **30 Oct**; the owner looks in most days for small things. His autopilot is automatic (markets by
