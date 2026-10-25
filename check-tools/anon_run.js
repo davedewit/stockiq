@@ -1,6 +1,7 @@
 // Run the real page code (auth.js + analysis-functions.js) as an ANONYMOUS visitor.
 // The usage tracker is simulated: it starts at USED (default 0, so 1 of 1 free use left) and counts increments.
 // Analysis Lambdas are called for real. Usage: node anon_run.js 72 single   |   USED=1 node anon_run.js 72 single
+// RUNS=2 NEW_IP=1: two runs in a row, the tracker forgetting the first (a phone whose address changed): the second must redirect.
 const vm = require('vm'), fs = require('fs');
 const [option, subOption] = process.argv.slice(2);
 let usage = Number(process.env.USED || 0); const events = []; const t0 = Date.now(); const log = (m) => events.push(`${((Date.now() - t0) / 1000).toFixed(1)}s ${m}`);
@@ -10,7 +11,7 @@ async function fakeFetch(url, opts = {}) {
   const json = (o) => ({ ok: true, status: 200, json: async () => o, text: async () => JSON.stringify(o) });
   if (u.includes('ipify')) return json({ ip: '203.0.113.7' });
   if (u.includes('dcegrxwikpuwup7qas24dubloq0ohurf')) {           // anonymous usage tracker
-    if (body.action === 'increment_usage') { usage++; log(`tracker: increment -> usage ${usage}`); return json({ usage }); }
+    if (body.action === 'increment_usage') { usage++; log(`tracker: increment -> usage ${usage}`); const r = json({ usage }); if (process.env.NEW_IP) { usage = 0; log('tracker: the visitor now has a new address (count 0)'); } return r; }
     log(`tracker: get_usage -> ${usage}`); return json({ usage });
   }
   if (/5fyemil3eipbwqyyb2kloijyhi0uvtct|uotf7ibcklwyuehblv7zsl7ney0ngmrl|5oqosafg2mflk7oyydkk3d3rdq0amufq/.test(u) || /worker|lambda-url/.test(u) && !/usage|trial|dashboard/.test(u)) {
@@ -41,8 +42,11 @@ Object.assign(ctx, { displayResults: (r) => { out.result = r; log(`RESULT displa
   showAnonymousUpgradeModal: () => log('showAnonymousUpgradeModal'), startCountdown() {}, clearCountdown() {} });
 (async () => {
   log(`authManager present: ${typeof ctx.authManager !== 'undefined'} | authenticated: ${ctx.authManager && ctx.authManager.isAuthenticated ? ctx.authManager.isAuthenticated() : 'n/a'}`);
-  try { await ctx.runAnalysis(Number(option), subOption, { target: mkEl('btn'), currentTarget: mkEl('btn'), preventDefault() {}, stopPropagation() {} }); } catch (e) { log('runAnalysis threw: ' + e.message); }
-  await new Promise(r => setTimeout(r, 2500));
+  for (let run = 1; run <= Number(process.env.RUNS || 1); run++) {
+    log(`--- run ${run}`); if (ctx.authManager) ctx.authManager._redirecting = false;
+    try { await ctx.runAnalysis(Number(option), subOption, { target: mkEl('btn'), currentTarget: mkEl('btn'), preventDefault() {}, stopPropagation() {} }); } catch (e) { log('runAnalysis threw: ' + e.message); }
+    await new Promise(r => setTimeout(r, 2500));
+  }
   console.log(`--- anonymous run of ${option}-${subOption}: result=${!!out.result} error=${out.error || 'none'} final usage=${usage}`);
   events.forEach(e => console.log('   ' + e.slice(0, 420)));
   process.exit(0);

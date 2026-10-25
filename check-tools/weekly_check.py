@@ -225,6 +225,9 @@ if not QUICK:
     note('4. Background run and visitors', 'a visitor who is not signed in gets their one free analysis', 'result=true' in out, out.strip().splitlines()[-3:])
     code, out = run(['node', os.path.join(HERE, 'anon_run.js'), '3', '8'], 600, cwd=tmp, env={'USED': '1'})
     note('4. Background run and visitors', 'and after it is used, is sent to sign up before anything runs', 'result=false' in out and 'signup' in out, out.strip().splitlines()[-3:])
+    # 25 Oct 2026, the owner on his phone: a new mobile-data address gave a second free analysis
+    code, out = run(['node', os.path.join(HERE, 'anon_run.js'), '3', '8'], 900, cwd=tmp, env={'RUNS': '2', 'NEW_IP': '1'})
+    note('4. Background run and visitors', 'and a phone whose address changes after the free analysis still gets only one (the second is sent to sign up)', out.count('RESULT displayed') == 1 and 'signup' in out, out.strip().splitlines()[-4:])
     code, out = run(['node', os.path.join(HERE, 'trial_run.js'), '3', '8'], 600, cwd=tmp, env={'TRIAL': '1'})
     note('4. Background run and visitors', 'a visitor on the free trial gets a result', 'result=true' in out, out.strip().splitlines()[-3:])
     code, out = run(['node', os.path.join(HERE, 'trial_run.js'), '3', '8'], 600, cwd=tmp, env={'TRIAL': '1', 'USED': '5'})
