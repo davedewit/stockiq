@@ -9,6 +9,7 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
   duplicate-code  the same function defined in several pages or scripts (the market panel was three copies)
   run-links       a daily screener page whose run button opens the wrong section or runs no screener
   late-layout     a page whose own padding or width is set by a style inside the body (it moves after the first draw)
+  one-count       a page or script other than auth.js that asks the anonymous usage counter itself (two counts disagree)
   theme-early     a page that loads theme.js late (defer/async), so the menu flashes before the page is marked signed in
   copies          a block of 8+ lines (code, style or markup) word for word in 3+ hand-edited files; a problem when a change adds one
   shared-parts    a page whose menu or footer differs from the one definition in shared_parts.py
@@ -321,6 +322,13 @@ def main():
         b = src[f].find('<body')
         if b >= 0 and any(re.search(r'(^|[\s,}])body\s*\{[^}]*(padding|margin|width)', m.group(0)) for m in re.finditer(r'<style[^>]*>.*?</style>', src[f][b:], re.S)):
             find('late-layout', 'problem', "sets the page's own padding or width in a style inside the body: put it in the head, or the page moves after it is first drawn", f)
+
+    # one-count: the visitor's free-use count is worked out in one place, auth.js (getAnonymousUsageCount: the server's count by
+    # IP and the browser's own note). 25 Oct 2026, the owner on his phone: the dashboard asked the server itself and read 1/1
+    # after the sign-up page had said 0/1
+    for f in pages + scripts:
+        if f != 'auth.js' and 'dcegrxwikpuwup7qas24dubloq0ohurf' in src[f]:
+            find('one-count', 'problem', "asks the anonymous usage counter itself: use authManager.getAnonymousUsageCount() (auth.js), or the counts disagree", f)
 
     # theme-early: theme.js marks the page (signed in, paid, light or dark) before it is drawn; loaded with defer or async it runs
     # after, and the menu shows "Sign up free" for a moment to a signed-in visitor (24 Oct 2026, the owner on the home page)

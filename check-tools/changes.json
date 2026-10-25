@@ -2,6 +2,16 @@
  "about": "What the sessions changed on the site, newest first, in plain words for the owner's Admin page ('What changed lately'). Add with: python3 check-tools/admin.py change \"<what>\". Nothing private: both repositories are public.",
  "changes": [
   {
+   "at": "2026-10-25",
+   "what": "Dashboard: a visitor not signed in saw '1/1 remaining' there after using the free analysis (it counted by internet address alone). It now uses the same count as every other page; a nightly check makes sure no page counts on its own again",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-25",
+   "what": "On a phone, a visitor not signed in could run a second free analysis after the phone's mobile-data address changed (each new address looked like a new visitor). The browser now remembers the day's free use too, so it is one a day as on desktop",
+   "found": "owner"
+  },
+  {
    "at": "2026-10-24",
    "what": "Deleted the three made-up test accounts from the user table",
    "found": "owner"
@@ -307,16 +317,6 @@
   {
    "at": "2026-10-23",
    "what": "Fixed a false 'Needs you' warning (it left the sector funds out of its sums); the screeners the AI chooses are greyed out and locked again, with a clearer tick",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "Clearer ticks for the screeners the AI chooses; the autopilot emails only when something changes how it trades (not its daily notes); prices update as soon as you return to the Practice portfolio",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "The number of holdings and the budget are now automatic: 42 holdings (about 2 for each screener ticked, each from the top 10 of its list) and all the practice money it can reach. The improvement lists are checked against what is live at every session",
    "found": "owner"
   }
  ]
