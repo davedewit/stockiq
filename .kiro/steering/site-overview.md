@@ -185,7 +185,12 @@ about what the "Still never" list keeps for him (real money, costs above the rul
 settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
 warns about; one change at a time, measured, with its experiment entry.
 
-**WHERE THINGS STAND (rewrite this block at the end of every session; last: 24 Oct 2026, evening, end of a very long session)**
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 25 Oct 2026, a short session on the owner's finds)**
+- **25 Oct 2026 (short, the owner's finds on his phone):** the anonymous free analysis is one a day on a phone too (the server counted
+  by exact IP, and mobile addresses change: the browser now keeps the day's count, `auth.js`; the dashboard's own copy of the count
+  removed; nightly check `one-count`; weekly test `RUNS=2 NEW_IP=1`); the register page's empty band on a phone (`signup.html`). Left
+  as is, at his word: a private window or another browser can still get a second free run ("simple is fine"). Not done this session:
+  #8, the daily log's Traceback, the bill at $1.14 (over the $1 target, under $1.50).
 - **The account (24 Oct):** $97,967, **$356 ahead** of the same $100,000 in an S&P 500 fund; 105 finished trades, -0.07% a trade this
   month, inside the margin of error. Month 1 goal ($101,000 by 12 Nov) out of reach. Claude's forecast on the Admin page: 25%. The
   weekly review is next due around **30 Oct**; the owner looks in most days for small things. His autopilot is automatic (markets by
