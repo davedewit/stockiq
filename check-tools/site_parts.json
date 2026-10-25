@@ -599,6 +599,12 @@
      "found": "Built (#9 on the Admin page): 24 markets and a hub, live, in the sitemap, named to IndexNow, refreshed by the daily update"
     }
    ]
+  },
+  {
+   "id": "notes",
+   "part": "The notes themselves: do they match the code, is anything out of date, said twice, or superseded, are expired watch-list entries gone; the aim is shorter and truer, never losing a fact that matters",
+   "where": ".kiro/steering/*.md (site-overview.md most), CLAUDE.md, check-tools/README.md, watch-list.md",
+   "last": null
   }
  ]
 }

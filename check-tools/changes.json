@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-25",
+   "what": "The notes that guide each session are now one of the site's parts, and tidying them (out of date, said twice, expired temporary notes) is part of every weekly review",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-25",
    "what": "AWS cost is now checked every day for free: a service's spend jumping, a database table or Lambda calls spiking, the month over your $1 target or $1.50 limit; anything found goes in the daily email",
    "found": "owner"
   },
@@ -312,11 +317,6 @@
   {
    "at": "2026-10-23",
    "what": "Refined: a look at a profit or growth part of the site must always end in an improvement; other parts may end 'fine as it is' with the reason, and then wait until they change",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "Every look at a part of the site must now end in an improvement (fixed, improved, simplified, a new idea to test, or a new question): 'it's fine' is not accepted",
    "found": "owner"
   }
  ]

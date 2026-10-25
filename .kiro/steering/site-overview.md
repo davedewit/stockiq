@@ -158,7 +158,9 @@ improvements and wait for his yes. The routine, every session:
    improvements. so will me saying hi in a week continue this"): the opening check lists what he had to point out in the last 7 days
    (`--found owner`); for each, find why no check and no session caught it first, and close that gap, not only the fault. Then ask:
    would the next session know what to do from these notes and the findings alone? What was done by hand that a script should do?
-   What has nobody looked at? Fix the answers in the same session. The aim is that he never has to lead.
+   What has nobody looked at? Fix the answers in the same session. **And tidy the notes themselves** (the part `notes`, the owner, 25 Oct
+   2026: "fixing up all these mds ... an ongoing process"): expired watch-list entries checked and removed, anything out of date rewritten,
+   anything said twice merged, the week's change-log entries short; then `site_parts.py done notes …`. Shorter and truer, no fact lost. The aim is that he never has to lead.
 5d. **Walk the site as he does, every weekly session, and ask his questions before he does** (the owner, 24 Oct 2026: "see how simple it
    is the questions i ask to make improvements, you should be doing this moving forward ... think outside the box a little"). In one
    sitting, on the live site, at desktop and at phone width (the scripts are only the floor): the home page top to bottom as a first-time
