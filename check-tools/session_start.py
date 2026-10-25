@@ -213,6 +213,14 @@ try:
 except Exception as e:
     print(f"  watch list not read ({type(e).__name__})")
 
+# the notes against the files: a note naming a file that exists nowhere is out of date (notes_check.py, 25 Oct 2026)
+try:
+    sys.path.insert(0, HERE); import notes_check
+    for _md, _n in notes_check.missing():
+        finding(f"{_md} names `{_n}`, which exists nowhere: rewrite that line (or say the file was removed)")
+except Exception as e:
+    print(f"  notes not checked against the files ({type(e).__name__})")
+
 # AWS cost and usage day by day: the daily site check's cost part (cost_check.py); its findings are shown with the site check's
 
 # 5. drift

@@ -160,7 +160,8 @@ improvements and wait for his yes. The routine, every session:
    would the next session know what to do from these notes and the findings alone? What was done by hand that a script should do?
    What has nobody looked at? Fix the answers in the same session. **And tidy the notes themselves** (the part `notes`, the owner, 25 Oct
    2026: "fixing up all these mds ... an ongoing process"): expired watch-list entries checked and removed, anything out of date rewritten,
-   anything said twice merged, the week's change-log entries short; then `site_parts.py done notes …`. Shorter and truer, no fact lost. The aim is that he never has to lead.
+   anything said twice merged, the week's change-log entries short; then `site_parts.py done notes …`. Shorter and truer, no fact lost.
+   The scripted part first: `notes_check.py` (in the opening check) lists notes naming files that no longer exist. The aim is that he never has to lead.
 5d. **Walk the site as he does, every weekly session, and ask his questions before he does** (the owner, 24 Oct 2026: "see how simple it
    is the questions i ask to make improvements, you should be doing this moving forward ... think outside the box a little"). In one
    sitting, on the live site, at desktop and at phone width (the scripts are only the floor): the home page top to bottom as a first-time
@@ -655,7 +656,7 @@ line by line. What was wrong, and what it does now:
   daily prices from Yahoo, company figures, dividends, the VIX and the latest news from the share's own stock page,
   scores the share and writes the report text. It calls `stockiq-chart-generator` (`lambda_function_simple.py`) for the
   picture, which comes back inside the report text as a `data:` address. The pages can also ask the chart function for
-  a chart by itself (`script.js`, `analysis-functions.js`: they turn the SVG text into a picture with `btoa()`, so **the
+  a chart by itself (`analysis-functions.js`: they turn the SVG text into a picture with `btoa()`, so **the
   chart's text must be plain ASCII**: a pound or yen sign is written as a character code).
 - **Prices in the share's own currency** (`money()`, `currency_note()`; the currency comes with Yahoo's prices). Every
   share was printed with a dollar sign: BHP.AX "$60.94" (Australian dollars), IMB.L "$2662.00" (2,662 pence). Now

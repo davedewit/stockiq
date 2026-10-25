@@ -113,7 +113,7 @@ aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R --paths "/*" 
 ### CloudFront
 - **Distribution ID:** `EHXV50CPHY07R`
 - **Function:** `stockiq-www-redirect` — www→non-www redirect + lowercase symbols→uppercase
-- **Backup:** `/Users/dave/VSCODE/stockiq/cloudfront-backup/` (`./restore-cloudfront-function.sh`)
+- **Its code** (the local backup folder no longer exists, checked 25 Oct 2026): read the live one with `aws cloudfront get-function --name stockiq-www-redirect --stage LIVE --profile default /tmp/cf.js` (free)
 
 ### DynamoDB Tables
 - `stockiq-dashboard-analysis-history` — Analysis history

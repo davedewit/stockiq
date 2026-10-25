@@ -44,7 +44,7 @@
 | `stockiq-option-3-1-sp100` | S&P 100 screener |
 | `stockiq-option-7-1-orchestrator` | Crypto screener (Option 7). Holds the coin list (`COINS`) and calls the 54 `stockiq-option-7-1-worker-N` functions ten coins a call (`{"coin_list": [...]}`, 54 calls a run; it was one call per coin, 540, on 10-11 Oct 2026). 2,048 MB. Also invoked every 30 minutes by EventBridge rule `stockiq-coinspot-predictions-schedule` to record the top 10 (history and entry log, see `site-overview.md` 8b); user calls only read that history. Handler `orchestrator.lambda_handler`; the zip must contain `orchestrator.py`, `orchestrator_simple.py`, `prediction_memory.py` |
 | `stockiq-screener-coordinator` | Main screener coordinator |
-| `stockiq-chart-generator` | The single-stock report's chart as an SVG (`lambda_function_simple.py`, redrawn 11 Oct 2026): price with 20-, 50- and 200-day averages, support and resistance, volume, RSI. Draws the prices the report sends it (`series`, `currency`, `support`, `resistance`); asked by itself (`{"symbol": "MSFT"}` from `script.js` and `analysis-functions.js`) it fetches its own. Output must stay plain ASCII (the pages use `btoa()`). Tests: `check-tools/report/chart_test.py` |
+| `stockiq-chart-generator` | The single-stock report's chart as an SVG (`lambda_function_simple.py`, redrawn 11 Oct 2026): price with 20-, 50- and 200-day averages, support and resistance, volume, RSI. Draws the prices the report sends it (`series`, `currency`, `support`, `resistance`); asked by itself (`{"symbol": "MSFT"}` from `analysis-functions.js`) it fetches its own. Output must stay plain ASCII (the pages use `btoa()`). Tests: `check-tools/report/chart_test.py` |
 | `stockiq-validate-symbol` | Validates stock symbols across exchanges |
 | `StockIQ-StockUpdater` | Stock data updater |
 
@@ -234,7 +234,6 @@ Lambda URLs are **hardcoded** in these JS/HTML files:
 - `market-panel.js` — the market panel on the right of the home page, the dashboard and the 25 daily screener pages (its tabs and figures: the seven `stockiq-market-data-*` functions; the four lists: `trending-scraper`, `gainers-scraper`, `losers-scraper`, `most-active-scraper`; their prices: `ticker-data-fetcher`)
 - `live-market.js` — keeps the figures on show moving while someone is on the page (`ticker-data-fetcher`, every 6 to 10 s; loaded by `theme.js`)
 - `sidebar.js` — empty since 18 Oct 2026 (it was an older copy of the market panel's code); the stock pages still ask for it until they are next regenerated
-- `script.js` — homepage widgets
 - `dashboard.html` — dashboard data, CSV export, payment
 - `practice-portfolio.js` — practice portfolio storage (`stockiq-paper-portfolio`), prices, symbol lookup
 - `practice-autopilot.js` — the AI autopilot (`stockiq-ai-trader`)
