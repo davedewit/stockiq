@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-25",
+   "what": "Register page on a phone: the empty band above 'Trade $100,000 of practice money' is gone (the page kept room for the desktop-only trial strip)",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-25",
    "what": "Dashboard: a visitor not signed in saw '1/1 remaining' there after using the free analysis (it counted by internet address alone). It now uses the same count as every other page; a nightly check makes sure no page counts on its own again",
    "found": "owner"
   },
@@ -312,11 +317,6 @@
   {
    "at": "2026-10-23",
    "what": "The Improvements tab now lists every fix and change with who found the problem behind it, and counts how many you pointed out: the checks should find them first. Two more automatic checks: every 'Needs you' warning is verified at each session, and the weekly check times how fast your prices load",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "Fixed a false 'Needs you' warning (it left the sector funds out of its sums); the screeners the AI chooses are greyed out and locked again, with a clearer tick",
    "found": "owner"
   }
  ]
