@@ -196,6 +196,13 @@ if os.path.exists(daily):
     if gap > 8:
         finding(f"the daily update has not run for {gap:.0f} days: news after 7 days is missed and stock figures are {gap:.0f} days old; run it now (cd stockiq && ./deploy.sh) or leave the laptop on for an afternoon")
     print(f"  daily deploy log: {time.strftime('%d %b %H:%M', time.localtime(os.path.getmtime(daily)))}; " + ('; '.join(l.strip() for l in text.splitlines() if re.search(r'Indexable|All done|pushed to GitHub', l))[:300]))
+# the daily email's "to look at" list (check-tools/daily_report.py keeps those days' logs as daily-<date>-warn.log): each is a finding
+# until a session has fixed it and renamed the file -done.log (25 Oct 2026)
+import glob as _g
+for w in sorted(_g.glob(os.path.expanduser('~/stockiq-logs/daily-*-warn.log'))):
+    if time.time() - os.path.getmtime(w) < 7 * 86400:
+        finding(f"the daily email of {os.path.basename(w)[6:16]} listed something to look at: python3 check-tools/daily_report.py --show {w} "
+                f"lists it, fix it, then rename the file to …-done.log")
 
 # 5. drift
 head('5. Live against local')

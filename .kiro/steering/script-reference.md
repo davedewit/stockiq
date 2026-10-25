@@ -26,6 +26,7 @@ For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-s
 |---|---|
 | `fetch_stock_data.py` | After adding new stocks — fetches names/sectors from Yahoo, updates stocks.txt and NUMERIC_COMPANY_NAMES |
 | `check-tools/stage_web.py` | Stages website files for a deploy in one command: `<name> <files>`, `--changed`, `--from <folder>`; writes `pending-<name>/deploy.sh` for `web_deploy.sh` |
+| `check-tools/daily_report.py` | The daily update's email from its log: "Nothing needs you" or what to look at, then what it did; keeps the log in `~/stockiq-logs/` (`-warn` when something is listed). `--show <log>` reads a kept one |
 | `check-tools/pre_deploy.py` | The checks every website deploy passes before upload (run by `web_deploy.sh` on the dry run): site check on the staged copy, inline scripts, header and phone checks on the changed pages (a sample for a shared file) |
 | `check-tools/lambda_deploy.sh` | The shared Lambda deploy (checks, rollback zip, mirror): a pending `deploy.sh` hands it `FUNCS` |
 | `shared_parts.py` | The menu (desktop and phone) and the footer of every page, defined once: change it there, run it, deploy. `--check` (read-only) lists pages that drifted; `--dry-run` |

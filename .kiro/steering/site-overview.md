@@ -395,11 +395,15 @@ launchd `com.stockiq.reminder` fires every 10 min → `~/stockiq-daily.sh` runs 
 `deploy-to-s3.sh` with `UPDATE_STOCK_NEWS=true`. Log: `~/stockiq-daily.log` (cleared each run).
 The hours are the **machine's own clock** (`date` in `~/stockiq-daily.sh`). On 11 Oct 2026 this Mac was
 set to UTC+7, not Sydney time; check `date` before working out when the next run is.
-**The email at the end** (Mail.app, to `deploy@stockiq.tech`; `~/stockiq-daily.sh`, not in git) says when the run started and
-how long it took, and its subject carries ⚠️ instead of ✅ when the log holds an error line (`Traceback`, `Error:`, a failed push)
-although the run finished (24 Oct 2026; the owner asked for the duration, and that day's "successfully" hid a crashed step).
-Since 25 Oct 2026 it also carries ⚠️ and names the first one when the daily site check found a problem it had not found before
-(`[problem, new]` in the log); until then those reached only the Admin page.
+**The email at the end** (Mail.app, to `deploy@stockiq.tech`; sent by `~/stockiq-daily.sh`, not in git) **is written by
+`check-tools/daily_report.py` from the log** (25 Oct 2026; the owner wanted anything that fails, and a way to hand it to a session):
+✅ "Nothing needs you" or ⚠️ with a list of what to look at (a crashed step with its error line, a step that did not finish, a top-level
+❌/⚠️ line, a new site-check problem, no news added, daily screener pages that kept yesterday's, a GitHub failure; routine retries and
+Yahoo's refusals, which fall back to AWS, are left out: `BENIGN`), then what the run did (news, stock pages, indexed pages, screener
+pages, sitemap, site check, GitHub), start time and duration. It keeps a copy of each day's log in `~/stockiq-logs/` (30 days),
+`daily-<date>-warn.log` when something is listed: the opening check makes each such file of the last 7 days a finding;
+`daily_report.py --show <file>` prints its list (saves nothing); rename it `…-done.log` once fixed. When the owner says "the daily
+email has a warning", start there. If the report itself fails, the email says so in one plain line.
 **The Mac's scheduler gives a job only 256 open files** (`launchctl limit maxfiles`); `deploy-to-s3.sh` raises it to 10,240 at
 its top. Without that, `update_stock_analysis.py` crashed on 24 Oct 2026 ("Too many open files", Yahoo's library leaving files
 open on a flaky network) before writing a page: the stock pages kept the day before's figures.
