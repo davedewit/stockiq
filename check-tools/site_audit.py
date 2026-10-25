@@ -10,6 +10,7 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
   run-links       a daily screener page whose run button opens the wrong section or runs no screener
   late-layout     a page whose own padding or width is set by a style inside the body (it moves after the first draw)
   cost            AWS: a service's spend jumping, the month over the owner's $1, Cost Explorer charged, a table or Lambda calls jumping (cost_check.py, free)
+  plan-claims     a plan card on the dashboard ticks a feature that is not on the list of what exists (unbuilt ones go under "Coming soon")
   news-stale      the newest article in news.html or news.js more than 2 days old (the news steps stopped adding articles)
   one-count       a page or script other than auth.js that asks the anonymous usage counter itself (two counts disagree)
   theme-early     a page that loads theme.js late (defer/async), so the menu flashes before the page is marked signed in
@@ -333,6 +334,19 @@ def main():
                 find('cost', level, text, 'AWS')
         except Exception as e:
             find('cost', 'idea', f'the AWS cost check could not run ({type(e).__name__}: {str(e)[:80]})', 'AWS')
+
+    # plan-claims: what a paying visitor is promised must exist (25 Oct 2026: the cards listed alerts, white-label and portfolio tools
+    # that were never built; the owner chose to keep them as "Coming soon"). A new ticked item must be added here once it exists.
+    EXISTS = [r'\d+ analyses/screeners per day', r'Unlimited analyses/screeners per day', r'Every report, all \d+ screeners and the trading signals',
+              r'Company figures in every stock report', r'Export to CSV', r'AI autopilot \(Beta\)', r'Email support', r'Priority email support',
+              r'Top-priority email support', r'Everything in (Starter|Pro)', r'Cancel anytime']
+    dash = src.get('dashboard.html', '')
+    if '💎 Upgrade Your Plan' in dash:
+        cards = dash[dash.index('💎 Upgrade Your Plan'):]
+        cards = cards[:cards.index('"Coming soon" features')] if '"Coming soon" features' in cards else cards[:8000]
+        for item in re.findall(r'>✓ ([^<]+)</li>', cards):
+            if not any(re.match(x, item.strip()) for x in EXISTS):
+                find('plan-claims', 'problem', f'a plan card ticks "{item.strip()[:80]}", which is not on the list of what exists: mark it "Coming soon", or add it to EXISTS in site_audit.py once built', 'dashboard.html')
 
     # news-stale: the daily run adds news before this check runs, so a working run always has articles from the last day (25 Oct 2026,
     # the owner: "so long as i'm aware if ... news articles aren't updating"; nothing looked at it until then)

@@ -54,3 +54,13 @@ Rules:
   a false ⚠️ from a routine line (add it to `BENIGN` in `daily_report.py`); a false cost alarm (thresholds in `cost_check.py`).
 - **Undo:** `cp ~/VSCODE/backup/stockiq-daily.sh_before_report_20261025 ~/stockiq-daily.sh`.
 - **Remove after:** 2026-11-15
+
+### 2026-10-25 · Plan cards: true features ticked, unbuilt ones "Coming soon"
+- **Changed:** `dashboard.html` "Upgrade Your Plan" (alerts, real-portfolio tracking, custom screeners, portfolio tools, white-label moved
+  under "Coming soon", at the owner's word; a note under the cards); `index.html` Pricing shows "Choose a plan" (to `dashboard.html#upgrade`)
+  to signed-in visitors, "Start Free Trial" to others. `site_audit.py` `plan-claims` fails a ticked item not in its `EXISTS` list.
+- **Could break:** the Pricing section showing both buttons or neither (the `only-signed-in` / `only-signed-out` classes); a click on a card
+  not starting checkout (the `subscribeToPlan` calls were left as they were). When a "Coming soon" feature is built: tick it and add it to `EXISTS`.
+- **Undo:** `git revert` the website commit "Plan cards: …".
+- **Remove after:** 2026-11-25
+
