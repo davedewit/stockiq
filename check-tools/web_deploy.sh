@@ -15,6 +15,14 @@ for row in $ROWS; do IFS=: read -r f was new <<< "$row"
   if [ "$was" = "none" ]; then [ ! -e "$WEB/$f" ] || [ "$(sha "$WEB/$f")" = "$new" ] || stop "website/$f exists already (a new file was expected)"
   else l="$(sha "$WEB/$f")"; [ "$l" = "$was" ] || [ "$l" = "$new" ] || stop "website/$f has changed since this was built"; fi
 done
+# the site's checks on the staged files (pre_deploy.py), once per set of files: the dry run runs them, the real run trusts its stamp.
+# SKIP_CHECKS="<the reason>" only for an emergency, and the reason is printed.
+STAMP="$(printf '%s\n' $ROWS | shasum | cut -d' ' -f1)"
+if [ -n "${SKIP_CHECKS:-}" ]; then echo "pre-deploy checks SKIPPED: $SKIP_CHECKS"
+elif [ "$(cat "$HERE/.checked" 2>/dev/null)" != "$STAMP" ]; then
+  /opt/homebrew/bin/python3 "$(dirname "$0")/pre_deploy.py" "$HERE" $(for r in $ROWS; do printf '%s ' "${r%%:*}"; done) || stop "the pre-deploy checks failed (above)"
+  echo "$STAMP" > "$HERE/.checked"
+else echo "pre-deploy checks: passed on the dry run for these same files"; fi
 [ "$DRY" = "true" ] && { echo "(dry run) would upload: $(for r in $ROWS; do printf '%s ' "${r%%:*}"; done)"; exit 0; }
 PATHS=()
 for row in $ROWS; do IFS=: read -r f was new <<< "$row"

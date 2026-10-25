@@ -61,6 +61,15 @@ deploy, refused anything but reading, the read-only checks, its report (`check-t
 the Admin page; 50 minutes at most; a trial that ends by itself on 1 Nov 2026 unless `reviews/daily/KEEP` exists (experiments
 `daily-review`). Installed by the owner on 18 Oct 2026; a session reads its reports in `check-tools/reviews/daily/` and acts on them.
 
+**EVERY WEBSITE DEPLOY IS CHECKED BEFORE ANYTHING IS UPLOADED: `check-tools/pre_deploy.py`** (25 Oct 2026; the owner: "when we change
+things is it updated to cross check it doesn't break something else"; until then a deploy only checked the file's fingerprint).
+`web_deploy.sh` runs it on the dry run (the real run trusts its stamp, `.checked`, for the same files): the daily site check on the staged
+copy (a problem the change adds stops it), every inline script of a staged page parsed, then in a browser the changed pages with two
+reference pages (a shared file such as `styles.css` or `theme.js`: a sample of ten kinds of page), `header_room_check.js` (the header,
+the room under it, the menu standing where it stands on every other page) and `phone_check.js`. About 1 minute for a page, 4 for a shared
+file. `SKIP_CHECKS="<reason>"` only in an emergency. **A fault found by hand becomes a check in one of those scripts, so every later deploy
+runs it.** Lambda deploys have their own test suites (section 8c), not this gate.
+
 **THE FULL CHECK OF THE SITE, EVERY 7 DAYS, BY ITSELF: `python3 check-tools/weekly_check.py`** (19 Oct 2026; the owner: "do a full
 check of everything ... consistency and confidence everything is good ... i want you to say hey i checked everything ... i checked
 xyz"). One command, read-only, about 15 minutes: (1) every test suite against the LIVE code (the autopilot function, the panel, the
