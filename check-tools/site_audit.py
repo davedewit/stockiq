@@ -9,6 +9,7 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
   duplicate-code  the same function defined in several pages or scripts (the market panel was three copies)
   run-links       a daily screener page whose run button opens the wrong section or runs no screener
   late-layout     a page whose own padding or width is set by a style inside the body (it moves after the first draw)
+  news-stale      the newest article in news.html or news.js more than 2 days old (the news steps stopped adding articles)
   one-count       a page or script other than auth.js that asks the anonymous usage counter itself (two counts disagree)
   theme-early     a page that loads theme.js late (defer/async), so the menu flashes before the page is marked signed in
   copies          a block of 8+ lines (code, style or markup) word for word in 3+ hand-edited files; a problem when a change adds one
@@ -322,6 +323,16 @@ def main():
         b = src[f].find('<body')
         if b >= 0 and any(re.search(r'(^|[\s,}])body\s*\{[^}]*(padding|margin|width)', m.group(0)) for m in re.finditer(r'<style[^>]*>.*?</style>', src[f][b:], re.S)):
             find('late-layout', 'problem', "sets the page's own padding or width in a style inside the body: put it in the head, or the page moves after it is first drawn", f)
+
+    # news-stale: the daily run adds news before this check runs, so a working run always has articles from the last day (25 Oct 2026,
+    # the owner: "so long as i'm aware if ... news articles aren't updating"; nothing looked at it until then)
+    from datetime import datetime as _dtn, timezone as _tzn
+    for f in ('news.html', 'news.js'):
+        ts = re.findall(r'(20\d\d-\d\d-\d\dT\d\d:\d\d:\d\d)', src.get(f, ''))
+        if ts:
+            age = (_dtn.now(_tzn.utc) - _dtn.fromisoformat(max(ts)).replace(tzinfo=_tzn.utc)).total_seconds() / 86400
+            if age > 2:
+                find('news-stale', 'problem', f'the newest article is {age:.1f} days old ({max(ts)[:16]} UTC): the news steps are not adding articles (update_news.py, update_stock_news.py in ~/stockiq-daily.log)', f)
 
     # one-count: the visitor's free-use count is worked out in one place, auth.js (getAnonymousUsageCount: the server's count by
     # IP and the browser's own note). 25 Oct 2026, the owner on his phone: the dashboard asked the server itself and read 1/1
