@@ -206,6 +206,11 @@ settings while he is on the page). Do not change one idea after another on thin 
 warns about; one change at a time, measured, with its experiment entry.
 
 **WHERE THINGS STAND (rewrite this block at the end of every session; last: 25 Oct 2026, a short session on the owner's finds)**
+- **26 Oct 2026 (short):** stock news reaches news.html again (a pattern broken by the shared footer on 24 Oct; refilled and live);
+  website deploys clear the cache once (`/*`; 1,084 paths this month, $0.39 past the free 1,000; `cost_check.py` now counts them);
+  the S&P 500 card shows the fund's own day. Admin #13, #14 done. **Still open for Sunday's weekly session: #8, #11, #12**, and the
+  three parts (home-pricing, plans, funnel; today's daily review has findings for each: the trial's "15 analyses (5 a day)", no
+  confirmation after paying). The Admin card reads "When you can" until the cost figures of 25 Oct age out (27 Oct).
 - **25 Oct 2026 (a short session on the owner's finds):** anonymous free analysis one a day on a phone too; register page spacing and
   the menu's place; the auto-delete cleanup's 64 table scans a day (most of the DynamoDB bill, and one account's setting applied to all);
   checks before every website deploy (`pre_deploy.py`); the daily email written from the log (`daily_report.py`); AWS cost checked daily
