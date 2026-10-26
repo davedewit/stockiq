@@ -249,10 +249,10 @@ warns about; one change at a time, measured, with its experiment entry.
   `longer-holds`), market-gauge, company-figures, trend-score, ai-markets, auto-holdings, screener-pages. Ideas: public-record (next),
   nav-simpler (done in part: the menu is one definition), paper-trading-words, earnings-hold, ai-market-tilt, screener-email and others.
 - **Next session, in order:**
-  (00) **From the owner at the close of 26 Oct (do first):** (a) the search's news box said "No recent articles for AAPL" on the live
-  site although AAPL.html has news (it works served locally: `search_news_check.js`); find why live (the page fetched, its markup, the
-  cache) and fix; the typed-code trigger was taken out the same evening because it hid the suggestion list, so news shows only when a
-  suggestion is picked (the weekly check's "typing AAPL" step must change to picking). (b) **A Yahoo-style search** (his two pictures):
+  (00) **From the owner at the close of 26 Oct (do first):** (a) the search's news box works on stockiq.tech; in his local preview
+  (Kiro) the stock page cannot be fetched and it says "No recent articles": make a failed fetch say "could not load" instead. The
+  typed-code trigger was taken out (it hid the suggestion list): news shows when a suggestion is picked, so the weekly check's "typing
+  AAPL" step must change to picking. (b) **A Yahoo-style search** (his two pictures):
   "Search for news, tickers or companies", a dropdown with matching shares (symbol, name, type, exchange) and a News part below with
   matching articles (headline, source, age), and a default list of what is popular (stocks and news) when the box is empty. (c) **Menu
   items like Yahoo Finance's** (Home, News, Markets, Research and tools, Watch...): look at what fits the site's menu (`shared_parts.py`),
