@@ -115,28 +115,24 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
         }
       }
       if (process.env.MARKET) { console.log('chosen before the picture: ' + await run(`(() => { const b = document.querySelector('[data-pp="mkt-toggle"]'); if (!b) return 'no menu'; if (!document.querySelector('.pp-mkt.open')) b.click(); ${process.env.MARKET_OPEN ? '' : `const q = document.querySelector('[data-pp="market"][data-id=' + JSON.stringify(${JSON.stringify(process.env.MARKET)}) + ']'); if (q) q.click();`} return (document.querySelector('.pp-mkt-btn') || {}).textContent; })()`)); await sleep(500); }
-      // DRAG=1: press, drag across the graph and let go, as a mouse does: the stretch must be measured, survive a redraw, and clear on a click (26 Oct 2026)
+      // DRAG=1: press and drag across the graph: while held the stretch is measured; let go and it clears (26 Oct 2026). TOUCH=1: by finger too
       if (process.env.DRAG) {
         const at = async () => JSON.parse(await run(`(() => { document.documentElement.style.scrollBehavior = 'auto'; const s = document.getElementById('pp-chart-svg'); s.scrollIntoView({ block: 'center' }); const r = s.getBoundingClientRect(); return JSON.stringify({ x: r.left, y: r.top, w: r.width, h: r.height }); })()`));
         const say = async (label) => console.log(label + await run(`(() => { const b = document.getElementById('pp-band'); return (b && b.style.display !== 'none' ? 'band shown' : 'no band') + ' | ' + document.getElementById('pp-chart-read').textContent.replace(/\\s+/g, ' ').trim(); })()`));
-        const dragAcross = async (f1, f2) => { const b = await at(); await sleep(300); const y = b.y + b.h / 2, x1 = b.x + b.w * f1, x2 = b.x + b.w * f2;
-          await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x1, y }); await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: x1, y, button: 'left', clickCount: 1 });
-          for (let i = 1; i <= 8; i++) await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x1 + (x2 - x1) * i / 8, y, button: 'left', buttons: 1 });
-          await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: x2, y, button: 'left', clickCount: 1 }); await sleep(300); };
-        if (process.env.TOUCH) {      // TOUCH=1: the same with a finger (touch events), as on a phone
+        if (process.env.TOUCH) {
           await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
           const b = await at(); await sleep(300); const y = b.y + b.h / 2, x1 = b.x + b.w * 0.25, x2 = b.x + b.w * 0.8;
           await send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: x1, y }] });
           for (let i = 1; i <= 8; i++) await send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x1 + (x2 - x1) * i / 8, y }] });
-          await send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await sleep(300); await say('finger drag: ');
-          const yy = b.y + b.h / 2, xx = b.x + b.w * 0.5; await send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: xx, y: yy }] }); await send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await sleep(300); await say('after a tap: ');
+          await sleep(200); await say('finger drag: ');
+          await send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await sleep(300); await say('finger released: ');
+          await send('Emulation.setTouchEmulationEnabled', { enabled: false });
         }
-        await dragAcross(0.3, 0.85); await say('drag: ');
-        await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 5, y: 5 }); await sleep(200); await say('pointer away: ');
-        await run(`window.practicePortfolio.setPlans([], { realizedUsd: null }); true`); await sleep(500); await say('after a redraw: ');
-        const b = await at(); await sleep(200); const y = b.y + b.h / 2, x = b.x + b.w * 0.5;
-        await send('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', clickCount: 1 }); await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 }); await sleep(300); await say('after a click: ');
-        await dragAcross(0.85, 0.2); await say('dragged back to front: ');
+        const b = await at(); await sleep(300); const y = b.y + b.h / 2, x1 = b.x + b.w * 0.3, x2 = b.x + b.w * 0.85;
+        await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x1, y }); await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: x1, y, button: 'left', clickCount: 1 });
+        for (let i = 1; i <= 8; i++) await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x1 + (x2 - x1) * i / 8, y, button: 'left', buttons: 1 });
+        await sleep(200); await say('drag: ');
+        await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: x2, y, button: 'left', clickCount: 1 }); await sleep(300); await say('released: ');
       }
       await run(`(() => { const c = document.querySelector('#practice-portfolio'); if (${process.env.OPEN_MORE ? 1 : 0}) { const m = document.querySelector('#pp-more'); if (m) m.open = true; } c.scrollIntoView(); window.scrollBy(0, -80); return 1; })()`); await sleep(400);
       const rect = JSON.parse(await run(`(() => { const r = document.querySelector('#practice-portfolio').getBoundingClientRect(); return JSON.stringify({ x: 0, y: Math.max(0, r.top + window.scrollY - 70), width: window.innerWidth, height: Math.min(1500, r.height + 90) }); })()`));

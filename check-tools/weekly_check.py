@@ -254,11 +254,11 @@ if not QUICK:
         note('4. Background run and visitors', "the Practice portfolio's market list opens again on the market chosen, not at its top", 'reopen: PASS' in out, line)
     except Exception as e:
         note('4. Background run and visitors', "the Practice portfolio graph: pressing its view buttons moves nothing", False, str(e)[:200])
-    # click and drag across the graph measures the stretch, by mouse and by finger; a click clears it (26 Oct 2026, the owner)
-    code, out = run(['node', 'live_practice_check.js'], 300, env={'REAL_USER': OWNER, 'WIDTH': '390', 'DRAG': '1', 'TOUCH': '1'})
-    lines = [l for l in out.splitlines() if l.split(':')[0] in ('drag', 'finger drag', 'after a redraw', 'after a click')]
-    ok = any(l.startswith('drag: band shown') for l in lines) and any(l.startswith('finger drag: band shown') for l in lines) and any(l.startswith('after a redraw: band shown') for l in lines) and any(l.startswith('after a click: no band') for l in lines)
-    note('4. Background run and visitors', "the Practice portfolio graph: a click and drag (mouse or finger) measures the stretch against the S&P 500, stays through a refresh, and a click clears it", ok, [l[:120] for l in lines] or out.strip().splitlines()[-2:])
+    # hold and drag across the graph measures the stretch, by mouse and by finger; letting go clears it (26 Oct 2026, the owner)
+    code, out = run(['node', 'live_practice_check.js'], 300, env={'REAL_USER': OWNER, 'WIDTH': '390', 'DRAG': '1', 'TOUCH': '1', 'SHOT': os.path.join(tempfile.gettempdir(), 'stockiq-drag.png')})
+    lines = [l for l in out.splitlines() if l.split(':')[0] in ('drag', 'released', 'finger drag', 'finger released')]
+    ok = all(any(l.startswith(w) for l in lines) for w in ('drag: band shown', 'released: no band', 'finger drag: band shown', 'finger released: no band'))
+    note('4. Background run and visitors', "the Practice portfolio graph: holding and dragging (mouse or finger) measures the stretch against the S&P 500, and letting go clears it", ok, [l[:120] for l in lines] or out.strip().splitlines()[-2:])
     # every public page fits a phone (24 Oct 2026, the owner: "make sure mobile version of the site is good too")
     for size in ('390x844', '360x740'):
         code, out = run(['node', 'phone_check.js'], 600, env={'SIZE': size})

@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-26",
+   "what": "The graph's measured stretch shows while you hold and clears when you let go, as broker apps do",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-26",
    "what": "On the graph, a chosen market's line is called the autopilot's buys from that screener, so it cannot be mistaken for the S&P 500 fund's line",
    "found": "session"
   },
@@ -313,11 +318,6 @@
    "at": "2026-10-24",
    "what": "New public pages, one for each of 24 markets plus a hub: the day's top 10 by trend with why each ranks there, updated every day, for visitors from Google (stockiq.tech/screeners-today.html)",
    "found": "session"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Fed decision days studied on five years of prices: no direction, only larger moves, so no rule; each company's results date is now kept so the autopilot can learn whether holding through results helps or hurts",
-   "found": "owner"
   }
  ]
 }

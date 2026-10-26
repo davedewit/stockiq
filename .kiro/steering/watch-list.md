@@ -76,7 +76,7 @@ Rules:
 
 ### 2026-10-26 · Click and drag on the practice graph
 - **Changed:** `practice-portfolio.js` (`dragStart`, `dragMove`, `dragEnd`, `showMeasure`, `reMeasure`; a band `#pp-band` in the picture):
-  a drag measures the stretch for the line on show and the S&P 500 fund; a click or tap clears it.
-- **Could break:** the read-out stuck on a stretch, a phone's page scroll caught by the graph, a swipe on the graph opening the menu.
+  while held, a drag measures the stretch for the line on show and the S&P 500 fund; letting go clears it (as broker apps do).
+- **Could break:** the read-out stuck on a stretch after letting go, a phone's page scroll caught by the graph, a swipe on the graph opening the menu.
 - **Undo:** `git revert` the website commit "Practice portfolio: click and drag across the graph".
 - **Remove after:** 2026-11-09
