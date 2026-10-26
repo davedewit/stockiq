@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-26",
+   "what": "The S&P 500 card on the Practice portfolio shows the fund's own day (Today, or Last trading day while the US market is shut), to set beside the account's Today",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-26",
    "what": "Website deploys clear the cache once, not file by file: that cost $0.39 on 25 Oct after the month's 1,000 free paths ran out; the daily cost check now counts them",
    "found": "check"
   },
@@ -312,11 +317,6 @@
   {
    "at": "2026-10-23",
    "what": "The Improvements tab now opens with the story: the score against an S&P 500 fund, what testing has proven (with its figures), what is being tested for profit and how far along, and what is next",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "The Improvements tab opens with three plain lines: what it works on next, what the last session improved, and what is being tested",
    "found": "owner"
   }
  ]
