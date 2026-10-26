@@ -18,7 +18,10 @@ ACCOUNT = '114366766218'
 LIMIT, HARD = 1.00, 1.50              # the owner's monthly target for StockIQ's running cost, and his most in a heavy month
 KNOWN_CE = {'2026-10': 2.65}          # Cost Explorer charge already explained (the session's tests of 17 Oct 2026)
 # a finding already fixed, left out until its old days have passed (then checked again as usual)
-FIXED_UNTIL = {'stockiq-dashboard-analysis-history': '2026-10-27'}   # the cleanup's 64 scans a day, fixed 25 Oct 13:20 UTC
+FIXED_UNTIL = {'stockiq-dashboard-analysis-history': '2026-10-27',   # the cleanup's 64 scans a day, fixed 25 Oct 13:20 UTC
+               'AmazonCloudFront': '2026-10-28',                     # one cache-clear path per file, fixed 26 Oct (web_deploy.sh)
+               'AmazonS3': '2026-10-28'}                             # the one-off re-upload of ~3,000 stock pages on 24 Oct
+KNOWN_PATHS = {'2026-10': 1100}     # cache-clear paths already explained for the month (the per-file clears of 23-25 Oct)
 TABLES = ['stockiq-dashboard-analysis-history', 'stockiq-ai-trader', 'stockiq-user-tracking', 'stockiq-paper-portfolios',
           'stockiq-ai-trader-journal', 'stockiq-coinspot-prediction-status', 'stockiq-coinspot-predictions', 'stockiq-usage-tracker',
           'stockiq-email-subscribers', 'stockiq-ai-chat-limits', 'stockiq-ai-chat-stats']
@@ -62,7 +65,7 @@ def run():
             continue
         running += latest
         rises = [b - a for a, b in zip(cum, cum[1:]) if b >= a]          # a fall is the month starting again
-        if jumped(rises, 0.02):
+        if jumped(rises, 0.02) and now.strftime('%Y-%m-%d') >= FIXED_UNTIL.get(d['ServiceName'], ''):
             out.append(('problem', f"{d['ServiceName']} cost ${rises[-1]:.2f} yesterday, against about ${statistics.median(rises[:-1]):.2f} a day "
                                    f"before: find what changed (CloudWatch usage of that service, the day's deploys)"))
     known = KNOWN_CE.get(now.strftime('%Y-%m'), 0)
@@ -114,7 +117,7 @@ def run():
                 paths += known[i['Id']]
         os.makedirs(os.path.dirname(keep), exist_ok=True)
         json.dump(known, open(keep, 'w'))
-        if paths >= 700:
+        if paths >= max(700, KNOWN_PATHS.get(month, 0)):
             out.append(('problem' if paths >= 1000 else 'idea', f"{paths:,} CloudFront cache-clear paths this month (1,000 are free, then $0.005 each): "
                         f"a deploy should clear '/*' once, not each file (web_deploy.sh)"))
     except Exception as e:
