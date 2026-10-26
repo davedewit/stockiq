@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-26",
+   "what": "The search's news box shows only when a suggestion is picked, so the suggestion list is never hidden",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-26",
    "what": "The home page's search boxes show a share's latest 3 news headlines and a link to its page when it is picked (or its code typed)",
    "found": "owner"
   },
@@ -312,11 +317,6 @@
   {
    "at": "2026-10-24",
    "what": "Practice portfolio: Show the figures (and every other fold) stays open when prices refresh; the figures list shows the latest 14 days (7 on a phone) with Show all; the graph opens on All after a page refresh",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "The autopilot now knows the market's calendar: big scheduled announcements (Fed, ECB, inflation, jobs) for the next two days and what came out in the last day go to its AI with the market's headlines when it chooses; they show in What happens next; every buy records how close it was to one and to its company's results; the month's OpenAI cost is on the Admin page",
    "found": "owner"
   }
  ]
