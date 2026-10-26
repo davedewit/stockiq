@@ -4,7 +4,7 @@
   {
    "id": "home-hero",
    "part": "Home page: the top, its four numbers, the two buttons",
-   "where": "index.html, top",
+   "where": "index.html, top; symbol-news.js (the search boxes' latest news)",
    "last": "2026-10-23",
    "log": [
     {

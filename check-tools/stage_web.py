@@ -24,7 +24,10 @@ def before(f):
     r = subprocess.run(['git', '-C', WEB, 'show', f'HEAD:{f}'], capture_output=True)
     if r.returncode == 0:
         return hashlib.sha256(r.stdout).hexdigest()
-    return sha(os.path.join(WEB, f)) if os.path.exists(os.path.join(WEB, f)) else 'none'
+    # not in git: a generated page git ignores keeps its fingerprint in website/; any other file is new (26 Oct 2026: symbol-news.js,
+    # new and not yet committed, read as "unchanged" and was left out of the deploy)
+    ignored = subprocess.run(['git', '-C', WEB, 'check-ignore', '-q', f]).returncode == 0
+    return sha(os.path.join(WEB, f)) if ignored and os.path.exists(os.path.join(WEB, f)) else 'none'
 
 
 def main(a):

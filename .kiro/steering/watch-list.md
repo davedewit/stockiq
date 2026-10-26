@@ -80,3 +80,12 @@ Rules:
 - **Could break:** the read-out stuck on a stretch after letting go, a phone's page scroll caught by the graph, a swipe on the graph opening the menu.
 - **Undo:** `git revert` the website commit "Practice portfolio: click and drag across the graph".
 - **Remove after:** 2026-11-09
+
+### 2026-10-26 · The home page's search shows a share's latest news
+- **Changed:** `symbol-news.js` (new; `symbolNews.show/hide`), `index.html` (a box under each search, shown when a suggestion is picked or
+  a code with a stock page is typed and no suggestions wait). Reads the share's stock page (its NEWS section): no new running cost.
+  `stage_web.py` now stages a brand-new file (it read an uncommitted new file as unchanged).
+- **Could break:** the box covering the suggestions, a stock page's news markup changing (`update_stock_news.py`) so no headlines are
+  found (the box then says "No recent articles"), the side panel's search height. `search_news_check.js` (weekly) tests it.
+- **Undo:** `git revert` the website commit "Home page search: a picked share's latest news" and deploy index.html.
+- **Remove after:** 2026-11-09

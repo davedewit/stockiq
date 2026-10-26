@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-26",
+   "what": "The home page's search boxes show a share's latest 3 news headlines and a link to its page when it is picked (or its code typed)",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-26",
    "what": "Your own buys and AI autopilot on the graph each draw the gold S&P 500 line too (the same money in the fund on the same days), so every view compares with the S&P the same way",
    "found": "owner"
   },
@@ -312,11 +317,6 @@
   {
    "at": "2026-10-24",
    "what": "The autopilot now knows the market's calendar: big scheduled announcements (Fed, ECB, inflation, jobs) for the next two days and what came out in the last day go to its AI with the market's headlines when it chooses; they show in What happens next; every buy records how close it was to one and to its company's results; the month's OpenAI cost is on the Admin page",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Practice portfolio graph: the 3m, 6m, 1y and longer buttons are hidden until the account is old enough, and pressing Your own buys or AI autopilot no longer moves the buttons or the graph",
    "found": "owner"
   }
  ]

@@ -263,6 +263,9 @@ if not QUICK:
     lines = [l for l in out.splitlines() if l.split(':')[0] in ('drag', 'released', 'finger drag', 'finger released')]
     ok = all(any(l.startswith(w) for l in lines) for w in ('drag: band shown', 'released: no band', 'finger drag: band shown', 'finger released: no band'))
     note('4. Background run and visitors', "the Practice portfolio graph: holding and dragging (mouse or finger) measures the stretch against the S&P 500, and letting go clears it", ok, [l[:120] for l in lines] or out.strip().splitlines()[-2:])
+    # the home page's search shows a share's latest news (26 Oct 2026, the owner)
+    code, out = run(['node', 'search_news_check.js'], 300)
+    note('4. Background run and visitors', "the home page's search boxes show a picked share's latest news (desktop and phone), and nothing for a share without a page", code == 0 and 'ALL PASS' in out, [l for l in out.splitlines() if l.startswith('FAIL')][:3] or out.strip().splitlines()[-1:])
     # every public page fits a phone (24 Oct 2026, the owner: "make sure mobile version of the site is good too")
     for size in ('390x844', '360x740'):
         code, out = run(['node', 'phone_check.js'], 600, env={'SIZE': size})
