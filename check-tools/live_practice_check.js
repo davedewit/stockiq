@@ -109,9 +109,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       }
       if (process.env.MOVES) {
         for (const key of ['value', 'own', 'ai', 'value']) {
-          console.log('moves ' + key + ': ' + await run(`(() => { const b = document.querySelector('[data-pp="chart-key"][data-id="${key}"]'); if (!b) return 'no button'; b.click();
+          console.log('moves ' + key + ': ' + await run(`(() => { let b = document.querySelector('[data-pp="chart-key"][data-id="${key}"]'); if (!b) { const id = '${key}' === 'value' ? '' : '${key}'; const t = document.querySelector('[data-pp="mkt-toggle"]'); if (t && !document.querySelector('.pp-mkt.open')) t.click(); b = document.querySelector('[data-pp="market"][data-id="' + id + '"]'); } if (!b) return 'no button'; b.click();
             return new Promise(r => setTimeout(() => { const y = (q) => { const e = document.querySelector(q); return e ? Math.round(e.getBoundingClientRect().top + window.scrollY) : '-'; };
-              r('tabs ' + y('.pp-chart-tabs') + ', by-market ' + y('.pp-mkt-btn') + ', read ' + y('#pp-chart-read') + ', picture ' + y('#pp-chart svg') + '; ranges: ' + [...document.querySelectorAll('[data-pp="chart-range"]')].map(x => x.textContent).join(' ')); }, 400)); })()`));
+              const hh = (q) => { const e = document.querySelector(q); return e ? e.getBoundingClientRect().height.toFixed(1) : '-'; }; r('tabs ' + y('.pp-chart-tabs') + ', by-market ' + y('.pp-mkt-btn') + ' (' + hh('.pp-mkt-btn') + ' high), read ' + y('#pp-chart-read') + ' (' + hh('#pp-chart-read') + ')' + ', picture ' + y('#pp-chart svg') + '; ranges: ' + [...document.querySelectorAll('[data-pp="chart-range"]')].map(x => x.textContent).join(' ')); }, 400)); })()`));
         }
       }
       if (process.env.MARKET) { console.log('chosen before the picture: ' + await run(`(() => { const b = document.querySelector('[data-pp="mkt-toggle"]'); if (!b) return 'no menu'; if (!document.querySelector('.pp-mkt.open')) b.click(); ${process.env.MARKET_OPEN ? '' : `const q = document.querySelector('[data-pp="market"][data-id=' + JSON.stringify(${JSON.stringify(process.env.MARKET)}) + ']'); if (q) q.click();`} return (document.querySelector('.pp-mkt-btn') || {}).textContent; })()`)); await sleep(500); }
