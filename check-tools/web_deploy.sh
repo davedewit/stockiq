@@ -32,6 +32,8 @@ for row in $ROWS; do IFS=: read -r f was new <<< "$row"
     *.xml) "${AWS[@]}" s3 cp "$WEB/$f" "s3://$BUCKET/$f" --cache-control "public, max-age=0, s-maxage=3600, must-revalidate" --content-type "application/xml" --only-show-errors; PATHS+=("/$f");;
     *) "${AWS[@]}" s3 cp "$WEB/$f" "s3://$BUCKET/$f" --cache-control "public, max-age=0, s-maxage=3600, must-revalidate" --content-type "text/html; charset=utf-8" --only-show-errors; PATHS+=("/$f");; esac
 done
+# AWS gives 1,000 cleared paths a month free, then $0.005 a path ("/*" counts as one): one path per file cost $0.39 on 25 Oct 2026.
+[ "${#PATHS[@]}" -gt 1 ] && PATHS=("/*")
 INV="$("${AWS[@]}" cloudfront create-invalidation --distribution-id "$DIST" --paths "${PATHS[@]}" --query Invalidation.Id --output text)"
 "${AWS[@]}" cloudfront wait invalidation-completed --distribution-id "$DIST" --id "$INV"
 for row in $ROWS; do IFS=: read -r f was new <<< "$row"; curl -s -o "$TMP/after" "https://stockiq.tech/$f"; cmp -s "$TMP/after" "$WEB/$f" && echo "live $f equals the local file" || stop "the live $f is not the uploaded file"; done

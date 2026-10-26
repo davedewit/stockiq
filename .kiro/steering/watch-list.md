@@ -64,3 +64,12 @@ Rules:
 - **Undo:** `git revert` the website commit "Plan cards: …".
 - **Remove after:** 2026-11-25
 
+
+### 2026-10-26 · Stock news on the news page; one cache clear per deploy
+- **Changed:** `update_stock_news.py` (its pattern for news.html allows a comment before `<footer>`; "Synced" only when written; the
+  same fallback fixed in `Sync_stock_to_news.py`, `remove_news_duplicates.py`, `update_news.py`); `web_deploy.sh` clears `/*` once for
+  2+ files; `site_audit.py` `news-stale` checks the stock news alone; `cost_check.py` counts the month's cache-clear paths.
+- **Could break:** news.html written with a broken end (look: the page's footer missing or doubled after tomorrow's run); stock news
+  stale again (the site check now says so); a CloudFront cost rise of more than a cent a day.
+- **Undo:** `git revert` the commit "Stock news reaches news.html again; one cache clear per deploy".
+- **Remove after:** 2026-11-09

@@ -2,6 +2,16 @@
  "about": "What the sessions changed on the site, newest first, in plain words for the owner's Admin page ('What changed lately'). Add with: python3 check-tools/admin.py change \"<what>\". Nothing private: both repositories are public.",
  "changes": [
   {
+   "at": "2026-10-26",
+   "what": "Website deploys clear the cache once, not file by file: that cost $0.39 on 25 Oct after the month's 1,000 free paths ran out; the daily cost check now counts them",
+   "found": "check"
+  },
+  {
+   "at": "2026-10-26",
+   "what": "Stock news reaches the news page again (it stopped on 24 Oct when the shared footer went in); the site check now watches it",
+   "found": "check"
+  },
+  {
    "at": "2026-10-25",
    "what": "Plan cards now tick only what exists, with alerts, white-label and the other planned features marked 'Coming soon'; signed-in members get a 'Choose a plan' button in the home page's pricing",
    "found": "owner"
@@ -307,16 +317,6 @@
   {
    "at": "2026-10-23",
    "what": "The Improvements tab opens with three plain lines: what it works on next, what the last session improved, and what is being tested",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "At least two of the three parts each session works on are now profit and growth areas, so most of each session goes where the money is",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-23",
-   "what": "Every weekly session now also questions its own process: for each problem you had to point out, why no check caught it first, and that gap is closed too",
    "found": "owner"
   }
  ]

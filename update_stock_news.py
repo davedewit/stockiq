@@ -538,13 +538,15 @@ def update_news_html(items):
         # Insert after blog-content div
         content_start = html.find('<div class="blog-content">')
         if content_start == -1:
-            return
+            print("❌ Could not find the article list in news.html")
+            return False
         
         before = html[:content_start + len('<div class="blog-content">')]
-        after_match = re.search(r'</div>\s*<footer', html)
+        # A comment may stand before the footer (shared_parts.py writes one since 24 Oct 2026)
+        after_match = re.search(r'</div>\s*(?:<!--.*?-->\s*)*<footer', html, re.DOTALL)
         if not after_match:
             print("❌ Could not find footer pattern in news.html")
-            return
+            return False
         after = html[after_match.start():]
         
         new_html = before + '\n' + '\n'.join(all_articles) + '''        </div>
@@ -557,11 +559,13 @@ def update_news_html(items):
         
         with open(NEWS_HTML_PATH, 'w') as f:
             f.write(new_html)
+        return True
     
     except Exception as e:
         import traceback
         print(f"Error updating news.html: {e}")
         traceback.print_exc()
+        return False
 
 def update_news_js(items):
     """Add/update stock news in news.js, preserving general market news"""
@@ -1059,8 +1063,8 @@ def main():
             # Update news.html and news.js every 10 articles
             if len(updated_items) >= batch_size:
                 update_news_js(updated_items)
-                update_news_html(updated_items)
-                print(f"   📝 Synced {len(updated_items)} articles to news.html")
+                if update_news_html(updated_items):
+                    print(f"   📝 Synced {len(updated_items)} articles to news.html")
                 updated_items = []  # Clear batch
     
     print(f"\n✅ Updated {updates_made} stock pages")
@@ -1069,8 +1073,8 @@ def main():
     if len(updated_items) > 0:
         update_news_js(updated_items)
         print(f"✅ Added {len(updated_items)} items to homepage news")
-        update_news_html(updated_items)
-        print(f"✅ Added {len(updated_items)} items to news.html")
+        if update_news_html(updated_items):
+            print(f"✅ Added {len(updated_items)} items to news.html")
 
 if __name__ == '__main__':
     main()

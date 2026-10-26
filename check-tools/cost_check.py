@@ -97,6 +97,28 @@ def run():
             out.append(('problem', f"Lambda calls jumped to {s[-1]:,.0f} yesterday (usual about {statistics.median(s[:-1]):,.0f}): find which function"))
         if statistics.mean(s[-3:]) * 30 > 900000:
             out.append(('problem', f"Lambda calls on course for about {statistics.mean(s[-3:]) * 30:,.0f} a month, near the free million"))
+    # 4. CloudFront cache clears: 1,000 paths a month free, then $0.005 a path ("/*" is one). 25 Oct 2026: one path per file in the
+    # one-off deploys cost $0.39. Listing and reading clears is free; a clear never changes, so its count is kept (audit/cf_paths.json)
+    try:
+        import json, os
+        keep = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'audit', 'cf_paths.json')
+        known = json.load(open(keep)) if os.path.exists(keep) else {}
+        cf = boto3.Session(profile_name='default', region_name='us-east-1').client('cloudfront')
+        month, paths = now.strftime('%Y-%m'), 0
+        for page in cf.get_paginator('list_invalidations').paginate(DistributionId='EHXV50CPHY07R'):
+            for i in page['InvalidationList'].get('Items', []):
+                if i['CreateTime'].strftime('%Y-%m') != month:
+                    continue
+                if i['Id'] not in known:
+                    known[i['Id']] = cf.get_invalidation(DistributionId='EHXV50CPHY07R', Id=i['Id'])['Invalidation']['InvalidationBatch']['Paths']['Quantity']
+                paths += known[i['Id']]
+        os.makedirs(os.path.dirname(keep), exist_ok=True)
+        json.dump(known, open(keep, 'w'))
+        if paths >= 700:
+            out.append(('problem' if paths >= 1000 else 'idea', f"{paths:,} CloudFront cache-clear paths this month (1,000 are free, then $0.005 each): "
+                        f"a deploy should clear '/*' once, not each file (web_deploy.sh)"))
+    except Exception as e:
+        out.append(('idea', f'could not count the CloudFront cache clears: {e}'))
     return out, running
 
 

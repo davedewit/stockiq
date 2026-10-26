@@ -46,7 +46,7 @@ if duplicates_removed:
     
     after_match = re.search(r'</div>\s*<div style="text-align: center', content)
     if not after_match:
-        after_match = re.search(r'</div>\s*<footer', content)
+        after_match = re.search(r'</div>\s*(?:<!--.*?-->\s*)*<footer', content, re.DOTALL)
     
     if after_match:
         after = content[after_match.start():]

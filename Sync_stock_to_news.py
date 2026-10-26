@@ -136,7 +136,7 @@ if new_articles:
     before = news_html[:content_start + len('<div class="blog-content">')]
     after_match = re.search(r'</div>\s*<div style="text-align: center', news_html)
     if not after_match:
-        after_match = re.search(r'</div>\s*<footer', news_html)
+        after_match = re.search(r'</div>\s*(?:<!--.*?-->\s*)*<footer', news_html, re.DOTALL)
     
     if after_match:
         after = news_html[after_match.start():]

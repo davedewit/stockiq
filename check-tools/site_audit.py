@@ -357,6 +357,14 @@ def main():
             age = (_dtn.now(_tzn.utc) - _dtn.fromisoformat(max(ts)).replace(tzinfo=_tzn.utc)).total_seconds() / 86400
             if age > 2:
                 find('news-stale', 'problem', f'the newest article is {age:.1f} days old ({max(ts)[:16]} UTC): the news steps are not adding articles (update_news.py, update_stock_news.py in ~/stockiq-daily.log)', f)
+    # the stock news alone: from 24 to 26 Oct 2026 no stock article reached news.html (a pattern broken by the shared footer)
+    # while the general news stayed fresh, so the check above passed
+    st = [m.group(1) for a in re.findall(r'<article class="blog-post".*?</article>', src.get('news.html', ''), re.DOTALL)
+          if 'Market News' not in a for m in [re.search(r'data-timestamp="(20\d\d-\d\d-\d\dT\d\d:\d\d:\d\d)', a)] if m]
+    if st:
+        age = (_dtn.now(_tzn.utc) - _dtn.fromisoformat(max(st)).replace(tzinfo=_tzn.utc)).total_seconds() / 86400
+        if age > 2:
+            find('news-stale', 'problem', f'the newest stock article is {age:.1f} days old ({max(st)[:16]} UTC): update_stock_news.py is not writing news.html ("Could not find" in ~/stockiq-daily.log)', 'news.html')
 
     # one-count: the visitor's free-use count is worked out in one place, auth.js (getAnonymousUsageCount: the server's count by
     # IP and the browser's own note). 25 Oct 2026, the owner on his phone: the dashboard asked the server itself and read 1/1

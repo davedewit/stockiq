@@ -1048,7 +1048,7 @@ def update_news_html(new_items):
         before_content = html_content[:content_start + len('<div class="blog-content">')]
         after_content_match = re.search(r'</div>\s*<div style="text-align: center', html_content)
         if not after_content_match:
-            after_content_match = re.search(r'</div>\s*</div>\s*<footer', html_content)
+            after_content_match = re.search(r'</div>\s*</div>\s*(?:<!--.*?-->\s*)*<footer', html_content, re.DOTALL)
         if not after_content_match:
             print("Error: Could not find end of blog-content")
             return
