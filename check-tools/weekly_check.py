@@ -248,6 +248,10 @@ if not QUICK:
         code, out = run(['node', 'live_practice_check.js'], 300, env={'REAL_USER': OWNER, 'WIDTH': '1100', 'MOVES': '1', 'MARKETS': mk, 'SHOT': os.path.join(tempfile.gettempdir(), 'stockiq-moves.png')})
         spots = {re.sub(r'^moves \w+: ', '', l) for l in out.splitlines() if l.startswith('moves ')}
         note('4. Background run and visitors', "the Practice portfolio graph: pressing All markets, Your own buys and AI autopilot moves nothing (1100 wide)", len(spots) == 1, sorted(spots)[:3] or out.strip().splitlines()[-2:])
+        # the market list reopens on the market chosen, not at its top (26 Oct 2026, the owner)
+        code, out = run(['node', 'live_practice_check.js'], 300, env={'REAL_USER': OWNER, 'MARKETS': mk, 'MARKET': 'last', 'REOPEN': '1'})
+        line = next((l for l in out.splitlines() if l.startswith('reopen: ')), out.strip().splitlines()[-1:] or ['no answer'])
+        note('4. Background run and visitors', "the Practice portfolio's market list opens again on the market chosen, not at its top", 'reopen: PASS' in out, line)
     except Exception as e:
         note('4. Background run and visitors', "the Practice portfolio graph: pressing its view buttons moves nothing", False, str(e)[:200])
     # every public page fits a phone (24 Oct 2026, the owner: "make sure mobile version of the site is good too")
