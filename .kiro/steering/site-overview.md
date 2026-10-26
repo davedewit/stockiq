@@ -210,7 +210,13 @@ warns about; one change at a time, measured, with its experiment entry.
   website deploys clear the cache once (`/*`; 1,084 paths this month, $0.39 past the free 1,000; `cost_check.py` now counts them);
   the S&P 500 card shows the fund's own day. Admin #13, #14 done. **Still open for Sunday's weekly session: #8, #11, #12**, and the
   three parts (home-pricing, plans, funnel; today's daily review has findings for each: the trial's "15 analyses (5 a day)", no
-  confirmation after paying). The Admin card reads "When you can" until the cost figures of 25 Oct age out (27 Oct).
+  confirmation after paying). The two cost spikes wait out their days in `cost_check.py` `FIXED_UNTIL` (to 28 Oct); October's explained
+  cache-clear paths are `KNOWN_PATHS`. **The practice graph, later the same day (the owner's asks):** the S&P 500 card shows the fund's own
+  day; the "By market" list opens on the market chosen; hold and drag measures a stretch (clears on release); a market's line is named as
+  the autopilot's buys; **every view (All markets, Your own buys, AI autopilot, a market) draws the gold S&P 500 line**, the part views as
+  the same money in the fund on the same days; default stays All markets (decided with him). Read on his account: whole account ahead of
+  the fund by $153, his own buys ahead by $201, **the autopilot behind by $400 across all its markets** (its S&P 500 buys ahead by $423).
+  New checks in the weekly run: `live_practice_check.js` REOPEN, DRAG/TOUCH, VIEWS; MOVES prints heights.
 - **25 Oct 2026 (a short session on the owner's finds):** anonymous free analysis one a day on a phone too; register page spacing and
   the menu's place; the auto-delete cleanup's 64 table scans a day (most of the DynamoDB bill, and one account's setting applied to all);
   checks before every website deploy (`pre_deploy.py`); the daily email written from the log (`daily_report.py`); AWS cost checked daily
