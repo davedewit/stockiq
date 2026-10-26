@@ -254,6 +254,10 @@ if not QUICK:
         note('4. Background run and visitors', "the Practice portfolio's market list opens again on the market chosen, not at its top", 'reopen: PASS' in out, line)
     except Exception as e:
         note('4. Background run and visitors', "the Practice portfolio graph: pressing its view buttons moves nothing", False, str(e)[:200])
+    # each view button draws the S&P 500 fund beside it: the whole account, your own buys, the autopilot's (26 Oct 2026, the owner)
+    code, out = run(['node', 'live_practice_check.js'], 300, env={'REAL_USER': OWNER, 'WIDTH': '1100', 'VIEWS': '1', 'SHOT': os.path.join(tempfile.gettempdir(), 'stockiq-views.png')})
+    lines = [l for l in out.splitlines() if l.startswith('view ')]
+    note('4. Background run and visitors', "the Practice portfolio graph: All markets, Your own buys and AI autopilot each draw the S&P 500 fund beside them", len(lines) == 3 and all('gold line drawn' in l for l in lines), [l[:110] for l in lines] or out.strip().splitlines()[-2:])
     # hold and drag across the graph measures the stretch, by mouse and by finger; letting go clears it (26 Oct 2026, the owner)
     code, out = run(['node', 'live_practice_check.js'], 300, env={'REAL_USER': OWNER, 'WIDTH': '390', 'DRAG': '1', 'TOUCH': '1', 'SHOT': os.path.join(tempfile.gettempdir(), 'stockiq-drag.png')})
     lines = [l for l in out.splitlines() if l.split(':')[0] in ('drag', 'released', 'finger drag', 'finger released')]

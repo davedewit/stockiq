@@ -107,6 +107,13 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
               const more = document.querySelector('[data-pp="figs-all"]');
               r('opened ' + ids.join(', ') + '; closed after the redraw: ' + (shut.length ? shut.join(', ') : 'none') + '; figures rows ' + (f ? f.querySelectorAll('tr').length - 1 : '-') + (more ? ', button: ' + more.textContent : '')); }, 600); }, 300)); })()`));
       }
+      // VIEWS=1: press each view button and read what the graph says, and whether the gold S&P 500 line is drawn (26 Oct 2026)
+      if (process.env.VIEWS) {
+        for (const key of ['value', 'own', 'ai']) {
+          console.log('view ' + key + ': ' + await run(`(() => { const b = document.querySelector('[data-pp="chart-key"][data-id="${key}"]'); if (!b) return 'no button'; b.click();
+            return new Promise(r => setTimeout(() => r((document.querySelector('.pp-fund') ? 'gold line drawn' : 'no gold line') + ' | ' + document.getElementById('pp-chart-read').textContent.replace(/\\s+/g, ' ').trim() + ' | note: ' + ((document.querySelector('.pp-chart-note') || {}).textContent || '').replace(/\\s+/g, ' ').slice(180, 520)), 400)); })()`));
+        }
+      }
       if (process.env.MOVES) {
         for (const key of ['value', 'own', 'ai', 'value']) {
           console.log('moves ' + key + ': ' + await run(`(() => { let b = document.querySelector('[data-pp="chart-key"][data-id="${key}"]'); if (!b) { const id = '${key}' === 'value' ? '' : '${key}'; const t = document.querySelector('[data-pp="mkt-toggle"]'); if (t && !document.querySelector('.pp-mkt.open')) t.click(); b = document.querySelector('[data-pp="market"][data-id="' + id + '"]'); } if (!b) return 'no button'; b.click();

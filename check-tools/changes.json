@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-26",
+   "what": "Your own buys and AI autopilot on the graph each draw the gold S&P 500 line too (the same money in the fund on the same days), so every view compares with the S&P the same way",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-26",
    "what": "The graph's measured stretch shows while you hold and clears when you let go, as broker apps do",
    "found": "owner"
   },
@@ -313,11 +318,6 @@
    "at": "2026-10-24",
    "what": "Practice portfolio graph: the 3m, 6m, 1y and longer buttons are hidden until the account is old enough, and pressing Your own buys or AI autopilot no longer moves the buttons or the graph",
    "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "New public pages, one for each of 24 markets plus a hub: the day's top 10 by trend with why each ranks there, updated every day, for visitors from Google (stockiq.tech/screeners-today.html)",
-   "found": "session"
   }
  ]
 }
