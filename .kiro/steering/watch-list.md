@@ -73,3 +73,10 @@ Rules:
   stale again (the site check now says so); a CloudFront cost rise of more than a cent a day.
 - **Undo:** `git revert` the commit "Stock news reaches news.html again; one cache clear per deploy".
 - **Remove after:** 2026-11-09
+
+### 2026-10-26 · Click and drag on the practice graph
+- **Changed:** `practice-portfolio.js` (`dragStart`, `dragMove`, `dragEnd`, `showMeasure`, `reMeasure`; a band `#pp-band` in the picture):
+  a drag measures the stretch for the line on show and the S&P 500 fund; a click or tap clears it.
+- **Could break:** the read-out stuck on a stretch, a phone's page scroll caught by the graph, a swipe on the graph opening the menu.
+- **Undo:** `git revert` the website commit "Practice portfolio: click and drag across the graph".
+- **Remove after:** 2026-11-09

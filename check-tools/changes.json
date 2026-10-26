@@ -3,6 +3,16 @@
  "changes": [
   {
    "at": "2026-10-26",
+   "what": "On the graph, a chosen market's line is called the autopilot's buys from that screener, so it cannot be mistaken for the S&P 500 fund's line",
+   "found": "session"
+  },
+  {
+   "at": "2026-10-26",
+   "what": "Click and drag across the practice graph (a finger on a phone) shows the change between the two moments, for the account or the market chosen and for the S&P 500 fund over the same stretch",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-26",
    "what": "The By market list on the graph opens on the market you chose, not at its top",
    "found": "owner"
   },
@@ -308,16 +318,6 @@
    "at": "2026-10-24",
    "what": "Fed decision days studied on five years of prices: no direction, only larger moves, so no rule; each company's results date is now kept so the autopilot can learn whether holding through results helps or hurts",
    "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "The daily update's email says when it started, how long it took, and warns (⚠️) when a step failed inside a run that still finished",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "The daily update had stopped refreshing the stock pages' figures on 24 Oct (too many open files under the Mac's scheduler): the limit is raised, from the next run",
-   "found": "check"
   }
  ]
 }
