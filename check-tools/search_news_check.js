@@ -36,7 +36,7 @@ const server = http.createServer((q, r) => {
       const q = d.params.request;
       if (q.url.startsWith(BASE) && q.method === 'GET') { send('Fetch.continueRequest', { requestId: d.params.requestId }); return; }
       let b = {}; try { b = JSON.parse(q.postData || '{}'); } catch (e) { /* not JSON */ }
-      const reply = q.url.includes(LOOKUP) ? { suggestions: b.symbol === 'APPLE' ? [{ symbol: 'AAPL', name: 'Apple Inc.' }, { symbol: 'APLE', name: 'Apple Hospitality REIT' }] : [] }
+      const reply = q.url.includes(LOOKUP) ? { suggestions: b.symbol === 'APPLE' ? [{ symbol: 'AAPL', name: 'Apple Inc.' }, { symbol: 'APLE', name: 'Apple Hospitality REIT' }] : b.symbol === 'ZZQX' ? [] : [{ symbol: b.symbol, name: 'A company' }] }
         : (b.action === 'get_usage' || b.action === 'increment_usage') ? { usage: 0, success: true } : {};
       const js = /\.js(\?|$)/.test(q.url), css = /\.css(\?|$)|fonts\.googleapis/.test(q.url);
       send('Fetch.fulfillRequest', { requestId: d.params.requestId, responseCode: 200,
@@ -54,11 +54,12 @@ const server = http.createServer((q, r) => {
       await send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile });
       await send('Emulation.setUserAgentOverride', { userAgent: mobile ? 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36' });
       await send('Page.navigate', { url: BASE + 'index.html' }); await sleep(2500);
-      await type('#stock-search', withNews);
+      const pick = (list, sym) => js(`(() => { const s = [...document.querySelectorAll('${list} div')].find(d => d.textContent.includes('${sym}')); if (!s) return 'no suggestion'; s.click(); return 'clicked'; })()`);
+      await type('#stock-search', withNews); await pick('#home-symbol-suggestions', withNews); await sleep(1200);
       let b = await box('#home-symbol-news');
-      check(`${size}: typing ${withNews} (it has a stock page with news) shows its headlines`, b.shown && b.links >= 1 && b.page === `stocks/${withNews}.html` && b.wide, JSON.stringify(b).slice(0, 220));
-      const sug = await js(`getComputedStyle(document.getElementById('home-symbol-suggestions')).display`);
-      check(`${size}: with the news on show, the empty suggestion list is closed (nothing covers the news)`, sug === 'none', sug);
+      check(`${size}: picking ${withNews} (it has a stock page with news) shows its headlines, centred under the search`, b.shown && b.links >= 1 && b.page === `stocks/${withNews}.html` && b.wide, JSON.stringify(b).slice(0, 220));
+      const centred = await js(`(() => { const a = document.querySelector('.search-container').getBoundingClientRect(), b = document.getElementById('home-symbol-news').getBoundingClientRect(); return Math.abs(a.left - b.left) < 2 && Math.abs(a.right - b.right) < 2; })()`);
+      check(`${size}: the news box is as wide as the search row and lines up with it`, centred === true, String(centred));
       if (process.env.SHOT) {      // SHOT=<folder>: a picture of the search and its news box
         const r = JSON.parse(await js(`(() => { const e = document.querySelector('.search-container'); e.scrollIntoView({ block: 'start' }); const a = e.getBoundingClientRect(), b = document.getElementById('home-symbol-news').getBoundingClientRect(); return JSON.stringify({ x: 0, y: Math.max(0, a.top + scrollY - 20), width: innerWidth, height: b.bottom - a.top + 40 }); })()`));
         const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip: Object.assign(r, { scale: 1 }) });
@@ -76,7 +77,7 @@ const server = http.createServer((q, r) => {
       check(`${size}: the × clears the news box`, !b.shown, JSON.stringify(b).slice(0, 100));
       if (!mobile) {
         const side = await js(`!!document.getElementById('side-stock-search') && getComputedStyle(document.getElementById('quick-analysis-panel') || document.body).display !== 'none'`);
-        if (side) { await type('#side-stock-search', withNews); b = await box('#side-symbol-news'); check(`${size}: the side panel's search shows the news too`, b.shown && b.links >= 1, JSON.stringify(b).slice(0, 160)); }
+        if (side) { await type('#side-stock-search', withNews); await pick('#side-symbol-suggestions', withNews); await sleep(1200); b = await box('#side-symbol-news'); check(`${size}: the side panel's search shows the news too`, b.shown && b.links >= 1, JSON.stringify(b).slice(0, 160)); }
       }
     }
     ws.close();
