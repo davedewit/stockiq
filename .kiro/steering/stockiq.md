@@ -1,3 +1,10 @@
+# Session Rules
+
+## Gemini MCP Trigger
+When Dave starts a message with "gemini", "gem", or "gem hi" — or addresses Gemini directly — use the Gemini MCP tool (`gemini::gemini_chat`) for that request. Load it and call it rather than responding as Kiro alone. This applies every session.
+
+---
+
 # StockIQ Project Documentation
 
 ## Overview
