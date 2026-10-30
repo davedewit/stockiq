@@ -1917,7 +1917,12 @@ with `document.querySelector('h3')`.
   third card appears with the others (6 price requests instead of 32; `live_practice_check.js TIME=1` reports it). **The Admin page's
   decision card splits the gap to the S&P 500** (`splitHtml`, from `figures().ownValue`): choosing shares (account against the same
   markets) and choosing markets (those markets against the S&P 500); questions.md 54 and 55. On 30 Oct: +$1,260 and -$2,180; the coins of
-  10-17 Oct alone cost about $1,776 against the S&P 500 (the autopilot has bought none since 14 Oct: coins are not in `MAIN_PICK`). Before that: the badge was the same money put into that row's own index on the same days (`bench`, from `homeGap`; the sector funds and
+  10-17 Oct alone cost about $1,776 against the S&P 500 (the autopilot has bought none since 14 Oct: coins are not in `MAIN_PICK`).
+  **Coins: decided 30 Oct 2026** (the owner left it to the session): the autopilot never buys coins when it chooses the markets (`apply_pick`
+  unticks the coin screener, "or is coins"); a user on Manual may still tick it. The old coin trades stay in the record (the money was lost),
+  and the S&P card adds one line: where the account stands without them (`coinsVsSpy`; the Admin split gives their part too). **The By market
+  list is in dollars only** (no "Total bought" column: the sum of every buy, $531,140 on 30 Oct, read as money at risk); its summary counts
+  the screeners it has ever bought from (27), not those ticked now. Before that: the badge was the same money put into that row's own index on the same days (`bench`, from `homeGap`; the sector funds and
   his own buys against the S&P 500, coins against nothing); the grey line under it names the index and gives the S&P 500 in dollars;
   All markets is every buy added up against its own market (the third card); the S&P reconciliation ("how the whole account's gap adds
   up") is folded underneath. The paragraph below describes the S&P layout it replaced.

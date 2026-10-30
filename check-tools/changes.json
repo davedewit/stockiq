@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-30",
+   "what": "Coins: the autopilot never buys them when it chooses the markets (Manual users can still tick them); the S&P card now says where the account stands without the old coin trades; the By market list shows results in dollars only, without the confusing Total bought column",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
    "what": "The second card is now If all in the S&P 500 instead; the third card loads with the others on a refresh (the index prices come with the holdings' prices: 6 requests instead of 32); the Admin page splits the gap to the S&P 500 into choosing shares and choosing markets",
    "found": "owner"
   },
@@ -308,12 +313,6 @@
    "what": "Sign-up page: three short lines instead of four long ones, and one-click Google or Facebook sign-up above the email form (a 4-week trial measured on sign-ups)",
    "found": "owner",
    "link": "https://stockiq.tech/signup.html"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "The menu no longer jumps sideways when a page opens for a signed-in visitor (the bell appeared a moment late on the daily screener pages and guides); the header check now fails any page whose menu moves while loading",
-   "found": "owner",
-   "link": "https://stockiq.tech/screeners-today.html"
   }
  ]
 }
