@@ -23,6 +23,7 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
   page-weight     a page heavier than 250 KB, or 15% heavier than at the last check
   stale-counts    the home page's count of screeners against screeners.js
   seo-basics      an indexed page without a title, a description or a canonical link; two pages with one title
+  ga4-missing     an indexed page without the Google Analytics tag
   sitemap         the sitemap's form, and every page in it present and indexable
   structured-data JSON-LD that does not parse
   console-noise   console.log lines left in the pages' scripts
@@ -270,6 +271,8 @@ def main():
             find('seo-basics', 'problem', 'no meta description (or a very short one)', p)
         if 'rel="canonical"' not in head:
             find('seo-basics', 'problem', 'no canonical link', p)
+        if 'G-WVETNMPF8V' not in src[p]:          # 30 Oct 2026: four indexed pages had none, so their visits and sign-ups went uncounted
+            find('ga4-missing', 'problem', 'no Google Analytics tag: its visits, sign-ups and payments are not counted', p)
     for t, ps in titles.items():
         if len(ps) > 1:
             find('seo-basics', 'problem', f'{len(ps)} pages share the title "{t[:60]}"', ', '.join(ps))
