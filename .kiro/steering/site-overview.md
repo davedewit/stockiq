@@ -205,11 +205,13 @@ about what the "Still never" list keeps for him (real money, costs above the rul
 settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
 warns about; one change at a time, measured, with its experiment entry.
 
-**WHERE THINGS STAND (rewrite this block at the end of every session; last: 30 Oct 2026, the weekly session)**
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 31 Oct 2026, early, after the weekly session of 30 Oct; the owner away a week)**
 - **The stance (the owner, 30 Oct 2026):** "we are just going to give this a shot ... with future AI updates over the next 6 or so months
   we will continue to find improvements - more profit". Profit first; one tested change at a time; each newer AI model looks again at what
   failed; a plain verdict at month 3 (12 Jan 2027). Visitors and sign-ups stay the priority for the site itself.
-- **The account (30 Oct):** about $97,900, **about $900 behind** the same $100,000 in an S&P 500 fund; 153 finished trades, -0.38% a trade
+- **The account (31 Oct, after the US close of 30 Oct, a falling day: the account -2.6%, the S&P 500 -2.0%):** about $95,070, **$1,747 behind**
+  the same $100,000 in an S&P 500 fund and **$451 behind** the same markets with no AI (so both the choice of shares and of markets lost that
+  day); 156 finished trades. On 30 Oct: about $97,900, about $900 behind the S&P 500; 153 finished trades, -0.38% a trade
   after costs; shares alone +0.22% a trade against the fund (132 trades, inside the margin). The losses: coins -$1,819 and the AI review's
   sales -$1,577 (both stopped 17 Oct), overnight falls through the loss limit -$2,476 (`gap-wait` on trial). Claude's forecast 20%. Month 1
   ($101,000 by 12 Nov) out of reach. His autopilot is automatic (markets by the AI; pace, holdings, budget automatic; Balanced, 5-day
@@ -217,7 +219,10 @@ warns about; one change at a time, measured, with its experiment entry.
   **The gap to the S&P 500 split (30 Oct evening):** choosing shares about **+$1,230** (the account against "Same markets, no AI", the
   Practice tab's third card) and choosing markets about **-$2,220** (those markets against the S&P 500), of which the old coin trades about
   -$1,776: without them the account is about $790 ahead of the S&P 500. The Admin page's decision card shows the split; read it each week.
-- **Live lately** (the detail in section 13 and `watch-list.md`): 30 Oct evening, the Practice portfolio against each buy's own market
+- **Live lately** (the detail in section 13 and `watch-list.md`): 31 Oct, the Practice tab's top made plain (three cards alike, then a line each
+  "Your account against the same markets, no AI / the S&P 500: ▼ $X behind", then cash and holdings; no coin note; v80), "Needs you" quiet about
+  cash while the budget is automatic, the daily run 20 hours apart, the full check's cost item on the owner's rule ($1.50), `--recheck` for the
+  panel and header checks, two tests kept off the live sign-up functions; 30 Oct evening, the Practice portfolio against each buy's own market
   (the graph's gold line, the third card "Same markets, no AI", the By market list as two dollar results side by side, the S&P card
   "If all in the S&P 500 instead" with its line without the coins, the indexes fetched with the prices; v78); 30 Oct, the news.html blow-up fixed and guarded, market news links,
   analytics events and tags, a thank-you after Stripe, the portfolio's figures and the all-markets index line, the Admin page's timeline
@@ -232,7 +237,9 @@ warns about; one change at a time, measured, with its experiment entry.
   stop-watch, theme-sleeve with the AI's daily market calls (3 right of 8 scored on 30 Oct; decide at 30: stop showing it headlines, or
   let it lean the budget as a trial), crypto-no-chasing, market-gauge, company-figures, trend-score, ai-markets, auto-holdings, screener-pages,
   signup-simpler and market-panel-pages (about 21 Nov on GA4 figures). Kept on 30 Oct: polling-cut, daily-review.
-- **Next session, in order:** the opening check first, and its part 8 (the weekly check-in, item by item) when the weekly one is due.
+- **Next session, in order (about 7 Nov, the weekly one):** the opening check first, and its part 8 (the weekly check-in, item by item).
+  The owner's two Admin yeses still open: #15 payments (below, first) and #8 (learning). Read the cost: November should run about $0.90
+  (idea `s3-requests` if S3 stays about 2 cents a day).
   (P0) **Payments security** (the daily review's proposal of 30 Oct; Claude recommends yes, see "Decisions for you"): anyone can cancel a
   paying member's real Stripe subscription through two public addresses (`stockiq-dashboard` get_subscription_id, `stockiq-payment-handler`
   cancel_subscription take whatever they are sent; verified 30 Oct); Stripe's events are not signature-checked; a plan change marks the
@@ -1726,10 +1733,13 @@ is hidden. **Keep the Reports panel first in the page**: one report routine find
 with `document.querySelector('h3')`.
 
 **Practice portfolio** (its own tab, container `#practice-portfolio`):
-- **The top is three figures since 30 Oct 2026** (the owner: "hows my automation doing total and today, and hows s&p doing compared to
-  it", then "it looked alot better with a 3rd box"): **Your account** (its value, the day's move beside it in smaller type, `dayChip`; under
-  it the change since the start), **If in the S&P 500 instead** (the same starting money in the fund now, its day beside it; under it the
-  fund's change since the start and "Your account is $X (Y%) higher / lower") and **Same markets, no AI** (it was "If in their own markets instead"; the owner asked for a name that says which markets, and "no AI picks" broke the wording rule; `ownMarkets`,
+- **The top is three figures since 30 Oct 2026, read alike since 31 Oct** (the owner: "hows my automation doing total and today, and hows s&p
+  doing compared to it", then "it looked alot better with a 3rd box", then on 31 Oct: the exact gaps in each card were clutter). Each card: its
+  value, the day beside it (`dayChip`), the change since the start; order **Your account**, **Same markets, no AI**, **If all in the S&P 500
+  instead**. Under them `.pp-facts`: one line each, "Your account against the same markets, no AI: ▼ $X (p%) behind" and "… against the S&P 500:
+  …" (`vsParts`, `aheadWord`: the arrow is the account's, and the word says it), then "Cash · In holdings". The coin note went (the Admin
+  split keeps `coinsVsSpy`). The weekly sums check reads that line (`sums_agree`). **Same markets, no AI** is the test of the AI's share
+  picks; the S&P 500 is the bar for real money (it decides which markets too). The older detail: **Same markets, no AI** (it was "If in their own markets instead"; the owner asked for a name that says which markets, and "no AI picks" broke the wording rule; `ownMarkets`,
   `homeBench`: the account had each buy's money gone into its own market on the same days: the autopilot's into the index its screener
   comes from, in that market's currency (`homeTrack`); the owner's own buys and the sector funds into an S&P 500 fund; coins at their own
   result; cash as cash; shown once the autopilot has bought). **The graph's gold line is that same sum over time** (`home` / `phome` in
@@ -5691,3 +5701,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     passes alone; `--recheck` now re-runs those checks by themselves. "Needs you" no longer reports short cash while the budget is
     automatic (`stockiq-ai-trader` `QEITzl1O…`, rollback `…_before_autopilot_needsauto_20261030.zip`). Cost: October about $1.47 (the
     cleanup bug and the cache clears, both fixed); November about $0.90 at the present rate, S3's requests the largest part (idea `s3-requests`).
+- **31 Oct 2026** (short, from the owner's look at the Practice tab): the three cards read alike and the gaps moved to a line each under them
+  (v80); the daily run waits 20 hours after the last (it had run at 15:33 and 00:02; `~/stockiq-daily.sh`, watch list); `stage_web.py` stages a
+  file committed but not yet live; a wait loop that matched its own text (`pgrep -f deploy-to-s3.sh`) cost an hour: wait on a lock file or
+  a process id, never on a pattern the waiting command contains. Question 56.
