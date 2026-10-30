@@ -94,7 +94,9 @@ def main():
     os.makedirs(LOGS, exist_ok=True)
     day = datetime.now().strftime('%Y-%m-%d')
     kept = os.path.join(LOGS, f'daily-{day}{"-warn" if look else ""}.log')
+    earlier = None
     for other in glob.glob(os.path.join(LOGS, f'daily-{day}*.log')):   # a re-run the same day replaces that day's copy
+        earlier = max(earlier or 0, os.path.getmtime(other))
         os.remove(other)
     shutil.copyfile(log_path, kept)
     for old in glob.glob(os.path.join(LOGS, 'daily-*.log')):
@@ -103,6 +105,9 @@ def main():
 
     icon = '❌' if code != '0' else ('⚠️' if look else '✅')
     lines = [f'Finished {datetime.now().strftime("%a %d %b, %I:%M %p")} (started {started}, took {took}).', '']
+    if earlier:   # the job runs once a day; a second run means its lock was cleared (a session re-running it by hand)
+        lines[1:1] = [f'This is the second run today: the first finished at {datetime.fromtimestamp(earlier).strftime("%I:%M %p")}. '
+                      'It runs once a day, so a session re-ran it by hand (the reason is on the Admin page\'s "What changed lately").']
     if look:
         lines += [f'⚠️ {len(look)} thing(s) to look at:'] + [f'  • {x}' for x in look] + ['']
     else:

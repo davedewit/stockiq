@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-30",
+   "what": "The daily update can no longer run twice in a day after a restart: its once-a-day lock was in a folder macOS empties on restart (30 Oct: a restart at 3:04 pm, a second run at 3:33 pm). The daily Claude review had the same fault. A second run, if ever started by hand, now says so in its email",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
    "what": "Today's top 10s page: from the next daily update, each market shows its change since the day before (▲/▼, and a 'new' leader), and the Updated date stands out",
    "found": "owner",
    "link": "https://stockiq.tech/screeners-today.html"
@@ -315,12 +320,6 @@
    "what": "The AI chat types its replies out, and links only to stock pages that exist (it had linked Fisher & Paykel and a2 Milk to pages that do not exist)",
    "found": "owner",
    "link": "https://stockiq.tech/"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Signed-out visitors now see Log in and a blue Sign up free button in the menu; Pricing is hidden for paying members; the free-trial strip is on every page with the same wording (the stock pages had old wording)",
-   "found": "owner",
-   "link": "https://stockiq.tech/screeners-today.html"
   }
  ]
 }

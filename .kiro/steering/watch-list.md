@@ -106,3 +106,11 @@ Rules:
   owner set his own time (it must not: `hold_days` checks `auto`); the review tool's split missing.
 - **Undo:** `LONGER = False` in the function (tagged shares then follow the level's time), or the rollback zip `…_before_autopilot_longer_20261030.zip`.
 - **Remove after:** 2026-11-20
+
+### 2026-10-30 · The once-a-day locks moved out of /tmp
+- **Changed:** `~/stockiq-daily.sh` (NOT in git) and `check-tools/daily_review.sh` keep their locks in `~/.stockiq-locks/` (a restart at
+  15:04 emptied `/tmp` and the daily job ran a second time at 15:33; the review tried again at 16:23); old locks removed after 14 days.
+  `daily_report.py` says "This is the second run today" when a log for the day already exists.
+- **Could break:** no daily run at all (a lock left for a day that has not run: look in `~/.stockiq-locks/`); the review never starting.
+- **Undo:** `cp ~/VSCODE/backup/stockiq-daily.sh_before_homelock_20261030 ~/stockiq-daily.sh`; `git revert` the commit for the other two.
+- **Remove after:** 2026-11-13

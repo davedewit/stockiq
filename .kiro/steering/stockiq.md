@@ -47,7 +47,7 @@ Detailed docs live in separate files — check these first:
 ### Files
 - **Bash script:** `/Users/dave/stockiq-daily.sh` (logic: Mon-Sat, 7am-10pm by the Mac's clock, once/day; its email gives the run's duration and ⚠️ on an error line)
 - **Launchd plist:** `~/Library/LaunchAgents/com.stockiq.reminder.plist` (StartInterval 600 = checks every 10 min)
-- **Lock file:** `/tmp/stockiq-deploy-YYYYMMDD.lock` (prevents duplicate runs)
+- **Lock file:** `~/.stockiq-locks/deploy-YYYYMMDD.lock` (prevents a second run the same day; in `/tmp` until 30 Oct 2026, which a restart empties, so a restart after the day's run let it run again). The daily Claude review keeps `review-YYYYMMDD.lock` beside it
 - **Log:** `~/stockiq-daily.log`
 - **GitHub:** each run ends by committing and pushing both repos (stockiq + website), unless
   the deploy script already pushed within the last 23h. No run on Sunday. Details and timing
@@ -64,8 +64,8 @@ launchctl load ~/Library/LaunchAgents/com.stockiq.reminder.plist
 ```bash
 bash ~/stockiq-daily.sh                        # Test now
 tail -50 ~/stockiq-daily.log                   # View log
-ls -la /tmp/stockiq-deploy-*.lock              # Check if ran today
-rm /tmp/stockiq-deploy-$(date +%Y%m%d).lock   # Force retry today
+ls -la ~/.stockiq-locks/                       # Check if ran today
+rm ~/.stockiq-locks/deploy-$(date +%Y%m%d).lock   # Force a second run today (its email then says so)
 ```
 
 ## Quick Reference Commands

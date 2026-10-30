@@ -15,7 +15,8 @@ set -u
 ROOT=/Users/dave/VSCODE/stockiq
 LOG="$HOME/stockiq-review.log"
 TODAY=$(date +%Y%m%d)
-LOCK="/tmp/stockiq-review-$TODAY.lock"
+mkdir -p "$HOME/.stockiq-locks"   # not /tmp: a restart empties it, and the review ran a second time after one (30 Oct 2026)
+LOCK="$HOME/.stockiq-locks/review-$TODAY.lock"
 NOW_ARG="${1:-}"
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 
@@ -25,7 +26,7 @@ if [ "$NOW_ARG" != "--now" ]; then
     HOUR=$((10#$(date +%H))); DOW=$(date +%u)
     [ "$HOUR" -lt 13 ] || [ "$HOUR" -ge 22 ] && exit 0               # afternoon or evening on this Mac's clock
     # after the daily deploy (Monday to Saturday it runs from 11:00; there is none on Sunday), and never during it
-    if [ "$DOW" -ne 7 ] && [ ! -f "/tmp/stockiq-deploy-$TODAY.lock" ] && [ "$HOUR" -lt 18 ]; then exit 0; fi
+    if [ "$DOW" -ne 7 ] && [ ! -f "$HOME/.stockiq-locks/deploy-$TODAY.lock" ] && [ "$HOUR" -lt 18 ]; then exit 0; fi
 fi
 pgrep -f "deploy-to-s3\.sh" >/dev/null && exit 0
 CLAUDE=$(ls -d "$HOME"/.kiro/extensions/anthropic.claude-code-*/resources/native-binary/claude 2>/dev/null | sort -V | tail -1)
