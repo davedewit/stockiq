@@ -3,6 +3,26 @@
  "changes": [
   {
    "at": "2026-10-30",
+   "what": "Two trials decided and kept: the pages' market data once a minute (Lambda calls down from about 15,000 to under 2,500 a day) and the daily review by Claude",
+   "found": "session"
+  },
+  {
+   "at": "2026-10-30",
+   "what": "The weekly review of the autopilot (30 Oct): no faults; no rule change, as no group of 30 trades is clearly up or down; Claude's forecast lowered from 25% to 20%",
+   "found": "session"
+  },
+  {
+   "at": "2026-10-30",
+   "what": "The daily email now names a step the system stopped (out of memory) and warns when news.html grows too large; the 27-29 Oct emails had missed it",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
+   "what": "Market news articles get their 'Read full article' link again (it had come out blank since the script was written, on the news page and the home page's list)",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
    "what": "The daily update had stalled: news.html had doubled itself to 5.8 GB since 27 Oct (a fault in the 26 Oct news fix), so today's run hung 8 hours and uploaded nothing. Fixed the cause, added a guard, restored the page, and the run then finished. The daily email now says when a step is killed.",
    "found": "owner"
   },
@@ -297,26 +317,6 @@
   {
    "at": "2026-10-24",
    "what": "Daily market pages: the headings over numbers are right-aligned; the hub's 'Scoring above zero' is now 'In a rising trend' with its percentage and a line explaining it, the columns line up across regions, and each leader is clickable",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Home page: the intro's middle button is now Today's top 10s (the daily market pages, free for every visitor) in place of US Stock Screener, which stays in the menu",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Shares without a stock page on the daily market pages now open and run their analysis (the link lacked one setting); the home page's link to every market's top 10 is a button at the top of its section; the Admin page's questions show the live ones first, answered ones folded as history",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Every share on the daily market pages can be clicked: one without a stock page opens its full analysis; the Screeners menu on every page has a new entry, Today's top 10s",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Home page: a new section near the top, This week in the markets: the big scheduled announcements coming up (in the visitor's own time) and how the trend stands across 24 markets today, rewritten every day",
    "found": "owner"
   }
  ]

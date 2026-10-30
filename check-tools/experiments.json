@@ -55,10 +55,12 @@
    "what": "The pages ask for market data once a minute, not once a second (17 Oct 2026)",
    "angle": "cost",
    "measure": "Lambda calls a day on the Admin page: about 66,000 before, 5,182 the first day after",
-   "status": "running",
+   "status": "kept",
    "started": "2026-10-17",
    "decide": "2026-10-31",
-   "added": "2026-10-17"
+   "added": "2026-10-17",
+   "decided": "2026-10-30",
+   "result": "Lambda calls of the sidebar's ticker fell from about 13,000-19,600 a day (12 and 17 Oct) to 250-2,300 a day over 23-29 Oct; the pages still update while someone is on them (live-market.js). Kept."
   },
   {
    "id": "longer-holds",
@@ -243,10 +245,12 @@
    "what": "A daily review by Claude, unattended (check-tools/daily_review.sh, launchd com.stockiq.review): reads the site, runs the read-only checks, writes a report to check-tools/reviews/daily/ and up to three proposals on the Admin page; it cannot deploy or change the site",
    "angle": "ease of use, faults, profit, AI use",
    "measure": "whether its reports find real faults a session acts on (the first, 18 and 19 Oct, found stale stock pages, wrong news dates, a hidden phone button: all fixed); it ends by itself on 1 Nov unless kept",
-   "status": "running",
+   "status": "kept",
    "started": "2026-10-18",
    "decide": "2026-11-01",
-   "added": "2026-10-18"
+   "added": "2026-10-18",
+   "decided": "2026-10-30",
+   "result": "Its reports found real faults that sessions fixed (stale stock pages, wrong news dates, the hidden phone button, no confirmation after paying, which is built today); five reports in 12 days, no deploys of its own, no cost on AWS. Kept: reviews/daily/KEEP."
   },
   {
    "id": "crypto-no-chasing",
