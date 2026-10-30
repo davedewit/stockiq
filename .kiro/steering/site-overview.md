@@ -206,6 +206,12 @@ settings while he is on the page). Do not change one idea after another on thin 
 warns about; one change at a time, measured, with its experiment entry.
 
 **WHERE THINGS STAND (rewrite this block at the end of every session; last: 25 Oct 2026, a short session on the owner's finds)**
+- **30 Oct 2026 (the owner: no email, site not updated):** `news.html` had doubled itself every 10 articles since 27 Oct (the 26 Oct
+  fix's end-of-list pattern matched a `</div>` in the menu) and reached 5.8 GB: the news step, the site check and the link cleanup were
+  killed for memory, the 30 Oct run hung 8 hours, Kiro used 35 GB of memory, backups took 6 GB each. Fixed (`608fd71`), every writer
+  guarded (`news_guard.py`), the page restored from the live copy, the two broken backup copies removed (11.5 GB), the email now names a
+  killed step. Market news: the AI summaries with any percentage were all thrown away; now only one not in the source (`update_news.py`).
+  Today's run was then run again in full.
 - **26 Oct 2026 (short):** stock news reaches news.html again (a pattern broken by the shared footer on 24 Oct; refilled and live);
   website deploys clear the cache once (`/*`; 1,084 paths this month, $0.39 past the free 1,000; `cost_check.py` now counts them);
   the S&P 500 card shows the fund's own day. Admin #13, #14 done. **Still open for Sunday's weekly session: #8, #11, #12**, and the
@@ -3683,6 +3689,9 @@ more finished trades than there are, and would chase noise before then.
     the body with the local file; that settles in a minute whether the site or the viewer is behind.
   - Change one thing per round and say what was and was not reproduced. Four deploys chasing guesses cost more than one
     question would have.
+- **A pattern that finds the end of a list must be searched from the list's start, and must not let `.*?` with DOTALL cross tags**
+  (30 Oct 2026: `</div>\s*(?:<!--.*?-->\s*)*<footer` matched in the menu and every rewrite of news.html put the whole page back in,
+  0.4 MB to 5.8 GB in a day). Test such a change by running the writer three times on a copy and comparing the sizes.
 - **Template drift:** in Sep 2026 the live stock pages had a newer footer than the generator
   template, so running the generator would have reverted all 3,467 footers. Before running
   `generate-stock-pages.py` after template edits, test it on a copy of `stocks/` and diff.
