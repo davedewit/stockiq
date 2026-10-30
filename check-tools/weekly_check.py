@@ -59,6 +59,27 @@ OWNER = os.environ.get('REVIEW_ACCOUNT', 'dave@dewit.com.au')
 results = []          # (part, name, ok, detail)
 
 
+def sums_agree(out):
+    """Reads live_practice_check.js's output (cards, read-out, market rows) and checks that the figures add up. (ok, what was compared)."""
+    money = lambda t: [float(x.replace(',', '')) for x in re.findall(r'\$([\d,]+\.\d\d)', t)]
+    try:
+        d = json.loads(out[out.index('{\n'):out.rindex('}') + 1]); cards = d['figures']
+        rows = json.loads(re.search(r'market menu: (\[.*?\])\n', out).group(1))
+        acct, sp, own = money(cards[0])[0], money(cards[1])[0], money(cards[2])[0]
+        part = lambda c: c.split('Your account is')[1].split('Without')[0]          # not the S&P card's line without the coin trades
+        said = lambda c: (1 if 'higher' in part(c) else -1) * money(part(c))[0]
+        read_own = money(d['above'].split('Same markets, no AI')[-1])[0]
+        allrow = next(r for r in rows if r.startswith('All markets'))
+        res, idx = [(-1 if a == '▼' else 1) * float(b.replace(',', '')) for a, b in re.findall(r'([▲▼]) \$([\d,]+\.\d\d)', allrow)][:2]
+        checks = [('card 3 = graph read-out', own, read_own, 0.05), ('card 2 says account - S&P', said(cards[1]), acct - sp, 0.02),
+                  ('card 3 says account - own markets', said(cards[2]), acct - own, 0.02), ('All row index result = card 3 - $100,000', idx, own - 100000, 5),
+                  ('All row result = account - $100,000', res, acct - 100000, 5)]
+        bad = [f'{n}: {a:,.2f} vs {b:,.2f}' for n, a, b, tol in checks if abs(a - b) > tol]
+        return (not bad, bad or [f'{n} ({a:,.2f})' for n, a, b, tol in checks])
+    except Exception as e:
+        return False, f'could not read the page: {e}'
+
+
 def run(cmd, timeout=900, cwd=None, env=None):
     try:
         p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=cwd or HERE, env=dict(os.environ, **(env or {})))
@@ -252,12 +273,17 @@ if not QUICK:
         code, out = run(['node', 'live_practice_check.js'], 300, env={'REAL_USER': OWNER, 'MARKETS': mk, 'MARKET': 'last', 'REOPEN': '1'})
         line = next((l for l in out.splitlines() if l.startswith('reopen: ')), out.strip().splitlines()[-1:] or ['no answer'])
         note('4. Background run and visitors', "the Practice portfolio's market list opens again on the market chosen, not at its top", 'reopen: PASS' in out, line)
+        # the sums agree (30 Oct 2026, the owner: "how do you confirm math checks out"): the three cards, the graph's read-out and the
+        # All markets row are one set of figures read off the live page; each difference a card states must be the difference of its figures
+        code, out = run(['node', 'live_practice_check.js'], 300, env={'REAL_USER': OWNER, 'MARKETS': mk, 'MARKET_OPEN': '1'})
+        ok, why = sums_agree(out)
+        note('4. Background run and visitors', "the Practice portfolio's sums agree: the three cards, the graph's read-out and the All markets row", ok, why)
     except Exception as e:
         note('4. Background run and visitors', "the Practice portfolio graph: pressing its view buttons moves nothing", False, str(e)[:200])
     # each view button draws the S&P 500 fund beside it: the whole account, your own buys, the autopilot's (26 Oct 2026, the owner)
     code, out = run(['node', 'live_practice_check.js'], 300, env={'REAL_USER': OWNER, 'WIDTH': '1100', 'VIEWS': '1', 'SHOT': os.path.join(tempfile.gettempdir(), 'stockiq-views.png')})
     lines = [l for l in out.splitlines() if l.startswith('view ')]
-    note('4. Background run and visitors', "the Practice portfolio graph: All markets, Your own buys and AI autopilot each draw the S&P 500 fund beside them", len(lines) == 3 and all('gold line drawn' in l for l in lines), [l[:110] for l in lines] or out.strip().splitlines()[-2:])
+    note('4. Background run and visitors', "the Practice portfolio graph: All markets, Your own buys and AI autopilot each draw their own-markets line beside them", len(lines) == 3 and all('gold line drawn' in l for l in lines), [l[:110] for l in lines] or out.strip().splitlines()[-2:])
     # hold and drag across the graph measures the stretch, by mouse and by finger; letting go clears it (26 Oct 2026, the owner)
     code, out = run(['node', 'live_practice_check.js'], 300, env={'REAL_USER': OWNER, 'WIDTH': '390', 'DRAG': '1', 'TOUCH': '1', 'SHOT': os.path.join(tempfile.gettempdir(), 'stockiq-drag.png')})
     lines = [l for l in out.splitlines() if l.split(':')[0] in ('drag', 'released', 'finger drag', 'finger released')]
