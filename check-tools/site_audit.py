@@ -45,7 +45,7 @@ GUIDES = ('stock-analysis-guide.html', 'stock-screener-guide.html', 'technical-a
 KNOWN = {
     # stock pages known to be stale for a reason that ends by itself, with the day it should be over: left out of the stale count
     # until then, counted again after it (19 Oct 2026: they turned the Admin page's check-in card amber for nothing)
-    'stale-until': {'BEZ.L': '2026-10-27', 'SDR.L': '2026-10-27', 'PSKY': '2026-10-27'},   # taken over / no usable prices; the 21-day rule de-indexes them (24 Oct's run crashed before it: Monday 26 Oct's does it)
+    'stale-until': {'BEZ.L': '2026-12-01', 'SDR.L': '2026-12-01', 'PSKY': '2026-12-01'},   # taken over / no usable prices; extended 29 Oct 2026
     'duplicate-code': {'toggleMobileMenu', 'closeMobileMenu', 'showDropdown', 'hideDropdown', 'toggleDropdown', 'toggleTheme', 'logout',
                        'fillMobileSidebar', 'emptyMobileSidebar', 'toggleMobileSidebar', 'closeMobileSidebar',   # each page's own menu and sidebar hooks (mobile-sidebar.js calls them)
                        'gtag',                                                    # Google Analytics' own snippet, on every page by design

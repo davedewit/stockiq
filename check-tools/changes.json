@@ -2,6 +2,11 @@
  "about": "What the sessions changed on the site, newest first, in plain words for the owner's Admin page ('What changed lately'). Add with: python3 check-tools/admin.py change \"<what>\". Nothing private: both repositories are public.",
  "changes": [
   {
+   "at": "2026-10-30",
+   "what": "The daily update had stalled: news.html had doubled itself to 5.8 GB since 27 Oct (a fault in the 26 Oct news fix), so today's run hung 8 hours and uploaded nothing. Fixed the cause, added a guard, restored the page, and the run then finished. The daily email now says when a step is killed.",
+   "found": "owner"
+  },
+  {
    "at": "2026-10-26",
    "what": "The search's news box shows only when a suggestion is picked, so the suggestion list is never hidden",
    "found": "owner"
@@ -312,11 +317,6 @@
   {
    "at": "2026-10-24",
    "what": "Home page: a new section near the top, This week in the markets: the big scheduled announcements coming up (in the visitor's own time) and how the trend stands across 24 markets today, rewritten every day",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Practice portfolio: Show the figures (and every other fold) stays open when prices refresh; the figures list shows the latest 14 days (7 on a phone) with Show all; the graph opens on All after a page refresh",
    "found": "owner"
   }
  ]
