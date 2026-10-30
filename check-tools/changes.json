@@ -3,6 +3,21 @@
  "changes": [
   {
    "at": "2026-10-30",
+   "what": "The daily update now waits 20 hours after the last one (it ran at 15:33 and again at 00:02)",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
+   "what": "Practice portfolio: the three cards read alike (value, today, since the start), in the order your account, same markets, S&P 500; under them one line each saying how far your account is ahead or behind, then cash and holdings; the coin note is gone",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
+   "what": "Two tests no longer reach the live sign-up and usage functions (one had registered a made-up trial account today)",
+   "found": "check"
+  },
+  {
+   "at": "2026-10-30",
    "what": "The full check's re-check now re-runs the panel comparison and the header checks by themselves, without a 15-minute full run",
    "found": "session"
   },
@@ -291,24 +306,6 @@
    "what": "Daily screener pages: 'Run the … screener' now runs that market's screener straight away, in the right section (Mexico went to Asia-Pacific and ran nothing); the free-trial button there shows only to signed-out visitors; 'Shares in a rising trend' as the column heading. The nightly check now tests every page's run button",
    "found": "owner",
    "link": "https://stockiq.tech/screener-mexico-ipc.html"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Phone menu: Sign up free and Log in at the top for a signed-out visitor (they were last); Dashboard straight after Home when signed in; the same menu written into every page; the round buttons no longer sit on top of the open menu",
-   "found": "owner",
-   "link": "https://stockiq.tech/"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Sign-up page in its final form for the 4-week trial: Trade $100,000 of practice money; four short lines (any stock, ETF or coin; your own AI trader; beat the S&P 500; 15 analyses); Google first",
-   "found": "owner",
-   "link": "https://stockiq.tech/signup.html"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Sign-up page now leads with 'Trade $100,000 of practice money: yourself, with your own AI trader, or both'",
-   "found": "owner",
-   "link": "https://stockiq.tech/signup.html"
   }
  ]
 }

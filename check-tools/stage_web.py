@@ -47,7 +47,15 @@ def main(a):
         shutil.copy2(os.path.join(src, f), os.path.join(folder, 'web', f))
         was, new = before(f), sha(os.path.join(folder, 'web', f))
         if was == new and src == WEB:
-            print(f'{f}: unchanged since the last commit, left out'); continue
+            # committed is not live (31 Oct 2026: a script committed during the daily run was left out though the site had an older one)
+            try:
+                import urllib.request
+                live = hashlib.sha256(urllib.request.urlopen(f'https://stockiq.tech/{f}', timeout=20).read()).hexdigest()
+            except Exception:
+                live = new
+            if live == new:
+                print(f'{f}: unchanged since the last commit and the same as the live site, left out'); continue
+            print(f'{f}: committed but not live yet, staged')
         rows.append(f'{f}:{was}:{new}')
     with open(os.path.join(folder, 'deploy.sh'), 'w') as fh:
         fh.write('#!/bin/bash\n# Written by check-tools/stage_web.py: ' + ', '.join(r.split(':')[0] for r in rows) + '\n'
