@@ -213,8 +213,13 @@ warns about; one change at a time, measured, with its experiment entry.
   after costs; shares alone +0.22% a trade against the fund (132 trades, inside the margin). The losses: coins -$1,819 and the AI review's
   sales -$1,577 (both stopped 17 Oct), overnight falls through the loss limit -$2,476 (`gap-wait` on trial). Claude's forecast 20%. Month 1
   ($101,000 by 12 Nov) out of reach. His autopilot is automatic (markets by the AI; pace, holdings, budget automatic; Balanced, 5-day
-  holds); coins unticked. Do not write his settings while he is on the page.
-- **Live lately** (the detail in section 13 and `watch-list.md`): 30 Oct, the news.html blow-up fixed and guarded, market news links,
+  holds); coins never bought on AI (decided 30 Oct). Do not write his settings while he is on the page.
+  **The gap to the S&P 500 split (30 Oct evening):** choosing shares about **+$1,230** (the account against "Same markets, no AI", the
+  Practice tab's third card) and choosing markets about **-$2,220** (those markets against the S&P 500), of which the old coin trades about
+  -$1,776: without them the account is about $790 ahead of the S&P 500. The Admin page's decision card shows the split; read it each week.
+- **Live lately** (the detail in section 13 and `watch-list.md`): 30 Oct evening, the Practice portfolio against each buy's own market
+  (the graph's gold line, the third card "Same markets, no AI", the By market list as two dollar results side by side, the S&P card
+  "If all in the S&P 500 instead" with its line without the coins, the indexes fetched with the prices; v78); 30 Oct, the news.html blow-up fixed and guarded, market news links,
   analytics events and tags, a thank-you after Stripe, the portfolio's figures and the all-markets index line, the Admin page's timeline
   with jump links, a button per plan, `longer-holds`; 26 Oct, stock news on news.html again, one cache clear per deploy, the practice graph's
   drag and S&P line in every view; 25 Oct, the deploy checks, the daily email from the log, the daily cost check; 24 Oct, one header, menu
