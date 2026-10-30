@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-30",
+   "what": "The second card is now If all in the S&P 500 instead; the third card loads with the others on a refresh (the index prices come with the holdings' prices: 6 requests instead of 32); the Admin page splits the gap to the S&P 500 into choosing shares and choosing markets",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
    "what": "By market list: the S&P 500 lines taken out (the second card already has it); your own buys get their own row; the third card shows its own today figure like the other two, and the day figures sit neatly under each total",
    "found": "owner"
   },
@@ -309,12 +314,6 @@
    "what": "The menu no longer jumps sideways when a page opens for a signed-in visitor (the bell appeared a moment late on the daily screener pages and guides); the header check now fails any page whose menu moves while loading",
    "found": "owner",
    "link": "https://stockiq.tech/screeners-today.html"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Sign-in and sign-up pages: the 'Don't have an account? / Already have an account?' prompt shows on phones only (on a desktop the header's Log in and Sign up free do the same)",
-   "found": "owner",
-   "link": "https://stockiq.tech/login.html"
   }
  ]
 }

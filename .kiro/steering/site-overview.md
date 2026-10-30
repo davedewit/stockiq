@@ -233,6 +233,8 @@ warns about; one change at a time, measured, with its experiment entry.
   cancel_subscription take whatever they are sent; verified 30 Oct); Stripe's events are not signature-checked; a plan change marks the
   member cancelled. Only the owner pays today: close it before the first customer, at the start of a session with full attention. Needs
   from the owner: the webhook signing secret (Stripe dashboard, Developers, Webhooks, the endpoint, "Signing secret").
+  (P1) **Question 54** (the gap to the S&P 500 is now split): replay "every country's main index" against "the US only" and "the US plus
+  the strongest few" over five years; choosing markets cost about $2,180 against the S&P 500 by 30 Oct, choosing shares gained about $1,260.
   (P) **#8** (his yes on the Admin page): a score-version tag on buys and learning only from the current score, notes and scorecard lines
   from 30 a group, `chosen` rank when `rp`, one night's correlated losses counted once, replay `review_resting` on the wide set.
   12 Nov: decide `patient-shares`.
@@ -1910,7 +1912,12 @@ with `document.querySelector('h3')`.
   our result less the gap). **The S&P 500 is no longer in the list at all** (the grey S&P line and the folded S&P reconciliation went: the
   second card has it); the grey line names the index; the owner's own buys have a row of their own (against the S&P 500); the summary
   line counts screeners that did better or worse than their index. The third card has its own day (`ownMarkets` `dayUsd`: each holding's
-  money moved by its index's day, `indexDayPct`), so the three cards read alike. Before that: the badge was the same money put into that row's own index on the same days (`bench`, from `homeGap`; the sector funds and
+  money moved by its index's day, `indexDayPct`), so the three cards read alike. The second card is **"If all in the S&P 500 instead"**.
+  The indexes' prices are asked for with the holdings' prices on a return visit (`knownIndexes`, `stockiqPracticeIndexes_<address>`), so the
+  third card appears with the others (6 price requests instead of 32; `live_practice_check.js TIME=1` reports it). **The Admin page's
+  decision card splits the gap to the S&P 500** (`splitHtml`, from `figures().ownValue`): choosing shares (account against the same
+  markets) and choosing markets (those markets against the S&P 500); questions.md 54 and 55. On 30 Oct: +$1,260 and -$2,180; the coins of
+  10-17 Oct alone cost about $1,776 against the S&P 500 (the autopilot has bought none since 14 Oct: coins are not in `MAIN_PICK`). Before that: the badge was the same money put into that row's own index on the same days (`bench`, from `homeGap`; the sector funds and
   his own buys against the S&P 500, coins against nothing); the grey line under it names the index and gives the S&P 500 in dollars;
   All markets is every buy added up against its own market (the third card); the S&P reconciliation ("how the whole account's gap adds
   up") is folded underneath. The paragraph below describes the S&P layout it replaced.

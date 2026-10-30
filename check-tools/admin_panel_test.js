@@ -118,6 +118,11 @@ async function page(status, uid) {
     pl = await show({ days: 40, ahead: 18, avg: -0.05, se: 0.1 });
     check('a record behind the fund reads Low', /\(what has happened\) More likely behind 3\d%/.test(pl), pl.slice(pl.indexOf("So far against"), pl.indexOf("So far against") + 200));
   }
+  if (/function splitHtml/.test(fs.readFileSync(process.argv[2], 'utf8'))) { // the gap to the S&P split into choosing shares and choosing markets (30 Oct 2026)
+    const q = await page(200, 'dave@x.com'); q.ctx.window.practicePortfolio = { figures: () => ({ accountValue: 97900, gainUsd: -2100, gainPct: -2.1, startingCash: 100000, fundValue: 98817, ownValue: 96640, topGains: 700, createdAt: new Date(Date.now() - 20 * 86400000).toISOString(), versus: { days: 14, ahead: 6, avg: -0.05, se: 0.1, gaps: [0.1, -0.2] } }) }; q.fire('practice-portfolio:figures');
+    const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    check('the gap to the S&P 500 is split into choosing shares and choosing markets, and the two add up', /choosing shares ▲ \$1,260 .* choosing markets ▼ \$2,177 .* = ▼ \$917 in all/.test(pl), pl.slice(pl.indexOf('Where the gap'), pl.indexOf('Where the gap') + 300));
+  }
   if (/const START = 100000/.test(fs.readFileSync(process.argv[2], 'utf8'))) { // the account's bar runs from the start to the target (19 Oct 2026)
     const q = await page(200, 'dave@x.com'); q.ctx.window.practicePortfolio = { figures: () => ({ accountValue: 99847, gainUsd: -153, gainPct: -0.15, startingCash: 100000 }) }; q.fire('practice-portfolio:figures');
     const h = q.panel.innerHTML, pl = h.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
