@@ -495,7 +495,9 @@ def fetch_google_news():
             # Remove source names at end (e.g., "- Yahoo Finance", "- CNBC")
             title = re.sub(r'\s*[-–—]\s*[A-Za-z\s]+$', '', title).strip()
             description = desc_tag.get_text(strip=True) if desc_tag else title
-            link = link_tag.get_text(strip=True) if link_tag else ''
+            # html.parser takes <link> for an empty HTML tag, so its address is the text just after it (30 Oct 2026: every
+            # market-news link had come out blank, on news.html and on the home page's list)
+            link = (link_tag.get_text(strip=True) or str(link_tag.next_sibling or '').strip()) if link_tag else ''
             
             # Parse publication date from RSS feed
             pub_datetime = None
@@ -912,8 +914,9 @@ def update_news_html(new_items):
             article_link = item.get('link', '')
             read_article_link = ''
             
-            # Only add link if it's NOT a Google News redirect and is a valid URL
-            if article_link and 'news.google.com' not in article_link and article_link.startswith('http'):
+            # Any real address, Google News's own included: it forwards to the publisher (30 Oct 2026: market news had no link at
+            # all, because every one comes from Google News; the home page's list already linked the same address)
+            if article_link and article_link.startswith('http'):
                 read_article_link = f'<a href="{article_link}" target="_blank" style="color: #007bff;">Read full article →</a>'
             
             # Extract stock symbols using company name mapping (up to 3)
