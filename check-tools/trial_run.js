@@ -5,6 +5,12 @@ const vm = require('vm'), fs = require('fs');
 const [option, subOption] = process.argv.slice(2);
 let usage = 0; const events = []; const t0 = Date.now(); const log = (m) => events.push(`${((Date.now() - t0) / 1000).toFixed(1)}s ${m}`);
 const realFetch = fetch;
+// Only the analysis functions are called for real, found by name (30 Oct 2026: the old rule passed any function address without the
+// words usage/trial/dashboard in it, and addresses are random letters, so the trial manager registered trial-user@example.com).
+const NAME_OF = (() => { const m = JSON.parse(require('fs').readFileSync('/Users/dave/VSCODE/stockiq/lambda-url-mapping.json', 'utf8')), o = {};
+  for (const [n, u] of Object.entries(m)) { const h = (u.match(/https:\/\/([a-z0-9]+)\./) || [])[1]; if (h) o[h] = n; } return o; })();
+const passes = (u) => { const n = NAME_OF[(String(u).match(/https:\/\/([a-z0-9]+)\./) || [])[1]] || '';
+  return /worker|orchestrator|option-|chart-generator|price-proxy|validate-symbol|screener-coordinator/.test(n) && !/usage|trial|dashboard|tracker|email|payment|checkout|notification|ip-blocking|cognito|delete|csv-export/i.test(n); };
 async function fakeFetch(url, opts = {}) {
   const u = String(url); let body = {}; try { body = JSON.parse(opts.body || '{}'); } catch (e) {}
   const json = (o) => ({ ok: true, status: 200, json: async () => o, text: async () => JSON.stringify(o) });
@@ -13,7 +19,7 @@ async function fakeFetch(url, opts = {}) {
     if (body.action === 'increment_usage') { usage++; log(`tracker: increment -> usage ${usage}`); return json({ usage }); }
     log(`tracker: get_usage -> ${usage}`); return json({ usage });
   }
-  if (/5fyemil3eipbwqyyb2kloijyhi0uvtct|uotf7ibcklwyuehblv7zsl7ney0ngmrl|5oqosafg2mflk7oyydkk3d3rdq0amufq/.test(u) || /worker|lambda-url/.test(u) && !/usage|trial|dashboard/.test(u)) {
+  if (passes(u)) {
     log(`analysis call start: ${u.slice(8, 30)}…`); const r = await realFetch(url, opts); const txt = await r.text(); log(`analysis call done (${r.status})`);
     return { ok: r.ok, status: r.status, json: async () => JSON.parse(txt), text: async () => txt };
   }
