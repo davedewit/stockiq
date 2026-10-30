@@ -136,7 +136,7 @@ if new_articles:
     before = news_html[:content_start + len('<div class="blog-content">')]
     after_match = re.search(r'</div>\s*<div style="text-align: center', news_html)
     if not after_match:
-        after_match = re.search(r'</div>\s*(?:<!--.*?-->\s*)*<footer', news_html, re.DOTALL)
+        after_match = re.compile(r'</div>\s*(?:<!--[^<>]*-->\s*)*<footer').search(news_html, news_html.find('<div class="blog-content">'))
     
     if after_match:
         after = news_html[after_match.start():]
@@ -146,6 +146,11 @@ if new_articles:
         news_html = before + '\n' + '\n'.join(all_articles) + '        ' + after
         print(f"✅ Added {len(new_articles)} current stock articles")
         
+        from news_guard import check as _news_check
+        bad = _news_check(news_html)
+        if bad:
+            print(f"❌ news.html not written: {bad}")
+            raise SystemExit(1)
         with open(NEWS_HTML_PATH, 'w') as f:
             f.write(news_html)
         print(f"✅ Wrote changes to news.html")

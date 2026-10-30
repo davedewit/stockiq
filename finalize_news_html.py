@@ -98,6 +98,11 @@ def main():
     print(f"✅ news.html: {len(articles)} -> {len(kept)} articles, "
           f"{len(html) / 1e6:.1f} MB -> {len(new_html) / 1e6:.2f} MB, noindex set"
           f"{' (dry run - nothing written)' if args.dry_run else ''}")
+    from news_guard import check as _news_check
+    bad = _news_check(new_html)
+    if bad:
+        print(f"❌ news.html not written: {bad}")
+        raise SystemExit(1)
     if not args.dry_run:
         with open(NEWS_HTML_PATH, 'w', encoding='utf-8') as f:
             f.write(new_html)

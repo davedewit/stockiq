@@ -543,7 +543,7 @@ def update_news_html(items):
         
         before = html[:content_start + len('<div class="blog-content">')]
         # A comment may stand before the footer (shared_parts.py writes one since 24 Oct 2026)
-        after_match = re.search(r'</div>\s*(?:<!--.*?-->\s*)*<footer', html, re.DOTALL)
+        after_match = re.compile(r'</div>\s*(?:<!--[^<>]*-->\s*)*<footer').search(html, html.find('<div class="blog-content">'))
         if not after_match:
             print("❌ Could not find footer pattern in news.html")
             return False
@@ -557,8 +557,18 @@ def update_news_html(items):
 
     ''' + after
         
-        with open(NEWS_HTML_PATH, 'w') as f:
+        # Write to a temp file first then rename atomically — a kill mid-write
+        # can never leave news.html as 0 bytes this way (lid-down throttle risk)
+        import tempfile, os as _os
+        from news_guard import check as _news_check
+        bad = _news_check(new_html)
+        if bad:
+            print(f"❌ news.html not written: {bad}")
+            return False
+        tmp = NEWS_HTML_PATH + '.tmp'
+        with open(tmp, 'w') as f:
             f.write(new_html)
+        _os.replace(tmp, NEWS_HTML_PATH)
         return True
     
     except Exception as e:
@@ -727,8 +737,10 @@ const newsItems = [
 {render_func}
 """
         
-        with open(NEWS_JS_PATH, 'w') as f:
+        tmp = NEWS_JS_PATH + '.tmp'
+        with open(tmp, 'w') as f:
             f.write(new_content)
+        import os as _os; _os.replace(tmp, NEWS_JS_PATH)
     
     except Exception as e:
         print(f"Error updating news.js: {e}")

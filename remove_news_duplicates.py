@@ -46,7 +46,7 @@ if duplicates_removed:
     
     after_match = re.search(r'</div>\s*<div style="text-align: center', content)
     if not after_match:
-        after_match = re.search(r'</div>\s*(?:<!--.*?-->\s*)*<footer', content, re.DOTALL)
+        after_match = re.compile(r'</div>\s*(?:<!--[^<>]*-->\s*)*<footer').search(content, content.find('<div class="blog-content">'))
     
     if after_match:
         after = content[after_match.start():]
@@ -56,6 +56,11 @@ if duplicates_removed:
         after = re.sub(r'<span id="article-count">[0-9]+</span>', f'<span id="article-count">{article_count}</span>', after)
         
         new_content = before + '\n' + '\n'.join(articles_to_keep) + '        ' + after
+        from news_guard import check as _news_check
+        bad = _news_check(new_content)
+        if bad:
+            print(f"❌ news.html not written: {bad}")
+            raise SystemExit(1)
         news_html_path.write_text(new_content)
         
         print(f"✅ Removed duplicates. Articles: {len(articles)} → {len(articles_to_keep)}")

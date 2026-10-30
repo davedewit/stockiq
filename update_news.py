@@ -1048,7 +1048,7 @@ def update_news_html(new_items):
         before_content = html_content[:content_start + len('<div class="blog-content">')]
         after_content_match = re.search(r'</div>\s*<div style="text-align: center', html_content)
         if not after_content_match:
-            after_content_match = re.search(r'</div>\s*</div>\s*(?:<!--.*?-->\s*)*<footer', html_content, re.DOTALL)
+            after_content_match = re.compile(r'</div>\s*</div>\s*(?:<!--[^<>]*-->\s*)*<footer').search(html_content, html_content.find('<div class="blog-content">'))
         if not after_content_match:
             print("Error: Could not find end of blog-content")
             return
@@ -1057,8 +1057,16 @@ def update_news_html(new_items):
         
         new_html = before_content + '\n' + '\n'.join(all_articles) + '        ' + after_content
         
-        with open(NEWS_HTML_PATH, 'w') as f:
+        import os as _os
+        from news_guard import check as _news_check
+        bad = _news_check(new_html)
+        if bad:
+            print(f"❌ news.html not written: {bad}")
+            return
+        tmp = NEWS_HTML_PATH + '.tmp'
+        with open(tmp, 'w') as f:
             f.write(new_html)
+        _os.replace(tmp, NEWS_HTML_PATH)
         
         print(f"✅ Updated news.html with {len(new_items_filtered)} new articles")
     
