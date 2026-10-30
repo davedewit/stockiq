@@ -89,3 +89,13 @@ Rules:
   found (the box then says "No recent articles"), the side panel's search height. `search_news_check.js` (weekly) tests it.
 - **Undo:** `git revert` the website commit "Home page search: a picked share's latest news" and deploy index.html.
 - **Remove after:** 2026-11-09
+
+### 2026-10-30 · news.html can no longer double itself
+- **Changed:** the end-of-list pattern in `update_stock_news.py`, `update_news.py`, `Sync_stock_to_news.py`, `remove_news_duplicates.py` is
+  searched from the article list onwards (the 26 Oct pattern matched a `</div>` in the menu and doubled the page every 10 articles, to
+  5.8 GB by 27 Oct); `news_guard.py` makes every writer refuse a page with the list or footer twice, or over 20 MB. `daily_report.py`
+  names a step killed by the system and a news.html over 20 MB.
+- **Could break:** no stock news reaching news.html (a "❌ news.html not written: …" line in the log); the guard refusing a good page
+  (the footer counted twice if a page ever has two `<footer`).
+- **Undo:** `git revert 608fd71`.
+- **Remove after:** 2026-11-13

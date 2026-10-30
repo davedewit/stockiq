@@ -70,6 +70,15 @@ def main():
     for tb in re.finditer(r'^Traceback \(most recent call last\):\n(?:[ \t].*\n)+(.+)$', text, re.M):
         before = text[:tb.start()].strip().splitlines()[-1:] or ['']
         look.append(f'A step crashed: {tb.group(1).strip()[:200]}' + (f' (after: {before[0].strip()[:80]})' if before[0] else ''))
+    # a step the system stopped (usually out of memory): bash prints "Killed: 9" and the script's path (30 Oct 2026: news.html at 5.8 GB)
+    for m in re.finditer(r'Killed: 9\s+.*?([\w.-]+\.py)', text):
+        look.append(f'A step was stopped by the system (out of memory?): {m.group(1)}')
+    try:
+        mb = os.path.getsize('/Users/dave/VSCODE/website/news.html') / 1e6
+        if mb > 20:
+            look.append(f'news.html is {mb:,.0f} MB (normal is about 0.4 MB): it has grown out of control')
+    except OSError:
+        pass
     for l in re.findall(r'^(?:❌|⚠️).*$|^.*\bError:.*$', text, re.M):   # top-level warnings only: indented ones are notes on one item
         if not any(re.search(b, l) for b in BENIGN) and 'Error:' not in ' '.join(look):
             look.append(l.strip()[:200])
@@ -106,8 +115,11 @@ def main():
     open(body_path, 'w', encoding='utf-8').write('\n'.join(lines) + '\n')
     if not os.environ.get('DAILY_LOGS'):            # the Admin page's "What runs by itself" (one small write; not from a test)
         import subprocess
-        subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'admin.py'), 'runs', day,
-                        'ok' if not look else 'warn', took, look[0] if look else ''], capture_output=True, timeout=120)
+        try:
+            subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'admin.py'), 'runs', day,
+                            'ok' if not look else 'warn', took, look[0] if look else ''], capture_output=True, timeout=300)
+        except subprocess.TimeoutExpired:
+            pass  # non-fatal: the Admin page's run record simply won't update this time
     print(f'StockIQ Daily {icon} - {datetime.now().strftime("%a %b %d")} ({took})' + (f' - {len(look)} to look at' if look else ''))
 
 
