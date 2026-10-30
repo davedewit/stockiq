@@ -501,6 +501,14 @@
    "decide": "2026-12-29",
    "public": true,
    "publicText": "Keeping some shares longer (up to 20 days instead of 5), side by side with the current rule, to see whether fewer, longer trades do better after costs"
+  },
+  {
+   "id": "s3-requests",
+   "what": "Find what makes S3's requests: about 2 US cents a day all month (storage is only about 0.5 GB), the largest running cost left once October's one-off charges are gone; turn on the free S3 storage-lens or a day of CloudTrail data events only if they are free, otherwise read which functions call S3 and how often",
+   "angle": "cost",
+   "measure": "S3's daily charge in CloudWatch's billing figures before and after (cost_check.py), target under 1 cent a day",
+   "status": "idea",
+   "added": "2026-10-30"
   }
  ]
 }

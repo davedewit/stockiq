@@ -5686,3 +5686,8 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     parts home-pricing, plans and funnel improved), a button on each price card, the analysis guide fitting a phone (found by the deploy's
     phone check), "This week in the markets" linking each announcement's market (from the next daily update), and **the `longer-holds`
     trial live** (`stockiq-ai-trader` `j82lXMrV…`; decide by 29 Dec 2026, or at 30 finished each way). The Admin card read "No, all good".
+  - **Evening, resumed after the usage limit:** the full check's 3 failures: the panel comparison now switches the longer-holds trial off
+    (as it does the sector funds) and the Settings text names the trial (`practice-autopilot.js?v=75`); the header check had timed out and
+    passes alone; `--recheck` now re-runs those checks by themselves. "Needs you" no longer reports short cash while the budget is
+    automatic (`stockiq-ai-trader` `QEITzl1O…`, rollback `…_before_autopilot_needsauto_20261030.zip`). Cost: October about $1.47 (the
+    cleanup bug and the cache clears, both fixed); November about $0.90 at the present rate, S3's requests the largest part (idea `s3-requests`).
