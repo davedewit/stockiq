@@ -410,7 +410,7 @@ Stock page order: header, **ANALYSIS snapshot**, "Full report" CTA card, NEWS, R
 ## 5. Daily pipeline
 
 launchd `com.stockiq.reminder` fires every 10 min → `~/stockiq-daily.sh` runs once a day
-**every day, whenever the Mac is on** (lock `~/.stockiq-locks/deploy-YYYYMMDD.lock`: not `/tmp`, which a restart empties; a second run the same day says so in its email) → `deploy.sh` →
+**every day, whenever the Mac is on** (lock `~/.stockiq-locks/deploy-YYYYMMDD.lock`: not `/tmp`, which a restart empties; a second run the same day says so in its email; and since 31 Oct 2026 never within 20 hours of the last run's start, after a run at 15:33 was followed by one at 00:02. There is no hour window: it runs at the first check of the day once 20 hours have passed) → `deploy.sh` →
 `deploy-to-s3.sh` with `UPDATE_STOCK_NEWS=true`. Log: `~/stockiq-daily.log` (cleared each run).
 The hours are the **machine's own clock** (`date` in `~/stockiq-daily.sh`). On 11 Oct 2026 this Mac was
 set to UTC+7, not Sydney time; check `date` before working out when the next run is.

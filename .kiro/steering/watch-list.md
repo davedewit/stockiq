@@ -122,3 +122,9 @@ Rules:
   a phone (more points: each index's closes); the three figures disagreeing (they are one sum: `practice_test.js` checks it).
 - **Undo:** `git revert` the website commit "Practice graph against each buy's own market" and deploy; the chat: `~/VSCODE/backup/stockiq-ai-chat_before_ownmarkets_20261030.zip`.
 - **Remove after:** 2026-11-13
+
+### 2026-10-31 · The daily run waits 20 hours after the last one
+- **Changed:** `~/stockiq-daily.sh` (NOT in git): it also needs the newest `deploy-*.lock` to be 20 hours old (a run at 15:33 on 30 Oct was followed by one at 00:02).
+- **Could break:** a day with no run at all (look: no daily email; `ls -la ~/.stockiq-locks/`).
+- **Undo:** `cp ~/VSCODE/backup/stockiq-daily.sh_before_20hours_20261031 ~/stockiq-daily.sh`.
+- **Remove after:** 2026-11-14
