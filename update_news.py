@@ -576,13 +576,10 @@ def fetch_google_news():
             print(f"   Generating AI content for: {title[:50]}...")
             full_content = generate_ai_content(title, description if description != title else None)
             
-            # Validate: reject a percentage the model made up. One that stands in the headline or the feed's description is a
-            # fact from the source and may stay (30 Oct 2026: every percentage was rejected, so in earnings season 8 of 10
-            # summaries were paid for and thrown away, and the Market News list fell behind)
-            source_pcts = {p.rstrip('0').rstrip('.') for p in re.findall(r'(\d+(?:\.\d+)?)\s*%', f"{title} {description or ''}")}
-            invented = [p for p in re.findall(r'(\d+(?:\.\d+)?)\s*%', full_content or '') if p.rstrip('0').rstrip('.') not in source_pcts]
-            if invented:
-                print(f"   ⚠️  Rejected (a percentage not in the source: {invented[0]}%): {title[:50]}...")
+            # Validate: reject any percentage. The summary is written from little more than the headline, so even a real
+            # figure from it can end up attached to the wrong thing (the owner, 30 Oct 2026, when a session loosened this)
+            if re.search(r'\d+\.?\d*%', full_content):
+                print(f"   ⚠️  Rejected (contains percentages): {title[:50]}...")
                 continue
             
             # Use first 150 chars of AI content as preview (not the title)
