@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-30",
+   "what": "By market list: the last column now shows what each market's own index made with the same money (up or down, like your result beside it), not the difference; the third card is now called Same markets, no AI",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
    "what": "The practice graph's gold line now compares each market with its own index (the Hang Seng's buys with the Hang Seng, and so on), not the S&P 500; a third card at the top, If in their own markets instead, gives the same figure; the S&P card says how much it is down since the start",
    "found": "owner"
   },
@@ -311,12 +316,6 @@
    "what": "Ask the chat on the home page opens the chat (it opened and closed at once); the sign-up and sign-in boxes sit closer under the header",
    "found": "owner",
    "link": "https://stockiq.tech/#features"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Home page: Sign up free no longer flashes in the menu for a signed-in visitor (the page marked who was looking only after drawing); the nightly check now catches a page that does that",
-   "found": "owner",
-   "link": "https://stockiq.tech/"
   }
  ]
 }

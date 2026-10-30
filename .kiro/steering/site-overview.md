@@ -1722,7 +1722,7 @@ with `document.querySelector('h3')`.
 - **The top is three figures since 30 Oct 2026** (the owner: "hows my automation doing total and today, and hows s&p doing compared to
   it", then "it looked alot better with a 3rd box"): **Your account** (its value, the day's move beside it in smaller type, `dayChip`; under
   it the change since the start), **If in the S&P 500 instead** (the same starting money in the fund now, its day beside it; under it the
-  fund's change since the start and "Your account is $X (Y%) higher / lower") and **If in their own markets instead** (`ownMarkets`,
+  fund's change since the start and "Your account is $X (Y%) higher / lower") and **Same markets, no AI** (it was "If in their own markets instead"; the owner asked for a name that says which markets, and "no AI picks" broke the wording rule; `ownMarkets`,
   `homeBench`: the account had each buy's money gone into its own market on the same days: the autopilot's into the index its screener
   comes from, in that market's currency (`homeTrack`); the owner's own buys and the sector funds into an S&P 500 fund; coins at their own
   result; cash as cash; shown once the autopilot has bought). **The graph's gold line is that same sum over time** (`home` / `phome` in
@@ -1905,7 +1905,9 @@ with `document.querySelector('h3')`.
   in the dashboard's Top 10 tracker (`TOP10_BENCHMARKS`), whose comparison had been empty for those four screeners.
   `check-tools/index_check.js` (in the weekly full check) fails if any index the site uses has fewer than 10 daily prices.
   **Since 30 Oct 2026 each row is set against its own index, not the S&P 500** (the owner: "our result, vs result if we had just invested in
-  x fund"): the badge is the same money put into that row's own index on the same days (`bench`, from `homeGap`; the sector funds and
+  x fund"). **Since the evening of 30 Oct the last column, "If in its own index", is the index's own result for the same money, up or down
+  like the Result beside it, not a gap** (the owner: "just show how much its up or down same as mine ... i easily see i'm winning"; `idxHtml`:
+  our result less the gap; the grey S&P line likewise its own result). Before that: the badge was the same money put into that row's own index on the same days (`bench`, from `homeGap`; the sector funds and
   his own buys against the S&P 500, coins against nothing); the grey line under it names the index and gives the S&P 500 in dollars;
   All markets is every buy added up against its own market (the third card); the S&P reconciliation ("how the whole account's gap adds
   up") is folded underneath. The paragraph below describes the S&P layout it replaced.
