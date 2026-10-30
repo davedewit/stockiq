@@ -82,13 +82,15 @@ def sums_agree(out):
     try:
         d = json.loads(out[out.index('{\n'):out.rindex('}') + 1]); cards = d['figures']
         rows = json.loads(re.search(r'market menu: (\[.*?\])\n', out).group(1))
-        acct, sp, own = money(cards[0])[0], money(cards[1])[0], money(cards[2])[0]
-        part = lambda c: c.split('Your account is')[1].split(' than')[0].split('(without')[0]   # the line under the cards (since 31 Oct 2026), not the coin part
-        said = lambda c: (1 if 'higher' in part(c) else -1) * money(part(c))[0]
+        named = lambda w: next(c for c in cards if c.startswith(w))     # by name, not place (31 Oct 2026: the cards' order changed)
+        acct, sp, own = money(named('Your account'))[0], money(named('If all in the S'))[0], money(named('Same markets'))[0]
+        # the line under the cards (since 31 Oct 2026): "Against the same markets, no AI: ▼ $X (p%) · Against the S&P 500: ▼ $Y (q%) ..."
+        said = lambda c, what: (lambda m: (-1 if m.group(1) == '▼' else 1) * float(m.group(2).replace(',', '')))(re.search(re.escape(what) + r': ([▲▼–]) \$([\d,]+\.\d\d)', c))
         read_own = money(d['above'].split('Same markets, no AI')[-1])[0]
         allrow = next(r for r in rows if r.startswith('All markets'))
         res, idx = [(-1 if a == '▼' else 1) * float(b.replace(',', '')) for a, b in re.findall(r'([▲▼]) \$([\d,]+\.\d\d)', allrow)][:2]
-        checks = [('card 3 = graph read-out', own, read_own, 0.05), ('the line under the cards says account - S&P', said(d['oneLine']), acct - sp, 0.02),
+        checks = [('card 3 = graph read-out', own, read_own, 0.05), ('the line under the cards says account - S&P', said(d['oneLine'], 'Against the S&P 500'), acct - sp, 0.02),
+                  ('the line under the cards says account - same markets', said(d['oneLine'], 'Against the same markets, no AI'), acct - own, 0.02),
                   ('All row index result = card 3 - $100,000', idx, own - 100000, 5),
                   ('All row result = account - $100,000', res, acct - 100000, 5)]
         bad = [f'{n}: {a:,.2f} vs {b:,.2f}' for n, a, b, tol in checks if abs(a - b) > tol]
