@@ -543,6 +543,9 @@ WORDS = {'Federal Funds Rate': 'Fed interest-rate decision', 'FOMC Statement': '
          'Cash Rate': 'RBA rate decision', 'Overnight Rate': 'Bank of Canada rate decision', 'Non-Farm Employment Change': 'jobs report',
          'CPI m/m': 'inflation (month)', 'CPI y/y': 'inflation (year)', 'CPI q/q': 'inflation (quarter)', 'Trimmed Mean CPI q/q': 'core inflation (quarter)', 'Core CPI m/m': 'core inflation (month)', 'Advance GDP q/q': 'growth (GDP)'}
 HOME_START, HOME_END = '<!-- MARKET_WEEK_START -->', '<!-- MARKET_WEEK_END -->'
+# an announcement's market, linked to that market's daily top 10 (30 Oct 2026, the owner: "should i be able to click these things")
+PLACE_PAGE = {'USD': '3-3', 'EUR': '5-sx5e', 'GBP': '5-ftse100', 'JPY': '5-nikkei225', 'AUD': '4-200', 'CAD': '5-tsx60', 'NZD': '5-nzx50',
+              'CNY': '5-csi300', 'CHF': '5-smi'}
 
 
 def week_events():
@@ -572,11 +575,13 @@ def week_events():
 def home_section(summary, events, now, today, names=None, overall=None):
     names = names or {}
     def ev_line(e):
-        name = f"{PLACES.get(e['cur'], e['cur'])}: {WORDS.get(e['title'], e['title'])}"
-        was = 'was ' if e['t'] < now else ''
-        figs = f" <span class=\"sp-muted\">forecast {was}{esc(e['forecast'])}, previous {esc(e['previous'])}</span>" if e['forecast'] and e['previous'] else ''
+        place, what = PLACES.get(e['cur'], e['cur']), WORDS.get(e['title'], e['title'])
+        k = PLACE_PAGE.get(e['cur'])
+        where = (f"<a href=\"screener-{SCREENERS[k][0]}.html\" title=\"{esc(SCREENERS[k][1])}: the top 10 today\">{esc(place)}</a>"
+                 if k in SCREENERS else esc(place))
+        figs = f" <span class=\"sp-muted\">expected {esc(e['forecast'])} · last time {esc(e['previous'])}</span>" if e['forecast'] and e['previous'] else ''
         when = e['t'].strftime('%a %d %b, %H:%M UTC')
-        return f"<li><time datetime=\"{e['t'].strftime('%Y-%m-%dT%H:%M:%SZ')}\">{esc(when)}</time> · <strong>{esc(name)}</strong>{figs}</li>"
+        return f"<li><time datetime=\"{e['t'].strftime('%Y-%m-%dT%H:%M:%SZ')}\">{esc(when)}</time> · <strong>{where}: {esc(what)}</strong>{figs}</li>"
     ahead = [e for e in events if now <= e['t'] <= now + timedelta(days=8)][:6]
     past = [e for e in events if now - timedelta(days=4) <= e['t'] < now][-4:]
     if ahead:
