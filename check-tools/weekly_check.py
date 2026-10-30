@@ -33,7 +33,11 @@ if '--recheck' in sys.argv:                # only what failed last time, where t
     _p = os.path.join(HERE, 'weekly_check.json'); _w = json.load(open(_p)); _left = []
     for _f in _w['failed']:
         _m = re.search(r'fits a (\d+)px phone', _f['name'])
-        if _f['name'] in _alone:
+        if _f['name'].startswith("StockIQ's running cost within the cost rule"):     # read the Admin record's bill again (free), the same rule as the full run
+            _r = subprocess.run([sys.executable, '-c', "import sys,json;sys.path.insert(0,%r);import admin;u=(admin.load() or {}).get('usage') or {};"
+                                 "print('OK' if u.get('costStockiq',9)<1.5 and (u.get('costStockiqForecast') or 0)<1.5 else 'FAIL', u.get('costStockiq'), u.get('costStockiqForecast'))" % HERE],
+                                capture_output=True, text=True, timeout=120, cwd=HERE); _last = (_r.stdout.strip().splitlines() or [''])[-1]; _ok = _last.startswith('OK '); print(' ', _last or _r.stderr.strip()[-200:])
+        elif _f['name'] in _alone:
             _cmd, _judge = _alone[_f['name']]
             _r = subprocess.run(_cmd, capture_output=True, text=True, timeout=1500, cwd=HERE); _ok = _judge(_r.stdout)
         elif _m:
@@ -207,7 +211,10 @@ const pp = require(process.argv[2]); const PRICE = 'https://dohdeb4vpu67fa2tq3ax
     if u.get('costStockiq') is not None and u.get('cost') is not None:
         parts = u['costStockiq'] + u.get('costExplorer', 0) + u.get('costOther', 0)
         note('2. The figures agree across the site', f"the bill on the Admin page adds up (${u['cost']:.2f} = StockIQ ${u['costStockiq'] + u.get('costExplorer', 0):.2f} + other ${u.get('costOther', 0):.2f})", abs(parts - u['cost']) < 0.05, parts)
-        note('2. The figures agree across the site', f"StockIQ's running cost within the cost rule (${u['costStockiq']:.2f} this month, under $1)", u['costStockiq'] < 1, u.get('costStockiqForecast'))
+        # the owner's rule (17 Oct 2026): under $1 a month, $1.50 at most in a heavy month. Over $1 is a note in the daily check
+        # (cost_check.py, session_start); only over $1.50, spent or forecast, fails here (30 Oct 2026: it failed at $1.41, inside the rule)
+        note('2. The figures agree across the site', f"StockIQ's running cost within the cost rule (${u['costStockiq']:.2f} this month, forecast ${u.get('costStockiqForecast') or 0:.2f}: under $1 a month, at most $1.50 in a heavy month)",
+             u['costStockiq'] < 1.5 and (u.get('costStockiqForecast') or 0) < 1.5, u.get('costStockiqForecast'))
     if u.get('forecast'):
         note('2. The figures agree across the site', f"Lambda calls on course for {u['forecast']:,} of the free 1,000,000", u['forecast'] < 900000, u['forecast'])
     smap = open(os.path.join(WEB, 'sitemap.xml')).read(); listed = [l.strip() for l in open(os.path.join(ROOT, 'indexable_stocks.txt')) if l.strip()]
