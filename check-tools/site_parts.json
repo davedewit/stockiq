@@ -29,7 +29,19 @@
    "id": "home-pricing",
    "part": "Home page: pricing and the plans",
    "where": "index.html #pricing",
-   "last": null
+   "last": "2026-10-30",
+   "log": [
+    {
+     "at": "2026-10-30",
+     "kind": "improved",
+     "found": "Improved: Daily review: accurate; per-card buttons staged (pending-wording-web); next idea: 'Choose Pro' could land on the dashboard with that plan marked"
+    },
+    {
+     "at": "2026-10-30",
+     "kind": "improved",
+     "found": "Improved: A button on each plan card (Start free trial / Choose <plan>), the shared button removed"
+    }
+   ]
   },
   {
    "id": "home-widgets",
@@ -185,7 +197,19 @@
    "id": "plans",
    "part": "Plans, upgrade and manage subscription",
    "where": "dashboard.html plan sections, Stripe",
-   "last": null
+   "last": "2026-10-30",
+   "log": [
+    {
+     "at": "2026-10-30",
+     "kind": "fixed",
+     "found": "Fixed: Daily review: two faults found and proposed (#15): any member's real Stripe subscription can be cancelled by two public requests, and a plan change marks the member cancelled and schedules data deletion; unsigned webhook events accepted"
+    },
+    {
+     "at": "2026-10-30",
+     "kind": "improved",
+     "found": "Improved: A thank-you after Stripe (nothing read ?payment=success before) and begin_checkout / purchase recorded in GA4"
+    }
+   ]
   },
   {
    "id": "reports-tab",
@@ -490,8 +514,19 @@
    "id": "funnel",
    "part": "From first visit to sign-up and to a paid plan: where visitors come from (GA4, Search Console), what they do, where they leave",
    "where": "GA4, Search Console; index.html, stock pages, analysis.html, signup.html, the plans",
-   "last": null,
-   "log": []
+   "last": "2026-10-30",
+   "log": [
+    {
+     "at": "2026-10-30",
+     "kind": "improved",
+     "found": "Improved: Daily review: nothing measurable until #11 is live; the staged purchase event carries no amount or plan, so GA4 would count purchases with no revenue: add value, currency and plan (plan in the success_url)"
+    },
+    {
+     "at": "2026-10-30",
+     "kind": "improved",
+     "found": "Improved: GA4 events at each step (sign_up, analysis_run, autopilot_on, begin_checkout, purchase) and the tag on every indexed page: the funnel can now be read"
+    }
+   ]
   },
   {
    "id": "analysis-page",

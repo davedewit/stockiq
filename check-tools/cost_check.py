@@ -21,7 +21,7 @@ KNOWN_CE = {'2026-10': 2.65}          # Cost Explorer charge already explained (
 FIXED_UNTIL = {'stockiq-dashboard-analysis-history': '2026-10-27',   # the cleanup's 64 scans a day, fixed 25 Oct 13:20 UTC
                'AmazonCloudFront': '2026-10-28',                     # one cache-clear path per file, fixed 26 Oct (web_deploy.sh)
                'AmazonS3': '2026-10-28'}                             # the one-off re-upload of ~3,000 stock pages on 24 Oct
-KNOWN_PATHS = {'2026-10': 1100}     # cache-clear paths already explained for the month (the per-file clears of 23-25 Oct)
+KNOWN_PATHS = {'2026-10': 1125}     # cache-clear paths already explained for the month (the per-file clears of 23-25 Oct, then one '/*' a deploy; resets 1 Nov)
 TABLES = ['stockiq-dashboard-analysis-history', 'stockiq-ai-trader', 'stockiq-user-tracking', 'stockiq-paper-portfolios',
           'stockiq-ai-trader-journal', 'stockiq-coinspot-prediction-status', 'stockiq-coinspot-predictions', 'stockiq-usage-tracker',
           'stockiq-email-subscribers', 'stockiq-ai-chat-limits', 'stockiq-ai-chat-stats']

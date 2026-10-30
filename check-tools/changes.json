@@ -3,6 +3,48 @@
  "changes": [
   {
    "at": "2026-10-30",
+   "what": "The chat knows the free trial includes the AI autopilot; the autopilot tab explains 'Holding 46' when its number is lower; no past sell dates",
+   "found": "check"
+  },
+  {
+   "at": "2026-10-30",
+   "what": "Stock analysis guide fits a phone (two boxes side by side were wider than the screen); found by the deploy's own phone check",
+   "found": "check"
+  },
+  {
+   "at": "2026-10-30",
+   "what": "Home page pricing: a button on each plan (Start free trial, or Choose Starter / Pro / Elite when signed in)",
+   "found": "session",
+   "link": "https://stockiq.tech/#pricing"
+  },
+  {
+   "at": "2026-10-30",
+   "what": "Google Analytics now counts sign-ups, analyses, the autopilot switched on, checkouts and payments; four pages had no analytics; a thank-you notice after paying",
+   "found": "check"
+  },
+  {
+   "at": "2026-10-30",
+   "what": "Admin page: 'Done in the last 3 days' above 'Coming up'",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
+   "what": "By market, All markets: a line with the autopilot's holdings against the S&P 500 and against their own indexes, on the same holdings",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
+   "what": "Practice portfolio: the third figure is now 'Against the S&P 500: ▼ $… behind' (the fund's own value in the small print); every big number is about your account",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
+   "what": "This week in the markets (home page): each announcement's market now links to that market's top 10 today, and its figures read 'expected … · last time …'",
+   "found": "owner",
+   "link": "https://stockiq.tech/#market-week"
+  },
+  {
+   "at": "2026-10-30",
    "what": "Two trials decided and kept: the pages' market data once a minute (Lambda calls down from about 15,000 to under 2,500 a day) and the daily review by Claude",
    "found": "session"
   },
@@ -277,46 +319,6 @@
   {
    "at": "2026-10-24",
    "what": "On the home page the menu now glides when let go, like the dashboard (a leftover style line stopped it); the swipe test now checks the glide on every page. Part reviews that find nothing rest a month, then 2, 4, 8 months, or until the part's code changes",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "New ongoing check: the nightly site check counts code copied into several pages (219 lines today, mostly the header and footer) and flags any change that adds more; each weekly part review asks whether anything is built more than once. First job at the next weekly review: the header and footer from one source",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "On a phone the menu and the market panel no longer pop when let go: they glide on at the finger's speed and slow down gently, and the menu slides more smoothly on an iPhone",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "On a phone the menu and the market panel open without the dark shade behind them (iPhone Safari changed its shade as they settled, which looked like a flicker); the green market button no longer sits on top of the open menu",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "The 25 daily screener pages now have the market panel on the right (desktop) and the green button or a swipe on a phone, as a 4-week trial; their tables also fit a phone now. Not added to guides, legal or stock pages, to keep them uncluttered",
-   "found": "session"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Every page now has the same header: on a phone the guides, legal pages and daily screener pages get the menu button, bell, swipe and usage count; on a desktop the usage count and your name in the Account menu. The weekly phone check now tests every page's header",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Stock pages with no news at all (49 of the 946 in Google, all outside the US, e.g. Ramsay Health Care) now take the newest article clearly about the company, even if it is not 'critical' news; from Monday's run",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "The stock pages showed Thursday's figures on Saturday (this morning's update had crashed before writing them): refreshed by hand to Friday's close and uploaded; the crash itself is fixed for Monday's run",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Daily market pages: the headings over numbers are right-aligned; the hub's 'Scoring above zero' is now 'In a rising trend' with its percentage and a line explaining it, the columns line up across regions, and each leader is clickable",
    "found": "owner"
   }
  ]
