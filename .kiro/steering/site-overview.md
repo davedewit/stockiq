@@ -1907,7 +1907,10 @@ with `document.querySelector('h3')`.
   **Since 30 Oct 2026 each row is set against its own index, not the S&P 500** (the owner: "our result, vs result if we had just invested in
   x fund"). **Since the evening of 30 Oct the last column, "If in its own index", is the index's own result for the same money, up or down
   like the Result beside it, not a gap** (the owner: "just show how much its up or down same as mine ... i easily see i'm winning"; `idxHtml`:
-  our result less the gap; the grey S&P line likewise its own result). Before that: the badge was the same money put into that row's own index on the same days (`bench`, from `homeGap`; the sector funds and
+  our result less the gap). **The S&P 500 is no longer in the list at all** (the grey S&P line and the folded S&P reconciliation went: the
+  second card has it); the grey line names the index; the owner's own buys have a row of their own (against the S&P 500); the summary
+  line counts screeners that did better or worse than their index. The third card has its own day (`ownMarkets` `dayUsd`: each holding's
+  money moved by its index's day, `indexDayPct`), so the three cards read alike. Before that: the badge was the same money put into that row's own index on the same days (`bench`, from `homeGap`; the sector funds and
   his own buys against the S&P 500, coins against nothing); the grey line under it names the index and gives the S&P 500 in dollars;
   All markets is every buy added up against its own market (the third card); the S&P reconciliation ("how the whole account's gap adds
   up") is folded underneath. The paragraph below describes the S&P layout it replaced.

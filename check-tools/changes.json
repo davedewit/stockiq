@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-30",
+   "what": "By market list: the S&P 500 lines taken out (the second card already has it); your own buys get their own row; the third card shows its own today figure like the other two, and the day figures sit neatly under each total",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
    "what": "By market list: the last column now shows what each market's own index made with the same money (up or down, like your result beside it), not the difference; the third card is now called Same markets, no AI",
    "found": "owner"
   },
@@ -310,12 +315,6 @@
    "what": "Sign-in and sign-up pages: the 'Don't have an account? / Already have an account?' prompt shows on phones only (on a desktop the header's Log in and Sign up free do the same)",
    "found": "owner",
    "link": "https://stockiq.tech/login.html"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Ask the chat on the home page opens the chat (it opened and closed at once); the sign-up and sign-in boxes sit closer under the header",
-   "found": "owner",
-   "link": "https://stockiq.tech/#features"
   }
  ]
 }
