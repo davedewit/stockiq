@@ -166,7 +166,14 @@ async function page(status, uid) {
     ADMIN.open = ADMIN.open.map(x => Object.assign({}, x, { kind: 'session', at: new Date().toISOString() }));
     const q = await page(200, 'dave@x.com'); const pl = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
     check('"What runs by itself" lists the daily update with its last runs, a warning with its issue', /The daily update: .*Last runs: ⚠️ .*: A step crashed · ✅/.test(pl), pl.slice(pl.indexOf('daily update'), pl.indexOf('daily update') + 300));
-    check('"Coming up" says who does each thing', /a session with Claude/.test(pl) && /The daily update \(automatic, on your Mac Mon to Sat/.test(pl), pl.slice(pl.indexOf('Coming up'), pl.indexOf('Coming up') + 500));
+    if (/Done in the last 3 days/.test(fs.readFileSync(process.argv[2], 'utf8'))) {
+      const iso = (k) => { const t = new Date(Date.now() - k * 86400000); return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`; };
+      ADMIN.plan.dailyRuns = [{ date: iso(1), ok: true, took: '30 min', issue: '' }, { date: iso(6), ok: true, took: '30 min', issue: '' }];
+      ADMIN.plan.changes = [{ at: new Date().toISOString(), what: 'a' }, { at: new Date().toISOString(), what: 'b' }];
+      const q2 = await page(200, 'dave@x.com'); const dn = q2.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+      check('"Done in the last 3 days" lists the recent daily update and the session with its count, newest first, and leaves out older ones', /Done in the last 3 days Today 🔧 A session with Claude: 2 changes .*✅ The daily update .*Coming up/.test(dn) && (dn.match(/✅ The daily update/g) || []).length === 1, dn.slice(dn.indexOf('Done in'), dn.indexOf('Done in') + 400));
+    }
+    check('"Coming up" says who does each thing', /a session with Claude/.test(pl) && /The daily update \(automatic, on your Mac every day/.test(pl), pl.slice(pl.indexOf('Coming up'), pl.indexOf('Coming up') + 500));
     check('proposals for a session are not counted as decisions waiting for the owner', !/decisions? waiting for your yes or no/.test(pl), pl.slice(0, 400));
   }
   console.log(ok ? 'ALL PASS' : 'SOME FAILED'); process.exit(ok ? 0 : 1);

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="https://stockiq.tech/data-deletion.html">
+    <meta name="robots" content="index, follow">    <title>Data Deletion Instructions - StockIQ</title>
+    <meta name="description" content="How to have the data StockIQ holds about you deleted, including what was shared by signing in with Facebook: through Facebook&#x27;s settings or by email.">
+    <link rel="icon" type="image/png" sizes="32x32" href="stockiq-logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="stockiq-logo.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    <style>
+        html, body { background: #0f0f0f !important; transition: none !important; }
+        [data-theme="light"] html, [data-theme="light"] body { background: #ffffff !important; }
+    </style>
+    <script>
+        const savedTheme = localStorage.getItem('theme');
+        const manualOverride = localStorage.getItem('manualOverride');
+        const hour = new Date().getHours();
+        const autoTheme = (hour >= 18 || hour < 6) ? 'dark' : 'light';
+        const theme = (manualOverride === 'true' && savedTheme) ? savedTheme : autoTheme;
+        document.documentElement.setAttribute('data-theme', theme);
+    </script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="theme.js"></script>
+<!-- AUTOPILOT_BELL_START: the AI autopilot's practice buys and sells in the notification bell, for signed-in visitors only --><script>(function(){try{var u=localStorage.getItem('userId');if(u&&u!=='anonymous'&&!window.autopilotBell){var s=document.createElement('script');s.src='autopilot-bell.js?h='+Math.floor(Date.now()/36e5);s.async=true;document.head.appendChild(s);}}catch(e){}})();</script><!-- AUTOPILOT_BELL_END -->
+    <style>
+        .top-nav { top: 0 !important; }
+        body { padding-top: 64px !important; }
+        .mobile-menu { top: 64px !important; height: calc(100vh - 64px) !important; }
+        #trial-status-display { top: 60px !important; }
+        
+        .deletion-container {
+            max-width: 700px;
+            margin: 80px auto;
+            padding: 40px 30px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .deletion-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .deletion-header h1 {
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .deletion-content {
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .deletion-content h2 {
+            color: var(--text-primary);
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .deletion-content p {
+            margin-bottom: 15px;
+        }
+        
+        .deletion-content ol {
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+        
+        .deletion-content li {
+            margin-bottom: 10px;
+        }
+        
+        .contact-box {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+        }
+        
+        .email-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .email-link:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .deletion-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+        }
+    </style>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WVETNMPF8V"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+
+gtag('config', 'G-WVETNMPF8V');
+</script>
+</head>
+<body>
+<!-- SHARED_STRIP_START: the strip across the top on a desktop, written by stockiq/shared_parts.py: change it there, not here -->
+<a id="site-strip" class="site-strip" href="signup.html" hidden></a>
+<script>(function () { try { var d = document.documentElement, s = document.getElementById('site-strip'), u = localStorage.getItem('userId'), signed = !!u && u !== 'anonymous'; if (window.innerWidth <= 768 || (signed && localStorage.getItem('userPaidStatus_' + u) === 'paid')) { s.remove(); d.style.setProperty('--nav-top', '0px'); return; } s.innerHTML = '<span>' + (signed ? 'Plans from <strong>$4.99/month</strong>: more analyses a day, and the AI autopilot (Beta) for your practice portfolio' : 'Free 3-day trial: <strong>15 analyses</strong>, no credit card needed') + '</span>'; if (signed) s.href = 'index.html#pricing'; s.hidden = false; d.classList.add('has-strip'); d.style.setProperty('--nav-top', '41px'); } catch (e) { } })();</script>
+<!-- SHARED_STRIP_END -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="index.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit;">
+                    <img src="stockiq-logo.png" alt="StockIQ" class="brand-logo" style="width: 24px; height: 24px;">
+                    <span class="brand-text">StockIQ</span>
+                </a>
+            </div>
+            
+            <div class="desktop-nav">
+                <!-- SHARED_MENU_START: the menu, written by stockiq/shared_parts.py: change it there, not here -->
+<a href="index.html" class="nav-item home-link" style="text-decoration: none !important; color: inherit; display: flex; align-items: center;">Home</a>
+<div class="nav-item dropdown" onclick="showDropdown('analysis-dropdown', event)">Analysis <span class="dropdown-arrow">▼</span><div class="dropdown-menu" id="analysis-dropdown"><a href="analysis.html?option=1">Stock &amp; ETF Analysis</a><a href="analysis.html?option=2">Trading Signals</a></div></div>
+<div class="nav-item dropdown" onclick="showDropdown('screeners-dropdown', event)">Screeners <span class="dropdown-arrow">▼</span><div class="dropdown-menu" id="screeners-dropdown"><a href="screeners-today.html">📊 Today&rsquo;s top 10s</a><a href="analysis.html?option=3">🇺🇸 US Markets</a><a href="analysis.html?option=4">🇪🇺 Europe Markets</a><a href="analysis.html?option=5">🌏 Asia-Pacific Markets</a><a href="analysis.html?option=6">🌎 Americas Markets</a><a href="analysis.html?option=7">🪙 Crypto (540 coins)</a></div></div>
+<a href="index.html#pricing" class="nav-item home-link nav-pricing" style="text-decoration: none !important; color: inherit; display: flex; align-items: center;">Pricing</a>
+<a href="login.html" class="nav-item home-link nav-login">Log in</a>
+<a href="signup.html" class="nav-signup">Sign up free</a>
+<div class="nav-item dropdown nav-account" onclick="showDropdown('account-dropdown', event)" style="margin-left: auto;">Account <span class="dropdown-arrow">▼</span><div class="dropdown-menu" id="account-dropdown"><a href="signup.html">Register</a><a href="login.html">Login</a></div></div>
+<!-- SHARED_MENU_END -->
+                <button class="notification-bell" id="notification-bell" onclick="goToNotifications()" title="Notifications" aria-label="View notifications" style="display: none; position: relative; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-primary); margin-right: 10px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span class="notification-badge" id="notification-badge" style="position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; font-weight: bold; display: none; align-items: center; justify-content: center;"></span>
+                </button>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Click: Toggle theme | Double-click: Reset to auto" aria-label="Toggle dark mode">
+                    <span class="theme-icon" aria-hidden="true">🌙</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+<!-- SHARED_PHONE_BLOCK_START: the phone menu, written by stockiq/shared_parts.py: change it there, not here -->
+<div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
+<div class="mobile-menu" id="mobile-menu">
+<div class="mobile-menu-header"><span class="mobile-brand"><img src="stockiq-logo.png" alt="StockIQ" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;" width="20" height="20">StockIQ.tech</span><div class="mobile-header-controls"><button class="close-btn" onclick="closeMobileMenu()" aria-label="Close menu">×</button></div></div>
+<div class="mobile-menu-content">
+<!-- SHARED_PHONE_MENU_START: the phone menu, written by stockiq/shared_parts.py: change it there, not here -->
+<div class="mobile-section mobile-join only-signed-out"><a href="signup.html" class="mobile-signup">Sign up free</a><a href="login.html" class="mobile-login">Log in</a></div>
+<div class="mobile-section"><a href="index.html">🏠 Home</a></div>
+<div class="mobile-section only-signed-in" id="mobile-dashboard-section"><a href="dashboard.html">📊 Dashboard</a></div>
+<div class="mobile-section"><div class="mobile-section-title">Analysis</div><a href="analysis.html?option=1">Stock &amp; ETF Analysis</a><a href="analysis.html?option=2">Trading Signals</a></div>
+<div class="mobile-section"><div class="mobile-section-title">Screeners</div><a href="screeners-today.html">📊 Today&rsquo;s top 10s</a><a href="analysis.html?option=3">🇺🇸 US Markets</a><a href="analysis.html?option=4">🇪🇺 Europe Markets</a><a href="analysis.html?option=5">🌏 Asia-Pacific Markets</a><a href="analysis.html?option=6">🌎 Americas Markets</a><a href="analysis.html?option=7">🪙 Crypto (540 coins)</a></div>
+<div class="mobile-section mobile-pricing"><a href="index.html#pricing">💳 Pricing</a></div>
+<div class="mobile-section only-signed-in"><div class="mobile-section-title">Account</div><a href="signup.html">Register</a><a href="login.html">Login</a></div>
+<div class="mobile-section"><div class="mobile-section-title">Theme</div><a href="#" onclick="event.preventDefault(); toggleTheme()" id="mobile-theme-toggle">🌙 Dark Mode</a></div>
+<!-- SHARED_PHONE_MENU_END -->
+</div>
+</div>
+<!-- SHARED_PHONE_BLOCK_END -->
+
+    <div class="deletion-container">
+        <div class="deletion-header">
+            <h1>Data Deletion Instructions</h1>
+        </div>
+
+        <div class="deletion-content">
+            <p>If you have used Facebook Login to access StockIQ and want to delete your data, you can request deletion through the following methods:</p>
+
+            <h2>Method 1: Facebook Settings</h2>
+            <ol>
+                <li>Go to your Facebook Settings & Privacy</li>
+                <li>Click on "Settings"</li>
+                <li>Select "Apps and Websites"</li>
+                <li>Find "StockIQ" in your app list</li>
+                <li>Click "Remove" to revoke access and delete associated data</li>
+            </ol>
+
+            <h2>Method 2: Direct Request</h2>
+            <div class="contact-box">
+                <p><strong>Email us directly:</strong></p>
+                <p>Send a data deletion request to: <a href="mailto:privacy@stockiq.tech" class="email-link">privacy@stockiq.tech</a></p>
+                <p><strong>Include in your email:</strong></p>
+                <ul>
+                    <li>Your Facebook email address</li>
+                    <li>Subject line: "Data Deletion Request"</li>
+                    <li>Confirmation that you want all your StockIQ data deleted</li>
+                </ul>
+            </div>
+
+            <h2>What Data Gets Deleted</h2>
+            <p>When you request data deletion, we will remove:</p>
+            <ul>
+                <li>Your account information (name, email)</li>
+                <li>Login history and session data</li>
+                <li>Usage analytics and preferences</li>
+                <li>Any stored analysis requests or results</li>
+            </ul>
+
+            <h2>Processing Time</h2>
+            <p>Data deletion requests are processed within <strong>30 days</strong> of receipt. You will receive a confirmation email once your data has been permanently deleted from our systems.</p>
+
+            <h2>Questions?</h2>
+            <p>If you have any questions about data deletion or need assistance, contact us at <a href="mailto:privacy@stockiq.tech" class="email-link">privacy@stockiq.tech</a></p>
+        </div>
+    </div>
+
+    <!-- SHARED_FOOTER_START: the footer, written by stockiq/shared_parts.py: change it there, not here -->
+<footer class="footer site-footer">
+<div class="sf-cols">
+<div class="sf-brand"><a href="index.html" class="sf-logo"><img src="stockiq-logo.png" alt="" width="20" height="20" loading="lazy">StockIQ</a><p>Research tools for individual investors: scores, screeners and a practice portfolio.</p></div>
+<div class="sf-col"><div class="sf-head">Tools</div><a href="analysis.html?option=1">Stock analysis</a><a href="screeners-today.html">Today&rsquo;s top 10s</a><a href="analysis.html?option=3">All screeners</a><a href="index.html#pricing">Pricing</a></div><div class="sf-col"><div class="sf-head">Learn</div><a href="news.html">Market news</a><a href="blog.html">Blog</a><a href="faq.html">FAQ</a><a href="about.html">About</a></div><div class="sf-col"><div class="sf-head">Help</div><a href="support.html">Support</a><a href="contact.html">Contact</a><a href="terms.html">Terms of Service</a><a href="privacy-policy.html">Privacy Policy</a><a href="refunds.html">Refund Policy</a><a href="data-deletion.html">Data Deletion</a></div>
+</div>
+<p class="sf-legal">General information only, not financial advice. Scores and signals are automated model outputs that do not take your personal circumstances into account, and past performance does not indicate future results. Market data comes from third parties (Yahoo Finance, Finnhub) and may be delayed or inaccurate.</p>
+<p class="sf-copy">&copy; 2026 StockIQ &middot; <a href="https://instagram.com/stockiq.tech" target="_blank" rel="noopener noreferrer">Instagram</a></p>
+</footer>
+<!-- SHARED_FOOTER_END -->
+</body>
+</html>
