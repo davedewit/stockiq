@@ -63,17 +63,6 @@
    "result": "Lambda calls of the sidebar's ticker fell from about 13,000-19,600 a day (12 and 17 Oct) to 250-2,300 a day over 23-29 Oct; the pages still update while someone is on them (live-market.js). Kept."
   },
   {
-   "id": "longer-holds",
-   "what": "A longer holding time for shares, beside the current one, as a trial in the autopilot",
-   "angle": "profit",
-   "measure": "Starts when the patient-shares trial is decided (12 Nov 2026): both are about how long shares are kept, and running them together would muddy both. Every second share kept twice the level's holding time (the owner's pace has been left to the level since 23 Oct, so it overrides nothing he set); 30 finished each way, after costs, against an S&P 500 fund. The replay: 5 days +92%, 20 days +103 to +106% over four years",
-   "status": "idea",
-   "order": 1,
-   "public": true,
-   "publicText": "Next: a trial of holding shares longer, beside the current holding time.",
-   "added": "2026-10-17"
-  },
-  {
    "id": "company-figures",
    "what": "Record profit margin, debt and growth with every share bought, then split the record by them",
    "angle": "analysis, profit",
@@ -500,6 +489,18 @@
    "measure": "GA4 events news_click by kind, against news.html views and sign_up, 4 weeks",
    "status": "idea",
    "added": "2026-10-30"
+  },
+  {
+   "id": "longer-holds",
+   "what": "Longer holds for shares: while the holding time is automatic, shares tagged 0, 1, 1, 0 are kept up to 20 days instead of the level's 5, beside the current rule (since 30 Oct 2026)",
+   "angle": "profit",
+   "measure": "average a finished trade after costs against an S&P 500 fund, kept-up-to-20-days against the level's own time, 30 finished each way (autopilot_review.py, the longer-holds split), counting what is still held too",
+   "status": "running",
+   "added": "2026-10-30",
+   "started": "2026-10-30",
+   "decide": "2026-12-29",
+   "public": true,
+   "publicText": "Keeping some shares longer (up to 20 days instead of 5), side by side with the current rule, to see whether fewer, longer trades do better after costs"
   }
  ]
 }

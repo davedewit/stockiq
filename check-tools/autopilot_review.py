@@ -181,6 +181,7 @@ def main():
         breakdown('by debt to equity when bought (shares)', [t for t in shares_cf if t.get('de') is not None], lambda t: 'low debt (under 0.5)' if t['de'] < 0.5 else 'some debt (0.5 to 1.5)' if t['de'] <= 1.5 else 'high debt (over 1.5)')
         breakdown('by revenue growth when bought (shares)', [t for t in shares_cf if t.get('rg') is not None], lambda t: 'revenue shrinking' if t['rg'] < 0 else 'growing under 15%' if t['rg'] < 15 else 'growing 15% or more')
     breakdown('the patient-shares trial (from 12 Oct 2026: a patient share is not sold on the signal, nor by the AI review)', [t for t in trades if t.get('pt') is not None], lambda t: 'patient: sold by price or time only' if t.get('pt') == 1 else 'ordinary: also sold when the signal turns')
+    breakdown('the longer-holds trial (from 30 Oct 2026: while the holding time is automatic, half the shares are kept up to 20 days)', [t for t in trades if t.get('lh') is not None], lambda t: 'kept up to 20 days' if t.get('lh') == 1 else "kept the level's own time")
     breakdown('the AI model against the top by rank (a trial from 23 Oct 2026: every second share the model picks is swapped for the top-ranked of its market)',
               [t for t in trades if t.get('rp') is not None], lambda t: 'taken by rank' if t.get('rp') == 1 else "the AI model's own choice")
     waits = [t['gw'] for t in trades if t.get('gw') is not None]
@@ -267,6 +268,9 @@ def main():
     now_at = lambda group: (sum((h.get('path') or [[0, 0]])[-1][1] for h in group) / len(group)) if group else 0.0
     say(f"  the patient-shares trial, still held: {len(pat)} patient (on paper {now_at(pat):+.2f}% on average at their last check-in), {len(plain)} ordinary ({now_at(plain):+.2f}%). "
         "A fair comparison counts both: what was sold and what is still held, for buys of the same weeks.")
+    lng = [h for h in held.values() if h.get('lh') == 1]; std = [h for h in held.values() if h.get('lh') == 0]
+    if lng or std:
+        say(f"  the longer-holds trial, still held: {len(lng)} kept up to 20 days (on paper {now_at(lng):+.2f}% on average at their last check-in), {len(std)} the level's own time ({now_at(std):+.2f}%). Count what was sold and what is still held together: the longer group finishes later.")
     order = state.get('order') or {}
     order_words = {'trial': 'the trial of the buying order is running', 'low52': 'shares are bought furthest above their 52-week low (kept after a trial)',
                    'rank': 'shares are bought as ranked' + (' (the trial of the buying order ended, not kept)' if order.get('ended') else '')}.get(order.get('mode'), f"buying order '{order.get('mode')}'")

@@ -99,3 +99,10 @@ Rules:
   (the footer counted twice if a page ever has two `<footer`).
 - **Undo:** `git revert 608fd71`.
 - **Remove after:** 2026-11-13
+
+### 2026-10-30 · The longer-holds trial
+- **Changed:** `stockiq-ai-trader` (`LONGER`, `LONGER_DAYS` 20, tag `lh` 0, 1, 1, 0 on share buys while `maxHoldDays` is automatic; `hold_days`).
+- **Could break:** the budget filling up and buying slowing (tagged shares are held longer); a holding's plan showing 20 days where the
+  owner set his own time (it must not: `hold_days` checks `auto`); the review tool's split missing.
+- **Undo:** `LONGER = False` in the function (tagged shares then follow the level's time), or the rollback zip `…_before_autopilot_longer_20261030.zip`.
+- **Remove after:** 2026-11-20

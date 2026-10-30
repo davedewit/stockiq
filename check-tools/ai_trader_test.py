@@ -40,6 +40,7 @@ SHARED = m.CENTRAL; m.CENTRAL = False
 NOTES = getattr(m, 'LESSONS_MIN', 0); m.LESSONS_MIN = 5
 # And every share is sold by the ordinary rules here; the trial in which some are "patient" is tested on its own (PATIENT).
 PATIENT_ON = getattr(m, 'PATIENT', False); m.PATIENT = False
+LONGER_ON = getattr(m, 'LONGER', False); m.LONGER = False
 PICK_DEFAULT = m.DEFAULTS.get('pickMode')
 if PICK_DEFAULT: m.DEFAULTS['pickMode'] = 'manual'   # the older tests tick their own screeners; the AI's choice of markets has its own tests
 RANK_ON = getattr(m, 'RANK_PICK', False); m.RANK_PICK = False   # the trial of the model's choice against the top by rank has its own tests
@@ -1312,6 +1313,27 @@ if PATIENT_ON:
     check('nor is an account with "Try changes to its own rules" switched off', rec['state']['open'] and all('pt' not in f for f in rec['state']['open'].values()))
     check('the tag goes with a finished trade into the shared record', 'pt' in m.POOL_FIELDS)
     m.PATIENT = False; m.CENTRAL = was_central; m.datetime = clock; D.t.clear(); m._BRAIN.clear()
+# ---- the longer-holds trial (30 Oct 2026): while the holding time is automatic, shares tagged 0, 1, 1, 0 are kept up to 20 days
+if LONGER_ON:
+    m.LONGER = True; D.t.clear(); m._BRAIN.clear(); was_central = m.CENTRAL; m.CENTRAL = False; m.datetime = Open; SNAP['3-100'] = rows(); MODEL['answer'] = None; MODEL['prompts'].clear()
+    base = dict(m.DEFAULTS, enabled=True, risk=3, budgetUsd=16000, periodDays=1, everyHours=24, maxHoldDays=5, auto=['maxHoldDays'], screeners=['3-100'])
+    rec = m.load_item(U); rec['settings'] = m.clean_settings(dict(base), U); rec['state'] = {'startedAt': m.iso(Open.utcnow() - dt.timedelta(days=2))}
+    m.run_user(U, rec, Open.utcnow(), snapshot=snapshot, quote=quote, model=model)
+    m.run_user(U, rec, Open.utcnow() + dt.timedelta(days=1), snapshot=snapshot, quote=quote, model=model)
+    fs = list(rec['state']['open'].values()); tags = [f.get('lh') for f in fs]
+    check('longer holds: shares are tagged 0, 1, 1, 0 in turn while the holding time is automatic', len(tags) >= 4 and tags[:4] == [0, 1, 1, 0], tags)
+    lvl = rec['settings']['maxHoldDays']
+    check('longer holds: a tagged share is kept up to 20 days, the others the level\'s own time', all(f['hold'] == 20 for f in fs if f.get('lh') == 1) and all(f['hold'] == lvl for f in fs if f.get('lh') == 0), [(f.get('lh'), f['hold']) for f in fs])
+    pub = m.public(rec, Open.utcnow() + dt.timedelta(days=1), U); plans = {p['id']: p for p in pub.get('plans', [])}
+    longp = [plans[i]['holdDays'] for i, f in rec['state']['open'].items() if f.get('lh') == 1 and i in plans]
+    check('longer holds: the page is told the longer holding time', longp and all(d == 20 for d in longp), longp)
+    hand = dict(rec['settings'], auto=[], maxHoldDays=7)
+    check('longer holds: once the user sets the holding time himself, every share follows it', m.hold_days(hand, {'lh': 1}) == 7 and m.hold_days(hand, {'lh': 0}) == 7)
+    rec2 = m.load_item(U); rec2['settings'] = m.clean_settings(dict(base, auto=[]), U); rec2['state'] = {'startedAt': m.iso(Open.utcnow() - dt.timedelta(days=2))}
+    m.run_user(U, rec2, Open.utcnow(), snapshot=snapshot, quote=quote, model=model)
+    check('longer holds: no share is tagged while the holding time is set by the user', all('lh' not in f for f in rec2['state']['open'].values()) and rec2['state']['open'], [f.get('lh') for f in rec2['state']['open'].values()])
+    check('longer holds: the tag travels to the shared record', 'lh' in m.POOL_FIELDS)
+    m.LONGER = False; m.CENTRAL = was_central; m.datetime = clock; D.t.clear(); m._BRAIN.clear()
 # ---- a fall through the loss limit overnight waits one check-in (23 Oct 2026)
 if GAP_ON:
     m.GAP_WAIT = True

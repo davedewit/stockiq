@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-30",
+   "what": "A new trial for profit: half of new share buys are kept up to 20 days instead of 5 (the replay's clearest finding), beside the current rule; decided at 30 finished trades each way",
+   "found": "session"
+  },
+  {
+   "at": "2026-10-30",
    "what": "The chat knows the free trial includes the AI autopilot; the autopilot tab explains 'Holding 46' when its number is lower; no past sell dates",
    "found": "check"
   },
@@ -314,11 +319,6 @@
   {
    "at": "2026-10-24",
    "what": "The menu and footer are now one design on every page, defined in one place: Screeners now includes crypto, Pricing is in the menu bar, and the footer has three tidy columns with the disclaimer on every page (it was missing on some). Code copied across pages is down from 219 to 106 lines",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "On the home page the menu now glides when let go, like the dashboard (a leftover style line stopped it); the swipe test now checks the glide on every page. Part reviews that find nothing rest a month, then 2, 4, 8 months, or until the part's code changes",
    "found": "owner"
   }
  ]

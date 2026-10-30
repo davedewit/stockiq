@@ -227,13 +227,10 @@ warns about; one change at a time, measured, with its experiment entry.
     Stripe; #12's holdings wording; the portfolio's three figures each about the user's account, "Against the S&P 500: ▼ $… behind"; the
     All markets row's line "the autopilot's holdings: against the S&P 500 x% · against their own indexes y%"; the Admin page's "Done in the
     last 3 days"). `site_audit.py` `ga4-missing` is new.
-  - **To finish if the session stopped:** (1) the two market-news articles with a percentage, written under the loosened rule (Amazon AWS
-    +39%, Microsoft +32%), out of news.html and news.js; (2) the two deploys above (dry run, run, check live), then `admin.py change` lines
-    and `site_parts.py done` for home-pricing, plans, funnel; `admin.py done 11` and `done 12`; (3) a button on each home-page price card
-    (index.html after the run; signed out "Start free trial", signed in "Choose Starter/Pro/Elite" to dashboard.html#upgrade; drop the shared
-    button); (4) **the `longer-holds` trial, owed since 23 Oct** (the owner's holding time has been automatic since then, so a trial may
-    test it): half of new share buys kept up to 20 days instead of the level's 5, only while the holding time is automatic, beside the current
-    rule, its experiment entry and review split; (5) rename `~/stockiq-logs/daily-2026-10-30-warn.log` to done once the rerun is clean.
+  - **Finished the same day, all live and checked as the owner's account:** the two articles out, both deploys (Admin #11 and #12 done;
+    parts home-pricing, plans and funnel improved), a button on each price card, the analysis guide fitting a phone (found by the deploy's
+    phone check), "This week in the markets" linking each announcement's market (from the next daily update), and **the `longer-holds`
+    trial live** (`stockiq-ai-trader` `j82lXMrV…`; decide by 29 Dec 2026, or at 30 finished each way). The Admin card read "No, all good".
 - **26 Oct 2026 (short):** stock news reaches news.html again (a pattern broken by the shared footer on 24 Oct; refilled and live);
   website deploys clear the cache once (`/*`; 1,084 paths this month, $0.39 past the free 1,000; `cost_check.py` now counts them);
   the S&P 500 card shows the fund's own day. Admin #13, #14 done. **Still open for Sunday's weekly session: #8, #11, #12**, and the

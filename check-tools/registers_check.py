@@ -25,7 +25,7 @@ STALE_DAYS = 21
 # switch in the function -> experiment id, or 'infra: why it is not an experiment'. Add a line whenever a switch is added.
 SWITCHES = {'DIARY': 'infra: the diary of every line and trade, a record, not a rule', 'CENTRAL': 'infra: one shared record every account learns from',
             'AI_SELL': 'ai-review-off', 'THEMES': 'theme-sleeve', 'GAP_WAIT': 'gap-wait', 'RANK_PICK': 'rank-pick', 'PATIENT': 'patient-shares',
-            'STOP_WATCH': 'stop-watch'}
+            'STOP_WATCH': 'stop-watch', 'LONGER': 'longer-holds'}
 SETTINGS = {'selfTune': 'infra: the user lets it try changes to its own rules', 'emails': 'infra: emails', 'compound': 'compound', 'themes': 'theme-sleeve'}
 
 def main():
