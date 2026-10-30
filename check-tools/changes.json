@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-30",
+   "what": "Sector funds line now says which 3 funds it holds right now (Chips, Energy, Technology) and that the others, gold included, are only bought when in the top 3",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
    "what": "Coins: the autopilot never buys them when it chooses the markets (Manual users can still tick them); the S&P card now says where the account stands without the old coin trades; the By market list shows results in dollars only, without the confusing Total bought column",
    "found": "owner"
   },
@@ -305,12 +310,6 @@
   {
    "at": "2026-10-24",
    "what": "The free 3-day trial now includes the AI autopilot: a new account can switch it on and watch it trade its practice portfolio; when the trial ends it pauses by itself (a note and an email say so) and switches back on with any paid plan. The sign-up page now leads with it; the FAQ, About, home page and the AI chat say the same",
-   "found": "owner",
-   "link": "https://stockiq.tech/signup.html"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Sign-up page: three short lines instead of four long ones, and one-click Google or Facebook sign-up above the email form (a 4-week trial measured on sign-ups)",
    "found": "owner",
    "link": "https://stockiq.tech/signup.html"
   }
