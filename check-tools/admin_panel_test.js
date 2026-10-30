@@ -171,7 +171,10 @@ async function page(status, uid) {
       ADMIN.plan.dailyRuns = [{ date: iso(1), ok: true, took: '30 min', issue: '' }, { date: iso(6), ok: true, took: '30 min', issue: '' }];
       ADMIN.plan.changes = [{ at: new Date().toISOString(), what: 'a' }, { at: new Date().toISOString(), what: 'b' }];
       const q2 = await page(200, 'dave@x.com'); const dn = q2.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
-      check('"Done in the last 3 days" lists the recent daily update and the session with its count, newest first, and leaves out older ones', /Done in the last 3 days Today 🔧 A session with Claude: 2 changes .*✅ The daily update .*Coming up/.test(dn) && (dn.match(/✅ The daily update/g) || []).length === 1, dn.slice(dn.indexOf('Done in'), dn.indexOf('Done in') + 400));
+      check('"Done in the last 3 days" comes under "Coming up", lists the session with its count and the recent daily update, newest first, and leaves out older ones', /Coming up .*Done in the last 3 days Today 🔧 A session with Claude \(2 changes.*✅ The daily update/.test(dn) && (dn.match(/The daily update/g) || []).length >= 1 && !/Done in the last 3 days.*Coming up/.test(dn), dn.slice(dn.indexOf('Coming up'), dn.indexOf('Coming up') + 600));
+      ADMIN.plan.checkins = [iso(0)]; ADMIN.plan.dailyRuns = [{ date: iso(1), ok: false, fixed: true, took: '30 min', issue: 'x' }];
+      const q3 = await page(200, 'dave@x.com'); const dn3 = q3.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+      check('a weekly check-in is named as such, and a warning since fixed says so', /👋 Your weekly check-in with Claude \(the full review; 2 changes/.test(dn3) && /The daily update \(it had a warning; since fixed\)/.test(dn3), dn3.slice(dn3.indexOf('Done in'), dn3.indexOf('Done in') + 400));
     }
     check('"Coming up" says who does each thing', /a session with Claude/.test(pl) && /The daily update \(automatic, on your Mac every day/.test(pl), pl.slice(pl.indexOf('Coming up'), pl.indexOf('Coming up') + 500));
     check('proposals for a session are not counted as decisions waiting for the owner', !/decisions? waiting for your yes or no/.test(pl), pl.slice(0, 400));

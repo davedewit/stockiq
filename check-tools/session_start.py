@@ -303,12 +303,14 @@ finding('every session: add at least one new idea of your own to check-tools/exp
 # 6e. the page as the owner reads it (clarity_check.py; the owner, 17 Oct 2026: "anything else confusing you want to optimise?
 #     and i'm tired of asking this!"): near-identical lines, "A and B and C", a switched-off feature still described, huge menus
 head('6e. The dashboard as the owner reads it')
+CHECKIN_TEXT = None
 try:
     r = subprocess.run([sys.executable, os.path.join(HERE, 'clarity_check.py')], capture_output=True, text=True, timeout=400)
     out = [l for l in r.stdout.splitlines() if l.strip()]
     for l in out: print('  ' + l)
     for l in out:
         if l.startswith('FLAG '): finding('CLARITY (fix it, or teach clarity_check.py that it is fine): ' + l[5:])
+        if l.startswith('CHECKIN '): CHECKIN_TEXT = l[8:]
         if l.startswith('CHECKIN ') and not l[8:].startswith('No, all good'):
             finding('THE ADMIN PAGE ASKS THE OWNER TO CHECK IN (fix the cause, or it stays so after the session): ' + l[8:][:240])
     if not out: finding('clarity_check.py printed nothing: ' + (r.stderr.strip().splitlines() or ['no error'])[-1][:150])
@@ -336,6 +338,50 @@ part = part[:part.find('*Housekeeping')]
 for line in part.splitlines():
     if line.startswith('- **') or re.match(r'^\d+\. \*\*', line): print('  ' + line[:170])
 finding('every session: add new ideas of your own to check-tools/reviews/questions.md and the improvements list, and look again at what was ruled out')
+
+# 8. THE WEEKLY CHECK-IN, item by item (30 Oct 2026, the owner: "no point me having you skip things during our weekly checkin the md
+#    should know what to do thats the whole point of the hi"). Shown when the weekly review is due or was written today: each item done
+#    today (✓) or still to do (✗). The session is not over until every line is ✓, whatever else the owner asked for in it.
+_today = datetime.date.today(); _iso = _today.isoformat()
+_rev_today = os.path.exists(os.path.join(HERE, 'reviews', f'review-{_iso}.txt'))
+if age >= 7 or _rev_today:
+    head('8. The weekly check-in: every item, done today or not')
+    _plan = (admin or {}).get('plan') or {}
+    _ests = _plan.get('estimates') or []
+    try:
+        _ex = json.load(open(os.path.join(HERE, 'experiments.json')))['experiments']
+    except Exception:
+        _ex = []
+    try:
+        _parts = json.load(open(os.path.join(HERE, 'site_parts.json')))['parts']
+    except Exception:
+        _parts = []
+    try:
+        _yes = int(re.search(r'FOR THIS SESSION TO DO \(the owner said yes\): (\d+)', subprocess.run([sys.executable, os.path.join(HERE, 'admin.py')], capture_output=True, text=True, timeout=120).stdout).group(1))
+    except Exception:
+        _yes = None
+    try:
+        _chg = json.load(open(os.path.join(HERE, 'changes.json')))['changes']
+    except Exception:
+        _chg = []
+    _warn = glob.glob(os.path.expanduser('~/stockiq-logs/daily-*-warn.log'))
+    _stand = f"last: {_today.day} {_today.strftime('%b')} {_today.year}"
+    items = [
+        (_rev_today, 'the autopilot review written (autopilot_review.py --days 7 --out check-tools/reviews/review-<date>.txt) and read: faults, dollars, losses, trials'),
+        (bool(_ests) and str(_ests[-1].get('at', ''))[:10] == _iso, "Claude's forecast updated (admin.py estimate <pct> '<why>', single quotes: a $ inside double quotes is lost)"),
+        (not [e for e in _ex if e.get('status') == 'running' and e.get('decide') and e['decide'] <= _iso], 'every trial due is decided (experiments.py decide)'),
+        (_yes == 0, f"what the owner said yes to on the Admin page is built ({_yes if _yes is not None else '?'} open; admin.py lists them; too big for one session: build a stage and say which is next)"),
+        (sum(1 for p in _parts if p.get('last') == _iso) >= 3, 'three parts of the site reviewed, profit parts ending in an improvement (site_parts.py done)'),
+        (any(e.get('added') == _iso for e in _ex), 'at least one new idea of your own in the register (experiments.py idea)'),
+        (datetime.date.fromtimestamp(os.path.getmtime(os.path.join(HERE, 'reviews', 'questions.md'))) == _today, 'questions.md: answers brought up to date and new questions added'),
+        (not _warn, f"every daily email warning fixed and its log renamed …-done.log ({len(_warn)} left)"),
+        (any(str(c.get('at', ''))[:10] == _iso for c in _chg), 'each change written as a line on the Admin page (admin.py change … --found)'),
+        (_stand in notes, f'"WHERE THINGS STAND" rewritten for today (its heading says "{_stand}")'),
+        (bool(CHECKIN_TEXT) and CHECKIN_TEXT.startswith('No, all good'), f"the Admin card says \"No, all good\" (now: {(CHECKIN_TEXT or '?')[:40]})"),
+    ]
+    for ok_, what in items: print(f"  {'✓' if ok_ else '✗'} {what}")
+    left = [w for ok_, w in items if not ok_]
+    if left: finding(f"THE WEEKLY CHECK-IN IS NOT FINISHED: {len(left)} of {len(items)} items still to do (part 8 above); do them before saying the session is done, whatever else the owner asked for")
 
 print('\n== FINDINGS (act on these; tell the owner the result in dollars first)')
 for i, f in enumerate(findings, 1): print(f'  {i}. {f}')

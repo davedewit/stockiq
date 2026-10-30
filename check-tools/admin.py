@@ -106,7 +106,15 @@ elif args[0] == 'sync':
     if kept_est:
         admin['plan']['estimates'] = kept_est
     if kept_runs:
+        # a warning since put right (its log renamed …-done.log by the session that fixed it) shows as fixed, not as still to look at
+        logs = os.path.expanduser('~/stockiq-logs')
+        for r in kept_runs:
+            r['fixed'] = (not r.get('ok')) and os.path.exists(os.path.join(logs, f"daily-{r.get('date')}-done.log"))
         admin['plan']['dailyRuns'] = kept_runs
+    # the weekly check-ins with Claude (the "hi" sessions that ran the full review: check-tools/reviews/review-<date>.txt), so the
+    # Admin page can tell them from a small session and from the unattended daily review (30 Oct 2026, the owner)
+    revdir = os.path.join(here, 'reviews')
+    admin['plan']['checkins'] = sorted(f[7:17] for f in os.listdir(revdir) if f.startswith('review-') and f.endswith('.txt'))[-10:]
     admin['plan']['changes'] = changes
     save(admin)
     print(f"the Admin page's improvements: {len(ex)} items, {len(reviews)} recent reviews")

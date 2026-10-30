@@ -138,7 +138,7 @@ improvements and wait for his yes. The routine, every session:
    included, before the first reply; the owner asked on 19 Oct 2026 to be told so at every session's opening). If they were not
    (the session started without CLAUDE.md), read this file in full before anything else. A Mac has no `timeout` command: do not
    wrap commands in it (it cost a confusing error at the opening of 19 Oct).
-1. `python3 check-tools/session_start.py`, and act on every finding (faults first, whatever the sample size). Its part 1c
+1. `python3 check-tools/session_start.py` **as the very first thing, before answering anything else the owner writes**, and act on every finding (faults first, whatever the sample size). **When the weekly session is due, its part 8 lists every item of the weekly check-in with ✓ or ✗ (30 Oct 2026, the owner: "no point me having you skip things during our weekly checkin"): the session is not over until every line is ✓, however much else the owner raises in it; run it again before the closing report.** Its part 1c
    compares the account with an S&P 500 fund and an all-world fund day by day (`check-tools/versus_market.js`): read it.
    **Keep a "hi" light unless the weekly review is due** (the owner, 19 Oct 2026: "each week ... do a big check ... to not
    un-necessary take my session usage"): the opening check, act on its findings and on the daily review's proposals, report.
@@ -274,6 +274,11 @@ warns about; one change at a time, measured, with its experiment entry.
   `longer-holds`), market-gauge, company-figures, trend-score, ai-markets, auto-holdings, screener-pages. Ideas: public-record (next),
   nav-simpler (done in part: the menu is one definition), paper-trading-words, earnings-hold, ai-market-tilt, screener-email and others.
 - **Next session, in order:**
+  (P0) **Payments security (the daily review's proposal of 30 Oct, Claude recommends yes; check "Decisions for you"):** anyone can cancel a
+  paying member's real Stripe subscription through two public addresses (`stockiq-dashboard` get_subscription_id, `stockiq-payment-handler`
+  cancel_subscription take whatever they are sent; verified 30 Oct), Stripe's events are not signature-checked, a plan change marks the member
+  cancelled. Only the owner pays today; close it before the first customer, at the start of a session with full attention. Needs from the
+  owner: the webhook signing secret (Stripe dashboard, Developers, Webhooks, the endpoint, "Signing secret") into the function's settings.
   (P) **Profit first (agreed 30 Oct):** anything left of the list above; #8 (learn only from the current score, notes from 30 trades,
   one night's losses counted once); 12 Nov decide `patient-shares`; the AI's market calls at 30 scored; then the rest below.
   (00) **From the owner at the close of 26 Oct (do first):** (a) the search's news box works on stockiq.tech; in his local preview
