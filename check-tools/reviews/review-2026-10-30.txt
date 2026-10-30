@@ -1,0 +1,272 @@
+REVIEW OF THE AI AUTOPILOT (fake money)   23 Oct 2026 05:30 to 30 Oct 2026 05:30 UTC (7 days)
+Read-only. Past practice results; nothing here is a forecast. Judge by dollars and the average per trade, not by how many ended up.
+
+1. SETTINGS
+  now: ON, Balanced level, 38 holdings, budget $97,129 over 5 days, checks in every 6 h, keeps a holding at most 5 days; loss limit -10%, gain mark +18%, buys from the top 10; trailing stop 'gains'
+  screeners: S&P 500, ASX 200, Netherlands AEX, France CAC 40, China CSI 300, Germany DAX 40, UK FTSE 100, Italy FTSE MIB, Hong Kong Hang Seng, Spain IBEX 35, Mexico IPC, Japan Nikkei 225, New Zealand NZX 50, Sweden OMX Stockholm 30, India Sensex, Switzerland SMI, Singapore STI, Canada TSX 60, Taiwan 50
+  changes of the settings in the period: 44
+    2026-10-27T00:12  enabled True, risk 3, holdings None, budgetUsd 97457.0, periodDays 5, everyHours 6, maxHoldDays 5, trailMode gains, stopPct None, takePct None, screeners 21
+    2026-10-27T00:42  budgetUsd 97470.0
+    2026-10-27T01:42  budgetUsd 97450.0
+    2026-10-27T12:17  budgetUsd 97514.0
+    2026-10-27T14:10  budgetUsd 96817.0, screeners 20
+    2026-10-27T14:59  budgetUsd 97118.0
+    2026-10-28T01:10  budgetUsd 96920.0
+    2026-10-28T10:49  budgetUsd 96916.0
+    2026-10-28T14:22  budgetUsd 96976.0
+    2026-10-28T15:30  budgetUsd 97155.0
+    2026-10-29T04:10  budgetUsd 97145.0, screeners 19
+    2026-10-29T07:10  budgetUsd 97129.0
+  NOTE: the settings changed several times; trades made under different settings are not one experiment.
+
+2. THE RESULT IN DOLLARS
+  finished in the period               55 trades   26 up  average  -0.78% (± 0.80)      -623.78 USD   inside the margin of error
+  finished, all recorded              153 trades   70 up  average  -0.38% (± 0.53)    -2,091.67 USD   inside the margin of error
+  still held: 45 holdings, $77,406 put in, about -160.28 USD on paper at their last check-in (not final; the dashboard has the live figure)
+  the bar: 300 finished trades whose average is clearly ahead. So far 153. Average -0.38% ± 0.53.
+  gains as a share of the money its finished trades moved (all): 41% ($5,029 made, $7,121 lost); the owner's target 70% or more
+  gains as a share of the money its finished trades moved (shares): 49% ($4,752 made, $5,024 lost); the owner's target 70% or more
+  shares against an S&P 500 fund over the same days: +0.22% a trade (± 0.61, 132 trades)
+
+3. WHERE THE MONEY WENT (finished trades, all recorded; the group that lost most first)
+
+by how it was sold
+  at the loss limit                    11 trades    0 up  average -14.39% (± 1.72)    -2,475.72 USD   too few to read
+  by the AI review                     31 trades    8 up  average  -1.46% (± 0.40)    -1,577.40 USD   clearly down
+  slipped down the ranking              1 trades    0 up  average  -1.81% (± 0.00)      -452.27 USD   too few to read
+  signal or score turned                3 trades    2 up  average  +0.30% (± 1.17)       +12.56 USD   too few to read
+  at the time limit                    52 trades   27 up  average  +0.20% (± 0.67)      +226.10 USD   inside the margin of error
+  at the gain mark                      3 trades    3 up  average +25.25% (± 1.88)    +1,039.87 USD   too few to read
+  by the stop that followed it         52 trades   30 up  average  +1.16% (± 0.42)    +1,135.19 USD   clearly up
+
+by market
+  Coins                                21 trades    6 up  average  -1.23% (± 0.68)    -1,819.38 USD   too few to read
+  Americas markets                     29 trades   16 up  average  -1.46% (± 0.98)      -627.16 USD   too few to read
+  Asia-Pacific markets                 38 trades   16 up  average  -1.29% (± 1.70)      -583.48 USD   inside the margin of error
+  Europe markets                       31 trades   16 up  average  +0.60% (± 0.85)      +271.37 USD   inside the margin of error
+  US markets                           34 trades   16 up  average  +1.20% (± 0.71)      +666.98 USD   inside the margin of error
+
+by screener
+  Crypto (top coins)                   21 trades    6 up  average  -1.23% (± 0.68)    -1,819.38 USD   too few to read
+  Brazil Bovespa                       17 trades    9 up  average  -2.61% (± 1.57)      -683.94 USD   too few to read
+  South Korea KOSPI 200                 8 trades    2 up  average  -1.97% (± 4.13)      -547.87 USD   too few to read
+  Netherlands AEX                       3 trades    0 up  average  -4.62% (± 1.30)      -229.19 USD   too few to read
+  Italy FTSE MIB                        2 trades    0 up  average  -5.45% (± 3.16)      -196.25 USD   too few to read
+  Spain IBEX 35                         4 trades    0 up  average  -2.04% (± 1.16)      -129.80 USD   too few to read
+  ASX 200                              13 trades    7 up  average  -1.58% (± 3.64)      -122.37 USD   too few to read
+  New Zealand NZX 50                    2 trades    0 up  average  -3.65% (± 2.37)       -95.79 USD   too few to read
+  Russell 2000 (small)                  3 trades    0 up  average  -1.35% (± 0.25)       -75.97 USD   too few to read
+  Taiwan 50                             1 trades    0 up  average  -8.70% (± 0.00)       -20.37 USD   too few to read
+  Germany DAX 40                        3 trades    1 up  average  +0.53% (± 1.34)       -19.70 USD   too few to read
+  India Sensex                          1 trades    0 up  average  -1.04% (± 0.00)       -16.16 USD   too few to read
+  Euro Stoxx 50                         1 trades    0 up  average  -0.25% (± 0.00)        -3.90 USD   too few to read
+  Canada TSX 60                        12 trades    7 up  average  +0.17% (± 0.69)       +56.78 USD   too few to read
+  Russell 1000                          1 trades    1 up  average  +3.38% (± 0.00)       +66.97 USD   too few to read
+  Dow 30                                2 trades    1 up  average  +2.90% (± 3.61)      +108.39 USD   too few to read
+  Switzerland SMI                       2 trades    2 up  average  +4.09% (± 2.57)      +118.42 USD   too few to read
+  S&P 500                              21 trades   10 up  average  +0.45% (± 0.64)      +179.04 USD   too few to read
+  France CAC 40                         2 trades    2 up  average  +5.90% (± 2.56)      +184.78 USD   too few to read
+  Japan Nikkei 225                     13 trades    7 up  average  +0.33% (± 2.42)      +219.08 USD   too few to read
+  NASDAQ 100                            7 trades    4 up  average  +3.76% (± 2.59)      +388.55 USD   too few to read
+  UK FTSE 100                          14 trades   11 up  average  +2.15% (± 1.27)      +547.01 USD   too few to read
+
+by place in the ranking when bought
+  rank 1 to 3                          87 trades   37 up  average  -0.82% (± 0.68)    -1,942.25 USD   inside the margin of error
+  rank 11 to 20                        20 trades    7 up  average  -1.84% (± 1.77)      -680.42 USD   too few to read
+  rank 21 and lower                     4 trades    1 up  average  -1.09% (± 0.47)       -81.80 USD   too few to read
+  rank 4 to 10                         42 trades   25 up  average  +1.30% (± 0.99)      +612.80 USD   inside the margin of error
+
+by RSI when bought
+  RSI 50 to 65                         67 trades   29 up  average  -0.30% (± 0.61)    -2,127.87 USD   inside the margin of error
+  RSI to 50                            42 trades   17 up  average  -1.13% (± 1.40)      -678.89 USD   inside the margin of error
+  RSI above 75                          3 trades    1 up  average  -0.62% (± 0.65)       -29.00 USD   too few to read
+  RSI 65 to 75                         41 trades   23 up  average  +0.27% (± 0.93)      +744.09 USD   inside the margin of error
+
+by how long it was held
+  1 to 5 days                          62 trades   24 up  average  -0.95% (± 0.91)    -1,332.98 USD   inside the margin of error
+  6 hours to a day                     25 trades    7 up  average  -0.98% (± 0.65)    -1,218.63 USD   too few to read
+  under 6 hours                        12 trades    3 up  average  -1.57% (± 0.68)      -362.42 USD   too few to read
+  over 5 days                          54 trades   36 up  average  +0.81% (± 1.00)      +822.36 USD   inside the margin of error
+
+by who chose it
+  the AI model                        124 trades   58 up  average  -0.32% (± 0.55)    -1,538.81 USD   inside the margin of error
+  furthest above its 52-week low (tr   28 trades   11 up  average  -0.72% (± 1.55)      -592.61 USD   too few to read
+  rules                                 1 trades    1 up  average  +2.14% (± 0.00)       +39.75 USD   too few to read
+
+by headlines shown to the model when it was bought (recorded from 12 Oct 2026)
+  none found                           88 trades   39 up  average  -0.88% (± 0.81)    -1,389.49 USD   inside the margin of error
+  not recorded (bought before)         10 trades    5 up  average  -0.76% (± 0.78)    -1,339.79 USD   too few to read
+  newest under a day old               38 trades   16 up  average  +0.21% (± 0.78)      +150.96 USD   inside the margin of error
+  newest one to three days old         17 trades   10 up  average  +1.14% (± 1.27)      +486.65 USD   too few to read
+
+the market-risk gauge when bought (from 18 Oct 2026; 0 very low .. 4 very high; for information, it holds no cash)
+  0 very low                           30 trades   11 up  average  -1.37% (± 1.35)      -888.99 USD   inside the margin of error
+  1 low                                33 trades   12 up  average  -1.90% (± 1.16)      -853.26 USD   inside the margin of error
+
+by the next high-impact announcement for its market when bought (Fed, inflation, jobs...; recorded from 24 Oct 2026)
+  1 to 3 days                           2 trades    0 up  average  -0.37% (± 0.16)       -13.69 USD   too few to read
+
+by profit margin when bought (shares; recorded from 19 Oct 2026)
+  losing money (margin under 0%)        3 trades    2 up  average  +0.43% (± 2.44)       -24.02 USD   too few to read
+  margin 10% or more                    8 trades    4 up  average  +0.33% (± 2.45)       +47.39 USD   too few to read
+  margin 0% to 10%                     15 trades    8 up  average  +1.26% (± 1.46)      +282.31 USD   too few to read
+
+by debt to equity when bought (shares)
+  some debt (0.5 to 1.5)                9 trades    4 up  average  -0.66% (± 1.49)      -134.53 USD   too few to read
+  high debt (over 1.5)                  3 trades    2 up  average  +0.19% (± 1.40)        +9.13 USD   too few to read
+  low debt (under 0.5)                 12 trades    7 up  average  +2.49% (± 2.12)      +455.32 USD   too few to read
+
+by revenue growth when bought (shares)
+  revenue shrinking                     1 trades    0 up  average  -0.75% (± 0.00)       -11.97 USD   too few to read
+  growing under 15%                     9 trades    7 up  average  +1.20% (± 0.46)      +125.33 USD   too few to read
+  growing 15% or more                  16 trades    7 up  average  +0.81% (± 1.84)      +192.32 USD   too few to read
+
+the patient-shares trial (from 12 Oct 2026: a patient share is not sold on the signal, nor by the AI review)
+  ordinary: also sold when the signa   64 trades   27 up  average  -0.68% (± 0.76)      -326.60 USD   inside the margin of error
+  patient: sold by price or time onl   64 trades   34 up  average  +0.19% (± 0.98)       -72.47 USD   inside the margin of error
+
+the AI model against the top by rank (a trial from 23 Oct 2026: every second share the model picks is swapped for the top-ranked of its market)
+  the AI model's own choice             4 trades    0 up  average  -1.41% (± 0.83)      -101.74 USD   too few to read
+  taken by rank                         1 trades    1 up  average  +8.46% (± 0.00)      +131.84 USD   too few to read
+  a fall through the loss limit overnight, kept one more check-in: 4 cases, waiting gave back +0.50% on average (+-2.09); decide at 30 (experiment gap-wait)
+
+by risk level at the time
+  Adventurous                           3 trades    1 up  average  -0.95% (± 1.64)      -986.28 USD   too few to read
+  Balanced                            147 trades   67 up  average  -0.36% (± 0.55)      -954.48 USD   inside the margin of error
+  Careful                               3 trades    2 up  average  -0.96% (± 2.23)      -150.91 USD   too few to read
+
+4. THE LOSSES AND THE GAINS, ONE BY ONE (finished in the period; why each: part 4b)
+  UGPA3.SA: -17.40% (-274.39 USD) in 6.9 days, sold at the loss limit. Bought at rank 1 of Brazil Bovespa, score 2.7, RSI 62.5, 30-day move 6.8%. Best +0.3%, worst -18.7%.
+  PETR3.SA: -13.37% (-211.63 USD) in 5.0 days, sold at the loss limit. Bought at rank 2 of Brazil Bovespa, score 2.7, RSI 71.4, 30-day move 22.2%. Best +0.5%, worst -17.9%.
+  PETR4.SA: -13.28% (-211.52 USD) in 5.8 days, sold at the loss limit. Bought at rank 2 of Brazil Bovespa, score 2.7, RSI 68.3, 30-day move 20.4%. Best +2.3%, worst -15.5%.
+  SPM.MI: -8.61% (-160.42 USD) in 9.0 days, sold at the time limit. Bought at rank 3 of Italy FTSE MIB, score 2.8, RSI 68.6, 30-day move 4.1%. Best +0.6%, worst -8.4%; in the same time again after the sale it went +5.5%.
+  PRIO3.SA: -9.05% (-143.34 USD) in 3.9 days, sold by the stop that followed it. Bought at rank 3 of Brazil Bovespa, score 2.7, RSI 74.2, 30-day move 14.6%. Best +4.3%, worst -12.4%.
+  192820.KS: -8.82% (-138.41 USD) in 5.0 days, sold at the time limit. Bought at rank 9 of South Korea KOSPI 200, score 2.3, RSI 49.9, 30-day move 1.3%. Best +0.0%, worst -8.6%.
+  ASML.AS: -7.15% (-112.21 USD) in 6.9 days, sold at the time limit. Bought at rank 1 of Netherlands AEX, score 2.5, RSI 45.3, 30-day move 0.0%. Best +0.0%, worst -7.3%.
+  TECK-B.TO: -6.06% (-96.47 USD) in 5.0 days, sold at the time limit. Bought at rank 4 of Canada TSX 60, score 2.3, RSI 42.4, 30-day move -10.1%. Best +0.0%, worst -7.2%.
+  HLG.NZ: -6.02% (-94.69 USD) in 7.0 days, sold at the time limit. Bought at rank 2 of New Zealand NZX 50, score 1.8, RSI 73.8, 30-day move 25.3%. Best +0.0%, worst -6.1%.
+  161890.KS: -5.57% (-87.41 USD) in 5.0 days, sold at the time limit. Bought at rank 3 of South Korea KOSPI 200, score 2.7, RSI 36.7, 30-day move -15.2%. Best +0.0%, worst -5.4%.
+  AMD: -5.07% (-79.73 USD) in 6.0 days, sold at the time limit. Bought at rank 2 of S&P 500, score 2.7, RSI 42.5, 30-day move 7.8%. Best +1.5%, worst -6.2%.
+  MTS.MC: -5.07% (-79.68 USD) in 6.0 days, sold at the time limit. Bought at rank 2 of Spain IBEX 35, score 2.4, RSI 37.2, 30-day move -17.3%. Best +1.0%, worst -5.4%.
+  DSFIR.AS: -3.86% (-71.89 USD) in 5.0 days, sold at the time limit. Bought at rank 3 of Netherlands AEX, score 2.1, RSI 71.2, 30-day move 23.1%. Best +0.0%, worst -3.7%.
+  LITE: -4.43% (-69.68 USD) in 6.0 days, sold at the time limit. Bought at rank 1 of NASDAQ 100, score 2.7, RSI 38.2, 30-day move -15.2%. Best +3.1%, worst -7.9%.
+  4689.T: -3.27% (-58.25 USD) in 9.9 days, sold at the time limit. Bought at rank 1 of Japan Nikkei 225, score 3.3, RSI 61.5, 30-day move -2.5%. Best +0.0%, worst -3.6%.
+
+  THE GAINS, ONE BY ONE (best first):
+  ALAB: +11.28% (+178.68 USD) in 5.9 days, sold at the time limit. Bought at rank 1 of NASDAQ 100, score 2.7, RSI 32.8, 30-day move -8.1%. Best +11.5%.
+  PANW: +10.93% (+173.04 USD) in 5.0 days, sold at the time limit. Bought at rank 4 of NASDAQ 100, score 2.7, RSI 44.0, 30-day move 5.4%. Best +11.2%.
+  CRWD: +10.53% (+145.17 USD) in 5.0 days, sold at the time limit. Bought at rank 2 of NASDAQ 100, score 2.7, RSI 45.0, 30-day move 13.9%. Best +10.8%.
+  STMPA.PA: +8.46% (+131.84 USD) in 5.2 days, sold at the time limit. Bought at rank 1 of France CAC 40, score 2.1, RSI 33.6, 30-day move -8.9%. Best +8.7%.
+  SDZ.SW: +6.66% (+104.66 USD) in 6.8 days, sold at the time limit. Bought at rank 1 of Switzerland SMI, score 1.9, RSI 71.6, 30-day move 13.0%. Best +6.9%.
+  FTNT: +6.53% (+103.31 USD) in 5.0 days, sold at the time limit. Bought at rank 7 of S&P 500, score 2.7, RSI 44.8, 30-day move 8.4%. Best +6.7%.
+  CTEC.L: +5.09% (+94.87 USD) in 10.0 days, sold at the time limit. Bought at rank 6 of UK FTSE 100, score 2.8, RSI 68.7, 30-day move 3.2%. Best +5.3%; in the same time again after the sale it went -1.6%.
+  BIIB: +4.18% (+77.63 USD) in 8.0 days, sold at the time limit. Bought at rank 7 of S&P 500, score 3.1, RSI 67.4, 30-day move 6.4%. Best +5.8%; in the same time again after the sale it went +4.2%.
+  CCC.L: +4.19% (+66.20 USD) in 5.0 days, sold at the time limit. Bought at rank 1 of UK FTSE 100, score 2.6, RSI 41.3, 30-day move -2.1%. Best +4.4%.
+  OKE: +3.23% (+60.17 USD) in 9.0 days, sold at the time limit. Bought at rank 19 of S&P 500, score 3.1, RSI 55.0, 30-day move -3.3%. Best +3.4%; in the same time again after the sale it went -0.9%.
+
+  had been up 2% or more and still ended down: 18 of 153 (CKB-USD, CKB-USD, HASH-USD, HUM, CSMG3.SA, FLRY3.SA, FA, IDR.MC); a stop only acts at a check-in
+  what sold holdings did in the same length of time again (a plus means it was sold too early, a minus that selling saved money):
+    sold at the gain mark                             3 trades  went on +9.31% (± 1.41)
+    sold at the loss limit                            8 trades  went on +4.94% (± 3.44)
+    sold at the time limit                           10 trades  went on -0.58% (± 1.79)
+    sold by the AI review                            27 trades  went on +3.24% (± 2.90)
+    sold by the stop that followed it                49 trades  went on +0.39% (± 1.04)
+    sold signal or score turned                       3 trades  went on +3.50% (± 2.36)
+    sold slipped down the ranking                     1 trades  went on -0.01% (± 0.00)
+  a week after the sale, the share against an S&P 500 fund over the same days (a plus means holding on would have beaten the fund):
+    sold at the gain mark                             2 trades  +7.70% (± 2.96)   too few to read
+    sold at the loss limit                            7 trades  +5.10% (± 3.32)   too few to read
+    sold by the stop that followed it                34 trades  -1.15% (± 1.39)
+    sold signal or score turned                       1 trades  +8.62% (± 0.00)   too few to read
+
+4b. WHY EACH TRADE ENDED AS IT DID: its market, one event, or the share itself; and each against its own index (trade_causes.py)
+  Finished trades of the last 7 days: 5 (up 1, flat 1, down 3), +$30 in all
+  
+  Losses, by cause (3 trades):
+    the share      2 trades  -$      82
+    its market     1 trades  -$      16
+  
+  Gains, by cause (1 trades):
+    the share      1 trades  +$     132
+  
+  Flat (within 0.5%): 1 trades: the trading cost is lost on each, and the money waited
+  
+  Against its own index over the same days (the pick, not the market), by region:
+    Asia-Pacific markets     2 trades: -0.51% a trade against its index, ahead in 1 of 2 (50%)  (too few to read: under 30)
+    Europe markets           3 trades: +2.30% a trade against its index, ahead in 1 of 3 (33%)  (too few to read: under 30)
+  
+  One-event days:
+    none with three or more on one day
+  
+  Shares traded more than once (all time): PETR4.SA (2x: +0.1% -13.3%), 009150.KS (2x: -11.9% -0.5%), CKB-USD (2x: -0.8% -4.8%), PRIO3.SA (2x: +3.5% -9.1%), CVE.TO (2x: -0.6% -1.9%), STO.AX (2x: -1.4% +1.7%), 6098.T (2x: +2.8% -1.9%), IMO.TO (2x: +2.6% -0.4%), CCC.L (2x: -1.1% +4.2%), ITH.L (2x: +0.8% +2.7%), FTNT (2x: -0.3% +6.5%)
+  
+  The largest moves:
+    STMPA.PA    +8.46%  +$    132  sold 23 Oct by time, the share; CAC 40 -2.19% over the same days
+    DSFIR.AS    -3.86%  -$     72  sold 23 Oct by time, the share; AEX -0.98% over the same days
+    TECHM.NS    -1.04%  -$     16  sold 23 Oct by time, its market; Sensex -2.15% over the same days
+    009150.KS   -0.53%  -$     10  sold 27 Oct by trail, the share; KOSPI +1.59% over the same days
+    ACX.MC      -0.21%  -$      4  sold 27 Oct by trail, flat; IBEX 35 +0.67% over the same days
+  
+  FINDING: the picks did +1.18% a trade against their own markets over 5 trades (probably between -3.75% and +6.10%): not clearly different from their markets (could be luck).
+  FINDING: most of the money lost was 'the share' ($82): shares fell by themselves: was it news? headlines at a sale are not recorded yet (idea loss-news); the loss limit, question 11
+
+5. WHAT IT DID AND DID NOT DO (activity lines in the period)
+  50 buys, 55 sales, 60 notes
+      21 check-ins: a share left alone: its price was old
+      21 check-ins: open markets already hold their share
+      11 check-ins: nothing changed
+       5 check-ins: too little practice cash
+       3 check-ins: picks
+       1 check-ins: waiting for the next step of the budget
+    2026-10-29T08:10  Left alone: ENI.MI (its price last traded 16 hours ago), ABN.AS (its price last traded 16 hours ago), DB1.DE (its price last traded 16 hours ago), SPM.MI (its price last 
+    2026-10-29T13:40  Checked in. Americas markets already hold their share of the budget ($18,850 of $18,403). The rest is for US markets and Europe markets, bought when those markets are ope
+    2026-10-30T00:10  Checked in. Not enough practice cash for another holding ($82 left, a holding is $2,045). Left alone: 028050.KS (its price last traded 18 hours ago), 6981.T (its price la
+
+6. WHAT IT HAS LEARNED AND IS TRYING (the record every account learns from)
+  every account together              153 trades   70 up  average  -0.38% (± 0.53)    -2,091.67 USD   inside the margin of error
+  153 finished trades taken in from 1 account(s); per level: {'3': 147, '5': 3, '2': 3}
+  level 2: rules changed after a trial: none; trial running: none; earlier trials: 0
+  level 3: rules changed after a trial: none; trial running: trail; earlier trials: 1
+      2026-10-20 trail None -> None: not kept 2 of the 2 trades that had been up enough for a gain to be protected ended well below their best (+3.0% agains
+  level 5: rules changed after a trial: none; trial running: none; earlier trials: 0
+  trial of which share to buy: rank since 2026-10-11
+    furthest above its 52-week low     28 trades   11 up  average  -0.72% (± 1.55)      -592.61 USD   too few to read
+    as ranked                          28 trades   20 up  average  +1.77% (± 0.57)    +1,039.65 USD   too few to read
+  screeners rested: Brazil Bovespa until 2026-11-10, South Korea KOSPI 200 until 2026-11-12
+  progress report, level 3, batch 6: average -1.75%, verdict same; did: A trial of one of its rules is already running; it is left to finish.
+  progress report, level 3, batch 7: average -1.09%, verdict same; did: A trial of one of its rules is already running; it is left to finish.
+  note: Rank 4 to 10 trades performed best with an average +1.3% across 42 trades, ahead in 27.
+  note: RSI under 45 trades averaged +1.1% over 26 trades, outperforming other RSI ranges.
+  note: Crypto trades had the worst performance, averaging -1.2% across 21 trades, ahead in only 6.
+  note: Trades bought furthest above 52-week low averaged +2.0% over 34 trades, indicating better outcomes.
+  the patient-shares trial, still held: 22 patient (on paper -0.17% on average at their last check-in), 23 ordinary (-0.36%). A fair comparison counts both: what was sold and what is still held, for buys of the same weeks.
+  this account: shares are bought as ranked (the trial of the buying order ended, not kept), 56 share buys counted; AI calls today 0; early sells by the AI review switched off for every account (AI_SELL)
+
+6b. THE THEMES PART (a trial since 18 Oct 2026: 20% of the budget in the 3 strongest of 14 sector and theme funds, changed monthly)
+  Sector funds (a trial since 19 Oct 2026, 20% of the budget, not counted in the share trades above): holds SMH, XLE, XLK ($19,642 put in). No fund sold yet. The AI model's daily calls on the funds (each scored a week later), recorded and not acted on: 3 of 8 right (too few to read under 30).
+  AI call 2026-10-27 XLE better: not scored yet (Oil support amidst market uncertainty.)
+  AI call 2026-10-27 SMH better: not scored yet (Chip stocks catching a wave.)
+  AI call 2026-10-28 SMH better: not scored yet (Tech strength amid AI boom)
+  AI call 2026-10-28 XLK better: not scored yet (Tech strength amid AI boom)
+  AI call 2026-10-28 XLE worse: not scored yet (Market volatility concerns)
+  AI call 2026-10-29 SMH worse: not scored yet (Tech earnings concerns)
+  AI call 2026-10-29 XLK worse: not scored yet (Tech earnings concerns)
+  AI call 2026-10-29 XLE better: not scored yet (Crude oil declines)
+  Judge the part on its own, against an S&P 500 fund over the same days, for over a year; the AI's calls from 30 scored.
+
+7. FAULTS IN THE FUNCTION'S LOG (the period)
+  0 lines: none
+
+8. THE RECORD ITSELF
+  the account's record is 252 KB (a row can hold 400 KB): 153 of 300 finished trades kept, 80 of 80 activity lines, 45 holdings remembered
+  the diary: 982 rows in all (620 activity lines, 153 finished trades, 209 settings), first 2026-10-10T10:31
+  not yet in the diary: 0 (they go with the record's next save)
+
+9. AGAINST THE GOALS (targets set on 12 Oct 2026, not forecasts)
+  Month 1: in profit. Due 2026-11-12 (13 days left).
+    finished trades in all:             153   target 100   reached
+    average a trade this month:       -0.38% (± 0.54, 149 trades, after costs)   target +0.2% or better   not yet
+    the account, about:            $    97,969   target $101,000 or more   not yet
+  If a month's goal is missed: say so first thing, say why, and bring the changes that follow from it (the notes, same part).
+
+WHAT TO DO WITH THIS: site-overview.md section 8c, 'The review every week or two'.
