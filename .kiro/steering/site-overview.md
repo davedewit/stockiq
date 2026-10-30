@@ -205,13 +205,35 @@ about what the "Still never" list keeps for him (real money, costs above the rul
 settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
 warns about; one change at a time, measured, with its experiment entry.
 
-**WHERE THINGS STAND (rewrite this block at the end of every session; last: 25 Oct 2026, a short session on the owner's finds)**
-- **30 Oct 2026 (the owner: no email, site not updated):** `news.html` had doubled itself every 10 articles since 27 Oct (the 26 Oct
-  fix's end-of-list pattern matched a `</div>` in the menu) and reached 5.8 GB: the news step, the site check and the link cleanup were
-  killed for memory, the 30 Oct run hung 8 hours, Kiro used 35 GB of memory, backups took 6 GB each. Fixed (`608fd71`), every writer
-  guarded (`news_guard.py`), the page restored from the live copy, the two broken backup copies removed (11.5 GB), the email now names a
-  killed step. Market news: the AI summaries with any percentage were all thrown away; now only one not in the source (`update_news.py`).
-  Today's run was then run again in full.
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 30 Oct 2026, the weekly session)**
+- **30 Oct 2026, the weekly session (the owner: no email, the site not updated; then "we are just going to give this a shot ... with
+  future AI updates over the next 6 or so months we will continue to find improvements - more profit").** THE AGREED STANCE: profit
+  first; one tested change at a time; each newer AI model looks again at what failed; a plain verdict at month 3 (12 Jan 2027).
+  - **The stall:** `news.html` had doubled itself every 10 articles since 27 Oct (the 26 Oct end-of-list pattern matched a `</div>` in the
+    menu) to 5.8 GB; the news step, the site check and the link cleanup were killed for memory, the run of 30 Oct hung 12 hours, Kiro used
+    35 GB, backups took 6 GB each. Fixed (`608fd71`), every writer guarded (`news_guard.py`), the page restored from the live copy, the two
+    broken backup copies removed (11.5 GB), the email names a killed step. The day's update was run again in full.
+  - **Market news:** its "Read full article" link was always blank (html.parser reads `<link>` as empty): fixed. **The rule that rejects
+    any summary with a percentage is deliberate and stays** (the owner: the summary is written from the headline, so even a real figure can
+    end up on the wrong thing; a session loosened it and it was put back the same day).
+  - **The weekly review** (`reviews/review-2026-10-30.txt`): account about $97,960, **$836 behind** the same $100,000 in an S&P 500 fund;
+    153 finished trades, -0.38% a trade; shares alone +0.22% a trade against the fund (132, inside the margin). The losses: coins -$1,819 and
+    the AI review's sales -$1,577 (both stopped 17 Oct), overnight falls through the loss limit -$2,476 (`gap-wait` on trial). No rule
+    changed; forecast 25% -> 20%. The AI's daily market calls: 3 right of 8 scored, and it flips its view: decide at 30 (stop showing it
+    headlines, or let it lean the budget as a trial). Decided and kept: `polling-cut`, `daily-review` (`reviews/daily/KEEP`).
+  - **Staged and tested, deployed after the day's run:** `check-tools/pending-wording/` (functions: the chat's guide says the trial includes
+    the autopilot; a holding's sell-by is never a past date) and `pending-wording-web/` (Admin #11: `stockiqTrack()` in `theme.js`, events
+    sign_up, analysis_run, autopilot_on, begin_checkout, purchase, the GA4 tag on faq and the two guides and data-deletion, a thank-you after
+    Stripe; #12's holdings wording; the portfolio's three figures each about the user's account, "Against the S&P 500: ▼ $… behind"; the
+    All markets row's line "the autopilot's holdings: against the S&P 500 x% · against their own indexes y%"; the Admin page's "Done in the
+    last 3 days"). `site_audit.py` `ga4-missing` is new.
+  - **To finish if the session stopped:** (1) the two market-news articles with a percentage, written under the loosened rule (Amazon AWS
+    +39%, Microsoft +32%), out of news.html and news.js; (2) the two deploys above (dry run, run, check live), then `admin.py change` lines
+    and `site_parts.py done` for home-pricing, plans, funnel; `admin.py done 11` and `done 12`; (3) a button on each home-page price card
+    (index.html after the run; signed out "Start free trial", signed in "Choose Starter/Pro/Elite" to dashboard.html#upgrade; drop the shared
+    button); (4) **the `longer-holds` trial, owed since 23 Oct** (the owner's holding time has been automatic since then, so a trial may
+    test it): half of new share buys kept up to 20 days instead of the level's 5, only while the holding time is automatic, beside the current
+    rule, its experiment entry and review split; (5) rename `~/stockiq-logs/daily-2026-10-30-warn.log` to done once the rerun is clean.
 - **26 Oct 2026 (short):** stock news reaches news.html again (a pattern broken by the shared footer on 24 Oct; refilled and live);
   website deploys clear the cache once (`/*`; 1,084 paths this month, $0.39 past the free 1,000; `cost_check.py` now counts them);
   the S&P 500 card shows the fund's own day. Admin #13, #14 done. **Still open for Sunday's weekly session: #8, #11, #12**, and the
@@ -255,6 +277,8 @@ warns about; one change at a time, measured, with its experiment entry.
   `longer-holds`), market-gauge, company-figures, trend-score, ai-markets, auto-holdings, screener-pages. Ideas: public-record (next),
   nav-simpler (done in part: the menu is one definition), paper-trading-words, earnings-hold, ai-market-tilt, screener-email and others.
 - **Next session, in order:**
+  (P) **Profit first (agreed 30 Oct):** anything left of the list above; #8 (learn only from the current score, notes from 30 trades,
+  one night's losses counted once); 12 Nov decide `patient-shares`; the AI's market calls at 30 scored; then the rest below.
   (00) **From the owner at the close of 26 Oct (do first):** (a) the search's news box works on stockiq.tech; in his local preview
   (Kiro) the stock page cannot be fetched and it says "No recent articles": make a failed fetch say "could not load" instead. The
   typed-code trigger was taken out (it hid the suggestion list): news shows when a suggestion is picked, so the weekly check's "typing
