@@ -8,7 +8,7 @@ For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-s
 
 | Script | What it does | Cooldown |
 |---|---|---|
-| `update_news.py` | Yahoo/Google RSS → OpenAI summaries → news.html + news.js | 2 hours |
+| `update_news.py` | Yahoo/Google RSS → OpenAI summaries → news.html + news.js. A summary with any percentage is rejected on purpose (written from the headline, a figure can land on the wrong thing) | 2 hours |
 | `update_stock_news.py` | Per-stock RSS → stock pages + news.html/news.js. Keeps last 3 articles per stock, removes articles 30+ days old. Fetches articles from the last **7 days** (2, then 4 until 18 Oct 2026: the laptop is often off a few days at a time). Keeps only "critical" news (`CRITICAL_KEYWORDS`: earnings, acquisition, upgrade, CEO, dividend …), **except that a page with no news at all takes the newest article clearly about its company** (24 Oct 2026: RHC.AX was empty; 49 of the 946 indexed pages had none, all outside the US) | 23h per stock |
 | `update_stock_analysis.py` | Data snapshot + 0-100 score on large caps, sets index/noindex, writes indexable_stocks.txt. Runs on all 3,467 stocks — ~20 min, mostly free (Yahoo Finance). 404s for delisted stocks are normal and cached | none (runs in the daily run, i.e. when `UPDATE_STOCK_NEWS=true`; skipped by a plain `./deploy-to-s3.sh`) |
 | `publish_company_figures.py` | Straight after `update_stock_analysis.py`: puts the company figures that step keeps for every stock (`.analysis_cache/info/`) into one private file on S3 for the single-stock report, which has none of its own for shares outside the US. Refuses to upload fewer than 1,000 stocks; never stops the deploy; `--dry-run` only builds the file. Calls `aws` by its full path (launchd's PATH has no Homebrew: its first daily run, 12 Oct 2026, could not upload). Once a week it also keeps a dated copy in `research-data/company-figures/` (not in git), so that a history of company figures builds up | none (daily run only) |
@@ -19,6 +19,7 @@ For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-s
 | `cleanup_broken_links.py` | Removes dead article links from news.html | none |
 | `remove_news_duplicates.py` | Deduplicates news.html | none |
 | `finalize_news_html.py` | Trims news.html to 240 stock + 60 general articles, keeps noindex | none |
+| `news_guard.py` | Not run by itself: every script that writes news.html calls its `check()` first and refuses a page with the article list or the footer twice, or over 20 MB (30 Oct 2026: a bad pattern had doubled the page to 5.8 GB) | – |
 
 ## Manual / One-Off Scripts
 

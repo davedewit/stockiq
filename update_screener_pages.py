@@ -223,7 +223,7 @@ HEAD = '''<!DOCTYPE html>
         .sp-table th, .sp-table td {{ padding: 8px 6px; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: top; }}
         .sp-table th {{ font-size: 0.75rem; text-transform: uppercase; letter-spacing: .04em; color: var(--text-secondary); }}
         .sp-table td.n, .sp-table th.n {{ text-align: right; white-space: nowrap; }}
-        .sp-hub {{ table-layout: fixed; }} .sp-hub col.c1 {{ width: 30%; }} .sp-hub col.c3 {{ width: 30%; }}
+        .sp-hub {{ table-layout: fixed; }} .sp-hub col.c1 {{ width: 26%; }} .sp-hub col.c3 {{ width: 24%; }} .sp-hub col.c4 {{ width: 17%; }}
         .sp-table a {{ color: #3b82f6; text-decoration: none; }}
         .sp-up {{ color: #16a34a; }} .sp-down {{ color: #dc2626; }}
         .sp-why {{ margin: 4px 0 0; padding-left: 18px; color: var(--text-secondary); font-size: 0.85rem; }}
@@ -498,7 +498,7 @@ def page_for(key, data, names, pages, prev, today, made):
     return '\n'.join(out), {'top': [r['symbol'] for r in top], 'streak': new_streak, 'day': today}
 
 
-def hub(results, names, today, made, pages=frozenset()):
+def hub(results, names, today, made, pages=frozenset(), before=None, before_date=None):
     url = f'{SITE}screeners-today.html'
     title = "Today's stock rankings for 24 markets: top 10 by trend | StockIQ"
     desc = ('Every trading day, the shares of 24 major indexes (S&P 500, NASDAQ 100, FTSE 100, DAX 40, ASX 200, Nikkei 225 and '
@@ -507,14 +507,17 @@ def hub(results, names, today, made, pages=frozenset()):
     out = [HEAD.format(title=esc(title), desc=esc(desc), url=url, ld=json.dumps(ld))]
     out.append('{nav}')
     out.append('<main class="sp-wrap"><h1>Stock rankings today, market by market</h1>')
-    out.append(f'<p class="sp-muted">Updated <strong>{esc(today)}</strong>. Each index\'s shares ranked by StockIQ\'s trend score: '
+    before = before or {}
+    since = f' (compared with {esc(before_date)})' if before_date else ''
+    out.append(f'<p style="margin:0 0 8px;font-size:1.02rem;">📅 <strong>Updated {esc(today)}</strong>, from each market\'s latest close{since}.</p>')
+    out.append(f'<p class="sp-muted">Each index\'s shares ranked by StockIQ\'s trend score: '
                'what stands above its lowest price of the year, has risen over the year and holds above its long average. '
                'Open a market for its top 10, why each ranks there and the full list.</p>')
     out.append('<p class="sp-muted" style="font-size:.9rem;">"In a rising trend" counts the shares whose trend score is above zero: '
                'more of them means more of that market is trending up today.</p>')
     for region in REGIONS:
-        out.append(f'<h2>{esc(region)}</h2><div class="sp-scroll"><table class="sp-table sp-hub"><colgroup><col class="c1"><col class="c2"><col class="c3"></colgroup>'
-                   '<thead><tr><th>Market</th><th>Leader today</th><th class="n">Shares in a rising trend</th></tr></thead><tbody>')
+        out.append(f'<h2>{esc(region)}</h2><div class="sp-scroll"><table class="sp-table sp-hub"><colgroup><col class="c1"><col class="c2"><col class="c3"><col class="c4"></colgroup>'
+                   '<thead><tr><th>Market</th><th>Leader today</th><th class="n">Shares in a rising trend</th><th class="n">Since last update</th></tr></thead><tbody>')
         for k, (slug, name, reg, _) in SCREENERS.items():
             if reg != region:
                 continue
@@ -526,7 +529,18 @@ def hub(results, names, today, made, pages=frozenset()):
             else:
                 leader = '<span class="sp-muted">–</span>'
             share = f"{info['pos']} of {info['n']} ({round(100 * info['pos'] / info['n'])}%)" if info.get('n') else '–'
-            out.append(f'<tr><td><a href="screener-{slug}.html"><strong>{esc(name)}</strong></a></td><td>{leader}</td><td class="n">{share}</td></tr>')
+            # against the last update (30 Oct 2026, the owner: "should it have an up or down arrow to compare the previous day"): the
+            # change in the share of the market rising, in points, and a new leader marked
+            was = before.get(k) or {}
+            if info.get('n') and was.get('n'):
+                pts = round(100 * info['pos'] / info['n']) - round(100 * was['pos'] / was['n'])
+                move = (f'<span style="color:#16a34a;font-weight:700;">▲ {pts} pts</span>' if pts > 0 else
+                        f'<span style="color:#dc2626;font-weight:700;">▼ {-pts} pts</span>' if pts < 0 else '<span class="sp-muted">no change</span>')
+            else:
+                move = '<span class="sp-muted">–</span>'
+            if lead and was.get('lead') and was['lead'] != lead:
+                leader += ' <span style="font-size:.75rem;font-weight:700;color:#3b82f6;border:1px solid #3b82f6;border-radius:4px;padding:0 4px;">new</span>'
+            out.append(f'<tr><td><a href="screener-{slug}.html"><strong>{esc(name)}</strong></a></td><td>{leader}</td><td class="n">{share}</td><td class="n">{move}</td></tr>')
         out.append('</tbody></table></div>')
     out.append('<p class="sp-muted" style="font-size:.85rem;margin-top:24px;">General information only, not financial advice.</p></main>')
     out.append('{foot}')
@@ -665,6 +679,11 @@ def main():
         return 1
     fill_names(names, [r.get('symbol', '') for d in ok.values() for r in d['results']], dry)
     summary = {k: v for k, v in (prev.get('_hub') or {}).items()}
+    # the last day's figures, for the hub's arrows; a second run the same day still compares with the day before
+    if prev.get('_hubDate') == today:
+        before, before_date = prev.get('_hubPrev') or {}, prev.get('_hubPrevDate')
+    else:
+        before, before_date = {k: dict(v) for k, v in summary.items()}, prev.get('_hubDate')
     state = dict(prev)
     for k, d in ok.items():
         text, st = page_for(k, d, names, pages, prev, today, made)
@@ -682,7 +701,8 @@ def main():
         if k not in ok:
             print(f'⚠️  {SCREENERS[k][1]}: no answer, yesterday\'s page kept')
     state['_hub'] = summary
-    text = hub(summary, names, today, made, pages).replace('{nav}', nav).replace('{foot}', foot).replace('</head>', PANEL_CSS + '</head>', 1)
+    state['_hubDate'], state['_hubPrev'], state['_hubPrevDate'] = today, before, before_date
+    text = hub(summary, names, today, made, pages, before, before_date).replace('{nav}', nav).replace('{foot}', foot).replace('</head>', PANEL_CSS + '</head>', 1)
     if not dry:
         with open(os.path.join(OUT, 'screeners-today.html'), 'w', encoding='utf-8') as f:
             f.write(text)

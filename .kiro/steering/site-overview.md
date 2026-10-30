@@ -206,81 +206,36 @@ settings while he is on the page). Do not change one idea after another on thin 
 warns about; one change at a time, measured, with its experiment entry.
 
 **WHERE THINGS STAND (rewrite this block at the end of every session; last: 30 Oct 2026, the weekly session)**
-- **30 Oct 2026, the weekly session (the owner: no email, the site not updated; then "we are just going to give this a shot ... with
-  future AI updates over the next 6 or so months we will continue to find improvements - more profit").** THE AGREED STANCE: profit
-  first; one tested change at a time; each newer AI model looks again at what failed; a plain verdict at month 3 (12 Jan 2027).
-  - **The stall:** `news.html` had doubled itself every 10 articles since 27 Oct (the 26 Oct end-of-list pattern matched a `</div>` in the
-    menu) to 5.8 GB; the news step, the site check and the link cleanup were killed for memory, the run of 30 Oct hung 12 hours, Kiro used
-    35 GB, backups took 6 GB each. Fixed (`608fd71`), every writer guarded (`news_guard.py`), the page restored from the live copy, the two
-    broken backup copies removed (11.5 GB), the email names a killed step. The day's update was run again in full.
-  - **Market news:** its "Read full article" link was always blank (html.parser reads `<link>` as empty): fixed. **The rule that rejects
-    any summary with a percentage is deliberate and stays** (the owner: the summary is written from the headline, so even a real figure can
-    end up on the wrong thing; a session loosened it and it was put back the same day).
-  - **The weekly review** (`reviews/review-2026-10-30.txt`): account about $97,960, **$836 behind** the same $100,000 in an S&P 500 fund;
-    153 finished trades, -0.38% a trade; shares alone +0.22% a trade against the fund (132, inside the margin). The losses: coins -$1,819 and
-    the AI review's sales -$1,577 (both stopped 17 Oct), overnight falls through the loss limit -$2,476 (`gap-wait` on trial). No rule
-    changed; forecast 25% -> 20%. The AI's daily market calls: 3 right of 8 scored, and it flips its view: decide at 30 (stop showing it
-    headlines, or let it lean the budget as a trial). Decided and kept: `polling-cut`, `daily-review` (`reviews/daily/KEEP`).
-  - **Staged and tested, deployed after the day's run:** `check-tools/pending-wording/` (functions: the chat's guide says the trial includes
-    the autopilot; a holding's sell-by is never a past date) and `pending-wording-web/` (Admin #11: `stockiqTrack()` in `theme.js`, events
-    sign_up, analysis_run, autopilot_on, begin_checkout, purchase, the GA4 tag on faq and the two guides and data-deletion, a thank-you after
-    Stripe; #12's holdings wording; the portfolio's three figures each about the user's account, "Against the S&P 500: ▼ $… behind"; the
-    All markets row's line "the autopilot's holdings: against the S&P 500 x% · against their own indexes y%"; the Admin page's "Done in the
-    last 3 days"). `site_audit.py` `ga4-missing` is new.
-  - **Finished the same day, all live and checked as the owner's account:** the two articles out, both deploys (Admin #11 and #12 done;
-    parts home-pricing, plans and funnel improved), a button on each price card, the analysis guide fitting a phone (found by the deploy's
-    phone check), "This week in the markets" linking each announcement's market (from the next daily update), and **the `longer-holds`
-    trial live** (`stockiq-ai-trader` `j82lXMrV…`; decide by 29 Dec 2026, or at 30 finished each way). The Admin card read "No, all good".
-- **26 Oct 2026 (short):** stock news reaches news.html again (a pattern broken by the shared footer on 24 Oct; refilled and live);
-  website deploys clear the cache once (`/*`; 1,084 paths this month, $0.39 past the free 1,000; `cost_check.py` now counts them);
-  the S&P 500 card shows the fund's own day. Admin #13, #14 done. **Still open for Sunday's weekly session: #8, #11, #12**, and the
-  three parts (home-pricing, plans, funnel; today's daily review has findings for each: the trial's "15 analyses (5 a day)", no
-  confirmation after paying). The two cost spikes wait out their days in `cost_check.py` `FIXED_UNTIL` (to 28 Oct); October's explained
-  cache-clear paths are `KNOWN_PATHS`. **The practice graph, later the same day (the owner's asks):** the S&P 500 card shows the fund's own
-  day; the "By market" list opens on the market chosen; hold and drag measures a stretch (clears on release); a market's line is named as
-  the autopilot's buys; **every view (All markets, Your own buys, AI autopilot, a market) draws the gold S&P 500 line**, the part views as
-  the same money in the fund on the same days; default stays All markets (decided with him). Read on his account: whole account ahead of
-  the fund by $153, his own buys ahead by $201, **the autopilot behind by $400 across all its markets** (its S&P 500 buys ahead by $423).
-  New checks in the weekly run: `live_practice_check.js` REOPEN, DRAG/TOUCH, VIEWS; MOVES prints heights.
-- **25 Oct 2026 (a short session on the owner's finds):** anonymous free analysis one a day on a phone too; register page spacing and
-  the menu's place; the auto-delete cleanup's 64 table scans a day (most of the DynamoDB bill, and one account's setting applied to all);
-  checks before every website deploy (`pre_deploy.py`); the daily email written from the log (`daily_report.py`); AWS cost checked daily
-  (`cost_check.py`); news freshness checked. **Each is in `watch-list.md` with what could break and how to undo it.** Not done: #8, the bill
-  at $1.14 (over the $1 target, under $1.50; most of it the cleanup bug).
-- **The account (24 Oct):** $97,967, **$356 ahead** of the same $100,000 in an S&P 500 fund; 105 finished trades, -0.07% a trade this
-  month, inside the margin of error. Month 1 goal ($101,000 by 12 Nov) out of reach. Claude's forecast on the Admin page: 25%. The
-  weekly review is next due around **30 Oct**; the owner looks in most days for small things. His autopilot is automatic (markets by
-  the AI, pace, holdings and budget automatic; coins unticked, the crypto screener rests until 29 Oct). Do not write his settings
-  while he is on the page.
-- **Built on 24 Oct, all live and checked** (section 13 has the detail): every page's header is the same (`site-header.js`; menu,
-  bell, usage chip, swipe); **the menu, footer and trial strip are written from one definition** (`shared_parts.py`; menu: Home ·
-  Analysis · Screeners (with crypto) · Pricing · Log in + Sign up free or Account; footer in three columns; the strip on every page but
-  the four with their own); who is looking is marked before drawing (`theme.js`: `html.signed-in`, `html.paid-user`); the home page
-  about 30% shorter on a phone, a button on every feature card; sign-in and sign-up cards fixed; the phone panels glide and have no
-  shade; the market panel on the daily screener pages; the chat types its replies and links only to stock pages that exist; **the free
-  trial includes the AI autopilot** (paused when the trial ends, back on with a plan); **the sign-up page: "Trade $100,000 of practice
-  money", four short lines, Google first** (left alone now: it is what `signup-simpler` measures). New checks: the header on every
-  phone page, the menu not moving while a page loads, the glide on release, the copies count (`site_audit.py` `copies`: 219 → 106
-  lines), shared-parts drift, `theme-early`. New tools: `stage_web.py`, `lambda_deploy.sh` (a deploy is one command).
-  Last, the same evening: the phone menu puts Sign up free / Log in first for a signed-out visitor and is one menu on every page; the
-  daily pages' run buttons run their screener in the right section (`run-links`); the room for the market panel is set in the head
-  (`late-layout`); the dashboard's notices sit under the header; the Admin card's verdict is read by the checks (`CHECKIN`) and must
-  say "No, all good" before a session ends; `weekly_check.py --recheck` and `--ack-daily`. The card said "No, all good" at the close.
-- **To be seen for real:** Monday's daily run rebuilding the daily pages with the panel and the strip by itself, and the stock pages'
-  shared parts surviving it; the first trial account switching the autopilot on, and its pause when the trial ends; `M&M.NS`, the
-  market's calendar (`ev`, `ed`) and the other items from earlier days.
-- **Trials running** (`python3 check-tools/experiments.py`): signup-simpler and market-panel-pages (decided around 21 Nov on GA4
-  figures the owner sends), gap-wait, rank-pick, crypto-no-chasing, theme-sleeve, stop-watch, patient-shares (12 Nov; then
-  `longer-holds`), market-gauge, company-figures, trend-score, ai-markets, auto-holdings, screener-pages. Ideas: public-record (next),
-  nav-simpler (done in part: the menu is one definition), paper-trading-words, earnings-hold, ai-market-tilt, screener-email and others.
-- **Next session, in order:**
-  (P0) **Payments security (the daily review's proposal of 30 Oct, Claude recommends yes; check "Decisions for you"):** anyone can cancel a
+- **The stance (the owner, 30 Oct 2026):** "we are just going to give this a shot ... with future AI updates over the next 6 or so months
+  we will continue to find improvements - more profit". Profit first; one tested change at a time; each newer AI model looks again at what
+  failed; a plain verdict at month 3 (12 Jan 2027). Visitors and sign-ups stay the priority for the site itself.
+- **The account (30 Oct):** about $97,900, **about $900 behind** the same $100,000 in an S&P 500 fund; 153 finished trades, -0.38% a trade
+  after costs; shares alone +0.22% a trade against the fund (132 trades, inside the margin). The losses: coins -$1,819 and the AI review's
+  sales -$1,577 (both stopped 17 Oct), overnight falls through the loss limit -$2,476 (`gap-wait` on trial). Claude's forecast 20%. Month 1
+  ($101,000 by 12 Nov) out of reach. His autopilot is automatic (markets by the AI; pace, holdings, budget automatic; Balanced, 5-day
+  holds); coins unticked. Do not write his settings while he is on the page.
+- **Live lately** (the detail in section 13 and `watch-list.md`): 30 Oct, the news.html blow-up fixed and guarded, market news links,
+  analytics events and tags, a thank-you after Stripe, the portfolio's figures and the all-markets index line, the Admin page's timeline
+  with jump links, a button per plan, `longer-holds`; 26 Oct, stock news on news.html again, one cache clear per deploy, the practice graph's
+  drag and S&P line in every view; 25 Oct, the deploy checks, the daily email from the log, the daily cost check; 24 Oct, one header, menu
+  and footer for every page, the free trial includes the autopilot, the daily screener pages.
+- **To be seen for real:** the hub's arrows (`screeners-today.html`, from the daily update of 31 Oct: it compares with the day before);
+  "This week in the markets" linking each announcement's market (same update); the first `longer-holds` buys (`lh` on the remembered buy)
+  and the review's split; the first GA4 events (sign_up, purchase …) in Google Analytics (the owner sends figures); the thank-you after a
+  real payment; the first trial account switching the autopilot on, and its pause when the trial ends; `M&M.NS` in a top 10.
+- **Trials running** (`python3 check-tools/experiments.py`): longer-holds (from 30 Oct), patient-shares (12 Nov), gap-wait, rank-pick,
+  stop-watch, theme-sleeve with the AI's daily market calls (3 right of 8 scored on 30 Oct; decide at 30: stop showing it headlines, or
+  let it lean the budget as a trial), crypto-no-chasing, market-gauge, company-figures, trend-score, ai-markets, auto-holdings, screener-pages,
+  signup-simpler and market-panel-pages (about 21 Nov on GA4 figures). Kept on 30 Oct: polling-cut, daily-review.
+- **Next session, in order:** the opening check first, and its part 8 (the weekly check-in, item by item) when the weekly one is due.
+  (P0) **Payments security** (the daily review's proposal of 30 Oct; Claude recommends yes, see "Decisions for you"): anyone can cancel a
   paying member's real Stripe subscription through two public addresses (`stockiq-dashboard` get_subscription_id, `stockiq-payment-handler`
-  cancel_subscription take whatever they are sent; verified 30 Oct), Stripe's events are not signature-checked, a plan change marks the member
-  cancelled. Only the owner pays today; close it before the first customer, at the start of a session with full attention. Needs from the
-  owner: the webhook signing secret (Stripe dashboard, Developers, Webhooks, the endpoint, "Signing secret") into the function's settings.
-  (P) **Profit first (agreed 30 Oct):** anything left of the list above; #8 (learn only from the current score, notes from 30 trades,
-  one night's losses counted once); 12 Nov decide `patient-shares`; the AI's market calls at 30 scored; then the rest below.
+  cancel_subscription take whatever they are sent; verified 30 Oct); Stripe's events are not signature-checked; a plan change marks the
+  member cancelled. Only the owner pays today: close it before the first customer, at the start of a session with full attention. Needs
+  from the owner: the webhook signing secret (Stripe dashboard, Developers, Webhooks, the endpoint, "Signing secret").
+  (P) **#8** (his yes on the Admin page): a score-version tag on buys and learning only from the current score, notes and scorecard lines
+  from 30 a group, `chosen` rank when `rp`, one night's correlated losses counted once, replay `review_resting` on the wide set.
+  12 Nov: decide `patient-shares`.
   (00) **From the owner at the close of 26 Oct (do first):** (a) the search's news box works on stockiq.tech; in his local preview
   (Kiro) the stock page cannot be fetched and it says "No recent articles": make a failed fetch say "could not load" instead. The
   typed-code trigger was taken out (it hid the suggestion list): news shows when a suggestion is picked, so the weekly check's "typing
@@ -313,17 +268,13 @@ warns about; one change at a time, measured, with its experiment entry.
   the home page's autopilot card and the strip. **With it, a first-visit "Start here"** for a new account (the owner: visitors must
   not think they just watch an AI): the dashboard opens on the Practice portfolio with three steps (buy a first stock; switch on your
   AI trader; watch the graph against the S&P 500) until done.
-  (1) **#8** (his yes on the Admin page): a score-version tag on buys and learning only from the current score, notes and scorecard
-  lines from 30 a group, `chosen` rank when `rp`, one night's correlated losses counted once, replay `review_resting` on the wide set.
-  (1c) **The daily pages built on AWS once a day, every day** (idea `pages-at-close`; the owner: never miss a day, the hour matters less).
+  (1) **The daily pages built on AWS once a day, every day** (idea `pages-at-close`; the owner: never miss a day, the hour matters less).
   Today the Mac's daily run builds them, so a day with the Mac off is missed; the home section must then go into its own file so the
   Mac's upload of index.html and the AWS run cannot overwrite each other. With it, the hub also shows the week's big announcements (the owner likes
   the hub as the one place for everything daily).
-  (2) The parts `session_start` names (home pricing and the plans: never looked at).
-  (3) **Store his autopilot record compressed**, as `_brain` is (about 190 KB written at most check-ins: the largest running cost).
-  (4) Decide `daily-review` by 1 Nov (Claude recommends keeping it: `touch check-tools/reviews/daily/KEEP`). (5) The walk of step 5d.
-  (6) A small one from him: a "View report" link on the "Analysis complete" note after a background analysis.
-  (7) **Built once, next:** copies 106 lines: mostly the bell's code in index, blog and news (merge with a real signed-in browser to
+  (2) **Store his autopilot record compressed**, as `_brain` is (about 250 KB now, the largest running write).
+  (3) A small one from him: a "View report" link on the "Analysis complete" note after a background analysis.
+  (4) **Built once, next:** copies 106 lines: mostly the bell's code in index, blog and news (merge with a real signed-in browser to
   check), the pages' own phone-menu functions, the four pages' own trial strips. Bring it down, never up.
 - **How the session works:** the routine at the top (steps 0 to 6, with 5b, 5c, 5d); "THE GOAL OF ALL OF IT" below; four entry points
   for checks (`session_start.py`, `site_audit.py` daily, `weekly_check.py` weekly, `autopilot_review.py`); one register each for parts,
@@ -618,7 +569,7 @@ git pull --rebase && git push
 - **Daily public screener pages (24 Oct 2026; #9 on the Admin page, the traffic plan's first build):** `screener-<market>.html` for 24
   markets (the main index of each country, the Dow 30, NASDAQ 100, Euro Stoxx 50) and the hub `screeners-today.html`, written by
   `update_screener_pages.py` in the daily run from the coordinator on AWS (no account, nothing saved; about 25 calls a day, 30 s): the
-  top 10 by the trend score with each share's breakdown, how the whole list stands, new in and out since the day before, the lowest 5,
+  top 10 by the trend score with each share's breakdown, how the whole list stands, new in and out since the day before, the lowest 5 (the hub, `screeners-today.html`, gives each market's leader, its share rising and, since 31 Oct 2026, the change since the day before: ▲/▼ points and a "new" leader, from `screener_pages_state.json`),
   the full ranking folded, links to the stock pages. A market that fails keeps yesterday's page; fewer than half answering writes
   nothing. Names: `stocks.txt`, the analysis page's name tables, then the price function once (`screener_names.json`). **Every share is a link**: to its stock page,
   or, with none on the site, to its analysis (`analysis.html?option=1&symbol=…&autorun=true`, `rel="nofollow"` so crawlers set nothing off).
@@ -5653,3 +5604,44 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     description and a guide's button heading: reworded, words only (website `1dafe26d`; uploaded by the daily update of 23 Oct,
     which was running). The stock pages' template likewise (13c above). The daily site check has a new check, `claims`.
 
+- **25 Oct 2026** (a short session on the owner's finds): anonymous free analysis one a day on a phone too; register page spacing and
+  the menu's place; the auto-delete cleanup's 64 table scans a day (most of the DynamoDB bill, and one account's setting applied to all);
+  checks before every website deploy (`pre_deploy.py`); the daily email written from the log (`daily_report.py`); AWS cost checked daily
+  (`cost_check.py`); news freshness checked. **Each is in `watch-list.md` with what could break and how to undo it.** Not done: #8, the bill
+  at $1.14 (over the $1 target, under $1.50; most of it the cleanup bug).
+- **26 Oct 2026** (short): stock news reaches news.html again (a pattern broken by the shared footer on 24 Oct; refilled and live);
+  website deploys clear the cache once (`/*`; 1,084 paths this month, $0.39 past the free 1,000; `cost_check.py` now counts them);
+  the S&P 500 card shows the fund's own day. Admin #13, #14 done. **Still open for Sunday's weekly session: #8, #11, #12**, and the
+  three parts (home-pricing, plans, funnel; today's daily review has findings for each: the trial's "15 analyses (5 a day)", no
+  confirmation after paying). The two cost spikes wait out their days in `cost_check.py` `FIXED_UNTIL` (to 28 Oct); October's explained
+  cache-clear paths are `KNOWN_PATHS`. **The practice graph, later the same day (the owner's asks):** the S&P 500 card shows the fund's own
+  day; the "By market" list opens on the market chosen; hold and drag measures a stretch (clears on release); a market's line is named as
+  the autopilot's buys; **every view (All markets, Your own buys, AI autopilot, a market) draws the gold S&P 500 line**, the part views as
+  the same money in the fund on the same days; default stays All markets (decided with him). Read on his account: whole account ahead of
+  the fund by $153, his own buys ahead by $201, **the autopilot behind by $400 across all its markets** (its S&P 500 buys ahead by $423).
+  New checks in the weekly run: `live_practice_check.js` REOPEN, DRAG/TOUCH, VIEWS; MOVES prints heights.
+- **30 Oct 2026** (the weekly session):
+  future AI updates over the next 6 or so months we will continue to find improvements - more profit").** THE AGREED STANCE: profit
+  first; one tested change at a time; each newer AI model looks again at what failed; a plain verdict at month 3 (12 Jan 2027).
+  - **The stall:** `news.html` had doubled itself every 10 articles since 27 Oct (the 26 Oct end-of-list pattern matched a `</div>` in the
+    menu) to 5.8 GB; the news step, the site check and the link cleanup were killed for memory, the run of 30 Oct hung 12 hours, Kiro used
+    35 GB, backups took 6 GB each. Fixed (`608fd71`), every writer guarded (`news_guard.py`), the page restored from the live copy, the two
+    broken backup copies removed (11.5 GB), the email names a killed step. The day's update was run again in full.
+  - **Market news:** its "Read full article" link was always blank (html.parser reads `<link>` as empty): fixed. **The rule that rejects
+    any summary with a percentage is deliberate and stays** (the owner: the summary is written from the headline, so even a real figure can
+    end up on the wrong thing; a session loosened it and it was put back the same day).
+  - **The weekly review** (`reviews/review-2026-10-30.txt`): account about $97,960, **$836 behind** the same $100,000 in an S&P 500 fund;
+    153 finished trades, -0.38% a trade; shares alone +0.22% a trade against the fund (132, inside the margin). The losses: coins -$1,819 and
+    the AI review's sales -$1,577 (both stopped 17 Oct), overnight falls through the loss limit -$2,476 (`gap-wait` on trial). No rule
+    changed; forecast 25% -> 20%. The AI's daily market calls: 3 right of 8 scored, and it flips its view: decide at 30 (stop showing it
+    headlines, or let it lean the budget as a trial). Decided and kept: `polling-cut`, `daily-review` (`reviews/daily/KEEP`).
+  - **Staged and tested, deployed after the day's run:** `check-tools/pending-wording/` (functions: the chat's guide says the trial includes
+    the autopilot; a holding's sell-by is never a past date) and `pending-wording-web/` (Admin #11: `stockiqTrack()` in `theme.js`, events
+    sign_up, analysis_run, autopilot_on, begin_checkout, purchase, the GA4 tag on faq and the two guides and data-deletion, a thank-you after
+    Stripe; #12's holdings wording; the portfolio's three figures each about the user's account, "Against the S&P 500: ▼ $… behind"; the
+    All markets row's line "the autopilot's holdings: against the S&P 500 x% · against their own indexes y%"; the Admin page's "Done in the
+    last 3 days"). `site_audit.py` `ga4-missing` is new.
+  - **Finished the same day, all live and checked as the owner's account:** the two articles out, both deploys (Admin #11 and #12 done;
+    parts home-pricing, plans and funnel improved), a button on each price card, the analysis guide fitting a phone (found by the deploy's
+    phone check), "This week in the markets" linking each announcement's market (from the next daily update), and **the `longer-holds`
+    trial live** (`stockiq-ai-trader` `j82lXMrV…`; decide by 29 Dec 2026, or at 30 finished each way). The Admin card read "No, all good".
