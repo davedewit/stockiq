@@ -11,6 +11,7 @@ os.environ['AI_TRADER_USERS'] = 'tester@x.com'
 spec = importlib.util.spec_from_file_location('tr', sys.argv[1]); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
 if 'pickMode' in m.DEFAULTS: m.DEFAULTS['pickMode'] = 'manual'   # the replays tick their own screeners (the AI's choice of markets is tested in ai_trader_test.py)
 if hasattr(m, 'THEMES'): m.THEMES = False      # the themes part (a trial) takes its own 20%; this check compares the share rules alone
+if hasattr(m, 'LONGER'): m.LONGER = False      # the longer-holds trial keeps some shares 20 days on purpose; the panel describes each holding's date from the function (30 Oct 2026)
 HERE = os.path.dirname(os.path.abspath(__file__)) + '/'
 class T:
     def __init__(s): s.rows = {}

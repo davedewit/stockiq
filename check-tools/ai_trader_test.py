@@ -759,6 +759,8 @@ check('every ticked screener resting: that needs the user, and the list says whe
 big = m.load_item(U); big['settings']['budgetUsd'] = 200000.0
 check('a budget larger than the practice money there is: that is pointed out', [n['kind'] for n in m.needs(big, portfolio(), later)] == ['budget'] and 'Its budget ($200,000) is more than the practice money it can reach ($100,000: $99,000 cash and $1,000 it has invested)' in m.needs(big, portfolio(), later)[0]['text'], m.needs(big, portfolio(), later))
 check('too little practice cash for one more holding: that needs the user', [n['kind'] for n in m.needs(m.load_item(U), dict(portfolio(), cash=500.0), later)] == ['cash'] and 'It buys nothing: the practice cash ($500) is less than one holding ($1,000).' in {c['kind']: c for c in m.coming(m.load_item(U), dict(portfolio(), cash=500.0), later, out['plans'])}['check']['text'])
+_r = m.load_item(U); _r['settings'] = dict(_r['settings'], auto=list(_r['settings'].get('auto') or []) + ['budgetUsd'])
+check('with the budget automatic, too little cash for one more holding needs nobody: it buys again when a holding is sold', 'cash' not in [n['kind'] for n in m.needs(_r, dict(portfolio(), cash=500.0), later)])
 # a check-in that should have happened and has not
 rec = m.load_item(U); due_at = dt.datetime(2026, 10, 11, 9, 10)
 check('a check-in is not "missed" before it is due, nor a few minutes after', m.missed_check(rec, due_at - dt.timedelta(minutes=30)) is None and m.missed_check(rec, due_at + dt.timedelta(minutes=20)) is None)

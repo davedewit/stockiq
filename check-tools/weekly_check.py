@@ -22,14 +22,27 @@ QUICK = '--quick' in sys.argv
 if '--recheck' in sys.argv:                # only what failed last time, where that part can be run alone (24 Oct 2026: two failures
     # were the session's own test runs colliding on the same ports, and a 40-minute full run to clear them was waste; the owner:
     # "probably zero point doing it now as it was so recently done"). The phone checks can; anything else needs the full run.
+    # 30 Oct 2026: the panel comparison and the header check can run alone too (a timed-out header check needed a 15-minute full run)
+    _fn = os.path.join(ROOT, 'lambda-sync', 'stockiq-ai-trader', 'lambda_function.py'); _web = os.path.join(os.path.dirname(ROOT), 'website')
+    _alone = {'the panel works out the budget, the spread and the check-ins as the function does':
+                  (['python3', '-W', 'ignore', 'autopilot_plan_check.py', _fn, os.path.join(_web, 'practice-autopilot.js'), '60'],
+                   lambda o: (lambda d: bool(d) and all(x == '0' for x in d))(re.findall(r'differs from the function in: (\d+)', o))),
+              'the header and the room under it': (['node', 'header_room_check.js'], lambda o: ('ALL PASS' in o or re.search(r'all \d+ checks passed', o)) and 'FAIL' not in o),
+              'the two sliding panels on a phone': (['node', 'mobile_sidebar_check.js', 'index.html', 'dashboard.html', 'analysis.html'], lambda o: ('ALL PASS' in o or re.search(r'all \d+ checks passed', o)) and 'FAIL' not in o),
+              'the market panel and live figures': (['node', 'live_market_check.js', 'index.html', 'dashboard.html'], lambda o: ('ALL PASS' in o or re.search(r'all \d+ checks passed', o)) and 'FAIL' not in o)}
     _p = os.path.join(HERE, 'weekly_check.json'); _w = json.load(open(_p)); _left = []
     for _f in _w['failed']:
         _m = re.search(r'fits a (\d+)px phone', _f['name'])
-        if not _m:
+        if _f['name'] in _alone:
+            _cmd, _judge = _alone[_f['name']]
+            _r = subprocess.run(_cmd, capture_output=True, text=True, timeout=1500, cwd=HERE); _ok = _judge(_r.stdout)
+        elif _m:
+            _size = {'390': '390x844', '360': '360x740'}.get(_m.group(1), _m.group(1) + 'x800')
+            _r = subprocess.run(['node', os.path.join(HERE, 'phone_check.js')], capture_output=True, text=True, timeout=900, env=dict(os.environ, SIZE=_size), cwd=HERE)
+            _ok = _r.returncode == 0 and 'ALL PASS' in _r.stdout
+        else:
             _left.append(_f); print('cannot be re-checked alone (run the full check):', _f['name']); continue
-        _size = {'390': '390x844', '360': '360x740'}.get(_m.group(1), _m.group(1) + 'x800')
-        _r = subprocess.run(['node', os.path.join(HERE, 'phone_check.js')], capture_output=True, text=True, timeout=900, env=dict(os.environ, SIZE=_size), cwd=HERE)
-        if _r.returncode == 0 and 'ALL PASS' in _r.stdout:
+        if _ok:
             print('passes now:', _f['name'])
             for _it in _w.get('items', []):
                 if _it['name'] == _f['name']: _it['ok'] = True; _it['rechecked'] = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')

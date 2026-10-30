@@ -1,0 +1,78 @@
+FULL CHECK OF THE SITE, 2026-10-30 (everything): 62 of 65 passed
+It covers 42 of the 60 parts of the site. Left to a person: The screeners' trend score itself: does it still beat its lists?; Sign up, log in, activation; Admin page: the Improvements tab and the lists behind it (experiments.json, reviews/questions.md); From first visit to sign-up and to a paid plan: where visitors come from (GA4, Search Console), what they do, where they leave; The analysis page itself: its layout, buttons, the order of the options; What every page shares: the header and menu, the footer, light and dark, the cache-clear page; Contact and support; The blog page; How fast the main pages and the dashboard tabs load and update; Security and abuse: the open function addresses, the userId the browser sends, scrapers, keys, the public repositories; Every email the site sends: activation, the autopilot, the weekly check, sign-up alerts; Autopilot: the sector funds (the themes part) and the AI read of the headlines; Practice portfolio: the By market list (each market against the S&P 500 and its own index); The checks themselves: do they find problems before the owner does? (Improvements tab: how many he pointed out); What runs by itself: the daily update, the daily review by Claude, the weekly check, the schedules; Backups, the ways back, and what is in git; Daily public screener pages: each market's top 10 by trend, the hub (for visitors from search); The notes themselves: do they match the code, is anything out of date, said twice, or superseded, are expired watch-list entries gone; the aim is shorter and truer, never losing a fact that matters.
+
+1. Test suites on the live code
+  PASS  the autopilot function (594 checks)
+  PASS  the autopilot panel (231 checks)
+  PASS  the practice portfolio (167 checks)
+  PASS  the Admin page (51 checks)
+  PASS  the notification bell (21 checks)
+  PASS  the AI chat (30 checks)
+  PASS  the trading signals (42 checks)
+  PASS  the home page news list (4 checks)
+  FAIL  the panel works out the budget, the spread and the check-ins as the function does
+        ["   {'budgetUsd': 2500, 'periodDays': 10, 'everyHours': 3, 'risk': 2, 'coins': False} hold hours 6.0 ", "     panel {'first': 1, 'peak': 1500, 'count': 6, 'hours': 123} ", "     function {'first': 1, 'peak': 2500.0, 'count': 10, 'hours': 216}"]
+  PASS  the AI autopilot tab and the Admin page read clearly (clarity check)
+  PASS  the nightly site check's tests (0 problems)
+  PASS  the screeners' stock lists (page and coordinator alike, no duplicates)
+  PASS  every index the site compares with has daily prices (32 checks)
+  PASS  every share-screener worker runs the one package
+  PASS  the market panel and live figures
+  PASS  the two sliding panels on a phone
+  FAIL  the header and the room under it
+        ['timed out']
+
+2. The figures agree across the site
+  PASS  the account value: the Admin page's $97,789 and the Practice portfolio tab's $97,789 (prices a few seconds apart)
+  PASS  the S&P 500 fund since the start: the weekly review and the graph agree
+  PASS  every holding of the autopilot (45) has its remembered buy (the plan and the record need it)
+  PASS  no remembered buy is left for a holding already sold
+  PASS  the budget ($97,129) is within the practice money it can reach ($97,129)
+  PASS  the autopilot's results so far: its running total ($-2,091.67) and its finished trades added up ($-2,091.67)
+  PASS  the diary holds every finished trade (153 written, 153 in the record)
+  PASS  the bill on the Admin page adds up ($4.24 = StockIQ $4.06 + other $0.18)
+  FAIL  StockIQ's running cost within the cost rule ($1.41 this month, under $1)
+        1.49
+  PASS  Lambda calls on course for 686,828 of the free 1,000,000
+  PASS  the sitemap lists every indexed stock page (964 in it, 964 indexed)
+  PASS  every improvement on trial past its decision day has been decided (the Improvements tab stays true)
+  PASS  the autopilot's last scheduled run reported no failed check-in
+
+3. Every analysis button
+  PASS  ASX 50: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Netherlands AEX: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Brazil Bovespa: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  France CAC 40: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  China CSI 300: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  Germany DAX 40: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  the single-stock report (AAPL, KO): runs, no error, no raw codes or 'undefined'
+  PASS  live trading signals: runs, no error, no raw codes or 'undefined'
+  PASS  auto-detect signals: runs, no error, no raw codes or 'undefined'
+  PASS  the crypto screener: runs, no error, no raw codes or 'undefined', the 🎯 tracker reads its top 10
+  PASS  single coin analysis (BTC): runs, no error, no raw codes or 'undefined'
+
+4. Background run and visitors
+  PASS  "Run in Background" for Dow Jones 30 (the dashboard's path): every worker answers, the report is formed (30 of 30)
+  PASS  "Run in Background" for Germany DAX 40 (the dashboard's path): every worker answers, the report is formed (40 of 40)
+  PASS  "Run in Background" for Japan Nikkei 225 (the dashboard's path): every worker answers, the report is formed (225 of 225)
+  PASS  "Run in Background" for ASX 200 (the dashboard's path): every worker answers, the report is formed (195 of 195)
+  PASS  a visitor who is not signed in gets their one free analysis
+  PASS  and after it is used, is sent to sign up before anything runs
+  PASS  and a phone whose address changes after the free analysis still gets only one (the second is sent to sign up)
+  PASS  a visitor on the free trial gets a result
+  PASS  and with the day's 5 used, is sent to the plans before anything runs
+  PASS  the usage chip and the sign-up buttons, for every kind of visitor, at four widths
+  PASS  the home page's "View Pricing Plans" lands on the plans, clear of the header
+  PASS  your Practice portfolio tab, opened as your account (read-only): it draws, with your holdings
+  PASS  the Practice portfolio graph: pressing All markets, Your own buys and AI autopilot moves nothing (1100 wide)
+  PASS  the Practice portfolio's market list opens again on the market chosen, not at its top
+  PASS  the Practice portfolio's sums agree: the three cards, the graph's read-out and the All markets row
+  PASS  the Practice portfolio graph: All markets, Your own buys and AI autopilot each draw their own-markets line beside them
+  PASS  the Practice portfolio graph: holding and dragging (mouse or finger) measures the stretch against the S&P 500, and letting go clears it
+  PASS  the home page's search boxes show a picked share's latest news (desktop and phone), and nothing for a share without a page
+  PASS  every public page fits a 390px phone (no sideways scroll, nothing cut off at the edge)
+  PASS  every public page fits a 360px phone (no sideways scroll, nothing cut off at the edge)
+  PASS  the Practice portfolio's folds stay open through a refresh (the breakdown, the figures, the sold list)
+  PASS  your Practice portfolio shows its prices within 6 seconds on a return visit (read-only, timed)
+  PASS  the notification bell on the home page, as your account (read-only): one list, no errors
+  PASS  the last daily update finished cleanly (0 days ago)
