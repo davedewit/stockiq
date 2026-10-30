@@ -3,6 +3,12 @@
  "changes": [
   {
    "at": "2026-10-30",
+   "what": "Today's top 10s page: from the next daily update, each market shows its change since the day before (▲/▼, and a 'new' leader), and the Updated date stands out",
+   "found": "owner",
+   "link": "https://stockiq.tech/screeners-today.html"
+  },
+  {
+   "at": "2026-10-30",
    "what": "A new trial for profit: half of new share buys are kept up to 20 days instead of 5 (the replay's clearest finding), beside the current rule; decided at 30 finished trades each way",
    "found": "session"
   },
@@ -315,11 +321,6 @@
    "what": "Signed-out visitors now see Log in and a blue Sign up free button in the menu; Pricing is hidden for paying members; the free-trial strip is on every page with the same wording (the stock pages had old wording)",
    "found": "owner",
    "link": "https://stockiq.tech/screeners-today.html"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "The menu and footer are now one design on every page, defined in one place: Screeners now includes crypto, Pricing is in the menu bar, and the footer has three tidy columns with the disclaimer on every page (it was missing on some). Code copied across pages is down from 219 to 106 lines",
-   "found": "owner"
   }
  ]
 }
