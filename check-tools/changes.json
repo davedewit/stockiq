@@ -3,6 +3,21 @@
  "changes": [
   {
    "at": "2026-10-30",
+   "what": "The full check's re-check now re-runs the panel comparison and the header checks by themselves, without a 15-minute full run",
+   "found": "session"
+  },
+  {
+   "at": "2026-10-30",
+   "what": "The autopilot's Settings now say that two of every four shares are kept up to 20 days (the longer-holds trial), and the full check's panel comparison allows for it",
+   "found": "check"
+  },
+  {
+   "at": "2026-10-30",
+   "what": "The autopilot tab's 'Needs you' no longer says the cash is too low while its budget is automatic: all its money is invested and it buys again when a holding is sold",
+   "found": "check"
+  },
+  {
+   "at": "2026-10-30",
    "what": "Sector funds line now says which 3 funds it holds right now (Chips, Energy, Technology) and that the others, gold included, are only bought when in the top 3",
    "found": "owner"
   },
@@ -292,24 +307,6 @@
   {
    "at": "2026-10-24",
    "what": "Sign-up page now leads with 'Trade $100,000 of practice money: yourself, with your own AI trader, or both'",
-   "found": "owner",
-   "link": "https://stockiq.tech/signup.html"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Sign-up page now reads 'Set up your own AI trader': make it yours (its markets and risk, or let it pick; switch to trading by hand any time), and can you and the AI beat the S&P 500",
-   "found": "owner",
-   "link": "https://stockiq.tech/signup.html"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Sign-up page pitch: test your own ideas with $100,000 of practice money, and see if you can beat the AI and the S&P 500 (instead of 'your own AI runs your portfolio')",
-   "found": "owner",
-   "link": "https://stockiq.tech/signup.html"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "The free 3-day trial now includes the AI autopilot: a new account can switch it on and watch it trade its practice portfolio; when the trial ends it pauses by itself (a note and an email say so) and switches back on with any paid plan. The sign-up page now leads with it; the FAQ, About, home page and the AI chat say the same",
    "found": "owner",
    "link": "https://stockiq.tech/signup.html"
   }
