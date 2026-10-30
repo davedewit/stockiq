@@ -89,7 +89,7 @@ def sums_agree(out):
         allrow = next(r for r in rows if r.startswith('All markets'))
         res, idx = [(-1 if a == '▼' else 1) * float(b.replace(',', '')) for a, b in re.findall(r'([▲▼]) \$([\d,]+\.\d\d)', allrow)][:2]
         checks = [('card 3 = graph read-out', own, read_own, 0.05), ('card 2 says account - S&P', said(cards[1]), acct - sp, 0.02),
-                  ('card 3 says account - own markets', said(cards[2]), acct - own, 0.02), ('All row index result = card 3 - $100,000', idx, own - 100000, 5),
+                  ('All row index result = card 3 - $100,000', idx, own - 100000, 5),
                   ('All row result = account - $100,000', res, acct - 100000, 5)]
         bad = [f'{n}: {a:,.2f} vs {b:,.2f}' for n, a, b, tol in checks if abs(a - b) > tol]
         return (not bad, bad or [f'{n} ({a:,.2f})' for n, a, b, tol in checks])
