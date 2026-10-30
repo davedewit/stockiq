@@ -1892,6 +1892,11 @@ with `document.querySelector('h3')`.
   ^SP1500, ^KS200, 000300.SS): the S&P 400, the S&P 500, the KOSPI (^KS11) and the CSI 300 fund (510300.SS) stand in, here and
   in the dashboard's Top 10 tracker (`TOP10_BENCHMARKS`), whose comparison had been empty for those four screeners.
   `check-tools/index_check.js` (in the weekly full check) fails if any index the site uses has fewer than 10 daily prices.
+  **Since 30 Oct 2026 each row is set against its own index, not the S&P 500** (the owner: "our result, vs result if we had just invested in
+  x fund"): the badge is the same money put into that row's own index on the same days (`bench`, from `homeGap`; the sector funds and
+  his own buys against the S&P 500, coins against nothing); the grey line under it names the index and gives the S&P 500 in dollars;
+  All markets is the autopilot's buys added up against their own indexes; the S&P reconciliation ("how the whole account's gap adds
+  up") is folded underneath. The paragraph below describes the S&P layout it replaced.
   **The All markets row carries the totals** (the owner's main view): every buy, the account's result since the start, and the
   account against the same $100,000 in an S&P 500 fund since the start (equals the graph's gap). The graph's ranges are 1d, 1w,
   1m, 3m, 6m, 1y, 2y, 5y, 10y and All (those longer than the account's life greyed); its first button is "All markets" (it was

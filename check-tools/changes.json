@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-30",
+   "what": "By market now compares each market with its own index (Dow 30 buys against the Dow, NASDAQ 100 against the NASDAQ 100); All markets adds those up. The S&P 500 stays as a small grey line, the top card and the graph's gold line",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
    "what": "By market, All markets: the autopilot's line now gives its dollars against the S&P 500 (▼ $1,326) and says its percent is per dollar traded, so it no longer looks at odds with the 0.9% beside it",
    "found": "owner"
   },
@@ -314,11 +319,6 @@
    "what": "Home page about 30% shorter on a phone: the repeated 'How it works' and 'what it is not' sections removed, the guides one row of links, the intro and the numbers compact; every feature card now has a button (a free account offered where you need one)",
    "found": "owner",
    "link": "https://stockiq.tech/#features"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Each change on this list can now carry a view link to where it can be seen",
-   "found": "owner"
   }
  ]
 }
