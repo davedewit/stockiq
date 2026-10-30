@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-30",
+   "what": "Practice portfolio top: two figures side by side, your account and what the same $100,000 would be in an S&P 500 fund, each with its day's move beside it and how much higher or lower the account is; the separate Today box is gone",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
    "what": "By market now compares each market with its own index (Dow 30 buys against the Dow, NASDAQ 100 against the NASDAQ 100); All markets adds those up. The S&P 500 stays as a small grey line, the top card and the graph's gold line",
    "found": "owner"
   },
@@ -313,12 +318,6 @@
    "what": "Sign-up page lists what you really get; the sign-in and sign-up prompts sit under the form instead of pinned near the header; no bell for a signed-out visitor",
    "found": "owner",
    "link": "https://stockiq.tech/signup.html"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Home page about 30% shorter on a phone: the repeated 'How it works' and 'what it is not' sections removed, the guides one row of links, the intro and the numbers compact; every feature card now has a button (a free account offered where you need one)",
-   "found": "owner",
-   "link": "https://stockiq.tech/#features"
   }
  ]
 }

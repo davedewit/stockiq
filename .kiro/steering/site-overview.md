@@ -1719,7 +1719,11 @@ is hidden. **Keep the Reports panel first in the page**: one report routine find
 with `document.querySelector('h3')`.
 
 **Practice portfolio** (its own tab, container `#practice-portfolio`):
-- **The top is three figures** (`.pp-top`): **since 17 Oct 2026 Account value (with its change since the start under it, "▼ $356.77
+- **The top is two figures since 30 Oct 2026** (the owner: "hows my automation doing total and today, and hows s&p doing compared to
+  it"): **Your account** (its value, the day's move beside it in smaller type, `dayChip`; under it the change since the start) and **If in
+  the S&P 500 instead** (the same starting money in the fund now, its day beside it; under it "Your account is $X (Y%) higher / lower").
+  "today" reads "last trading day" while the markets are shut. The Today box went. On a phone the two stack. What follows describes earlier layouts.
+- **The top was three figures** (`.pp-top`): **since 17 Oct 2026 Account value (with its change since the start under it, "▼ $356.77
   (0.36%) since the start"), Today, and Against the S&P 500** (the account against the same $100,000 put into an S&P 500 fund
   when it began, in dollars, with what the fund would be worth now: `fundCard`; without the fund's prices back to the start,
   what is still held against the fund over the same days). It was Account value, Today, Since the start, with the fund in the
