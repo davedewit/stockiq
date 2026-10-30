@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-30",
+   "what": "The practice graph's gold line now compares each market with its own index (the Hang Seng's buys with the Hang Seng, and so on), not the S&P 500; a third card at the top, If in their own markets instead, gives the same figure; the S&P card says how much it is down since the start",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
    "what": "Practice portfolio top: two figures side by side, your account and what the same $100,000 would be in an S&P 500 fund, each with its day's move beside it and how much higher or lower the account is; the separate Today box is gone",
    "found": "owner"
   },
@@ -312,12 +317,6 @@
    "what": "Home page: Sign up free no longer flashes in the menu for a signed-in visitor (the page marked who was looking only after drawing); the nightly check now catches a page that does that",
    "found": "owner",
    "link": "https://stockiq.tech/"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Sign-up page lists what you really get; the sign-in and sign-up prompts sit under the form instead of pinned near the header; no bell for a signed-out visitor",
-   "found": "owner",
-   "link": "https://stockiq.tech/signup.html"
   }
  ]
 }

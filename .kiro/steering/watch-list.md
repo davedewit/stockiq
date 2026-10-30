@@ -114,3 +114,11 @@ Rules:
 - **Could break:** no daily run at all (a lock left for a day that has not run: look in `~/.stockiq-locks/`); the review never starting.
 - **Undo:** `cp ~/VSCODE/backup/stockiq-daily.sh_before_homelock_20261030 ~/stockiq-daily.sh`; `git revert` the commit for the other two.
 - **Remove after:** 2026-11-13
+
+### 2026-10-30 · The practice graph against each buy's own market; a third card
+- **Changed:** `practice-portfolio.js` v74 (`homeTrack`, `homeBench`, `ownMarkets`; `valueSeries` gives `home` / `phome`; the gold line,
+  the read-out, the figures table and the third card use them; the All markets row counts the owner's own buys). The S&P line left the graph.
+- **Could break:** the third card or the gold line missing or "…" for long (an index's prices not coming: `ensureIndexes`); the graph slow on
+  a phone (more points: each index's closes); the three figures disagreeing (they are one sum: `practice_test.js` checks it).
+- **Undo:** `git revert` the website commit "Practice graph against each buy's own market" and deploy; the chat: `~/VSCODE/backup/stockiq-ai-chat_before_ownmarkets_20261030.zip`.
+- **Remove after:** 2026-11-13

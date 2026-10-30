@@ -1719,10 +1719,18 @@ is hidden. **Keep the Reports panel first in the page**: one report routine find
 with `document.querySelector('h3')`.
 
 **Practice portfolio** (its own tab, container `#practice-portfolio`):
-- **The top is two figures since 30 Oct 2026** (the owner: "hows my automation doing total and today, and hows s&p doing compared to
-  it"): **Your account** (its value, the day's move beside it in smaller type, `dayChip`; under it the change since the start) and **If in
-  the S&P 500 instead** (the same starting money in the fund now, its day beside it; under it "Your account is $X (Y%) higher / lower").
-  "today" reads "last trading day" while the markets are shut. The Today box went. On a phone the two stack. What follows describes earlier layouts.
+- **The top is three figures since 30 Oct 2026** (the owner: "hows my automation doing total and today, and hows s&p doing compared to
+  it", then "it looked alot better with a 3rd box"): **Your account** (its value, the day's move beside it in smaller type, `dayChip`; under
+  it the change since the start), **If in the S&P 500 instead** (the same starting money in the fund now, its day beside it; under it the
+  fund's change since the start and "Your account is $X (Y%) higher / lower") and **If in their own markets instead** (`ownMarkets`,
+  `homeBench`: the account had each buy's money gone into its own market on the same days: the autopilot's into the index its screener
+  comes from, in that market's currency (`homeTrack`); the owner's own buys and the sector funds into an S&P 500 fund; coins at their own
+  result; cash as cash; shown once the autopilot has bought). **The graph's gold line is that same sum over time** (`home` / `phome` in
+  `valueSeries`; every view: All markets, Your own buys, AI autopilot, a market or screener), so the third card, the graph's end and the
+  By market list's All markets row (now every buy, the owner's included) are one figure; the S&P 500 is no longer on the graph (the second
+  card has it; `fund` stays in `valueSeries` for the Admin page's dial). Checked on his account the day it went live: $1,279.56 on all
+  three, Hang Seng -$42.91 graph and list. "today" reads "last trading day" while the markets are shut. On a phone the three stack.
+  What follows describes earlier layouts.
 - **The top was three figures** (`.pp-top`): **since 17 Oct 2026 Account value (with its change since the start under it, "▼ $356.77
   (0.36%) since the start"), Today, and Against the S&P 500** (the account against the same $100,000 put into an S&P 500 fund
   when it began, in dollars, with what the fund would be worth now: `fundCard`; without the fund's prices back to the start,
@@ -1899,7 +1907,7 @@ with `document.querySelector('h3')`.
   **Since 30 Oct 2026 each row is set against its own index, not the S&P 500** (the owner: "our result, vs result if we had just invested in
   x fund"): the badge is the same money put into that row's own index on the same days (`bench`, from `homeGap`; the sector funds and
   his own buys against the S&P 500, coins against nothing); the grey line under it names the index and gives the S&P 500 in dollars;
-  All markets is the autopilot's buys added up against their own indexes; the S&P reconciliation ("how the whole account's gap adds
+  All markets is every buy added up against its own market (the third card); the S&P reconciliation ("how the whole account's gap adds
   up") is folded underneath. The paragraph below describes the S&P layout it replaced.
   **The All markets row carries the totals** (the owner's main view): every buy, the account's result since the start, and the
   account against the same $100,000 in an S&P 500 fund since the start (equals the graph's gap). The graph's ranges are 1d, 1w,
@@ -5650,6 +5658,8 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     Stripe; #12's holdings wording; the portfolio's three figures each about the user's account, "Against the S&P 500: ▼ $… behind"; the
     All markets row's line "the autopilot's holdings: against the S&P 500 x% · against their own indexes y%"; the Admin page's "Done in the
     last 3 days"). `site_audit.py` `ga4-missing` is new.
+  - **The graph and a third card against each buy's own market** (`practice-portfolio.js?v=74`, `stockiq-ai-chat` `1V/EU2lM…`; section 8c):
+    the owner saw a Hang Seng buy compared with the S&P 500 on the graph. Now every view's gold line is the same money in its own index.
   - **Finished the same day, all live and checked as the owner's account:** the two articles out, both deploys (Admin #11 and #12 done;
     parts home-pricing, plans and funnel improved), a button on each price card, the analysis guide fitting a phone (found by the deploy's
     phone check), "This week in the markets" linking each announcement's market (from the next daily update), and **the `longer-holds`
