@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-30",
+   "what": "By market, All markets: the autopilot's line now gives its dollars against the S&P 500 (▼ $1,326) and says its percent is per dollar traded, so it no longer looks at odds with the 0.9% beside it",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-30",
    "what": "The daily update can no longer run twice in a day after a restart: its once-a-day lock was in a folder macOS empties on restart (30 Oct: a restart at 3:04 pm, a second run at 3:33 pm). The daily Claude review had the same fault. A second run, if ever started by hand, now says so in its email",
    "found": "owner"
   },
@@ -314,12 +319,6 @@
    "at": "2026-10-24",
    "what": "Each change on this list can now carry a view link to where it can be seen",
    "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "The AI chat types its replies out, and links only to stock pages that exist (it had linked Fisher & Paykel and a2 Milk to pages that do not exist)",
-   "found": "owner",
-   "link": "https://stockiq.tech/"
   }
  ]
 }
