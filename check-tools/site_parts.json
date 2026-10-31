@@ -46,7 +46,7 @@
   {
    "id": "home-widgets",
    "part": "Home page: market widgets, movers lists, news panel",
-   "where": "index.html, the widgets and the right-hand panel; market-panel.js, live-market.js; stock-pages.js (written daily by update_home_stock_links.py, loaded by market-panel.js)",
+   "where": "index.html, the widgets and the right-hand panel; market-panel.js, live-market.js; stock-pages.js (written daily by update_home_stock_links.py, loaded by market-panel.js); stock-pages.html (the directory of every indexed stock page, written by update_home_stock_links.py)",
    "last": "2026-10-18",
    "log": [
     {

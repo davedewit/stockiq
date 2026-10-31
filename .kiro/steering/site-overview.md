@@ -424,7 +424,7 @@ Lambdas ──> Yahoo Finance + Finnhub (data), OpenAI gpt-4o-mini (AI chat), Dy
 | `news.html` article list | `update_news.py`, `update_stock_news.py`, then trimmed by `finalize_news_html.py` | Head and footer are preserved by all writers, so hand edits there stick |
 | `news.js` (sidebar, 100-item pool) | `update_news.py`, `update_stock_news.py` | Script only. **The file holds its own display code** (`renderNewsItems`, written into it by both scripts: change the two alike). It shows the newest general article and the four newest stock articles **by each item's `timestamp`**, whatever order the file is in. Check: `node check-tools/news_sidebar_test.js` |
 | `sitemap.xml` | `update_sitemap.py` (daily), `generate_sitemap.py` (manual) | Scripts only |
-| `index.html` "Stock Pages" section (between `<!-- STOCK_LINKS_START/END -->`) and `stock-pages.js` | `update_home_stock_links.py` (daily, after the snapshot step; since 18 Oct 2026) | Script only. The rest of `index.html` is hand-edited |
+| `index.html` "Stock Pages" section (between `<!-- STOCK_LINKS_START/END -->`), `stock-pages.js` and `stock-pages.html` (the directory of every indexed stock page, since 1 Nov 2026) | `update_home_stock_links.py` (daily, after the snapshot step; since 18 Oct 2026) | Script only. The rest of `index.html` is hand-edited |
 | `screener-<market>.html` (24) and `screeners-today.html` | `update_screener_pages.py` (daily, since 24 Oct 2026) | Script only; out of git (`.gitignore`), like `stocks/`. The shell (menu, footer) is copied from `stock-screener-guide.html` each run |
 | `stocks.txt` (3,467 symbols, CSV) | Hand-edited + `fetch_stock_data.py` | See `stocks-txt-csv-format.md` |
 | `index.html`, `about.html`, `faq.html`, `analysis.html`, `dashboard.html`, guides, legal pages, `*.js`, `styles.css` | Hand-edited, no generator | Edit directly |
@@ -5745,6 +5745,11 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   that changed, no flash without a new trade, soft tint, colour then figure); the seven market-data functions give the live function's
   figures (they took two daily bars); the price function sends each price's trade time and 4-6 decimals; `update_interval.sh` rewritten (it
   had changed nothing since 18 Oct) and timed in a browser on the home page, dashboard, a daily page and a stock page; Yahoo's stream ruled out.
+- **1 Nov 2026, just after midnight** (the owner: "has there been a thorough check everything is setup as best as possible for google"):
+  a crawl of all 1,001 sitemap pages as Googlebot found them clean (200, own canonical, unique titles and descriptions, valid JSON-LD,
+  redirects one way). Fixed: the IndexNow key (above), news.html's old title (`page-title` check), the sitemap's dates for about 95
+  stock pages (the newest news, not the data: now the later of the two), and **23 indexed stock pages linked from nowhere, 121 from
+  one page: `stock-pages.html`**, every indexed page by market, linked from the home page's stock section, in the sitemap, daily.
 - **31 Oct 2026, night** (the owner: the hub's "Since last update" said "no change" everywhere): a weekend run and the afternoon's
   run for the Russell 2000 alone had moved every market's comparison onto itself, and "days in the top 10" counted runs (28 for a page
   6 sessions old). The owner: would a session have found it? Honestly not soon: the checks test that figures are there, not that

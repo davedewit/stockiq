@@ -164,3 +164,11 @@ Rules:
 - **Undo:** `git revert` the commit "Daily hub: each market against its last trading session"; the old state format is read back as before.
 - **Remove after:** 2026-11-14
 
+### 2026-11-01 · The directory of stock pages; true sitemap dates; IndexNow key
+- **Changed:** `update_home_stock_links.py` writes `stock-pages.html` and a link to it in the home page's stock section; `update_sitemap.py`
+  lists it and dates a stock URL by the later of its news and its data; IndexNow's key file `5d95459b….txt` (deploy-to-s3.sh uploads it).
+- **Could break:** the home page's stock section (the script refuses under 20 links); stock-pages.html missing from the sitemap; a daily email
+  with "IndexNow response: 403" (Bing has not accepted the new key: look at the key file on the site).
+- **Undo:** `git revert` the commits of 1 Nov "Directory of stock pages…"; delete website/stock-pages.html and its line in the sitemap.
+- **Remove after:** 2026-11-15
+

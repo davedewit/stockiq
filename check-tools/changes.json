@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-31",
+   "what": "Google check: all 1,001 pages crawled as Google sees them and clean. Fixed: a page listing all 960 stock pages by market (23 had no link from any page), true 'last changed' dates in the sitemap for about 95 pages, and Bing's key",
+   "found": "session"
+  },
+  {
+   "at": "2026-10-31",
    "what": "news.html titled 'Market and Stock News' again (the restore of 30 Oct had brought back 'Free Stock Analysis Guide & Investment Blog'); a nightly check keeps it",
    "found": "owner"
   },
@@ -297,11 +302,6 @@
   {
    "at": "2026-10-25",
    "what": "Found most of the AWS database bill: the daily report clean-up read the whole report table 64 times a day (once per account) and applied one account's setting to everyone's reports. It now reads only that account's reports: about $0.50 a month saved, and no account's reports are hidden by another's setting",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-25",
-   "what": "The daily email now says 'Nothing needs you' or lists exactly what failed (with the error line), then what the run did; the day's log is kept so a session can read it without you copying anything",
    "found": "owner"
   }
  ]

@@ -58,8 +58,18 @@ def get_lastmod(symbol):
     if not os.path.exists(filepath):
         return datetime.now().strftime('%Y-%m-%d')
     news_date = get_stock_page_lastmod(filepath)
-    if news_date:
-        return news_date
+    # the page's figures change with every daily snapshot (its dateModified); the newest news alone made 95 indexed pages read as
+    # unchanged since March to September while their data was a day old (31 Oct 2026): the later of the two
+    data_date = None
+    try:
+        import re as _re
+        m = _re.search(r'"dateModified":\s*"(\d{4}-\d{2}-\d{2})', open(filepath, encoding='utf-8', errors='replace').read())
+        data_date = m.group(1) if m else None
+    except OSError:
+        pass
+    dates = [d for d in (news_date, data_date) if d]
+    if dates:
+        return max(dates)
     return get_file_mtime(filepath)
 
 
@@ -100,7 +110,7 @@ for match in re.finditer(r'<(?:ns0:)?url>.*?</(?:ns0:)?url>', existing, re.DOTAL
 
 # The daily public screener pages (24 Oct 2026): every one that exists is listed, changed daily
 import glob as _glob
-for _p in sorted(_glob.glob(os.path.join(WEBSITE_DIR, 'screener-*.html')) + _glob.glob(os.path.join(WEBSITE_DIR, 'screeners-today.html'))):
+for _p in sorted(_glob.glob(os.path.join(WEBSITE_DIR, 'screener-*.html')) + _glob.glob(os.path.join(WEBSITE_DIR, 'screeners-today.html')) + _glob.glob(os.path.join(WEBSITE_DIR, 'stock-pages.html'))):   # stock-pages.html: the directory of indexed stock pages (31 Oct 2026)
     _u = 'https://stockiq.tech/' + os.path.basename(_p)
     if _u not in site_page_blocks:
         site_page_blocks.append(_u)
