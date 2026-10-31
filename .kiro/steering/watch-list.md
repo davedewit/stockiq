@@ -128,3 +128,9 @@ Rules:
 - **Could break:** a day with no run at all (look: no daily email; `ls -la ~/.stockiq-locks/`).
 - **Undo:** `cp ~/VSCODE/backup/stockiq-daily.sh_before_20hours_20261031 ~/stockiq-daily.sh`.
 - **Remove after:** 2026-11-14
+
+### 2026-10-31 · Market figures flash the moment their price arrives
+- **Changed:** `live-market.js` version 5 (`later()` runs at once; each row had waited a random 0 to 2.5 s). `update_interval.sh` rewritten.
+- **Could break:** nothing should; at worst the rows all change in the same frame, which looks less lively. `live_market_check.js` checks it.
+- **Undo:** `git revert` the website commit "live-market.js: a change flashes the moment its price arrives" and deploy live-market.js.
+- **Remove after:** 2026-11-14

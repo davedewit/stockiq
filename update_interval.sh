@@ -27,11 +27,11 @@ current() {
     echo "  3. Full reload of the market panel: every $panel min"
 }
 
-ask_secs() {   # ask_secs "<question>" <minimum>
-    local v; read -r -p "$1: " v
-    [[ $v =~ ^[0-9]+$ ]] || { echo "Whole seconds only."; exit 1; }
-    (( v >= $2 )) || { echo "At least $2 s, to keep the Lambda calls down."; exit 1; }
-    echo "$v"
+ask_secs() {   # ask_secs <variable> "<question>" <minimum>: sets the variable, or stops the script with the reason
+    local v; read -r -p "$2: " v
+    [[ $v =~ ^[0-9]+$ ]] || { echo "Not saved: whole seconds only."; exit 1; }
+    (( v >= $3 )) || { echo "Not saved: at least $3 s (the price function itself takes about 2 s to answer)."; exit 1; }
+    printf -v "$1" '%s' "$v"
 }
 
 current
@@ -39,13 +39,13 @@ echo ""
 read -r -p "Change which (1-3, or Enter to leave them): " option
 case "${option:-}" in
     "") exit 0 ;;
-    1)  lo=$(ask_secs "Shortest gap in seconds (now 6)" 5)
-        hi=$(ask_secs "Longest gap in seconds (now 10)" "$lo")
+    1)  ask_secs lo "Shortest gap in seconds" 3
+        ask_secs hi "Longest gap in seconds" "$lo"
         sed -i '' -E "s/T\.fast \|\| \[[0-9]+, [0-9]+\]/T.fast || [$(( lo * 1000 )), $(( hi * 1000 ))]/" "$LM" ;;
-    2)  s=$(ask_secs "Seconds between stock page refreshes (now 5)" 5)
+    2)  ask_secs s "Seconds between stock page refreshes" 3
         sed -i '' -E "s/setInterval\(refreshPrices, [0-9]+\)/setInterval(refreshPrices, $(( s * 1000 )))/g" "$SP" ;;
-    3)  read -r -p "Minutes between full reloads (now 5): " m
-        [[ $m =~ ^[0-9]+$ && $m -ge 1 ]] || { echo "Whole minutes, at least 1."; exit 1; }
+    3)  read -r -p "Minutes between full reloads: " m
+        [[ $m =~ ^[0-9]+$ && $m -ge 1 ]] || { echo "Not saved: whole minutes, at least 1."; exit 1; }
         sed -i '' -E "s/var EVERY = [0-9]+ \* 60 \* 1000/var EVERY = $m * 60 * 1000/" "$MP" ;;
     *)  echo "Use 1, 2 or 3."; exit 1 ;;
 esac

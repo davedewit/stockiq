@@ -7,6 +7,9 @@
 //   node check-tools/live_market_check.js index.html dashboard.html stocks/AAPL.html
 //   WEB=<folder> node ...    files found in that folder are served instead of the ones in ../website (a staged copy)
 //   SHOTS=<folder> node ...  a picture of each page at the end
+//   REAL_TIMES=1 node ...    the page's own gaps, not the test's shortened ones: about 40 s of use a page, then every gap between
+//                            requests must lie inside the range live-market.js sets (update_interval.sh changes it), and every
+//                            flash must come within half a second of the answer that caused it
 //
 // Nothing real is called: every request beyond the site's own files is answered here.
 const { spawn } = require('child_process'); const os = require('os'), fs = require('fs'), path = require('path'), http = require('http');
@@ -18,7 +21,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const LISTS = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'AMZN'];
 const CATS = { us: [['S&P 500', '^GSPC', 7650], ['Dow Jones', '^DJI', 46000], ['Nasdaq', '^IXIC', 25000], ['Russell 2000', '^RUT', 2400], ['VIX', '^VIX', 20], ['10-Year', '^TNX', 4.1]] };
 ['europe', 'asia', 'cryptocurrencies', 'rates', 'commodities', 'currencies'].forEach(c => { CATS[c] = CATS.us.map(([n, s, v]) => [c + ' ' + n, s, v]); });
-let calls = 0, frozen = false, priceRequests = [], lastData = {};
+let calls = 0, frozen = false, priceRequests = [], lastData = {}, stockRequests = [];
 
 const server = http.createServer((q, r) => {
   const name = decodeURIComponent(q.url.split('?')[0]).replace(/^\/+/, '') || 'index.html';
@@ -70,7 +73,8 @@ function anyAnswer() {
         const q = d.params.request;
         if (q.url.startsWith(BASE) && q.method === 'GET') { send('Fetch.continueRequest', { requestId: d.params.requestId }); return; }
         if (q.method === 'OPTIONS') { reply(d.params.requestId, ''); return; }
-        if (q.url.includes(PRICES)) { const b = q.postData || ''; priceRequests.push({ at: Date.now(), body: b }); reply(d.params.requestId, priceAnswer(b)); return; }
+        if (q.url.includes(PRICES)) { const b = q.postData || ''; const rec = { at: Date.now(), body: b }; priceRequests.push(rec); reply(d.params.requestId, priceAnswer(b)).then(() => { rec.answered = Date.now(); }); return; }
+        if (q.url.includes('vknfjazip3xpfwpfyd6ja6ui6q0lmxkw')) stockRequests.push(Date.now());   // a stock page's own price refresh (stock-prices.js)
         if (/lambda-url/.test(q.url)) { reply(d.params.requestId, anyAnswer()); return; }
         const js = /\.js(\?|$)/.test(q.url), css = /\.css(\?|$)|fonts\.googleapis/.test(q.url);
         reply(d.params.requestId, js || css ? '' : '{}', js ? 'application/javascript' : css ? 'text/css' : 'application/json');
@@ -83,8 +87,8 @@ function anyAnswer() {
     await send('Page.addScriptToEvaluateOnNewDocument', { source: `try { localStorage.setItem('userId', 'live-check@example.com'); localStorage.setItem('userEmail', 'live-check@example.com');
       ${JSON.stringify(['gainersTickersList', 'losersTickersList', 'activeTickersList', 'trendingTickersList'])}.forEach(function (k) { localStorage.setItem(k, ${JSON.stringify(JSON.stringify(LISTS))}); });
       localStorage.setItem('marketDataSidebar', ${JSON.stringify(JSON.stringify(anyAnswer()))}); } catch (e) {}
-      window.LIVE_MARKET_TEST = { fast: [1500, 2000], slow: 6000, idle: 5000 };
-      window.__flashes = 0; new MutationObserver(function (ms) { ms.forEach(function (m) { if (m.target.classList && (m.target.classList.contains('lm-up') || m.target.classList.contains('lm-down'))) window.__flashes++; }); })
+      ${process.env.REAL_TIMES ? '' : 'window.LIVE_MARKET_TEST = { fast: [1500, 2000], slow: 6000, idle: 5000 };'}
+      window.__flashes = 0; window.__flashAt = []; new MutationObserver(function (ms) { ms.forEach(function (m) { if (m.target.classList && (m.target.classList.contains('lm-up') || m.target.classList.contains('lm-down'))) { window.__flashes++; window.__flashAt.push(Date.now()); } }); })
         .observe(document, { subtree: true, attributes: true, attributeFilter: ['class'] });` });
     const mouse = async (n) => { for (let i = 0; i < n; i++) { await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 200 + (i % 7) * 30, y: 300 + (i % 5) * 20 }); await sleep(500); } };
 
@@ -98,10 +102,31 @@ function anyAnswer() {
       if (!has) {                                        // a page with no market data (a stock page: its own price has its own refresh)
         await mouse(8);
         check('a page with no market data does not load the script and asks for nothing', !first.loaded && priceRequests.length === 0, { loaded: first.loaded, asked: priceRequests.length });
+        if (process.env.REAL_TIMES && /^stocks\//.test(pg)) {   // its price refreshes on its own clock, as update_interval.sh sets it
+          const every = Number((fs.readFileSync(WEB && fs.existsSync(path.join(WEB, 'stock-prices.js')) ? path.join(WEB, 'stock-prices.js') : path.join(SITE, 'stock-prices.js'), 'utf8').match(/setInterval\(refreshPrices, (\d+)\)/) || [])[1]);
+          const from = stockRequests.length; await mouse(70);
+          const req = stockRequests.slice(from), gaps = req.slice(1).map((t, i) => t - req[i]);
+          check(`the stock page's price is asked for every ${every / 1000} s (${gaps.length} gaps: ${gaps.map(g => (g / 1000).toFixed(1)).join(', ')} s)`,
+            every && gaps.length >= 2 && gaps.every(g => Math.abs(g - every) <= 400), { every, gaps });
+        }
         check('no script error on the page', errors.length === 0, errors);
         continue;
       }
       check('live-market.js is loaded on the page and finds its figures', first.loaded && first.movers + first.panel > 0, first);
+      if (process.env.REAL_TIMES) {                      // the real gaps, as update_interval.sh sets them
+        const src = fs.readFileSync(WEB && fs.existsSync(path.join(WEB, 'live-market.js')) ? path.join(WEB, 'live-market.js') : path.join(SITE, 'live-market.js'), 'utf8');
+        const [lo, hi] = (src.match(/T\.fast \|\| \[(\d+), (\d+)\]/) || []).slice(1).map(Number);
+        const from = priceRequests.length; await mouse(80);   // 40 seconds of someone using the page
+        const req = priceRequests.slice(from), gaps = req.slice(1).map((r, i) => r.at - req[i].at);
+        check(`every gap between price requests is inside the set ${lo / 1000}-${hi / 1000} s (${gaps.length} gaps: ${gaps.map(g => (g / 1000).toFixed(1)).join(', ')} s)`,
+          lo && gaps.length >= Math.floor(35000 / hi) && gaps.every(g => g >= lo - 150 && g <= hi + 600), { lo, hi, gaps });
+        const flashAt = await js('window.__flashAt'), answers = priceRequests.map(r => r.answered).filter(Boolean);
+        const lag = flashAt.map(t => t - Math.max.apply(null, answers.filter(a => a <= t + 50).concat([0])));
+        check(`each change flashes the moment its answer arrives (${flashAt.length} flashes, slowest ${lag.length ? Math.max.apply(null, lag) : '-'} ms after its answer)`,
+          flashAt.length > 0 && lag.every(l => l <= 500), { lag: lag.slice(0, 20) });
+        check('no script error on the page', errors.length === 0, errors);
+        continue;
+      }
       if (await js('!!window.marketPanel')) {             // the shared panel script (market-panel.js): tabs, arrows, lists, countdown
         const names = () => js(`Array.from(document.querySelectorAll('#market-data-sidebar-container .market-item-sidebar-name')).map(e => e.textContent)`);
         const tabNow = () => js(`(document.querySelector('.market-tab-sidebar.active') || {}).getAttribute && document.querySelector('.market-tab-sidebar.active').getAttribute('data-tab')`);
@@ -147,6 +172,9 @@ function anyAnswer() {
       check('one request covers every figure on show, at most 40, each once', asked.tickers && asked.tickers.length === new Set(asked.tickers).size && asked.tickers.length <= 40 && asked.spark === true, asked);
       const moved = after.texts.filter((t, i) => t !== first.texts[i]).length;
       check('the figures on show change, and changes flash', moved >= Math.min(3, first.texts.length) && after.flashes > 0, { moved, of: first.texts.length, flashes: after.flashes });
+      { const flashAt = await js('window.__flashAt'), answers = priceRequests.map(r => r.answered).filter(Boolean);
+        const lag = flashAt.map(t => t - Math.max.apply(null, answers.filter(a => a <= t + 50).concat([0])));
+        check('each change flashes the moment its answer arrives (until 31 Oct 2026 each row waited up to 2.5 s)', flashAt.length > 0 && lag.every(l => l <= 500), { slowest: Math.max.apply(null, lag) }); }
       if (first.panel) {
         const want = await js(`(function () { var a = ${JSON.stringify(lastData[after.want])}; return window.liveMarket.sparkPoints(a.spark, a.prev); })()`);
         check('the side panel\'s small chart is today\'s line from the answer, not a random one', after.line === want, { line: after.line, want });

@@ -1161,8 +1161,11 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   `<kind>TickersList`; the side panel's symbols from `marketDataSidebar`; the open tab from `.market-tab-sidebar.active`),
   every 6 to 10 s at random, **only while the tab is on screen and someone has moved, scrolled, typed or touched in the last 90 s**;
   a round that changes nothing makes the next gap half as long again, up to a minute (a closed market costs almost nothing), and
-  a change or a return to the page brings it back. A figure that moves flashes green or red (`lm-up`, `lm-down`), each row a
-  moment apart (the owner's own random delay). **The side panel's small charts were random lines** (`generateSparkline`): each is
+  a change or a return to the page brings it back. A figure that moves flashes green or red (`lm-up`, `lm-down`) the moment its price arrives (since 31 Oct 2026; until then each
+  row waited a random 0 to 2.5 s, which put the flash up to 2.5 s late). **The gaps are set with `bash update_interval.sh`** (it shows and
+  changes this one, the stock pages' 5 s and the panel's 5 minutes); `REAL_TIMES=1 node check-tools/live_market_check.js …` times them for
+  real. **Yahoo's free price stream (`wss://streamer.finance.yahoo.com`) was tried on 31 Oct 2026: it works from a server but refuses a
+  page on stockiq.tech** (it checks the origin), and a relay would need a server running all the time, far over the cost rule: so polling. **The side panel's small charts were random lines** (`generateSparkline`): each is
   now that item's real prices for its latest trading day (the price function's `spark`, about 30 points; a green line is
   up on the previous close, red down). Futures (the Rates tab's 2- and 10-year notes, every Commodities item: `=F`) have no
   points in Yahoo's one-day chart until their session reopens, so the function takes the last trading day from the five-day
@@ -5701,6 +5704,8 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     passes alone; `--recheck` now re-runs those checks by themselves. "Needs you" no longer reports short cash while the budget is
     automatic (`stockiq-ai-trader` `QEITzl1O…`, rollback `…_before_autopilot_needsauto_20261030.zip`). Cost: October about $1.47 (the
     cleanup bug and the cache clears, both fixed); November about $0.90 at the present rate, S3's requests the largest part (idea `s3-requests`).
+- **31 Oct 2026, later:** the market figures flash the moment their price arrives (`live-market.js` version 5); `update_interval.sh` rewritten (it
+  had changed nothing since 18 Oct) and timed in a browser on the home page, dashboard, a daily page and a stock page; Yahoo's stream ruled out.
 - **31 Oct 2026** (short, from the owner's look at the Practice tab): the three cards read alike and the gaps moved to a line each under them
   (v80); the daily run waits 20 hours after the last (it had run at 15:33 and 00:02; `~/stockiq-daily.sh`, watch list); `stage_web.py` stages a
   file committed but not yet live; a wait loop that matched its own text (`pgrep -f deploy-to-s3.sh`) cost an hour: wait on a lock file or
