@@ -260,7 +260,7 @@ warns about; one change at a time, measured, with its experiment entry.
   (G) **Google indexes 67 of the 972 sitemap pages it has read** (Search Console, 1 Nov 2026: 905 not indexed, 847 "crawled - currently not indexed", 56
   discovered, 2 noindex left over). Nothing technical blocks it (`seo_crawl.py` clean): Google judges the stock pages not worth listing
   (alike to every finance site's) on a site with almost no links in. Bring tested plans for ideas `stock-page-unique` (each page's daily
-  ranks across screeners and its score history) and `fewer-pages`; ask the owner for the indexed list (which 67) and positions (28 days).
+  ranks across screeners and its score history) (not `fewer-pages`: the owner wants more pages, not fewer, 1 Nov 2026; once the pages carry their own data, open more of them to Google); ask the owner for the indexed list (which 67) and positions (28 days).
   The owner's two Admin yeses still open: #15 payments (below, first) and #8 (learning). Read the cost: November should run about $0.90
   (idea `s3-requests` if S3 stays about 2 cents a day).
   (P0) **Payments security** (the daily review's proposal of 30 Oct; Claude recommends yes, see "Decisions for you"): anyone can cancel a

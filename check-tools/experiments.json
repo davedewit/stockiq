@@ -571,8 +571,10 @@
    "what": "Offer Google fewer, stronger stock pages (e.g. the largest 300 plus the daily top-10 pages) instead of 960 near-identical ones from a little-known site; the rest noindex as the small ones are now. Decide together with stock-page-unique, not at the same time",
    "angle": "growth",
    "measure": "Indexed pages and impressions in Search Console 6 weeks after, against 1 Nov 2026",
-   "status": "idea",
-   "added": "2026-11-01"
+   "status": "removed",
+   "added": "2026-11-01",
+   "decided": "2026-11-01",
+   "result": "Not tried, at the owner's word (1 Nov 2026): he wants many pages, and fewer would mean fewer chances to be found. The better route is stock-page-unique: make the pages worth listing, then open more of them to Google, not fewer"
   }
  ]
 }
