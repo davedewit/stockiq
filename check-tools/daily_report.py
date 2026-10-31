@@ -13,7 +13,7 @@ import glob, os, re, shutil, sys, time
 from datetime import datetime
 
 LOGS = os.environ.get('DAILY_LOGS') or os.path.expanduser('~/stockiq-logs')   # DAILY_LOGS: a test folder
-BENIGN = [r'IndexNow response', r'possibly delisted', r'Failed download', r'curl: \(', r'Retrying', r'Internet check failed \(attempt',
+BENIGN = [r'IndexNow response: 20[02]', r'possibly delisted', r'Failed download', r'curl: \(', r'Retrying', r'Internet check failed \(attempt',
           r'No new items found', r'Yahoo rate limit hit', r'FX rate for .* unavailable', r'Price download failed for batch',
           r': no answer, yesterday']   # routine: the step retries, falls back to AWS for prices, or the summary above says it
 

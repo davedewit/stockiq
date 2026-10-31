@@ -610,7 +610,9 @@ git pull --rebase && git push
   or, with none on the site, to its analysis (`analysis.html?option=1&symbol=…&autorun=true`, `rel="nofollow"` so crawlers set nothing off).
   The **Screeners menu of every page has "📊 Today's top 10s"** (the hand-edited pages, the stock-page template for its next
   regeneration; the daily pages copy the screener guide's menu each run). The site check leaves the daily pages out of its growth alarm. In the
-  sitemap (`update_sitemap.py` adds every one, daily) and named to IndexNow daily (`website/notify_search_engines.py`). Linked
+  sitemap (`update_sitemap.py` adds every one, daily) and named to IndexNow daily (`website/notify_search_engines.py`; its key file
+  `website/5d95459bdfa249efa511862a23fb9791.txt` since 31 Oct 2026: the first key's file never existed, so every ping was refused
+  and the key blocked, hidden by the daily email's filter; `site_audit.py` `indexnow-key`). Linked
   from the home page's screeners card. Experiment `screener-pages`, decided on Search Console's figures. Not yet: crypto, the
   email box's sample.
   **Since 24 Oct 2026 they carry the market panel** (`PANEL` in `update_screener_pages.py`, added to the footer part that `shell_parts()`

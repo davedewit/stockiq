@@ -9,6 +9,7 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
   duplicate-code  the same function defined in several pages or scripts (the market panel was three copies)
   run-links       a daily screener page whose run button opens the wrong section or runs no screener
   late-layout     a page whose own padding or width is set by a style inside the body (it moves after the first draw)
+  indexnow-key    the key file the search engines' ping names is on the site
   time-claims     a "N days in the top 10" larger than the trading days since the daily pages began
   hub-compare     the daily hub's "Since last update" all "no change" (comparing a session with itself)
   cost            AWS: a service's spend jumping, the month over the owner's $1, Cost Explorer charged, a table or Lambda calls jumping (cost_check.py, free)
@@ -283,6 +284,17 @@ def main():
                  'pages began on 23 Oct 2026 (update_screener_pages.py counts runs, not sessions)', 'screener-*.html')
     except Exception as e:
         find('time-claims', 'idea', f'the days-in-the-top-10 counts could not be checked ({type(e).__name__})', 'screener-*.html')
+
+    # indexnow-key: the key file the search engines' ping names must be on the site (31 Oct 2026: it never was, Bing blocked the key,
+    # and the daily email's filter hid the refusal for five weeks)
+    try:
+        ns = read(os.path.join(WEB, 'notify_search_engines.py'))
+        km = re.search(r'"keyLocation":\s*"https://stockiq\.tech/([^"]+)"', ns)
+        if km and not os.path.exists(os.path.join(WEB, km.group(1))):
+            find('indexnow-key', 'problem', f'notify_search_engines.py names {km.group(1)} as its key file, and website/ has no such file: '
+                 'Bing and Yandex refuse every ping (and block the key)', 'notify_search_engines.py')
+    except Exception as e:
+        find('indexnow-key', 'idea', f'the IndexNow key could not be checked ({type(e).__name__})', 'notify_search_engines.py')
 
     # seo-basics
     titles = {}

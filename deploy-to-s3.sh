@@ -354,6 +354,7 @@ retry_aws $AWS s3 sync "$WEBSITE_DIR" s3://$BUCKET/ \
   --exclude "*" \
   --include "stocks.txt" \
   --include "robots.txt" \
+  --include "5d95459bdfa249efa511862a23fb9791.txt" \
   --include "sitemap.xml"
 
 if [ "$DRY_RUN" = "true" ]; then
