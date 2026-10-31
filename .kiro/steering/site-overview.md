@@ -166,7 +166,10 @@ improvements and wait for his yes. The routine, every session:
    is the questions i ask to make improvements, you should be doing this moving forward ... think outside the box a little"). In one
    sitting, on the live site, at desktop and at phone width (the scripts are only the floor): the home page top to bottom as a first-time
    visitor; one daily market page; the dashboard's three tabs as his account (`live_practice_check.js`, `clarity_check.py --keep`);
-   the Admin page. At each, the questions he asked on 24 Oct, which are the kind to keep asking: *Is that number right, and what does it
+   the Admin page. At each, the questions he asked on 24 Oct, which are the kind to keep asking: *Does it behave right over a few minutes, after a
+   refresh and with its market shut?* (31 Oct 2026: watching the home page for an afternoon, the owner found wrong figures on every page
+   load, closed markets flashing, two colours in one row, updates stopping after 90 s and a settings script that did nothing; the walk
+   now includes 3 minutes of watching a live page without touching it, two refreshes, and the same with its market shut) *Is that number right, and what does it
    count?* (2,359 was places, not shares) *Can I click it, and where does it take me?* (shares with no stock page were dead text) *Does
    what I opened stay open, and does a fresh page start from the default?* *Does everything I can see still say what is true after this
    week's changes?* (the chat said the autopilot could not know about the Fed) *Would a visitor see that the site is alive today?*
