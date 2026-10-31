@@ -217,7 +217,7 @@ about what the "Still never" list keeps for him (real money, costs above the rul
 settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
 warns about; one change at a time, measured, with its experiment entry.
 
-**WHERE THINGS STAND (rewrite this block at the end of every session; last: 31 Oct 2026, evening, after a session on the market figures; the weekly session is next)**
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 1 Nov 2026, just after midnight, after a session on the bill, the daily hub and Google; the weekly session is next, about 7 Nov)**
 - **The stance (the owner, 30 Oct 2026):** "we are just going to give this a shot ... with future AI updates over the next 6 or so months
   we will continue to find improvements - more profit". Profit first; one tested change at a time; each newer AI model looks again at what
   failed; a plain verdict at month 3 (12 Jan 2027). Visitors and sign-ups stay the priority for the site itself.
@@ -248,6 +248,11 @@ warns about; one change at a time, measured, with its experiment entry.
   with jump links, a button per plan, `longer-holds`; 26 Oct, stock news on news.html again, one cache clear per deploy, the practice graph's
   drag and S&P line in every view; 25 Oct, the deploy checks, the daily email from the log, the daily cost check; 24 Oct, one header, menu
   and footer for every page, the free trial includes the autopilot, the daily screener pages.
+- **Google (1 Nov 2026):** 67 of the 972 sitemap pages it has read are indexed; nothing technical blocks it (`seo_crawl.py`, weekly).
+  The plan the owner liked: idea `stock-page-unique` first (each stock page its own daily ranks and score history), then open MORE pages
+  to Google, never fewer (the owner wants thousands of pages; `fewer-pages` dropped). First build at the weekly session: (G) below.
+  To be seen after the run of 1 Nov: stock-pages.html live and in the sitemap, the sitemap's stock dates current (`seo_crawl.py`
+  passes all), the hub's arrows against Thursday, "6 days in the top 10", a daily email without "IndexNow response: 403".
 - **To be seen for real:** the hub's arrows (`screeners-today.html`, from the daily update of 31 Oct: it compares with the day before);
   "This week in the markets" linking each announcement's market (same update); the first `longer-holds` buys (`lh` on the remembered buy)
   and the review's split; the first GA4 events (sign_up, purchase …) in Google Analytics (the owner sends figures); the thank-you after a
