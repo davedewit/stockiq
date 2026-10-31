@@ -560,9 +560,9 @@
   },
   {
    "id": "stock-page-unique",
-   "what": "Search Console, 1 Nov 2026: of the 1,001 sitemap pages about 96 are indexed, 847 'crawled - currently not indexed' (Google judged them not worth listing: template pages like every finance site's). Give each indexed stock page data nobody else has: its daily rank in every screener it belongs to ('12th of 502 in the S&P 500 today, 31st a week ago'), a small history of its trend score, from what update_screener_pages.py already works out each day",
+   "what": "Search Console, 1 Nov 2026: of the 972 sitemap pages Google has read 67 are indexed, 847 'crawled - currently not indexed' (Google judged them not worth listing: template pages like every finance site's). Give each indexed stock page data nobody else has: its daily rank in every screener it belongs to ('12th of 502 in the S&P 500 today, 31st a week ago'), a small history of its trend score, from what update_screener_pages.py already works out each day",
    "angle": "growth",
-   "measure": "Search Console's indexed share of the sitemap's stock pages, 4 and 8 weeks after, against 96 of 1,001 on 1 Nov 2026",
+   "measure": "Search Console's indexed share of the sitemap's stock pages, 4 and 8 weeks after, against 67 of 972 on 1 Nov 2026",
    "status": "idea",
    "added": "2026-11-01"
   },

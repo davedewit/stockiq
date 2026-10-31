@@ -257,10 +257,10 @@ warns about; one change at a time, measured, with its experiment entry.
   let it lean the budget as a trial), crypto-no-chasing, market-gauge, company-figures, trend-score, ai-markets, auto-holdings, screener-pages,
   signup-simpler and market-panel-pages (about 21 Nov on GA4 figures). Kept on 30 Oct: polling-cut, daily-review.
 - **Next session, in order (about 7 Nov, the weekly one):** the opening check first, and its part 8 (the weekly check-in, item by item).
-  (G) **Google indexes about 96 of the 1,001 sitemap pages** (Search Console, 1 Nov 2026: 847 "crawled - currently not indexed", 56
+  (G) **Google indexes 67 of the 972 sitemap pages it has read** (Search Console, 1 Nov 2026: 905 not indexed, 847 "crawled - currently not indexed", 56
   discovered, 2 noindex left over). Nothing technical blocks it (`seo_crawl.py` clean): Google judges the stock pages not worth listing
   (alike to every finance site's) on a site with almost no links in. Bring tested plans for ideas `stock-page-unique` (each page's daily
-  ranks across screeners and its score history) and `fewer-pages`; ask the owner for the indexed list (which 96) and positions (28 days).
+  ranks across screeners and its score history) and `fewer-pages`; ask the owner for the indexed list (which 67) and positions (28 days).
   The owner's two Admin yeses still open: #15 payments (below, first) and #8 (learning). Read the cost: November should run about $0.90
   (idea `s3-requests` if S3 stays about 2 cents a day).
   (P0) **Payments security** (the daily review's proposal of 30 Oct; Claude recommends yes, see "Decisions for you"): anyone can cancel a
