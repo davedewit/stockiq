@@ -557,6 +557,22 @@
    "measure": "Whether the next cost finding names its feature at once, without a session tracing it",
    "status": "idea",
    "added": "2026-10-31"
+  },
+  {
+   "id": "stock-page-unique",
+   "what": "Search Console, 1 Nov 2026: of the 1,001 sitemap pages about 96 are indexed, 847 'crawled - currently not indexed' (Google judged them not worth listing: template pages like every finance site's). Give each indexed stock page data nobody else has: its daily rank in every screener it belongs to ('12th of 502 in the S&P 500 today, 31st a week ago'), a small history of its trend score, from what update_screener_pages.py already works out each day",
+   "angle": "growth",
+   "measure": "Search Console's indexed share of the sitemap's stock pages, 4 and 8 weeks after, against 96 of 1,001 on 1 Nov 2026",
+   "status": "idea",
+   "added": "2026-11-01"
+  },
+  {
+   "id": "fewer-pages",
+   "what": "Offer Google fewer, stronger stock pages (e.g. the largest 300 plus the daily top-10 pages) instead of 960 near-identical ones from a little-known site; the rest noindex as the small ones are now. Decide together with stock-page-unique, not at the same time",
+   "angle": "growth",
+   "measure": "Indexed pages and impressions in Search Console 6 weeks after, against 1 Nov 2026",
+   "status": "idea",
+   "added": "2026-11-01"
   }
  ]
 }
