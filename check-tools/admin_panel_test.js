@@ -151,6 +151,18 @@ async function page(status, uid) {
     check('a failed full check: "Yes, please check in", and the card lists what failed', /Do you need to check in\? Yes, please check in Open a session and say hi: the full check found 2 problems/.test(pl) && /2 of 25 checks failed/.test(pl) && /the sitemap/.test(pl), pl.slice(0, 400));
     ADMIN.plan.weekly = { at: today, passed: 25, total: 25, failed: [] }; ADMIN.plan.changes = [{ at: new Date(Date.now() - 9 * 86400000).toISOString().slice(0, 10), what: 'x' }];
     pl = await look();
+    { // a month over $1.50 whose cause is fixed does not call him in; past the known amount it does again (31 Oct 2026)
+      const was = ADMIN.usage, mon = new Date().toISOString().slice(0, 7), plan0 = ADMIN.plan;
+      ADMIN.usage = Object.assign({}, was, { costStockiq: 1.57, costAt: new Date().toISOString() });
+      ADMIN.plan = Object.assign({}, plan0, { billKnown: { [mon]: { upTo: 1.65, why: 'two faults, both fixed' } }, changes: [{ at: today.slice(0, 10), what: 'x' }] });
+      let b = await look();
+      check('a known, fixed overrun: "No, all good", and the card says it is over the limit, explained, and when it starts again', /Do you need to check in\? No, all good/.test(b) && /the bill is over the \$1\.50 limit this month \(StockIQ's running cost \$1\.57\), already explained and fixed: two faults, both fixed; it starts again from zero on 1 /.test(b), b.slice(0, 500));
+      ADMIN.usage.costStockiq = 1.70; b = await look();
+      check('above the known amount: "Yes, please check in" for the bill again', /Yes, please check in Open a session and say hi: the AWS bill needs a look/.test(b), b.slice(0, 300));
+      ADMIN.plan = Object.assign({}, plan0, { changes: [{ at: today.slice(0, 10), what: 'x' }] }); ADMIN.usage.costStockiq = 1.57; b = await look();
+      check('an overrun nobody has explained: "Yes, please check in"', /Yes, please check in Open a session and say hi: the AWS bill needs a look/.test(b), b.slice(0, 300));
+      ADMIN.usage = was; ADMIN.plan = plan0;
+    }
     check('nine days since the last session: "When you can", the weekly review and improvements due', /Do you need to check in\? When you can Nothing is broken, but a session would help: the last session was 9 days ago: the weekly review and new improvements are due/.test(pl), pl.slice(0, 400));
     Object.keys(ADMIN).forEach(k => delete ADMIN[k]); Object.assign(ADMIN, keep);
   }

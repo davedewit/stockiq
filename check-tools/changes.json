@@ -3,6 +3,16 @@
  "changes": [
   {
    "at": "2026-10-31",
+   "what": "Two untrue lines gone: the autopilot no longer says 'the AI model may sell early again' (those sales have been off since 17 Oct), and the AI chat says 25 markets have a daily top-10 page, not 24",
+   "found": "check"
+  },
+  {
+   "at": "2026-10-31",
+   "what": "The Admin page no longer asks you to check in for October's bill: it was $1.57, 7 cents over your $1.50, from two faults of 23-26 Oct that are already fixed; it says so and goes red again only if the bill climbs past $1.65. The daily cost check stopped counting known costs and a few cents of page refreshes as problems",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-31",
    "what": "Market figures: a new trade flashes within a second of a refresh, a row's price and % always flash the same colour, the figure changes a moment after the colour",
    "found": "owner"
   },
@@ -292,16 +302,6 @@
   {
    "at": "2026-10-25",
    "what": "Register page on a phone: the empty band above 'Trade $100,000 of practice money' is gone (the page kept room for the desktop-only trial strip)",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-25",
-   "what": "Dashboard: a visitor not signed in saw '1/1 remaining' there after using the free analysis (it counted by internet address alone). It now uses the same count as every other page; a nightly check makes sure no page counts on its own again",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-25",
-   "what": "On a phone, a visitor not signed in could run a second free analysis after the phone's mobile-data address changed (each new address looked like a new visitor). The browser now remembers the day's free use too, so it is one a day as on desktop",
    "found": "owner"
   }
  ]

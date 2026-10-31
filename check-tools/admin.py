@@ -116,6 +116,11 @@ elif args[0] == 'sync':
     revdir = os.path.join(here, 'reviews')
     admin['plan']['checkins'] = sorted(f[7:17] for f in os.listdir(revdir) if f.startswith('review-') and f.endswith('.txt'))[-10:]
     admin['plan']['changes'] = changes
+    try:                                   # a month over $1.50 whose cause is fixed (cost_check.KNOWN_OVER), for the check-in card (31 Oct 2026)
+        sys.path.insert(0, here); from cost_check import KNOWN_OVER
+        admin['plan']['billKnown'] = KNOWN_OVER
+    except Exception:
+        pass
     save(admin)
     print(f"the Admin page's improvements: {len(ex)} items, {len(reviews)} recent reviews")
 elif args[0] == 'audit':

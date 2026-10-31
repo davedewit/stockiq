@@ -19,8 +19,17 @@ LIMIT, HARD = 1.00, 1.50              # the owner's monthly target for StockIQ's
 KNOWN_CE = {'2026-10': 2.65}          # Cost Explorer charge already explained (the session's tests of 17 Oct 2026)
 # a finding already fixed, left out until its old days have passed (then checked again as usual)
 FIXED_UNTIL = {'stockiq-dashboard-analysis-history': '2026-10-27',   # the cleanup's 64 scans a day, fixed 25 Oct 13:20 UTC
-               'AmazonCloudFront': '2026-10-28',                     # one cache-clear path per file, fixed 26 Oct (web_deploy.sh)
+               'AmazonCloudFront': '2026-11-02',                     # one path per file, fixed 26 Oct; then each '/*' cost $0.005 while October was over the free 1,000 (KNOWN_PATHS)
                'AmazonS3': '2026-10-28'}                             # the one-off re-upload of ~3,000 stock pages on 24 Oct
+# A month over the owner's $1.50 whose cause is found and fixed: known up to this amount, so it stops calling him in (31 Oct 2026, the owner:
+# "seems suddenly alot to check on admin dashboard especially the bill?"). Beyond the amount it is a problem again. admin.py sync copies
+# this to the Admin page, whose "Do you need to check in?" card reads it. Add a month only when its cause is fixed, with the reason.
+KNOWN_OVER = {'2026-10': {'upTo': 1.65, 'why': "two faults of 23-26 Oct, both fixed: a cleanup that read the whole reports table 64 times a day, "
+                                               "and a cache clear for every file deployed (125 paths over the free 1,000)"}}
+# A table's reads with a known cause, as a note rather than a problem up to this many units a day
+KNOWN_READS = {'stockiq-dashboard-analysis-history': (150000, 'about 400 read units each time the dashboard is loaded (it reads every report '
+                                                               'with its text): idea history-light')}
+TABLE_FLOOR = 0.10    # a table matters from about 10 cents a month: below that a busy day of page refreshes is not a problem
 KNOWN_PATHS = {'2026-10': 1125}     # cache-clear paths already explained for the month (the per-file clears of 23-25 Oct, then one '/*' a deploy; resets 1 Nov)
 TABLES = ['stockiq-dashboard-analysis-history', 'stockiq-ai-trader', 'stockiq-user-tracking', 'stockiq-paper-portfolios',
           'stockiq-ai-trader-journal', 'stockiq-coinspot-prediction-status', 'stockiq-coinspot-predictions', 'stockiq-usage-tracker',
@@ -75,7 +84,11 @@ def run():
     days_in = now.day + now.hour / 24
     month_days = ((now.replace(day=28) + dt.timedelta(days=4)).replace(day=1) - dt.timedelta(days=1)).day
     on_course = running / max(days_in, 1) * month_days
-    if running >= HARD:
+    over = KNOWN_OVER.get(now.strftime('%Y-%m'))
+    if running >= HARD and over and running <= over['upTo']:
+        out.append(('idea', f"StockIQ's running AWS cost this month is ${running:.2f}, over the owner's ${HARD:.2f}: known ({over['why']}); "
+                            f"a problem again above ${over['upTo']:.2f}"))
+    elif running >= HARD:
         out.append(('problem', f"StockIQ's running AWS cost this month is ${running:.2f}, over the owner's ${HARD:.2f} at most"))
     elif running >= LIMIT:
         out.append(('idea', f"StockIQ's running AWS cost this month is ${running:.2f}, over the owner's ${LIMIT:.2f} target (his most is ${HARD:.2f})"))
@@ -88,10 +101,14 @@ def run():
             s = daily(cw, 'AWS/DynamoDB', metric, [{'Name': 'TableName', 'Value': t}])
             if not s or now.strftime('%Y-%m-%d') < FIXED_UNTIL.get(t, ''):
                 continue
-            if jumped(s, 5000) or (word == 'read' and s[-1] > 40000) or (word == 'write' and s[-1] > 20000):
-                price = 0.125 if word == 'read' else 0.625
-                out.append(('problem', f"table {t}: {s[-1]:,.0f} {word} units yesterday (usual about {statistics.median(s[:-1] or [0]):,.0f}), "
-                                       f"about ${s[-1] * 30 * price / 1e6:.2f} a month at that rate: find what does it (a scan in a loop?)"))
+            price = 0.125 if word == 'read' else 0.625
+            floor = TABLE_FLOOR * 1e6 / 30 / price           # units a day that cost TABLE_FLOOR a month
+            if jumped(s, floor) or (word == 'read' and s[-1] > 40000) or (word == 'write' and s[-1] > 20000):
+                known_r = KNOWN_READS.get(t) if word == 'read' else None
+                level = 'idea' if known_r and s[-1] <= known_r[0] else 'problem'
+                cause = f"known: {known_r[1]}" if level == 'idea' else 'find what does it (a scan in a loop?)'
+                out.append((level, f"table {t}: {s[-1]:,.0f} {word} units yesterday (usual about {statistics.median(s[:-1] or [0]):,.0f}), "
+                                   f"about ${s[-1] * 30 * price / 1e6:.2f} a month at that rate: {cause}"))
 
     # 3. Lambda calls for the whole account (one figure, no dimension)
     s = daily(cw, 'AWS/Lambda', 'Invocations', [], days=9)
@@ -117,7 +134,9 @@ def run():
                 paths += known[i['Id']]
         os.makedirs(os.path.dirname(keep), exist_ok=True)
         json.dump(known, open(keep, 'w'))
-        if paths >= max(700, KNOWN_PATHS.get(month, 0)):
+        # beyond what is already explained, by more than a few deploys' '/*' (20 paths, 10 cents): it fired at exactly the known 1,125,
+        # then at 1,126 for one deploy's half cent (31 Oct 2026). What it is for is a deploy clearing file by file again.
+        if paths >= 700 and paths > KNOWN_PATHS.get(month, 0) + (20 if month in KNOWN_PATHS else 0):
             out.append(('problem' if paths >= 1000 else 'idea', f"{paths:,} CloudFront cache-clear paths this month (1,000 are free, then $0.005 each): "
                         f"a deploy should clear '/*' once, not each file (web_deploy.sh)"))
     except Exception as e:

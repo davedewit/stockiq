@@ -1646,6 +1646,11 @@ check('Mexico trades 13:35-19:55 UTC on weekdays, in the Americas share', m.mark
 if HAS_AI_SELL:
     m.AI_SELL = False
     check('with AI_SELL off the setting is always off, also when a page sends it on', m.clean_settings({'aiSell': True, 'enabled': True}, 'x@y.z')['aiSell'] is False and m.clean_settings({}, 'x@y.z')['aiSell'] is False)
+    # 31 Oct 2026: with the early sales off, an old pause neither shows as "may sell early again" nor writes that line when it ends
+    _n = dt.datetime(2026, 11, 2, 8, 0)
+    _rec = {'state': {'aiSell': {'rest': m.iso(_n - m.timedelta(hours=1))}}, 'history': []}
+    _said = m.review_ai_sells(_rec, _n)
+    check('with AI_SELL off a pause that ends writes no "may sell early again"', not any('may sell early again' in e['text'] for e in _said) and 'rest' not in _rec['state']['aiSell'])
     m.AI_SELL = True
 if hasattr(m, 'words_and'):
     check('several names read "A, B and C"', (m.words_and(['A']), m.words_and(['A', 'B']), m.words_and(['A', 'B', 'C']), m.words_and([])) == ('A', 'A and B', 'A, B and C', ''))

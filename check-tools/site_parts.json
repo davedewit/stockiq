@@ -215,7 +215,14 @@
    "id": "reports-tab",
    "part": "Dashboard Reports tab: history, re-run, background run, auto-delete",
    "where": "dashboard.html Reports",
-   "last": null
+   "last": "2026-10-31",
+   "log": [
+    {
+     "at": "2026-10-31",
+     "kind": "question",
+     "found": "New question: Found (daily review, not fixed): reports auto-deleted after 3 days by default while the tracker measures 1-3 weeks; cleanup never really removes rows (no ttl); loadAutoDeleteSetting called twice. Proposed as Admin #18"
+    }
+   ]
   },
   {
    "id": "tracker",
@@ -577,6 +584,11 @@
      "at": "2026-10-31",
      "kind": "improved",
      "found": "Improved: Live home page measured (31 Oct 2026): 109 ms of script work and 3.6% of one CPU core in a minute of use, 1.4 MB memory, nothing asked for while not on screen; the market figures now flash on a real trade only, within a second of a refresh; a signed-in page load reads the whole report history (idea history-light)"
+    },
+    {
+     "at": "2026-10-31",
+     "kind": "question",
+     "found": "New question: Found (daily review): Practice tab ~2.7 s fine; Russell 2000 daily page 444 KB (full 1,829-row ranking: cut to top 100 + bottom 25); auth.js blocking in the home page head (defer only with the visitor test); up to 4 trial-function calls per dashboard load"
     }
    ]
   },
@@ -598,8 +610,19 @@
    "id": "ap-themes",
    "part": "Autopilot: the sector funds (the themes part) and the AI read of the headlines",
    "where": "practice-autopilot.js themesHtml; stockiq-ai-trader run_themes",
-   "last": null,
-   "log": []
+   "last": "2026-10-31",
+   "log": [
+    {
+     "at": "2026-10-31",
+     "kind": "fixed",
+     "found": "Fixed: Fault: AI calls scored against the S&P price of 19 Oct (spyNow), not of the call's day; XLK and SMH are much the same bet (question: correlation cap, replay first). Admin #16"
+    },
+    {
+     "at": "2026-10-31",
+     "kind": "question",
+     "found": "New question: Correction to the entry before (nothing was fixed, daily review is read-only): AI calls scored against the S&P price of 19 Oct (spyNow), not of the call's day, proposed as Admin #16; XLK and SMH much the same bet: replay a correlation cap"
+    }
+   ]
   },
   {
    "id": "pp-markets",
@@ -645,7 +668,14 @@
    "id": "notes",
    "part": "The notes themselves: do they match the code, is anything out of date, said twice, or superseded, are expired watch-list entries gone; the aim is shorter and truer, never losing a fact that matters",
    "where": ".kiro/steering/*.md (site-overview.md most), CLAUDE.md, check-tools/README.md, watch-list.md",
-   "last": null
+   "last": "2026-10-31",
+   "log": [
+    {
+     "at": "2026-10-31",
+     "kind": "improved",
+     "found": "Improved: Watch-list entry for the bill rule; the cost check's known overruns (KNOWN_OVER) are the one place for an explained month"
+    }
+   ]
   }
  ]
 }

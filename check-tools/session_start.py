@@ -134,7 +134,13 @@ if u:
         print(f"  StockIQ's running cost this month ${running:.2f} (" + ', '.join(f"{k} ${v:.2f}" for k, v in sorted(parts.items(), key=lambda x: -x[1]) if v >= 0.01) +
               f"); Cost Explorer ${ce:.2f}" + (f" (${known:.2f} of it the known charge of 17 Oct)" if known else ''))
         if ce > known + 0.02: finding(f"Cost Explorer has been charged ${ce - known:.2f} beyond the known amount: something asks it (aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventSource,AttributeValue=ce.amazonaws.com)")
-        if running >= 1: finding(f"StockIQ's running AWS cost this month is ${running:.2f}: the owner's limit is about $1 a month")
+        try:
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from cost_check import KNOWN_OVER
+        except Exception:
+            KNOWN_OVER = {}
+        over = KNOWN_OVER.get(now.strftime('%Y-%m'))
+        if over and running <= over['upTo']: print(f"  over $1 this month, known: {over['why']} (a finding again above ${over['upTo']:.2f})")
+        elif running >= 1: finding(f"StockIQ's running AWS cost this month is ${running:.2f}: the owner's limit is about $1 a month")
     except Exception as e:
         print(f'  bill by service not read ({type(e).__name__})')
         if (u.get('cost') or 0) >= 1: finding(f"the AWS bill this month is ${u['cost']:.2f}: the owner's limit is about $1 a month")

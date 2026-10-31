@@ -146,3 +146,12 @@ Rules:
   timing out in the daily update (it took 26 s); panel rows not updating when the list of items changes (a tab with new items).
 - **Undo:** website `git revert` the commits of 31 Oct evening; remove `'3-6'` from `SCREENERS` in update_screener_pages.py.
 - **Remove after:** 2026-11-14
+
+### 2026-10-31 · A month over $1.50 with a known, fixed cause no longer calls the owner in
+- **Changed:** `cost_check.py` (`KNOWN_OVER` per month with its reason and an upper amount; `KNOWN_READS`; tables flag from 10 cents a month;
+  cache clears flag 20 paths past the explained count); `session_start.py` and the Admin card (`admin-panel.js?v=56`, `plan.billKnown` from
+  `admin.py sync`) read `KNOWN_OVER`. `stockiq-ai-trader`: no "may sell early again" while `AI_SELL` is off; `stockiq-ai-chat`: 25 daily pages.
+- **Could break:** a real cost rise hidden (only up to `upTo`, only for the month named: check November reads under $1 with no entry);
+  the card wrong on 1 Nov while AWS still reports October (the month comes from the bill's own reading time, `costAt`).
+- **Undo:** `git revert` the commits of 31 Oct "Bill: a known overrun…"; functions: their `…_20261031.zip` in ~/VSCODE/backup/.
+- **Remove after:** 2026-11-14

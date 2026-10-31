@@ -38,7 +38,10 @@ suite, run on this Mac, asked it 253 times through the function's own bill-readi
 in CloudTrail's free event history; checked again on 19 Oct: no question from code since 16:53 UTC on 17 Oct, only five from the
 owner's own billing pages, which are free). The bill is read from the AWS budget instead, free: `aws budgets describe-budget
 --account-id 114366766218 --budget-name stockiq-monthly` (spend so far and AWS's forecast); calls from CloudWatch (free). The
-function's role has no Cost Explorer permission any more, and `ai_trader_test.py` refuses it. **A test must never reach a paid
+function's role has no Cost Explorer permission any more, and `ai_trader_test.py` refuses it. **A month over $1.50 whose cause is found and fixed is
+entered in `cost_check.py` `KNOWN_OVER` (the reason and an upper amount)**: the cost check, the opening check and the Admin card then
+note it instead of calling the owner in, and call him in again above that amount (31 Oct 2026, the owner: "seems suddenly alot to check
+on admin dashboard especially the bill?"; October was $1.57 from the two faults of 23-26 Oct). **A test must never reach a paid
 AWS service: stand it in.** To see who asked Cost Explorer: `aws cloudtrail lookup-events --lookup-attributes
 AttributeKey=EventSource,AttributeValue=ce.amazonaws.com` (free; the AWS website's own billing pages show as "AWS Internal"
 or the console, and are free). About $0.09 a month is the owner's other projects' buckets (Sydney region): not StockIQ's, leave them.
@@ -228,9 +231,10 @@ warns about; one change at a time, measured, with its experiment entry.
   **The gap to the S&P 500 split (30 Oct evening):** choosing shares about **+$1,230** (the account against "Same markets, no AI", the
   Practice tab's third card) and choosing markets about **-$2,220** (those markets against the S&P 500), of which the old coin trades about
   -$1,776: without them the account is about $790 ahead of the S&P 500. The Admin page's decision card shows the split; read it each week.
-- **The bill for October: $1.53 of StockIQ's running cost, just over the $1.50 limit** (the Admin card says "check in" for it until the
-  month turns): the auto-delete cleanup bug and the cache clears of 25-26 Oct (both fixed), and on 31 Oct a few cents of deploy cache
-  clears and about 240 dashboard-function calls from the owner refreshing pages. November should start under $1; read `cost_check.py`.
+- **The bill for October: $1.57 of StockIQ's running cost, 7 cents over the $1.50 limit**, explained and fixed (the auto-delete cleanup
+  bug and the per-file cache clears of 23-26 Oct): in `KNOWN_OVER`, so the Admin card says "No, all good" with the reason. The report
+  history's reads (about 400 units a dashboard load, idea `history-light`) are the largest running database cost. November should run
+  under $1: read `cost_check.py` in its first week; add no `KNOWN_OVER` entry for November without a fixed cause.
 - **Live lately** (the detail in section 13 and `watch-list.md`): 31 Oct evening, the market figures flash like a broker's screen (on a
   real trade only, in trade order, the changed part only, one colour a row; section 8), the panel's seven data functions agree with the
   live prices (`market_sources_check.py` weekly), the home page's index cards link their daily page and run the screener, a Russell 2000
@@ -5739,6 +5743,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   that changed, no flash without a new trade, soft tint, colour then figure); the seven market-data functions give the live function's
   figures (they took two daily bars); the price function sends each price's trade time and 4-6 decimals; `update_interval.sh` rewritten (it
   had changed nothing since 18 Oct) and timed in a browser on the home page, dashboard, a daily page and a stock page; Yahoo's stream ruled out.
+- **31 Oct 2026, late** (the owner: "suddenly alot to check on admin dashboard especially the bill?"): the card was red for October's
+  $1.57, explained and fixed days before: `KNOWN_OVER` (top of this file, the cost rule); the cost check's table and cache-clear rules in
+  dollars, not counts; Admin #17 done (no "may sell early again", the chat's 25 pages). Card: "No, all good". Idea `cost-by-feature`.
 - **31 Oct 2026** (short, from the owner's look at the Practice tab): the three cards read alike and the gaps moved to a line each under them
   (v80); the daily run waits 20 hours after the last (it had run at 15:33 and 00:02; `~/stockiq-daily.sh`, watch list); `stage_web.py` stages a
   file committed but not yet live; a wait loop that matched its own text (`pgrep -f deploy-to-s3.sh`) cost an hour: wait on a lock file or

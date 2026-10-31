@@ -134,7 +134,7 @@ def flags(name, text, selects, settings):
     for m in re.finditer(r'\b1 (such moves|holdings|trades|days|markets|coins|shares|checks)\b', text):
         out.append(f'{name}: "{m.group(0)}": singular')
     if settings and settings.get('aiSell') is not True:
-        for pat in ('AI model also reviews each holding', "AI model's latest review", 'AI review: keep', 'may sell it earlier than these rules'):
+        for pat in ('AI model also reviews each holding', "AI model's latest review", 'AI review: keep', 'may sell it earlier than these rules', 'may sell early again'):
             if pat in text: out.append(f'{name}: describes the AI review\'s early sales, which are switched off: "{pat}"')
     for label, n in selects:
         if n > 20: out.append(f'{name}: the menu "{label}" has {n} choices: offer fewer steps')

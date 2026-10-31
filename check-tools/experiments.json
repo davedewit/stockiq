@@ -549,6 +549,14 @@
    "measure": "time on the home page (GA4) before and after",
    "status": "idea",
    "added": "2026-10-31"
+  },
+  {
+   "id": "cost-by-feature",
+   "what": "The bill is read by AWS service (DynamoDB, S3, CloudFront), so a rise has to be traced by hand to the feature behind it (on 31 Oct: the dashboard's report history, about 400 read units a load). Tag each function's own cost from CloudWatch's free figures (calls x memory x time, table units by caller) into one line a feature on the Admin page's bill row: dashboard loads, the autopilot, the daily update, the market panel",
+   "angle": "cost",
+   "measure": "Whether the next cost finding names its feature at once, without a session tracing it",
+   "status": "idea",
+   "added": "2026-10-31"
   }
  ]
 }
