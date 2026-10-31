@@ -527,7 +527,13 @@ def hub(results, names, today, made, pages=frozenset(), before=None, before_date
     out.append('<main class="sp-wrap"><h1>Stock rankings today, market by market</h1>')
     before = before or {}
     since = f' (compared with {esc(before_date)})' if before_date else ''
-    out.append(f'<p style="margin:0 0 8px;font-size:1.02rem;">📅 <strong>Updated {esc(today)}</strong>, from each market\'s latest close{since}.</p>')
+    # say what the prices are (31 Oct 2026): the daily update runs about 17:00 UTC, when Asia and Europe have closed and the Americas
+    # are partway through their day; "latest close" was untrue for them then
+    t = datetime.now(timezone.utc)
+    americas_open = t.weekday() < 5 and (13, 30) <= (t.hour, t.minute) < (21, 0)
+    basis = ("Asia's and Europe's closing prices, and the Americas' prices partway through their trading day" if americas_open
+             else "each market's latest close")
+    out.append(f'<p style="margin:0 0 8px;font-size:1.02rem;">📅 <strong>Updated {esc(today)}</strong>, from {basis}{since}.</p>')
     out.append(f'<p class="sp-muted">Each index\'s shares ranked by StockIQ\'s trend score: '
                'what stands above its lowest price of the year, has risen over the year and holds above its long average. '
                'Open a market for its top 10, why each ranks there and the full list.</p>')
