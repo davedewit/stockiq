@@ -137,3 +137,12 @@ Rules:
   panel empty (a function failing on the new request: `market_sources_check.py` says which); more Lambda calls from the 15-minute stop.
 - **Undo:** website `git revert` the live-market.js commits of 31 Oct; the functions: their `~/VSCODE/backup/*_before_{time,decimals,reference}_20261031.zip`.
 - **Remove after:** 2026-11-14
+
+### 2026-10-31 · The home page's index cards: two links each; the Russell 2000 daily page
+- **Changed:** `index.html` cards (name to `screener-<market>.html`, "Run screener" to the analysis, nofollow), `styles.css` (`.ic-link`);
+  `update_screener_pages.py` adds the Russell 2000 (one more coordinator run a day, about 200 worker calls) and counts the markets;
+  `market-panel.js` v4 draws rows only when their items change; `live-market.js` keeps trade times 2 minutes across a refresh.
+- **Could break:** a card link to a page that is not there (the daily run failing for a market keeps yesterday's page); the Russell run
+  timing out in the daily update (it took 26 s); panel rows not updating when the list of items changes (a tab with new items).
+- **Undo:** website `git revert` the commits of 31 Oct evening; remove `'3-6'` from `SCREENERS` in update_screener_pages.py.
+- **Remove after:** 2026-11-14

@@ -580,8 +580,8 @@ git pull --rebase && git push
   `update_screener_pages.py`; `run=` in `js/analysis-core.js` when the screener's number differs from its section, as Mexico's 5 in the
   Americas' 6). Until 24 Oct 2026 it opened the Asia-Pacific section for every market outside the US and ran nothing; the owner found
   it. `site_audit.py` `run-links` checks every page's button nightly; the trial button beside it is for signed-out visitors only.
-- **Daily public screener pages (24 Oct 2026; #9 on the Admin page, the traffic plan's first build):** `screener-<market>.html` for 24
-  markets (the main index of each country, the Dow 30, NASDAQ 100, Euro Stoxx 50) and the hub `screeners-today.html`, written by
+- **Daily public screener pages (24 Oct 2026; #9 on the Admin page, the traffic plan's first build):** `screener-<market>.html` for 25
+  markets (the Russell 2000 since 31 Oct 2026) (the main index of each country, the Dow 30, NASDAQ 100, Euro Stoxx 50) and the hub `screeners-today.html`, written by
   `update_screener_pages.py` in the daily run from the coordinator on AWS (no account, nothing saved; about 25 calls a day, 30 s): the
   top 10 by the trend score with each share's breakdown, how the whole list stands, new in and out since the day before, the lowest 5 (the hub, `screeners-today.html`, gives each market's leader, its share rising and, since 31 Oct 2026, the change since the day before: ▲/▼ points and a "new" leader, from `screener_pages_state.json`),
   the full ranking folded, links to the stock pages. A market that fails keeps yesterday's page; fewer than half answering writes
@@ -5712,6 +5712,12 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     passes alone; `--recheck` now re-runs those checks by themselves. "Needs you" no longer reports short cash while the budget is
     automatic (`stockiq-ai-trader` `QEITzl1O…`, rollback `…_before_autopilot_needsauto_20261030.zip`). Cost: October about $1.47 (the
     cleanup bug and the cache clears, both fixed); November about $0.90 at the present rate, S3's requests the largest part (idea `s3-requests`).
+- **31 Oct 2026, evening:** the home page's four index cards are two links each (the name: that index's daily page; "Run screener":
+  the screener, `rel="nofollow"`), both underlined on hover; a **Russell 2000 daily page** (25 markets now; the writer counts them, it
+  had "24" typed in); a flash 0.6 s after a refresh for a new trade (trade times kept 2 minutes in the browser, `lmSeen`), the panel no
+  longer redraws rows whose items are unchanged (`market-panel.js` version 4: figures are live-market.js's to change), one colour a row
+  (XRP showed a green price beside a red %), the figure 0.35 s after the colour. Measured on the live home page: 109 ms of script work
+  and 3.6% of one CPU core in a minute of use, 1.4 MB of memory; a page not on screen asks for nothing.
 - **31 Oct 2026, later:** the market figures flash as described in section 8 (`live-market.js` version 9: trade order, only the part
   that changed, no flash without a new trade, soft tint, colour then figure); the seven market-data functions give the live function's
   figures (they took two daily bars); the price function sends each price's trade time and 4-6 decimals; `update_interval.sh` rewritten (it

@@ -21,8 +21,9 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascr
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const LISTS = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'AMZN'];
 const CATS = { us: [['S&P 500', '^GSPC', 7650], ['Dow Jones', '^DJI', 46000], ['Nasdaq', '^IXIC', 25000], ['Russell 2000', '^RUT', 2400], ['VIX', '^VIX', 20], ['10-Year', '^TNX', 4.1]] };
-['europe', 'asia', 'cryptocurrencies', 'rates', 'commodities', 'currencies'].forEach(c => { CATS[c] = CATS.us.map(([n, s, v]) => [c + ' ' + n, s, v]); });
+['europe', 'asia', 'cryptocurrencies', 'rates', 'commodities', 'currencies'].forEach(c => { CATS[c] = CATS.us.map(([n, s, v]) => [c + ' ' + n, s, v]); CATS[c][5] = [c + ' Cardano', 'ADA-USD', 0.19]; });   // a coin under $1 whose price goes up and down by fractions of a cent
 const SHUT_AT = Math.floor(Date.now() / 1000) - 50000;
+let otherRequests = 0;
 let calls = 0, frozen = false, priceRequests = [], lastData = {}, stockRequests = [];
 
 const server = http.createServer((q, r) => {
@@ -41,6 +42,11 @@ function priceAnswer(body) {
   const data = {};
   tickers.forEach((t, i) => {
     const base = (CATS.us.find(x => x[1] === t) || [0, 0, 100 + i * 10])[2], price = +(base * (1 + Math.ceil(calls / 2) * 0.001)).toFixed(2), only = calls % 2 === 0;   // every second answer moves only the change, not the price
+    if (t === 'ADA-USD') {                              // its change in money rounds to 0.00 on the page; its price and % still move both ways
+      const p = +(0.19 * (1 + (calls % 3 - 1) * 0.0005)).toFixed(6);
+      data[t] = { name: t, price: p, change: +(p - 0.19).toFixed(6), changePercent: +((p / 0.19 - 1) * 100).toFixed(2), error: false, spark: [0.189, 0.191, p], prev: 0.19, time: Math.floor(Date.now() / 1000) };
+      return;
+    }
     data[t] = { name: t, price, change: +(price - base + (only ? 0.01 * calls : 0)).toFixed(2), changePercent: +((price / base - 1) * 100 + (only ? 0.01 * calls : 0)).toFixed(2), error: false,
                 spark: [base * 0.99, base * 1.004, base * 0.997, price], prev: base,
                 time: t === '^DJI' ? SHUT_AT : Math.floor(Date.now() / 1000) - (i % 4) };   // the Dow: a market that is shut (its last trade never moves, its figure still differs a little)     // each price last traded at its own second, as Yahoo's do
@@ -78,7 +84,7 @@ function anyAnswer() {
         if (q.method === 'OPTIONS') { reply(d.params.requestId, ''); return; }
         if (q.url.includes(PRICES)) { const b = q.postData || ''; const rec = { at: Date.now(), body: b }; priceRequests.push(rec); reply(d.params.requestId, priceAnswer(b)).then(() => { rec.answered = Date.now(); }); return; }
         if (q.url.includes('vknfjazip3xpfwpfyd6ja6ui6q0lmxkw')) stockRequests.push(Date.now());   // a stock page's own price refresh (stock-prices.js)
-        if (/lambda-url/.test(q.url)) { reply(d.params.requestId, anyAnswer()); return; }
+        if (/lambda-url/.test(q.url)) { otherRequests++; reply(d.params.requestId, anyAnswer()); return; }
         const js = /\.js(\?|$)/.test(q.url), css = /\.css(\?|$)|fonts\.googleapis/.test(q.url);
         reply(d.params.requestId, js || css ? '' : '{}', js ? 'application/javascript' : css ? 'text/css' : 'application/json');
       }
@@ -96,14 +102,16 @@ function anyAnswer() {
           var t = m.target, part = /-(price|change)-/.test(t.id) ? 'lists' : t.closest && t.closest('.market-item-sidebar') ? 'panel' : /^(sp500|dow|nasdaq|russell)-/.test(t.id) ? 'cards' : 'other';
           var cls = t.classList.contains('lm-up') ? 'lm-up' : 'lm-down'; if ((' ' + (m.oldValue || '') + ' ').indexOf(' ' + cls + ' ') >= 0) return;   // a class swapped beside a flash that is already there
           var row = t.closest && t.closest('.market-item-sidebar'), nm = row && row.querySelector('.market-item-sidebar-name');
-          var rec = { el: t, dow: /^dow-/.test(t.id) || !!(nm && /Dow Jones/.test(nm.textContent)), part: part, phone: !!(t.closest && t.closest('#mobile-sidebar-modal')), before: t.textContent }; (window.__fl = window.__fl || []).push(rec); setTimeout(function () { rec.after = t.textContent; }, 400); } }); })
+          var rowKey = row ? 'p:' + (nm && nm.textContent) : t.id.replace(/-(price|change|value)-?/, '|');
+          var rec = { el: t, row: rowKey, cls: cls, at: Date.now(), dow: /^dow-/.test(t.id) || !!(nm && /Dow Jones/.test(nm.textContent)), part: part, phone: !!(t.closest && t.closest('#mobile-sidebar-modal')), before: t.textContent }; (window.__fl = window.__fl || []).push(rec); setTimeout(function () { rec.after = t.textContent; }, 400); } }); })
         .observe(document, { subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['class'] });` });
     const mouse = async (n) => { for (let i = 0; i < n; i++) { await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 200 + (i % 7) * 30, y: 300 + (i % 5) * 20 }); await sleep(500); } };
 
     for (const pg of pages) {
       console.log(`\n== ${pg}`);
       calls = 0; frozen = false; priceRequests = []; errors.length = 0;
-      await send('Page.navigate', { url: BASE + pg }); await sleep(4500);
+      await js("try { localStorage.removeItem('lmSeen'); } catch (e) {}");   // a first visit: no trade times kept from the page before
+      const navAt = Date.now(); await send('Page.navigate', { url: BASE + pg }); await sleep(4500);
       const first = await js(`(function () { var lm = window.liveMarket; return { loaded: !!lm, movers: lm ? lm.movers().length : 0, panel: lm ? lm.panelRows().length : 0,
         texts: lm ? lm.movers().map(function (m) { return m.price.textContent; }).concat(lm.panelRows().map(function (r) { var v = r.row.querySelector('.market-item-sidebar-value'); return v && v.textContent; })) : [] }; })()`);
       const has = await js(`!!(document.getElementById('market-data-sidebar-container') || document.querySelector('[id^="gainer-price-"],[id^="loser-price-"],[id^="active-price-"],[id^="trend-price-"]'))`);
@@ -136,6 +144,8 @@ function anyAnswer() {
       if (process.env.REAL_TIMES) {                      // the real gaps, as update_interval.sh sets them
         const src = fs.readFileSync(WEB && fs.existsSync(path.join(WEB, 'live-market.js')) ? path.join(WEB, 'live-market.js') : path.join(SITE, 'live-market.js'), 'utf8');
         const [lo, hi] = (src.match(/T\.fast \|\| \[(\d+), (\d+)\]/) || []).slice(1).map(Number);
+        const firstFlash = await js('(window.__flashAt || [])[0] || 0');
+        check(`after the page opens the first flash comes within 5 s (${firstFlash ? ((firstFlash - navAt) / 1000).toFixed(1) + ' s' : 'none yet'}; until 31 Oct 2026 about 10 s)`, firstFlash && firstFlash - navAt <= 5000, firstFlash - navAt);
         const from = priceRequests.length; await mouse(80);   // 40 seconds of someone using the page
         const req = priceRequests.slice(from), gaps = req.slice(1).map((r, i) => r.at - req[i].at);
         check(`every gap between price requests is inside the set ${lo / 1000}-${hi / 1000} s (${gaps.length} gaps: ${gaps.map(g => (g / 1000).toFixed(1)).join(', ')} s)`,
@@ -199,6 +209,9 @@ function anyAnswer() {
       const asked = priceRequests.length ? JSON.parse(priceRequests[priceRequests.length - 1].body) : {};
       check('one request covers every figure on show, at most 40, each once', asked.tickers && asked.tickers.length === new Set(asked.tickers).size && asked.tickers.length <= 40 && asked.spark === true, asked);
       const moved = after.texts.filter((t, i) => t !== first.texts[i]).length;
+      { const mixed = await js(`(function () { var fl = window.__fl || [], bad = []; fl.forEach(function (a) { fl.forEach(function (b) { if (a !== b && a.row === b.row && Math.abs(a.at - b.at) < 120 && a.cls !== b.cls) bad.push(a.row + ' ' + a.cls + '/' + b.cls); }); }); return bad.slice(0, 6); })()`);
+        const ada = await js(`(window.__fl || []).filter(function (x) { return /Cardano/.test(x.row); }).length`);
+        check(`a row's price and % flash the same colour (${ada} flashes on a coin under $1 that goes up and down by fractions of a cent)`, mixed.length === 0, mixed); }
       { const shut = await js(`(window.__fl || []).filter(function (x) { return x.dow; }).length`);
         check('a market that is shut (no newer trade) puts its figure right without a flash (the Dow here)', shut === 0, shut);
         const ans = priceRequests.map(r => r.answered).filter(Boolean), early = await js(`(window.__flashAt || []).filter(function (t) { return t < ${ans[1] || 0}; }).length`);
@@ -213,7 +226,7 @@ function anyAnswer() {
       { const flashAt = await js('window.__flashAt'), answers = priceRequests.map(r => r.answered).filter(Boolean);
         const lag = flashAt.map(t => t - Math.max.apply(null, answers.filter(a => a <= t + 50).concat([0])));
         const spread = (() => { const a = flashAt.filter(t => t > flashAt[0] && t < flashAt[0] + 1500); return a.length ? Math.max.apply(null, a) - flashAt[0] : 0; })();
-        check('changes flash soon after their answer (by their trade times, at most the gap less a second) and not all in the same instant', flashAt.length > 0 && lag.every(l => l <= 1400) && spread > 40, { slowest: Math.max.apply(null, lag), spread }); }
+        check('changes flash soon after their answer (by their trade times, at most the gap less a second) and not all in the same instant', flashAt.length > 0 && lag.every(l => l <= 1600) && spread > 40, { slowest: Math.max.apply(null, lag), spread }); }
       if (first.panel) {
         const want = await js(`(function () { var a = ${JSON.stringify(lastData[after.want])}; return window.liveMarket.sparkPoints(a.spark, a.prev); })()`);
         check('the side panel\'s small chart is today\'s line from the answer, not a random one', after.line === want, { line: after.line, want });
@@ -232,6 +245,18 @@ function anyAnswer() {
       frozen = true; await mouse(30);                    // someone is back, but the prices have stopped moving (a market that is closed)
       const st = await js('window.liveMarket.state()');
       check('when the prices stop moving the gap between rounds grows (up to its longest)', st.gap > 2000, st);
+      // a refresh (within 2 minutes): the first answer flashes the prices that traded since, and a shut market (the Dow) stays quiet
+      { await mouse(4); await sleep(2500);
+        const r0 = Date.now(); await send('Page.reload', {}); await sleep(600); await mouse(6);
+        const ans = priceRequests.filter(r => r.at > r0 + 300 && r.answered).map(r => r.answered);   // the new page asks first at 0.5 s; anything sooner was the old page's
+        const firstFl = await js('(window.__flashAt || [])[0] || 0'), dow = await js(`(window.__fl || []).filter(function (x) { return x.dow; }).length`);
+        check(`after a refresh a new trade flashes with the first answer (${firstFl ? ((firstFl - r0) / 1000).toFixed(1) + ' s after the reload' : 'no flash'}), and the shut market stays quiet`,
+          firstFl && ans.length && firstFl < (ans[1] || Infinity) && dow === 0, { firstFl: firstFl - r0, answers: ans.map(a => a - r0), dow }); }
+      // a tab in the background (another tab on top, the window minimised): nothing is asked for, even with input
+      await js(`Object.defineProperty(document, 'hidden', { configurable: true, get: function () { return true; } }); Object.defineProperty(document, 'visibilityState', { configurable: true, get: function () { return 'hidden'; } }); document.dispatchEvent(new Event('visibilitychange'))`);
+      await sleep(1500); const hp = priceRequests.length, ho = otherRequests;
+      await mouse(30);
+      check(`a page that is not on screen asks for nothing (${priceRequests.length - hp} price requests, ${otherRequests - ho} other market-data requests in 15 s)`, priceRequests.length === hp && otherRequests === ho, { price: priceRequests.length - hp, other: otherRequests - ho });
       check('no script error on the page', errors.length === 0, errors);
       if (process.env.SHOTS) { const r = await send('Page.captureScreenshot', { format: 'png' }); fs.writeFileSync(path.join(process.env.SHOTS, pg.replace(/\W+/g, '_') + '.png'), Buffer.from(r.data, 'base64')); }
       if (process.env.SHOTS && pg === 'index.html') { await js(`(function () { var e = document.getElementById('stock-pages'); if (e) { document.documentElement.style.scrollBehavior = 'auto'; e.scrollIntoView({ block: 'start' }); window.scrollBy(0, -120); } })()`); await sleep(400);

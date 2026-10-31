@@ -34,6 +34,7 @@ SCREENERS = {
     '3-8': ('dow-jones-30', 'Dow Jones 30', 'US', 'the 30 large US companies of the Dow Jones Industrial Average'),
     '3-7': ('nasdaq-100', 'NASDAQ 100', 'US', 'the 100 largest non-financial companies listed on the Nasdaq'),
     '3-3': ('sp-500', 'S&P 500', 'US', 'the 500 large US companies of the S&P 500'),
+    '3-6': ('russell-2000', 'Russell 2000', 'US', 'about 1,800 smaller US companies of the Russell 2000 (the list is not refreshed by its provider: a few members have since changed)'),
     '5-tsx60': ('tsx-60', 'TSX 60', 'Americas', 'the 60 largest companies on the Toronto Stock Exchange'),
     '5-bovespa': ('bovespa', 'Bovespa (Ibovespa)', 'Americas', "the main index of Brazil's São Paulo exchange (B3)"),
     '5-ipc': ('mexico-ipc', 'Mexico IPC', 'Americas', "the main index of the Mexican Stock Exchange"),
@@ -322,7 +323,7 @@ PANEL = """
             setTimeout(function () { overlay.style.display = 'none'; modal.style.display = 'none'; emptyMobileSidebar(); }, 300);
         }
     </script>
-    <script src="market-panel.js?v=2"></script>
+    <script src="market-panel.js?v=3"></script>
     <script src="mobile-sidebar.js?v=2"></script>
     <!-- MARKET_PANEL_END -->
 """
@@ -500,8 +501,8 @@ def page_for(key, data, names, pages, prev, today, made):
 
 def hub(results, names, today, made, pages=frozenset(), before=None, before_date=None):
     url = f'{SITE}screeners-today.html'
-    title = "Today's stock rankings for 24 markets: top 10 by trend | StockIQ"
-    desc = ('Every trading day, the shares of 24 major indexes (S&P 500, NASDAQ 100, FTSE 100, DAX 40, ASX 200, Nikkei 225 and '
+    title = f"Today's stock rankings for {len(SCREENERS)} markets: top 10 by trend | StockIQ"
+    desc = (f'Every trading day, the shares of {len(SCREENERS)} major indexes (S&P 500, NASDAQ 100, FTSE 100, DAX 40, ASX 200, Nikkei 225 and '
             'more) ranked by trend, with the leader of each. General information, not advice.')
     ld = {'@context': 'https://schema.org', '@type': 'CollectionPage', 'name': title, 'url': url, 'description': desc, 'dateModified': made}
     out = [HEAD.format(title=esc(title), desc=esc(desc), url=url, ld=json.dumps(ld))]
@@ -624,7 +625,7 @@ def home_section(summary, events, now, today, names=None, overall=None):
 <section id="market-week" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px 22px; margin: 30px 0; text-align: left;">
 <style>#market-week h2{{margin:0 0 4px;font-size:1.4rem;color:var(--text-primary);}}#market-week h3{{font-size:1rem;margin:14px 0 8px;color:var(--text-primary);}}#market-week h4{{font-size:.85rem;margin:10px 0 6px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;}}#market-week .mw-grid{{display:grid;grid-template-columns:1fr 1fr;gap:10px 30px;}}#market-week .mw-list{{list-style:none;padding:0;margin:0;}}#market-week .mw-list li{{padding:5px 0;border-bottom:1px solid var(--border-color);color:var(--text-primary);font-size:.92rem;line-height:1.45;}}#market-week a{{color:#3b82f6;text-decoration:none;}}#market-week .sp-muted{{color:var(--text-secondary);}}#market-week time{{color:var(--text-secondary);}}@media(max-width:700px){{#market-week .mw-grid{{grid-template-columns:1fr;}}}}</style>
 <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;"><h2>This week in the markets</h2><a href="screeners-today.html" style="display:inline-block;background:#007bff;color:#fff;padding:9px 16px;border-radius:8px;font-weight:700;font-size:.92rem;">See every market&rsquo;s top 10 today &rarr;</a></div>
-<p class="sp-muted" style="margin:0 0 6px;font-size:.88rem;">Updated {esc(today)}: the scheduled announcements that can move whole markets, and where the trend stands in 24 markets today. General information, not advice.</p>
+<p class="sp-muted" style="margin:0 0 6px;font-size:.88rem;">Updated {esc(today)}: the scheduled announcements that can move whole markets, and where the trend stands in {len(SCREENERS)} markets today. General information, not advice.</p>
 <div class="mw-grid"><div>{cal}</div><div><h3>Today across the markets</h3>{breadth}{strong}{weak}</div></div>
 <script>(function(){{try{{document.querySelectorAll('#market-week time[datetime]').forEach(function(t){{var d=new Date(t.getAttribute('datetime'));if(!isNaN(d))t.textContent=d.toLocaleString(undefined,{{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}});}});}}catch(e){{}}}})();</script>
 </section>
