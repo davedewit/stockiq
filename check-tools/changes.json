@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-31",
+   "what": "news.html titled 'Market and Stock News' again (the restore of 30 Oct had brought back 'Free Stock Analysis Guide & Investment Blog'); a nightly check keeps it",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-31",
    "what": "Bing and Yandex were never told about new pages: the key file that proves the site is ours never existed, and the daily email's filter hid the refusal. New key, file on the site, the email now shows a refusal, and a nightly check that the file is there",
    "found": "session"
   },
@@ -297,11 +302,6 @@
   {
    "at": "2026-10-25",
    "what": "The daily email now says 'Nothing needs you' or lists exactly what failed (with the error line), then what the run did; the day's log is kept so a session can read it without you copying anything",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-25",
-   "what": "The daily site check now warns when the news stops updating (newest article over 2 days old), and the daily email names it",
    "found": "owner"
   }
  ]

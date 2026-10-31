@@ -9,6 +9,7 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
   duplicate-code  the same function defined in several pages or scripts (the market panel was three copies)
   run-links       a daily screener page whose run button opens the wrong section or runs no screener
   late-layout     a page whose own padding or width is set by a style inside the body (it moves after the first draw)
+  page-title      news.html and the daily hub titled for what they are
   indexnow-key    the key file the search engines' ping names is on the site
   time-claims     a "N days in the top 10" larger than the trading days since the daily pages began
   hub-compare     the daily hub's "Since last update" all "no change" (comparing a session with itself)
@@ -295,6 +296,13 @@ def main():
                  'Bing and Yandex refuse every ping (and block the key)', 'notify_search_engines.py')
     except Exception as e:
         find('indexnow-key', 'idea', f'the IndexNow key could not be checked ({type(e).__name__})', 'notify_search_engines.py')
+
+    # page-title: a page's title says what the page is (31 Oct 2026: news.html was "Free Stock Analysis Guide & Investment Blog" again
+    # after its restore of 30 Oct; Google showed it 133,000 times under that title)
+    for page, word in (('news.html', 'News'), ('screeners-today.html', 'ranking')):
+        tm = re.search(r'<title>([^<]*)</title>', src.get(page, '') or '')
+        if word and tm and word.lower() not in tm.group(1).lower():
+            find('page-title', 'problem', f'{page} is titled "{tm.group(1)}": its title should say what it is ({word})', page)
 
     # seo-basics
     titles = {}
