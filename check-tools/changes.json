@@ -3,6 +3,16 @@
  "changes": [
   {
    "at": "2026-10-31",
+   "what": "Market figures: a new trade flashes within a second of a refresh, a row's price and % always flash the same colour, the figure changes a moment after the colour",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-31",
+   "what": "Home page index cards: the name opens that index's daily top-10 page, Run screener runs the screener; both underline on hover; a new Russell 2000 daily page",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-31",
    "what": "Market figures flash like a broker's screen: only on a new trade, in the order trades happened, only the part that changed, a softer colour first then the figure; closed markets no longer flash on refresh; updates keep going 5 min while you watch without moving",
    "found": "owner"
   },
@@ -292,16 +302,6 @@
   {
    "at": "2026-10-25",
    "what": "On a phone, a visitor not signed in could run a second free analysis after the phone's mobile-data address changed (each new address looked like a new visitor). The browser now remembers the day's free use too, so it is one a day as on desktop",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Deleted the three made-up test accounts from the user table",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "The 'someone@example.com' sign-up in the daily email was a test of ours, not a person; the opening check now flags made-up accounts",
    "found": "owner"
   }
  ]
