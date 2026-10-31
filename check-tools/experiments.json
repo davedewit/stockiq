@@ -504,7 +504,7 @@
   },
   {
    "id": "s3-requests",
-   "what": "Find what makes S3's requests: about 2 US cents a day all month (storage is only about 0.5 GB), the largest running cost left once October's one-off charges are gone; turn on the free S3 storage-lens or a day of CloudTrail data events only if they are free, otherwise read which functions call S3 and how often",
+   "what": "Find what makes S3's requests: about 2 US cents a day all month (storage is only about 0.5 GB), the largest running cost left once October's one-off charges are gone; turn on the free S3 storage-lens or a day of CloudTrail data events only if they are free, otherwise read which functions call S3 and how often Held for later (the owner, 31 Oct 2026): only if the bill nears $1.50, and never at the cost of a feature.",
    "angle": "cost",
    "measure": "S3's daily charge in CloudWatch's billing figures before and after (cost_check.py), target under 1 cent a day",
    "status": "idea",
@@ -512,7 +512,7 @@
   },
   {
    "id": "history-light",
-   "what": "The home page, dashboard and bell ask stockiq-dashboard for the whole report history with every report's full text (about 400 read units a signed-in page load; 240 loads on 31 Oct 2026 read 97,000 units). Return a list without the texts (a projection), and the text only when a report is opened",
+   "what": "The home page, dashboard and bell ask stockiq-dashboard for the whole report history with every report's full text (about 400 read units a signed-in page load; 240 loads on 31 Oct 2026 read 97,000 units). Return a list without the texts (a projection), and the text only when a report is opened Held for later (the owner, 31 Oct 2026): only if the bill nears $1.50, and never at the cost of a feature.",
    "angle": "cost",
    "measure": "DynamoDB read units of stockiq-dashboard-analysis-history per call of stockiq-dashboard (CloudWatch, free): from about 400 to under 20",
    "status": "idea",

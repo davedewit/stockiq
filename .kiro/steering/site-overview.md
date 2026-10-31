@@ -28,7 +28,7 @@ mirrors, the site's key files against the local ones, both repositories, and end
 every finding** before or alongside whatever the owner asks; add a check to the script whenever a problem is found that it
 missed.
 
-**THE COST RULE (the owner, 17 Oct 2026): AWS under $1 a month, $1.50 at most in a heavy month.** An AWS budget, `stockiq-monthly`
+**THE COST RULE (the owner, 17 Oct 2026; restated 31 Oct): AWS under $1.50 most months (about $1 is the aim).** Never give up site features to save cost while the bill is that low: savings (ideas `history-light`, `s3-requests`, `cost-by-feature`) are for when it nears the limit, or come free with other work. A new running cost needs a reason he would accept, said to him with its amount. An AWS budget, `stockiq-monthly`
 ($1.50), emails him at $1 spent, at $1.50 spent and when $1.50 is forecast; the Admin page shows the bill. What costs is not stored
 data (every StockIQ table together was about 7 MB on 17 Oct, far inside the free 25 GB) but **requests**: database reads ($0.19 of
 $0.56 that month, mostly the autopilot panel re-reading the record every minute while the dashboard was open: now every 5
@@ -305,7 +305,7 @@ warns about; one change at a time, measured, with its experiment entry.
   Today the Mac's daily run builds them, so a day with the Mac off is missed; the home section must then go into its own file so the
   Mac's upload of index.html and the AWS run cannot overwrite each other. With it, the hub also shows the week's big announcements (the owner likes
   the hub as the one place for everything daily).
-  (1b) Idea `history-light` (cost): a signed-in page load reads the whole report history with every text (about 400 units); a list
+  (1b) Idea `history-light` (cost; only if the bill nears $1.50, the owner 31 Oct): a signed-in page load reads the whole report history with every text (about 400 units); a list
   without the texts. Small now, grows with every signed-in visitor.
   (2) **Store his autopilot record compressed**, as `_brain` is (about 250 KB now, the largest running write).
   (3) A small one from him: a "View report" link on the "Analysis complete" note after a background analysis.
