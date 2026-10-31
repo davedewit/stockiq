@@ -173,7 +173,7 @@ improvements and wait for his yes. The routine, every session:
    refresh and with its market shut?* (31 Oct 2026: watching the home page for an afternoon, the owner found wrong figures on every page
    load, closed markets flashing, two colours in one row, updates stopping after 90 s and a settings script that did nothing; the walk
    now includes 3 minutes of watching a live page without touching it, two refreshes, and the same with its market shut) *Is that number right, and what does it
-   count?* (2,359 was places, not shares) *Can I click it, and where does it take me?* (shares with no stock page were dead text) *Does
+   count? Would it still be true on a weekend, a holiday, its first day, after a re-run?* (2,359 was places, not shares; on 31 Oct the hub said "no change" everywhere at a weekend and "28 days" on week-old pages: the daily review now doubts three numbers a day, step 3c of `daily_review_prompt.md`, and `site_audit.py` has `hub-compare` and `time-claims`) *Can I click it, and where does it take me?* (shares with no stock page were dead text) *Does
    what I opened stay open, and does a fresh page start from the default?* *Does everything I can see still say what is true after this
    week's changes?* (the chat said the autopilot could not know about the Fed) *Would a visitor see that the site is alive today?*
    *What would make them sign up, and what is clutter to take away?* *Does the autopilot know what is happening in the world?* Write
@@ -5745,7 +5745,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   had changed nothing since 18 Oct) and timed in a browser on the home page, dashboard, a daily page and a stock page; Yahoo's stream ruled out.
 - **31 Oct 2026, night** (the owner: the hub's "Since last update" said "no change" everywhere): a weekend run and the afternoon's
   run for the Russell 2000 alone had moved every market's comparison onto itself, and "days in the top 10" counted runs (28 for a page
-  6 sessions old). Each market now keeps its last trading session (`session_sig`); the state was put back to Thursday's figures from the
+  6 sessions old). The owner: would a session have found it? Honestly not soon: the checks test that figures are there, not that
+  they are true. So the daily review by Claude now doubts three numbers a day (recomputes them, asks how each could be wrong on an edge
+  day), the part reviews have the lens "Doubt every number", and `time-claims` checks counts of days. Each market now keeps its last trading session (`session_sig`); the state was put back to Thursday's figures from the
   backup of 29 Oct (streaks capped at 5 then); live with the daily update of 1 Nov. `hub-compare` in the site check.
 - **31 Oct 2026, late** (the owner: "suddenly alot to check on admin dashboard especially the bill?"): the card was red for October's
   $1.57, explained and fixed days before: `KNOWN_OVER` (top of this file, the cost rule); the cost check's table and cache-clear rules in

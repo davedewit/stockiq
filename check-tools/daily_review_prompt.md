@@ -22,6 +22,16 @@ Do this, in order (about 30 minutes at most):
    (`website/faq.html`, `website/about.html`, `website/index.html`, the AI chat's prompt and `DASHBOARD_GUIDE` in
    `lambda-sync/stockiq-ai-chat/lambda_function.py`, the dashboard's own wording) and list each place that still says the old thing, or
    says nothing where a visitor would ask. A place that contradicts the site is a fault: report it first.
+3c. Doubt three numbers (31 Oct 2026, the owner, after finding the daily hub's "Since last update" at "no change" for every market
+   on a weekend and "28 days in the top 10" on pages a week old: "would you have found this problem without me?"). The checks
+   test that figures are there and well formed; you test that they are true. Each day take three figures a visitor sees, a
+   different kind each time (an arrow or "since" figure on `website/screeners-today.html` or a daily `screener-*.html` page, a
+   count or date on the home page, a stock page's snapshot, a figure on the Admin page or the practice tab as `clarity_check.py`
+   draws it), and for each: (a) recompute it from where it comes from (the script that writes it and its state, e.g.
+   `screener_pages_state.json`; the day before's copy in the newest `~/VSCODE/backup/website_backup_*/`), and (b) ask how it could be
+   wrong: on a weekend or a holiday, on its first day, after a second run the same day or a run for only part of it, with one market
+   missing, across a change of month. Today's date and weekday matter: say what they are. A figure that is plausible but untrue is
+   a fault: report it first, and say which scripted check would catch that kind of fault every day.
 4. Look at what `site_audit.py` found and say, for each problem, what the fix would be.
 5. Write your report to `check-tools/reviews/daily/<today's date, YYYY-MM-DD>.md`: what you looked at; each finding with its
    evidence (file and line, or the figure), how sure you are, and the change you would make; the faults first, then what would

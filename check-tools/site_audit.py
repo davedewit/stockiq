@@ -9,6 +9,7 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
   duplicate-code  the same function defined in several pages or scripts (the market panel was three copies)
   run-links       a daily screener page whose run button opens the wrong section or runs no screener
   late-layout     a page whose own padding or width is set by a style inside the body (it moves after the first draw)
+  time-claims     a "N days in the top 10" larger than the trading days since the daily pages began
   hub-compare     the daily hub's "Since last update" all "no change" (comparing a session with itself)
   cost            AWS: a service's spend jumping, the month over the owner's $1, Cost Explorer charged, a table or Lambda calls jumping (cost_check.py, free)
   plan-claims     a plan card on the dashboard ticks a feature that is not on the list of what exists (unbuilt ones go under "Coming soon")
@@ -267,6 +268,21 @@ def main():
         if len(moves) >= 10 and all(m == 'no change' for m in moves):
             find('hub-compare', 'problem', f'the daily hub shows "no change" for all {len(moves)} markets: it is comparing a session with itself '
                  '(update_screener_pages.py, session_sig / _hubBase)', 'screeners-today.html')
+
+    # time-claims: a count of days cannot be older than what it counts (31 Oct 2026: "28 days in the top 10" on daily pages that
+    # began with the session of 23 Oct 2026, because the count went up with every run). Weekdays since then are the most it can be.
+    try:
+        import datetime as _d, glob as _g
+        first, today_d = _d.date(2026, 10, 23), _d.datetime.utcnow().date()
+        most = sum(1 for i in range((today_d - first).days + 1) if (first + _d.timedelta(i)).weekday() < 5)
+        where_d = STAGE if STAGE and _g.glob(os.path.join(STAGE, 'screener-*.html')) else WEB      # a staged copy first, as elsewhere
+        worst = max((int(n) for f in _g.glob(os.path.join(where_d, 'screener-*.html'))
+                     for n in re.findall(r'(\d+) days in the top 10', open(f, encoding='utf-8').read())), default=0)
+        if worst > most:
+            find('time-claims', 'problem', f'a daily page says "{worst} days in the top 10" but only {most} trading days have passed since the '
+                 'pages began on 23 Oct 2026 (update_screener_pages.py counts runs, not sessions)', 'screener-*.html')
+    except Exception as e:
+        find('time-claims', 'idea', f'the days-in-the-top-10 counts could not be checked ({type(e).__name__})', 'screener-*.html')
 
     # seo-basics
     titles = {}
