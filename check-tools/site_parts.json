@@ -571,8 +571,14 @@
    "id": "speed",
    "part": "How fast the main pages and the dashboard tabs load and update",
    "where": "live_practice_check.js TIME=1; page weight in site_audit.py",
-   "last": null,
-   "log": []
+   "last": "2026-10-31",
+   "log": [
+    {
+     "at": "2026-10-31",
+     "kind": "improved",
+     "found": "Improved: Live home page measured (31 Oct 2026): 109 ms of script work and 3.6% of one CPU core in a minute of use, 1.4 MB memory, nothing asked for while not on screen; the market figures now flash on a real trade only, within a second of a refresh; a signed-in page load reads the whole report history (idea history-light)"
+    }
+   ]
   },
   {
    "id": "security",

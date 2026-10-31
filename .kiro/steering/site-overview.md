@@ -205,7 +205,7 @@ about what the "Still never" list keeps for him (real money, costs above the rul
 settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
 warns about; one change at a time, measured, with its experiment entry.
 
-**WHERE THINGS STAND (rewrite this block at the end of every session; last: 31 Oct 2026, early, after the weekly session of 30 Oct; the owner away a week)**
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 31 Oct 2026, evening, after a session on the market figures; the weekly session is next)**
 - **The stance (the owner, 30 Oct 2026):** "we are just going to give this a shot ... with future AI updates over the next 6 or so months
   we will continue to find improvements - more profit". Profit first; one tested change at a time; each newer AI model looks again at what
   failed; a plain verdict at month 3 (12 Jan 2027). Visitors and sign-ups stay the priority for the site itself.
@@ -219,7 +219,13 @@ warns about; one change at a time, measured, with its experiment entry.
   **The gap to the S&P 500 split (30 Oct evening):** choosing shares about **+$1,230** (the account against "Same markets, no AI", the
   Practice tab's third card) and choosing markets about **-$2,220** (those markets against the S&P 500), of which the old coin trades about
   -$1,776: without them the account is about $790 ahead of the S&P 500. The Admin page's decision card shows the split; read it each week.
-- **Live lately** (the detail in section 13 and `watch-list.md`): 31 Oct, the Practice tab's top made plain (three cards alike, then a line each
+- **The bill for October: $1.53 of StockIQ's running cost, just over the $1.50 limit** (the Admin card says "check in" for it until the
+  month turns): the auto-delete cleanup bug and the cache clears of 25-26 Oct (both fixed), and on 31 Oct a few cents of deploy cache
+  clears and about 240 dashboard-function calls from the owner refreshing pages. November should start under $1; read `cost_check.py`.
+- **Live lately** (the detail in section 13 and `watch-list.md`): 31 Oct evening, the market figures flash like a broker's screen (on a
+  real trade only, in trade order, the changed part only, one colour a row; section 8), the panel's seven data functions agree with the
+  live prices (`market_sources_check.py` weekly), the home page's index cards link their daily page and run the screener, a Russell 2000
+  daily page (25 markets), `update_interval.sh` works again; 31 Oct, the Practice tab's top made plain (three cards alike, then a line each
   "Your account against the same markets, no AI / the S&P 500: ▼ $X behind", then cash and holdings; no coin note; v80), "Needs you" quiet about
   cash while the budget is automatic, the daily run 20 hours apart, the full check's cost item on the owner's rule ($1.50), `--recheck` for the
   panel and header checks, two tests kept off the live sign-up functions; 30 Oct evening, the Practice portfolio against each buy's own market
@@ -286,6 +292,8 @@ warns about; one change at a time, measured, with its experiment entry.
   Today the Mac's daily run builds them, so a day with the Mac off is missed; the home section must then go into its own file so the
   Mac's upload of index.html and the AWS run cannot overwrite each other. With it, the hub also shows the week's big announcements (the owner likes
   the hub as the one place for everything daily).
+  (1b) Idea `history-light` (cost): a signed-in page load reads the whole report history with every text (about 400 units); a list
+  without the texts. Small now, grows with every signed-in visitor.
   (2) **Store his autopilot record compressed**, as `_brain` is (about 250 KB now, the largest running write).
   (3) A small one from him: a "View report" link on the "Analysis complete" note after a background analysis.
   (4) **Built once, next:** copies 106 lines: mostly the bell's code in index, blog and news (merge with a real signed-in browser to

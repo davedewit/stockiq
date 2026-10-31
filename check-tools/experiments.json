@@ -509,6 +509,14 @@
    "measure": "S3's daily charge in CloudWatch's billing figures before and after (cost_check.py), target under 1 cent a day",
    "status": "idea",
    "added": "2026-10-30"
+  },
+  {
+   "id": "history-light",
+   "what": "The home page, dashboard and bell ask stockiq-dashboard for the whole report history with every report's full text (about 400 read units a signed-in page load; 240 loads on 31 Oct 2026 read 97,000 units). Return a list without the texts (a projection), and the text only when a report is opened",
+   "angle": "cost",
+   "measure": "DynamoDB read units of stockiq-dashboard-analysis-history per call of stockiq-dashboard (CloudWatch, free): from about 400 to under 20",
+   "status": "idea",
+   "added": "2026-10-31"
   }
  ]
 }
