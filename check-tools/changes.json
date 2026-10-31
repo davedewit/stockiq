@@ -2,6 +2,26 @@
  "about": "What the sessions changed on the site, newest first, in plain words for the owner's Admin page ('What changed lately'). Add with: python3 check-tools/admin.py change \"<what>\". Nothing private: both repositories are public.",
  "changes": [
   {
+   "at": "2026-10-31",
+   "what": "Market figures flash like a broker's screen: only on a new trade, in the order trades happened, only the part that changed, a softer colour first then the figure; closed markets no longer flash on refresh; updates keep going 5 min while you watch without moving",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-31",
+   "what": "Market panel figures were wrong for a few seconds on every page load (Bitcoin -0.83% for -0.09%, XRP up for down, Brent oil $117.64 for $113.43): its seven data functions now work the day's change out as the live updates do",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-31",
+   "what": "Market figures on the home page, dashboard and daily pages now flash the moment the new price arrives (they waited up to 2.5 s); update_interval.sh tested on every kind of page",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-31",
+   "what": "update_interval.sh works again: it shows and changes how often prices refresh (it had silently changed nothing since 18 Oct)",
+   "found": "owner"
+  },
+  {
    "at": "2026-10-30",
    "what": "The daily update now waits 20 hours after the last one (it ran at 15:33 and again at 00:02)",
    "found": "owner"
@@ -283,29 +303,6 @@
    "at": "2026-10-24",
    "what": "The 'someone@example.com' sign-up in the daily email was a test of ours, not a person; the opening check now flags made-up accounts",
    "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Typing BTC in the practice buy box now offers Bitcoin the coin first; BTC on its own is a fund, and the box says so",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Dashboard: the 'Running background analyses' notice now appears just under the header instead of over your usage count",
-   "found": "owner",
-   "link": "https://stockiq.tech/dashboard.html"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Home page, dashboard and daily screener pages no longer jump sideways on a first visit on a wide screen (the room for the right-hand market panel was set at the end of the page); the daily site check now catches that kind of fault",
-   "found": "owner",
-   "link": "https://stockiq.tech/screeners-today.html"
-  },
-  {
-   "at": "2026-10-24",
-   "what": "Daily screener pages: 'Run the … screener' now runs that market's screener straight away, in the right section (Mexico went to Asia-Pacific and ran nothing); the free-trial button there shows only to signed-out visitors; 'Shares in a rising trend' as the column heading. The nightly check now tests every page's run button",
-   "found": "owner",
-   "link": "https://stockiq.tech/screener-mexico-ipc.html"
   }
  ]
 }
