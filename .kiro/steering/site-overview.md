@@ -5750,6 +5750,7 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   redirects one way). Fixed: the IndexNow key (above), news.html's old title (`page-title` check), the sitemap's dates for about 95
   stock pages (the newest news, not the data: now the later of the two), and **23 indexed stock pages linked from nowhere, 121 from
   one page: `stock-pages.html`**, every indexed page by market, linked from the home page's stock section, in the sitemap, daily.
+  The crawl is kept as `check-tools/seo_crawl.py` (a script, no AI, about 1,000 requests and 3 minutes) in the weekly full check.
 - **31 Oct 2026, night** (the owner: the hub's "Since last update" said "no change" everywhere): a weekend run and the afternoon's
   run for the Russell 2000 alone had moved every market's comparison onto itself, and "days in the top 10" counted runs (28 for a page
   6 sessions old). The owner: would a session have found it? Honestly not soon: the checks test that figures are there, not that
