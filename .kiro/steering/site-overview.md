@@ -192,6 +192,12 @@ improvements and wait for his yes. The routine, every session:
    (a failure already fixed by hand is acknowledged and the full check re-run), or tell the owner plainly that it needs him and why.
    On 24 Oct 2026 a session said all was well while the card still said "Yes, please check in" for a fault fixed that morning; the owner
    found it: "i don't really trust you when you say things are good then i find problems as obvious as that". **Rewrite "WHERE THINGS STAND"** (below) so the next session starts from the real state. If the reviews keep showing no edge, say so plainly and change what it buys from, or recommend stopping it.
+**FIND THE IMPROVEMENTS, DO NOT WAIT FOR THEM (the owner, 31 Oct 2026, after an afternoon in which he found and asked for every change:
+"i want you to find the improvements, not just confirm the improvements i make with you on check in continue to work").** Every
+session, not only the weekly one, ships at least two visible improvements the session found itself (`admin.py change … --found
+session`), found the way he finds them: use one part of the live site as a demanding visitor for a while, put it beside how Yahoo
+Finance, Google Finance or a broker's app does the same thing, and ask what looks fake, slow, confusing, inconsistent or missing.
+Build the best, put the rest in the register. The Improvements tab's count of what he pointed out is the score: it must fall.
 **Still never, even now:** anything with real money; costs above the cost rule; deleting what cannot be restored (Lambda functions,
 tables, users' data, the autopilot's records: those need his yes to an exact list); writing his autopilot settings while he is on
 the page. His requests are judged, not obeyed word for word: say when an idea is wrong and do the better thing.

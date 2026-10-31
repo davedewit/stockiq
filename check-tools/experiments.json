@@ -517,6 +517,38 @@
    "measure": "DynamoDB read units of stockiq-dashboard-analysis-history per call of stockiq-dashboard (CloudWatch, free): from about 400 to under 20",
    "status": "idea",
    "added": "2026-10-31"
+  },
+  {
+   "id": "nasdaq-card",
+   "what": "The home page's Nasdaq card shows the Nasdaq Composite (^IXIC) but its name opens the NASDAQ 100 page and runs the NASDAQ 100 screener: show the NASDAQ 100 (^NDX) on the card, as the page it leads to",
+   "angle": "accuracy",
+   "measure": "the card's figure and the page it opens are the same index",
+   "status": "idea",
+   "added": "2026-10-31"
+  },
+  {
+   "id": "market-state-label",
+   "what": "When a market is shut the cards and the panel show Friday's figures with nothing saying so (Yahoo shows 'At close: Oct 30, 4:00 PM'): a small 'At close' or 'Live' label per card and tab",
+   "angle": "ease of use",
+   "measure": "visitors no longer read a weekend figure as live (owner's eye at the next walk)",
+   "status": "idea",
+   "added": "2026-10-31"
+  },
+  {
+   "id": "panel-click-cost",
+   "what": "A click on a row of the market panel runs a full analysis, which spends a signed-out visitor's one free analysis of the day on a curiosity click; a broker app opens the quote. Open the share's stock page (or a small quote card) and offer the analysis from there",
+   "angle": "sign-ups",
+   "measure": "anonymous free analyses spent from the panel (the usage tracker's rows) against sign-ups after one",
+   "status": "idea",
+   "added": "2026-10-31"
+  },
+  {
+   "id": "card-hover-chart",
+   "what": "The index cards' small charts have no reading: hover (or tap) shows the time and price under the pointer, as Google Finance's do",
+   "angle": "appearance",
+   "measure": "time on the home page (GA4) before and after",
+   "status": "idea",
+   "added": "2026-10-31"
   }
  ]
 }
