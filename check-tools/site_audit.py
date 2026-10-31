@@ -9,6 +9,7 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
   duplicate-code  the same function defined in several pages or scripts (the market panel was three copies)
   run-links       a daily screener page whose run button opens the wrong section or runs no screener
   late-layout     a page whose own padding or width is set by a style inside the body (it moves after the first draw)
+  hub-compare     the daily hub's "Since last update" all "no change" (comparing a session with itself)
   cost            AWS: a service's spend jumping, the month over the owner's $1, Cost Explorer charged, a table or Lambda calls jumping (cost_check.py, free)
   plan-claims     a plan card on the dashboard ticks a feature that is not on the list of what exists (unbuilt ones go under "Coming soon")
   news-stale      the newest article in news.html or news.js more than 2 days old (the news steps stopped adding articles)
@@ -257,6 +258,15 @@ def main():
                     find('stale-counts', 'problem', f'says {n} markets have a daily page; update_screener_pages.py makes {pages_n}', where)
     except Exception as e:
         find('stale-counts', 'idea', f'the daily pages\' count could not be compared ({type(e).__name__})', 'update_screener_pages.py')
+
+    # hub-compare: "Since last update" must compare each market with its last trading session (31 Oct 2026, the owner saw "no change"
+    # everywhere: a weekend run and a run for one market had compared Friday with Friday). Every market at "no change" is that fault.
+    hubp = src.get('screeners-today.html', '')
+    if hubp:
+        moves = re.findall(r'<td class="n">(?:<span[^>]*>)?(▲ \d+ pts?|▼ \d+ pts?|no change)', hubp)
+        if len(moves) >= 10 and all(m == 'no change' for m in moves):
+            find('hub-compare', 'problem', f'the daily hub shows "no change" for all {len(moves)} markets: it is comparing a session with itself '
+                 '(update_screener_pages.py, session_sig / _hubBase)', 'screeners-today.html')
 
     # seo-basics
     titles = {}

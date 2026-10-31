@@ -371,6 +371,19 @@ def shell_parts():
     return nav, foot
 
 
+def session_sig(rows):
+    """A fingerprint of a market's prices: the same until a new session trades. A run at a weekend or a holiday, or a second
+    run the same day, then compares with the last real trading session instead of with itself (31 Oct 2026, the owner: "Since
+    last update says no change ... it should stick to the last business day as the last day of change")."""
+    import hashlib
+    return hashlib.sha1('|'.join(f"{r.get('symbol')}:{r.get('current_price')}" for r in sorted(rows, key=lambda r: str(r.get('symbol')))).encode()).hexdigest()[:16]
+
+
+def same_session(old, sig, today):
+    """True when the stored figures are of the session now on show (unchanged prices, or a re-run the same day)."""
+    return bool(old) and (old.get('sig') == sig or old.get('day') == today)
+
+
 def ranked(results):
     rows = [r for r in results if isinstance(r.get('score'), (int, float))]
     rows.sort(key=lambda r: (-r['score'], r.get('symbol', '')))
@@ -406,7 +419,11 @@ def page_for(key, data, names, pages, prev, today, made):
                                               'name': f"{names.get(r['symbol'].upper(), r['symbol'])} ({r['symbol']})",
                                               **({'url': f"{SITE}stocks/{r['symbol']}.html"} if r['symbol'].upper() in pages else {})}
                                              for i, r in enumerate(top)]}}
-    before = prev.get(key) or {}
+    stored, sig = prev.get(key) or {}, session_sig(rows)
+    # compare with the last session before the one on show: the stored one, or what it was itself compared with when it is the
+    # same session; the count of days in the top 10 goes up once a trading session, never once a run
+    before = (stored.get('base') or {}) if same_session(stored, sig, today) else stored
+    base = {x: before.get(x) for x in ('top', 'streak', 'day') if before.get(x) is not None}
     streak = before.get('streak') or {}
     new_streak = {r['symbol']: streak.get(r['symbol'], 0) + 1 for r in top}
     had = set(before.get('top') or [])
@@ -496,7 +513,7 @@ def page_for(key, data, names, pages, prev, today, made):
                'Scores and readings are automated model outputs from price data that may be delayed or wrong.</p>')
     out.append('</main>')
     out.append('{foot}')
-    return '\n'.join(out), {'top': [r['symbol'] for r in top], 'streak': new_streak, 'day': today}
+    return '\n'.join(out), {'top': [r['symbol'] for r in top], 'streak': new_streak, 'day': today, 'sig': sig, 'base': base}
 
 
 def hub(results, names, today, made, pages=frozenset(), before=None, before_date=None):
@@ -535,8 +552,9 @@ def hub(results, names, today, made, pages=frozenset(), before=None, before_date
             was = before.get(k) or {}
             if info.get('n') and was.get('n'):
                 pts = round(100 * info['pos'] / info['n']) - round(100 * was['pos'] / was['n'])
-                move = (f'<span style="color:#16a34a;font-weight:700;">▲ {pts} pts</span>' if pts > 0 else
-                        f'<span style="color:#dc2626;font-weight:700;">▼ {-pts} pts</span>' if pts < 0 else '<span class="sp-muted">no change</span>')
+                unit = 'pt' if abs(pts) == 1 else 'pts'
+                move = (f'<span style="color:#16a34a;font-weight:700;">▲ {pts} {unit}</span>' if pts > 0 else
+                        f'<span style="color:#dc2626;font-weight:700;">▼ {-pts} {unit}</span>' if pts < 0 else '<span class="sp-muted">no change</span>')
             else:
                 move = '<span class="sp-muted">–</span>'
             if lead and was.get('lead') and was['lead'] != lead:
@@ -679,18 +697,25 @@ def main():
         print('⚠️  Fewer than half answered: no page written (yesterday\'s stay)')
         return 1
     fill_names(names, [r.get('symbol', '') for d in ok.values() for r in d['results']], dry)
-    summary = {k: v for k, v in (prev.get('_hub') or {}).items()}
-    # the last day's figures, for the hub's arrows; a second run the same day still compares with the day before
-    if prev.get('_hubDate') == today:
-        before, before_date = prev.get('_hubPrev') or {}, prev.get('_hubPrevDate')
-    else:
-        before, before_date = {k: dict(v) for k, v in summary.items()}, prev.get('_hubDate')
+    summary = {k: dict(v) for k, v in (prev.get('_hub') or {}).items()}
+    # each market against its own last trading session (31 Oct 2026): a market whose prices have not moved (a weekend, a holiday) or
+    # a re-run the same day keeps the comparison it had; a market not run this time keeps both. Until then one date and one copy of
+    # every market was moved on each run, so a weekend or a run for one market showed "no change" everywhere.
+    bases = {k: dict(v) for k, v in (prev.get('_hubBase') or {}).items()}
+    if '_hubBase' not in prev:                                   # the state as it was before 31 Oct 2026
+        for k, v in (prev.get('_hubPrev') or {}).items():
+            bases[k] = dict(v, day=prev.get('_hubPrevDate'))
+        for v in summary.values():
+            v.setdefault('day', prev.get('_hubDate'))
     state = dict(prev)
     for k, d in ok.items():
         text, st = page_for(k, d, names, pages, prev, today, made)
         text = text.replace('{nav}', nav).replace('{foot}', foot).replace('</head>', PANEL_CSS + '</head>', 1)
         rows = ranked(d['results'])
-        summary[k] = {'lead': rows[0]['symbol'], 'pos': sum(1 for r in rows if r['score'] > 0), 'n': len(rows)}
+        now_k = {'lead': rows[0]['symbol'], 'pos': sum(1 for r in rows if r['score'] > 0), 'n': len(rows), 'sig': session_sig(rows), 'day': today}
+        if not same_session(summary.get(k), now_k['sig'], today) and summary.get(k):
+            bases[k] = dict(summary[k])
+        summary[k] = now_k
         state[k] = st
         path = os.path.join(OUT, f'screener-{SCREENERS[k][0]}.html')
         if dry:
@@ -701,9 +726,12 @@ def main():
     for k in keys:
         if k not in ok:
             print(f'⚠️  {SCREENERS[k][1]}: no answer, yesterday\'s page kept')
-    state['_hub'] = summary
-    state['_hubDate'], state['_hubPrev'], state['_hubPrevDate'] = today, before, before_date
-    text = hub(summary, names, today, made, pages, before, before_date).replace('{nav}', nav).replace('{foot}', foot).replace('</head>', PANEL_CSS + '</head>', 1)
+    state['_hub'], state['_hubBase'] = summary, bases
+    for gone in ('_hubDate', '_hubPrev', '_hubPrevDate'):
+        state.pop(gone, None)
+    days = {bases[k].get('day') for k in summary if k in bases and k in SCREENERS}
+    before_date = days.pop() if len(days) == 1 else ('each market\'s previous trading session' if days else None)
+    text = hub(summary, names, today, made, pages, bases, before_date).replace('{nav}', nav).replace('{foot}', foot).replace('</head>', PANEL_CSS + '</head>', 1)
     if not dry:
         with open(os.path.join(OUT, 'screeners-today.html'), 'w', encoding='utf-8') as f:
             f.write(text)

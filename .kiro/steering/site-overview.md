@@ -604,7 +604,7 @@ git pull --rebase && git push
 - **Daily public screener pages (24 Oct 2026; #9 on the Admin page, the traffic plan's first build):** `screener-<market>.html` for 25
   markets (the Russell 2000 since 31 Oct 2026) (the main index of each country, the Dow 30, NASDAQ 100, Euro Stoxx 50) and the hub `screeners-today.html`, written by
   `update_screener_pages.py` in the daily run from the coordinator on AWS (no account, nothing saved; about 25 calls a day, 30 s): the
-  top 10 by the trend score with each share's breakdown, how the whole list stands, new in and out since the day before, the lowest 5 (the hub, `screeners-today.html`, gives each market's leader, its share rising and, since 31 Oct 2026, the change since the day before: ▲/▼ points and a "new" leader, from `screener_pages_state.json`),
+  top 10 by the trend score with each share's breakdown, how the whole list stands, new in and out since the day before, the lowest 5 (the hub, `screeners-today.html`, gives each market's leader, its share rising and, since 31 Oct 2026, the change since that market's last trading session: ▲/▼ points and a "new" leader, from `screener_pages_state.json`; a run on unchanged prices (a weekend, a holiday), a second run the same day or a run for one market keeps each market's comparison, by a fingerprint of its prices, `session_sig`, `_hubBase`, and "days in the top 10" counts sessions, not runs; `site_audit.py` `hub-compare` flags a hub at "no change" everywhere),
   the full ranking folded, links to the stock pages. A market that fails keeps yesterday's page; fewer than half answering writes
   nothing. Names: `stocks.txt`, the analysis page's name tables, then the price function once (`screener_names.json`). **Every share is a link**: to its stock page,
   or, with none on the site, to its analysis (`analysis.html?option=1&symbol=…&autorun=true`, `rel="nofollow"` so crawlers set nothing off).
@@ -5743,6 +5743,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   that changed, no flash without a new trade, soft tint, colour then figure); the seven market-data functions give the live function's
   figures (they took two daily bars); the price function sends each price's trade time and 4-6 decimals; `update_interval.sh` rewritten (it
   had changed nothing since 18 Oct) and timed in a browser on the home page, dashboard, a daily page and a stock page; Yahoo's stream ruled out.
+- **31 Oct 2026, night** (the owner: the hub's "Since last update" said "no change" everywhere): a weekend run and the afternoon's
+  run for the Russell 2000 alone had moved every market's comparison onto itself, and "days in the top 10" counted runs (28 for a page
+  6 sessions old). Each market now keeps its last trading session (`session_sig`); the state was put back to Thursday's figures from the
+  backup of 29 Oct (streaks capped at 5 then); live with the daily update of 1 Nov. `hub-compare` in the site check.
 - **31 Oct 2026, late** (the owner: "suddenly alot to check on admin dashboard especially the bill?"): the card was red for October's
   $1.57, explained and fixed days before: `KNOWN_OVER` (top of this file, the cost rule); the cost check's table and cache-clear rules in
   dollars, not counts; Admin #17 done (no "may sell early again", the chat's 25 pages). Card: "No, all good". Idea `cost-by-feature`.

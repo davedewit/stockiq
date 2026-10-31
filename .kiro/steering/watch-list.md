@@ -155,3 +155,12 @@ Rules:
   the card wrong on 1 Nov while AWS still reports October (the month comes from the bill's own reading time, `costAt`).
 - **Undo:** `git revert` the commits of 31 Oct "Bill: a known overrun…"; functions: their `…_20261031.zip` in ~/VSCODE/backup/.
 - **Remove after:** 2026-11-14
+
+### 2026-10-31 · The daily hub compares each market with its own last trading session
+- **Changed:** `update_screener_pages.py` (`session_sig`, `same_session`; state `_hubBase` per market, a `sig` and `base` in each market's
+  page state; `_hubDate` / `_hubPrev` gone); the state was seeded from Thursday's backup (copy before it in the session's scratchpad only).
+- **Could break:** the hub stuck on an old comparison (a market whose prices never change: look for the same arrows for days), "days in
+  the top 10" not rising on a trading day, a market showing "–" for long. `site_audit.py` `hub-compare` catches "no change" everywhere.
+- **Undo:** `git revert` the commit "Daily hub: each market against its last trading session"; the old state format is read back as before.
+- **Remove after:** 2026-11-14
+

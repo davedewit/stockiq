@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-10-31",
+   "what": "Today's top 10s hub: 'Since last update' compares each market with its last trading day, so a weekend or holiday no longer shows 'no change' everywhere; 'days in the top 10' counts trading days (it had reached 28 on pages a week old)",
+   "found": "owner"
+  },
+  {
+   "at": "2026-10-31",
    "what": "Two untrue lines gone: the autopilot no longer says 'the AI model may sell early again' (those sales have been off since 17 Oct), and the AI chat says 25 markets have a daily top-10 page, not 24",
    "found": "check"
   },
@@ -297,11 +302,6 @@
   {
    "at": "2026-10-25",
    "what": "The menu now stands in the same place on every page: on the sign-up page it sat 31px left of the others (a hidden placeholder took room), on the unsubscribe page 31px right for signed-in visitors (no bell). The header check now compares every page",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-25",
-   "what": "Register page on a phone: the empty band above 'Trade $100,000 of practice money' is gone (the page kept room for the desktop-only trial strip)",
    "found": "owner"
   }
  ]
