@@ -25,6 +25,7 @@ For adding screeners see `add-new-screener.md`. For adding stocks see `add-new-s
 
 | Script | When to use |
 |---|---|
+| `update_interval.sh` | Shows or changes how often prices refresh: the market figures (`live-market.js`, 6-10 s at random while the page is in use), stock page prices (`stock-prices.js`, 5 s), the panel's full reload (`market-panel.js`, 5 min). Rewritten 31 Oct 2026: the old version edited index.html and dashboard.html, where the timings no longer are, and changed nothing |
 | `fetch_stock_data.py` | After adding new stocks — fetches names/sectors from Yahoo, updates stocks.txt and NUMERIC_COMPANY_NAMES |
 | `check-tools/stage_web.py` | Stages website files for a deploy in one command: `<name> <files>`, `--changed`, `--from <folder>`; writes `pending-<name>/deploy.sh` for `web_deploy.sh` |
 | `check-tools/notes_check.py` | The notes against the files: every file a steering note names that exists nowhere (the change log is skipped as history). Run by `session_start.py` |
