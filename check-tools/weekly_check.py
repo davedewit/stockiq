@@ -150,14 +150,16 @@ note('1. Test suites on the live code', f"the nightly site check's tests ({m.gro
 code, out = run(['python3', 'lists_check.py'], 300)
 note('1. Test suites on the live code', "the screeners' stock lists (page and coordinator alike, no duplicates)", 'FINDINGS: none' in out, out.strip().splitlines()[-4:])
 suite('every index the site compares with has daily prices', ['node', 'index_check.js'], 300)
+suite("the market panel's two sources give the same figures", ['python3', 'market_sources_check.py'], 300)
 code, out = run(['python3', 'workers.py'], 600)
 bad = [l for l in out.splitlines() if 'DIFFEREN' in l and '(not used)' not in l]      # old groups the site no longer calls are left alone (section 8b)
 note('1. Test suites on the live code', 'every share-screener worker runs the one package', code == 0 and not bad, bad[:3])
 if not QUICK:
-    for name, cmd in (('the market panel and live figures', ['node', 'live_market_check.js', 'index.html', 'dashboard.html']),
-                      ('the two sliding panels on a phone', ['node', 'mobile_sidebar_check.js', 'index.html', 'dashboard.html', 'analysis.html']),
-                      ('the header and the room under it', ['node', 'header_room_check.js'])):
-        code, out = run(cmd, 900)
+    for name, cmd, env in (('the market panel and live figures', ['node', 'live_market_check.js', 'index.html', 'dashboard.html', 'screener-sp-500.html'], None),
+                           ('the live figures flash in the phone\'s slide-in panel', ['node', 'live_market_check.js', 'index.html', 'dashboard.html', 'screener-sp-500.html'], {'PHONE': '1'}),
+                           ('the two sliding panels on a phone', ['node', 'mobile_sidebar_check.js', 'index.html', 'dashboard.html', 'analysis.html'], None),
+                           ('the header and the room under it', ['node', 'header_room_check.js'], None)):
+        code, out = run(cmd, 900, env=env)
         tail = out.strip().splitlines()[-1:] if out.strip() else ['no output']
         note('1. Test suites on the live code', name, ('ALL PASS' in out or re.search(r'all \d+ checks passed', out)) and 'FAIL' not in out, [l for l in out.splitlines() if 'FAIL' in l][:3] or tail)
 

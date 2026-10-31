@@ -7,6 +7,7 @@
 //   node check-tools/live_market_check.js index.html dashboard.html stocks/AAPL.html
 //   WEB=<folder> node ...    files found in that folder are served instead of the ones in ../website (a staged copy)
 //   SHOTS=<folder> node ...  a picture of each page at the end
+//   PHONE=1 node ...         at a phone's size, with the slide-in market panel opened: its rows, the four lists and the cards flash there
 //   REAL_TIMES=1 node ...    the page's own gaps, not the test's shortened ones: about 40 s of use a page, then every gap between
 //                            requests must lie inside the range live-market.js sets (update_interval.sh changes it), and every
 //                            flash must come within half a second of the answer that caused it
@@ -21,6 +22,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const LISTS = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'AMZN'];
 const CATS = { us: [['S&P 500', '^GSPC', 7650], ['Dow Jones', '^DJI', 46000], ['Nasdaq', '^IXIC', 25000], ['Russell 2000', '^RUT', 2400], ['VIX', '^VIX', 20], ['10-Year', '^TNX', 4.1]] };
 ['europe', 'asia', 'cryptocurrencies', 'rates', 'commodities', 'currencies'].forEach(c => { CATS[c] = CATS.us.map(([n, s, v]) => [c + ' ' + n, s, v]); });
+const SHUT_AT = Math.floor(Date.now() / 1000) - 50000;
 let calls = 0, frozen = false, priceRequests = [], lastData = {}, stockRequests = [];
 
 const server = http.createServer((q, r) => {
@@ -38,9 +40,10 @@ function priceAnswer(body) {
   if (!frozen) calls++;
   const data = {};
   tickers.forEach((t, i) => {
-    const base = (CATS.us.find(x => x[1] === t) || [0, 0, 100 + i * 10])[2], price = +(base * (1 + calls * 0.001)).toFixed(2);
-    data[t] = { name: t, price, change: +(price - base).toFixed(2), changePercent: +((price / base - 1) * 100).toFixed(2), error: false,
-                spark: [base * 0.99, base * 1.004, base * 0.997, price], prev: base };
+    const base = (CATS.us.find(x => x[1] === t) || [0, 0, 100 + i * 10])[2], price = +(base * (1 + Math.ceil(calls / 2) * 0.001)).toFixed(2), only = calls % 2 === 0;   // every second answer moves only the change, not the price
+    data[t] = { name: t, price, change: +(price - base + (only ? 0.01 * calls : 0)).toFixed(2), changePercent: +((price / base - 1) * 100 + (only ? 0.01 * calls : 0)).toFixed(2), error: false,
+                spark: [base * 0.99, base * 1.004, base * 0.997, price], prev: base,
+                time: t === '^DJI' ? SHUT_AT : Math.floor(Date.now() / 1000) - (i % 4) };   // the Dow: a market that is shut (its last trade never moves, its figure still differs a little)     // each price last traded at its own second, as Yahoo's do
   });
   Object.assign(lastData, data);
   return { success: true, data };
@@ -84,12 +87,17 @@ function anyAnswer() {
     const js = async (expression) => { const r = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true }); return r.result ? r.result.value : undefined; };
     await send('Page.enable'); await send('Runtime.enable'); await send('Fetch.enable', { patterns: [{ urlPattern: '*' }] });
     await send('Network.enable'); await send('Network.setUserAgentOverride', { userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36' });
+    if (process.env.PHONE) await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
     await send('Page.addScriptToEvaluateOnNewDocument', { source: `try { localStorage.setItem('userId', 'live-check@example.com'); localStorage.setItem('userEmail', 'live-check@example.com');
       ${JSON.stringify(['gainersTickersList', 'losersTickersList', 'activeTickersList', 'trendingTickersList'])}.forEach(function (k) { localStorage.setItem(k, ${JSON.stringify(JSON.stringify(LISTS))}); });
       localStorage.setItem('marketDataSidebar', ${JSON.stringify(JSON.stringify(anyAnswer()))}); } catch (e) {}
-      ${process.env.REAL_TIMES ? '' : 'window.LIVE_MARKET_TEST = { fast: [1500, 2000], slow: 6000, idle: 5000 };'}
-      window.__flashes = 0; window.__flashAt = []; new MutationObserver(function (ms) { ms.forEach(function (m) { if (m.target.classList && (m.target.classList.contains('lm-up') || m.target.classList.contains('lm-down'))) { window.__flashes++; window.__flashAt.push(Date.now()); } }); })
-        .observe(document, { subtree: true, attributes: true, attributeFilter: ['class'] });` });
+      ${process.env.REAL_TIMES ? '' : 'window.LIVE_MARKET_TEST = { fast: [1500, 2000], slow: 4000, idle: 3000, stop: 12000 };'}
+      window.__flashes = 0; window.__flashAt = []; new MutationObserver(function (ms) { ms.forEach(function (m) { if (m.target.classList && (m.target.classList.contains('lm-up') || m.target.classList.contains('lm-down'))) { window.__flashes++; window.__flashAt.push(Date.now()); (window.__flashEl = window.__flashEl || []).push([Date.now(), m.target.id || '']);
+          var t = m.target, part = /-(price|change)-/.test(t.id) ? 'lists' : t.closest && t.closest('.market-item-sidebar') ? 'panel' : /^(sp500|dow|nasdaq|russell)-/.test(t.id) ? 'cards' : 'other';
+          var cls = t.classList.contains('lm-up') ? 'lm-up' : 'lm-down'; if ((' ' + (m.oldValue || '') + ' ').indexOf(' ' + cls + ' ') >= 0) return;   // a class swapped beside a flash that is already there
+          var row = t.closest && t.closest('.market-item-sidebar'), nm = row && row.querySelector('.market-item-sidebar-name');
+          var rec = { el: t, dow: /^dow-/.test(t.id) || !!(nm && /Dow Jones/.test(nm.textContent)), part: part, phone: !!(t.closest && t.closest('#mobile-sidebar-modal')), before: t.textContent }; (window.__fl = window.__fl || []).push(rec); setTimeout(function () { rec.after = t.textContent; }, 400); } }); })
+        .observe(document, { subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['class'] });` });
     const mouse = async (n) => { for (let i = 0; i < n; i++) { await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 200 + (i % 7) * 30, y: 300 + (i % 5) * 20 }); await sleep(500); } };
 
     for (const pg of pages) {
@@ -113,6 +121,18 @@ function anyAnswer() {
         continue;
       }
       check('live-market.js is loaded on the page and finds its figures', first.loaded && first.movers + first.panel > 0, first);
+      if (process.env.PHONE) {                           // the slide-in panel on a phone: the same figures, moved into it
+        await js(`(window.mobileSidebar && window.mobileSidebar.open) ? window.mobileSidebar.open() : (window.toggleMobileSidebar && window.toggleMobileSidebar())`);
+        await sleep(800); await js('window.__fl = []');
+        await mouse(16);
+        const fl = await js(`(window.__fl || []).map(function (x) { return { part: x.part, phone: x.phone, moved: x.after === undefined || x.before !== x.after }; })`);
+        const parts = Array.from(new Set(fl.filter(x => x.phone).map(x => x.part))).sort();
+        const want = pg === 'index.html' ? ['lists', 'panel'] : ['lists', 'panel'];
+        check(`in the phone's slide-in panel the rows flash (parts flashing there: ${parts.join(', ') || 'none'})`, want.every(w => parts.includes(w)), { parts, sample: fl.slice(0, 5) });
+        check('on a phone each figure changes after its colour comes up, not before', fl.length > 0 && fl.every(x => x.moved), { moved: fl.filter(x => x.moved).length, of: fl.length });
+        check('no script error on the page', errors.length === 0, errors);
+        continue;
+      }
       if (process.env.REAL_TIMES) {                      // the real gaps, as update_interval.sh sets them
         const src = fs.readFileSync(WEB && fs.existsSync(path.join(WEB, 'live-market.js')) ? path.join(WEB, 'live-market.js') : path.join(SITE, 'live-market.js'), 'utf8');
         const [lo, hi] = (src.match(/T\.fast \|\| \[(\d+), (\d+)\]/) || []).slice(1).map(Number);
@@ -122,8 +142,16 @@ function anyAnswer() {
           lo && gaps.length >= Math.floor(35000 / hi) && gaps.every(g => g >= lo - 150 && g <= hi + 600), { lo, hi, gaps });
         const flashAt = await js('window.__flashAt'), answers = priceRequests.map(r => r.answered).filter(Boolean);
         const lag = flashAt.map(t => t - Math.max.apply(null, answers.filter(a => a <= t + 50).concat([0])));
-        check(`each change flashes the moment its answer arrives (${flashAt.length} flashes, slowest ${lag.length ? Math.max.apply(null, lag) : '-'} ms after its answer)`,
-          flashAt.length > 0 && lag.every(l => l <= 500), { lag: lag.slice(0, 20) });
+        check(`each change flashes within ${(lo - 1000 + 600) / 1000} s of its answer (${flashAt.length} flashes, slowest ${lag.length ? Math.max.apply(null, lag) : '-'} ms)`,
+          flashAt.length > 0 && lag.every(l => l <= lo - 1000 + 700), { lag: lag.slice(0, 20) });
+        // within one answer the movers' prices flash in the order their prices traded, a second apart for each second between them
+        const els = (await js('window.__flashEl')).filter(([t, id]) => /^gainer-(price|change)-/.test(id));
+        const windows = answers.slice(0, -1).map(a => els.filter(([t]) => t >= a && t < a + lo).map(([t, id]) => [t - a, LISTS.indexOf(id.split(/-(?:price|change)-/)[1].toUpperCase()) % 4]));
+        const order = windows.reduce((b, w) => w.length > b.length ? w : b, []).sort((x, y) => x[0] - y[0]);
+        const byTime = order.every((x, i) => i === 0 || x[1] <= order[i - 1][1] || x[0] - order[i - 1][0] < 700);
+        const span = order.length ? order[order.length - 1][0] - order[0][0] : 0;
+        check(`the rows of one answer flash in the order their prices traded, spread over ${(span / 1000).toFixed(1)} s (the stand-in's trades are up to 3 s apart)`,
+          order.length >= 4 && byTime && span >= 2500, order);
         check('no script error on the page', errors.length === 0, errors);
         continue;
       }
@@ -171,10 +199,21 @@ function anyAnswer() {
       const asked = priceRequests.length ? JSON.parse(priceRequests[priceRequests.length - 1].body) : {};
       check('one request covers every figure on show, at most 40, each once', asked.tickers && asked.tickers.length === new Set(asked.tickers).size && asked.tickers.length <= 40 && asked.spark === true, asked);
       const moved = after.texts.filter((t, i) => t !== first.texts[i]).length;
+      { const shut = await js(`(window.__fl || []).filter(function (x) { return x.dow; }).length`);
+        check('a market that is shut (no newer trade) puts its figure right without a flash (the Dow here)', shut === 0, shut);
+        const ans = priceRequests.map(r => r.answered).filter(Boolean), early = await js(`(window.__flashAt || []).filter(function (t) { return t < ${ans[1] || 0}; }).length`);
+        check('the first answer after the page opens fills the figures in without a flash', ans.length > 1 && early === 0, { early, answers: ans.length }); }
+      { const fl = await js(`(window.__fl || []).map(function (x) { return { part: x.part, moved: x.after === undefined || x.before !== x.after, id: x.el.id || x.el.className, before: x.before, now: x.after }; })`);
+        const parts = Array.from(new Set(fl.map(x => x.part))).sort(), want = pg === 'index.html' ? ['cards', 'lists', 'panel'] : ['lists', 'panel'];
+        const isCh = x => /change/.test(x.id), chN = fl.filter(isCh).length, prN = fl.length - chN;
+        check(`a move in the % alone shows and flashes the % by itself (${chN} % flashes, ${prN} price flashes; every second stand-in answer moves only the %)`, chN > prN * 1.3, { chN, prN });
+        check(`every part flashes on a change (${parts.join(', ')})`, want.every(w => parts.includes(w)), parts);
+        check('only a figure that changes flashes (a price that stays put does not, when only its % moves), and it changes after its colour comes up', fl.length > 0 && fl.every(x => x.moved), { moved: fl.filter(x => x.moved).length, of: fl.length, still: fl.filter(x => !x.moved).slice(0, 6) }); }
       check('the figures on show change, and changes flash', moved >= Math.min(3, first.texts.length) && after.flashes > 0, { moved, of: first.texts.length, flashes: after.flashes });
       { const flashAt = await js('window.__flashAt'), answers = priceRequests.map(r => r.answered).filter(Boolean);
         const lag = flashAt.map(t => t - Math.max.apply(null, answers.filter(a => a <= t + 50).concat([0])));
-        check('each change flashes the moment its answer arrives (until 31 Oct 2026 each row waited up to 2.5 s)', flashAt.length > 0 && lag.every(l => l <= 500), { slowest: Math.max.apply(null, lag) }); }
+        const spread = (() => { const a = flashAt.filter(t => t > flashAt[0] && t < flashAt[0] + 1500); return a.length ? Math.max.apply(null, a) - flashAt[0] : 0; })();
+        check('changes flash soon after their answer (by their trade times, at most the gap less a second) and not all in the same instant', flashAt.length > 0 && lag.every(l => l <= 1400) && spread > 40, { slowest: Math.max.apply(null, lag), spread }); }
       if (first.panel) {
         const want = await js(`(function () { var a = ${JSON.stringify(lastData[after.want])}; return window.liveMarket.sparkPoints(a.spark, a.prev); })()`);
         check('the side panel\'s small chart is today\'s line from the answer, not a random one', after.line === want, { line: after.line, want });
@@ -184,7 +223,10 @@ function anyAnswer() {
           return { sym: c.sym, value: c.value.textContent, line: c.line && c.line.getAttribute('points'), want: a ? lm.sparkPoints(a.spark, a.prev, 58) : 'no answer' }; }); })()`);
         check('the four index cards on the home page show figures and today\'s real line (it was a fixed up or down line)', cards.length === 4 && cards.every(c => /\d/.test(c.value) && c.line === c.want), cards);
       }
-      await sleep(9000);                                 // nobody moves: past the (shortened) idle time
+      const still0 = Date.now();
+      await sleep(13000);                                // nobody moves: past the (shortened) full-speed time and stop
+      const slowOn = priceRequests.filter(r => r.at > still0 + 3300 && r.at < still0 + 12000).length;
+      check('someone watching without moving still gets updates for a while (5 min at full speed, then once a minute, stopping at 15 min; shortened here)', slowOn >= 1, slowOn);
       const idleFrom = priceRequests.length; await sleep(6000);
       check('when nobody has moved for a while nothing more is asked for', priceRequests.length - idleFrom === 0, { asked: priceRequests.length - idleFrom });
       frozen = true; await mouse(30);                    // someone is back, but the prices have stopped moving (a market that is closed)

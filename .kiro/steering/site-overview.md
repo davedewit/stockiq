@@ -1125,6 +1125,10 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
     login.html signup.html stocks/AAPL.html` (`LIVE=1` for the site itself): a finger in headless Chrome at phone
     size; after every step, that the page has not moved. **Not checked: a real phone; Safari on an iPhone.** The
     pages without the script (blog, news, sign in, sign up, stock pages) open the menu by ☰ only, as before.
+- **The panel's first figures come from the seven `stockiq-market-data-*` functions, the live ones from `ticker-data-fetcher`: the
+  two must work the day's change out alike** (Yahoo's price now against its reference close; until 31 Oct 2026 the seven took the last
+  two daily bars, and a missing bar made Bitcoin read -0.83% for -0.09%, Brent oil $117.64 for $113.43, on every page load for a few
+  seconds). `check-tools/market_sources_check.py` compares them (weekly).
 - **The market panel on the right of the home page and the dashboard is drawn by one script: `website/market-panel.js`**
   (`?v=1`, loaded by both pages where their panel code was; 18 Oct 2026, the owner: "is there a smarter way to set them up. the
   dashboard and index.html should match"). The market tabs and their figures (the tab on show fetched first, the six others a
@@ -1161,8 +1165,12 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   `<kind>TickersList`; the side panel's symbols from `marketDataSidebar`; the open tab from `.market-tab-sidebar.active`),
   every 6 to 10 s at random, **only while the tab is on screen and someone has moved, scrolled, typed or touched in the last 90 s**;
   a round that changes nothing makes the next gap half as long again, up to a minute (a closed market costs almost nothing), and
-  a change or a return to the page brings it back. A figure that moves flashes green or red (`lm-up`, `lm-down`) the moment its price arrives (since 31 Oct 2026; until then each
-  row waited a random 0 to 2.5 s, which put the flash up to 2.5 s late). **The gaps are set with `bash update_interval.sh`** (it shows and
+  a change or a return to the page brings it back. **How a figure flashes (version 9, 31 Oct 2026, worked out with the owner):** every price carries the time it last traded
+  (`time`, from ticker-data-fetcher); a part flashes only when that time has moved on since the last answer, so the first answer after
+  a page load and a market that is shut put their figures right quietly; the rows of one answer flash in the order their prices
+  traded, with the real gaps (at most the shortest gap less a second); only the part whose text changes flashes (the price, or the
+  % alone); the soft tint comes first and the figure changes 0.25 s later; it holds about half a second, then fades over a second.
+  Full speed for 5 minutes without a touch, then once a minute, stopping at 15 minutes (it stopped after 90 s until then). **The gaps are set with `bash update_interval.sh`** (it shows and
   changes this one, the stock pages' 5 s and the panel's 5 minutes); `REAL_TIMES=1 node check-tools/live_market_check.js …` times them for
   real. **Yahoo's free price stream (`wss://streamer.finance.yahoo.com`) was tried on 31 Oct 2026: it works from a server but refuses a
   page on stockiq.tech** (it checks the origin), and a relay would need a server running all the time, far over the cost rule: so polling. **The side panel's small charts were random lines** (`generateSparkline`): each is
@@ -5704,7 +5712,9 @@ browser page, copy-of-the-live-record check, deploy script, verification).
     passes alone; `--recheck` now re-runs those checks by themselves. "Needs you" no longer reports short cash while the budget is
     automatic (`stockiq-ai-trader` `QEITzl1O…`, rollback `…_before_autopilot_needsauto_20261030.zip`). Cost: October about $1.47 (the
     cleanup bug and the cache clears, both fixed); November about $0.90 at the present rate, S3's requests the largest part (idea `s3-requests`).
-- **31 Oct 2026, later:** the market figures flash the moment their price arrives (`live-market.js` version 5); `update_interval.sh` rewritten (it
+- **31 Oct 2026, later:** the market figures flash as described in section 8 (`live-market.js` version 9: trade order, only the part
+  that changed, no flash without a new trade, soft tint, colour then figure); the seven market-data functions give the live function's
+  figures (they took two daily bars); the price function sends each price's trade time and 4-6 decimals; `update_interval.sh` rewritten (it
   had changed nothing since 18 Oct) and timed in a browser on the home page, dashboard, a daily page and a stock page; Yahoo's stream ruled out.
 - **31 Oct 2026** (short, from the owner's look at the Practice tab): the three cards read alike and the gaps moved to a line each under them
   (v80); the daily run waits 20 hours after the last (it had run at 15:33 and 00:02; `~/stockiq-daily.sh`, watch list); `stage_web.py` stages a

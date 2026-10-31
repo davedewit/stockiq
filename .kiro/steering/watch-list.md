@@ -129,8 +129,11 @@ Rules:
 - **Undo:** `cp ~/VSCODE/backup/stockiq-daily.sh_before_20hours_20261031 ~/stockiq-daily.sh`.
 - **Remove after:** 2026-11-14
 
-### 2026-10-31 · Market figures flash the moment their price arrives
-- **Changed:** `live-market.js` version 5 (`later()` runs at once; each row had waited a random 0 to 2.5 s). `update_interval.sh` rewritten.
-- **Could break:** nothing should; at worst the rows all change in the same frame, which looks less lively. `live_market_check.js` checks it.
-- **Undo:** `git revert` the website commit "live-market.js: a change flashes the moment its price arrives" and deploy live-market.js.
+### 2026-10-31 · Market figures: how they flash, and one rule for the day's change
+- **Changed:** `live-market.js` version 9 (flash only on a newer trade, in trade order, only the part that changed, soft tint, figure
+  0.25 s after the colour, full speed 5 min without a touch); `ticker-data-fetcher` (sends `time`, prices to 4 decimals, 6 under $1);
+  the seven `stockiq-market-data-*` functions (Yahoo's price against its reference close, not the last two daily bars).
+- **Could break:** nothing flashes in an open market (no `time` in the answer: then every change flashes, as before); a tab of the
+  panel empty (a function failing on the new request: `market_sources_check.py` says which); more Lambda calls from the 15-minute stop.
+- **Undo:** website `git revert` the live-market.js commits of 31 Oct; the functions: their `~/VSCODE/backup/*_before_{time,decimals,reference}_20261031.zip`.
 - **Remove after:** 2026-11-14
