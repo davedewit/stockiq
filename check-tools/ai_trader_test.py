@@ -64,6 +64,7 @@ def rows(kind='stock', key='3-100', n=25, **over):
         r.update(over.get(sym, {})); out.append(r)
     return out
 SNAP = {'3-100': rows(), '7-1': rows('crypto', '7-1')}
+ROWS = rows                  # kept: later parts reuse the name `rows` for a list
 PRICES = {}
 ATR = {}                     # how much a symbol normally moves in a day (%), where a test gives it; without it the simpler stop by holding time applies
 def snapshot(k): return copy.deepcopy(SNAP.get(k))
@@ -1852,4 +1853,54 @@ if hasattr(m, 'market_events'):
     cm = m.ai_cost_month({'month': '2026-10', 'calls': 10, 'in': 5, 'out': 5, 'usd': 0.5}, ET)
     check('the month\'s AI cost adds this container\'s calls at the published prices, and empties the count', cm == {'month': '2026-10', 'calls': 52, 'in': 1010005, 'out': 101005, 'usd': 0.745} and not m._TOKENS, cm)
     check('a new month starts at nothing', m.ai_cost_month({'month': '2026-09', 'calls': 9, 'in': 9, 'out': 9, 'usd': 9.0}, ET)['calls'] == 0)
+# ---- which AI model chooses the buys (CHOOSE_MODELS, 1 Nov 2026): turns by share, the free part a day, the tag on each buy
+if hasattr(m, 'model_turn'):
+    keep = (m.CHOOSE_MODELS, m.FREE_DAILY, m.ask_model, m.RANK_PICK, m.datetime)
+    turns = lambda arms, n: (setattr(m, 'CHOOSE_MODELS', arms), [m.model_turn(st_) for st_ in [{}] for _ in range(n)])[1]
+    check('two models take turns 50/50', turns([('a', 1), ('b', 1)], 4) == ['a', 'b', 'a', 'b'])
+    check('three take a third each', turns([('a', 1), ('b', 1), ('c', 1)], 6) == ['a', 'b', 'c', 'a', 'b', 'c'])
+    check('a share of 2 against 1 gives two thirds', turns([('a', 2), ('b', 1)], 6) == ['a', 'a', 'b', 'a', 'a', 'b'])
+    check('the model classes: mini and nano are small, the rest large', m.model_class('gpt-4o-mini') == 'mini' and m.model_class('gpt-5-nano') == 'mini' and m.model_class('gpt-5') == 'large')
+    check('GPT-5 and the o-series are asked as reasoning models, GPT-4o not', m.reasoning_model('gpt-5') and m.reasoning_model('o4-mini') and not m.reasoning_model('gpt-4o-mini'))
+    asked = []
+    def fake(prompt, name='gpt-4o-mini'):
+        asked.append(name); t = m._TOKENS.setdefault(name, [0, 0, 0]); t[0] += 4000; t[1] += 1000; t[2] += 1
+        return copy.deepcopy(MODEL['answer'])
+    D.t.clear(); m.ask_model = fake; m.FREE_DAILY = {'large': 9000, 'mini': 10 ** 9}; m.CHOOSE_MODELS = [('gpt-4o-mini', 1), ('gpt-5', 1)]
+    day = dt.datetime(2026, 11, 2, 15, 0, 0)
+    m.ask_within_free({'system': '', 'user': ''}, 'gpt-5', day)
+    used = json.loads(D.Table(m.SETTINGS_TABLE).rows[m.AIUSE_KEY]['data'])
+    check('a call counts its tokens in the day\'s record, by class', used == {'day': '2026-11-02', 'large': 5000, 'mini': 0}, used)
+    m.ask_within_free({'system': '', 'user': ''}, 'gpt-5', day); n_before = len(asked)
+    check('past its free part a model is not asked', m.ask_within_free({'system': '', 'user': ''}, 'gpt-5', day) is None and len(asked) == n_before)
+    check('a new day starts again', m.free_used(day + dt.timedelta(days=1)) == {'day': '2026-11-03', 'large': 0, 'mini': 0})
+    # a whole check-in with no stand-in model: the turn's model chooses and each buy it chose remembers which
+    T0 = dt.datetime(2026, 10, 12, 15, 0, 0)            # a Monday, the US market open (t0 is reused as a number above)
+    D.t.clear(); m.RANK_PICK = False; asked.clear(); m.FREE_DAILY = {'large': 10 ** 9, 'mini': 10 ** 9}; SNAP['3-100'] = ROWS(); PRICES.clear()
+    m.fetch_snapshot, m.fetch_quote = snapshot, quote; m.get_snapshot = lambda key, now=None: snapshot(key)
+    rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=20, screeners=['3-100'])
+    rec['state']['startedAt'] = m.iso(T0); m.save_item(U, rec)
+    MODEL['answer'] = {'picks': [{'symbol': 'S02', 'reason': 'Rank 3'}, {'symbol': 'S04', 'reason': 'Rank 5'}]}
+    rec = m.load_item(U); m.run_user(U, rec, T0, snapshot=snapshot, quote=quote, mail=lambda s_, l_: None, headlines=lambda h, now: [])
+    opened = rec['state'].get('open') or {}
+    tags = {f['symbol']: f.get('mdl') for f in opened.values()}
+    check('with no stand-in, the first check-in is the first model\'s turn: the buys it chose say so, those filled in by rank do not',
+          asked[:1] == ['gpt-4o-mini'] and tags.get('S02') == tags.get('S04') == 'gpt-4o-mini' and all(v is None for k, v in tags.items() if k not in ('S02', 'S04')), (asked, tags))
+    check('the buy\'s line names the model', any('chosen by the AI model (gpt-4o-mini)' in (e.get('text') or '') for e in rec['log'] if e.get('type') == 'buy'))
+    check('the model goes into the shared record', 'mdl' in m.POOL_FIELDS)
+    rec['state']['models'] = {'n': 1}; m.save_item(U, rec); rec = m.load_item(U)
+    MODEL['answer'] = {'picks': [{'symbol': 'S06', 'reason': 'Rank 7'}, {'symbol': 'S07', 'reason': 'Rank 8'}]}
+    m.run_user(U, rec, T0 + dt.timedelta(days=1), snapshot=snapshot, quote=quote, mail=lambda s_, l_: None, headlines=lambda h, now: [])
+    tags2 = {f['symbol']: f.get('mdl') for f in (rec['state'].get('open') or {}).values()}
+    check('the next turn is GPT-5\'s, and its buys say so', 'gpt-5' in asked and tags2.get('S06') == tags2.get('S07') == 'gpt-5', (asked, tags2))
+    def refuses(prompt, name='gpt-4o-mini'):
+        asked.append(name)
+        return None if name == 'gpt-5' else copy.deepcopy(MODEL['answer'])
+    m.ask_model = refuses; asked.clear(); rec['state']['models'] = {'n': 1}; m.save_item(U, rec); rec = m.load_item(U)
+    MODEL['answer'] = {'picks': [{'symbol': 'S08', 'reason': 'Rank 9'}, {'symbol': 'S09', 'reason': 'Rank 10'}]}
+    before = set((rec['state'].get('open') or {}).keys())
+    m.run_user(U, rec, T0 + dt.timedelta(days=2), snapshot=snapshot, quote=quote, mail=lambda s_, l_: None, headlines=lambda h, now: [])
+    new = [f for k, f in (rec['state'].get('open') or {}).items() if k not in before]
+    check('a model that does not answer hands its turn to the first in the list, and the buys say which answered', 'gpt-5' in asked and asked[asked.index('gpt-5') + 1] == 'gpt-4o-mini' and {f['symbol']: f.get('mdl') for f in new}.get('S08') == 'gpt-4o-mini', (asked, {f['symbol']: f.get('mdl') for f in new}))
+    m.CHOOSE_MODELS, m.FREE_DAILY, m.ask_model, m.RANK_PICK, m.datetime = keep; MODEL['answer'] = None
 print('ALL PASS' if ok else 'SOME FAILED')

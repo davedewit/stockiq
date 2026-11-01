@@ -2203,7 +2203,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 | Screener data | `stockiq-screener-coordinator` | Called with no `userId`, so nothing is saved to anyone's history |
 | Prices | `stockiq-price-proxy` | Also exchange rates (`AUDUSD=X`, `USDJPY=X`) and the S&P 500 fund (`SPY`) |
 | Headlines | Google News RSS (coins), Yahoo Finance RSS (shares) | Fetched by the Lambda; the AI model has no internet |
-| AI model | OpenAI `gpt-4o-mini`, JSON replies; `gpt-4o` for the holdings review when a gain is at stake | Three uses: choose buys, review holdings, write notes. `aws lambda invoke … --payload '{"model_test": true}'` asks each one question and says which answered |
+| AI model | OpenAI `gpt-4o-mini`, JSON replies. **The buys are chosen by `CHOOSE_MODELS` in turn by share (since 1 Nov 2026: GPT-4o-mini and GPT-5, 50/50; each buy tagged `mdl`)**, inside the account's free daily tokens (OpenAI's complimentary tokens for data sharing: about 250,000 a day for larger models, 2.5 million for small; `FREE_DAILY` is this function's part, counted in `_aiuse`). `gpt-4o` for the holdings review (off since 17 Oct) | Uses: choose buys, the sector funds' daily read, notes. `aws lambda invoke … --payload '{"model_test": true}'` asks each one question and says which answered |
 | Email | SES, from `autopilot@stockiq.tech` to the account's own address | The role has SES access; the owner's address is a verified identity (SES is still in sandbox) |
 
 The Function URLs are written into the scripts. As everywhere on this site the `userId` is whatever the browser

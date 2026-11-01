@@ -182,3 +182,12 @@ Rules:
   extractor reading the wrong part of a page: `python3 article_text.py <url>`); a summary that reads as advice.
 - **Undo:** `git revert` the commit "News summaries from the article itself".
 - **Remove after:** 2026-11-15
+
+### 2026-11-01 · The AI model that chooses the buys takes turns (GPT-4o-mini and GPT-5)
+- **Changed:** `stockiq-ai-trader`: `CHOOSE_MODELS` (who chooses, by share), `model_turn`, `ask_within_free` with a day's token count
+  in item `_aiuse` (`FREE_DAILY`: 150,000 large-model tokens a day of the account's ~250,000 free), `mdl` on each buy the model chose;
+  GPT-5 asked as a reasoning model (`reasoning_model`: no temperature, `max_completion_tokens`).
+- **Could break:** an OpenAI charge (look at the OpenAI usage page: spend must stay $0; if not, the model's class is not in the free
+  list: set `CHOOSE_MODELS` back to GPT-4o-mini alone); check-ins slower (GPT-5 takes about 8 s); "AI model gpt-5 not used" in the log.
+- **Undo:** `CHOOSE_MODELS = [('gpt-4o-mini', 1)]`, or the zip `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_models_20261101.zip`.
+- **Remove after:** 2026-11-15

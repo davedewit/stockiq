@@ -575,6 +575,16 @@
    "added": "2026-11-01",
    "decided": "2026-11-01",
    "result": "Not tried, at the owner's word (1 Nov 2026): he wants many pages, and fewer would mean fewer chances to be found. The better route is stock-page-unique: make the pages worth listing, then open more of them to Google, not fewer"
+  },
+  {
+   "id": "choose-models",
+   "what": "The AI model that chooses the buys takes turns: GPT-4o-mini (as before) and GPT-5, 50/50 (CHOOSE_MODELS in stockiq-ai-trader; any number of models with any shares), each buy tagged mdl, within OpenAI's free daily tokens (FREE_DAILY)",
+   "angle": "AI use, profit",
+   "measure": "the average a finished trade after costs against an S&P 500 fund, for the buys each model chose, from 30 each (autopilot_review.py 'by the AI model that chose it'); keep the better as the only model, or try a newer one against it",
+   "status": "running",
+   "added": "2026-11-01",
+   "started": "2026-11-01",
+   "decide": "2026-12-06"
   }
  ]
 }

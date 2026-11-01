@@ -184,6 +184,8 @@ def main():
     breakdown('the longer-holds trial (from 30 Oct 2026: while the holding time is automatic, half the shares are kept up to 20 days)', [t for t in trades if t.get('lh') is not None], lambda t: 'kept up to 20 days' if t.get('lh') == 1 else "kept the level's own time")
     breakdown('the AI model against the top by rank (a trial from 23 Oct 2026: every second share the model picks is swapped for the top-ranked of its market)',
               [t for t in trades if t.get('rp') is not None], lambda t: 'taken by rank' if t.get('rp') == 1 else "the AI model's own choice")
+    breakdown('by the AI model that chose it (CHOOSE_MODELS, from 1 Nov 2026: the models take turns, the review compares them)',
+              [t for t in trades if t.get('mdl')], lambda t: t['mdl'])
     waits = [t['gw'] for t in trades if t.get('gw') is not None]
     if waits:                                           # the gap rule (GAP_WAIT, a trial from 23 Oct 2026)
         m_, n_ = sum(waits) / len(waits), len(waits); se_ = (sum((x - m_) ** 2 for x in waits) / (n_ - 1) / n_) ** 0.5 if n_ > 1 else float('nan')
