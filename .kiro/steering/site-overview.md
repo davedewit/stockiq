@@ -4140,7 +4140,8 @@ Needs the owner's decision or more work (nothing here is fixed):
     taken off. It also brings back reports the user's own auto-delete removed in the last week (they carry a `ttl` too): harmless.
   - **Faults left for the payments session (#15):** a plan change ends the old Stripe subscription and is taken for a cancellation (the
     member's reports hidden, to be removed in 30 days, while paying); the files' clocks run from creation, not from the plan's end.
-  - The "Recently Deleted" switch on the Reports tab went on 1 Nov 2026 (it could only show deleted reports, not restore them). The
+  - The "Recently Deleted" switch on the Reports tab shows deleted reports faded in the list (the owner uses it; removed and put back on
+    1 Nov 2026): with deleted reports removed a week later it shows the last week's. It cannot restore one. The
     1,194 reports deleted before then (99% of the table) are removed by `check-tools/pending-expire-deleted/deploy.sh`, the owner's yes
     (#19); the session's safety check refuses bulk removal of user data, so the owner runs it.
 - **Email signup:** the endpoint is public (a bot could flood signups and notification emails),
