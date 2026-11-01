@@ -39,10 +39,6 @@ import requests
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from article_text import fetch_article_text, unbacked_figures
-try:
-    INDEXED = {l.strip() for l in open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'indexable_stocks.txt')) if l.strip()}
-except OSError:
-    INDEXED = set()
 
 STOCKS_DIR = '/Users/dave/VSCODE/website/stocks'
 NEWS_JS_PATH = '/Users/dave/VSCODE/website/news.js'
@@ -405,10 +401,10 @@ def generate_news_summary(symbol, news_item):
         # with nothing to stop an invented figure). Every figure must be in the article, or in the headline when only that
         # is known; a summary that keeps failing gives way to a plain pointer to the article
         title = news_item['title']
-        # Only for the indexed pages (about half the summaries): reading the article costs about $0.0002 a summary in tokens and a
-        # second or two each; at about 440 summaries a day that was about $2.20 a month for all, $1.10 for the indexed (1 Nov 2026,
-        # the owner: "only do this for the more popular pages as it cost more")
-        article = fetch_article_text(news_item.get('link', '')) if symbol in INDEXED else None
+        # For every page: the account has OpenAI's complimentary daily tokens (data sharing on; about 2.5 million a day for small
+        # models, the site uses well under one million even with the articles), so the cost is nil (1 Nov 2026). Without them it
+        # would be about $2.20 a month at list price
+        article = fetch_article_text(news_item.get('link', ''))
         if article:
             prompt = f"""Summarise this news article about {symbol} in 2-3 sentences (60-80 words).
 
