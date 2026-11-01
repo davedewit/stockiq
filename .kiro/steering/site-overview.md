@@ -465,7 +465,7 @@ its top. Without that, `update_stock_analysis.py` crashed on 24 Oct 2026 ("Too m
 open on a flaky network) before writing a page: the stock pages kept the day before's figures.
 
 Order inside `deploy-to-s3.sh`:
-1. `update_news.py`: Yahoo/Google RSS → OpenAI summaries → news.html + news.js (2-hour cooldown)
+1. `update_news.py`: CNBC feeds (the article itself summarised, since 1 Nov 2026), then Google News (headline only) → news.html + news.js (2-hour cooldown)
 2. `update_stock_news.py`: per-stock news into stock pages + news.html/news.js (23-hour cooldown per stock)
 3. `update_stock_analysis.py` (**daily run only**: it sits inside the `UPDATE_STOCK_NEWS=true` block, so a plain `./deploy-to-s3.sh` prints "Skipping stock data snapshots"): data snapshots on all 3,467 stocks, sets index/noindex on large caps (≥$10B), writes `indexable_stocks.txt`. ~20 min, no API cost. 404s for delisted stocks are normal/cached. When Yahoo has no price for a stock it keeps yesterday's snapshot and does not de-index it. Then `update_home_stock_links.py` rewrites the home page's "Stock Pages" section and `stock-pages.js` (section 6), and `update_screener_pages.py` the daily public screener pages (section 6). In the same block, `publish_company_figures.py` publishes the company figures the single-stock report uses for shares outside the US (section 7, "The single-stock report"); it never stops the deploy.
 4. Backups (website + stockiq; prod_scripts every 23h)
