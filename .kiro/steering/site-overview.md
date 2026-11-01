@@ -4132,7 +4132,8 @@ Needs the owner's decision or more work (nothing here is fixed):
   `stockiq-dashboard-analysis-history` and `stockiq-option-1-1-custom-analysis`, removed by the buckets' lifecycle rules on a tag.
   - *The user's own auto-delete* (`stockiq-auto-delete-scheduler` daily → `stockiq-auto-delete-cleanup` per user): reports older than
     their setting are hidden (`deleted`) and removed a week later (`ttl`). Default since 1 Nov 2026: **"never" for an active paid plan,
-    30 days for everyone else** (it was 3 days for everyone, paying members included). A stored choice wins. Pinned reports are kept.
+    30 days for everyone else** (it was 3 days for everyone, paying members included). A stored choice wins. Favourites (`pinned`) are skipped by this clean-up only: the trial-end and plan-end clean-ups below take them too.
+    The Reports tab's note says so per account (`.only-unpaid`, hidden by `html.paid-user`).
   - *A free trial that ended without paying* (`stockiq-trial-cleanup`, daily; 3 days after the first report): every report hidden and
     removed 30 days later; files tagged `AutoDeleteTrial` (the lifecycle removes them 30 days **after the file was made**).
   - *A paid plan that ended* (`stockiq-payment-handler`, Stripe's "subscription deleted" → `stockiq-dashboard` `set_subscription_end_ttl`):
