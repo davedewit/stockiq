@@ -234,7 +234,7 @@ warns about; one change at a time, measured, with its experiment entry.
 - **The bill for October: $1.57 of StockIQ's running cost, 7 cents over the $1.50 limit**, explained and fixed (the auto-delete cleanup
   bug and the per-file cache clears of 23-26 Oct): in `KNOWN_OVER`, so the Admin card says "No, all good" with the reason. The report
   history's reads were the largest running database cost: **99% of its rows were deleted reports never removed** (found 1 Nov 2026; now removed a
-  week after deletion, the old 1,194 by the owner's run of `pending-expire-deleted`, #19), about 30 cents a month saved; `history-light` waits. November should run
+  week after deletion, the old 1,195 by the owner's run on 1 Nov, #19), about 30 cents a month saved; `history-light` waits. November should run
   under $1: read `cost_check.py` in its first week; add no `KNOWN_OVER` entry for November without a fixed cause.
 - **Live lately** (the detail in section 13 and `watch-list.md`): 31 Oct evening, the market figures flash like a broker's screen (on a
   real trade only, in trade order, the changed part only, one colour a row; section 8), the panel's seven data functions agree with the
@@ -4144,8 +4144,8 @@ Needs the owner's decision or more work (nothing here is fixed):
     member's reports hidden, to be removed in 30 days, while paying); the files' clocks run from creation, not from the plan's end.
   - The "Recently Deleted" switch on the Reports tab shows deleted reports faded in the list (the owner uses it; removed and put back on
     1 Nov 2026): with deleted reports removed a week later it shows the last week's. It cannot restore one. The
-    1,194 reports deleted before then (99% of the table) are removed by `check-tools/pending-expire-deleted/deploy.sh`, the owner's yes
-    (#19); the session's safety check refuses bulk removal of user data, so the owner runs it.
+    1,195 reports deleted before then (99% of the table) were given an expiry by the owner's run on 1 Nov 2026 (#19; the session's safety
+    check refuses bulk removal of user data, so he ran the script); AWS removes them within about two days.
 - **Email signup:** the endpoint is public (a bot could flood signups and notification emails),
   the Lambda has no CloudWatch log group, and nothing is sent to subscribers yet.
 - **The site's wording (rewritten 13 Oct 2026; section 13): what it now says, so that it stays true.** The numbers on the
