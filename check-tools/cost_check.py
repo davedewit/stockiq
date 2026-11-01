@@ -27,8 +27,11 @@ FIXED_UNTIL = {'stockiq-dashboard-analysis-history': '2026-10-27',   # the clean
 KNOWN_OVER = {'2026-10': {'upTo': 1.65, 'why': "two faults of 23-26 Oct, both fixed: a cleanup that read the whole reports table 64 times a day, "
                                                "and a cache clear for every file deployed (125 paths over the free 1,000)"}}
 # A table's reads with a known cause, as a note rather than a problem up to this many units a day
-KNOWN_READS = {'stockiq-dashboard-analysis-history': (150000, 'about 400 read units each time the dashboard is loaded (it reads every report '
-                                                               'with its text): idea history-light')}
+# The report history's reads (1 Nov 2026): 99% of its rows were reports deleted but never removed, read again on every dashboard visit;
+# deleted reports are now removed a week after deletion and the old ones by the owner's run of pending-expire-deleted (#19). Lowered
+# from 150,000: if the reads stay above this after mid-November, something keeps them (the old rows not cleared, or a new reader)
+KNOWN_READS = {'stockiq-dashboard-analysis-history': (40000, 'a dashboard visit reads the user\'s reports with their text (idea history-light); '
+                                                              'deleted reports are removed a week after deletion since 1 Nov 2026')}
 TABLE_FLOOR = 0.10    # a table matters from about 10 cents a month: below that a busy day of page refreshes is not a problem
 KNOWN_PATHS = {'2026-10': 1125}     # cache-clear paths already explained for the month (the per-file clears of 23-25 Oct, then one '/*' a deploy; resets 1 Nov)
 TABLES = ['stockiq-dashboard-analysis-history', 'stockiq-ai-trader', 'stockiq-user-tracking', 'stockiq-paper-portfolios',

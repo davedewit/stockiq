@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-11-01",
+   "what": "The report history's database reads: 99% of its rows were deleted reports never removed, read on every dashboard visit; now removed a week after deletion (about 30 cents a month saved, a fifth of the bill). The Reports tab's note says how it works now",
+   "found": "session"
+  },
+  {
+   "at": "2026-11-01",
    "what": "The 'Recently Deleted' switch is back on the Reports tab (you use it): it shows the last week's deleted reports, faded, before they are removed for good",
    "found": "owner"
   },
@@ -298,11 +303,6 @@
   {
    "at": "2026-10-30",
    "what": "The daily update had stalled: news.html had doubled itself to 5.8 GB since 27 Oct (a fault in the 26 Oct news fix), so today's run hung 8 hours and uploaded nothing. Fixed the cause, added a guard, restored the page, and the run then finished. The daily email now says when a step is killed.",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-26",
-   "what": "The search's news box shows only when a suggestion is picked, so the suggestion list is never hidden",
    "found": "owner"
   }
  ]

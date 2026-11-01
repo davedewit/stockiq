@@ -233,7 +233,8 @@ warns about; one change at a time, measured, with its experiment entry.
   -$1,776: without them the account is about $790 ahead of the S&P 500. The Admin page's decision card shows the split; read it each week.
 - **The bill for October: $1.57 of StockIQ's running cost, 7 cents over the $1.50 limit**, explained and fixed (the auto-delete cleanup
   bug and the per-file cache clears of 23-26 Oct): in `KNOWN_OVER`, so the Admin card says "No, all good" with the reason. The report
-  history's reads (about 400 units a dashboard load, idea `history-light`) are the largest running database cost. November should run
+  history's reads were the largest running database cost: **99% of its rows were deleted reports never removed** (found 1 Nov 2026; now removed a
+  week after deletion, the old 1,194 by the owner's run of `pending-expire-deleted`, #19), about 30 cents a month saved; `history-light` waits. November should run
   under $1: read `cost_check.py` in its first week; add no `KNOWN_OVER` entry for November without a fixed cause.
 - **Live lately** (the detail in section 13 and `watch-list.md`): 31 Oct evening, the market figures flash like a broker's screen (on a
   real trade only, in trade order, the changed part only, one colour a row; section 8), the panel's seven data functions agree with the
