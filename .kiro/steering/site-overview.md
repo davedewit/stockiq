@@ -253,6 +253,7 @@ warns about; one change at a time, measured, with its experiment entry.
   to Google, never fewer (the owner wants thousands of pages; `fewer-pages` dropped). First build at the weekly session: (G) below.
   To be seen after the run of 1 Nov: stock-pages.html live and in the sitemap, the sitemap's stock dates current (`seo_crawl.py`
   passes all), the hub's arrows against Thursday, "6 days in the top 10", a daily email without "IndexNow response: 403".
+- **1 Nov 2026, from the owner's questions (all live):** news summaries from the real article (CNBC feeds, every stock page; OpenAI's tokens are free for this account), the progress score and the daily AI summaries (section 8c), GPT-4o-mini against GPT-5 choosing the buys (`choose-models`), the Practice tab's leader tag, the privacy policy naming OpenAI. **Read the first summaries (written after 21:10 UTC on 1 Nov) and Monday's first score point with its drivers; check OpenAI's spend stays $0.**
 - **To be seen for real:** the hub's arrows (`screeners-today.html`, from the daily update of 31 Oct: it compares with the day before);
   "This week in the markets" linking each announcement's market (same update); the first `longer-holds` buys (`lh` on the remembered buy)
   and the review's split; the first GA4 events (sign_up, purchase …) in Google Analytics (the owner sends figures); the thank-you after a
