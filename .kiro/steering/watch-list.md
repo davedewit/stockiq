@@ -213,3 +213,12 @@ Rules:
 - **Could break:** "theme calls not rescored" in the log; the Practice/autopilot figures of the AI's calls showing none scored (prices not had).
 - **Undo:** the zip `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_themecalls_20261101.zip`.
 - **Remove after:** 2026-11-15
+
+### 2026-11-01 · Reports kept 30 days by default; auto-deleted reports removed a week later (Admin #18)
+- **Changed:** `stockiq-auto-delete-cleanup` (queries only reports older than the cut-off; sets `ttl` 7 days on with `deleted`),
+  `stockiq-auto-delete-scheduler` and `stockiq-user-trial-manager` (default `autoDeleteDays` '30'), `dashboard.html` (30 days in the
+  menu, the default; the setting loaded once). The table's TTL is on (attribute `ttl`).
+- **Could break:** "Run Now" on the dashboard failing; reports a user wanted kept disappearing (pinned ones are skipped, as before);
+  the trial-manager answer (it serves every signed-in page: a smoke test after the deploy answered normally).
+- **Undo:** the zips `~/VSCODE/backup/stockiq-{auto-delete-cleanup,auto-delete-scheduler,user-trial-manager}_before_reports30_20261101.zip`.
+- **Remove after:** 2026-11-15

@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-11-01",
+   "what": "Reports are kept 30 days unless you choose otherwise (it was 3, which left the Top 10 tracker's weekly columns empty); auto-deleted reports are now really removed a week later",
+   "found": "check"
+  },
+  {
+   "at": "2026-11-01",
    "what": "The sector funds' AI calls are now judged against the S&P 500 over the same days (all 28 had been measured against one old price): 8 right of 14, not 6",
    "found": "check"
   },
@@ -298,11 +303,6 @@
   {
    "at": "2026-10-26",
    "what": "Your own buys and AI autopilot on the graph each draw the gold S&P 500 line too (the same money in the fund on the same days), so every view compares with the S&P the same way",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-26",
-   "what": "The graph's measured stretch shows while you hold and clears when you let go, as broker apps do",
    "found": "owner"
   }
  ]
