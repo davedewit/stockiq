@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-11-01",
+   "what": "The sector funds' AI calls are now judged against the S&P 500 over the same days (all 28 had been measured against one old price): 8 right of 14, not 6",
+   "found": "check"
+  },
+  {
+   "at": "2026-11-01",
    "what": "Autopilot tab: the market-risk gauge now says what made its reading without a click (today: 1 of 4, the S&P 500 below its 50-day average; the VIX at 19.4, close to 20)",
    "found": "owner"
   },
@@ -299,11 +304,6 @@
    "at": "2026-10-26",
    "what": "The graph's measured stretch shows while you hold and clears when you let go, as broker apps do",
    "found": "owner"
-  },
-  {
-   "at": "2026-10-26",
-   "what": "On the graph, a chosen market's line is called the autopilot's buys from that screener, so it cannot be mistaken for the S&P 500 fund's line",
-   "found": "session"
   }
  ]
 }

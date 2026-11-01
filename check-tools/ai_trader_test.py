@@ -1963,4 +1963,25 @@ if hasattr(m, 'score_day'):
     av = m.admin_view(m.load_admin(), rec, json.loads(D.Table(m.PORTFOLIO_TABLE).rows[U]['data']), mon)
     check('the Admin page gets the score\'s days and the owner\'s summary', av['digest']['days'][-1]['score'] == 50.0 and av['digest']['owner']['lines'] and av['digest']['start'] == 50.0)
     m.ask_model, m.datetime = keep; ANS.clear()
+# ---- the sector funds' AI calls judged against the S&P 500 on the same days (Admin #16, 1 Nov 2026)
+if hasattr(m, 'rescore_theme_calls'):
+    keep_dt = m.datetime
+    th = {}
+    m.theme_read(th, [{'symbol': 'XLE', 'name': 'Energy', 'price': 100.0, 'trend': 5.0, 'm3': 2.0}], lambda p: {'theme': 'oil', 'calls': [{'symbol': 'XLE', 'view': 'better', 'why': 'oil'}]},
+                 dt.datetime(2026, 11, 2, 15, 0), ['Oil rises'], spy=750.0)
+    check('a call keeps the S&P 500 fund\'s price of that moment', th['calls'][0]['spy'] == 750.0 and th['calls'][0]['sv'] == 2, th['calls'])
+    th2 = {}
+    m.theme_read(th2, [{'symbol': 'XLE', 'name': 'Energy', 'price': 100.0, 'trend': 5.0, 'm3': 2.0}], lambda p: {'calls': [{'symbol': 'XLE', 'view': 'better'}]}, dt.datetime(2026, 11, 2, 15, 0), ['x'])
+    check('without it, as before: the last monthly change\'s price (and no mark)', th2['calls'][0]['spy'] is None)
+    day = lambda d: int((dt.datetime(2026, 10, d, 20, 0) - dt.datetime(1970, 1, 1)).total_seconds())
+    CH = {'SPY': [(day(19), 760.0), (day(21), 770.0), (day(28), 762.3)], 'XLE': [(day(19), 90.0), (day(21), 100.0), (day(28), 103.0)]}
+    old = {'calls': [{'at': '2026-10-21T15:00:00Z', 'symbol': 'XLE', 'view': 'better', 'price': 99.0, 'spy': 760.0, 'due': '2026-10-28T15:00:00Z', 'rel': 4.31, 'right': True},
+                     {'at': '2026-10-31T15:00:00Z', 'symbol': 'XLE', 'view': 'worse', 'price': 104.0, 'spy': 760.0, 'due': '2026-11-07T15:00:00Z'}]}
+    m.rescore_theme_calls(old, chart=lambda s_: CH[s_])
+    c0, c1 = old['calls']
+    check('an old call is judged again from the closes of its own days: XLE +3% against the S&P 500 -1% is +4 points', c0['price'] == 100.0 and c0['spy'] == 770.0 and c0['rel'] == 4.0 and c0['right'] is True and c0['sv'] == 2, c0)
+    check('one not yet due keeps no score, with its prices set right', c1.get('rel') is None and c1['spy'] == 762.3 and c1['sv'] == 2, c1)
+    m.rescore_theme_calls(old, chart=lambda s_: {'SPY': [], 'XLE': []}[s_])
+    check('done once only', old['rescored'] == 1 and c0['rel'] == 4.0)
+    m.datetime = keep_dt
 print('ALL PASS' if ok else 'SOME FAILED')

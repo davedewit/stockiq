@@ -206,3 +206,10 @@ Rules:
 - **Could break:** the tag on two cards or on a card that is not highest; the weekly sums check (`sums_agree` reads the lines under the cards).
 - **Undo:** `git revert` the website commit "Practice portfolio: the leader tagged …".
 - **Remove after:** 2026-11-15
+
+### 2026-11-01 · The sector funds' AI calls judged against the S&P 500 over the same days (Admin #16)
+- **Changed:** `stockiq-ai-trader`: `theme_read(..., spy=)` keeps SPY's price with each call (`sv` 2); `rescore_theme_calls` judges the
+  older calls again from daily closes, once (`themes.rescored`), at the first check-in with the US market open (Mon 2 Nov).
+- **Could break:** "theme calls not rescored" in the log; the Practice/autopilot figures of the AI's calls showing none scored (prices not had).
+- **Undo:** the zip `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_themecalls_20261101.zip`.
+- **Remove after:** 2026-11-15
