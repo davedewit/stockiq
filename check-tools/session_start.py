@@ -129,9 +129,11 @@ if u:
             pts = cw.get_metric_statistics(Namespace='AWS/Billing', MetricName='EstimatedCharges', Dimensions=mt['Dimensions'],
                                            StartTime=now - datetime.timedelta(days=2), EndTime=now, Period=21600, Statistics=['Maximum'])['Datapoints']
             if pts:
-                pt = max(pts, key=lambda p: p['Timestamp']); parts[dd['ServiceName']] = pt['Maximum']; stamps.append(pt['Timestamp'])
+                pt = max(pts, key=lambda p: p['Timestamp']); parts[dd['ServiceName']] = (pt['Maximum'], pt['Timestamp']); stamps.append(pt['Timestamp'])
         # the month the figures belong to (early on the 1st AWS still serves last month's totals: cost_check.py, 1 Nov 2026)
         bill_month = max(stamps).astimezone(datetime.timezone.utc).strftime('%Y-%m') if stamps else now.strftime('%Y-%m')
+        # a service with no charge yet this month sends no new figure: its latest is last month's total (2 Nov 2026, Cost Explorer)
+        parts = {k: v for k, (v, t) in parts.items() if t.astimezone(datetime.timezone.utc).strftime('%Y-%m') == bill_month}
         ce = parts.pop('AWSCostExplorer', 0); known = KNOWN_CE.get(bill_month, 0)
         running = sum(parts.values())
         print(f"  StockIQ's running cost this month ${running:.2f} (" + ', '.join(f"{k} ${v:.2f}" for k, v in sorted(parts.items(), key=lambda x: -x[1]) if v >= 0.01) +

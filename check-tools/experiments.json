@@ -615,6 +615,14 @@
    "added": "2026-11-01",
    "started": "2026-11-01",
    "decide": "2026-11-22"
+  },
+  {
+   "id": "review-skip-session",
+   "what": "The daily Claude review shares the owner's Claude usage allowance (on 1 Nov 2026 it started after a long session and stopped at the usage limit, writing no report). Skip it on a day a session already ran (a line in What changed lately that day) and say so in its log, so his allowance goes to the sessions; the scripted daily site check still runs",
+   "angle": "cost",
+   "measure": "Days the review stops at the usage limit (2 of 6 so far) against its reports' useful findings",
+   "status": "idea",
+   "added": "2026-11-02"
   }
  ]
 }

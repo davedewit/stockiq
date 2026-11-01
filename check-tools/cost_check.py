@@ -18,7 +18,7 @@ ACCOUNT = '114366766218'
 LIMIT, HARD = 1.00, 1.50              # the owner's monthly target for StockIQ's running cost, and his most in a heavy month
 KNOWN_CE = {'2026-10': 2.65}          # Cost Explorer charge already explained (the session's tests of 17 Oct 2026)
 # a finding already fixed, left out until its old days have passed (then checked again as usual)
-FIXED_UNTIL = {'stockiq-dashboard-analysis-history': '2026-10-27',   # the cleanup's 64 scans a day, fixed 25 Oct 13:20 UTC
+FIXED_UNTIL = {'stockiq-dashboard-analysis-history': '2026-11-04',   # scans of the 1,195 deleted reports (31 Oct, 1 Nov), removed 1 Nov: 14 rows left
                'AmazonCloudFront': '2026-11-02',                     # one path per file, fixed 26 Oct; then each '/*' cost $0.005 while October was over the free 1,000 (KNOWN_PATHS)
                'AmazonS3': '2026-10-28'}                             # the one-off re-upload of ~3,000 stock pages on 24 Oct
 # A month over the owner's $1.50 whose cause is found and fixed: known up to this amount, so it stops calling him in (31 Oct 2026, the owner:
@@ -61,7 +61,7 @@ def run():
     now = dt.datetime.now(dt.timezone.utc)
 
     # 1. the bill by service (cumulative over the month, so a day's spend is the rise from one day to the next)
-    running, ce, stamps = 0.0, 0.0, []
+    running, ce, stamps, figures = 0.0, 0.0, [], []
     for mt in cw.list_metrics(Namespace='AWS/Billing', MetricName='EstimatedCharges')['Metrics']:
         d = {x['Name']: x['Value'] for x in mt['Dimensions']}
         if d.get('LinkedAccount') != ACCOUNT or 'ServiceName' not in d:
@@ -74,11 +74,7 @@ def run():
         if latest:
             pt = max(latest, key=lambda p: p['Timestamp'])
             stamps.append(pt['Timestamp'])
-        latest = pt['Maximum'] if latest else cum[-1]   # the month so far, as the opening check reads it
-        if d['ServiceName'] == 'AWSCostExplorer':
-            ce = latest
-            continue
-        running += latest
+        figures.append((d['ServiceName'], pt['Maximum'] if latest else cum[-1], pt['Timestamp'] if latest else None))
         rises = [b - a for a, b in zip(cum, cum[1:]) if b >= a]          # a fall is the month starting again
         if jumped(rises, 0.02) and now.strftime('%Y-%m-%d') >= FIXED_UNTIL.get(d['ServiceName'], ''):
             out.append(('problem', f"{d['ServiceName']} cost ${rises[-1]:.2f} yesterday, against about ${statistics.median(rises[:-1]):.2f} a day "
@@ -86,6 +82,15 @@ def run():
     # the month the figures belong to: in the first hours of a month AWS still serves the last month's totals (1 Nov 2026: October's
     # explained bill was read against November's lists and called in as two problems)
     bill_month = max(stamps).astimezone(dt.timezone.utc).strftime('%Y-%m') if stamps else now.strftime('%Y-%m')
+    # a service with no charge yet this month sends no new figure, so its latest one is still last month's total (2 Nov 2026: Cost
+    # Explorer's $2.65 of October read as a November charge): count a figure only in the month it was sent
+    for name, value, stamp in figures:
+        if stamp is not None and stamp.astimezone(dt.timezone.utc).strftime('%Y-%m') != bill_month:
+            continue
+        if name == 'AWSCostExplorer':
+            ce = value
+        else:
+            running += value
     known = KNOWN_CE.get(bill_month, 0)
     if ce > known + 0.01:
         out.append(('problem', f"Cost Explorer has been charged ${ce - known:.2f} this month beyond the known amount: something asks it "
