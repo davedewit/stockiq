@@ -3,6 +3,16 @@
  "changes": [
   {
    "at": "2026-11-01",
+   "what": "The daily cost check no longer counts last month's bill at the start of a new month (Cost Explorer's October $2.65 had read as a November charge in the daily email)",
+   "found": "check"
+  },
+  {
+   "at": "2026-11-01",
+   "what": "The AI chat knows the dashboard as it is now: the Practice tab's top and the Leading tag, the Reports tab's delete rules, the daily summary, the market-risk gauge, the two AI models taking turns",
+   "found": "owner"
+  },
+  {
+   "at": "2026-11-01",
    "what": "The Reports tab's auto-delete note is two short sentences; the line about a trial ending shows only to accounts without a paid plan",
    "found": "owner"
   },
@@ -294,16 +304,6 @@
    "at": "2026-10-30",
    "what": "The weekly review of the autopilot (30 Oct): no faults; no rule change, as no group of 30 trades is clearly up or down; Claude's forecast lowered from 25% to 20%",
    "found": "session"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "The daily email now names a step the system stopped (out of memory) and warns when news.html grows too large; the 27-29 Oct emails had missed it",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "Market news articles get their 'Read full article' link again (it had come out blank since the script was written, on the news page and the home page's list)",
-   "found": "owner"
   }
  ]
 }
