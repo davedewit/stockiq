@@ -191,3 +191,18 @@ Rules:
   list: set `CHOOSE_MODELS` back to GPT-4o-mini alone); check-ins slower (GPT-5 takes about 8 s); "AI model gpt-5 not used" in the log.
 - **Undo:** `CHOOSE_MODELS = [('gpt-4o-mini', 1)]`, or the zip `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_models_20261101.zip`.
 - **Remove after:** 2026-11-15
+
+### 2026-11-01 · The progress score and the daily AI summaries
+- **Changed:** `stockiq-ai-trader` (`write_digests` after 21:10 UTC, item `_digest`, `state.digest`; `admin_view` and `public()` send them);
+  `admin-panel.js?v=58` ("Today in 30 seconds"), `practice-autopilot.js?v=76` ("Your day in short").
+- **Could break:** no summary by the morning ("daily summaries not written" or "daily summary not written for …" in the function's log);
+  a summary that says something untrue (the figure check passes numbers only: read the first few); the score not moving on a trading
+  day (the SPY quote not fresh at 21:10); the scheduled run taking longer (GPT-5 about 10 s a day).
+- **Undo:** the zip `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_digest_20261101.zip`; the two scripts from git.
+- **Remove after:** 2026-11-15
+
+### 2026-11-01 · Practice portfolio top: the leader tagged, no "since the start" lines, cash on top
+- **Changed:** `practice-portfolio.js?v=81` (`leads`, `.pp-cashline`, the cards' sub lines removed).
+- **Could break:** the tag on two cards or on a card that is not highest; the weekly sums check (`sums_agree` reads the lines under the cards).
+- **Undo:** `git revert` the website commit "Practice portfolio: the leader tagged …".
+- **Remove after:** 2026-11-15

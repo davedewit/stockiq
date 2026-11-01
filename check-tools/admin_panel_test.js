@@ -196,5 +196,15 @@ async function page(status, uid) {
     check('"Coming up" says who does each thing', /a session with Claude/.test(pl) && /The daily update \(automatic, on your Mac every day/.test(pl), pl.slice(pl.indexOf('Coming up'), pl.indexOf('Coming up') + 500));
     check('proposals for a session are not counted as decisions waiting for the owner', !/decisions? waiting for your yes or no/.test(pl), pl.slice(0, 400));
   }
+  {   // the progress score and the day's summary (1 Nov 2026)
+    ADMIN.digest = { start: 50, perPct: 10, owner: { at: new Date().toISOString(), how: 'ai', lines: ['📈 Progress score 48.5, down 1.5 today.', '⚠️ Behind the S&P 500 fund by $1,537.'] },
+                     days: [{ d: '2026-10-30', score: 50, pts: 0, acct: 0, fund: 0, why: [] }, { d: '2026-11-02', score: 48.5, pts: -1.5, acct: -0.4, fund: -0.25, why: ['AMD -$202 against the fund'] }] };
+    const q = await page(200, 'dave@x.com'); const t = q.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    check('"Today in 30 seconds" comes straight after the check-in card: the score, its last move, the summary and the day by day with why', /Today in 30 seconds Progress score 48\.5 last trading day ▼ 1\.5/.test(t) && /📈 Progress score 48\.5, down 1\.5 today\. ⚠️ Behind the S&amp;P 500 fund by \$1,537\./.test(t) && /AMD -\$202 against the fund/.test(t) && (t.indexOf('Real money') === -1 || t.indexOf('Today in 30 seconds') < t.indexOf('Real money')) && t.indexOf('Do you need to check in') < t.indexOf('Today in 30 seconds') && /<polyline/.test(q.panel.innerHTML), t.slice(t.indexOf('Today in 30'), t.indexOf('Today in 30') + 300));
+    ADMIN.digest.owner = null;
+    const q2 = await page(200, 'dave@x.com'); const t2 = q2.panel.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    check('before the first summary it says when it comes, and shows the score', /Progress score 48\.5/.test(t2) && /The first daily summary is written tonight/.test(t2));
+    delete ADMIN.digest;
+  }
   console.log(ok ? 'ALL PASS' : 'SOME FAILED'); process.exit(ok ? 0 : 1);
 })();

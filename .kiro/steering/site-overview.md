@@ -1776,6 +1776,7 @@ is hidden. **Keep the Reports panel first in the page**: one report routine find
 with `document.querySelector('h3')`.
 
 **Practice portfolio** (its own tab, container `#practice-portfolio`):
+- **Since 1 Nov 2026 (the owner):** cash and holdings in one line under the heading (`.pp-cashline`); the three cards show the value and the day only (the "since the start" lines went: they all started at $100,000, which one line under the comparisons says); the highest of the three carries a small "🏆 Leading" tag in its corner (`leads`, `.pp-lead`), its figures keeping their own colours.
 - **The top is three figures since 30 Oct 2026, read alike since 31 Oct** (the owner: "hows my automation doing total and today, and hows s&p
   doing compared to it", then "it looked alot better with a 3rd box", then on 31 Oct: the exact gaps in each card were clutter). Each card: its
   value, the day beside it (`dayChip`), the change since the start; order **Your account**, **Same markets, no AI**, **If all in the S&P 500
@@ -2114,6 +2115,29 @@ the fold it lands in. The 18 Oct way back (`pending-simple-undo`) was removed: i
   the other is just for me").
 - **What it has done**: every buy, sell and check-in note, newest first; "Why, and the details" /
   "The plan for it" folded under each trade; "Refresh now"; a switch "Buys and sells only".
+
+### The progress score and the daily summaries (1 Nov 2026)
+
+The owner: "a points scale ... starts at say 50 and goes down if we do worse and up if it gets better ... some detail on why", and a
+summary of everything going on "i can read in 30 seconds", for him on the Admin page and for each user at the top of the autopilot tab.
+- **The score** (`score_day` in `stockiq-ai-trader`, item `_digest`): 50 when the account began (10 Oct 2026), then each US trading day
+  10 points for each 1% the owner's account did better than an S&P 500 fund over that day (a point for each 0.1%; a point off for each
+  0.1% worse). **Nothing else moves it**, so it cannot rise while money is lost; lessons and trials are written beside it, never added.
+  Each day keeps what drove it: every holding held both days against the same dollars in the fund, and the cash, which stands still
+  while the fund moves. A day the fund did not trade (a weekend, a US holiday) adds no point and keeps the starting point, so the next
+  day counts both. The days to 30 Oct were filled in from the graph's own sums (`check-tools/digest_seed.py`, run once; no breakdown).
+  On 1 Nov: 33.5 (the account 1.65% behind the fund over 15 trading days, counted day by day).
+- **The summaries** (`write_digests`, the first scheduled run after 21:10 UTC, `DIGEST_AFTER`, once a day): the owner's from
+  `owner_facts` (the score and its drivers, the account against the fund, the month's goal, the autopilot's day, trials decided and
+  due, the day's changes from `admin.py change`, the site check, the full check, the daily update, decisions waiting, failed check-ins),
+  on GPT-5 (`DIGEST_MODEL`, counted in the free tokens); each account's from `user_facts` on GPT-4o-mini, kept in `state.digest`, sent
+  by `public()` for 3 days. `summarise_facts`: 3 to 5 lines marked 📈 ✅ ⚠️ 🔬 👉; **every number must be in the facts and no advice
+  words** (`DIGEST_WORDS`), one retry, otherwise the facts themselves are shown (`how: 'facts'`, and the page says so). Being behind the
+  fund goes under ⚠️, no softening words. The facts come only from records: keep `admin.py change` lines true (a superseded change
+  should be corrected in `changes.json`, or the summary repeats it).
+- **Where:** the Admin page's "📋 Today in 30 seconds" under "Do you need to check in?" (`digestHtml`, `scoreSvg`; "Day by day: what
+  moved the score" folded); the autopilot tab's "📋 Your day in short" above "Needs you" (`digestHtml` in `practice-autopilot.js`).
+- Tests: `ai_trader_test.py` (the score, the drivers, a holiday, the figure check, a whole day), `admin_panel_test.js`, `autopilot_test.js`.
 
 ### Two boxes that look alike, and are not the same (17 Oct 2026)
 

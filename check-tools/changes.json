@@ -3,6 +3,21 @@
  "changes": [
   {
    "at": "2026-11-01",
+   "what": "The AI model that chooses the autopilot's buys now takes turns: GPT-4o-mini and GPT-5, 50/50, each buy remembering which, inside the free daily tokens; compared after 30 finished trades each (experiment choose-models)",
+   "found": "owner"
+  },
+  {
+   "at": "2026-11-01",
+   "what": "Practice portfolio: the highest of the three cards is tagged 🏆 Leading, the 'since the start' lines are gone (one line says all three started with $100,000), and cash and holdings sit under the heading",
+   "found": "owner"
+  },
+  {
+   "at": "2026-11-01",
+   "what": "A progress score (50 when the account began; a point for each 0.1% a day the account beats the S&P 500, one off for each 0.1% behind) and a 30-second AI summary of the day, at the top of the Admin page; each user gets a short summary of their day on the AI autopilot tab. Written every day after the US close",
+   "found": "owner"
+  },
+  {
+   "at": "2026-11-01",
    "what": "Privacy policy now says the AI chat's messages go to OpenAI (which may use them to improve its models), and names Stripe and AWS",
    "found": "session",
    "link": "https://stockiq.tech/privacy-policy.html"
@@ -14,7 +29,7 @@
   },
   {
    "at": "2026-11-01",
-   "what": "Stock news reads the real article only for the ~960 pages Google lists (about half the summaries), halving the added OpenAI cost to about $1.10 a month",
+   "what": "Stock news reads the real article (first set to the ~960 pages Google lists; the same day widened to every page, as OpenAI's tokens are free)",
    "found": "owner"
   },
   {
@@ -289,21 +304,6 @@
    "at": "2026-10-26",
    "what": "Click and drag across the practice graph (a finger on a phone) shows the change between the two moments, for the account or the market chosen and for the S&P 500 fund over the same stretch",
    "found": "owner"
-  },
-  {
-   "at": "2026-10-26",
-   "what": "The By market list on the graph opens on the market you chose, not at its top",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-26",
-   "what": "The S&P 500 card on the Practice portfolio shows the fund's own day (Today, or Last trading day while the US market is shut), to set beside the account's Today",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-26",
-   "what": "Website deploys clear the cache once, not file by file: that cost $0.39 on 25 Oct after the month's 1,000 free paths ran out; the daily cost check now counts them",
-   "found": "check"
   }
  ]
 }

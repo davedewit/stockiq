@@ -706,6 +706,11 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const old = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, ...base, settings: { ...settings, screeners: ['3-3'] } } })); await sleep(30);
     check('an answer without the setting (an older function) shows no choice and nothing greyed', !/ap-pickmode/.test(old.container.innerHTML) && !/disabled title="Ticked or not by the AI/.test(old.container.innerHTML));
   }
+  {   // the day's summary at the top of the tab (1 Nov 2026)
+    const dg = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPTIONS, settings: { ...settings, enabled: true }, state: {}, practiceCash: 100000, log: [], plans: [], needs: [], digest: { at: new Date().toISOString(), lines: ['📈 The account is at $95,528.', '⚠️ Behind the S&P 500 fund by $1,537.'] } } })); await sleep(30);
+    const dt = dg.container.innerHTML.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    check('the day\'s summary is at the top, before "Needs you"', /📋 Your day in short/.test(dt) && /📈 The account is at \$95,528\. ⚠️ Behind the S&amp;P 500 fund by \$1,537\./.test(dt) && dg.container.innerHTML.indexOf('ap-digest') < dg.container.innerHTML.indexOf('ap-needs'), dt.slice(0, 400));
+  }
   check('no broken values', !/undefined|NaN|\[object/.test(p.container.innerHTML), (p.container.innerHTML.match(/.{30}(undefined|NaN|\[object).{30}/) || [])[0]);
   console.log(ok ? 'ALL PASS' : 'SOME FAILED');
 })();

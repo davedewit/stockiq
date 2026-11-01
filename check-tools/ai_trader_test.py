@@ -1903,4 +1903,64 @@ if hasattr(m, 'model_turn'):
     new = [f for k, f in (rec['state'].get('open') or {}).items() if k not in before]
     check('a model that does not answer hands its turn to the first in the list, and the buys say which answered', 'gpt-5' in asked and asked[asked.index('gpt-5') + 1] == 'gpt-4o-mini' and {f['symbol']: f.get('mdl') for f in new}.get('S08') == 'gpt-4o-mini', (asked, {f['symbol']: f.get('mdl') for f in new}))
     m.CHOOSE_MODELS, m.FREE_DAILY, m.ask_model, m.RANK_PICK, m.datetime = keep; MODEL['answer'] = None
+# ---- the progress score and the daily summaries (1 Nov 2026)
+if hasattr(m, 'score_day'):
+    keep = (m.ask_model, m.datetime)
+    dg = {'days': [], 'last': None, 'owner': None}
+    mon, tue, wed = dt.datetime(2026, 11, 2, 21, 15), dt.datetime(2026, 11, 3, 21, 15), dt.datetime(2026, 11, 4, 21, 15)
+    check('the first day only sets the starting point', m.score_day(dg, {'AAA': 50000.0, 'cash': 50000.0}, 700.0, mon) is None and dg['last']['value'] == 100000.0)
+    r = m.score_day(dg, {'AAA': 51000.0, 'cash': 50000.0}, 707.0, tue)       # the account +1%, the fund +1%: level
+    check('a day level with the fund: no points', r['pts'] == 0.0 and r['score'] == 50.0 and r['acct'] == 1.0 and r['fund'] == 1.0, r)
+    check('what drove it: the holding against the same dollars in the fund, and the cash that stood still', set(r['why']) == {'AAA +$500 against the fund', 'the cash -$500 against the fund'}, r['why'])
+    r = m.score_day(dg, {'AAA': 52010.0, 'cash': 50000.0}, 707.0, wed)       # the fund at the same price: a US holiday
+    check('a day the fund did not trade adds no point, and keeps the starting point for the next', r is None and len(dg['days']) == 1 and dg['last']['d'] == '2026-11-03')
+    r = m.score_day(dg, {'AAA': 52010.0, 'cash': 50000.0}, 700.0, wed + dt.timedelta(days=1))   # from Tuesday: the account +1.0%, the fund -0.99%
+    check('a point for each 0.1% better than the fund', r['pts'] == 19.9 and r['score'] == 69.9, r)
+    check('the summary time: not before 21:10 UTC, then once a day', not m.digest_due(None, dt.datetime(2026, 11, 2, 20, 40)) and m.digest_due(None, mon) and not m.digest_due(m.iso(mon), mon + dt.timedelta(minutes=30)) and m.digest_due(m.iso(mon), tue))
+    ANS = {'a': None}
+    def fake(prompt, name='gpt-4o-mini'):
+        ANS.setdefault('asked', []).append(name)
+        return copy.deepcopy(ANS['a'](prompt) if callable(ANS['a']) else ANS['a'])
+    m.ask_model = fake
+    facts = ['Progress score 48.5 (it began at 50).', 'Today -1.5 points: the account -0.40%, the S&P 500 fund -0.25%.']
+    ANS['a'] = {'lines': ['📈 Score 48.5, down 1.5 today.', '⚠️ The account fell 0.40%, the fund 0.25%.']}
+    lines, how = m.summarise_facts(facts, 'the owner', mon)
+    check('a summary whose every figure is in the facts is used', how == 'ai' and lines[0].startswith('📈 Score 48.5'), (how, lines))
+    ANS['a'] = {'lines': ['📈 Score 48.5, and it will reach 60 by Friday.']}
+    lines, how = m.summarise_facts(facts, 'the owner', mon)
+    check('an invented figure: tried again, then the facts themselves are shown', how == 'facts' and lines == facts and ANS['asked'][-2:] == ['gpt-4o-mini', 'gpt-4o-mini'], (how, lines))
+    ANS['a'] = {'lines': ['📈 Score 48.5. You should buy more shares.']}
+    check('advice words are refused the same way', m.summarise_facts(facts, 'a user', mon)[1] == 'facts')
+    calls = {'n': 0}
+    def once_then(prompt):
+        calls['n'] += 1
+        return {'lines': ['📈 Score 48.5 by 2026.']} if calls['n'] == 1 else {'lines': ['📈 Score 48.5.']}
+    ANS['a'] = once_then
+    check('the second try is used when it is clean', m.summarise_facts(facts, 'the owner', mon) == (['📈 Score 48.5.'], 'ai'))
+    # a whole day: the owner's account and the summaries
+    D.t.clear(); m.CENTRAL = False
+    rec = m.load_item(U); rec['settings'].update(enabled=True, screeners=['3-100']); rec['state']['startedAt'] = m.iso(mon); m.save_item(U, rec)
+    D.Table(m.PORTFOLIO_TABLE).rows[U] = {'userId': U, 'version': 1, 'data': json.dumps(dict(m.new_portfolio(mon - dt.timedelta(days=20)), cash=60000.0, holdings=[
+        {'id': 'h1', 'symbol': 'S01', 'label': 'S01', 'qty': 400.0, 'buyPrice': 100.0, 'buyFx': 1, 'costUsd': 40000.0, 'currency': 'USD', 'by': 'ai', 'screener': '3-100', 'boughtAt': m.iso(mon - dt.timedelta(days=3))}]))}
+    m.save_digest({'days': [{'d': '2026-10-30', 'score': 40.0, 'pts': -2.0, 'acct': -1.0, 'fund': -0.8, 'why': []}], 'last': {'d': '2026-10-30', 'value': 100000.0, 'spy': 700.0, 'h': {'S01': 40000.0, 'cash': 60000.0}}, 'owner': None})
+    PRICES['S01'] = 105.0; spy_now = {'p': 707.0}
+    def dquote(sym):
+        if sym == 'SPY': return {'price': spy_now['p'], 'currency': 'USD', 'name': 'S&P 500 fund', 'time': int((m.datetime.utcnow() - dt.datetime(1970, 1, 1)).total_seconds())}
+        return quote(sym)
+    ANS['a'] = lambda prompt: {'lines': ['📈 ' + prompt['user'].split('Facts:')[1].strip().split('\n')[0][:80]]}
+    m.fund_since_start = lambda portfolio, value, now: (98000.0, round(value - 98000.0, 2))
+    class _Clock(dt.datetime):
+        @classmethod
+        def utcnow(cls): return mon
+    m.datetime = _Clock
+    done = m.write_digests([{'userId': U, 'enabled': True}], mon, quote=dquote)
+    dg = m.load_digest(); rec = m.load_item(U)
+    check('the day after the start: the account +2% against the fund +1% is 10 points', done and dg['days'][-1]['pts'] == 10.0 and dg['days'][-1]['score'] == 50.0, dg['days'][-1])
+    check('the owner\'s summary is written, from the facts', (dg['owner'] or {}).get('lines') and dg['owner']['how'] == 'ai' and 'Progress score 50' in dg['owner']['lines'][0], dg['owner'])
+    check('the user\'s summary is in their record', (rec['state'].get('digest') or {}).get('lines') and rec['state']['digest']['value'] == 102000.0, rec['state'].get('digest'))
+    check('and on their page', (m.public(rec, mon, U).get('digest') or {}).get('lines') == rec['state']['digest']['lines'])
+    check('once a day: a second run the same evening writes nothing', m.write_digests([{'userId': U, 'enabled': True}], mon + dt.timedelta(minutes=30), quote=dquote) is False)
+    av = m.admin_view(m.load_admin(), rec, json.loads(D.Table(m.PORTFOLIO_TABLE).rows[U]['data']), mon)
+    check('the Admin page gets the score\'s days and the owner\'s summary', av['digest']['days'][-1]['score'] == 50.0 and av['digest']['owner']['lines'] and av['digest']['start'] == 50.0)
+    m.ask_model, m.datetime = keep; ANS.clear()
 print('ALL PASS' if ok else 'SOME FAILED')
