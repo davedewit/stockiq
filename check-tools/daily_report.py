@@ -31,8 +31,8 @@ def main():
 
     gen = sum(int(n) for n in re.findall(r'Updated news\.html with (\d+) new articles', text))
     stock = sum(int(n) for n in re.findall(r'Added (\d+) items to news\.html', text))
-    rej = text.count('Rejected (contains percentages)')
-    did.append(f'News: {gen} general and {stock} stock articles added' + (f' ({rej} general stories left out: their summary gave a figure)' if gen == 0 and rej else ''))
+    rej = text.count('Rejected (')
+    did.append(f'News: {gen} general and {stock} stock articles added' + (f' ({rej} general stories left out: a figure in the summary was not in the article, or a headline-only summary gave a percentage)' if gen == 0 and rej else ''))
     if 'Internet connection OK' in text and gen == 0 and stock == 0:
         look.append('No news article was added today (the news steps may be failing): see update_news.py and update_stock_news.py in the log')
     pw = first(r'Pages written: (\d+)', text)

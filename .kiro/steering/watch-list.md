@@ -172,3 +172,13 @@ Rules:
 - **Undo:** `git revert` the commits of 1 Nov "Directory of stock pages…"; delete website/stock-pages.html and its line in the sitemap.
 - **Remove after:** 2026-11-15
 
+
+### 2026-11-01 · News summaries written from the article, not the headline
+- **Changed:** `article_text.py` (new); `update_news.py` reads CNBC's four market feeds before Google News and summarises the article
+  (every figure must be in it); `update_stock_news.py` summarises the stock article when it opens. Headline-only stories keep the
+  no-percentage rule (general) or may use only the headline's figures (stock). `daily_report.py` counts every "Rejected (".
+- **Could break:** no general news (CNBC's feeds moved: "CNBC feeds read: 0 of 4" in the log); the stock news step much slower
+  (one page fetch a summary: look at its time in the daily email); "summary had figures not in the article" on most stories (the
+  extractor reading the wrong part of a page: `python3 article_text.py <url>`); a summary that reads as advice.
+- **Undo:** `git revert` the commit "News summaries from the article itself".
+- **Remove after:** 2026-11-15
