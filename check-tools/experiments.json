@@ -585,6 +585,16 @@
    "added": "2026-11-01",
    "started": "2026-11-01",
    "decide": "2026-12-06"
+  },
+  {
+   "id": "admin-simpler",
+   "what": "The Admin page's Overview with the daily summary on top: after two weeks, fold what the owner does not read daily (the Real money card's dial, forecast and split behind one line; nothing removed, only folded)",
+   "angle": "ease of use",
+   "measure": "the owner reads the top two cards in 30 seconds and finds what he needs; ask him at the weekly session which parts he looked at; anything the summary already says goes into a fold",
+   "status": "running",
+   "added": "2026-11-01",
+   "started": "2026-11-01",
+   "decide": "2026-11-15"
   }
  ]
 }
