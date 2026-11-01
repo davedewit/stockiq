@@ -3872,6 +3872,13 @@ more finished trades than there are, and would chase noise before then.
   i talk smarts its more in the backend"). The smarts go into how it buys and sells. What a user sees changes only when it helps
   them; figures for the owner go on the Admin page or into the opening check and the review tool, not onto the public pages or
   the dashboard. Whatever a change replaces goes in the same session.
+- **Show it, then refine it down** (the owner, 1 Nov 2026: "get info then refine it down, just make sure we continue to do that ... if
+  info is useful for you to keep you can keep it in backend but remove front, or if useless to both of us can remove and just keep best
+  versions of things or combine them together"). Every new thing shown on a page (a card, a figure, a line, a summary) gets an
+  `experiments.py` entry with a decision date within about three weeks (as `admin-simpler`). On that date each one is decided as
+  **keep** (read and useful), **fold** (behind a click), **backend only** (off the page, kept for the checks, the review tool or the
+  summaries), **merge** (with the thing that says nearly the same) or **remove**. The weekly walk (step 5d) asks of each part of a page
+  whether the owner reads it; anything that says what another part already says is merged.
 - **Built once ("DRY": don't repeat yourself): one change in one place** (the owner, 24 Oct 2026: "make sure we don't create silly code that requires us having to update
   the same thing on multiple pages ... whatever makes your life easier to make updates"). Anything that appears on more than one page
   (a function, a style, a menu, a footer, a list, a number) lives in one shared file (`site-header.js`, `market-panel.js`,

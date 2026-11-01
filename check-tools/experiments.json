@@ -595,6 +595,26 @@
    "added": "2026-11-01",
    "started": "2026-11-01",
    "decide": "2026-11-15"
+  },
+  {
+   "id": "digest-and-score",
+   "what": "The progress score and the daily AI summaries (Admin page, autopilot tab), live 1 Nov 2026",
+   "angle": "ease of use, AI use",
+   "measure": "does the owner read them first and find them right? Are users' summaries accurate (read a sample)? Keep, fold, backend only, merge or remove each part",
+   "status": "running",
+   "added": "2026-11-01",
+   "started": "2026-11-01",
+   "decide": "2026-11-22"
+  },
+  {
+   "id": "portfolio-top-nov",
+   "what": "The Practice portfolio's top from 1 Nov 2026: the leader tag, no 'since the start' lines, cash and holdings under the heading",
+   "angle": "ease of use, appearance",
+   "measure": "the owner finds the top clear; nothing he misses; decide keep or adjust",
+   "status": "running",
+   "added": "2026-11-01",
+   "started": "2026-11-01",
+   "decide": "2026-11-22"
   }
  ]
 }
