@@ -217,7 +217,7 @@ about what the "Still never" list keeps for him (real money, costs above the rul
 settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
 warns about; one change at a time, measured, with its experiment entry.
 
-**WHERE THINGS STAND (rewrite this block at the end of every session; last: 1 Nov 2026, just after midnight, after a session on the bill, the daily hub and Google; the weekly session is next, about 7 Nov)**
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 1 Nov 2026, about 05:30 UTC, after a long session on the owner's questions: news from the real article, the progress score and daily AI summaries, model turns, the reports' data retention; the weekly session is next, about 6-7 Nov)**
 - **The stance (the owner, 30 Oct 2026):** "we are just going to give this a shot ... with future AI updates over the next 6 or so months
   we will continue to find improvements - more profit". Profit first; one tested change at a time; each newer AI model looks again at what
   failed; a plain verdict at month 3 (12 Jan 2027). Visitors and sign-ups stay the priority for the site itself.
@@ -263,7 +263,12 @@ warns about; one change at a time, measured, with its experiment entry.
   stop-watch, theme-sleeve with the AI's daily market calls (3 right of 8 scored on 30 Oct; decide at 30: stop showing it headlines, or
   let it lean the budget as a trial), crypto-no-chasing, market-gauge, company-figures, trend-score, ai-markets, auto-holdings, screener-pages,
   signup-simpler and market-panel-pages (about 21 Nov on GA4 figures). Kept on 30 Oct: polling-cut, daily-review.
-- **Next session, in order (about 7 Nov, the weekly one):** the opening check first, and its part 8 (the weekly check-in, item by item).
+- **Next session, in order (about 6-7 Nov, the weekly one):** the opening check first, and its part 8 (the weekly check-in, item by item).
+  **First, the checks on the 1 Nov work:** the daily summaries (Admin "Today in 30 seconds", the autopilot tab's "Your day in short")
+  written each evening after 21:10 UTC, readable and true (read the users' too); the score's first live points with their drivers
+  (from Mon 2 Nov); the sector funds' calls rescored (`themes.rescored`); GPT-5 buys tagged `mdl` and OpenAI's spend still $0 (ask the
+  owner); the reports table down to about 15 rows and its reads down (`cost_check.py`); news.html gaining CNBC-based general news daily.
+  Decide `admin-simpler` (15 Nov) with the owner. **Ask the owner for the Stripe webhook signing secret for #15 (payments) at the start.**
   (G) **Google indexes 67 of the 972 sitemap pages it has read** (Search Console, 1 Nov 2026: 905 not indexed, 847 "crawled - currently not indexed", 56
   discovered, 2 noindex left over). Nothing technical blocks it (`seo_crawl.py` clean): Google judges the stock pages not worth listing
   (alike to every finance site's) on a site with almost no links in. Bring tested plans for ideas `stock-page-unique` (each page's daily
