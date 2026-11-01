@@ -222,3 +222,10 @@ Rules:
   the trial-manager answer (it serves every signed-in page: a smoke test after the deploy answered normally).
 - **Undo:** the zips `~/VSCODE/backup/stockiq-{auto-delete-cleanup,auto-delete-scheduler,user-trial-manager}_before_reports30_20261101.zip`.
 - **Remove after:** 2026-11-15
+
+### 2026-11-01 · A paying member's reports kept by default; the "Recently Deleted" switch removed
+- **Changed:** `stockiq-auto-delete-scheduler` and `stockiq-user-trial-manager` (no stored choice: "never" for an active paid plan, else 30);
+  `dashboard.html` (the switch and its code gone; `showDeleted` always false).
+- **Could break:** the Reports tab's list or menu (the trial manager serves every signed-in page: smoke-tested after the deploy).
+- **Undo:** the zips `~/VSCODE/backup/stockiq-{auto-delete-scheduler,user-trial-manager}_before_paidkeep_20261101.zip`; the page from git.
+- **Remove after:** 2026-11-15

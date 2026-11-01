@@ -4126,6 +4126,23 @@ Needs the owner's decision or more work (nothing here is fixed):
   the fixed 500px window height when the keyboard opens.
 - **AI chat rate limit** is keyed on a browser-generated anonymous ID, so clearing site data
   resets it; the Lambda also looks up paid status from the `userId` the browser sends.
+- **What happens to a user's reports and files (mapped 1 Nov 2026; it was in no note).** Reports are rows of `stockiq-dashboard-analysis-history`
+  (TTL on `ttl`: a row is removed by AWS once its `ttl` has passed); their files (CSV, charts) are in the buckets
+  `stockiq-dashboard-analysis-history` and `stockiq-option-1-1-custom-analysis`, removed by the buckets' lifecycle rules on a tag.
+  - *The user's own auto-delete* (`stockiq-auto-delete-scheduler` daily → `stockiq-auto-delete-cleanup` per user): reports older than
+    their setting are hidden (`deleted`) and removed a week later (`ttl`). Default since 1 Nov 2026: **"never" for an active paid plan,
+    30 days for everyone else** (it was 3 days for everyone, paying members included). A stored choice wins. Pinned reports are kept.
+  - *A free trial that ended without paying* (`stockiq-trial-cleanup`, daily; 3 days after the first report): every report hidden and
+    removed 30 days later; files tagged `AutoDeleteTrial` (the lifecycle removes them 30 days **after the file was made**).
+  - *A paid plan that ended* (`stockiq-payment-handler`, Stripe's "subscription deleted" → `stockiq-dashboard` `set_subscription_end_ttl`):
+    every report hidden and removed 30 days later; files tagged `AutoDelete` (90 days after they were made, so older ones go at once).
+  - *Paying again within those 30 days* (`clear_deletion_markers`, on checkout): every report with a `ttl` comes back and the file tags are
+    taken off. It also brings back reports the user's own auto-delete removed in the last week (they carry a `ttl` too): harmless.
+  - **Faults left for the payments session (#15):** a plan change ends the old Stripe subscription and is taken for a cancellation (the
+    member's reports hidden, to be removed in 30 days, while paying); the files' clocks run from creation, not from the plan's end.
+  - The "Recently Deleted" switch on the Reports tab went on 1 Nov 2026 (it could only show deleted reports, not restore them). The
+    1,194 reports deleted before then (99% of the table) are removed by `check-tools/pending-expire-deleted/deploy.sh`, the owner's yes
+    (#19); the session's safety check refuses bulk removal of user data, so the owner runs it.
 - **Email signup:** the endpoint is public (a bot could flood signups and notification emails),
   the Lambda has no CloudWatch log group, and nothing is sent to subscribers yet.
 - **The site's wording (rewritten 13 Oct 2026; section 13): what it now says, so that it stays true.** The numbers on the

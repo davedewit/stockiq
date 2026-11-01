@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-11-01",
+   "what": "Paying members' reports are now kept unless they choose otherwise (the auto-delete had applied to them too, 3 days by default); trials and free accounts keep 30 days. The 'Recently Deleted' switch is gone",
+   "found": "owner"
+  },
+  {
+   "at": "2026-11-01",
    "what": "Reports are kept 30 days unless you choose otherwise (it was 3, which left the Top 10 tracker's weekly columns empty); auto-deleted reports are now really removed a week later",
    "found": "check"
   },
@@ -298,11 +303,6 @@
   {
    "at": "2026-10-26",
    "what": "The home page's search boxes show a share's latest 3 news headlines and a link to its page when it is picked (or its code typed)",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-26",
-   "what": "Your own buys and AI autopilot on the graph each draw the gold S&P 500 line too (the same money in the fund on the same days), so every view compares with the S&P the same way",
    "found": "owner"
   }
  ]
