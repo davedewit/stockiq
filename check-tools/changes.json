@@ -2,6 +2,42 @@
  "about": "What the sessions changed on the site, newest first, in plain words for the owner's Admin page ('What changed lately'). Add with: python3 check-tools/admin.py change \"<what>\". Nothing private: both repositories are public.",
  "changes": [
   {
+   "at": "2026-11-01",
+   "what": "Privacy policy now says the AI chat's messages go to OpenAI (which may use them to improve its models), and names Stripe and AWS",
+   "found": "session",
+   "link": "https://stockiq.tech/privacy-policy.html"
+  },
+  {
+   "at": "2026-11-01",
+   "what": "Stock news reads the real article on every page: your OpenAI account has free daily tokens (data sharing on), so it costs nothing",
+   "found": "owner"
+  },
+  {
+   "at": "2026-11-01",
+   "what": "Stock news reads the real article only for the ~960 pages Google lists (about half the summaries), halving the added OpenAI cost to about $1.10 a month",
+   "found": "owner"
+  },
+  {
+   "at": "2026-11-01",
+   "what": "News summaries are now written from the real article, not guessed from its headline: general news comes from CNBC first and stock news from its own article, and every figure must be in the article (stories whose page can't be opened stay general, as before)",
+   "found": "owner"
+  },
+  {
+   "at": "2026-11-01",
+   "what": "The cost checks no longer read last month's explained bill as new problems in the first hours of a month",
+   "found": "session"
+  },
+  {
+   "at": "2026-11-01",
+   "what": "The daily email explains the 'no fresh price' count: those are smaller pages that show no figures and are not in Google; the bigger shares get their prices through AWS",
+   "found": "owner"
+  },
+  {
+   "at": "2026-11-01",
+   "what": "Market news: on Fed-heavy days every summary was thrown out for quoting a percentage; the AI is now told not to use figures and gets one more try, so general news keeps coming (the no-percentages rule stays)",
+   "found": "owner"
+  },
+  {
    "at": "2026-10-31",
    "what": "Google check: all 1,001 pages crawled as Google sees them and clean. Fixed: a page listing all 960 stock pages by market (23 had no link from any page), true 'last changed' dates in the sitemap for about 95 pages, and Bing's key",
    "found": "session"
@@ -268,41 +304,6 @@
    "at": "2026-10-26",
    "what": "Website deploys clear the cache once, not file by file: that cost $0.39 on 25 Oct after the month's 1,000 free paths ran out; the daily cost check now counts them",
    "found": "check"
-  },
-  {
-   "at": "2026-10-26",
-   "what": "Stock news reaches the news page again (it stopped on 24 Oct when the shared footer went in); the site check now watches it",
-   "found": "check"
-  },
-  {
-   "at": "2026-10-25",
-   "what": "Plan cards now tick only what exists, with alerts, white-label and the other planned features marked 'Coming soon'; signed-in members get a 'Choose a plan' button in the home page's pricing",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-25",
-   "what": "The Admin page now says who does each thing in 'Coming up' (you with Claude, your Mac, or AWS by itself), lists the next daily update, and shows the last three daily updates with a tick or a warning",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-25",
-   "what": "The 'Do you need to check in?' card no longer turns amber for proposals the next session builds anyway; it does if one waits over a week",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-25",
-   "what": "The notes that guide each session are now one of the site's parts, and tidying them (out of date, said twice, expired temporary notes) is part of every weekly review",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-25",
-   "what": "AWS cost is now checked every day for free: a service's spend jumping, a database table or Lambda calls spiking, the month over your $1 target or $1.50 limit; anything found goes in the daily email",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-25",
-   "what": "Found most of the AWS database bill: the daily report clean-up read the whole report table 64 times a day (once per account) and applied one account's setting to everyone's reports. It now reads only that account's reports: about $0.50 a month saved, and no account's reports are hidden by another's setting",
-   "found": "owner"
   }
  ]
 }
