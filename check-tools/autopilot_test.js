@@ -676,6 +676,10 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       const gw = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPT, ...st, gauge: G } })); await sleep(30); const gt = gw.text();
       check('the market-risk gauge is shown on Activity, in words and as five steps, with what makes it up folded', /Market risk now: high/.test(gt) && /high, 3 of 4/.test(gw.container.innerHTML)
         && /below its 200-day average; below its 50-day average; the VIX \(the swings the market expects\) is 24\.5, over 20/.test(gt), gt.slice(gt.indexOf('Market risk'), gt.indexOf('Market risk') + 300));
+      check('what made the reading is on show without opening anything: its points', /3 of 4: the S&(?:amp;)?P 500 is below its 200-day average; the S&(?:amp;)?P 500 is below its 50-day average; the VIX is 24\.5, over 20\. The same for every account/.test(gt), (gt.match(/\d of 4:.{0,200}/) || [''])[0]);
+      const G1 = { level: 1, name: 'low', spy: 755.72, avg50: 767.49, avg200: 728.85, vix: 19.42, at: '2026-11-01T03:00:00Z' };      // 1 Nov 2026
+      const g1 = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPT, ...st, gauge: G1 } })); await sleep(30); const t1 = g1.text();
+      check('a reading close to the next level says so (the VIX 19.42, close to 20)', /1 of 4: the S&(?:amp;)?P 500 is below its 50-day average · close to the next level: the VIX is 19\.42, close to 20\./.test(t1), (t1.match(/\d of 4:.{0,200}/) || [''])[0]);
       check('it says that it holds no cash, and why', /it does not make the autopilot hold cash/.test(gt) && /made less than staying invested/.test(gt));
       check('the chat is told the gauge', /Market risk gauge now: high \(3 of 4/.test(gw.ctx.practiceAutopilot.summary()));
       const ng = page(() => ({ status: 200, body: { success: true, allowed: true, options: OPT, ...st } })); await sleep(30);

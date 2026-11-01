@@ -600,7 +600,7 @@
    "id": "digest-and-score",
    "what": "The progress score and the daily AI summaries (Admin page, autopilot tab), live 1 Nov 2026",
    "angle": "ease of use, AI use",
-   "measure": "does the owner read them first and find them right? Are users' summaries accurate (read a sample)? Keep, fold, backend only, merge or remove each part",
+   "measure": "does the owner read them first and find them right? Are users' summaries accurate (read a sample)? Keep, fold, backend only, merge or remove each part; on the autopilot tab, merge 'Your day in short' with 'How it is doing' if they say the same (the owner asked on 1 Nov whether they were the same thing)",
    "status": "running",
    "added": "2026-11-01",
    "started": "2026-11-01",

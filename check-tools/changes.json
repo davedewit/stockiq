@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-11-01",
+   "what": "Autopilot tab: the market-risk gauge now says what made its reading without a click (today: 1 of 4, the S&P 500 below its 50-day average; the VIX at 19.4, close to 20)",
+   "found": "owner"
+  },
+  {
+   "at": "2026-11-01",
    "what": "The AI model that chooses the autopilot's buys now takes turns: GPT-4o-mini and GPT-5, 50/50, each buy remembering which, inside the free daily tokens; compared after 30 finished trades each (experiment choose-models)",
    "found": "owner"
   },
@@ -299,11 +304,6 @@
    "at": "2026-10-26",
    "what": "On the graph, a chosen market's line is called the autopilot's buys from that screener, so it cannot be mistaken for the S&P 500 fund's line",
    "found": "session"
-  },
-  {
-   "at": "2026-10-26",
-   "what": "Click and drag across the practice graph (a finger on a phone) shows the change between the two moments, for the account or the market chosen and for the S&P 500 fund over the same stretch",
-   "found": "owner"
   }
  ]
 }
