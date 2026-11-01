@@ -95,8 +95,9 @@ def fetch_article_content(url):
     except:
         return None
 
-def generate_ai_content(headline, article_text=None):
-    """Use OpenAI to generate article content from headline and article text"""
+def generate_ai_content(headline, article_text=None, strict=False):
+    """Use OpenAI to generate article content from headline and article text.
+    strict: a second try after a summary was rejected for a percentage: no figures at all."""
     if not OPENAI_API_KEY:
         return f"{headline}\n\nBreaking market news. Full analysis coming soon."
     
@@ -112,7 +113,8 @@ Headline: {headline}
 Article: {article_text}
 
 Write a professional summary that:
-- Highlights the key facts and specific details (stocks, numbers, companies)
+- Highlights the key facts and specific details (companies, events, decisions)
+- Does not quote any percentages
 - Explains what this means for investors
 - Mentions broader market implications
 - Keep it factual and forward-looking"""
@@ -134,6 +136,8 @@ CRITICAL RULES - FOLLOW EXACTLY:
 
 Remember: It's better to be vague than to invent false data."""
         
+        if strict:
+            prompt += "\n\nWrite no figures at all: no percentages, no numbers, no dollar amounts, not even ones in the headline or the article. Describe them in words (\"held rates steady\", \"a sharp rise\")."
         response = client.chat.completions.create(
             model="gpt-4o-mini",  # Cheaper, faster, and follows instructions better for factual tasks
             messages=[
@@ -578,6 +582,9 @@ def fetch_google_news():
             
             # Validate: reject any percentage. The summary is written from little more than the headline, so even a real
             # figure from it can end up attached to the wrong thing (the owner, 30 Oct 2026, when a session loosened this)
+            # One more try with no figures at all (Fed weeks: nearly every story is about a rate in percent)
+            if re.search(r'\d+\.?\d*%', full_content):
+                full_content = generate_ai_content(title, description if description != title else None, strict=True)
             if re.search(r'\d+\.?\d*%', full_content):
                 print(f"   ⚠️  Rejected (contains percentages): {title[:50]}...")
                 continue

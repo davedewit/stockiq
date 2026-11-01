@@ -414,6 +414,14 @@ def main():
         age = (_dtn.now(_tzn.utc) - _dtn.fromisoformat(max(st)).replace(tzinfo=_tzn.utc)).total_seconds() / 86400
         if age > 2:
             find('news-stale', 'problem', f'the newest stock article is {age:.1f} days old ({max(st)[:16]} UTC): update_stock_news.py is not writing news.html ("Could not find" in ~/stockiq-daily.log)', 'news.html')
+    # the general news alone: on 29 Oct and 1 Nov 2026 (a Fed week) every summary was rejected for a percentage while the stock news
+    # stayed fresh, so neither check above fired; the owner noticed it in the daily email. A weekend may give a day with none
+    gn = [m.group(1) for a in re.findall(r'<article class="blog-post".*?</article>', src.get('news.html', ''), re.DOTALL)
+          if 'Market News' in a for m in [re.search(r'data-timestamp="(20\d\d-\d\d-\d\dT\d\d:\d\d:\d\d)', a)] if m]
+    if gn:
+        age = (_dtn.now(_tzn.utc) - _dtn.fromisoformat(max(gn)).replace(tzinfo=_tzn.utc)).total_seconds() / 86400
+        if age > 3:
+            find('news-stale', 'problem', f'the newest general market article is {age:.1f} days old ({max(gn)[:16]} UTC): update_news.py adds none ("Rejected" and "Skipping" lines in ~/stockiq-daily.log)', 'news.html')
 
     # one-count: the visitor's free-use count is worked out in one place, auth.js (getAnonymousUsageCount: the server's count by
     # IP and the browser's own note). 25 Oct 2026, the owner on his phone: the dashboard asked the server itself and read 1/1

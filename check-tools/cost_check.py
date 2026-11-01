@@ -58,7 +58,7 @@ def run():
     now = dt.datetime.now(dt.timezone.utc)
 
     # 1. the bill by service (cumulative over the month, so a day's spend is the rise from one day to the next)
-    running, ce = 0.0, 0.0
+    running, ce, stamps = 0.0, 0.0, []
     for mt in cw.list_metrics(Namespace='AWS/Billing', MetricName='EstimatedCharges')['Metrics']:
         d = {x['Name']: x['Value'] for x in mt['Dimensions']}
         if d.get('LinkedAccount') != ACCOUNT or 'ServiceName' not in d:
@@ -68,7 +68,10 @@ def run():
             continue
         latest = cw.get_metric_statistics(Namespace='AWS/Billing', MetricName='EstimatedCharges', Dimensions=mt['Dimensions'],
                                           StartTime=now - dt.timedelta(days=2), EndTime=now, Period=21600, Statistics=['Maximum'])['Datapoints']
-        latest = max(latest, key=lambda p: p['Timestamp'])['Maximum'] if latest else cum[-1]   # the month so far, as the opening check reads it
+        if latest:
+            pt = max(latest, key=lambda p: p['Timestamp'])
+            stamps.append(pt['Timestamp'])
+        latest = pt['Maximum'] if latest else cum[-1]   # the month so far, as the opening check reads it
         if d['ServiceName'] == 'AWSCostExplorer':
             ce = latest
             continue
@@ -77,14 +80,17 @@ def run():
         if jumped(rises, 0.02) and now.strftime('%Y-%m-%d') >= FIXED_UNTIL.get(d['ServiceName'], ''):
             out.append(('problem', f"{d['ServiceName']} cost ${rises[-1]:.2f} yesterday, against about ${statistics.median(rises[:-1]):.2f} a day "
                                    f"before: find what changed (CloudWatch usage of that service, the day's deploys)"))
-    known = KNOWN_CE.get(now.strftime('%Y-%m'), 0)
+    # the month the figures belong to: in the first hours of a month AWS still serves the last month's totals (1 Nov 2026: October's
+    # explained bill was read against November's lists and called in as two problems)
+    bill_month = max(stamps).astimezone(dt.timezone.utc).strftime('%Y-%m') if stamps else now.strftime('%Y-%m')
+    known = KNOWN_CE.get(bill_month, 0)
     if ce > known + 0.01:
         out.append(('problem', f"Cost Explorer has been charged ${ce - known:.2f} this month beyond the known amount: something asks it "
                                f"(aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventSource,AttributeValue=ce.amazonaws.com)"))
     days_in = now.day + now.hour / 24
     month_days = ((now.replace(day=28) + dt.timedelta(days=4)).replace(day=1) - dt.timedelta(days=1)).day
     on_course = running / max(days_in, 1) * month_days
-    over = KNOWN_OVER.get(now.strftime('%Y-%m'))
+    over = KNOWN_OVER.get(bill_month)
     if running >= HARD and over and running <= over['upTo']:
         out.append(('idea', f"StockIQ's running AWS cost this month is ${running:.2f}, over the owner's ${HARD:.2f}: known ({over['why']}); "
                             f"a problem again above ${over['upTo']:.2f}"))

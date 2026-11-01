@@ -122,14 +122,17 @@ if u:
     KNOWN_CE = {'2026-10': 2.65}
     try:
         cw = boto3.Session(profile_name='default', region_name='us-east-1').client('cloudwatch')
-        parts = {}
+        parts, stamps = {}, []
         for mt in cw.list_metrics(Namespace='AWS/Billing', MetricName='EstimatedCharges')['Metrics']:
             dd = {x['Name']: x['Value'] for x in mt['Dimensions']}
             if dd.get('LinkedAccount') != '114366766218' or 'ServiceName' not in dd: continue
             pts = cw.get_metric_statistics(Namespace='AWS/Billing', MetricName='EstimatedCharges', Dimensions=mt['Dimensions'],
                                            StartTime=now - datetime.timedelta(days=2), EndTime=now, Period=21600, Statistics=['Maximum'])['Datapoints']
-            if pts: parts[dd['ServiceName']] = max(pts, key=lambda p: p['Timestamp'])['Maximum']
-        ce = parts.pop('AWSCostExplorer', 0); known = KNOWN_CE.get(now.strftime('%Y-%m'), 0)
+            if pts:
+                pt = max(pts, key=lambda p: p['Timestamp']); parts[dd['ServiceName']] = pt['Maximum']; stamps.append(pt['Timestamp'])
+        # the month the figures belong to (early on the 1st AWS still serves last month's totals: cost_check.py, 1 Nov 2026)
+        bill_month = max(stamps).astimezone(datetime.timezone.utc).strftime('%Y-%m') if stamps else now.strftime('%Y-%m')
+        ce = parts.pop('AWSCostExplorer', 0); known = KNOWN_CE.get(bill_month, 0)
         running = sum(parts.values())
         print(f"  StockIQ's running cost this month ${running:.2f} (" + ', '.join(f"{k} ${v:.2f}" for k, v in sorted(parts.items(), key=lambda x: -x[1]) if v >= 0.01) +
               f"); Cost Explorer ${ce:.2f}" + (f" (${known:.2f} of it the known charge of 17 Oct)" if known else ''))
@@ -138,7 +141,7 @@ if u:
             sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from cost_check import KNOWN_OVER
         except Exception:
             KNOWN_OVER = {}
-        over = KNOWN_OVER.get(now.strftime('%Y-%m'))
+        over = KNOWN_OVER.get(bill_month)
         if over and running <= over['upTo']: print(f"  over $1 this month, known: {over['why']} (a finding again above ${over['upTo']:.2f})")
         elif running >= 1: finding(f"StockIQ's running AWS cost this month is ${running:.2f}: the owner's limit is about $1 a month")
     except Exception as e:

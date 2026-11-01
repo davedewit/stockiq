@@ -31,13 +31,16 @@ def main():
 
     gen = sum(int(n) for n in re.findall(r'Updated news\.html with (\d+) new articles', text))
     stock = sum(int(n) for n in re.findall(r'Added (\d+) items to news\.html', text))
-    did.append(f'News: {gen} general and {stock} stock articles added')
+    rej = text.count('Rejected (contains percentages)')
+    did.append(f'News: {gen} general and {stock} stock articles added' + (f' ({rej} general stories left out: their summary gave a figure)' if gen == 0 and rej else ''))
     if 'Internet connection OK' in text and gen == 0 and stock == 0:
         look.append('No news article was added today (the news steps may be failing): see update_news.py and update_stock_news.py in the log')
     pw = first(r'Pages written: (\d+)', text)
     if pw:
         nd, kept = first(r'No price data: (\d+)', text), first(r"kept yesterday's snapshot: (\d+)", text)
-        did.append(f'Stock pages: {pw} updated' + (f' ({nd} had no fresh price, {kept} kept yesterday\'s figures)' if nd and nd != '0' else ''))
+        aws = re.search(r'Prices through the price function on AWS: (\d+) of (\d+)', text)
+        did.append(f'Stock pages: {pw} updated' + (f' ({nd} smaller pages got no price from Yahoo: they show no figures and are not in Google, so nothing on them changes'
+                   + (f'; the larger shares Yahoo missed came through AWS, {aws.group(1)} of {aws.group(2)}' if aws else '') + ')' if nd and nd != '0' else ''))
         ix = first(r'Indexable \(market cap >= \$10B\): \d+ this run, (\d+) total', text)
         if ix:
             did.append(f'Indexed stock pages: {ix}')
