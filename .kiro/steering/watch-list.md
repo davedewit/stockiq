@@ -235,3 +235,9 @@ Rules:
 - **Could break:** the review's "by who chose it" split showing a new line "by rank" (intended); a sale's story saying "chosen by rank" for these buys (correct now). Nothing else reads `chosen == 'ai'` except the `mdl` tag, which already excluded them.
 - **Undo:** `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_rankchosen_20261106.zip`.
 - **Remove after:** 2026-11-20
+
+### 2026-11-06 · The AI model sees the record only from 30 trades a line, and only trades bought under the current score (Admin #8, second stage)
+- **Changed:** `stockiq-ai-trader` (`CARD_MIN` 30, `SCORE_LIVE_FROM` 2026-10-17T10:55Z, `current_score`; used for the model's card of this account's record, of every account's, and for `write_lessons`). `MIN_SAMPLE` (8) still governs resting, tuning proposals and the AI-sell pause: those need a replay first (Admin #8's last stage).
+- **Could break:** the model's prompt showing "Fewer than 30 trades" for a small record (intended); no new shared notes until 30 current-score trades exist (about 122 now: fine); a prompt error in the function's log after a check-in.
+- **Undo:** `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_learnscore_20261106.zip`.
+- **Remove after:** 2026-11-20

@@ -44,6 +44,8 @@ LONGER_ON = getattr(m, 'LONGER', False); m.LONGER = False
 PICK_DEFAULT = m.DEFAULTS.get('pickMode')
 if PICK_DEFAULT: m.DEFAULTS['pickMode'] = 'manual'   # the older tests tick their own screeners; the AI's choice of markets has its own tests
 RANK_ON = getattr(m, 'RANK_PICK', False); m.RANK_PICK = False   # the trial of the model's choice against the top by rank has its own tests
+CARD_REAL, LIVE_REAL = getattr(m, 'CARD_MIN', None), getattr(m, 'SCORE_LIVE_FROM', None)   # 6 Nov 2026: the older tests use 8-trade groups and trades dated before 17 Oct; the real values are tested at the end
+if CARD_REAL is not None: m.CARD_MIN = m.MIN_SAMPLE; m.SCORE_LIVE_FROM = ''
 GAP_ON = getattr(m, 'GAP_WAIT', False); m.GAP_WAIT = False      # the wait after an overnight fall through the loss limit has its own tests
 THEMES_ON = getattr(m, 'THEMES', False); m.THEMES = False    # the themes part (a trial) has its own tests; the older ones give the whole budget to shares
 HAS_AI_SELL = hasattr(m, 'AI_SELL'); m.AI_SELL = True      # the AI review is off on the site (17 Oct 2026); its code is still tested
@@ -1986,3 +1988,14 @@ if hasattr(m, 'rescore_theme_calls'):
     check('done once only', old['rescored'] == 1 and c0['rel'] == 4.0)
     m.datetime = keep_dt
 print('ALL PASS' if ok else 'SOME FAILED')
+
+# Admin #8 (6 Nov 2026): the model is shown a line of the record only from 30 trades, and only trades bought under the current score
+if CARD_REAL is not None:
+    m.CARD_MIN, m.SCORE_LIVE_FROM = CARD_REAL, LIVE_REAL
+    base = dict(rec['history'][2]) if rec.get('history') else {'pct': 1.0, 'rank': 2, 'rsi': 50, 'screener': '3-100', 'chosen': 'ai'}
+    old_t = [dict(base, t='2026-10-12T15:00:00Z', pct=-5.0) for _ in range(40)]
+    new_t = [dict(base, t='2026-10-20T15:00:00Z', pct=3.0) for _ in range(40)]
+    check('only trades bought under the current score are kept for the model', m.current_score(old_t + new_t) == new_t and m.current_score([dict(base, t=None)]) == [dict(base, t=None)])
+    txt29 = m.memory_text(m.scorecard([dict(base, t='2026-10-20T15:00:00Z')] * 29), None)
+    txt30 = m.memory_text(m.scorecard([dict(base, t='2026-10-20T15:00:00Z')] * 30), None)
+    check('a line of the record needs 30 trades before the model sees it', ' trades, average' in txt30.split('\n', 1)[-1] and '- ' not in txt29 and 'Fewer than 30 trades' in txt29, (txt29, txt30))

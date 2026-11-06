@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-11-06",
+   "what": "Autopilot learning (your yes, #8), second stage live: the AI model is shown a line of its record only when it rests on 30 trades (it was 8), and only trades bought under the current screener score (17 Oct onward), so the old ranking's 83 trades no longer mix in. Left for the last stage: resting and trial rules, which need a replay first",
+   "found": "session"
+  },
+  {
+   "at": "2026-11-06",
    "what": "Written down before more data: the sector funds are down 13.8% in about 2.5 weeks and are checked on 3 Dec; behind an S&P 500 fund by more than 8 points with the AI's calls not clearly right, they are unticked",
    "found": "session"
   },
@@ -297,12 +302,6 @@
    "at": "2026-10-30",
    "what": "Stock analysis guide fits a phone (two boxes side by side were wider than the screen); found by the deploy's own phone check",
    "found": "check"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "Home page pricing: a button on each plan (Start free trial, or Choose Starter / Pro / Elite when signed in)",
-   "found": "session",
-   "link": "https://stockiq.tech/#pricing"
   }
  ]
 }
