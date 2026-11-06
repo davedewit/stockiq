@@ -273,7 +273,7 @@ warns about; one change at a time, measured, with its experiment entry.
   includes the autopilot (daily review, words only; the form is under test, `signup-simpler`, so left until 21 Nov), `session_start.py` still
   suggests `owner@example.com` is the email's recipient on the clarity text (a redaction, not a fault: check once).
 - **Next session, in order (about 13 Nov, the weekly one):** the opening check first, and its part 8 (the weekly check-in, item by item). **First: month 1's
-  goal fell due on 12 Nov and was missed: say so plainly, and decide with the owner what month 2 asks.** Then #8's next stage and #15.
+  goal fell due on 12 Nov and was missed: say so plainly, and decide with the owner what month 2 asks.** Then #8's last stage (a night's correlated losses counted once in `review_resting`: replay it on the wide price set first, no live change before; the 6 Nov session left it so on purpose) and #15. **Also replay the market-fall rule (option D, "Improvements to come"): the fall of 10 Oct to 6 Nov (S&P 500 -5.9%, account -10.1%, 12% cash) is a live case; the autopilot has no market-wide reaction, only per-holding stops and a gauge that holds no cash.**
   **First, the checks on the 1 Nov work:** the daily summaries (Admin "Today in 30 seconds", the autopilot tab's "Your day in short")
   written each evening after 21:10 UTC, readable and true (read the users' too); the score's first live points with their drivers
   (from Mon 2 Nov); the sector funds' calls rescored (`themes.rescored`); GPT-5 buys tagged `mdl` and OpenAI's spend still $0 (ask the
