@@ -5,11 +5,16 @@
    "id": "home-hero",
    "part": "Home page: the top, its four numbers, the two buttons",
    "where": "index.html, top; symbol-news.js (the search boxes' latest news)",
-   "last": "2026-10-23",
+   "last": "2026-11-06",
    "log": [
     {
      "at": "2026-10-23",
      "found": "The four numbers are true (33 screeners, 1,829 in the largest, 540 coins, $100,000); the footer's 'Professional Investment Research Platform' and 'Powered by AI' taken off every page"
+    },
+    {
+     "at": "2026-11-06",
+     "kind": "idea",
+     "found": "New idea to test: Hero text and numbers still true (33 screeners, 540 coins, $100,000). The strongest missing proof is a public record page (idea public-record); with the account 10% down and 4 points behind the S&P 500 it would show losses, which is the honest version but is the owner's call to publish: left in the register, not built"
     }
    ]
   },
@@ -185,11 +190,16 @@
    "id": "signup-login",
    "part": "Sign up, log in, activation",
    "where": "signup.html, login.html",
-   "last": "2026-10-23",
+   "last": "2026-11-06",
    "log": [
     {
      "at": "2026-10-23",
      "found": "The sign-up page says what the trial is in three lines; the old footer claim taken off; idea: a shorter form (questions.md 41)"
+    },
+    {
+     "at": "2026-11-06",
+     "kind": "idea",
+     "found": "New idea to test: Confirm-password field is the next fewer-fields step but the form is under test (signup-simpler, decided 21 Nov): registered as idea signup-one-password to start after it, so two changes are not mixed"
     }
    ]
   },
@@ -300,7 +310,14 @@
    "id": "ap-screeners",
    "part": "Autopilot: screeners card, shortcuts, the spread over markets",
    "where": "practice-autopilot.js Settings",
-   "last": null
+   "last": "2026-11-06",
+   "log": [
+    {
+     "at": "2026-11-06",
+     "kind": "improved",
+     "found": "Improved: Read the autopilot tab as the owner does: the sector funds line said '$19,642 of its $18,815' (read as a fault); now '$19,642 put in; its share of the budget is $18,815' (live, practice-autopilot.js v78). The rest of the screeners card reads clearly: the market shares, the resting screeners with their dates, the AI-ticked boxes"
+    }
+   ]
   },
   {
    "id": "ap-switches",

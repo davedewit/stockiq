@@ -217,20 +217,20 @@ about what the "Still never" list keeps for him (real money, costs above the rul
 settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
 warns about; one change at a time, measured, with its experiment entry.
 
-**WHERE THINGS STAND (rewrite this block at the end of every session; last: 1 Nov 2026, about 05:30 UTC, after a long session on the owner's questions: news from the real article, the progress score and daily AI summaries, model turns, the reports' data retention; the weekly session is next, about 6-7 Nov)**
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 6 Nov 2026, about 08:45 UTC, the weekly session; the next weekly one is about 13 Nov, the day after month 1's goal falls due)**
 - **The stance (the owner, 30 Oct 2026):** "we are just going to give this a shot ... with future AI updates over the next 6 or so months
   we will continue to find improvements - more profit". Profit first; one tested change at a time; each newer AI model looks again at what
   failed; a plain verdict at month 3 (12 Jan 2027). Visitors and sign-ups stay the priority for the site itself.
-- **The account (31 Oct, after the US close of 30 Oct, a falling day: the account -2.6%, the S&P 500 -2.0%):** about $95,070, **$1,747 behind**
-  the same $100,000 in an S&P 500 fund and **$451 behind** the same markets with no AI (so both the choice of shares and of markets lost that
-  day); 156 finished trades. On 30 Oct: about $97,900, about $900 behind the S&P 500; 153 finished trades, -0.38% a trade
-  after costs; shares alone +0.22% a trade against the fund (132 trades, inside the margin). The losses: coins -$1,819 and the AI review's
-  sales -$1,577 (both stopped 17 Oct), overnight falls through the loss limit -$2,476 (`gap-wait` on trial). Claude's forecast 20%. Month 1
-  ($101,000 by 12 Nov) out of reach. His autopilot is automatic (markets by the AI; pace, holdings, budget automatic; Balanced, 5-day
-  holds); coins never bought on AI (decided 30 Oct). Do not write his settings while he is on the page.
-  **The gap to the S&P 500 split (30 Oct evening):** choosing shares about **+$1,230** (the account against "Same markets, no AI", the
-  Practice tab's third card) and choosing markets about **-$2,220** (those markets against the S&P 500), of which the old coin trades about
-  -$1,776: without them the account is about $790 ahead of the S&P 500. The Admin page's decision card shows the split; read it each week.
+- **The account (6 Nov 2026):** about $90,270, **10% below the start and $3,877 behind** the same $100,000 in an S&P 500 fund ($94,147; the
+  fund is -5.85% since 10 Oct, the account -9.72%); 205 finished trades, -1.07% a trade after costs (clearly down); shares alone -0.28% a
+  trade against the fund (184 trades, inside the margin). **Month 1's goal ($101,000 and +0.2% a trade, due 12 Nov) will be missed.** The
+  week's pattern: on the days the S&P 500 rose the account averaged -0.05% against +0.57%, on the days it fell -0.91% against -1.10% (it
+  takes the falls and misses the rises; question 57, idea `capture-ratio`). The sector funds (SMH, XLK, XLE, 20% of the budget) are down
+  13.8% in 2.5 weeks, the largest single piece of the gap: their early-stop rule is written down (idea `sector-early-stop`, checked 3 Dec).
+  The S&P 500 screener's picks are -3.28% over 31 trades (clearly down) and rested until 13 Nov by the autopilot itself; 18 loss-limit
+  sales averaged -14.8% (overnight gaps; `gap-wait` has 9 cases, waiting gave back -1.6% ±2.1). Claude's forecast 12%. His autopilot is
+  automatic (markets by the AI; pace, holdings, budget automatic; Balanced, 5-day holds); coins never bought on AI. Do not write his
+  settings while he is on the page.
 - **The bill for October: $1.57 of StockIQ's running cost, 7 cents over the $1.50 limit**, explained and fixed (the auto-delete cleanup
   bug and the per-file cache clears of 23-26 Oct): in `KNOWN_OVER`, so the Admin card says "No, all good" with the reason. The report
   history's reads were the largest running database cost: **99% of its rows were deleted reports never removed** (found 1 Nov 2026; now removed a
@@ -263,7 +263,17 @@ warns about; one change at a time, measured, with its experiment entry.
   stop-watch, theme-sleeve with the AI's daily market calls (3 right of 8 scored on 30 Oct; decide at 30: stop showing it headlines, or
   let it lean the budget as a trial), crypto-no-chasing, market-gauge, company-figures, trend-score, ai-markets, auto-holdings, screener-pages,
   signup-simpler and market-panel-pages (about 21 Nov on GA4 figures). Kept on 30 Oct: polling-cut, daily-review.
-- **Next session, in order (about 6-7 Nov, the weekly one):** the opening check first, and its part 8 (the weekly check-in, item by item).
+- **Done on 6 Nov 2026 (the weekly session):** the owner's AWS cost-anomaly email (API Gateway and DynamoDB) was in another account on the bill
+  (506092802627, "aws1"; StockIQ's own DynamoDB $0.05), so `cost_check.py` now lists a $0.10+ daily jump in any other account; its misreading of
+  October's $2.65 Cost Explorer charge as November's (the cause of the 3 and 5 Nov daily-email warnings) fixed; KVUE (taken over) known stale;
+  Admin #8 first stage live (rank-pick buys recorded as chosen by rank); six old questions closed or scheduled, 57 and 58 added; ideas
+  `capture-ratio`, `sector-early-stop`, `signup-one-password`; the sector funds line reworded; estimate 12%. **Not done:** #8's later stages
+  (learn only from the current screener score; notes and scorecard lines from 30 trades a group; one night's correlated losses counted once;
+  replay `review_resting`), #15 payments (needs the webhook signing secret from the owner), the sign-up page's description does not say the trial
+  includes the autopilot (daily review, words only; the form is under test, `signup-simpler`, so left until 21 Nov), `session_start.py` still
+  suggests `owner@example.com` is the email's recipient on the clarity text (a redaction, not a fault: check once).
+- **Next session, in order (about 13 Nov, the weekly one):** the opening check first, and its part 8 (the weekly check-in, item by item). **First: month 1's
+  goal fell due on 12 Nov and was missed: say so plainly, and decide with the owner what month 2 asks.** Then #8's next stage and #15.
   **First, the checks on the 1 Nov work:** the daily summaries (Admin "Today in 30 seconds", the autopilot tab's "Your day in short")
   written each evening after 21:10 UTC, readable and true (read the users' too); the score's first live points with their drivers
   (from Mon 2 Nov); the sector funds' calls rescored (`themes.rescored`); GPT-5 buys tagged `mdl` and OpenAI's spend still $0 (ask the

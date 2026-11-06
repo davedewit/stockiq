@@ -2,6 +2,41 @@
  "about": "What the sessions changed on the site, newest first, in plain words for the owner's Admin page ('What changed lately'). Add with: python3 check-tools/admin.py change \"<what>\". Nothing private: both repositories are public.",
  "changes": [
   {
+   "at": "2026-11-06",
+   "what": "Written down before more data: the sector funds are down 13.8% in about 2.5 weeks and are checked on 3 Dec; behind an S&P 500 fund by more than 8 points with the AI's calls not clearly right, they are unticked",
+   "found": "session"
+  },
+  {
+   "at": "2026-11-06",
+   "what": "Autopilot learning (your yes, #8), first stage live: a share the rank-pick trial takes by rank is now recorded as chosen by rank, not by the AI model (176 buys had been counted as the model's); the ai_trader test no longer depends on today's date. Next stages: learn only from the current screener score, notes from 30 trades a group, one night's losses counted once",
+   "found": "session"
+  },
+  {
+   "at": "2026-11-06",
+   "what": "Questions list: six that had sat open 25 days are now answered or waiting with a reason, and two new ones asked (does the account lose on days the S&P 500 does not; do shares bought after a fall lose more at the loss limit)",
+   "found": "session"
+  },
+  {
+   "at": "2026-11-06",
+   "what": "Autopilot tab: the sector funds line now says '$19,642 put in; its share of the budget is $18,815' instead of '$19,642 of its $18,815', which read like a fault",
+   "found": "session"
+  },
+  {
+   "at": "2026-11-06",
+   "what": "Kenvue (KVUE), taken over and no longer trading since 30 Oct, no longer shows as a stale stock page in the site check",
+   "found": "check"
+  },
+  {
+   "at": "2026-11-06",
+   "what": "Fixed a false alarm that called you in twice: October's one-off $2.65 Cost Explorer charge was being read as a November charge (daily emails of 3 and 5 Nov). The real November figure is $0.02, your own visits to the billing pages",
+   "found": "check"
+  },
+  {
+   "at": "2026-11-06",
+   "what": "The bill check now also watches the other accounts on your AWS bill. AWS's cost-anomaly email (API Gateway and DynamoDB, 2 to 5 Nov, about $0.66) was in another account (506092802627), not StockIQ's: StockIQ's own DynamoDB is normal at $0.05 for the month",
+   "found": "owner"
+  },
+  {
    "at": "2026-11-01",
    "what": "The daily cost check no longer counts last month's bill at the start of a new month (Cost Explorer's October $2.65 had read as a November charge in the daily email)",
    "found": "check"
@@ -268,42 +303,6 @@
    "what": "Home page pricing: a button on each plan (Start free trial, or Choose Starter / Pro / Elite when signed in)",
    "found": "session",
    "link": "https://stockiq.tech/#pricing"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "Google Analytics now counts sign-ups, analyses, the autopilot switched on, checkouts and payments; four pages had no analytics; a thank-you notice after paying",
-   "found": "check"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "Admin page: 'Done in the last 3 days' above 'Coming up'",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "By market, All markets: a line with the autopilot's holdings against the S&P 500 and against their own indexes, on the same holdings",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "Practice portfolio: the third figure is now 'Against the S&P 500: ▼ $… behind' (the fund's own value in the small print); every big number is about your account",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "This week in the markets (home page): each announcement's market now links to that market's top 10 today, and its figures read 'expected … · last time …'",
-   "found": "owner",
-   "link": "https://stockiq.tech/#market-week"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "Two trials decided and kept: the pages' market data once a minute (Lambda calls down from about 15,000 to under 2,500 a day) and the daily review by Claude",
-   "found": "session"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "The weekly review of the autopilot (30 Oct): no faults; no rule change, as no group of 30 trades is clearly up or down; Claude's forecast lowered from 25% to 20%",
-   "found": "session"
   }
  ]
 }

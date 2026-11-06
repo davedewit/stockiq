@@ -165,7 +165,7 @@ def main():
     breakdown('by place in the ranking when bought', trades, lambda t: band(t.get('rank'), [3, 10, 20, 10 ** 9], ['rank 1 to 3', 'rank 4 to 10', 'rank 11 to 20', 'rank 21 and lower']))
     breakdown('by RSI when bought', trades, lambda t: band(t.get('rsi'), [50, 65, 75, 10 ** 9], ['RSI to 50', 'RSI 50 to 65', 'RSI 65 to 75', 'RSI above 75']))
     breakdown('by how long it was held', trades, lambda t: band(t.get('days'), [0.25, 1, 5, 10 ** 9], ['under 6 hours', '6 hours to a day', '1 to 5 days', 'over 5 days']))
-    breakdown('by who chose it', trades, lambda t: {'ai': 'the AI model', 'rank': 'by rank (the model did not answer)', 'order': 'furthest above its 52-week low (trial)'}.get(t.get('chosen'), str(t.get('chosen'))))
+    breakdown('by who chose it', trades, lambda t: {'ai': 'the AI model', 'rank': 'by rank (the rank-pick trial, or the model did not answer)', 'order': 'furthest above its 52-week low (trial)'}.get(t.get('chosen'), str(t.get('chosen'))))
     breakdown('by headlines shown to the model when it was bought (recorded from 12 Oct 2026)', trades, lambda t: 'not recorded (bought before)' if t.get('heads') is None else 'none found' if not t['heads'] else 'newest under a day old' if (t.get('headAge') or 0) < 24 else 'newest one to three days old')
     breakdown('the market-risk gauge when bought (from 18 Oct 2026; 0 very low .. 4 very high; for information, it holds no cash)', [t for t in trades if t.get('mg') is not None], lambda t: f"{t['mg']} {('very low', 'low', 'medium', 'high', 'very high')[t['mg']]}")
     # company figures when bought (recorded from 19 Oct 2026; shares only): the measurement behind replacing the screeners' empty

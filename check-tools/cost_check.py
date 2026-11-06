@@ -74,7 +74,13 @@ def run():
         if latest:
             pt = max(latest, key=lambda p: p['Timestamp'])
             stamps.append(pt['Timestamp'])
-        figures.append((d['ServiceName'], pt['Maximum'] if latest else cum[-1], pt['Timestamp'] if latest else None))
+        if latest:
+            fig_stamp = pt['Timestamp']
+        else:        # no recent figure: it is the last day it was sent, and that day's month decides whether it counts (2 Nov and 6 Nov 2026: October's $2.65 read as November's)
+            old_pts = cw.get_metric_statistics(Namespace='AWS/Billing', MetricName='EstimatedCharges', Dimensions=mt['Dimensions'],
+                                               StartTime=now - dt.timedelta(days=10), EndTime=now, Period=86400, Statistics=['Maximum'])['Datapoints']
+            fig_stamp = max(old_pts, key=lambda p: p['Timestamp'])['Timestamp'] if old_pts else None
+        figures.append((d['ServiceName'], pt['Maximum'] if latest else cum[-1], fig_stamp))
         rises = [b - a for a, b in zip(cum, cum[1:]) if b >= a]          # a fall is the month starting again
         if jumped(rises, 0.02) and now.strftime('%Y-%m-%d') >= FIXED_UNTIL.get(d['ServiceName'], ''):
             out.append(('problem', f"{d['ServiceName']} cost ${rises[-1]:.2f} yesterday, against about ${statistics.median(rises[:-1]):.2f} a day "
@@ -91,6 +97,19 @@ def run():
             ce = value
         else:
             running += value
+    # the other accounts on the same bill (the owner's other projects): not StockIQ's cost, but his bill and his anomaly emails. 6 Nov 2026:
+    # AWS's anomaly email named API Gateway and DynamoDB in account 506092802627; this check had looked at StockIQ's account only
+    others = {}
+    for mt in cw.list_metrics(Namespace='AWS/Billing', MetricName='EstimatedCharges')['Metrics']:
+        d = {x['Name']: x['Value'] for x in mt['Dimensions']}
+        if d.get('LinkedAccount') in (None, ACCOUNT) or 'ServiceName' not in d:
+            continue
+        cum = daily(cw, 'AWS/Billing', 'EstimatedCharges', mt['Dimensions'], days=10, stat='Maximum')
+        if len(cum) >= 2 and cum[-1] >= cum[-2] and cum[-1] - cum[-2] >= 0.10:
+            others[(d['LinkedAccount'], d['ServiceName'])] = (cum[-1] - cum[-2], cum[-1])
+    for (acct, svc), (rise, total) in sorted(others.items()):
+        out.append(('idea', f"another account on the bill ({acct}): {svc} rose ${rise:.2f} yesterday (${total:.2f} this month). Not StockIQ's; "
+                            f"look in that account (its API Gateway / DynamoDB / a loop?)"))
     known = KNOWN_CE.get(bill_month, 0)
     if ce > known + 0.01:
         out.append(('problem', f"Cost Explorer has been charged ${ce - known:.2f} this month beyond the known amount: something asks it "

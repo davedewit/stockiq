@@ -229,3 +229,9 @@ Rules:
 - **Could break:** the Reports tab's list or menu (the trial manager serves every signed-in page: smoke-tested after the deploy).
 - **Undo:** the zips `~/VSCODE/backup/stockiq-{auto-delete-scheduler,user-trial-manager}_before_paidkeep_20261101.zip`; the page from git.
 - **Remove after:** 2026-11-15
+
+### 2026-11-06 · Rank-pick buys recorded as chosen by rank (Admin #8, first stage)
+- **Changed:** `stockiq-ai-trader` (`remember_buy` result: `facts['chosen'] = 'rank'` when `_rp == 1`); `cost_check.py` reads a service with no recent figure by its last datapoint's month (October's $2.65 was read as November's twice) and now lists a jump of $0.10+ in another account on the bill; `site_audit.py` `stale-until` has KVUE.
+- **Could break:** the review's "by who chose it" split showing a new line "by rank" (intended); a sale's story saying "chosen by rank" for these buys (correct now). Nothing else reads `chosen == 'ai'` except the `mdl` tag, which already excluded them.
+- **Undo:** `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_rankchosen_20261106.zip`.
+- **Remove after:** 2026-11-20

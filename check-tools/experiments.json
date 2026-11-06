@@ -623,6 +623,30 @@
    "measure": "Days the review stops at the usage limit (2 of 6 so far) against its reports' useful findings",
    "status": "idea",
    "added": "2026-11-02"
+  },
+  {
+   "id": "capture-ratio",
+   "what": "Capture ratio: the account has taken most of the S&P 500's falls and none of its rises since the start (down days -0.91% against -1.10%, up days -0.05% against +0.57%; the 3 sector funds -14% in the week of 30 Oct). Track it every week from the graph's daily sums and, if the ratio stays that bad after 30 trading days, replay a cap on the high-flyer sleeve (sector funds plus the S&P 500 screener's momentum shares) and a share of the budget in the plain S&P 500 fund as the floor",
+   "angle": "profit",
+   "measure": "up-capture and down-capture against the S&P 500 fund, daily, 30 trading days; then replay on the wide set, both halves",
+   "status": "idea",
+   "added": "2026-11-06"
+  },
+  {
+   "id": "signup-one-password",
+   "what": "Sign-up form with one password field and a show-password toggle instead of password plus confirm (one field fewer). Starts after signup-simpler is decided on 21 Nov 2026, so the two changes are not mixed (the form is under test now)",
+   "angle": "sign-ups",
+   "measure": "GA4: accounts created per visit to signup.html, 4 weeks against the 4 before",
+   "status": "idea",
+   "added": "2026-11-06"
+  },
+  {
+   "id": "sector-early-stop",
+   "what": "Written down on 6 Nov 2026, before more data: the sector funds (20% of the budget, 3 funds, bought 19 Oct; $19,642 put in, $16,935 worth on 6 Nov, -13.8%) are checked on 3 Dec 2026, 30 trading days in. Rule: if they are then behind an S&P 500 fund over the same days by more than 8 points AND the AI's calls are not clearly right (under 60% of 30+ scored), the sector funds are unticked (the 'themes' setting) and the 20% goes back to the shares; the theme-sleeve trial stays on record as not kept. If they are within 8 points or ahead they stay to the year. The year-long bar of theme-sleeve is not changed for a pass",
+   "angle": "profit",
+   "measure": "the funds' result against SPY over the same days (the review's part 6b), the AI's scored calls; decided 3 Dec 2026",
+   "status": "idea",
+   "added": "2026-11-06"
   }
  ]
 }

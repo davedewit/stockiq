@@ -317,7 +317,7 @@ said = m.review_sells(portfolio(), rec['settings'], {'3-100': below}, {other['sy
 check('a score below zero with a signal that is only mixed: the reason says the score, not the signal', len(said) == 1 and 'Its screener score fell below zero (score -1.0, rank 149)' in said[0][2] and 'signal turned negative' not in said[0][2], said and said[0][2])
 check('far down the ranking but the score has held: kept', m.review_sells(portfolio(), rec['settings'], {'3-100': near}, {other['symbol']: {'price': other['buyPrice']}}, t0 + dt.timedelta(days=8), opened=rec['state']['open']) == [])
 s, b = call(action='get', userId=U); plan = b['plans'][0]
-check('the dashboard gets a plan for each holding: sell-by time and marks', len(b['plans']) == len([h for h in portfolio()['holdings'] if h.get('by') == 'ai']) and plan['auto'] is True and plan['stop'] == -10 and plan['take'] == 18 and plan['arm'] == 9 and m.parse_time(plan['sellBy']) == m.when_open('us', m.parse_time(plan['boughtAt']) + dt.timedelta(days=20)) and plan['sellBy'] == '2026-11-02T14:35:00Z' and plan['market'] == 'US', plan)   # 20 days from Monday 12 Oct 15:00 is a Sunday: sold when the US market opens on the Monday
+check('the dashboard gets a plan for each holding: sell-by time and marks', len(b['plans']) == len([h for h in portfolio()['holdings'] if h.get('by') == 'ai']) and plan['auto'] is True and plan['stop'] == -10 and plan['take'] == 18 and plan['arm'] == 9 and m.parse_time(plan['sellBy']) >= m.when_open('us', m.parse_time(plan['boughtAt']) + dt.timedelta(days=20)) and plan['sellBy'] >= '2026-11-02T14:35:00Z' and plan['sellBy'][11:] == '14:35:00Z' and plan['market'] == 'US', plan)   # 6 Nov 2026: a sell-by is never in the past, so once the real clock passes 2 Nov it is the next US opening; the exact date was a real-clock test   # 20 days from Monday 12 Oct 15:00 is a Sunday: sold when the US market opens on the Monday
 check('and the rules in force, the month so far and the review countdown', b['rules']['stop'] == -10 and b['rules']['changed'] == {} and b['month']['last30']['n'] >= 0 and b['tune']['trial'] is None and b['tune']['nextReviewIn'] == 19 and b['now'], (b['rules'], b['tune']))
 
 # --- the activity list: the same uneventful check-in is counted, not repeated; reasons name the right setting
@@ -1389,6 +1389,7 @@ if hasattr(m, 'apply_rank_pick'):
     check('nothing is swapped when the model did not choose (picked by rank already), or with trials switched off',
           m.apply_rank_pick({}, stg, list(picks), cands, 'rules') == picks and m.apply_rank_pick({}, dict(stg, selfTune=False), list(picks), cands, 'ai') == picks)
     check('coins are left alone', m.apply_rank_pick({}, stg, [(dict(cands[3], kind='crypto'), 'm')], cands, 'ai')[0][0].get('_rp') is None and 'rp' in m.POOL_FIELDS)
+    check('a share taken by rank in the trial is recorded as chosen by rank, not by the model (source check; Admin #8, 6 Nov 2026)', "facts['chosen'] = 'rank'" in open(m.__file__).read())
     m.RANK_PICK = False
 # ---- the themes part (a trial since 18 Oct 2026): 20% of the budget in the 3 strongest of 14 sector and theme funds, changed monthly
 if THEMES_ON:
