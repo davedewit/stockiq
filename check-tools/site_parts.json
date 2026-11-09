@@ -34,7 +34,7 @@
    "id": "home-pricing",
    "part": "Home page: pricing and the plans",
    "where": "index.html #pricing",
-   "last": "2026-10-30",
+   "last": "2026-11-08",
    "log": [
     {
      "at": "2026-10-30",
@@ -45,6 +45,11 @@
      "at": "2026-10-30",
      "kind": "improved",
      "found": "Improved: A button on each plan card (Start free trial / Choose <plan>), the shared button removed"
+    },
+    {
+     "at": "2026-11-08",
+     "kind": "idea",
+     "found": "New idea to test: Plan cards true; email box is a dead end without a way to send to the public (idea weekly-email needs a start condition); paying members see Choose-plan buttons while #15 is open."
     }
    ]
   },
@@ -423,7 +428,14 @@
    "id": "chat",
    "part": "The AI chat (everywhere and on the dashboard)",
    "where": "ai-chat.js; stockiq-ai-chat",
-   "last": null
+   "last": "2026-11-08",
+   "log": [
+    {
+     "at": "2026-11-08",
+     "kind": "fine",
+     "found": "Fine as it is: Guide read against the last days' changes: consistent. Idea: add the 25-pages and 3,467-stock-pages counts to the site check as it does for 33 screeners."
+    }
+   ]
   },
   {
    "id": "stock-pages",
@@ -673,11 +685,16 @@
    "id": "screener-pages",
    "part": "Daily public screener pages: each market's top 10 by trend, the hub (for visitors from search)",
    "where": "screener-*.html, screeners-today.html; update_screener_pages.py (daily deploy); the link in index.html #features",
-   "last": "2026-10-24",
+   "last": "2026-11-08",
    "log": [
     {
      "at": "2026-10-24",
      "found": "Built (#9 on the Admin page): 24 markets and a hub, live, in the sitemap, named to IndexNow, refreshed by the daily update"
+    },
+    {
+     "at": "2026-11-08",
+     "kind": "idea",
+     "found": "New idea to test: screener-pages: rising-trend wording overclaims (Taiwan 50 100% rising vs 29 of 50 above the 200-day average): proposal #22; Russell 2000 page 444 KB."
     }
    ]
   },
