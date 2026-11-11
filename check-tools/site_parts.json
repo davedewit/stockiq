@@ -212,7 +212,7 @@
    "id": "plans",
    "part": "Plans, upgrade and manage subscription",
    "where": "dashboard.html plan sections, Stripe",
-   "last": "2026-10-30",
+   "last": "2026-11-10",
    "log": [
     {
      "at": "2026-10-30",
@@ -223,6 +223,11 @@
      "at": "2026-10-30",
      "kind": "improved",
      "found": "Improved: A thank-you after Stripe (nothing read ?payment=success before) and begin_checkout / purchase recorded in GA4"
+    },
+    {
+     "at": "2026-11-10",
+     "kind": "improved",
+     "found": "Improved: Limits, 33 screeners and the Coming-soon items are true; the three support tiers on the cards contradict the FAQ and cannot be delivered (proposal #25)"
     }
    ]
   },
@@ -454,7 +459,14 @@
    "id": "news",
    "part": "News page and the news sidebar",
    "where": "news.html, news.js",
-   "last": null
+   "last": "2026-11-09",
+   "log": [
+    {
+     "at": "2026-11-09",
+     "kind": "fine",
+     "found": "Fine as it is: Read: noindex by design, title and canonical right, 268 articles within the limit; fine because it earns no search traffic on purpose and nothing is broken"
+    }
+   ]
   },
   {
    "id": "guides",
@@ -472,7 +484,14 @@
    "id": "about-faq",
    "part": "About and FAQ (are they still true?)",
    "where": "about.html, faq.html",
-   "last": null
+   "last": "2026-11-10",
+   "log": [
+    {
+     "at": "2026-11-10",
+     "kind": "improved",
+     "found": "Improved: Scoring, trend-score table, trial and autopilot wording all match the site; faults: the S&P 400+600 missing from About's screener list, and the FAQ says plans differ only in analyses a day while the plan cards sell tiered support (proposal #25)"
+    }
+   ]
   },
   {
    "id": "legal",
