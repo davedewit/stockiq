@@ -2,6 +2,31 @@
  "about": "What the sessions changed on the site, newest first, in plain words for the owner's Admin page ('What changed lately'). Add with: python3 check-tools/admin.py change \"<what>\". Nothing private: both repositories are public.",
  "changes": [
   {
+   "at": "2026-11-12",
+   "what": "Stock pages no longer call a part-day price 'close': a Sydney or US page written while its market is open shows the last finished session (and a share a session behind its exchange is asked for again from AWS)",
+   "found": "check"
+  },
+  {
+   "at": "2026-11-12",
+   "what": "The Russell 2000 daily page is a quarter of its size (453 KB to 107 KB): its folded ranking shows the top 250 and lowest 50 of 1,794 and says how many sit between",
+   "found": "check"
+  },
+  {
+   "at": "2026-11-12",
+   "what": "The weekly full check can run from the Mac's scheduler again (it died on 6 Nov before writing a result), and the opening check now says so if it ever crashes",
+   "found": "check"
+  },
+  {
+   "at": "2026-11-12",
+   "what": "The AI model is no longer shown headlines for each share it picks from: 91 buys with a headline averaged -1.85% a trade, 138 with none -0.92% (the market's calendar and general headlines stay)",
+   "found": "session"
+  },
+  {
+   "at": "2026-11-12",
+   "what": "The daily pages and the hub no longer call shares 'rising' when their trend score is above zero: they say 'positive trend score' (Taiwan 50 read 100% rising on a day its leaders fell)",
+   "found": "check"
+  },
+  {
    "at": "2026-11-06",
    "what": "Autopilot learning (your yes, #8), second stage live: the AI model is shown a line of its record only when it rests on 30 trades (it was 8), and only trades bought under the current screener score (17 Oct onward), so the old ranking's 83 trades no longer mix in. Left for the last stage: resting and trial rules, which need a replay first",
    "found": "session"
@@ -276,32 +301,6 @@
    "at": "2026-10-30",
    "what": "By market, All markets: the autopilot's line now gives its dollars against the S&P 500 (▼ $1,326) and says its percent is per dollar traded, so it no longer looks at odds with the 0.9% beside it",
    "found": "owner"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "The daily update can no longer run twice in a day after a restart: its once-a-day lock was in a folder macOS empties on restart (30 Oct: a restart at 3:04 pm, a second run at 3:33 pm). The daily Claude review had the same fault. A second run, if ever started by hand, now says so in its email",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "Today's top 10s page: from the next daily update, each market shows its change since the day before (▲/▼, and a 'new' leader), and the Updated date stands out",
-   "found": "owner",
-   "link": "https://stockiq.tech/screeners-today.html"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "A new trial for profit: half of new share buys are kept up to 20 days instead of 5 (the replay's clearest finding), beside the current rule; decided at 30 finished trades each way",
-   "found": "session"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "The chat knows the free trial includes the AI autopilot; the autopilot tab explains 'Holding 46' when its number is lower; no past sell dates",
-   "found": "check"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "Stock analysis guide fits a phone (two boxes side by side were wider than the screen); found by the deploy's own phone check",
-   "found": "check"
   }
  ]
 }

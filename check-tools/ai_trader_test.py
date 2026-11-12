@@ -54,6 +54,10 @@ COSTS = getattr(m, 'TRADE_COST', 0); m.TRADE_COST = 0
 D = DB(); m._db = D
 U = 'tester@x.com'
 ok = True
+def item_json(item):          # the stored account record, compressed (since 12 Nov 2026) or plain
+    return m.item_json(item) if hasattr(m, 'item_json') else item['data']
+
+
 def check(name, cond, extra=''):
     global ok; ok = ok and bool(cond); print(('PASS ' if cond else 'FAIL ') + name + ('' if cond else f'   {extra}'))
 
@@ -319,7 +323,7 @@ said = m.review_sells(portfolio(), rec['settings'], {'3-100': below}, {other['sy
 check('a score below zero with a signal that is only mixed: the reason says the score, not the signal', len(said) == 1 and 'Its screener score fell below zero (score -1.0, rank 149)' in said[0][2] and 'signal turned negative' not in said[0][2], said and said[0][2])
 check('far down the ranking but the score has held: kept', m.review_sells(portfolio(), rec['settings'], {'3-100': near}, {other['symbol']: {'price': other['buyPrice']}}, t0 + dt.timedelta(days=8), opened=rec['state']['open']) == [])
 s, b = call(action='get', userId=U); plan = b['plans'][0]
-check('the dashboard gets a plan for each holding: sell-by time and marks', len(b['plans']) == len([h for h in portfolio()['holdings'] if h.get('by') == 'ai']) and plan['auto'] is True and plan['stop'] == -10 and plan['take'] == 18 and plan['arm'] == 9 and m.parse_time(plan['sellBy']) >= m.when_open('us', m.parse_time(plan['boughtAt']) + dt.timedelta(days=20)) and plan['sellBy'] >= '2026-11-02T14:35:00Z' and plan['sellBy'][11:] == '14:35:00Z' and plan['market'] == 'US', plan)   # 6 Nov 2026: a sell-by is never in the past, so once the real clock passes 2 Nov it is the next US opening; the exact date was a real-clock test   # 20 days from Monday 12 Oct 15:00 is a Sunday: sold when the US market opens on the Monday
+check('the dashboard gets a plan for each holding: sell-by time and marks', len(b['plans']) == len([h for h in portfolio()['holdings'] if h.get('by') == 'ai']) and plan['auto'] is True and plan['stop'] == -10 and plan['take'] == 18 and plan['arm'] == 9 and m.parse_time(plan['sellBy']) >= m.when_open('us', m.parse_time(plan['boughtAt']) + dt.timedelta(days=20)) and plan['sellBy'] >= '2026-11-02T14:35:00Z' and (plan['sellBy'][11:] == '14:35:00Z' or abs((m.parse_time(plan['sellBy']) - dt.datetime.utcnow()).total_seconds()) < 300) and plan['market'] == 'US', plan)   # 12 Nov 2026: with the US market open right now, the next opening is now   # 6 Nov 2026: a sell-by is never in the past, so once the real clock passes 2 Nov it is the next US opening; the exact date was a real-clock test   # 20 days from Monday 12 Oct 15:00 is a Sunday: sold when the US market opens on the Monday
 check('and the rules in force, the month so far and the review countdown', b['rules']['stop'] == -10 and b['rules']['changed'] == {} and b['month']['last30']['n'] >= 0 and b['tune']['trial'] is None and b['tune']['nextReviewIn'] == 19 and b['now'], (b['rules'], b['tune']))
 
 # --- the activity list: the same uneventful check-in is counted, not repeated; reasons name the right setting
@@ -373,6 +377,16 @@ notes = m.review_ai_sells(rec, t0 + dt.timedelta(days=19)); check('after the pau
 rec2 = {'settings': dict(m.DEFAULTS), 'state': {}, 'log': [], 'history': [early(-2.0)] * 8}; check('if what it sold early went on falling, it carries on', m.review_ai_sells(rec2, t0) == [] and 'rest' not in rec2['state']['aiSell'])
 PRICES.clear(); NEWS.clear(); MODEL['answer'] = None; SNAP['3-100'] = rows(); D.t.clear()
 
+# the headlines switch (experiment `headlines`, decided 12 Nov 2026): off, the model is shown none and nothing is fetched for the shortlist
+if hasattr(m, 'CANDIDATE_HEADLINES'):
+    m.CANDIDATE_HEADLINES = False
+    D.t.clear(); PRICES.clear(); NEWS.clear(); MODEL['answer'] = None; MODEL['prompts'].clear(); SNAP['3-100'] = rows()
+    NEWS['S02'] = [{'title': 'S02 recalls its main product', 'hours': 3.0}]
+    rec = m.load_item(U); rec['settings'].update(enabled=True, risk=3, budgetUsd=8000.0, periodDays=1, everyHours=24, maxHoldDays=20, screeners=['3-100']); rec['state']['startedAt'] = m.iso(t0); m.save_item(U, rec)
+    MODEL['answer'] = {'picks': [{'symbol': 'S02', 'reason': 'Rank 3'}]}
+    s, rec = run(t0); ask = buy_prompts()[-1]; bought = [e for e in rec['log'] if e['type'] == 'buy' and e['symbol'] == 'S02'][0]
+    check('headlines switched off: none in the prompt, none kept, none recorded with the buy', 'headlines:' not in ask['user'] and not (rec['state'].get('seen')) and 'Headlines it was shown' not in bought['detail'] and (rec['state']['open'][next(k for k, f in rec['state']['open'].items() if f['symbol'] == 'S02')].get('heads') == 0), (ask['user'][-300:], bought['detail'][:200]))
+    m.CANDIDATE_HEADLINES = True                      # the checks that follow are of the headline path
 # --- headlines when choosing what to buy; the switches; sell everything; the user's say over its own changes
 D.t.clear(); PRICES.clear(); NEWS.clear(); MODEL['answer'] = None; MODEL['prompts'].clear(); SNAP['3-100'] = rows()
 NEWS['S02'] = [{'title': 'S02 recalls its main product', 'hours': 3.0}]
@@ -1060,7 +1074,7 @@ code_, b = call(action='save', userId='pay@z.com', settings=dict(m.DEFAULTS, ena
 check('an account on a paid plan can switch it on like the owner', code_ == 200 and b['allowed'] is True and b['settings']['enabled'] is True and b['nextCheck'] is not None, (code_, b.get('settings')))
 m.datetime = at(sun + dt.timedelta(minutes=30)); r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body'])
 check('and the schedule checks in for it', len(r['ran']) == 1 and r['ran'][0]['bought'] >= 1 and 'pay@z.com' in D.Table(m.PORTFOLIO_TABLE).rows, r)
-plan('pay@z.com', subscriptionStatus='cancelled', planType='starter', expiryDate='2026-10-10'); m.datetime = at(sun + dt.timedelta(days=1)); r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); rec = json.loads(D.Table(m.SETTINGS_TABLE).rows['pay@z.com']['data'])
+plan('pay@z.com', subscriptionStatus='cancelled', planType='starter', expiryDate='2026-10-10'); m.datetime = at(sun + dt.timedelta(days=1)); r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); rec = json.loads(item_json(D.Table(m.SETTINGS_TABLE).rows['pay@z.com']))
 check('when its plan has ended the schedule pauses it instead of checking in, says why, and emails once', r == {'ran': [], 'paused': 1, 'waiting': 0} and D.Table(m.SETTINGS_TABLE).rows['pay@z.com']['enabled'] is False and rec['state']['pausedWhy'] == 'plan' and rec['log'][-1]['text'].startswith('Paused: the AI autopilot is part of the paid plans, and this account is no longer on one') and len(sent) == 1 and 'the paid plan has ended' in sent[0][1], (r, rec['log'][-1]['text'][:90], sent[-1:]))
 code_, b = call(action='get', userId='pay@z.com'); check('its dashboard then shows the locked view', b.get('locked') == 'plan' and b['allowed'] is False)
 plan('pay@z.com', subscriptionStatus='active', planType='pro', expiryDate='2026-12-01'); m.datetime = at(sun + dt.timedelta(days=2)); code_, b = call(action='get', userId='pay@z.com')
@@ -1068,7 +1082,7 @@ check('and once it is on a paid plan again, opening the dashboard switches the a
 broken = D.Table(m.USERS_TABLE); real_get = broken.get_item; m.PLAN_CACHE.clear()
 def fail(Key): raise RuntimeError('database away')
 broken.get_item = fail; code_, b = call(action='get', userId='pay@z.com'); code2, b2 = call(action='run', userId='pay@z.com'); r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); broken.get_item = real_get; m.PLAN_CACHE.clear()
-check('if the plan cannot be read, nobody is locked out for good or paused: the page says to try again and the schedule leaves the account for its next run', b == {'success': True, 'allowed': False, 'locked': 'unknown'} and code2 == 503 and r['paused'] == 0 and r['waiting'] == 1 and json.loads(D.Table(m.SETTINGS_TABLE).rows['pay@z.com']['data'])['settings']['enabled'] is True, (b, code2, r))
+check('if the plan cannot be read, nobody is locked out for good or paused: the page says to try again and the schedule leaves the account for its next run', b == {'success': True, 'allowed': False, 'locked': 'unknown'} and code2 == 503 and r['paused'] == 0 and r['waiting'] == 1 and json.loads(item_json(D.Table(m.SETTINGS_TABLE).rows['pay@z.com']))['settings']['enabled'] is True, (b, code2, r))
 # the free trial includes the autopilot (24 Oct 2026): up to and including its last day; then it pauses like an ended plan, saying so
 m.datetime = at(sun + dt.timedelta(days=3)); m.PLAN_CACHE.clear(); day = m.datetime.utcnow().date()
 plan('tri@z.com', subscriptionStatus='trial', planType='trial', trialEndDate=str(day + dt.timedelta(days=2))); plan('old@z.com', subscriptionStatus='trial', planType='trial', trialEndDate=str(day - dt.timedelta(days=1)))
@@ -1077,7 +1091,7 @@ code_, b = call(action='save', userId='tri@z.com', settings=dict(m.DEFAULTS, ena
 check('a trial account can switch it on, and the page is told the day its trial ends', code_ == 200 and b['allowed'] is True and b['settings']['enabled'] is True and b.get('trialEnds') == str(day + dt.timedelta(days=2)), (code_, b.get('trialEnds')))
 code_, b = call(action='get', userId='pay@z.com'); check('a paid account is not told of any trial', 'trialEnds' not in b)
 plan('tri@z.com', subscriptionStatus='trial', planType='trial', trialEndDate=str(day - dt.timedelta(days=1))); m.PLAN_CACHE.clear()
-r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); rec = json.loads(D.Table(m.SETTINGS_TABLE).rows['tri@z.com']['data'])
+r = json.loads(m.lambda_handler({'source': 'aws.events'}, None)['body']); rec = json.loads(item_json(D.Table(m.SETTINGS_TABLE).rows['tri@z.com']))
 check('when the trial has ended the schedule pauses it and says the trial ended and how to keep it', D.Table(m.SETTINGS_TABLE).rows['tri@z.com']['enabled'] is False and any('your free trial has ended' in e['text'] and '$4.99' in e['text'] for e in rec['log']), [e['text'][:90] for e in rec['log'][-2:]])
 m.send_mail = real_send; m.datetime = clock; m.PLAN_CACHE.clear()
 
@@ -1159,7 +1173,7 @@ check('an older copy of the bell script, which a browser may still hold, is told
 check('the bell is given the latest buys and sells only: when, code, name, dollars, and a sale\'s result (read from an older entry\'s words when it was not stored)',
       code_ == 200 and b['allowed'] is True and [(t['type'], t['symbol'], t['gain']) for t in b['trades']] == [('buy', 'CFX-USD', None), ('sell', 'CFX-USD', 12.79), ('sell', 'ERG-USD', -173.03)]
       and b['trades'][0]['name'] == 'Conflux' and b['trades'][2]['pct'] == -2.8 and all(set(t) == {'t', 'type', 'symbol', 'name', 'usd', 'gain', 'pct'} for t in b['trades']), b)
-check('asking leaves no trace: nothing is written and it does not count as a visit to the dashboard', D.Table(m.SETTINGS_TABLE).rows == before and 'visit' not in json.loads(before[U]['data'])['state'])
+check('asking leaves no trace: nothing is written and it does not count as a visit to the dashboard', D.Table(m.SETTINGS_TABLE).rows == before and 'visit' not in json.loads(item_json(before[U]))['state'])
 code_, b = call(action='bell', userId='nobody@z.com', list=2)
 check('an account without the autopilot gets an empty list and no record is made for it', code_ == 200 and b == {'success': True, 'allowed': False, 'trades': []} and 'nobody@z.com' not in D.Table(m.SETTINGS_TABLE).rows, b)
 
@@ -1538,7 +1552,7 @@ if hasattr(m, 'keep_diary'):
     rec['settings'] = dict(rec['settings'], holdings=20); m.save_item(who, rec)
     check('a change of the settings is a row of its own, so a review knows which settings a trade was made under', sorted(str(x.get('holdings')) for x in diary.of('settings')) == ['20', 'None'], [x.get('holdings') for x in diary.of('settings')])
     diary.fail = 1; rec['log'].append(note('2026-10-12T03:10:00Z', 'A line while the table is away.')); before = len(diary.rows); m.save_item(who, rec)
-    saved = json.loads(D.Table(m.SETTINGS_TABLE).rows[who]['data'])
+    saved = json.loads(item_json(D.Table(m.SETTINGS_TABLE).rows[who]))
     check('when the diary cannot be written the save still happens, and the line goes with the next save', len(diary.rows) == before and saved['log'][-1]['text'] == 'A line while the table is away.' and 'j' not in rec['log'][-1], len(diary.rows) - before)
     m.save_item(who, rec); check('(it does)', diary.of('log')[-1]['text'] == 'A line while the table is away.' and rec['log'][-1]['j'] == 1)
     for i in range(m.LOG_KEEP + 40): rec['log'].append({'t': m.iso(t0 + dt.timedelta(minutes=i)), 'type': 'buy', 'symbol': f'S{i}', 'usd': 100, 'text': f'Bought S{i}.'})
@@ -1644,7 +1658,7 @@ def open_at(mk, when): return m.market_open(mk, when) if hasattr(m, 'market_open
 wk = dt.datetime(2026, 10, 14)      # a Wednesday
 check('China, Taiwan and New Zealand are open in their sessions and shut outside them', all(m.market_open(mk, wk.replace(hour=h, minute=mi)) for mk, h, mi in (('cn', 2, 0), ('cn', 6, 30), ('tw', 3, 0), ('nz', 1, 0))) and not any(m.market_open(mk, wk.replace(hour=h, minute=mi)) for mk, h, mi in (('cn', 8, 0), ('tw', 6, 0), ('nz', 5, 0))) and not m.market_open('nz', dt.datetime(2026, 10, 17, 1, 0)))
 check('the Euro Stoxx 50 and Stockholm keep the European hours, the three others draw on Asia-Pacific', m.SCREENERS['5-sx5e'][4] == 'eu' and m.SCREENERS['5-omx30'][4] == 'eu' and {m.SCREENERS[k][5] for k in ('5-csi300', '5-tw50', '5-nzx50')} == {'Asia-Pacific markets'})
-check('Mexico trades 13:35-19:55 UTC on weekdays, in the Americas share', m.market_open('mx', dt.datetime(2026, 10, 14, 14, 0)) and not m.market_open('mx', dt.datetime(2026, 10, 14, 20, 30)) and m.SCREENERS['5-ipc'][5] == 'Americas markets')
+check('Mexico trades 14:35-20:55 UTC on weekdays (8:30-15:00 Mexico City), in the Americas share', m.market_open('mx', dt.datetime(2026, 10, 14, 15, 0)) and m.market_open('mx', dt.datetime(2026, 10, 14, 20, 30)) and not m.market_open('mx', dt.datetime(2026, 10, 14, 14, 0)) and not m.market_open('mx', dt.datetime(2026, 10, 14, 21, 30)) and m.SCREENERS['5-ipc'][5] == 'Americas markets')
 
 # --- 17 Oct 2026: the AI review's early sales are off for every account while AI_SELL is False, whatever a page sends
 if HAS_AI_SELL:
@@ -1919,6 +1933,14 @@ if hasattr(m, 'score_day'):
     check('a day the fund did not trade adds no point, and keeps the starting point for the next', r is None and len(dg['days']) == 1 and dg['last']['d'] == '2026-11-03')
     r = m.score_day(dg, {'AAA': 52010.0, 'cash': 50000.0}, 700.0, wed + dt.timedelta(days=1))   # from Tuesday: the account +1.0%, the fund -0.99%
     check('a point for each 0.1% better than the fund', r['pts'] == 19.9 and r['score'] == 69.9, r)
+    # Admin #23 (6 Nov 2026): a day the account fell 2.14% while the fund fell 4.41% added about +22 points, never took any away
+    dg2 = {'days': [], 'last': None, 'owner': None}
+    m.score_day(dg2, {'AAA': 90000.0, 'cash': 10000.0}, 800.0, mon)
+    r = m.score_day(dg2, {'AAA': 87860.0, 'cash': 10000.0}, 800.0 * (1 - 0.0441), tue)    # the account -2.14%, the fund -4.41%
+    check('a down day that falls less than a falling fund adds points', r['pts'] > 22 and r['score'] > 72 and r['acct'] < 0 and r['fund'] < r['acct'], r)
+    check('the 7-day total in the summary is the sum of the days', abs(sum(d['pts'] for d in dg2['days']) - (r['score'] - 50.0)) < 0.2, dg2['days'])
+    if hasattr(m, 'left_text'):
+        check('days left are worded right: 12 days, 1 day, the last day', (m.left_text(12), m.left_text(1), m.left_text(0)) == ('12 days left', '1 day left', 'the last day'), (m.left_text(12), m.left_text(1), m.left_text(0)))
     check('the summary time: not before 21:10 UTC, then once a day', not m.digest_due(None, dt.datetime(2026, 11, 2, 20, 40)) and m.digest_due(None, mon) and not m.digest_due(m.iso(mon), mon + dt.timedelta(minutes=30)) and m.digest_due(m.iso(mon), tue))
     ANS = {'a': None}
     def fake(prompt, name='gpt-4o-mini'):
@@ -1979,7 +2001,7 @@ if hasattr(m, 'rescore_theme_calls'):
     day = lambda d: int((dt.datetime(2026, 10, d, 20, 0) - dt.datetime(1970, 1, 1)).total_seconds())
     CH = {'SPY': [(day(19), 760.0), (day(21), 770.0), (day(28), 762.3)], 'XLE': [(day(19), 90.0), (day(21), 100.0), (day(28), 103.0)]}
     old = {'calls': [{'at': '2026-10-21T15:00:00Z', 'symbol': 'XLE', 'view': 'better', 'price': 99.0, 'spy': 760.0, 'due': '2026-10-28T15:00:00Z', 'rel': 4.31, 'right': True},
-                     {'at': '2026-10-31T15:00:00Z', 'symbol': 'XLE', 'view': 'worse', 'price': 104.0, 'spy': 760.0, 'due': '2026-11-07T15:00:00Z'}]}
+                     {'at': '2026-10-31T15:00:00Z', 'symbol': 'XLE', 'view': 'worse', 'price': 104.0, 'spy': 760.0, 'due': '2099-01-01T15:00:00Z'}]}   # far ahead: the function reads the real clock, and a real date here failed on 7 Nov 2026
     m.rescore_theme_calls(old, chart=lambda s_: CH[s_])
     c0, c1 = old['calls']
     check('an old call is judged again from the closes of its own days: XLE +3% against the S&P 500 -1% is +4 points', c0['price'] == 100.0 and c0['spy'] == 770.0 and c0['rel'] == 4.0 and c0['right'] is True and c0['sv'] == 2, c0)
@@ -1987,6 +2009,23 @@ if hasattr(m, 'rescore_theme_calls'):
     m.rescore_theme_calls(old, chart=lambda s_: {'SPY': [], 'XLE': []}[s_])
     check('done once only', old['rescored'] == 1 and c0['rel'] == 4.0)
     m.datetime = keep_dt
+# ---- the account record is stored compressed (12 Nov 2026): 400 KB is the table's limit for an item and the owner's was 321 KB and climbing
+if hasattr(m, 'item_json'):
+    D.t.clear()
+    rec = m.load_item('zip@x.com'); rec['settings'].update(risk=4)
+    rec['history'] = [{'symbol': f'S{i:03d}', 'label': f'S{i:03d}', 'screener': '3-100', 'pct': (i % 7) - 3.0, 'usd': 10.0 * (i % 5), 'path': [[1.0, 0.5]] * 16,
+                       'sold': '2026-11-01T10:00:00Z', 'detail': 'x' * 300} for i in range(300)]
+    plain = len(json.dumps(rec))
+    m.save_item('zip@x.com', rec)
+    stored = D.Table(m.SETTINGS_TABLE).rows['zip@x.com']
+    check('a saved record is kept compressed, not as plain text', 'z' in stored and 'data' not in stored and len(stored['z']) < plain / 3, (list(stored), len(stored.get('z', '')), plain))
+    check('it reads back exactly', m.load_item('zip@x.com')['history'] == rec['history'][-m.HISTORY_KEEP:] and m.load_item('zip@x.com')['settings']['risk'] == 4)
+    D.Table(m.SETTINGS_TABLE).rows['old@x.com'] = {'userId': 'old@x.com', 'data': json.dumps({'settings': {'enabled': False, 'risk': 4}, 'state': {'k': 1}, 'log': [], 'history': [{'pct': 1.0}]}), 'enabled': False}
+    old = m.load_item('old@x.com')
+    check('a record stored the old way (plain text) is still read', old['settings']['risk'] == 4 and old['state'] == {'k': 1} and old['history'] == [{'pct': 1.0}], old)
+    check('the schedule can still list accounts whose records are compressed', 'zip@x.com' in {r['userId'] for r in D.Table(m.SETTINGS_TABLE).scan(ProjectionExpression='userId, enabled')['Items']})
+    D.t.clear()
+
 print('ALL PASS' if ok else 'SOME FAILED')
 
 # Admin #8 (6 Nov 2026): the model is shown a line of the record only from 30 trades, and only trades bought under the current score

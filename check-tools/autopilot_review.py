@@ -108,7 +108,8 @@ def main():
         account = ids[0]
     item = table.get_item(Key={'userId': account}).get('Item')
     if not item: sys.exit('that account has no autopilot record')
-    rec = json.loads(item['data']); settings, state = rec['settings'], rec.get('state') or {}
+    import trader_record
+    rec = trader_record.load(item); settings, state = rec['settings'], rec.get('state') or {}
 
     diary, more = [], {}
     while True:
@@ -305,8 +306,8 @@ def main():
         say(f"  the log could not be read: {type(e).__name__}: {e}")
 
     say("\n8. THE RECORD ITSELF")
-    size = len(item['data'].encode()); kept = len(rec.get('history', []))
-    say(f"  the account's record is {size / 1024:.0f} KB (a row can hold 400 KB): {kept} of {m.HISTORY_KEEP} finished trades kept, {len(rec.get('log', []))} of {m.LOG_KEEP} activity lines, {len(held)} holdings remembered"
+    size = trader_record.stored_bytes(item); unpacked = len(trader_record.text(item).encode()); kept = len(rec.get('history', []))
+    say(f"  the account's record is {size / 1024:.0f} KB stored ({unpacked / 1024:.0f} KB once unpacked; a row can hold 400 KB): {kept} of {m.HISTORY_KEEP} finished trades kept, {len(rec.get('log', []))} of {m.LOG_KEEP} activity lines, {len(held)} holdings remembered"
         + ('   WARNING: over 300 KB, look at what is growing' if size > 300 * 1024 else ''))
     say(f"  the diary: {len(diary)} rows in all ({sum(1 for r in diary if r['kind'] == 'log')} activity lines, {sum(1 for r in diary if r['kind'] == 'trade')} finished trades, {sum(1 for r in diary if r['kind'] == 'settings')} settings), first {min((r['at'] for r in diary), default='none')[:16]}")
     unsent = sum(1 for e in rec.get('log', []) if not e.get('j')) + sum(1 for t in rec.get('history', []) if t.get('pct') is not None and not t.get('j'))
@@ -323,7 +324,7 @@ def main():
             before = due; continue
         span = (parse(due + 'T00:00:00') - parse(before + 'T00:00:00')).days; gone = max(0, (now - parse(before + 'T00:00:00')).days)
         start_n = len([t for t in trades if str(t.get('sold'))[:10] < before]); pace = start_n + (want_n - start_n) * min(1, gone / span)
-        say(f"  {name}. Due {due} ({max(0, span - gone)} days left).")
+        say(f"  {name}. Due {due} ({(lambda n: 'the last day' if n <= 0 else '1 day left' if n == 1 else f'{n} days left')(max(0, span - gone))}).")
         say(f"    finished trades in all:           {len(trades):>5}   target {want_n}   " + ('reached' if len(trades) >= want_n else 'on course' if len(trades) >= pace - 0.5 else f'behind (about {pace:.0f} by today at an even pace)'))
         say(f"    average a trade this month:       {avg_m:+5.2f}% (± {se_m:.2f}, {n_m} trades, after costs)   target {want_avg:+.1f}% or better   " + ('too few to read' if n_m < MIN_GROUP else 'reached' if avg_m >= want_avg else 'not yet'))
         if value is not None: say(f"    the account, about:            ${value:>10,.0f}   target ${want_value:,.0f} or more   " + ('reached' if value >= want_value else 'not yet'))

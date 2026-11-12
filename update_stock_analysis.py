@@ -48,6 +48,7 @@ import yfinance as yf
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from stock_metrics import compute_analysis, score_label
+from session_hours import only_closed, suffix
 
 WEBSITE_DIR = '/Users/dave/VSCODE/website'
 STOCKS_FILE = os.path.join(WEBSITE_DIR, 'stocks.txt')
@@ -232,8 +233,8 @@ def download_prices(symbols):
             df = df.dropna(subset=['Close', 'High', 'Low'])
             if len(df) < MIN_PRICE_ROWS:
                 continue
-            out[s] = (
-                df.index[-1].date(),
+            out[s] = only_closed(      # a last bar whose session is still running is not "the close" (Admin #24, 12 Nov 2026)
+                s, [d.date() for d in df.index],
                 [float(x) for x in df['Close']],
                 [float(x) for x in df['High']],
                 [float(x) for x in df['Low']],
@@ -255,9 +256,11 @@ def proxy_bars(symbol, rng='1y'):
             rows = [r_ for r_ in rows if None not in r_[1:4]]
             if len(rows) < (MIN_PRICE_ROWS if rng == '1y' else 1):
                 return None
-            last = datetime.fromtimestamp(rows[-1][0] + off, tz=timezone.utc).date()
-            return (last, [float(r_[1]) for r_ in rows], [float(r_[2]) for r_ in rows], [float(r_[3]) for r_ in rows],
-                    [float(r_[4] or 0) for r_ in rows])
+            dates = [datetime.fromtimestamp(r_[0] + off, tz=timezone.utc).date() for r_ in rows]
+            series = ([float(r_[1]) for r_ in rows], [float(r_[2]) for r_ in rows], [float(r_[3]) for r_ in rows], [float(r_[4] or 0) for r_ in rows])
+            if rng != '1y':                     # exchange rates (a 5-day look) trade all day: the latest is the latest
+                return (dates[-1],) + series
+            return only_closed(symbol, dates, *series)
         except Exception:
             time.sleep(2 + 3 * attempt)
     return None
@@ -272,6 +275,21 @@ def proxy_prices(symbols):
                 out[sym] = bars
     print(f"   Prices through the price function on AWS: {len(out)} of {len(symbols)} asked for")
     return out
+
+
+def refetch_behind(prices, near, skip=(), fetch=None):
+    """A share whose last bar is older than the newest bar of its own exchange (same suffix) is a session behind: ask AWS for it once
+    (Admin #24, 12 Nov 2026: US and European pages said "6 Nov" on 10 Nov). Kept only if AWS has a newer one. (asked, replaced)."""
+    newest = {}
+    for s_, v_ in prices.items():
+        newest[suffix(s_)] = max(newest.get(suffix(s_), v_[0]), v_[0])
+    behind = [s_ for s_, v_ in prices.items() if v_[0] < newest[suffix(s_)] and near(s_) and s_ not in skip]
+    gained = 0
+    if behind:
+        for s_, v_ in (fetch or proxy_prices)(behind).items():
+            if v_[0] > prices[s_][0]:
+                prices[s_] = v_; gained += 1
+    return len(behind), gained
 
 
 def load_fx(currencies):
@@ -480,6 +498,9 @@ def main():
     missing = [s for s in symbols if s not in prices and (args.aws_prices or near(s))]
     if missing:
         prices.update(proxy_prices(missing))
+    behind, gained = refetch_behind(prices, near, set(missing))
+    if behind:
+        print(f"   {behind} shares were a session behind their exchange's newest bar; AWS had a newer one for {gained}")
     rates = load_fx({MINOR_UNITS.get(e['currency'], e['currency']) for e in infos.values() if e and e.get('currency')})
 
     indexable = set()

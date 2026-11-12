@@ -42,7 +42,8 @@ def main():
     import boto3, urllib.parse  # noqa: F401
     days = int(sys.argv[sys.argv.index('--days') + 1]) if '--days' in sys.argv else 14
     acct = sys.argv[sys.argv.index('--account') + 1] if '--account' in sys.argv else os.environ.get('REVIEW_ACCOUNT', 'dave@dewit.com.au')
-    rec = json.loads(boto3.resource('dynamodb', region_name='us-east-1').Table('stockiq-ai-trader').get_item(Key={'userId': acct})['Item']['data'])
+    import trader_record
+    rec = trader_record.load(boto3.resource('dynamodb', region_name='us-east-1').Table('stockiq-ai-trader').get_item(Key={'userId': acct})['Item'])
     now = datetime.datetime.utcnow(); since = now - datetime.timedelta(days=days)
     hist = [t for t in rec.get('history') or [] if m.parse_time(t.get('t')) and m.parse_time(t['t']) >= since]
     ix = home_index()

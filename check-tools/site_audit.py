@@ -12,6 +12,7 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
   page-title      news.html and the daily hub titled for what they are
   indexnow-key    the key file the search engines' ping names is on the site
   time-claims     a "N days in the top 10" larger than the trading days since the daily pages began
+  rising-claim    the daily pages calling shares with a positive trend score "rising" (the hub said Taiwan 50 was 100% rising)
   hub-compare     the daily hub's "Since last update" all "no change" (comparing a session with itself)
   cost            AWS: a service's spend jumping, the month over the owner's $1, Cost Explorer charged, a table or Lambda calls jumping (cost_check.py, free)
   plan-claims     a plan card on the dashboard ticks a feature that is not on the list of what exists (unbuilt ones go under "Coming soon")
@@ -23,6 +24,7 @@ scripts, the sitemap, a sample of stock pages) and tests concrete things a sessi
   made-up-visuals Math.random() used to draw something (the side panel's charts were random lines), a fixed line written into a
                   chart, or figures written into the code to show when the data fails
   stale-stock-pages indexed stock pages whose "Data as of" is more than 4 days behind the newest
+  part-day        an indexed page saying "Data as of D close" that was written before D's session had finished (session_hours.py)
   unused-scripts  a script no page loads; a script a page loads that finds none of its elements there (sidebar.js)
   page-weight     a page heavier than 250 KB, or 15% heavier than at the last check
   stale-counts    the home page's count of screeners against screeners.js
@@ -50,7 +52,7 @@ GUIDES = ('stock-analysis-guide.html', 'stock-screener-guide.html', 'technical-a
 KNOWN = {
     # stock pages known to be stale for a reason that ends by itself, with the day it should be over: left out of the stale count
     # until then, counted again after it (19 Oct 2026: they turned the Admin page's check-in card amber for nothing)
-    'stale-until': {'BEZ.L': '2026-12-01', 'SDR.L': '2026-12-01', 'PSKY': '2026-12-01', 'KVUE': '2026-12-01'},   # taken over / no usable prices; extended 29 Oct 2026; KVUE last traded 30 Oct 2026 (taken over), added 6 Nov
+    'stale-until': {'BEZ.L': '2026-12-01', 'SDR.L': '2026-12-01', 'PSKY': '2026-12-01', 'KVUE': '2026-12-01', 'ROKU': '2026-12-01'},   # taken over / no usable prices; extended 29 Oct 2026; KVUE last traded 30 Oct 2026 (taken over), added 6 Nov; ROKU last traded 6 Nov (Fox closed its takeover), added 12 Nov
     'duplicate-code': {'toggleMobileMenu', 'closeMobileMenu', 'showDropdown', 'hideDropdown', 'toggleDropdown', 'toggleTheme', 'logout',
                        'fillMobileSidebar', 'emptyMobileSidebar', 'toggleMobileSidebar', 'closeMobileSidebar',   # each page's own menu and sidebar hooks (mobile-sidebar.js calls them)
                        'gtag',                                                    # Google Analytics' own snippet, on every page by design
@@ -120,6 +122,21 @@ def main():
             find('stale-stock-pages', 'problem', f'{len(old)} of {len(dates)} indexed stock pages show data more than 4 days older than the newest '
                  f'({newest:%d %b}); the oldest {old[0][0]:%d %b} (e.g. {", ".join(s_ for _, s_ in old[:4])})',
                  'update_stock_analysis.py (Yahoo refuses this Mac: "No price data" in ~/stockiq-daily.log)')
+        # part-day: "Data as of D close" on a page written before the session of D had finished (BHP.AX and 7203.T said "10 Nov close" with
+        # Sydney and Tokyo still trading, Admin #24, 12 Nov 2026). session_hours.py holds the closing times; a page written by the fixed
+        # script of 13 Nov 2026 onward never has this. The page's file time is when it was last written by any step (a later news
+        # write hides one, never invents one).
+        try:
+            import sys as _sys; _sys.path.insert(0, os.path.join(HERE, '..'))
+            from session_hours import session_closed
+            from datetime import timezone as _tz
+            part = [s_ for s_, d in dates.items() if not session_closed(s_, d, _dt.fromtimestamp(os.path.getmtime(os.path.join(WEB, 'stocks', s_ + '.html')), _tz.utc))]
+            if part:
+                big = len(part) >= 0.1 * len(dates) and today > '2026-11-15'      # the run of 12-13 Nov still wrote them the old way
+                find('part-day', 'problem' if big else 'idea', f'{len(part)} of {len(dates)} indexed stock pages say "Data as of D close" but were written before D\'s session had finished '
+                     f'(e.g. {", ".join(part[:4])}): update_stock_analysis.py drops an unfinished last bar since 13 Nov 2026', 'update_stock_analysis.py, session_hours.py')
+        except Exception as e:
+            find('part-day', 'idea', f'the data dates could not be compared with the closing times ({type(e).__name__})', 'session_hours.py')
 
     # made-up fallback figures: numbers written into the page to show when the data cannot be had (the home page's index cards
     # showed January 2024 figures as today's until 18 Oct 2026)
@@ -151,15 +168,25 @@ def main():
         find('claims', 'idea', f'{stale} of 200 stock pages looked at still carry the old footer ("Real-time Data"): the template is right, '
              'they change at the next regeneration (generate-stock-pages.py, then update_stock_analysis.py)', 'stocks/*.html')
 
+    # legal-claims: promises the Terms and the refund policy made that the site does not keep (12 Nov 2026, the daily review: "double opt-in" with
+    # no confirmation email, annual plans that do not exist, a downgrade "at the next billing cycle" when the old plan ends at once, "priority
+    # support" with no queue). A phrase listed here must not come back; add one whenever a policy line is found to be untrue.
+    UNTRUE = {'terms.html': ['Double opt-in', 'CAN-SPAM', 'priority support'], 'refunds.html': ['Annual subscriptions', 'next billing cycle', 'Account Settings'],
+              'dashboard.html': ['Priority email support', 'Top-priority email support']}
+    for p_, phrases in UNTRUE.items():
+        hit = [x for x in phrases if x in src.get(p_, '')]
+        if hit:
+            find('legal-claims', 'problem', f'{p_} says {", ".join(repr(x) for x in hit)}, which the site does not do (see the comment at legal-claims in site_audit.py)', p_)
+
     # stale-dates: a page that says "Last updated: <date>" more than 30 days before its last real change in git (23 Oct 2026: the
     # four guides said February and April after being reworded on 13 Oct and given stock examples on 18 Oct)
     import subprocess
     for p in pages:
-        m = re.search(r'Last updated: ([A-Za-z]+ \d{1,2}, \d{4})', src[p])
+        m = re.search(r'Last updated: ([A-Za-z]+(?: \d{1,2},)? \d{4})', src[p])      # "October 23, 2026" or, on the legal pages, "October 2026"
         if not m:
             continue
         try:
-            said = _dt.strptime(m.group(1), '%B %d, %Y').date()
+            said = _dt.strptime(m.group(1), '%B %d, %Y' if ',' in m.group(1) else '%B %Y').date()
             last = subprocess.run(['git', '-C', WEB, 'log', '-1', '--format=%ad', '--date=short', '--', p], capture_output=True, text=True, timeout=20).stdout.strip()
             if last and (_dt.strptime(last, '%Y-%m-%d').date() - said).days > 30:
                 find('stale-dates', 'idea', f'says "Last updated: {m.group(1)}" but was last changed on {last}', p)
@@ -270,6 +297,20 @@ def main():
         if len(moves) >= 10 and all(m == 'no change' for m in moves):
             find('hub-compare', 'problem', f'the daily hub shows "no change" for all {len(moves)} markets: it is comparing a session with itself '
                  '(update_screener_pages.py, session_sig / _hubBase)', 'screeners-today.html')
+
+    # rising-claim: the daily pages count shares whose trend score is above zero; that is not "rising" (Admin #22, 10 Nov 2026: the hub
+    # said Taiwan 50 was 100% rising while 29 of 50 stood above their 200-day average and the leaders fell that day)
+    try:
+        import glob as _g2
+        where_r = STAGE if STAGE and _g2.glob(os.path.join(STAGE, 'screener-*.html')) else WEB
+        texts = [(os.path.basename(f), open(f, encoding='utf-8').read()) for f in _g2.glob(os.path.join(where_r, 'screener*.html'))]
+        texts.append(('index.html', src.get('index.html', '')))
+        bad = [n for n, t in texts if re.search(r'in a rising trend|\d+% rising|Shares in a rising', t)]
+        if bad:
+            find('rising-claim', 'problem', f'{len(bad)} page(s) call shares with a positive trend score "rising" ({", ".join(bad[:3])}…): say "positive trend score" '
+                 '(update_screener_pages.py)', 'screener-*.html')
+    except Exception as e:
+        find('rising-claim', 'idea', f'the "rising" wording could not be checked ({type(e).__name__})', 'screener-*.html')
 
     # time-claims: a count of days cannot be older than what it counts (31 Oct 2026: "28 days in the top 10" on daily pages that
     # began with the session of 23 Oct 2026, because the count went up with every run). Weekdays since then are the most it can be.

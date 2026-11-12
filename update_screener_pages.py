@@ -57,6 +57,7 @@ SCREENERS = {
     '5-sti': ('sti', 'Straits Times Index (STI)', 'Asia-Pacific', "Singapore's 30 largest listed companies"),
     '5-nzx50': ('nzx-50', 'NZX 50', 'Asia-Pacific', "New Zealand's 50 largest listed companies"),
 }
+BIG_LIST, HEAD_ROWS, TAIL_ROWS = 600, 250, 50     # a list over 600 shares shows its top 250 and lowest 50 in the folded ranking
 REGIONS = ('US', 'Americas', 'Europe', 'Asia-Pacific')
 SECTION = {'US': 3, 'Europe': 4, 'Asia-Pacific': 5, 'Americas': 6}      # the analysis page's section for each region (its Screeners menu)
 # the number runAnalysis knows a screener by, where it is not the coordinator key's first part (the ASX is 4-… there and 5 on the page,
@@ -411,7 +412,7 @@ def page_for(key, data, names, pages, prev, today, made):
     top3 = ', '.join(f"{names.get(r['symbol'].upper(), r['symbol'])}" for r in top[:3])
     title = f'{name} stocks ranked today: the top 10 by trend | StockIQ'
     desc = (f'The {n} shares of the {name} ranked by trend on {today}: {top3} lead. Why each ranks there, how the whole list '
-            f'stands, and the full ranking, updated every trading day. General information, not advice.')
+            f'stands, and the {"ranking" if n > BIG_LIST else "full ranking"}, updated every trading day. General information, not advice.')
     ld = {'@context': 'https://schema.org', '@type': 'WebPage', 'name': title, 'url': url, 'description': desc,
           'dateModified': made, 'isPartOf': {'@type': 'WebSite', 'name': 'StockIQ', 'url': SITE},
           'mainEntity': {'@type': 'ItemList', 'name': f'{name}: top 10 by trend score, {today}', 'numberOfItems': len(top),
@@ -439,7 +440,7 @@ def page_for(key, data, names, pages, prev, today, made):
                f'<strong>{esc(today)}</strong> with the latest available prices. Updated every trading day.</p>')
 
     # how the whole list stands, in words
-    s = [f'<strong>{pos} of {n}</strong> shares are in a rising trend (a trend score above zero)',
+    s = [f'<strong>{pos} of {n}</strong> shares have a positive trend score (above zero)',
          f'{above200} trade above their 200-day average', f'{near_high} are within 5% of their 52-week high',
          f'{up_day} rose on the latest trading day']
     if med is not None:
@@ -494,11 +495,19 @@ def page_for(key, data, names, pages, prev, today, made):
                f'<a class="sp-cta" href="{esc(run_link(key))}">Run the {esc(name)} screener</a>'
                f'<a class="sp-cta only-signed-out" href="signup.html" style="background:#16a34a;">Free 3-day trial (15 analyses)</a></div>')
 
-    # the full ranking
-    out.append(f'<h2>The full ranking ({n} shares)</h2><details><summary style="cursor:pointer;color:#3b82f6;">Show all {n}</summary>'
+    # the full ranking. A list over BIG_LIST shares (the Russell 2000: 1,829 rows, 444 KB, the one page over the site check's 250 KB) shows
+    # its top HEAD_ROWS and lowest TAIL_ROWS and says how many sit between (12 Nov 2026); the CSV of the screener has them all
+    cut = n > BIG_LIST
+    shown = list(enumerate(rows, 1)) if not cut else list(enumerate(rows, 1))[:HEAD_ROWS] + [None] + list(enumerate(rows, 1))[-TAIL_ROWS:]
+    title = f'The full ranking ({n} shares)' if not cut else f'The ranking: the top {HEAD_ROWS} and lowest {TAIL_ROWS} of {n:,} shares'
+    out.append(f'<h2>{title}</h2><details><summary style="cursor:pointer;color:#3b82f6;">Show {"all " + str(n) if not cut else "the " + str(HEAD_ROWS + TAIL_ROWS)}</summary>'
                '<div class="sp-scroll"><table class="sp-table"><thead><tr><th>#</th><th>Share</th><th class="n">Score</th>'
                '<th class="sp-hide">Reading</th><th class="n">1 year</th></tr></thead><tbody>')
-    for i, r in enumerate(rows, 1):
+    for item in shown:
+        if item is None:
+            out.append(f'<tr><td colspan="5" class="sp-muted" style="text-align:center;">{n - HEAD_ROWS - TAIL_ROWS:,} shares between, in the screener\'s CSV</td></tr>')
+            continue
+        i, r = item
         link, nm = stock_link(r['symbol'], names, pages)
         out.append(f'<tr><td>{i}</td><td>{link} <span class="sp-muted">{esc(nm)}</span></td><td class="n">{r["score"]:+.1f}</td>'
                    f'<td class="sp-hide">{esc(LABELS.get(r.get("recommendation"), "Unrated"))}</td><td class="n">{pct(r.get("change_1yr"))}</td></tr>')
@@ -537,11 +546,12 @@ def hub(results, names, today, made, pages=frozenset(), before=None, before_date
     out.append(f'<p class="sp-muted">Each index\'s shares ranked by StockIQ\'s trend score: '
                'what stands above its lowest price of the year, has risen over the year and holds above its long average. '
                'Open a market for its top 10, why each ranks there and the full list.</p>')
-    out.append('<p class="sp-muted" style="font-size:.9rem;">"In a rising trend" counts the shares whose trend score is above zero: '
-               'more of them means more of that market is trending up today.</p>')
+    out.append('<p class="sp-muted" style="font-size:.9rem;">"Positive trend score" counts the shares whose trend score is above zero: they stand '
+               'above their lowest price of the year and have risen over the year. It describes the year\'s trend, not today\'s price move, '
+               'so a market can have many of them on a day its leaders fall.</p>')
     for region in REGIONS:
         out.append(f'<h2>{esc(region)}</h2><div class="sp-scroll"><table class="sp-table sp-hub"><colgroup><col class="c1"><col class="c2"><col class="c3"><col class="c4"></colgroup>'
-                   '<thead><tr><th>Market</th><th>Leader today</th><th class="n">Shares in a rising trend</th><th class="n">Since last update</th></tr></thead><tbody>')
+                   '<thead><tr><th>Market</th><th>Leader today</th><th class="n">Shares with a positive trend score</th><th class="n">Since last update</th></tr></thead><tbody>')
         for k, (slug, name, reg, _) in SCREENERS.items():
             if reg != region:
                 continue
@@ -636,13 +646,13 @@ def home_section(summary, events, now, today, names=None, overall=None):
     def mk(kv):
         k, v = kv
         return (f"<li><a href=\"screener-{SCREENERS[k][0]}.html\"><strong>{esc(SCREENERS[k][1])}</strong></a> "
-                f"{round(100 * v['pos'] / v['n'])}% rising <span class=\"sp-muted\">· leader {esc(short(names.get(v['lead'].upper(), v['lead'])))}</span></li>")
+                f"{round(100 * v['pos'] / v['n'])}% positive trend score <span class=\"sp-muted\">· leader {esc(short(names.get(v['lead'].upper(), v['lead'])))}</span></li>")
     # each share counted once (24 Oct 2026, the owner queried the total: the Dow 30 sits inside the S&P 500, the Euro Stoxx 50 inside the
     # national lists, so adding the markets up counted about 160 shares twice)
     if overall and overall[1]:
         total_pos, total_n = overall[0], overall[1]
     breadth = (f"<p style=\"margin:0 0 8px;\"><strong>{round(100 * total_pos / total_n) if total_n else 0}%</strong> of the {total_n:,} shares in "
-               f"{len(rows)} main indexes are in a rising trend by StockIQ's trend score.</p>") if rows else ''
+               f"{len(rows)} main indexes have a positive trend score (StockIQ's trend score above zero).</p>") if rows else ''
     strong = f"<h4>Strongest trend</h4><ul class=\"mw-list\">{''.join(mk(kv) for kv in rows[:3])}</ul>" if rows else ''
     weak = f"<h4>Weakest trend</h4><ul class=\"mw-list\">{''.join(mk(kv) for kv in rows[-3:][::-1])}</ul>" if len(rows) > 5 else ''
     return f'''{HOME_START}

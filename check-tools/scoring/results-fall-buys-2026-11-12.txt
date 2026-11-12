@@ -1,0 +1,18 @@
+SPY days: 152 fell 1% or more, 579 within +-0.5%, of 1254
+  sp400_600  first  after a fall  +0.26 (108) | quiet days  +0.95 (126)
+  sp400_600  second after a fall  +0.95 (168) | quiet days  -0.80 (237)
+  ftse100    first  after a fall  -0.07 (102) | quiet days  +0.38 (120)
+  ftse100    second after a fall  +0.50 (159) | quiet days  +0.81 (216)
+  dax40      first  after a fall  -0.23 (96) | quiet days  +0.27 (105)
+  dax40      second after a fall  +2.68 (153) | quiet days  -0.12 (225)
+  cac40      first  after a fall  -0.36 (99) | quiet days  +0.01 (117)
+  cac40      second after a fall  +0.45 (156) | quiet days  +0.36 (210)
+  nikkei225  first  after a fall  -0.94 (87) | quiet days  -0.15 (108)
+  nikkei225  second after a fall  +2.21 (141) | quiet days  +1.50 (204)
+  asx200     first  after a fall  -1.00 (60) | quiet days  -0.33 (81)
+  asx200     second after a fall  +1.49 (96) | quiet days  +0.89 (186)
+  tsx60      first  after a fall  -0.31 (105) | quiet days  +0.10 (120)
+  tsx60      second after a fall  +1.67 (156) | quiet days  +1.73 (222)
+  pooled first: after a fall -0.32 (se 0.22, 657) | quiet days +0.21 (se 0.20, 777): quiet minus fall +0.53 (margin 0.59)
+  pooled second: after a fall +1.39 (se 0.23, 1029) | quiet days +0.59 (se 0.17, 1500): quiet minus fall -0.80 (margin 0.57)
+  fall-day buys did worse than quiet-day buys in 7 (first half) and 2 (second half) of 7 lists -> does NOT pass the bar

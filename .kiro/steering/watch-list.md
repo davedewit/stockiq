@@ -241,3 +241,26 @@ Rules:
 - **Could break:** the model's prompt showing "Fewer than 30 trades" for a small record (intended); no new shared notes until 30 current-score trades exist (about 122 now: fine); a prompt error in the function's log after a check-in.
 - **Undo:** `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_learnscore_20261106.zip`.
 - **Remove after:** 2026-11-20
+
+### 2026-11-12 · The model is no longer shown headlines for the shares it picks from (experiment `headlines` removed)
+- **Changed:** `stockiq-ai-trader` (`CANDIDATE_HEADLINES = False`: the shortlist's per-share headlines are not fetched or put in the prompt; the market's
+  calendar and general headlines stay; `heads` on a buy is 0 from now). Reason: 91 buys with a headline averaged -1.85% a trade, 138 with none -0.92%.
+- **Could break:** a prompt error in the function's log after a check-in (none seen at the first run); the review tool's headline split showing only
+  "none found" (intended); the model choosing worse without the headlines (its picks were already -3.29% against -2.08% by rank: `rank-pick`, `choose-models`).
+- **Undo:** `CANDIDATE_HEADLINES = True`, or the zip `~/VSCODE/backup/stockiq-ai-trader_before_autopilot_noheads_20261112.zip`.
+- **Remove after:** 2026-11-26
+
+### 2026-11-12 · The daily pages say "positive trend score", not "rising"
+- **Changed:** `update_screener_pages.py` (the hub, the 25 daily pages, the home page's market week); `site_audit.py` `rising-claim` fails a page that says
+  "in a rising trend" or "N% rising" of it again. The pages were regenerated on 12 Nov and go up with the next daily update.
+- **Could break:** the daily pages' text running long in the hub's column (a table heading is longer); a `rising-claim` problem if a new writer brings the old words back.
+- **Undo:** `git revert` the commit "Daily pages: positive trend score…".
+- **Remove after:** 2026-11-26
+
+### 2026-11-12 · The weekly full check: PATH, a missing program, the market-sources tolerance
+- **Changed:** `weekly_check.py` (Homebrew first on PATH; a program it cannot start is a failed step; `--recheck` can re-run the sources check alone),
+  `market_sources_check.py` (the % may differ by 0.2 points, was 0.05: ticks between the two calls failed it), `session_start.py` (a Traceback in
+  `~/stockiq-weekly-check.log` newer than the last result is a finding).
+- **Could break:** the automatic run (end of `deploy-to-s3.sh`) still dying: look at `~/stockiq-weekly-check.log` after the next daily update on or after 19 Nov.
+- **Undo:** `git revert` the commit.
+- **Remove after:** 2026-11-26

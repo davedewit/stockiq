@@ -33,22 +33,27 @@
    "measure": "patient against ordinary shares, sold and still held, 30 finished each way",
    "status": "running",
    "started": "2026-10-12",
-   "decide": "2026-11-12",
+   "decide": "2026-11-26",
    "public": true,
    "publicText": "Every second pair of shares is \"patient\": sold only by its limits or its time, not when the screener signal turns. The two kinds are being compared.",
-   "added": "2026-10-17"
+   "added": "2026-10-17",
+   "notes": [
+    "2026-11-12: extended: 12 Nov 2026: patient shares -0.73% a trade (103 sold, +-0.79) against ordinary -1.82% (111, +-0.60): ahead by 1.09, about 1.1 margins of error, short of the twice-the-margin bar; what is still held points the same way (patient +2.71% on paper, ordinary +1.04%) as the October replay said (selling on the signal cuts winners). Extended once, 14 days: about 100 more trades will say. If it stays this far ahead beyond twice the margin: make it the rule for shares; if it falls back inside, switch PATIENT off."
+   ]
   },
   {
    "id": "headlines",
    "what": "Headlines shown to the AI model when it chooses (measured since 12 Oct 2026)",
    "angle": "AI use, analysis",
    "measure": "buys with headlines against without (heads), 30 each",
-   "status": "running",
+   "status": "removed",
    "started": "2026-10-12",
    "decide": "2026-11-12",
    "public": true,
    "publicText": "Whether the news headlines it reads when choosing a buy help: buys with headlines are compared with buys without.",
-   "added": "2026-10-17"
+   "added": "2026-10-17",
+   "decided": "2026-11-12",
+   "result": "Decided 12 Nov 2026 on 239 finished trades. Buys shown a headline: 91 trades (61 under a day old -2.61% +-0.90, 30 one to three days old -0.32% +-0.86) averaged -1.85%; buys with none found: 138 trades -0.92% +-0.63. No better (nominally worse, 1.5 margins, not beyond twice), and the rule written on 12 Oct was 'if no better, stop fetching them'. The per-share headlines are no longer fetched or shown (CANDIDATE_HEADLINES = False); the market's own calendar and general headlines stay. Fewer calls, shorter prompts. Rollback: set the switch True."
   },
   {
    "id": "polling-cut",
@@ -78,38 +83,47 @@
    "what": "Hold fewer shares, or none, while the S&P 500 is below its 200-day average",
    "angle": "profit",
    "measure": "replay first (the four tests), then a live trial",
-   "status": "idea",
+   "status": "removed",
    "order": 3,
    "public": true,
    "publicText": "Later: holding fewer shares while the S&P 500 is below its long-term average, if it passes a test on past prices first.",
-   "added": "2026-10-17"
+   "added": "2026-10-17",
+   "decided": "2026-11-12",
+   "result": "12 Nov 2026: replayed, twice, and neither passes. Holding cash by the market-risk gauge or the 200-day trend was behind staying invested in both halves of five years (replay/cash_study.py, 18 Oct), and leaving a market while it is below its 200-day average did not pass the bar (scoring/market_trend_study.py, 23 Oct). The live fall of 10 Oct-6 Nov (account -10%, S&P 500 -5.9%) was what the account held, not a lack of cash. Dropped."
   },
   {
    "id": "newer-model",
    "what": "A newer, stronger OpenAI model for the autopilot's choice of what to buy, beside gpt-4o-mini",
    "angle": "AI use, profit",
    "measure": "every second choice by the newer model, the record split by model, the cost a month stated (under $1)",
-   "status": "idea",
+   "status": "removed",
    "order": 4,
-   "added": "2026-10-17"
+   "added": "2026-10-17",
+   "decided": "2026-11-12",
+   "result": "12 Nov 2026: running now as the choose-models trial (GPT-5 against GPT-4o-mini, every second share, since 1 Nov)."
   },
   {
    "id": "chat-model",
    "what": "The AI chat on a newer model, if it answers the dashboard questions better at the same cost",
    "angle": "AI use, ease of use",
-   "measure": "the same 20 real questions to both, read side by side; the cost a month",
+   "measure": "the same 20 real questions to both, read side by side; the cost a month Starts when a new OpenAI small model is released (checked at each weekly session) or the chat is found to answer wrongly in the weekly walk.",
    "status": "idea",
    "order": 5,
-   "added": "2026-10-17"
+   "added": "2026-10-17",
+   "notes": [
+    "2026-11-12: extended: 12 Nov 2026: the AI chat costs about 2 US cents a month, so a newer model is not worth a trial for the cost. Starts when: a new OpenAI model is released for small tasks (check at each weekly session) or the chat's answers are found wrong in the walk (step 5d)."
+   ]
   },
   {
    "id": "weekly-email",
    "what": "A short weekly email to the owner with the account against an S&P 500 fund, the trades and what was changed (the full check already emails its result every 7 days)",
    "angle": "ease of use",
    "measure": "does he read and act on it (ask him after a month)",
-   "status": "idea",
+   "status": "removed",
    "order": 6,
-   "added": "2026-10-17"
+   "added": "2026-10-17",
+   "decided": "2026-11-12",
+   "result": "12 Nov 2026: the Admin page's 'Today in 30 seconds', 'Do you need to check in?' and the full check's weekly email already say it, and he reads the Admin page on his phone."
   },
   {
    "id": "trend-score-study",
@@ -215,7 +229,10 @@
    "decide": "2027-10-19",
    "public": true,
    "publicText": "A themes part (since 18 Oct 2026): a fifth of the budget is held in the three strongest of 14 sector and theme funds, changed once a month, and compared with an S&P 500 fund. Every trading day the AI model also reads the market's headlines and makes calls on the funds, which are scored but not acted on.",
-   "added": "2026-10-18"
+   "added": "2026-10-18",
+   "notes": [
+    "2026-11-12: the AI's calls reached 30 scored (34 scored, 19 right = 56%; 20 of 40 on the 12 Nov review): not beyond chance (a coin gives that or better about 3 times in 10), and each call is judged over a week with one made a day, so they carry about seven independent weeks. Decision: keep recording them (about 2 US cents a month), never act on them or let them lean the budget; judge again at 60 scored calls with the overlap allowed for (Admin #27)."
+   ]
   },
   {
    "id": "market-gauge",
@@ -344,7 +361,7 @@
    "id": "asia-overnight",
    "what": "Fewer or smaller Asian holdings overnight: on 22-23 Oct six loss limits were passed in one Asian night (one correlated bet)",
    "angle": "profit",
-   "measure": "Replay first on the wide price set (research-data/prices/): the account with at most a set share in Asia-Pacific overnight against as it is, both halves; then a trial. Question 45",
+   "measure": "Replay first on the wide price set (research-data/prices/): the account with at most a set share in Asia-Pacific overnight against as it is, both halves; then a trial. Question 45. Starts when `gap-wait` is decided (22 Dec 2026): if waiting one check-in after an overnight fall did not give back more than it cost, replay the cap on the wide set; the lists there cover Japan and Australia only, so Hong Kong and Korea need prices fetched first.",
    "status": "idea",
    "added": "2026-10-23"
   },
@@ -352,7 +369,7 @@
    "id": "market-hours-checkins",
    "what": "Check-ins set by each market's own hours (soon after its open and before its close) instead of every 6 hours for all",
    "angle": "profit",
-   "measure": "A 6-hour session can be looked at twice, then not for 19 hours; replay the stops passed between check-ins with and without; then a trial. Question 40",
+   "measure": "A 6-hour session can be looked at twice, then not for 19 hours; replay the stops passed between check-ins with and without; then a trial. Question 40. Starts when `stop-watch` is decided (30 Nov 2026): if sales between check-ins kept most of their best gain, this is not needed; if stops are still passed, replay hours-based check-ins.",
    "status": "idea",
    "added": "2026-10-23"
   },
@@ -647,6 +664,14 @@
    "measure": "the funds' result against SPY over the same days (the review's part 6b), the AI's scored calls; decided 3 Dec 2026",
    "status": "idea",
    "added": "2026-11-06"
+  },
+  {
+   "id": "core-sleeve",
+   "what": "A fixed core of the budget (say 30%) in the plain S&P 500 fund beside the autopilot's own buying, so the account always takes its share of a rise: since 10 Oct it took 73% of the fund's falls and only 20% of its rises (24 trading days, 12 Nov 2026), which no stop or screener rule can fix because it is what the picks are (high-beta sector funds and foreign shares). Replay first: the account's daily sums with 0, 20, 30, 50% moved into the fund, both halves; the autopilot's trades would then compete only for the rest",
+   "angle": "profit",
+   "measure": "up-capture and down-capture against the S&P 500 fund over the same days, and the gap in dollars, for the account as it is against the account with a core, 30 trading days. Starts when capture-ratio reaches 30 trading days (about 26 Nov 2026); the owner's bar for real money is ahead of the fund by 5% a year, which a core cannot give: it only narrows the gap, so say so",
+   "status": "idea",
+   "added": "2026-11-13"
   }
  ]
 }

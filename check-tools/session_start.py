@@ -91,6 +91,14 @@ try:
     if wage >= 7: finding('the full check of the site is 7 days old or more: python3 check-tools/weekly_check.py (about 15 minutes), then read a tab with clarity_check.py --keep and tell the owner in plain words what was checked')
 except FileNotFoundError:
     finding('the full check of the site has never run: python3 check-tools/weekly_check.py')
+# a run that crashed under the Mac's scheduler leaves a Traceback in its log and no result (6 Nov 2026, Admin #21)
+try:
+    _wl = os.path.expanduser('~/stockiq-weekly-check.log'); _t = open(_wl, errors='replace').read()
+    if 'Traceback' in _t and os.path.getmtime(_wl) > os.path.getmtime(os.path.join(HERE, 'weekly_check.json')):
+        _l = [l for l in _t.splitlines() if l.strip()][-1]
+        finding(f'the last automatic full check CRASHED before writing a result ({_l[:150]}): see ~/stockiq-weekly-check.log')
+except OSError:
+    pass
 
 # 1b. the nightly site check (site_audit.py, run by the daily deploy): its problems are findings
 head('1b. The nightly site check')

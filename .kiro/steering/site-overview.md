@@ -1008,6 +1008,22 @@ open. Full output: `check-tools/replay/results-replay-2026-10-11.txt`. To keep i
   be small; the likelier income is subscriptions. He chose to carry on in the order: replay, real costs, better inputs,
   the bar in writing.
 
+**Three more things the live record raised, replayed on the same five years (12 Nov 2026; each bar written down first; `check-tools/scoring/`).**
+- **Resting a screener after its trades lagged the S&P 500 (`review_resting`) has no support** (`rest_study.py`, `results-rest-2026-11-12.txt`):
+  top 3 a week by the trend score, 5-day holds, nine lists. The weeks the live rule skips did slightly *better* than the weeks it trades (+0.17
+  against +0.08 in the first half, +0.44 against +0.31 in the second; the gap inside its margin), so a lag does not persist; a variant that
+  counts one bad night once (the median of the last five weekly groups) does no better. Neither passes (6 of 9 lists both halves, beyond twice
+  the margin). The rule costs about 10% of trades and does neither harm nor good: left as it is, with the evidence on record (Admin #8's last
+  stage: nothing to build). It rests the S&P 500, Nikkei, ASX 200 and TSX 60 as of 12 Nov.
+- **A share that jumped the day before is not a worse buy** (`jump_study.py`, question 36): top-30 trend shares up 5% (or 3%, or 8%) on the
+  decision day did the same or better over 20 days than the rest. Coins are different (the crypto score no longer rewards a jump).
+- **Buying right after an S&P 500 fall is no rule** (`fall_buys_study.py`, question 23): the live record's 56 buys after a fall of 1% or more
+  averaged -1.79% against the fund (one fall week), but in the replay buys after a fall did worse in 2022 (-0.32% against +0.21%) and better in
+  2024-26 (+1.39% against +0.59%). It flips with the market's mood.
+- **The market-fall rule ("option D") was already answered** by `replay/cash_study.py` (18 Oct: cash by the risk gauge or the 200-day trend
+  behind staying invested in both halves) and `scoring/market_trend_study.py` (23 Oct: leaving a market below its 200-day does not pass). The
+  fall of 10 Oct to 6 Nov (account -10%, S&P 500 -5.9%) was what the account held (sector funds -14% in 2.5 weeks, shares chosen), not too little cash.
+
 ## 8. Front end
 
 - `analysis.html`: options 1–7 (stock/ETF report, signals, US/EU/Asia/other screeners, crypto).
@@ -1299,7 +1315,7 @@ crypto orchestrator or any worker.
 | **China CSI 300** (since 17 Oct 2026) | `5, 'csi300'` | `5-csi300` | `stockiq-asia-5-10-worker-N` (30) | 300 | The index provider's own file for 16 Oct 2026 (`oss-ch.csindex.com.cn/.../cons/000300cons.xls`); Shanghai `.SS`, Shenzhen `.SZ`. One share returns no data on a run (299 of 300) |
 | **Taiwan 50** (since 17 Oct 2026) | `5, 'tw50'` | `5-tw50` | `stockiq-asia-5-11-worker-N` (5) | 50 | Chinese Wikipedia (members of 30 Sep 2025 with every change through the review of September 2026 applied); `.TW`. Its Top 10 comparison uses the TAIEX (`^TWII`): the Taiwan 50 index has no symbol at the price source |
 | **New Zealand NZX 50** (since 17 Oct 2026) | `5, 'nzx50'` | `5-nzx50` | `stockiq-asia-5-12-worker-N` (5) | 47 | English Wikipedia's S&P/NZX 50 table (undated; S&P's announcements show no change in June or September 2026); three members no longer have prices (Arvida and Manawa Energy taken over, Goodman Property Trust not at the price source) and their replacements are not in the list |
-| **Mexico IPC** (since 17 Oct 2026) | `5, 'ipc'` | `5-ipc` | `stockiq-americas-6-3-worker-N` (4) | 35 | **The holdings of BlackRock's NAFTRAC fund, which follows the index** (15 Oct 2026; `blackrock.com/mx/intermediarios/productos/251895/ishares-naftrac-fund/1501904811835.ajax?fileType=csv&fileName=NAFTRAC_holdings&dataType=fund`): S&P and the exchange refuse scripts. Symbols are the exchange's tickers with `.MX` (asterisk dropped; `PE&OLES.MX`, Liverpool `LIVEPOLC-1.MX`). **The exchange trades 13:30-20:00 UTC**, with New York; its daily close is an auction price, a little off the last quote |
+| **Mexico IPC** (since 17 Oct 2026) | `5, 'ipc'` | `5-ipc` | `stockiq-americas-6-3-worker-N` (4) | 35 | **The holdings of BlackRock's NAFTRAC fund, which follows the index** (15 Oct 2026; `blackrock.com/mx/intermediarios/productos/251895/ishares-naftrac-fund/1501904811835.ajax?fileType=csv&fileName=NAFTRAC_holdings&dataType=fund`): S&P and the exchange refuse scripts. Symbols are the exchange's tickers with `.MX` (asterisk dropped; `PE&OLES.MX`, Liverpool `LIVEPOLC-1.MX`). **The exchange trades 14:30-21:00 UTC** (8:30-15:00 Mexico City, no summer time since 2022; the autopilot had 13:35-19:55 until 12 Nov 2026, copied from New York); its daily close is an auction price, a little off the last quote |
 | Crypto universe | `7, 'coinspot'` | `7-1` | orchestrator + 54 `stockiq-option-7-1-worker-N` | 540 coins | CoinGecko top by market cap, price-checked |
 | Single coin | `72, 'single'` | – | the single-stock report function, `"asset": "crypto"` (since 12 Oct 2026; section 7) | – | – |
 

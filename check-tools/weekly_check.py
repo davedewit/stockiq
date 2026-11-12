@@ -17,6 +17,9 @@ It is the floor, not the whole job: a session that runs it also reads the dashbo
 and reports in plain words what was checked and what was fixed (site-overview.md, the HI routine).
 """
 import os, sys, json, re, subprocess, tempfile, datetime, importlib.util, shutil
+# The Mac's scheduler gives a job a bare PATH (no Homebrew): without this, 'node' and the python packages were not found and the
+# 6 Nov 2026 run died before writing a result (Admin #21).
+os.environ['PATH'] = '/opt/homebrew/bin:/usr/local/bin:' + os.environ.get('PATH', '')
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE); WEB = os.path.join(os.path.dirname(ROOT), 'website')
 QUICK = '--quick' in sys.argv
 if '--recheck' in sys.argv:                # only what failed last time, where that part can be run alone (24 Oct 2026: two failures
@@ -27,6 +30,7 @@ if '--recheck' in sys.argv:                # only what failed last time, where t
     _alone = {'the panel works out the budget, the spread and the check-ins as the function does':
                   (['python3', '-W', 'ignore', 'autopilot_plan_check.py', _fn, os.path.join(_web, 'practice-autopilot.js'), '60'],
                    lambda o: (lambda d: bool(d) and all(x == '0' for x in d))(re.findall(r'differs from the function in: (\d+)', o))),
+              "the market panel's two sources give the same figures": (['python3', 'market_sources_check.py'], lambda o: 'ALL PASS' in o),
               'the header and the room under it': (['node', 'header_room_check.js'], lambda o: ('ALL PASS' in o or re.search(r'all \d+ checks passed', o)) and 'FAIL' not in o),
               'the two sliding panels on a phone': (['node', 'mobile_sidebar_check.js', 'index.html', 'dashboard.html', 'analysis.html'], lambda o: ('ALL PASS' in o or re.search(r'all \d+ checks passed', o)) and 'FAIL' not in o),
               'the market panel and live figures': (['node', 'live_market_check.js', 'index.html', 'dashboard.html'], lambda o: ('ALL PASS' in o or re.search(r'all \d+ checks passed', o)) and 'FAIL' not in o)}
@@ -105,6 +109,8 @@ def run(cmd, timeout=900, cwd=None, env=None):
         return p.returncode, (p.stdout or '') + (p.stderr or '')
     except subprocess.TimeoutExpired:
         return 99, 'timed out'
+    except OSError as e:                      # a program that is not there is a failed step, not a crash of the whole check
+        return 98, f'could not start {cmd[0]}: {e}'
 
 
 def note(part, name, ok, detail=''):
@@ -133,6 +139,8 @@ suite('the notification bell', ['node', 'autopilot_bell_test.js', os.path.join(W
 suite('the AI chat', ['python3', 'ai_chat_test.py', LIVE_FN('stockiq-ai-chat')])
 suite('the trading signals', ['python3', os.path.join(ROOT, 'signals', 'test_signals.py')])
 suite('the home page news list', ['node', 'news_sidebar_test.js'])
+suite("the stock pages' data dates", ['python3', '-W', 'ignore', 'stock_dates_test.py'])
+suite('the payment function (Stripe events, cancelling)', ['python3', 'payments_test.py', LIVE_FN('stockiq-payment-handler')])
 code, out = run(['python3', '-W', 'ignore', 'autopilot_plan_check.py', LIVE_FN('stockiq-ai-trader'), os.path.join(WEB, 'practice-autopilot.js'), '60'], 1200)
 diff = re.findall(r'differs from the function in: (\d+)', out)
 note('1. Test suites on the live code', 'the panel works out the budget, the spread and the check-ins as the function does', diff and all(d == '0' for d in diff), out.strip().splitlines()[-3:])

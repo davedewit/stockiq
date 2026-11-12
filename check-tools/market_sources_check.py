@@ -8,7 +8,9 @@ work the day's change out differently, every page load and every 5-minute reload
 
 Asks each of the seven once and the price function once for the same symbols (8 Lambda calls, read-only), and lists every
 item whose price, change or % differ by more than rounding. A price can move between the two calls (a coin trades all
-the time), so a difference under 0.1% of the price is allowed and the % must agree to 0.05 points.
+the time), so a difference under 0.1% of the price is allowed and the % must agree to 0.2 points
+(12 Nov 2026: it was 0.05, and a tick between the two calls, 0.06 to 0.12 points on a different item each run, failed the full check;
+the faults this exists for were 0.7 to 1.6 points).
 
     python3 check-tools/market_sources_check.py        # prints ALL PASS or each difference
 """
@@ -48,7 +50,7 @@ for tab, name, v in items:
     if q.get('error') or 'price' not in q:
         continue                                     # the price function could not get this one: nothing to compare
     p = float(q['price']); off = abs(float(v['value']) - p) / abs(p) if p else 0
-    if off > 0.001 or abs(float(v['changePercent']) - float(q['changePercent'])) > 0.05:
+    if off > 0.001 or abs(float(v['changePercent']) - float(q['changePercent'])) > 0.2:
         bad.append(f"{tab}: {name} ({v['symbol']}) panel {v['value']} {v['changePercent']}%  live {q['price']} {q['changePercent']}%")
 print(f'{len(items)} items on 7 tabs compared with the live price function')
 for tab in empty:
