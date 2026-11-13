@@ -165,6 +165,11 @@ SUBS['sub_live'] = {'id': 'sub_live', 'status': 'canceled', 'current_period_end'
 stripe_event('evt_co_dead', 'checkout.session.completed', session); CALLS.clear(); before = list(T.writes)
 code, body = hook({'id': 'evt_co_dead', 'type': 'checkout.session.completed'})
 check('a replayed checkout for a subscription that is no longer active changes nothing and cancels nothing', code == 200 and T.writes == before and not [c for c in CALLS if c[0] == 'Subscription.delete'], (code, T.writes[len(before):], CALLS))
+AT_DELETE = []
+_orig_delete = _Sub.delete
+def _spy_delete(i):
+    AT_DELETE.append((i, T.rows['pay@example.com#registration'].get('stripeSubscriptionId'))); _orig_delete(i)
+_Sub.delete = staticmethod(_spy_delete)
 SUBS['sub_live']['status'] = 'active'; stripe_event('evt_co_live', 'checkout.session.completed', session); CALLS.clear()
 code, body = hook({'id': 'evt_co_live', 'type': 'checkout.session.completed'})
 rec = T.rows['pay@example.com#registration']
@@ -172,6 +177,7 @@ check('a checkout for a live subscription switches the plan on and ends the old 
 SUBS['sub_same'] = {'id': 'sub_same', 'status': 'active', 'current_period_end': now + 86400}
 stripe_event('evt_co_same', 'checkout.session.completed', dict(session, subscription='sub_same', metadata=dict(session['metadata'], old_subscription_id='sub_same'))); CALLS.clear()
 hook({'id': 'evt_co_same', 'type': 'checkout.session.completed'})
+check('the old subscription ends only after the record names the new one (so its "deleted" event is ignored)', AT_DELETE[:1] == [('sub_new', 'sub_live')], AT_DELETE)
 check('a checkout never deletes the subscription it is switching on', ('Subscription.delete', 'sub_same') not in CALLS, CALLS)
 CALLS.clear(); hook({'id': 'evt_co_live', 'type': 'checkout.session.completed'}, {'stripe-signature': 'wrong'})
 check('a signature that does not check is logged and the event is still taken from Stripe', ('Event.retrieve', 'evt_co_live') in CALLS)

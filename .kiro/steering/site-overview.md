@@ -217,129 +217,66 @@ about what the "Still never" list keeps for him (real money, costs above the rul
 settings while he is on the page). Do not change one idea after another on thin evidence either: that is the "mixed ideas" he
 warns about; one change at a time, measured, with its experiment entry.
 
-**WHERE THINGS STAND (rewrite this block at the end of every session; last: 6 Nov 2026, about 08:45 UTC, the weekly session; the next weekly one is about 13 Nov, the day after month 1's goal falls due)**
-- **The stance (the owner, 30 Oct 2026):** "we are just going to give this a shot ... with future AI updates over the next 6 or so months
-  we will continue to find improvements - more profit". Profit first; one tested change at a time; each newer AI model looks again at what
-  failed; a plain verdict at month 3 (12 Jan 2027). Visitors and sign-ups stay the priority for the site itself.
-- **The account (6 Nov 2026):** about $90,270, **10% below the start and $3,877 behind** the same $100,000 in an S&P 500 fund ($94,147; the
-  fund is -5.85% since 10 Oct, the account -9.72%); 205 finished trades, -1.07% a trade after costs (clearly down); shares alone -0.28% a
-  trade against the fund (184 trades, inside the margin). **Month 1's goal ($101,000 and +0.2% a trade, due 12 Nov) will be missed.** The
-  week's pattern: on the days the S&P 500 rose the account averaged -0.05% against +0.57%, on the days it fell -0.91% against -1.10% (it
-  takes the falls and misses the rises; question 57, idea `capture-ratio`). The sector funds (SMH, XLK, XLE, 20% of the budget) are down
-  13.8% in 2.5 weeks, the largest single piece of the gap: their early-stop rule is written down (idea `sector-early-stop`, checked 3 Dec).
-  The S&P 500 screener's picks are -3.28% over 31 trades (clearly down) and rested until 13 Nov by the autopilot itself; 18 loss-limit
-  sales averaged -14.8% (overnight gaps; `gap-wait` has 9 cases, waiting gave back -1.6% ±2.1). Claude's forecast 12%. His autopilot is
-  automatic (markets by the AI; pace, holdings, budget automatic; Balanced, 5-day holds); coins never bought on AI. Do not write his
-  settings while he is on the page.
-- **The bill for October: $1.57 of StockIQ's running cost, 7 cents over the $1.50 limit**, explained and fixed (the auto-delete cleanup
-  bug and the per-file cache clears of 23-26 Oct): in `KNOWN_OVER`, so the Admin card says "No, all good" with the reason. The report
-  history's reads were the largest running database cost: **99% of its rows were deleted reports never removed** (found 1 Nov 2026; now removed a
-  week after deletion, the old 1,195 by the owner's run on 1 Nov, #19), about 30 cents a month saved; `history-light` waits. November should run
-  under $1: read `cost_check.py` in its first week; add no `KNOWN_OVER` entry for November without a fixed cause.
-- **Live lately** (the detail in section 13 and `watch-list.md`): 31 Oct evening, the market figures flash like a broker's screen (on a
-  real trade only, in trade order, the changed part only, one colour a row; section 8), the panel's seven data functions agree with the
-  live prices (`market_sources_check.py` weekly), the home page's index cards link their daily page and run the screener, a Russell 2000
-  daily page (25 markets), `update_interval.sh` works again; 31 Oct, the Practice tab's top made plain (three cards alike, then a line each
-  "Your account against the same markets, no AI / the S&P 500: ▼ $X behind", then cash and holdings; no coin note; v80), "Needs you" quiet about
-  cash while the budget is automatic, the daily run 20 hours apart, the full check's cost item on the owner's rule ($1.50), `--recheck` for the
-  panel and header checks, two tests kept off the live sign-up functions; 30 Oct evening, the Practice portfolio against each buy's own market
-  (the graph's gold line, the third card "Same markets, no AI", the By market list as two dollar results side by side, the S&P card
-  "If all in the S&P 500 instead" with its line without the coins, the indexes fetched with the prices; v78); 30 Oct, the news.html blow-up fixed and guarded, market news links,
-  analytics events and tags, a thank-you after Stripe, the portfolio's figures and the all-markets index line, the Admin page's timeline
-  with jump links, a button per plan, `longer-holds`; 26 Oct, stock news on news.html again, one cache clear per deploy, the practice graph's
-  drag and S&P line in every view; 25 Oct, the deploy checks, the daily email from the log, the daily cost check; 24 Oct, one header, menu
-  and footer for every page, the free trial includes the autopilot, the daily screener pages.
-- **Google (1 Nov 2026):** 67 of the 972 sitemap pages it has read are indexed; nothing technical blocks it (`seo_crawl.py`, weekly).
-  The plan the owner liked: idea `stock-page-unique` first (each stock page its own daily ranks and score history), then open MORE pages
-  to Google, never fewer (the owner wants thousands of pages; `fewer-pages` dropped). First build at the weekly session: (G) below.
-  To be seen after the run of 1 Nov: stock-pages.html live and in the sitemap, the sitemap's stock dates current (`seo_crawl.py`
-  passes all), the hub's arrows against Thursday, "6 days in the top 10", a daily email without "IndexNow response: 403".
-- **1 Nov 2026, from the owner's questions (all live):** news summaries from the real article (CNBC feeds, every stock page; OpenAI's tokens are free for this account), the progress score and the daily AI summaries (section 8c), GPT-4o-mini against GPT-5 choosing the buys (`choose-models`), the Practice tab's leader tag, the privacy policy naming OpenAI. **Read the first summaries (written after 21:10 UTC on 1 Nov) and Monday's first score point with its drivers; check OpenAI's spend stays $0.**
-- **To be seen for real:** the hub's arrows (`screeners-today.html`, from the daily update of 31 Oct: it compares with the day before);
-  "This week in the markets" linking each announcement's market (same update); the first `longer-holds` buys (`lh` on the remembered buy)
-  and the review's split; the first GA4 events (sign_up, purchase …) in Google Analytics (the owner sends figures); the thank-you after a
-  real payment; the first trial account switching the autopilot on, and its pause when the trial ends; `M&M.NS` in a top 10.
-- **Trials running** (`python3 check-tools/experiments.py`): longer-holds (from 30 Oct), patient-shares (12 Nov), gap-wait, rank-pick,
-  stop-watch, theme-sleeve with the AI's daily market calls (3 right of 8 scored on 30 Oct; decide at 30: stop showing it headlines, or
-  let it lean the budget as a trial), crypto-no-chasing, market-gauge, company-figures, trend-score, ai-markets, auto-holdings, screener-pages,
-  signup-simpler and market-panel-pages (about 21 Nov on GA4 figures). Kept on 30 Oct: polling-cut, daily-review.
-- **Done on 6 Nov 2026 (the weekly session):** the owner's AWS cost-anomaly email (API Gateway and DynamoDB) was in another account on the bill
-  (506092802627, "aws1"; StockIQ's own DynamoDB $0.05), so `cost_check.py` now lists a $0.10+ daily jump in any other account; its misreading of
-  October's $2.65 Cost Explorer charge as November's (the cause of the 3 and 5 Nov daily-email warnings) fixed; KVUE (taken over) known stale;
-  Admin #8 first stage live (rank-pick buys recorded as chosen by rank); six old questions closed or scheduled, 57 and 58 added; ideas
-  `capture-ratio`, `sector-early-stop`, `signup-one-password`; the sector funds line reworded; estimate 12%. **Not done:** #8's later stages
-  (learn only from the current screener score; notes and scorecard lines from 30 trades a group; one night's correlated losses counted once;
-  replay `review_resting`), #15 payments (needs the webhook signing secret from the owner), the sign-up page's description does not say the trial
-  includes the autopilot (daily review, words only; the form is under test, `signup-simpler`, so left until 21 Nov), `session_start.py` still
-  suggests `owner@example.com` is the email's recipient on the clarity text (a redaction, not a fault: check once).
-- **Next session, in order (about 13 Nov, the weekly one):** the opening check first, and its part 8 (the weekly check-in, item by item). **First: month 1's
-  goal fell due on 12 Nov and was missed: say so plainly, and decide with the owner what month 2 asks.** Then #8's last stage (a night's correlated losses counted once in `review_resting`: replay it on the wide price set first, no live change before; the 6 Nov session left it so on purpose) and #15. **Also replay the market-fall rule (option D, "Improvements to come"): the fall of 10 Oct to 6 Nov (S&P 500 -5.9%, account -10.1%, 12% cash) is a live case; the autopilot has no market-wide reaction, only per-holding stops and a gauge that holds no cash.**
-  **First, the checks on the 1 Nov work:** the daily summaries (Admin "Today in 30 seconds", the autopilot tab's "Your day in short")
-  written each evening after 21:10 UTC, readable and true (read the users' too); the score's first live points with their drivers
-  (from Mon 2 Nov); the sector funds' calls rescored (`themes.rescored`); GPT-5 buys tagged `mdl` and OpenAI's spend still $0 (ask the
-  owner); the reports table down to about 15 rows and its reads down (`cost_check.py`); news.html gaining CNBC-based general news daily.
-  Decide `admin-simpler` (15 Nov) with the owner. **Ask the owner for the Stripe webhook signing secret for #15 (payments) at the start.**
-  (G) **Google indexes 67 of the 972 sitemap pages it has read** (Search Console, 1 Nov 2026: 905 not indexed, 847 "crawled - currently not indexed", 56
-  discovered, 2 noindex left over). Nothing technical blocks it (`seo_crawl.py` clean): Google judges the stock pages not worth listing
-  (alike to every finance site's) on a site with almost no links in. Bring tested plans for ideas `stock-page-unique` (each page's daily
-  ranks across screeners and its score history) (not `fewer-pages`: the owner wants more pages, not fewer, 1 Nov 2026; once the pages carry their own data, open more of them to Google); ask the owner for the indexed list (which 67) and positions (28 days).
-  The owner's two Admin yeses still open: #15 payments (below, first) and #8 (learning). Read the cost: November should run about $0.90
-  (idea `s3-requests` if S3 stays about 2 cents a day).
-  (P0) **Payments security** (the daily review's proposal of 30 Oct; Claude recommends yes, see "Decisions for you"): anyone can cancel a
-  paying member's real Stripe subscription through two public addresses (`stockiq-dashboard` get_subscription_id, `stockiq-payment-handler`
-  cancel_subscription take whatever they are sent; verified 30 Oct); Stripe's events are not signature-checked; a plan change marks the
-  member cancelled. Only the owner pays today: close it before the first customer, at the start of a session with full attention. Needs
-  from the owner: the webhook signing secret (Stripe dashboard, Developers, Webhooks, the endpoint, "Signing secret").
-  (P1) **Question 54** (the gap to the S&P 500 is now split): replay "every country's main index" against "the US only" and "the US plus
-  the strongest few" over five years; choosing markets cost about $2,180 against the S&P 500 by 30 Oct, choosing shares gained about $1,260.
-  (P) **#8** (his yes on the Admin page): a score-version tag on buys and learning only from the current score, notes and scorecard lines
-  from 30 a group, `chosen` rank when `rp`, one night's correlated losses counted once, replay `review_resting` on the wide set.
-  12 Nov: decide `patient-shares`.
-  (00) **From the owner at the close of 26 Oct (do first):** (a) the search's news box works on stockiq.tech; in his local preview
-  (Kiro) the stock page cannot be fetched and it says "No recent articles": make a failed fetch say "could not load" instead. The
-  typed-code trigger was taken out (it hid the suggestion list): news shows when a suggestion is picked, so the weekly check's "typing
-  AAPL" step must change to picking. (b) **A Yahoo-style search** (his two pictures):
-  "Search for news, tickers or companies", a dropdown with matching shares (symbol, name, type, exchange) and a News part below with
-  matching articles (headline, source, age), and a default list of what is popular (stocks and news) when the box is empty. (c) **Menu
-  items like Yahoo Finance's** (Home, News, Markets, Research and tools, Watch...): look at what fits the site's menu (`shared_parts.py`),
-  keeping it simple.
-  (0) **The stock pages for the 1,257 listed shares without one** (the owner wants the daily pages to link stock pages, not the
-  analysis; a2 Milk and most of New Zealand have none, which the chat also met): `add-new-stocks.md`'s steps in bulk, names slowly,
-  one `generate-stock-pages.py` run tested on a copy first (the template now carries the shared parts), `update_stock_analysis.py`;
-  the daily pages then link them by themselves; check the sitemap and the page count.
-  **Found on 24 Oct (a quick look, at the owner's question whether news exists outside the US):** the existing pages outside the US do get
-  news (Toronto 93%, London 88%, DAX 90%, Tokyo 63%, ASX 58%, Hong Kong 50% of pages have articles; the US 97%), all from Yahoo's
-  per-symbol feed (`update_stock_news.py`, `feeds.finance.yahoo.com/rss/2.0/headline?s=…&region=US`), and that feed answers for the
-  new markets too (2330.TW 16 items, 600519.SS 6, 005930.KS 15, VALE3.SA 19, 2359.HK 18), though some items are not about the share
-  (the script's name matching filters them). **Cost to weigh first:** the step summarises articles with OpenAI, so 1,257 more shares
-  means more summaries a day: measure the articles per share on a sample and price it before adding them all; pages for shares with
-  no news are allowed (the snapshot is the page's substance; noindex under $10B, as now).
-  **And a snapshot on every page with prices, not only the 946 indexed ones** (the owner, 24 Oct 2026, comparing KO.html with CPB.html:
-  pages under $10B have an empty snapshot section by design since 25 Sep, and visitors now reach them from the daily pages). The
-  figures cost nothing (`update_stock_analysis.py` already downloads every share's prices); the uploads do: daily for 2,500 more pages
-  is about 75,000 S3 writes a month, about $0.37, too much against the cost rule for pages nobody visits yet. So: **daily for the
-  indexed pages, weekly for the rest** (rewrite a non-indexed page's snapshot only when its block is 7 days old or missing; its line says
-  "updated weekly"; about $0.05 a month), noindex under $10B as now. Do it with the new pages, which will mostly be under $10B.
-  (0b) **The public record page** (idea `public-record`; the owner: "signup watch it if it gains you get a plan"): a public page written by
-  the daily update from his autopilot record (no new public access to data, no running cost): the AI's practice account against the
-  same $100,000 in an S&P 500 fund, what it holds, every trade with its reason, losses included, daily. Only the autopilot's side, no
-  address. An experiment to follow, never "it will make you money" (no licence; weeks prove nothing). Linked from the sign-up page,
-  the home page's autopilot card and the strip. **With it, a first-visit "Start here"** for a new account (the owner: visitors must
-  not think they just watch an AI): the dashboard opens on the Practice portfolio with three steps (buy a first stock; switch on your
-  AI trader; watch the graph against the S&P 500) until done.
-  (1) **The daily pages built on AWS once a day, every day** (idea `pages-at-close`; the owner: never miss a day, the hour matters less).
-  Today the Mac's daily run builds them, so a day with the Mac off is missed; the home section must then go into its own file so the
-  Mac's upload of index.html and the AWS run cannot overwrite each other. With it, the hub also shows the week's big announcements (the owner likes
-  the hub as the one place for everything daily).
-  (1b) Idea `history-light` (cost; only if the bill nears $1.50, the owner 31 Oct): a signed-in page load reads the whole report history with every text (about 400 units); a list
-  without the texts. Small now, grows with every signed-in visitor.
-  (2) **Store his autopilot record compressed**, as `_brain` is (about 250 KB now, the largest running write).
-  (3) A small one from him: a "View report" link on the "Analysis complete" note after a background analysis.
-  (4) **Built once, next:** copies 106 lines: mostly the bell's code in index, blog and news (merge with a real signed-in browser to
-  check), the pages' own phone-menu functions, the four pages' own trial strips. Bring it down, never up.
-- **How the session works:** the routine at the top (steps 0 to 6, with 5b, 5c, 5d); "THE GOAL OF ALL OF IT" below; four entry points
-  for checks (`session_start.py`, `site_audit.py` daily, `weekly_check.py` weekly, `autopilot_review.py`); one register each for parts,
-  experiments and questions, kept in step by `registers_check.py`. A new check goes into one of the four, never a fifth thing.
+**WHERE THINGS STAND (rewrite this block at the end of every session; last: 12-13 Nov 2026, the weekly session a day early; the next weekly one is about 19 Nov)**
+- **The stance (the owner, 30 Oct 2026):** "we are just going to give this a shot ... with future AI updates over the next 6 or so months we will
+  continue to find improvements - more profit". Profit first; one tested change at a time; each newer AI model looks again at what failed; a plain
+  verdict at month 3 (12 Jan 2027). Visitors and sign-ups stay the priority for the site itself.
+- **The account (12 Nov 2026):** about $93,000, **7% below the start and about $4,000-4,600 behind** the same $100,000 in an S&P 500 fund (the fund is
+  -2.4% since 10 Oct, the account -7.05%); 239 finished trades, -1.27% a trade after costs (±0.44, clearly down); shares alone -0.47% a trade
+  against the fund (218, inside the margin). **Month 1's goal (due 12 Nov) was MISSED**: -1.30% a trade this month over 234 trades against +0.2%,
+  the account $92,961 against $101,000. The month 2 and 3 targets stay as written (a goal is not moved after the fact); month 2 ($102,500, +0.3% a
+  trade, 300 trades by 12 Dec) is out of reach on these figures, and the month 3 verdict (12 Jan 2027) stands. Since the start the account took 73%
+  of the fund's falls and 20% of its rises (24 trading days; idea `capture-ratio`, then `core-sleeve`). The AI model's own choice of buys is -3.29%
+  a trade (44) against -2.08% for the top-ranked of its market (47): it is not helping (`rank-pick` decides 6 Jan). Claude's forecast 8%.
+- **The bill:** November $1.23 at AWS's reading (other accounts included), StockIQ's own running cost $0.23 so far; October's $1.57 is in `KNOWN_OVER`.
+  The account's record in DynamoDB was 321 KB against the 400 KB limit and climbing: stored compressed from the function deploy of 12-13 Nov
+  (item `z`; `trader_record.py` reads either way).
+- **Done on 12 Nov 2026 (the weekly session):** Admin #8, #15 (built; see below), #21, #22, #23, #24, #26, #27 done, #25 in the page deploy. Decisions:
+  `headlines` removed (the shortlist's headlines are no longer shown to the model), `patient-shares` extended once to 26 Nov (patient -0.73% a trade,
+  ordinary -1.82%, 1.1 margins), ideas `market-mood`, `newer-model`, `weekly-email` dropped, seven stale questions answered. Replays (section 7b):
+  resting a lagging screener, a jump the day before, buying after a market fall: none passes. The full check ran (it had not since 30 Oct: it crashed
+  under the Mac's scheduler, fixed): 62 of 68, the failures were the sources tolerance, the All row's missing earlier sales, a latent check bug
+  (the fund's one-month prices), timing under load and the daily run still going. Mexico's autopilot hours were an hour early and a closing hour
+  short (now 14:35-20:55 UTC).
+- **Payments (#15), built, check it is live:** `check-tools/pending-payments/` (payment handler and dashboard function; patch.py rebuilds them from the
+  mirrors) and `pending-payments-web/` (dashboard.html's cancel flow, the plan cards' "Email support", the portfolio and autopilot scripts, the
+  analysis page's option descriptions). Stripe events are believed only when fetched back from Stripe by id (the signing secret was not read: it
+  is logged, not enforced; look for "Webhook signature: ok" in the payment function's log after a real event, then enforce); cancel needs a Cognito,
+  Google or Facebook proof and ignores a subscription id; the end of a subscription that is not the member's current one is ignored. **Not done:** a
+  plan change is still a new checkout and the old subscription deleted (a downgrade loses the rest of the month), which needs the upgrade buttons on three
+  pages changed to `Subscription.modify`. Google and Facebook sign-ins are not Cognito sessions (the browser holds `google_` / `facebook_` markers and
+  the raw credential): a Google credential lasts an hour, so the page asks the member to sign in again if the cancel is refused.
+- **Google (1 Nov 2026):** 67 of the 972 sitemap pages it had read were indexed; nothing technical blocks it (`seo_crawl.py`, weekly). The plan the owner
+  liked: idea `stock-page-unique` first, then more pages open to Google, never fewer. Ask the owner for Search Console's Performance page and GA4's
+  event counts at the 21 Nov decisions (`market-panel-pages`, `signup-simpler`).
+- **To be seen for real:** the stock pages from the daily run after 13 Nov say "Data as of D close" only for a finished session (`part-day` in the site
+  check; `update_stock_analysis.py` now also asks AWS for a share a session behind); the first check-in with headlines off (look for a prompt error);
+  the first compressed save of the account record (`aws logs` for "diary not written" or a save error); the Russell 2000 page at about 107 KB; the
+  first `longer-holds` buys and the review's split; the first GA4 events; a real payment's thank-you page; `M&M.NS` in a top 10.
+- **Trials running** (`python3 check-tools/experiments.py`): patient-shares (26 Nov), longer-holds (29 Dec), gap-wait (22 Dec), rank-pick (6 Jan),
+  choose-models (6 Dec), stop-watch and company-figures (30 Nov), trend-score (14 Nov), auto-holdings and crypto-no-chasing (7 Dec), theme-sleeve
+  (19 Oct 2027; its AI calls are recorded only: 19 of 34 right, judge again at 60), market-gauge, ai-markets, screener-pages, signup-simpler and
+  market-panel-pages (21 Nov), admin-simpler (15 Nov), digest-and-score and portfolio-top-nov (22 Nov).
+- **Next session, in order:** the opening check first (its part 8 when the weekly review is due). (1) Check the three deploys of 12-13 Nov took (the two
+  functions, the page files) and that the weekly check's failures are gone: `weekly_check.py --recheck`, then a full run if more than a day has passed.
+  (2) Decide `trend-score` (14 Nov) and `admin-simpler` (15 Nov); `patient-shares` on 26 Nov. (3) Open Google's pages: plan for `stock-page-unique`
+  (each page's daily ranks across screeners and its score history; the owner wants thousands of pages). (4) The plan-change fix for payments
+  (`Subscription.modify`), then enforce the webhook signature once a real event shows it passing. (5) `capture-ratio` at 30 trading days (about 26 Nov),
+  then replay `core-sleeve`. (6) The sector funds' monthly change was due 16 Nov: read it. (7) The Practice portfolio's sold list keeps 200 sales; the All
+  row now adds the earlier ones as one amount, but the By market rows cover only the listed sales: if the owner relies on them, store an archive
+  per market when the list trims (three places cap it: the page, `stockiq-paper-portfolio`, the trader).
+  (00) **From the owner at the close of 26 Oct (still open):** (a) the search's news box in a local preview says "No recent articles" when the stock page
+  cannot be fetched: make a failed fetch say "could not load"; (b) a Yahoo-style search ("Search for news, tickers or companies", matching shares with
+  symbol, name, type and exchange, a news part, a popular list when empty); (c) menu items like Yahoo Finance's, keeping it simple.
+  (0) **Stock pages for the 1,257 listed shares without one** (`add-new-stocks.md` in bulk; price the OpenAI summaries first; a snapshot on every page
+  with prices, daily for the indexed ones and weekly for the rest). (0b) **The public record page** (idea `public-record`) with a first-visit "Start here"
+  for a new account. (1) **Daily pages built on AWS once a day** (idea `pages-at-close`). (1b) `history-light` and `s3-requests` only if the bill nears
+  $1.50. (3) A "View report" link on the "Analysis complete" note. (4) Copies: 106 lines, mostly the bell's code in index, blog and news: bring it down.
+- **How the session works:** the routine at the top (steps 0 to 6, with 5b, 5c, 5d); "THE GOAL OF ALL OF IT" below; four entry points for checks
+  (`session_start.py`, `site_audit.py` daily, `weekly_check.py` weekly, `autopilot_review.py`); one register each for parts, experiments and questions,
+  kept in step by `registers_check.py`. A new check goes into one of the four, never a fifth thing. **A browser check and a test run must not overlap
+  (shared ports), and a deploy must wait for the daily update to finish (`lambda_deploy.sh` stops while it runs; the daily run takes 2 hours from about
+  17:00 UTC on a Mac whose clock is UTC+7).**
 
 **THE GOAL OF ALL OF IT, in the owner's words (23 Oct 2026):** "it figures something out thats a problem or a profit tries to remove it
 or continue it more ... AI driven to react based on data and show improvement that gets exponential over time". So: every finding in
@@ -2018,6 +1955,9 @@ with `document.querySelector('h3')`.
   his own buys against the S&P 500, coins against nothing); the grey line under it names the index and gives the S&P 500 in dollars;
   All markets is every buy added up against its own market (the third card); the S&P reconciliation ("how the whole account's gap adds
   up") is folded underneath. The paragraph below describes the S&P layout it replaced.
+  **The sold list keeps the latest 200 sales** (the page, `stockiq-paper-portfolio` and the trader each cap it): from 12 Nov 2026 older sales were off it, so the
+  All row and the By market rows left their result out while the account, the third card and the graph kept it (the weekly check failed on it); the All row
+  now adds that amount (`earlier`, from `valueSeries().undated`) and says so, the By market rows cover the listed sales only.
   **The All markets row carries the totals** (the owner's main view): every buy, the account's result since the start, and the
   account against the same $100,000 in an S&P 500 fund since the start (equals the graph's gap). The graph's ranges are 1d, 1w,
   1m, 3m, 6m, 1y, 2y, 5y, 10y and All (those longer than the account's life greyed); its first button is "All markets" (it was
@@ -5856,3 +5796,10 @@ browser page, copy-of-the-live-record check, deploy script, verification).
   (v80); the daily run waits 20 hours after the last (it had run at 15:33 and 00:02; `~/stockiq-daily.sh`, watch list); `stage_web.py` stages a
   file committed but not yet live; a wait loop that matched its own text (`pgrep -f deploy-to-s3.sh`) cost an hour: wait on a lock file or
   a process id, never on a pattern the waiting command contains. Question 56.
+- **12 Nov 2026** (the owner: "you should have a lot of pending work, you can do it now as much as you want"; the weekly session a day early). Month 1's
+  goal missed (WHERE THINGS STAND). **Live:** headlines off in the trader; the weekly check works from the scheduler. **Staged, deploy after the daily
+  update:** payments (#15), the goal wording and compressed account record and Mexico hours (`pending-goalwords`), the page files (`pending-payments-web`:
+  cancel flow, "Email support" on all plans, the All row's earlier sales, the holding count wording, option descriptions on the analysis page). **Uploaded by
+  the daily update:** Terms, refunds, privacy and About reworded to what the site does, `admin-panel.js`, the daily pages ("positive trend score", the
+  Russell 2000 page capped), stock pages with finished-session dates. Found by the session, not the owner: the resting rule has no edge (replays), the
+  account record near DynamoDB's item limit, Mexico's hours, stock pages stamped "close" mid-session, the weekly check's latent one-month-fund bug.

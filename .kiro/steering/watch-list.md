@@ -22,13 +22,6 @@ Rules:
 - **Undo:** `git revert` the two website commits of 25 Oct ("auth.js: the browser also remembers…", "dashboard.html: anonymous…") and deploy.
 - **Remove after:** 2026-11-25
 
-### 2026-10-25 · Register page spacing and the menu's place
-- **Changed:** `signup.html` (64px under the bar on a phone; the hidden 20px bell placeholder replaced by the real bell);
-  `unsubscribe.html` got the bell. `header_room_check.js` now fails a page whose menu stands elsewhere.
-- **Could break:** the register page's top under the bar on a phone; the bell showing on the register page for a signed-out visitor.
-- **Undo:** `git revert` those website commits.
-- **Remove after:** 2026-11-08
-
 ### 2026-10-25 · The auto-delete cleanup handles only its own user
 - **Changed:** Lambda `stockiq-auto-delete-cleanup` (it scanned the whole report table and applied one user's setting to everyone,
   64 times a day). Now: only the `userId` it is given; no userId answers 400. `lambda_deploy.sh` now replaces one file in a package
@@ -65,63 +58,12 @@ Rules:
 - **Remove after:** 2026-11-25
 
 
-### 2026-10-26 · Stock news on the news page; one cache clear per deploy
-- **Changed:** `update_stock_news.py` (its pattern for news.html allows a comment before `<footer>`; "Synced" only when written; the
-  same fallback fixed in `Sync_stock_to_news.py`, `remove_news_duplicates.py`, `update_news.py`); `web_deploy.sh` clears `/*` once for
-  2+ files; `site_audit.py` `news-stale` checks the stock news alone; `cost_check.py` counts the month's cache-clear paths.
-- **Could break:** news.html written with a broken end (look: the page's footer missing or doubled after tomorrow's run); stock news
-  stale again (the site check now says so); a CloudFront cost rise of more than a cent a day.
-- **Undo:** `git revert` the commit "Stock news reaches news.html again; one cache clear per deploy".
-- **Remove after:** 2026-11-09
-
-### 2026-10-26 · Click and drag on the practice graph
-- **Changed:** `practice-portfolio.js` (`dragStart`, `dragMove`, `dragEnd`, `showMeasure`, `reMeasure`; a band `#pp-band` in the picture):
-  while held, a drag measures the stretch for the line on show and the S&P 500 fund; letting go clears it (as broker apps do).
-- **Could break:** the read-out stuck on a stretch after letting go, a phone's page scroll caught by the graph, a swipe on the graph opening the menu.
-- **Undo:** `git revert` the website commit "Practice portfolio: click and drag across the graph".
-- **Remove after:** 2026-11-09
-
-### 2026-10-26 · The home page's search shows a share's latest news
-- **Changed:** `symbol-news.js` (new; `symbolNews.show/hide`), `index.html` (a box under each search, shown when a suggestion is picked or
-  a code with a stock page is typed and no suggestions wait). Reads the share's stock page (its NEWS section): no new running cost.
-  `stage_web.py` now stages a brand-new file (it read an uncommitted new file as unchanged).
-- **Could break:** the box covering the suggestions, a stock page's news markup changing (`update_stock_news.py`) so no headlines are
-  found (the box then says "No recent articles"), the side panel's search height. `search_news_check.js` (weekly) tests it.
-- **Undo:** `git revert` the website commit "Home page search: a picked share's latest news" and deploy index.html.
-- **Remove after:** 2026-11-09
-
-### 2026-10-30 · news.html can no longer double itself
-- **Changed:** the end-of-list pattern in `update_stock_news.py`, `update_news.py`, `Sync_stock_to_news.py`, `remove_news_duplicates.py` is
-  searched from the article list onwards (the 26 Oct pattern matched a `</div>` in the menu and doubled the page every 10 articles, to
-  5.8 GB by 27 Oct); `news_guard.py` makes every writer refuse a page with the list or footer twice, or over 20 MB. `daily_report.py`
-  names a step killed by the system and a news.html over 20 MB.
-- **Could break:** no stock news reaching news.html (a "❌ news.html not written: …" line in the log); the guard refusing a good page
-  (the footer counted twice if a page ever has two `<footer`).
-- **Undo:** `git revert 608fd71`.
-- **Remove after:** 2026-11-13
-
 ### 2026-10-30 · The longer-holds trial
 - **Changed:** `stockiq-ai-trader` (`LONGER`, `LONGER_DAYS` 20, tag `lh` 0, 1, 1, 0 on share buys while `maxHoldDays` is automatic; `hold_days`).
 - **Could break:** the budget filling up and buying slowing (tagged shares are held longer); a holding's plan showing 20 days where the
   owner set his own time (it must not: `hold_days` checks `auto`); the review tool's split missing.
 - **Undo:** `LONGER = False` in the function (tagged shares then follow the level's time), or the rollback zip `…_before_autopilot_longer_20261030.zip`.
 - **Remove after:** 2026-11-20
-
-### 2026-10-30 · The once-a-day locks moved out of /tmp
-- **Changed:** `~/stockiq-daily.sh` (NOT in git) and `check-tools/daily_review.sh` keep their locks in `~/.stockiq-locks/` (a restart at
-  15:04 emptied `/tmp` and the daily job ran a second time at 15:33; the review tried again at 16:23); old locks removed after 14 days.
-  `daily_report.py` says "This is the second run today" when a log for the day already exists.
-- **Could break:** no daily run at all (a lock left for a day that has not run: look in `~/.stockiq-locks/`); the review never starting.
-- **Undo:** `cp ~/VSCODE/backup/stockiq-daily.sh_before_homelock_20261030 ~/stockiq-daily.sh`; `git revert` the commit for the other two.
-- **Remove after:** 2026-11-13
-
-### 2026-10-30 · The practice graph against each buy's own market; a third card
-- **Changed:** `practice-portfolio.js` v74-78 (v78: the coin line on the S&P card, the list in dollars; v77: the S&P card renamed, the indexes fetched with the prices, the Admin split; v75: the list shows each index's own result, the third card "Same markets, no AI"; v76: no S&P lines in the list, the third card's day) (`homeTrack`, `homeBench`, `ownMarkets`; `valueSeries` gives `home` / `phome`; the gold line,
-  the read-out, the figures table and the third card use them; the All markets row counts the owner's own buys). The S&P line left the graph.
-- **Could break:** the third card or the gold line missing or "…" for long (an index's prices not coming: `ensureIndexes`); the graph slow on
-  a phone (more points: each index's closes); the three figures disagreeing (they are one sum: `practice_test.js` checks it).
-- **Undo:** `git revert` the website commit "Practice graph against each buy's own market" and deploy; the chat: `~/VSCODE/backup/stockiq-ai-chat_before_ownmarkets_20261030.zip`.
-- **Remove after:** 2026-11-13
 
 ### 2026-10-31 · The daily run waits 20 hours after the last one
 - **Changed:** `~/stockiq-daily.sh` (NOT in git): it also needs the newest `deploy-*.lock` to be 20 hours old (a run at 15:33 on 30 Oct was followed by one at 00:02).

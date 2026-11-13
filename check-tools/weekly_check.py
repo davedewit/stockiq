@@ -189,7 +189,7 @@ try:
 const pp = require(process.argv[2]); const PRICE = 'https://dohdeb4vpu67fa2tq3ax56ls4i0rshvm.lambda-url.us-east-1.on.aws/?symbol=';
 (async () => { const state = JSON.parse(require('fs').readFileSync(process.argv[3], 'utf8')); const syms = new Set(['SPY']);
   [...state.holdings, ...state.closed].forEach(h => { syms.add(h.symbol); const fx = pp.fxFor(h.currency || 'USD'); if (fx.symbol) syms.add(fx.symbol); });
-  const quotes = {}; await Promise.all([...syms].map(async s => { try { const j = await (await fetch(PRICE + encodeURIComponent(s))).json(); const r = j.chart.result[0], mm = r.meta;
+  const quotes = {}; await Promise.all([...syms].map(async s => { try { const j = await (await fetch(PRICE + encodeURIComponent(s) + (s === 'SPY' ? '&range=1y' : ''))).json();   /* the fund needs prices back to the start: a month was enough until the account passed 30 days (12 Nov 2026) */ const r = j.chart.result[0], mm = r.meta;
     quotes[s] = { price: mm.regularMarketPrice, currency: mm.currency, time: mm.regularMarketTime, series: pp.seriesOf(r, s) }; } catch (e) {} }));
   const s = pp.summarize(state, quotes), vs = pp.versusStart(state, quotes, Date.now()), d = pp.versusDays(state, quotes, Date.now());
   console.log(JSON.stringify({ account: s.accountValue, fund: vs && vs.value, days: d && d.days })); })();"""
