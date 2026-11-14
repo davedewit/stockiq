@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-11-14",
+   "what": "The Practice portfolio's All markets row no longer breaks the sums check: its earlier-sales figure used a time that was not defined (live 14 Nov)",
+   "found": "check"
+  },
+  {
+   "at": "2026-11-14",
    "what": "Plan cards say email support on all three plans; the analysis page describes each option in a line; the All markets row includes the oldest sales",
    "found": "check"
   },
@@ -295,11 +300,6 @@
   {
    "at": "2026-10-30",
    "what": "By market list: the S&P 500 lines taken out (the second card already has it); your own buys get their own row; the third card shows its own today figure like the other two, and the day figures sit neatly under each total",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "By market list: the last column now shows what each market's own index made with the same money (up or down, like your result beside it), not the difference; the third card is now called Same markets, no AI",
    "found": "owner"
   }
  ]
