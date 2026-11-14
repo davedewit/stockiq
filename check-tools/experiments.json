@@ -595,13 +595,14 @@
   },
   {
    "id": "choose-models",
-   "what": "The AI model that chooses the buys takes turns: GPT-4o-mini (as before) and GPT-5, 50/50 (CHOOSE_MODELS in stockiq-ai-trader; any number of models with any shares), each buy tagged mdl, within OpenAI's free daily tokens (FREE_DAILY)",
+   "what": "The AI model that chooses the buys takes turns, 50/50, each buy tagged mdl (CHOOSE_MODELS in stockiq-ai-trader), within OpenAI's free daily tokens (FREE_DAILY). 1-14 Nov 2026: GPT-4o mini against GPT-5. From 14 Nov 2026 (OpenAI retires GPT-4o mini on 14 Jan 2027): GPT-5.6 Luna against GPT-5; a new comparison, the GPT-4o mini buys are never pooled with it",
    "angle": "AI use, profit",
    "measure": "the average a finished trade after costs against an S&P 500 fund, for the buys each model chose, from 30 each (autopilot_review.py 'by the AI model that chose it'); keep the better as the only model, or try a newer one against it",
    "status": "running",
    "added": "2026-11-01",
    "started": "2026-11-01",
-   "decide": "2026-12-06"
+   "decide": "2026-12-20",
+   "result": "14 Nov 2026: GPT-4o mini replaced by GPT-5.6 Luna in the list, decision day moved from 6 Dec to 20 Dec so that each side has 30 finished trades of its own."
   },
   {
    "id": "admin-simpler",

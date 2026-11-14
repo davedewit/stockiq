@@ -206,3 +206,33 @@ Rules:
 - **Could break:** the automatic run (end of `deploy-to-s3.sh`) still dying: look at `~/stockiq-weekly-check.log` after the next daily update on or after 19 Nov.
 - **Undo:** `git revert` the commit.
 - **Remove after:** 2026-11-26
+
+### 2026-11-14 · GPT-5.6 Luna replaces GPT-4o mini everywhere (OpenAI retires 4o mini on 14 Jan 2027)
+- **Changed:** `stockiq-ai-trader` (`USUAL_MODEL`; `CHOOSE_MODELS` is now Luna and GPT-5; Luna counts in the small pool; priced $0.20/$1.20 in `AI_PRICES`),
+  `stockiq-ai-chat` (`CHAT_MODEL`, `max_completion_tokens` = reply cap + 1,500, `reasoning_effort` low, no temperature), `stockiq-ai-chat-reporter`
+  (prices), and on the Mac `update_news.py` (2 calls), `update_stock_news.py` (1 call) (`reasoning_effort` none, `max_completion_tokens`). Luna refuses
+  `temperature`, `max_tokens` and `reasoning_effort` 'minimal'. The experiment `choose-models` restarts as Luna against GPT-5 (decide 20 Dec).
+- **Could break:** a chat reply that is empty or cut (the thinking ate the cap: look for short replies in the chat's daily report); more "AI model … not
+  used" lines in the trader's log; the news summaries rejected more often for invented figures (count "Rejected (" in the daily email: it was the
+  routine level before); an OpenAI charge (Luna may not be in the account's free daily tokens: look at OpenAI's usage page, the Admin page's AI cost
+  line shows the month's spend at Luna's prices); the chat slower (4-5 s a reply against 1-2 s).
+- **Left on purpose:** `STRONG_MODEL = 'gpt-4o'` (the AI review's larger model: the review is off, `AI_SELL = False`; it also retires on 14 Jan 2027, so
+  choose its replacement when that trial ever returns; until then the model test's "larger" answer will turn false on that day and mean nothing).
+- **Undo:** the zips `~/VSCODE/backup/stockiq-{ai-trader,ai-chat,ai-chat-reporter}_before_luna_20261114.zip`; the news scripts from git. Not before 14 Jan 2027.
+- **Remove after:** 2026-12-01
+
+### 2026-11-14 · Payments: Stripe events believed only when Stripe confirms them; cancelling needs proof (Admin #15)
+- **Changed:** `stockiq-payment-handler`, `stockiq-dashboard` (no subscription ids handed out), the dashboard's cancel flow, "Email support" on the plan cards.
+- **Could break:** a real purchase not turning the member's plan on (look at the first real checkout's log: "Webhook signature: ok", and the plan on the
+  account); a member refused when cancelling ("sign out and sign in again": Google sign-ins last an hour). Not done: a plan change is still a new checkout and
+  the old subscription deleted (a downgrade loses the rest of the month); enforce the webhook signature once a real event shows it passing.
+- **Undo:** the zips `~/VSCODE/backup/stockiq-{payment-handler,dashboard}_before_payments_20261112.zip`; the pages from git.
+- **Remove after:** 2026-12-14
+
+### 2026-11-14 · The account record is stored compressed; Mexico's hours; "1 day left" wording
+- **Changed:** `stockiq-ai-trader` (`item_json`: a record in `z`, zlib and base64, 326 KB became 69 KB; read either way; Mexico 14:35-20:55 UTC; `left_text`).
+- **Could break:** any reader of the table that reads `data` only (the scripts use `trader_record.py`; none found that do not); a save error in the
+  trader's log; the account looking empty on the dashboard (it would be `get` failing: check at the next visit).
+- **Undo:** the zip `~/VSCODE/backup/stockiq-ai-trader_before_luna_20261114.zip` (it reads `data` only: a record saved compressed would then look new, so
+  put the record back from `z` first with `trader_record.py`).
+- **Remove after:** 2026-12-01

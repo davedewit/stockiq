@@ -341,7 +341,7 @@ Browser ──> Lambda function URLs directly (no API Gateway; 1,056 functions, 
               ├─ index/dashboard/sidebar: market data, gainers/losers/trending, email capture
               └─ auth.js: usage/trial trackers
 Browser ──> Cognito (user pool us-east-1_P4lqPzrlY, tokens in localStorage), Google/Facebook login, Stripe
-Lambdas ──> Yahoo Finance + Finnhub (data), OpenAI gpt-4o-mini (AI chat), DynamoDB, S3
+Lambdas ──> Yahoo Finance + Finnhub (data), OpenAI gpt-5.6-luna (AI chat), DynamoDB, S3
 ```
 
 - S3 versioning is **Suspended**: an overwrite cannot be rolled back from S3. Rollback comes
@@ -2103,7 +2103,7 @@ summary of everything going on "i can read in 30 seconds", for him on the Admin 
 - **The summaries** (`write_digests`, the first scheduled run after 21:10 UTC, `DIGEST_AFTER`, once a day): the owner's from
   `owner_facts` (the score and its drivers, the account against the fund, the month's goal, the autopilot's day, trials decided and
   due, the day's changes from `admin.py change`, the site check, the full check, the daily update, decisions waiting, failed check-ins),
-  on GPT-5 (`DIGEST_MODEL`, counted in the free tokens); each account's from `user_facts` on GPT-4o-mini, kept in `state.digest`, sent
+  on GPT-5 (`DIGEST_MODEL`, counted in the free tokens); each account's from `user_facts` on GPT-5.6 Luna, kept in `state.digest`, sent
   by `public()` for 3 days. `summarise_facts`: 3 to 5 lines marked 📈 ✅ ⚠️ 🔬 👉; **every number must be in the facts and no advice
   words** (`DIGEST_WORDS`), one retry, otherwise the facts themselves are shown (`how: 'facts'`, and the page says so). Being behind the
   fund goes under ⚠️, no softening words. The facts come only from records: keep `admin.py change` lines true (a superseded change
@@ -2200,7 +2200,7 @@ Built on 11 Oct 2026 in several rounds; this is the state it ended in. The story
 | Screener data | `stockiq-screener-coordinator` | Called with no `userId`, so nothing is saved to anyone's history |
 | Prices | `stockiq-price-proxy` | Also exchange rates (`AUDUSD=X`, `USDJPY=X`) and the S&P 500 fund (`SPY`) |
 | Headlines | Google News RSS (coins), Yahoo Finance RSS (shares) | Fetched by the Lambda; the AI model has no internet |
-| AI model | OpenAI `gpt-4o-mini`, JSON replies. **The buys are chosen by `CHOOSE_MODELS` in turn by share (since 1 Nov 2026: GPT-4o-mini and GPT-5, 50/50; each buy tagged `mdl`)**, inside the account's free daily tokens (OpenAI's complimentary tokens for data sharing: about 250,000 a day for larger models, 2.5 million for small; `FREE_DAILY` is this function's part, counted in `_aiuse`). `gpt-4o` for the holdings review (off since 17 Oct) | Uses: choose buys, the sector funds' daily read, notes. `aws lambda invoke … --payload '{"model_test": true}'` asks each one question and says which answered |
+| AI model | OpenAI `gpt-5.6-luna` (`USUAL_MODEL`, since 14 Nov 2026: OpenAI retires GPT-4o mini on 14 Jan 2027; Luna takes no temperature, counts thinking in `max_completion_tokens`, `reasoning_effort` none or low; $0.20 in / $1.20 out per million tokens), JSON replies. **The buys are chosen by `CHOOSE_MODELS` in turn by share (since 1 Nov 2026: 50/50, GPT-4o mini then, Luna and GPT-5 from 14 Nov: a new comparison, never pooled with the old; each buy tagged `mdl`)**, inside the account's free daily tokens (OpenAI's complimentary tokens for data sharing: about 250,000 a day for larger models, 2.5 million for small; `FREE_DAILY` is this function's part, counted in `_aiuse`). `gpt-4o` for the holdings review (off since 17 Oct) | Uses: choose buys, the sector funds' daily read, notes. `aws lambda invoke … --payload '{"model_test": true}'` asks each one question and says which answered |
 | Email | SES, from `autopilot@stockiq.tech` to the account's own address | The role has SES access; the owner's address is a verified identity (SES is still in sandbox) |
 
 The Function URLs are written into the scripts. As everywhere on this site the `userId` is whatever the browser
@@ -2424,7 +2424,7 @@ sends. The autopilot acts for accounts on a paid plan and for the accounts liste
    sell** with a reason; "tighten" keeps the holding with a closer stop (`tight`). **A larger model
    (`STRONG_MODEL`, gpt-4o) does this review when a gain is at stake** (some holding is up enough
    for its gain to be protected), at most 8 times a day per user (`STRONG_PER_DAY`, `state.strong`;
-   about 0.3 US cents a call, so under $1 a month; the owner's limit). Otherwise gpt-4o-mini. If the
+   about 0.3 US cents a call, so under $1 a month; the owner's limit). Otherwise the usual model (Luna). If the
    larger model cannot be reached the usual one answers. **It can only sell earlier than the rules, never keep past one.**
    A "keep" is stored with the holding (`view`) and shown on the panel.
 5. The sales are made; each gets a log entry with its story (`sale_detail`).

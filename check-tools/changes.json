@@ -2,6 +2,26 @@
  "about": "What the sessions changed on the site, newest first, in plain words for the owner's Admin page ('What changed lately'). Add with: python3 check-tools/admin.py change \"<what>\". Nothing private: both repositories are public.",
  "changes": [
   {
+   "at": "2026-11-14",
+   "what": "Plan cards say email support on all three plans; the analysis page describes each option in a line; the All markets row includes the oldest sales",
+   "found": "check"
+  },
+  {
+   "at": "2026-11-14",
+   "what": "The autopilot's saved record is stored compressed (326 KB down to 69 KB, the limit is 400 KB), Mexico's trading hours are right, and the goal text says 'the last day' instead of '1 days left'",
+   "found": "check"
+  },
+  {
+   "at": "2026-11-14",
+   "what": "Payments closed: a forged Stripe event does nothing, and cancelling a subscription needs proof of who is asking (a plan change that keeps the rest of the month is still to do)",
+   "found": "check"
+  },
+  {
+   "at": "2026-11-14",
+   "what": "The AI model behind the autopilot, the chat and the news summaries is now GPT-5.6 Luna: OpenAI retires GPT-4o mini on 14 Jan 2027. The buy-choosing comparison restarts as Luna against GPT-5 (decision 20 Dec)",
+   "found": "owner"
+  },
+  {
    "at": "2026-11-12",
    "what": "Stock pages no longer call a part-day price 'close': a Sydney or US page written while its market is open shows the last finished session (and a share a session behind its exchange is asked for again from AWS)",
    "found": "check"
@@ -280,26 +300,6 @@
   {
    "at": "2026-10-30",
    "what": "By market list: the last column now shows what each market's own index made with the same money (up or down, like your result beside it), not the difference; the third card is now called Same markets, no AI",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "The practice graph's gold line now compares each market with its own index (the Hang Seng's buys with the Hang Seng, and so on), not the S&P 500; a third card at the top, If in their own markets instead, gives the same figure; the S&P card says how much it is down since the start",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "Practice portfolio top: two figures side by side, your account and what the same $100,000 would be in an S&P 500 fund, each with its day's move beside it and how much higher or lower the account is; the separate Today box is gone",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "By market now compares each market with its own index (Dow 30 buys against the Dow, NASDAQ 100 against the NASDAQ 100); All markets adds those up. The S&P 500 stays as a small grey line, the top card and the graph's gold line",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "By market, All markets: the autopilot's line now gives its dollars against the S&P 500 (▼ $1,326) and says its percent is per dollar traded, so it no longer looks at odds with the 0.9% beside it",
    "found": "owner"
   }
  ]

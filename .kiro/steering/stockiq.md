@@ -147,7 +147,7 @@ aws cloudfront create-invalidation --distribution-id EHXV50CPHY07R --paths "/*" 
 - `stockiq-market-data-{us,europe,asia,crypto,commodities,rates,currencies}`
 - `stockiq-trial-cleanup` — Daily cron, removes abandoned trials
 - `stockiq-auto-delete-scheduler`, `stockiq-auto-delete-cleanup` — S3 data cleanup
-- `stockiq-ai-chat` — GPT-4o-mini chat (128MB, 30s timeout, 300 max tokens)
+- `stockiq-ai-chat` — GPT-5.6 Luna chat since 14 Nov 2026 (128MB, 30s timeout; 300 words of reply cap plus 1,500 tokens of thinking room: `max_completion_tokens`)
 - `stockiq-ai-chat-reporter` — Daily usage email at 5pm UTC
 - 1,056 functions in total (1,041 with URLs); `-worker-` functions are parallel workers. See `lambda-reference.md`
 
@@ -236,7 +236,7 @@ aws s3 rm s3://stockiq-option-1-1-custom-analysis/charts/email@example.com/ --re
 - **Sidebar shows no news:** `node -c /Users/dave/VSCODE/website/news.js`
 
 ## AI Chat System (Updated Oct 9, 2026)
-- **Lambda:** `stockiq-ai-chat` | **Model:** GPT-4o-mini | **Cost:** ~$0.02/month (Oct 2026)
+- **Lambda:** `stockiq-ai-chat` | **Model:** GPT-5.6 Luna (since 14 Nov 2026; GPT-4o mini is retired by OpenAI on 14 Jan 2027) | **Cost:** about $0.03/month
 - **Frontend:** `ai-chat.js` (about 24 KB) on the pages that load it: the home page, blog, the dashboard and the stock pages (not the analysis page, the guides or the legal pages)
 - **Features:** 3-message conversation memory, live stock prices, links to stock pages
 - **On the dashboard (11 Oct 2026):** `dashboard.html` loads the chat too; there it is told how the dashboard works (`DASHBOARD_GUIDE`) and what the user's own practice portfolio and AI autopilot show (a summary built by the page, sent as `pageContext.dashboard`). It explains and points to controls; it cannot change settings. Detail and the rules: `site-overview.md` section 8c, "The AI chat on the dashboard"

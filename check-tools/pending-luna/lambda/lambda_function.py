@@ -124,7 +124,7 @@ OLD_GROUPS = {'US shares': 'US markets', 'UK shares': 'Europe markets', 'Austral
 MARKET_HOURS = {'us': (14 * 60 + 35, 19 * 60 + 55), 'au': (5, 4 * 60 + 55), 'jp': (5, 5 * 60 + 55), 'uk': (8 * 60 + 5, 15 * 60 + 25),
                 'eu': (8 * 60 + 5, 15 * 60 + 15), 'hk': (1 * 60 + 35, 7 * 60 + 55), 'in': (3 * 60 + 50, 9 * 60 + 55), 'kr': (5, 6 * 60 + 25),
                 'sg': (1 * 60 + 5, 8 * 60 + 55), 'ca': (14 * 60 + 35, 19 * 60 + 55), 'br': (13 * 60 + 5, 19 * 60 + 55),
-                'cn': (1 * 60 + 35, 6 * 60 + 55), 'tw': (1 * 60 + 5, 5 * 60 + 25), 'nz': (5, 3 * 60 + 40), 'mx': (13 * 60 + 35, 19 * 60 + 55)}      # the Mexican exchange: 13:30-20:00 UTC, as New York      # Shanghai/Shenzhen 01:30-07:00 UTC with a lunch break, Taipei 01:00-05:30, Wellington the part of its day after 00:00 UTC (summer and winter)
+                'cn': (1 * 60 + 35, 6 * 60 + 55), 'tw': (1 * 60 + 5, 5 * 60 + 25), 'nz': (5, 3 * 60 + 40), 'mx': (14 * 60 + 35, 20 * 60 + 55)}      # the Mexican exchange: 8:30-15:00 Mexico City time = 14:30-21:00 UTC all year (no summer time since 2022; it was 13:35-19:55, copied from New York, so it checked in an hour before the open and missed the last hour)      # Shanghai/Shenzhen 01:30-07:00 UTC with a lunch break, Taipei 01:00-05:30, Wellington the part of its day after 00:00 UTC (summer and winter)
 MARKET_NAMES = {'us': 'US', 'au': 'Australian', 'uk': 'UK', 'jp': 'Japanese', 'eu': 'European', 'hk': 'Hong Kong', 'in': 'Indian', 'kr': 'Korean',
                 'sg': 'Singapore', 'ca': 'Canadian', 'br': 'Brazilian', 'cn': 'Chinese', 'tw': 'Taiwanese', 'nz': 'New Zealand', 'mx': 'Mexican', 'crypto': 'coin'}
 # What the risk slider changes. positions: how many holdings the budget is split across. top: how far down
@@ -250,7 +250,7 @@ NEWS_KEEP_MINUTES = 120          # a holding's headlines are fetched again after
 NEWS_PER_HOLDING = 3
 NEWS_JUNK = re.compile(r'^convert\b|price (today|prediction|forecast|analysis|chart|live)|price (is |are )?(up|down)\b|live price|\bto usd\b|how to buy', re.I)
 STRONG_MODEL = 'gpt-4o'          # the larger AI model: asked for the hold-or-sell review only when a gain is at stake ...
-STRONG_PER_DAY = 8               # ... and at most this often a day per user (about 0.3 US cents a call: under $1 a month). Otherwise gpt-4o-mini
+STRONG_PER_DAY = 8               # ... and at most this often a day per user (about 0.3 US cents a call: under $1 a month). Otherwise the usual model
 PATH_KEEP = 16                   # check-ins of a holding's price path that are kept
 # A coin's ticker is often also a company's or just a word (ERG is the Ergo coin and an Italian energy company whose
 # share news once reached the model as "ERG" headlines). So for a coin a headline counts only if it names the coin
@@ -415,9 +415,17 @@ def clean_settings(raw, user_id):
     return out
 
 
+def item_json(item):
+    """The JSON text of a stored account record: compressed (`z`, since 12 Nov 2026) or plain (`data`, before it). DynamoDB holds
+    400 KB an item at most; the owner's record was 321 KB and climbing (239 of its 300 trades), and each save is billed by its size."""
+    if item.get('z'):
+        return zlib.decompress(base64.b64decode(item['z'])).decode('utf-8')
+    return item.get('data') or '{}'
+
+
 def load_item(user_id):
     item = db().Table(SETTINGS_TABLE).get_item(Key={'userId': user_id}).get('Item')
-    data = json.loads(item['data']) if item else {}
+    data = json.loads(item_json(item)) if item else {}
     return {'settings': clean_settings(data.get('settings'), user_id), 'state': data.get('state') or {}, 'log': data.get('log') or [],
             'history': data.get('history') or []}
 
@@ -466,8 +474,9 @@ def save_item(user_id, record):
     keep_diary(user_id, record)                             # and everything goes, untrimmed, into the diary
     record['log'] = record['log'][-LOG_KEEP:]
     record['history'] = record.get('history', [])[-HISTORY_KEEP:]
+    packed = base64.b64encode(zlib.compress(json.dumps(record, separators=(',', ':')).encode('utf-8'), 6)).decode('ascii')
     db().Table(SETTINGS_TABLE).put_item(Item={
-        'userId': user_id, 'data': json.dumps(record), 'enabled': bool(record['settings']['enabled']),
+        'userId': user_id, 'z': packed, 'enabled': bool(record['settings']['enabled']),
         'updatedAt': iso(datetime.utcnow())})
 
 
@@ -708,12 +717,18 @@ def get_news(state, holdings, now, fetch):
     return out
 
 
+# The usual AI model (14 Nov 2026, the owner: GPT-4o mini is being retired by OpenAI, 14 Jan 2027 at the latest). GPT-5.6 Luna answers the
+# small jobs (the model that chooses on its turn, the summaries, the pings); it is a reasoning model: no temperature, `max_completion_tokens`
+# for everything it says and thinks, and `reasoning_effort` 'none' / 'low' (it refuses 'minimal'). $0.20 in and $1.20 out per million tokens.
+USUAL_MODEL = 'gpt-5.6-luna'
+
+
 def reasoning_model(name):
     """GPT-5 and the o-series think before answering: no temperature, and their thinking counts towards the answer's tokens."""
     return bool(re.match(r'(gpt-[5-9]|o\d)', name))
 
 
-def ask_model(prompt, name='gpt-4o-mini'):
+def ask_model(prompt, name=USUAL_MODEL):
     """The AI model's answer as a dict, or None if it cannot be reached."""
     key = os.environ.get('OPENAI_API_KEY')
     if not key:
@@ -745,7 +760,7 @@ def ask_model(prompt, name='gpt-4o-mini'):
 # and prices them at the published rates (US dollars a million tokens, in and out). The scheduled run adds them up by month in
 # _health; the Admin page shows the month. Calls made outside a scheduled run are counted at the next one in the same container.
 _TOKENS = {}
-AI_PRICES = {'gpt-4o-mini': (0.15, 0.60), 'gpt-4o': (2.50, 10.00), 'gpt-5': (1.25, 10.00), 'gpt-5-mini': (0.25, 2.00)}
+AI_PRICES = {'gpt-5.6-luna': (0.20, 1.20), 'gpt-4o-mini': (0.15, 0.60), 'gpt-4o': (2.50, 10.00), 'gpt-5': (1.25, 10.00), 'gpt-5-mini': (0.25, 2.00)}
 
 # Which AI model chooses the buys (1 Nov 2026, the owner: "set it up so you can easily switch between them and compare if you want
 # to compare two do 50/50 if you want to do 3 33.% each etc ... make sure it stays within free tier"). Each time the model is asked
@@ -755,13 +770,13 @@ AI_PRICES = {'gpt-4o-mini': (0.15, 0.60), 'gpt-4o': (2.50, 10.00), 'gpt-5': (1.2
 # larger models, 2.5 million of the small ones, for the whole account: the news scripts and the chat use small models too), so
 # FREE_DAILY is this function's part, counted day by day (UTC) in the item AIUSE_KEY; a model whose part is used up hands its turn
 # to the first in the list. Changing the list starts a new comparison: say so in the review, never pool the old with the new.
-CHOOSE_MODELS = [('gpt-4o-mini', 1), ('gpt-5', 1)]
+CHOOSE_MODELS = [(USUAL_MODEL, 1), ('gpt-5', 1)]       # 14 Nov 2026: Luna took GPT-4o mini's place (it is being retired): a new comparison, never pooled with the old
 FREE_DAILY = {'large': 150_000, 'mini': 1_000_000}
 AIUSE_KEY = '_aiuse'
 
 
 def model_class(name):
-    return 'mini' if re.search(r'mini|nano', name) else 'large'
+    return 'mini' if re.search(r'mini|nano|luna', name) else 'large'      # Luna is the usual (small-job) model, counted in the small pool so that it does not use up GPT-5's part
 
 
 def model_turn(state):
@@ -787,7 +802,7 @@ def free_used(now):
 def ask_named(prompt, name):
     """ask_model for a named model; the usual one is asked as ask_model is everywhere else (a test's stand-in takes one argument)."""
     try:
-        return ask_model(prompt) if name == 'gpt-4o-mini' else ask_model(prompt, name)
+        return ask_model(prompt) if name == USUAL_MODEL else ask_model(prompt, name)
     except Exception as e:
         print(f'AI model {name} not used: {type(e).__name__}')
         return None
@@ -3730,6 +3745,12 @@ def fund_since_start(portfolio, value, now):
         return None
 
 
+def left_text(n):
+    """'the last day', '1 day left', '12 days left' (12 Nov 2026: the summaries said '1 days left')."""
+    n = int(n or 0)
+    return 'the last day' if n <= 0 else '1 day left' if n == 1 else f'{n} days left'
+
+
 def goal_standing(record, portfolio, now, quote=None):
     due = next((g for g in GOALS if now <= parse_time(g[0] + 'T23:59:59Z')), GOALS[-1])
     i = GOALS.index(due)
@@ -3850,7 +3871,7 @@ def write_review(admin, record, portfolio, now, quote=None):
     lines = [f"Last 7 days: {w['n']} trades finished, {w['up']} made money, {signed_usd(w['usd'])}, an average of {w['avg']:+.2f}% a trade after costs.",
              f"In all: {a['n']} finished trades, {a['up']} made money, {signed_usd(a['usd'])}, average {a['avg']:+.2f}% ({likely(a['avg'], a['se'])})."
              + (' That is clearly down.' if a['n'] >= 30 and a['avg'] + 2 * a['se'] < 0 else ' That is clearly up.' if a['n'] >= 30 and a['avg'] - 2 * a['se'] > 0 else ' Too few, or too close, to read yet.'),
-             f"{g['name']} (due {g['due']}, {g['daysLeft']} days left): {g['trades']} of {g['tradesGoal']} trades; this month's average {g['avg']:+.2f}% against above {g['avgGoal']:+.1f}%; the account about ${g['value']:,.0f} against ${g['valueGoal']:,.0f}."]
+             f"{g['name']} (due {g['due']}, {left_text(g['daysLeft'])}): {g['trades']} of {g['tradesGoal']} trades; this month's average {g['avg']:+.2f}% against above {g['avgGoal']:+.1f}%; the account about ${g['value']:,.0f} against ${g['valueGoal']:,.0f}."]
     vs = fund_since_start(portfolio, g['value'], now) if quote else None
     if vs:
         lines.append(f"Against the same ${num(portfolio.get('startingCash') or STARTING_CASH):,.0f} in an S&P 500 fund since the account began: the fund would be ${vs[0]:,.0f}, so the account is "
@@ -3988,7 +4009,7 @@ def _numbers(text):
     return out
 
 
-def summarise_facts(facts, who, now, name='gpt-4o-mini', words=110):
+def summarise_facts(facts, who, now, name=USUAL_MODEL, words=110):
     """Lines written by an AI model from `facts`, every figure in them checked against the facts; the facts themselves if not."""
     source = '\n'.join(facts)
     ask = {'system': "You write short, plain, honest summaries for StockIQ, a stock research site with a practice (fake money) portfolio. "
@@ -4002,9 +4023,9 @@ def summarise_facts(facts, who, now, name='gpt-4o-mini', words=110):
                    "day with no trades on a weekend is not a problem; no filler, every line carries a fact.\n\nFacts:\n" + source,
            'tokens': 500}
     for attempt in (0, 1):
-        answer = ask_within_free(ask, name, now) if name != 'gpt-4o-mini' else ask_named(ask, name)
-        if answer is None and name != 'gpt-4o-mini':
-            answer = ask_named(ask, 'gpt-4o-mini')
+        answer = ask_within_free(ask, name, now) if name != USUAL_MODEL else ask_named(ask, name)
+        if answer is None and name != USUAL_MODEL:
+            answer = ask_named(ask, USUAL_MODEL)
         lines = [re.sub(r'\s+', ' ', str(x)).strip()[:300] for x in ((answer or {}).get('lines') or []) if str(x).strip()][:6]
         text = ' '.join(lines)
         if lines and not (_numbers(text) - _numbers(source)) and not DIGEST_WORDS.search(text):
@@ -4039,7 +4060,7 @@ def owner_facts(admin, digest, row, record, portfolio, now, value, vs, quote=Non
     if vs:
         facts.append(f"The account ${value:,.0f}; the same $100,000 in an S&P 500 fund ${vs[0]:,.0f}: {'ahead' if vs[1] >= 0 else 'behind'} by ${abs(vs[1]):,.0f}.")
     g = goal_standing(record, portfolio, now, quote)
-    facts.append(f"{g['name']} (due {g['due']}, {g['daysLeft']} days left): {g['trades']} of {g['tradesGoal']} finished trades; the account ${g['value']:,.0f} against ${g['valueGoal']:,.0f}; {'met' if g['met'] else 'not met yet'}.")
+    facts.append(f"{g['name']} (due {g['due']}, {left_text(g['daysLeft'])}): {g['trades']} finished trades (the goal is {g['tradesGoal']}); the account ${g['value']:,.0f} against ${g['valueGoal']:,.0f}; {'met' if g['met'] else 'not met yet'}.")
     since = iso(now - timedelta(days=1))
     buys = [e for e in record.get('log', []) if e.get('type') == 'buy' and e.get('t', '') >= since]
     sells = [e for e in record.get('log', []) if e.get('type') == 'sell' and e.get('t', '') >= since]

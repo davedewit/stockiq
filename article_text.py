@@ -18,7 +18,7 @@ import requests
 UA = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) '
                     'Chrome/130.0 Safari/537.36',
       'Accept-Language': 'en-US,en;q=0.9'}
-MAX_WORDS = 800          # enough for a summary; about 1,100 tokens of gpt-4o-mini (a fiftieth of a US cent)
+MAX_WORDS = 800          # enough for a summary; about 1,100 tokens of gpt-5.6-luna (a fiftieth of a US cent)
 MIN_WORDS = 120          # less than this is a teaser or a paywall, not the article
 
 # paragraphs that are page furniture, not the article
