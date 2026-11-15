@@ -2,6 +2,11 @@
  "about": "What the sessions changed on the site, newest first, in plain words for the owner's Admin page ('What changed lately'). Add with: python3 check-tools/admin.py change \"<what>\". Nothing private: both repositories are public.",
  "changes": [
   {
+   "at": "2026-11-15",
+   "what": "Daily screener pages: 'days in the top 10' can no longer be more than the trading days since the pages began (Hang Seng said 17 after 16; corrects at the next daily update)",
+   "found": "check"
+  },
+  {
    "at": "2026-11-14",
    "what": "The Practice portfolio's All markets row no longer breaks the sums check: its earlier-sales figure used a time that was not defined (live 14 Nov)",
    "found": "check"
@@ -295,11 +300,6 @@
   {
    "at": "2026-10-30",
    "what": "The second card is now If all in the S&P 500 instead; the third card loads with the others on a refresh (the index prices come with the holdings' prices: 6 requests instead of 32); the Admin page splits the gap to the S&P 500 into choosing shares and choosing markets",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "By market list: the S&P 500 lines taken out (the second card already has it); your own buys get their own row; the third card shows its own today figure like the other two, and the day figures sit neatly under each total",
    "found": "owner"
   }
  ]
