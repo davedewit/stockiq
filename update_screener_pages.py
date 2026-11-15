@@ -426,7 +426,11 @@ def page_for(key, data, names, pages, prev, today, made):
     before = (stored.get('base') or {}) if same_session(stored, sig, today) else stored
     base = {x: before.get(x) for x in ('top', 'streak', 'day') if before.get(x) is not None}
     streak = before.get('streak') or {}
-    new_streak = {r['symbol']: streak.get(r['symbol'], 0) + 1 for r in top}
+    # never more days than there were weekdays since the pages began (15 Nov 2026: Hang Seng read 17 days after 16 weekdays: a run made while
+    # an Asian market was still trading, then one after its close, counted one session twice; the data carries no session date to tell them apart)
+    import datetime as _dt
+    most = sum(1 for i in range((_dt.datetime.utcnow().date() - _dt.date(2026, 10, 23)).days + 1) if (_dt.date(2026, 10, 23) + _dt.timedelta(i)).weekday() < 5)
+    new_streak = {r['symbol']: min(streak.get(r['symbol'], 0) + 1, most) for r in top}
     had = set(before.get('top') or [])
     entered = [r['symbol'] for r in top if had and r['symbol'] not in had]
     left = [s for s in (before.get('top') or []) if s not in new_streak]
