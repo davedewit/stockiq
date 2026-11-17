@@ -599,8 +599,14 @@
    "id": "analysis-page",
    "part": "The analysis page itself: its layout, buttons, the order of the options",
    "where": "analysis.html, analysis-functions.js, js/analysis-core.js, screeners.js, crypto-filter-buttons.js",
-   "last": null,
-   "log": []
+   "last": "2026-11-16",
+   "log": [
+    {
+     "at": "2026-11-16",
+     "kind": "fine",
+     "found": "Fine as it is: Option sizes agree with real counts except Russell 2000 (1,829 listed, 1,796 scored) and CSI 300 (300 listed, 298 scored); raised in Admin proposal 29; not opened in a browser this run"
+    }
+   ]
   },
   {
    "id": "site-wide",
@@ -624,8 +630,14 @@
    "id": "contact-support",
    "part": "Contact and support",
    "where": "contact.html, support.html",
-   "last": null,
-   "log": []
+   "last": "2026-11-17",
+   "log": [
+    {
+     "at": "2026-11-17",
+     "kind": "fine",
+     "found": "Fine as it is: Read only through the audit, which finds nothing on it; not opened in a browser in this run"
+    }
+   ]
   },
   {
    "id": "blog",
