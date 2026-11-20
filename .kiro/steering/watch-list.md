@@ -138,3 +138,9 @@ Rules:
 - **Could break:** the autopilot or the dashboard slowed or failing on a throttle (a 69 KB record write is 69 units: it lives on burst credit): look for "ProvisionedThroughputExceeded" in the trader's and portfolio function's logs and `ReadThrottleEvents` / `WriteThrottleEvents` in CloudWatch; the cost check's throttle line.
 - **Undo (one switch per table per 24 h):** `aws dynamodb update-table --table-name <t> --billing-mode PAY_PER_REQUEST`.
 - **Remove after:** 2026-12-04
+
+### 2026-11-20 · Patient retries on a throttled table (autopilot and portfolio functions)
+- **Changed:** environment `AWS_MAX_ATTEMPTS=20`, `AWS_RETRY_MODE=adaptive` on `stockiq-ai-trader` and `stockiq-paper-portfolio` (the owner: a delay of seconds is fine, a skipped job is not). A throttled DynamoDB call now waits and retries instead of failing; the other functions keep boto3's default of 10 retries.
+- **Could break:** nothing known; a function that always waits long would show as longer run times (the trader has 300 s).
+- **Undo:** remove the two variables (`aws lambda update-function-configuration`, keep the others: the trader also has `OPENAI_API_KEY` and `AI_TRADER_USERS`).
+- **Remove after:** 2026-12-04
