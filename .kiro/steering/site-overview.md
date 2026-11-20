@@ -235,7 +235,7 @@ warns about; one change at a time, measured, with its experiment entry.
 - **Done on 20 Nov:** the full check re-run; Admin #28 to #31; the chat's model wording; the home page's "1,700+"; trial `admin-simpler` kept, `trend-score`
   extended to the 12 Jan verdict; 13 stale ideas given start conditions, questions 51, 53, 54 set to waiting, five new questions (59 to 63) and idea
   `index-fall-skip`; the watch list tidied (17 entries removed).
-- **Payments (#15):** built and live (see 12 Nov). **Not done:** a plan change is still a new checkout with the old subscription deleted (a downgrade
+- **Payments (#15): PUSHED BACK by the owner on 20 Nov ("no customers yet, skip all payment work"): do not raise it in sessions until the first customer is near.** Built and live (see 12 Nov). **Not done:** a plan change is still a new checkout with the old subscription deleted (a downgrade
   loses the rest of the month): the upgrade buttons on three pages need `Subscription.modify`, which cannot be tested without a real or test-mode Stripe
   purchase. Enforce the webhook signature only once "Webhook signature: ok" shows in the payment function's log after a real event (none yet: only the owner has paid).
 - **Google (1 Nov 2026):** 67 of the 972 sitemap pages it had read were indexed. Ask the owner for Search Console's Performance page and GA4's event counts at the
@@ -246,7 +246,7 @@ warns about; one change at a time, measured, with its experiment entry.
 - **Next session, in order:** the opening check first (its part 8 when the weekly review is due). (1) The replay behind questions 54 and 59: "every country's main
   index equally against the US only", and "no buy into a market whose index fell 3% in three sessions" (idea `index-fall-skip`). (2) 21 Nov decisions with the
   owner's GA4 and Search Console figures. (3) Decide `patient-shares` (26 Nov), `stop-watch` and `company-figures` (30 Nov); `capture-ratio` at 30 trading days.
-  (4) The plan-change fix for payments. (5) Stock pages for the shares without one, the public record page (waits for the 12 Jan verdict), `history-light` and
+  (4) Stock pages for the shares without one, the public record page (waits for the 12 Jan verdict), `history-light` and
   `s3-requests` only if StockIQ's own bill nears $1.50.
   (00) **From the owner at the close of 26 Oct (still open):** a failed search fetch says "could not load"; a Yahoo-style search; menu items like Yahoo Finance's.
 - **How the session works:** the routine at the top (steps 0 to 6, with 5b, 5c, 5d); "THE GOAL OF ALL OF IT" below; four entry points for checks

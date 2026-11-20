@@ -108,3 +108,9 @@ Rules:
 - **Undo:** `aws dynamodb update-table --table-name <t> --billing-mode PROVISIONED --provisioned-throughput ReadCapacityUnits=23,WriteCapacityUnits=2` (once a day at most).
 - **Remove after:** 2026-12-04
 
+
+### 2026-11-20 · The news summaries use GPT-5.4 mini (small models: 2.5 million free tokens a day; Luna 250,000)
+- **Changed:** `update_news.py` (two calls) and `update_stock_news.py` (one call) on this Mac: model `gpt-5.4-mini` (same parameters; tested). The chat and the autopilot stay on Luna.
+- **Could break:** more "Rejected (" lines in the daily email (summaries with figures not in the article); a summary that reads worse.
+- **Undo:** put `gpt-5.6-luna` back in those three places.
+- **Remove after:** 2026-12-04
