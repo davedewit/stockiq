@@ -126,3 +126,9 @@ Rules:
 - **Could break:** "AI model gpt-5.4-mini not used" in the trader's log after the 15:10 UTC run; worse choices (watch `choose-models`, decide 20 Dec); an OpenAI charge.
 - **Undo:** `~/VSCODE/backup/stockiq-ai-trader_before_mini_20261120.zip`.
 - **Remove after:** 2026-12-04
+
+### 2026-11-20 · Every AI job on GPT-5.4 mini (chat, the autopilot's choosing and its daily summary, the news summaries)
+- **Changed:** `stockiq-ai-chat` `CHAT_MODEL`, `stockiq-ai-trader` `CHOOSE_MODELS` (one model, no GPT-5 turns) and `DIGEST_MODEL`; the news scripts were already on it. The owner's rule: one model, 2.5 million free tokens a day; **use `gpt-5.4-mini` for any new AI job unless a test shows it cannot do it**. Experiment `choose-models` removed.
+- **Could break:** the chat's answers thinner or cut (read a few), the daily summary rejected by the figure check (it then shows the facts: `how: 'facts'`), "AI model gpt-5.4-mini not used" in the trader's log, an OpenAI charge.
+- **Undo:** `~/VSCODE/backup/stockiq-{ai-trader,ai-chat}_before_allmini_20261120.zip`.
+- **Remove after:** 2026-12-04

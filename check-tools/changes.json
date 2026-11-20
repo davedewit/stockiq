@@ -3,6 +3,16 @@
  "changes": [
   {
    "at": "2026-11-20",
+   "what": "Every AI job on the site now uses GPT-5.4 mini (chat, the autopilot's choices and daily summary, news summaries): one model, inside your 2.5 million free tokens a day",
+   "found": "owner"
+  },
+  {
+   "at": "2026-11-20",
+   "what": "The autopilot's AI uses GPT-5.4 mini (2.5 million free tokens a day) instead of Luna (250,000); the chat stays on GPT-6 Luna",
+   "found": "owner"
+  },
+  {
+   "at": "2026-11-20",
    "what": "The chat and the autopilot's AI now use GPT-6 Luna (the best Luna; it was GPT-5.6 Luna)",
    "found": "owner"
   },
@@ -291,16 +301,6 @@
    "at": "2026-10-30",
    "what": "Practice portfolio: the three cards read alike (value, today, since the start), in the order your account, same markets, S&P 500; under them one line each saying how far your account is ahead or behind, then cash and holdings; the coin note is gone",
    "found": "owner"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "Two tests no longer reach the live sign-up and usage functions (one had registered a made-up trial account today)",
-   "found": "check"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "The full check's re-check now re-runs the panel comparison and the header checks by themselves, without a 15-minute full run",
-   "found": "session"
   }
  ]
 }
