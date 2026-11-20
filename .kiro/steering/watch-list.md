@@ -120,3 +120,9 @@ Rules:
 - **Could break:** "AI model gpt-6-luna not used" in the trader's log (check after the 15:10 and 15:40 UTC runs); an empty chat reply (the live chat answered after the deploy); a charge on OpenAI's usage page (Luna's free pool is 250,000 a day).
 - **Undo:** the zips `~/VSCODE/backup/stockiq-{ai-trader,ai-chat}_before_luna6_20261120.zip`.
 - **Remove after:** 2026-12-04
+
+### 2026-11-20 · The autopilot's usual model is GPT-5.4 mini (was GPT-6 Luna the same day)
+- **Changed:** `stockiq-ai-trader` `USUAL_MODEL = 'gpt-5.4-mini'` (small pool: 2.5 million free tokens a day; Luna 250,000). The chat stays on GPT-6 Luna (few tokens). `CHOOSE_MODELS` is now GPT-5.4 mini and GPT-5: a new comparison; never pool with Luna's trades (GPT-5.6 Luna to 20 Nov 14:00 UTC, GPT-6 Luna to the deploy of this entry). AI_PRICES for it is a guess ($0.25/$2.00).
+- **Could break:** "AI model gpt-5.4-mini not used" in the trader's log after the 15:10 UTC run; worse choices (watch `choose-models`, decide 20 Dec); an OpenAI charge.
+- **Undo:** `~/VSCODE/backup/stockiq-ai-trader_before_mini_20261120.zip`.
+- **Remove after:** 2026-12-04

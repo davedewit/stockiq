@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-11-20",
+   "what": "The chat and the autopilot's AI now use GPT-6 Luna (the best Luna; it was GPT-5.6 Luna)",
+   "found": "owner"
+  },
+  {
+   "at": "2026-11-20",
    "what": "News summaries now use GPT-5.4 mini (2.5 million free tokens a day) instead of Luna (250,000); StockIQ's DynamoDB tables all pay per request, leaving the free 25 provisioned units to your other account",
    "found": "owner"
   },
@@ -296,11 +301,6 @@
    "at": "2026-10-30",
    "what": "The full check's re-check now re-runs the panel comparison and the header checks by themselves, without a 15-minute full run",
    "found": "session"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "The autopilot's Settings now say that two of every four shares are kept up to 20 days (the longer-holds trial), and the full check's panel comparison allows for it",
-   "found": "check"
   }
  ]
 }
