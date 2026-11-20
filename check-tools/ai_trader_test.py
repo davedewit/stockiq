@@ -1878,7 +1878,7 @@ if hasattr(m, 'model_turn'):
     check('three take a third each', turns([('a', 1), ('b', 1), ('c', 1)], 6) == ['a', 'b', 'c', 'a', 'b', 'c'])
     check('a share of 2 against 1 gives two thirds', turns([('a', 2), ('b', 1)], 6) == ['a', 'a', 'b', 'a', 'a', 'b'])
     check('the model classes: mini, nano and Luna are small, the rest large', m.model_class('gpt-5.6-luna') == 'mini' and m.model_class('gpt-5-nano') == 'mini' and m.model_class('gpt-5') == 'large')
-    check('GPT-5, Luna and the o-series are asked as reasoning models, GPT-4o not', m.reasoning_model('gpt-5') and m.reasoning_model('gpt-5.6-luna') and m.reasoning_model('o4-mini') and not m.reasoning_model('gpt-4o') and m.USUAL_MODEL == 'gpt-5.6-luna')
+    check('GPT-5, Luna and the o-series are asked as reasoning models, GPT-4o not', m.reasoning_model('gpt-5') and m.reasoning_model('gpt-5.6-luna') and m.reasoning_model('o4-mini') and not m.reasoning_model('gpt-4o') and m.USUAL_MODEL == 'gpt-6-luna')
     asked = []
     def fake(prompt, name='gpt-5.6-luna'):
         asked.append(name); t = m._TOKENS.setdefault(name, [0, 0, 0]); t[0] += 4000; t[1] += 1000; t[2] += 1

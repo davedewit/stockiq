@@ -24,7 +24,7 @@ def ask(message, **page):
     SENT.clear(); r = m.lambda_handler({'body': json.dumps({'message': message, 'userId': 'someone@dewit.com.au', 'pageContext': page, 'conversationHistory': []})}, None)
     return r['statusCode'], (SENT[0] if SENT else None)
 code, sent = ask('What does the data say about Apple?', page='home'); system = sent['messages'][0]['content']
-check('away from the dashboard the prompt has no dashboard guide, and keeps the reply short', code == 200 and 'About the dashboard (the user is on it now)' not in system and sent['max_completion_tokens'] == 1800 and sent['model'] == 'gpt-5.6-luna' and 'temperature' not in sent)
+check('away from the dashboard the prompt has no dashboard guide, and keeps the reply short', code == 200 and 'About the dashboard (the user is on it now)' not in system and sent['max_completion_tokens'] == 1800 and sent['model'] == 'gpt-6-luna' and 'temperature' not in sent)
 check('everywhere it knows the plans, the free practice portfolio and that the AI autopilot (Beta) is in the free trial and every paid plan', 'Starter $4.99 (15 analyses a day), Pro $14.99 (50), Elite $49.99 (unlimited)' in system and 'free for every account' in system and 'The free 3-day trial and every paid plan include the AI autopilot (Beta)' in system and 'no real trade is ever placed' in system)
 check('the rule against advice is still there', 'NEVER tell anyone to buy, sell or hold' in system and 'never give price targets' in system)
 facts = 'PRACTICE PORTFOLIO (fake money): account value $99,941.52, down $58.48 since the start of $100,000.00; practice cash left $87,441.52.\nAI AUTOPILOT (Beta, fake money): switched ON. Risk level Adventurous.\nNext check-in: Sun 11 Oct, 13:10 (in 12 min 05 s), coin market.'

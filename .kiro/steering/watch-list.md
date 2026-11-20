@@ -114,3 +114,9 @@ Rules:
 - **Could break:** more "Rejected (" lines in the daily email (summaries with figures not in the article); a summary that reads worse.
 - **Undo:** put `gpt-5.6-luna` back in those three places.
 - **Remove after:** 2026-12-04
+
+### 2026-11-20 · GPT-6 Luna replaces GPT-5.6 Luna (chat, autopilot's usual model and the buys' choosing)
+- **Changed:** `stockiq-ai-chat` (`CHAT_MODEL`) and `stockiq-ai-trader` (`USUAL_MODEL`, so `CHOOSE_MODELS` is GPT-6 Luna and GPT-5). The comparison of the two restarts; never pool trades from before 20 Nov 14:00 UTC with after. The price in `AI_PRICES` for GPT-6 Luna is a copy of 5.6's (unknown).
+- **Could break:** "AI model gpt-6-luna not used" in the trader's log (check after the 15:10 and 15:40 UTC runs); an empty chat reply (the live chat answered after the deploy); a charge on OpenAI's usage page (Luna's free pool is 250,000 a day).
+- **Undo:** the zips `~/VSCODE/backup/stockiq-{ai-trader,ai-chat}_before_luna6_20261120.zip`.
+- **Remove after:** 2026-12-04
