@@ -132,3 +132,9 @@ Rules:
 - **Could break:** the chat's answers thinner or cut (read a few), the daily summary rejected by the figure check (it then shows the facts: `how: 'facts'`), "AI model gpt-5.4-mini not used" in the trader's log, an OpenAI charge.
 - **Undo:** `~/VSCODE/backup/stockiq-{ai-trader,ai-chat}_before_allmini_20261120.zip`.
 - **Remove after:** 2026-12-04
+
+### 2026-11-20 · Three StockIQ tables use the free provisioned units (13 read / 13 write of the organisation's shared 25)
+- **Changed:** `stockiq-ai-trader` 6/6, `stockiq-paper-portfolios` 4/4, `stockiq-user-tracking` 2/2 plus its `ipAddress-index` 1/1 (the owner's other account uses 12/12; all other StockIQ tables, the two coin tables included, are pay-per-request). `cost_check.py` flags more than `POOL_MINE` (13) or any throttled request on the three.
+- **Could break:** the autopilot or the dashboard slowed or failing on a throttle (a 69 KB record write is 69 units: it lives on burst credit): look for "ProvisionedThroughputExceeded" in the trader's and portfolio function's logs and `ReadThrottleEvents` / `WriteThrottleEvents` in CloudWatch; the cost check's throttle line.
+- **Undo (one switch per table per 24 h):** `aws dynamodb update-table --table-name <t> --billing-mode PAY_PER_REQUEST`.
+- **Remove after:** 2026-12-04
