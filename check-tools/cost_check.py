@@ -111,6 +111,16 @@ def run():
     for (acct, svc), (rise, total) in sorted(others.items()):
         out.append(('idea', f"another account on the bill ({acct}): {svc} rose ${rise:.2f} yesterday (${total:.2f} this month). Not StockIQ's; "
                             f"look in that account (its API Gateway / DynamoDB / a loop?)"))
+    # the free 25 read / 25 write provisioned units are one pool for the whole organisation (20 Nov 2026: another account used them up and two
+    # StockIQ tables began to bill). StockIQ keeps every table pay-per-request, so it never draws on the pool
+    try:
+        import boto3
+        ddb = boto3.Session(profile_name='default', region_name='us-east-1').client('dynamodb')
+        for t in ddb.list_tables()['TableNames']:
+            if ddb.describe_table(TableName=t)['Table'].get('BillingModeSummary', {}).get('BillingMode') != 'PAY_PER_REQUEST':
+                out.append(('problem', f"table {t} is on provisioned capacity: StockIQ's tables are all pay-per-request (the free units are shared with the owner's other accounts); switch it back"))
+    except Exception:
+        pass
     known = KNOWN_CE.get(bill_month, 0)
     if ce > known + 0.01:
         out.append(('problem', f"Cost Explorer has been charged ${ce - known:.2f} this month beyond the known amount: something asks it "
