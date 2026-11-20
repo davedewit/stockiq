@@ -1,5 +1,0 @@
-#!/bin/bash
-# GPT-4o mini is being retired by OpenAI (14 Jan 2027): the usual model is GPT-5.6 Luna (USUAL_MODEL). Three functions: the autopilot (this also carries
-# the staged goal wording, the compressed account record and Mexico's hours from pending-goalwords), the chat, and the chat's daily usage report (prices).
-FUNCS="stockiq-ai-trader:lambda:lambda_function.py:NdXyA5pg4OqjVo/bO7sCvTs0BISCYrc3c2UK9TWHHHw=:b6ca918e66e0be9f0fabd08eb020526e93e59ffbdd64a6081d764279a7f874e7:14ac0bded2566ffa32c7a18c3e383d074f7f74fb5e6618e26fdd2d58c5c14389:before_luna_20261114 stockiq-ai-chat:chat:lambda_function.py:WoelBuyoxLT4Itp5b7thofvdkBgdFyObKEp4rmJlIoU=:21bf16dc43a9ecbe62c837f19e2dd550e084fa5ad91b88d10e5ed52d6106f9dc:cb1945cb7fdc37211a4d60b174007b896580fc4a0f60277c244c5b3368848dd3:before_luna_20261114 stockiq-ai-chat-reporter:reporter:lambda_function.py:/CvJoMs817uGihUHvhVJTacTkvF1wo2JsabiFy9XnRc=:3e37e71c611f4f16da9d134f86a8eb83a4284086e9a5017d47836114a38139f2:b74cb9405517f055ebefc714d72e3b5ad7e5350833efbea65b7247b4d6df5e39:before_luna_20261114" \
-  exec bash /Users/dave/VSCODE/stockiq/check-tools/lambda_deploy.sh "$(cd "$(dirname "$0")" && pwd)"

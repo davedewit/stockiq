@@ -20,7 +20,8 @@ KNOWN_CE = {'2026-10': 2.65}          # Cost Explorer charge already explained (
 # a finding already fixed, left out until its old days have passed (then checked again as usual)
 FIXED_UNTIL = {'stockiq-dashboard-analysis-history': '2026-11-04',   # scans of the 1,195 deleted reports (31 Oct, 1 Nov), removed 1 Nov: 14 rows left
                'AmazonCloudFront': '2026-11-02',                     # one path per file, fixed 26 Oct; then each '/*' cost $0.005 while October was over the free 1,000 (KNOWN_PATHS)
-               'AmazonS3': '2026-10-28'}                             # the one-off re-upload of ~3,000 stock pages on 24 Oct
+               'AmazonS3': '2026-10-28',
+               'AmazonDynamoDB': '2026-11-23'}                        # 18-19 Nov: two small provisioned tables began to bill (the organisation's shared free allowance used up by another account); on demand since 20 Nov                             # the one-off re-upload of ~3,000 stock pages on 24 Oct
 # A month over the owner's $1.50 whose cause is found and fixed: known up to this amount, so it stops calling him in (31 Oct 2026, the owner:
 # "seems suddenly alot to check on admin dashboard especially the bill?"). Beyond the amount it is a problem again. admin.py sync copies
 # this to the Admin page, whose "Do you need to check in?" card reads it. Add a month only when its cause is fixed, with the reason.

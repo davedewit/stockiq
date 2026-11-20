@@ -346,6 +346,14 @@ if not QUICK:
         # a failure a session has fixed is acknowledged against that very log (its time), so the alarm clears until the next run:
         #   python3 check-tools/weekly_check.py --ack-daily "<what was done>"
         bad = [l for l in t.splitlines() if re.search(r'Traceback|Error:|could not rebase|push failed', l) and 'crumb' not in l][:3]
+        # a push that failed and that the next run repeated is not a fault (20 Nov 2026, Admin #31): when neither repository is ahead of GitHub now, it is not listed
+        if bad and all('push failed' in l for l in bad):
+            try:
+                ahead = any('ahead' in subprocess.run(['git', '-C', r, 'status', '-sb'], capture_output=True, text=True).stdout.splitlines()[0] for r in ('/Users/dave/VSCODE/stockiq', '/Users/dave/VSCODE/website'))
+            except Exception:
+                ahead = True
+            if not ahead:
+                bad = []
         ack_p = os.path.join(HERE, 'reviews', 'weekly', 'daily_ack.json')
         ack = json.load(open(ack_p)) if os.path.exists(ack_p) else {}
         acked = bool(bad) and ack.get('log_mtime') == round(os.path.getmtime(log))

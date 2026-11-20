@@ -2,6 +2,21 @@
  "about": "What the sessions changed on the site, newest first, in plain words for the owner's Admin page ('What changed lately'). Add with: python3 check-tools/admin.py change \"<what>\". Nothing private: both repositories are public.",
  "changes": [
   {
+   "at": "2026-11-20",
+   "what": "The weekly full check no longer calls a GitHub push that failed and was repeated a fault; the cost check waits out the DynamoDB days",
+   "found": "session"
+  },
+  {
+   "at": "2026-11-20",
+   "what": "The home page said 1,800+ stocks ranked; the largest page ranks 1,787, so it now says 1,700+. The chat names the AI model that chooses the buys correctly (GPT-5.6 Luna and GPT-5)",
+   "found": "session"
+  },
+  {
+   "at": "2026-11-20",
+   "what": "AWS's cost alert for DynamoDB explained and fixed: the whole organisation's free allowance ran out, so two small coin tables started to bill; they now pay per request (about $0). StockIQ's own bill is $0.47; the $1.86 total includes your other accounts",
+   "found": "owner"
+  },
+  {
    "at": "2026-11-15",
    "what": "Daily screener pages: 'days in the top 10' can no longer be more than the trading days since the pages began (Hang Seng said 17 after 16; corrects at the next daily update)",
    "found": "check"
@@ -18,7 +33,7 @@
   },
   {
    "at": "2026-11-14",
-   "what": "The autopilot's saved record is stored compressed (326 KB down to 69 KB, the limit is 400 KB), Mexico's trading hours are right, and the goal text says 'the last day' instead of '1 days left'",
+   "what": "The autopilot's saved record is stored compressed (326 KB down to 69 KB, the limit is 400 KB), Mexico's trading hours are right, and the goal text says 'the last day' on the final day",
    "found": "check"
   },
   {
@@ -286,21 +301,6 @@
    "at": "2026-10-30",
    "what": "The autopilot tab's 'Needs you' no longer says the cash is too low while its budget is automatic: all its money is invested and it buys again when a holding is sold",
    "found": "check"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "Sector funds line now says which 3 funds it holds right now (Chips, Energy, Technology) and that the others, gold included, are only bought when in the top 3",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "Coins: the autopilot never buys them when it chooses the markets (Manual users can still tick them); the S&P card now says where the account stands without the old coin trades; the By market list shows results in dollars only, without the confusing Total bought column",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "The second card is now If all in the S&P 500 instead; the third card loads with the others on a refresh (the index prices come with the holdings' prices: 6 requests instead of 32); the Admin page splits the gap to the S&P 500 into choosing shares and choosing markets",
-   "found": "owner"
   }
  ]
 }

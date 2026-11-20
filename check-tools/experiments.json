@@ -7,10 +7,13 @@
    "measure": "the autopilot's share trades bought from 17 Oct against those before, after costs, each against an S&P 500 fund; the score study rerun on new prices; 30 trades a side",
    "status": "running",
    "started": "2026-10-17",
-   "decide": "2026-11-14",
+   "decide": "2026-12-04",
    "public": true,
    "publicText": "The screeners rank shares by a new trend score (how far a share is above its 52-week low, its rise over the year, its long-term averages). On four years of prices in nine markets it did clearly better than the old score. Its trades are being compared with those bought before.",
-   "added": "2026-10-17"
+   "added": "2026-10-17",
+   "notes": [
+    "2026-11-20: extended: Live from 17 Oct: about 219 share-heavy trades at roughly -1.6% a trade after costs against -1.15% on the 51 before it, inside the margin of error of the earlier group; the S&P 500 fell about 8% in the period, shares against the fund -0.75% a trade (249 trades, inside its margin). No clear gain, no clear harm, and the 5-year study (13 of 18 half-periods ahead) is the stronger evidence. Reverting on this would be a change on thin evidence; judged once more at the month 3 verdict"
+   ]
   },
   {
    "id": "ai-review-off",
@@ -385,7 +388,7 @@
    "id": "earnings-hold",
    "what": "Record days to each share's results date with every buy (from company_figures.json), split the record by it; if shares that report during the holding do clearly worse after 30 each way, hold back a buy within 2 days of its results (a trial beside the current rule)",
    "angle": "profit",
-   "measure": "average a trade against the S&P 500 fund: reporting during the holding against not, 30 each way",
+   "measure": "average a trade against the S&P 500 fund: reporting during the holding against not, 30 each way Starts when 30 buys a side carry their results date (`ed`; about the middle of December) and the review's split shows reporting-within-holding buys clearly behind.",
    "status": "idea",
    "added": "2026-10-24"
   },
@@ -403,7 +406,7 @@
    "id": "ai-market-tilt",
    "what": "The owner's idea (24 Oct 2026): the AI leans the budget toward the markets it expects to do better, from the news and the calendar. First as calls only: each trading day it names the regions it expects to beat or trail an S&P 500 fund over the next week, scored a week later (as the sector-fund calls are). Starts when the sector-fund calls have 30 scored: if the market calls are then right clearly more often than chance over 30+, a trial of shifting the shares between regions by them",
    "angle": "profit",
-   "measure": "share of calls right against 50%, beyond twice the margin of error; then the trial's result against the current even split",
+   "measure": "share of calls right against 50%, beyond twice the margin of error; then the trial's result against the current even split Starts when the AI's daily sector-fund calls are right clearly more often than chance over 60 scored (27 of 53 on 20 Nov: not yet).",
    "status": "idea",
    "added": "2026-10-24"
   },
@@ -411,7 +414,7 @@
    "id": "public-record",
    "what": "A public page, the AI autopilot against the S&P 500 with $100,000 of fake money, updated weekly, losses included (the traffic plan's third step): something other sites link to and visitors trust. Starts when the account has 30 trading days",
    "angle": "growth",
-   "measure": "Search Console impressions and links to the page; sign-ups that start on it (GA4)",
+   "measure": "Search Console impressions and links to the page; sign-ups that start on it (GA4) Starts when the account has 30 trading days of results and a verdict on the month 3 goal exists (12 Jan 2027): a record page of a losing account first needs the plain verdict.",
    "status": "idea",
    "added": "2026-10-24"
   },
@@ -419,7 +422,7 @@
    "id": "screener-email",
    "what": "The home page's email box offers last week's top 5 of one market from the daily pages, and a weekly email of the daily pages' highlights to the signup list (nothing has ever been sent): a reason to come back. Starts when the screener pages have run 2 weeks Then by interest (the owner, 24 Oct 2026): a signed-in subscriber gets the markets they ticked or looked at, an anonymous one picks markets when subscribing, or all of them",
    "angle": "growth",
-   "measure": "sign-ups to the list a week before and after; opens and clicks of the first emails",
+   "measure": "sign-ups to the list a week before and after; opens and clicks of the first emails Starts when the daily screener pages show search traffic in Search Console (the 21 Nov decisions on `screener-pages`).",
    "status": "idea",
    "added": "2026-10-24"
   },
@@ -427,7 +430,7 @@
    "id": "results-week",
    "what": "The daily pages and the home page name the big companies reporting results that week, from the results dates now kept (company_figures.json): searchers look for 'earnings this week'. Starts when the results dates cover most large companies (about 1 Nov 2026)",
    "angle": "growth",
-   "measure": "Search Console impressions on the pages that carry it",
+   "measure": "Search Console impressions on the pages that carry it Starts when results dates cover most indexed large companies (check company_figures.json's `earnings`) and Search Console shows the daily pages are indexed.",
    "status": "idea",
    "added": "2026-10-24"
   },
@@ -435,7 +438,7 @@
    "id": "crypto-page",
    "what": "A daily public page for the crypto screener's top 10, as the 24 market pages are (it has the most searches of any list)",
    "angle": "growth",
-   "measure": "Search Console impressions and clicks on it after 8 weeks",
+   "measure": "Search Console impressions and clicks on it after 8 weeks Starts when the 21 Nov decisions on the daily pages show them earning visits; a crypto page is the next page to copy then.",
    "status": "idea",
    "added": "2026-10-24"
   },
@@ -443,7 +446,7 @@
    "id": "home-show",
    "what": "The owner's idea (24 Oct 2026): show what the site does with pictures, not only words: one or two real screenshots (the practice portfolio's graph against the S&P 500, a daily market page) in the home page's 'What you can do' section, replacing text rather than adding to it; a short screen recording later. Starts after the daily pages have run a week (they make the best picture)",
    "angle": "growth",
-   "measure": "GA4: the share of home-page visitors who go on to the analysis page or sign up, two weeks before and after",
+   "measure": "GA4: the share of home-page visitors who go on to the analysis page or sign up, two weeks before and after Starts when the home page's sign-up rate is known from GA4 (the 21 Nov `signup-simpler` decision).",
    "status": "idea",
    "added": "2026-10-24"
   },
@@ -451,7 +454,7 @@
    "id": "pages-at-close",
    "what": "The daily market pages and the home page's 'This week in the markets' built on AWS once a day, every day, whether or not the Mac is on (the owner, 24 Oct 2026: 'better to get it complete than miss it': the point is that it never misses a day; the hour matters less). A small function on an EventBridge schedule writes the pages to S3 and invalidates them; the home section goes into its own small file so that the Mac's daily upload of index.html cannot overwrite it (or the other way round). A run after each region's close is a later refinement. Cost worked out first (about 25 screener runs a day, as now). Starts after the stock pages for every listed share With it: the hub (screeners-today.html) also shows the week's big scheduled announcements, so it is the one daily stop (the owner, 24 Oct 2026: 'a great spot to get to everything we create daily')",
    "angle": "growth",
-   "measure": "pages always show closing figures (checked by the site check); Search Console impressions against the weeks before",
+   "measure": "pages always show closing figures (checked by the site check); Search Console impressions against the weeks before Starts when a daily run is missed twice in a month with the Mac off (the daily email will say so), or Search Console shows stale daily pages.",
    "status": "idea",
    "added": "2026-10-24"
   },
@@ -459,7 +462,7 @@
    "id": "nav-simpler",
    "what": "The desktop menu written once and simpler: Crypto as a plain link (its menu holds one item), Today's top 10s first under Screeners, Pricing in the bar for a signed-out visitor and Dashboard for a signed-in one. Today the menu markup is copied into 45 pages and the stock-page template; site-header.js could draw it from one definition (the links stay in each page's HTML for search engines)",
    "angle": "ease of use, sign-ups",
-   "measure": "Clicks on Pricing and on the screener pages from the menu (GA4), sign-ups per visit, over 4 weeks against the 4 before",
+   "measure": "Clicks on Pricing and on the screener pages from the menu (GA4), sign-ups per visit, over 4 weeks against the 4 before Starts after the 21 Nov decisions on `signup-simpler` and `market-panel-pages`: one change to the header at a time.",
    "status": "idea",
    "added": "2026-10-24"
   },
@@ -487,7 +490,7 @@
    "id": "paper-trading-words",
    "what": "Use 'paper trading' (what people search for) in the titles, descriptions and headings of the practice portfolio's mentions (home card, sign-up, FAQ, About, a guide), keeping 'practice money' in the friendly wording",
    "angle": "visitors, search",
-   "measure": "Search Console: impressions and clicks for queries with 'paper trading' over 8 weeks",
+   "measure": "Search Console: impressions and clicks for queries with 'paper trading' over 8 weeks Starts when Search Console's queries show whether 'paper trading' is searched for the site's pages (21 Nov figures).",
    "status": "idea",
    "added": "2026-10-24"
   },
@@ -495,7 +498,7 @@
    "id": "graph-drag",
    "what": "Practice portfolio graph: press and drag across it (or two fingers on a phone) to read the change between two moments, in dollars and %, for the account and the S&P 500 fund together, as the Mac Stocks app does (the owner, 25 Oct 2026). Small: the graph already has the daily values and a pointer read-out",
    "angle": "ease of use",
-   "measure": "does the owner use it; no sign-up or profit effect expected, so build it alongside a profit change, not instead of one",
+   "measure": "does the owner use it; no sign-up or profit effect expected, so build it alongside a profit change, not instead of one Starts when the owner asks for it again or the Practice tab's use is measured by `stockiqTrack`.",
    "status": "idea",
    "added": "2026-10-25"
   },
@@ -503,7 +506,7 @@
    "id": "news-clicks",
    "what": "Count clicks from the news pages (Read full article, Analyze X) with stockiqTrack, to see whether news brings visitors to an analysis and a sign-up",
    "angle": "growth",
-   "measure": "GA4 events news_click by kind, against news.html views and sign_up, 4 weeks",
+   "measure": "GA4 events news_click by kind, against news.html views and sign_up, 4 weeks Starts when GA4 has two weeks of `analysis_run` events to put the news clicks beside.",
    "status": "idea",
    "added": "2026-10-30"
   },
@@ -523,7 +526,7 @@
    "id": "s3-requests",
    "what": "Find what makes S3's requests: about 2 US cents a day all month (storage is only about 0.5 GB), the largest running cost left once October's one-off charges are gone; turn on the free S3 storage-lens or a day of CloudTrail data events only if they are free, otherwise read which functions call S3 and how often Held for later (the owner, 31 Oct 2026): only if the bill nears $1.50, and never at the cost of a feature.",
    "angle": "cost",
-   "measure": "S3's daily charge in CloudWatch's billing figures before and after (cost_check.py), target under 1 cent a day",
+   "measure": "S3's daily charge in CloudWatch's billing figures before and after (cost_check.py), target under 1 cent a day Starts when the bill nears $1.50 for StockIQ's own services (it is $0.47 on 20 Nov).",
    "status": "idea",
    "added": "2026-10-30"
   },
@@ -609,10 +612,12 @@
    "what": "The Admin page's Overview with the daily summary on top: after two weeks, fold what the owner does not read daily (the Real money card's dial, forecast and split behind one line; nothing removed, only folded)",
    "angle": "ease of use",
    "measure": "the owner reads the top two cards in 30 seconds and finds what he needs; ask him at the weekly session which parts he looked at; anything the summary already says goes into a fold",
-   "status": "running",
+   "status": "kept",
    "added": "2026-11-01",
    "started": "2026-11-01",
-   "decide": "2026-11-15"
+   "decide": "2026-11-15",
+   "decided": "2026-11-20",
+   "result": "The summary and check-in card lead the Overview and the owner reads them first; the dial and forecast already sit in rows. Nothing further to fold"
   },
   {
    "id": "digest-and-score",
@@ -673,6 +678,14 @@
    "measure": "up-capture and down-capture against the S&P 500 fund over the same days, and the gap in dollars, for the account as it is against the account with a core, 30 trading days. Starts when capture-ratio reaches 30 trading days (about 26 Nov 2026); the owner's bar for real money is ahead of the fund by 5% a year, which a core cannot give: it only narrows the gap, so say so",
    "status": "idea",
    "added": "2026-11-13"
+  },
+  {
+   "id": "index-fall-skip",
+   "what": "Do not buy a share while its own market's index fell 3% or more in the 3 sessions before (four Taiwan shares bought into a falling market lost 15-24% each within a week, 16 Nov)",
+   "angle": "profit, analysis",
+   "measure": "Replay first (question 59): buys after such a fall against the rest, both halves of five years, beyond twice the margin; then a live trial every second market-day. Starts when the replay passes both halves.",
+   "status": "idea",
+   "added": "2026-11-20"
   }
  ]
 }

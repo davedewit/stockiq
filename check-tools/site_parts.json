@@ -5,7 +5,7 @@
    "id": "home-hero",
    "part": "Home page: the top, its four numbers, the two buttons",
    "where": "index.html, top; symbol-news.js (the search boxes' latest news)",
-   "last": "2026-11-06",
+   "last": "2026-11-20",
    "log": [
     {
      "at": "2026-10-23",
@@ -15,6 +15,11 @@
      "at": "2026-11-06",
      "kind": "idea",
      "found": "New idea to test: Hero text and numbers still true (33 screeners, 540 coins, $100,000). The strongest missing proof is a public record page (idea public-record); with the account 10% down and 4 points behind the S&P 500 it would show losses, which is the honest version but is the owner's call to publish: left in the register, not built"
+    },
+    {
+     "at": "2026-11-20",
+     "kind": "improved",
+     "found": "Improved: The \"1,800+ stocks ranked\" number claimed more than the largest daily page ranks (1,787): now \"1,700+\" (Admin #29)"
     }
    ]
   },
@@ -34,7 +39,7 @@
    "id": "home-pricing",
    "part": "Home page: pricing and the plans",
    "where": "index.html #pricing",
-   "last": "2026-11-08",
+   "last": "2026-11-20",
    "log": [
     {
      "at": "2026-10-30",
@@ -50,6 +55,11 @@
      "at": "2026-11-08",
      "kind": "idea",
      "found": "New idea to test: Plan cards true; email box is a dead end without a way to send to the public (idea weekly-email needs a start condition); paying members see Choose-plan buttons while #15 is open."
+    },
+    {
+     "at": "2026-11-20",
+     "kind": "improved",
+     "found": "Improved: Plan cards and pricing re-read: true (Starter $4.99, Pro $14.99, Elite $49.99, the autopilot in every plan and the trial); the open payments item is a plan-change fix, not a wording one; no change needed beyond what #15 finished"
     }
    ]
   },
@@ -643,8 +653,14 @@
    "id": "blog",
    "part": "The blog page",
    "where": "blog.html",
-   "last": null,
-   "log": []
+   "last": "2026-11-20",
+   "log": [
+    {
+     "at": "2026-11-20",
+     "kind": "improved",
+     "found": "Improved: Search description was generic (\"latest features, guides and tips\"); now says what is there. The page has one article; a second (how a trend score is built) would be the next content, idea left in the register"
+    }
+   ]
   },
   {
    "id": "speed",
