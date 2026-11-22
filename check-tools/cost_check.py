@@ -33,7 +33,7 @@ KNOWN_OVER = {'2026-10': {'upTo': 1.65, 'why': "two faults of 23-26 Oct, both fi
 # from 150,000: if the reads stay above this after mid-November, something keeps them (the old rows not cleared, or a new reader)
 KNOWN_READS = {'stockiq-dashboard-analysis-history': (40000, 'a dashboard visit reads the user\'s reports with their text (idea history-light); '
                                                               'deleted reports are removed a week after deletion since 1 Nov 2026')}
-POOL_MINE = 13        # of the organisation's free 25 read / 25 write provisioned units (the owner's other account uses 12)
+POOL_MINE = 25        # all of the organisation's free 25 read / 25 write provisioned units since 22 Nov 2026 (the owner's other account gave back its 12)
 TABLE_FLOOR = 0.10    # a table matters from about 10 cents a month: below that a busy day of page refreshes is not a problem
 KNOWN_PATHS = {'2026-10': 1125}     # cache-clear paths already explained for the month (the per-file clears of 23-25 Oct, then one '/*' a deploy; resets 1 Nov)
 TABLES = ['stockiq-dashboard-analysis-history', 'stockiq-ai-trader', 'stockiq-user-tracking', 'stockiq-paper-portfolios',
@@ -113,7 +113,7 @@ def run():
         out.append(('idea', f"another account on the bill ({acct}): {svc} rose ${rise:.2f} yesterday (${total:.2f} this month). Not StockIQ's; "
                             f"look in that account (its API Gateway / DynamoDB / a loop?)"))
     # the free 25 read / 25 write provisioned units are one pool for the whole organisation (20 Nov 2026: another account used them up and two
-    # StockIQ tables began to bill). StockIQ may use up to POOL_MINE of it: ai-trader 6, paper-portfolios 4, user-tracking 2 + its index 1
+    # StockIQ tables began to bill). StockIQ may use up to POOL_MINE of it: ai-trader 11 read / 15 write, paper-portfolios 6/6, user-tracking 7/3 + its index 1/1
     try:
         import boto3
         ddb = boto3.Session(profile_name='default', region_name='us-east-1').client('dynamodb')
@@ -124,7 +124,7 @@ def run():
                 pt = [d['ProvisionedThroughput']] + [g['ProvisionedThroughput'] for g in d.get('GlobalSecondaryIndexes', [])]
                 rcu += sum(x['ReadCapacityUnits'] for x in pt); wcu += sum(x['WriteCapacityUnits'] for x in pt)
         if rcu > POOL_MINE or wcu > POOL_MINE:
-            out.append(('problem', f"StockIQ's provisioned DynamoDB capacity is {rcu} read / {wcu} write units, over the {POOL_MINE} it may use of the free 25 shared with the owner's other accounts (his other account uses 12): lower it or switch tables to pay-per-request"))
+            out.append(('problem', f"StockIQ's provisioned DynamoDB capacity is {rcu} read / {wcu} write units, over the {POOL_MINE} it may use of the free 25 shared with the owner's other accounts : lower it or switch tables to pay-per-request"))
         for t in ('ReadThrottleEvents', 'WriteThrottleEvents'):
             for tn in ('stockiq-ai-trader', 'stockiq-paper-portfolios', 'stockiq-user-tracking'):
                 th = daily(cw, 'AWS/DynamoDB', t, [{'Name': 'TableName', 'Value': tn}], stat='Sum')

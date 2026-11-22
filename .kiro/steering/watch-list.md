@@ -144,3 +144,9 @@ Rules:
 - **Could break:** nothing known; a function that always waits long would show as longer run times (the trader has 300 s).
 - **Undo:** remove the two variables (`aws lambda update-function-configuration`, keep the others: the trader also has `OPENAI_API_KEY` and `AI_TRADER_USERS`).
 - **Remove after:** 2026-12-04
+
+### 2026-11-22 · StockIQ now uses all 25/25 free provisioned units (the owner's other account gave back its 12)
+- **Changed:** `stockiq-ai-trader` 6/6 to 11 read / 15 write, `stockiq-paper-portfolios` 4/4 to 6/6, `stockiq-user-tracking` 2/2 to 7/3 (index stays 1/1): 25 read / 25 write in all. Reason: user-tracking throttled 3 reads at about 17:00 UTC on 20 and 21 Nov; the trader's 69 KB record writes burst. `cost_check.py` `POOL_MINE` is 25.
+- **Could break:** the free pool is organisation-wide: if the owner's other account raises its units again, StockIQ's tables bill (look at the cost check's capacity line and DynamoDB on the Admin bill); throttles at 17:00 UTC returning.
+- **Undo:** lower the units (once a day at most) or `--billing-mode PAY_PER_REQUEST`.
+- **Remove after:** 2026-12-06

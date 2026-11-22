@@ -2,6 +2,11 @@
  "about": "What the sessions changed on the site, newest first, in plain words for the owner's Admin page ('What changed lately'). Add with: python3 check-tools/admin.py change \"<what>\". Nothing private: both repositories are public.",
  "changes": [
   {
+   "at": "2026-11-22",
+   "what": "StockIQ's three busiest tables now use all the free DynamoDB units the owner's other project gave back (the autopilot's table most), so the 17:00 UTC throttling on the user table should stop",
+   "found": "owner"
+  },
+  {
    "at": "2026-11-20",
    "what": "Three StockIQ tables (the autopilot's, the practice portfolios', the users') now use the leftover free DynamoDB units (13 of the shared 25); the cost check watches the total and any slow-down",
    "found": "owner"
@@ -295,11 +300,6 @@
   {
    "at": "2026-10-31",
    "what": "update_interval.sh works again: it shows and changes how often prices refresh (it had silently changed nothing since 18 Oct)",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-30",
-   "what": "The daily update now waits 20 hours after the last one (it ran at 15:33 and again at 00:02)",
    "found": "owner"
   }
  ]

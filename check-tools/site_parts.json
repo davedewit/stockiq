@@ -689,8 +689,14 @@
    "id": "security",
    "part": "Security and abuse: the open function addresses, the userId the browser sends, scrapers, keys, the public repositories",
    "where": "the Lambda function URLs, auth.js, the anonymous usage tracker, GitHub",
-   "last": null,
-   "log": []
+   "last": "2026-11-22",
+   "log": [
+    {
+     "at": "2026-11-22",
+     "kind": "fine",
+     "found": "Fine as it is: Looked again a day after proposal #35 (the chat's limit keyed on the browser's id): no key or secret in either public repository (searched for OpenAI, Stripe, webhook and AWS key patterns; one false match in news.html), the chat now names its real model; the known weak spots (userId from the browser, the owner's address in auth.js, the webhook signature not yet enforced) are recorded and waiting on #35 and the payments work, nothing new to change today."
+    }
+   ]
   },
   {
    "id": "emails",
