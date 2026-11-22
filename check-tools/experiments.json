@@ -534,7 +534,7 @@
    "id": "history-light",
    "what": "The home page, dashboard and bell ask stockiq-dashboard for the whole report history with every report's full text (about 400 read units a signed-in page load; 240 loads on 31 Oct 2026 read 97,000 units). Return a list without the texts (a projection), and the text only when a report is opened Held for later (the owner, 31 Oct 2026): only if the bill nears $1.50, and never at the cost of a feature.",
    "angle": "cost",
-   "measure": "DynamoDB read units of stockiq-dashboard-analysis-history per call of stockiq-dashboard (CloudWatch, free): from about 400 to under 20",
+   "measure": "DynamoDB read units of stockiq-dashboard-analysis-history per call of stockiq-dashboard (CloudWatch, free): from about 400 to under 20. Starts when StockIQ's own AWS bill reaches $1.25 in a month or the dashboard table's reads pass 40,000 units a day.",
    "status": "idea",
    "added": "2026-10-31"
   },
@@ -542,7 +542,7 @@
    "id": "nasdaq-card",
    "what": "The home page's Nasdaq card shows the Nasdaq Composite (^IXIC) but its name opens the NASDAQ 100 page and runs the NASDAQ 100 screener: show the NASDAQ 100 (^NDX) on the card, as the page it leads to",
    "angle": "accuracy",
-   "measure": "the card's figure and the page it opens are the same index",
+   "measure": "the card's figure and the page it opens are the same index. Starts when the home page is next changed for another reason (a one-line change then, no extra deploy).",
    "status": "idea",
    "added": "2026-10-31"
   },
@@ -550,7 +550,7 @@
    "id": "market-state-label",
    "what": "When a market is shut the cards and the panel show Friday's figures with nothing saying so (Yahoo shows 'At close: Oct 30, 4:00 PM'): a small 'At close' or 'Live' label per card and tab",
    "angle": "ease of use",
-   "measure": "visitors no longer read a weekend figure as live (owner's eye at the next walk)",
+   "measure": "visitors no longer read a weekend figure as live (owner's eye at the next walk). Starts when the home page or market panel is next changed for another reason, together with nasdaq-card.",
    "status": "idea",
    "added": "2026-10-31"
   },
@@ -558,7 +558,7 @@
    "id": "panel-click-cost",
    "what": "A click on a row of the market panel runs a full analysis, which spends a signed-out visitor's one free analysis of the day on a curiosity click; a broker app opens the quote. Open the share's stock page (or a small quote card) and offer the analysis from there",
    "angle": "sign-ups",
-   "measure": "anonymous free analyses spent from the panel (the usage tracker's rows) against sign-ups after one",
+   "measure": "anonymous free analyses spent from the panel (the usage tracker's rows) against sign-ups after one. Starts when the owner sends GA4's 28-day event counts, if anonymous analyses from the panel are a real share of the day's total.",
    "status": "idea",
    "added": "2026-10-31"
   },
@@ -566,7 +566,7 @@
    "id": "card-hover-chart",
    "what": "The index cards' small charts have no reading: hover (or tap) shows the time and price under the pointer, as Google Finance's do",
    "angle": "appearance",
-   "measure": "time on the home page (GA4) before and after",
+   "measure": "time on the home page (GA4) before and after. Starts when market-panel-pages and signup-simpler are decided and GA4 shows the home page's time on page is the weak step.",
    "status": "idea",
    "added": "2026-10-31"
   },
@@ -574,7 +574,7 @@
    "id": "cost-by-feature",
    "what": "The bill is read by AWS service (DynamoDB, S3, CloudFront), so a rise has to be traced by hand to the feature behind it (on 31 Oct: the dashboard's report history, about 400 read units a load). Tag each function's own cost from CloudWatch's free figures (calls x memory x time, table units by caller) into one line a feature on the Admin page's bill row: dashboard loads, the autopilot, the daily update, the market panel",
    "angle": "cost",
-   "measure": "Whether the next cost finding names its feature at once, without a session tracing it",
+   "measure": "Whether the next cost finding names its feature at once, without a session tracing it. Starts when StockIQ's own bill passes $1.00 in a month with a cause not found in one look.",
    "status": "idea",
    "added": "2026-10-31"
   },
@@ -582,7 +582,7 @@
    "id": "stock-page-unique",
    "what": "Search Console, 1 Nov 2026: of the 972 sitemap pages Google has read 67 are indexed, 847 'crawled - currently not indexed' (Google judged them not worth listing: template pages like every finance site's). Give each indexed stock page data nobody else has: its daily rank in every screener it belongs to ('12th of 502 in the S&P 500 today, 31st a week ago'), a small history of its trend score, from what update_screener_pages.py already works out each day. Build it so it grows: (1) one small daily history file a share (its ranks and score by day), written by the daily update from what it already computes, no new running cost; (2) the page shows it as a line and a short sentence in plain words ('in the top 10 of the DAX 40 on 4 of the last 10 trading days'); (3) the daily top-10 pages link each share to that part of its page; (4) once Google lists a clearly larger share of these pages, open the smaller companies' pages to Google the same way, and add pages for the 1,257 listed shares without one (WHERE THINGS STAND, item 0). Only figures that are true and checked (seo_crawl, the daily review's three numbers); describe, never advise",
    "angle": "growth",
-   "measure": "Search Console's indexed share of the sitemap's stock pages, 4 and 8 weeks after, against 67 of 972 on 1 Nov 2026",
+   "measure": "Search Console's indexed share of the sitemap's stock pages, 4 and 8 weeks after, against 67 of 972 on 1 Nov 2026. Starts when the owner has sent Search Console's Performance page, at the next weekly session; built as one tested stock-page change.",
    "status": "idea",
    "added": "2026-11-01"
   },

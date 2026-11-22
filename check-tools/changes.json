@@ -3,6 +3,11 @@
  "changes": [
   {
    "at": "2026-11-22",
+   "what": "Cleared seven stale ideas (each now has a start condition), closed question 24, parked 56, and made the screener list check treat an empty source as a failed read (it had said Mexico's whole index left). Found by the full list check: 10 live US/AEX shares (e.g. ROKU, KVUE) have only 1-10 days of prices at the source, so the screeners skip them until it recovers",
+   "found": "check"
+  },
+  {
+   "at": "2026-11-22",
    "what": "StockIQ's three busiest tables now use all the free DynamoDB units the owner's other project gave back (the autopilot's table most), so the 17:00 UTC throttling on the user table should stop",
    "found": "owner"
   },
@@ -295,11 +300,6 @@
   {
    "at": "2026-10-31",
    "what": "Market figures on the home page, dashboard and daily pages now flash the moment the new price arrives (they waited up to 2.5 s); update_interval.sh tested on every kind of page",
-   "found": "owner"
-  },
-  {
-   "at": "2026-10-31",
-   "what": "update_interval.sh works again: it shows and changes how often prices refresh (it had silently changed nothing since 18 Oct)",
    "found": "owner"
   }
  ]

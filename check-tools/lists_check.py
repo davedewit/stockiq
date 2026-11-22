@@ -130,6 +130,8 @@ def full(P, C):
             now -= KNOWN_LEFT_OUT.get(k, set())
         except Exception as e:
             findings.append(f"{k}: its members could not be read from the source this time ({type(e).__name__}): check by hand"); continue
+        if mine and len(now) < 0.7 * len(mine):      # an empty or partial read is a failed read, not an index that lost its members (22 Nov 2026: Mexico read 0 and 'left' all 35)
+            findings.append(f"{k}: the source gave {len(now)} members against {len(mine)} in the list: a failed read, check by hand"); continue
         joined, left = sorted(now - mine), sorted(mine - now)
         print(f'{k}: the source has {len(now)}, the list {len(mine)}')
         if joined or left: findings.append(f"{k}: the index has changed: joined {joined or 'none'}; left {left or 'none'} (update the page's entry and the coordinator, then deploy)")
