@@ -586,7 +586,7 @@
    "id": "funnel",
    "part": "From first visit to sign-up and to a paid plan: where visitors come from (GA4, Search Console), what they do, where they leave",
    "where": "GA4, Search Console; index.html, stock pages, analysis.html, signup.html, the plans",
-   "last": "2026-11-12",
+   "last": "2026-11-23",
    "log": [
     {
      "at": "2026-10-30",
@@ -602,6 +602,11 @@
      "at": "2026-11-12",
      "kind": "question",
      "found": "New question: GA4 events exist but no count has been read; the useful step is the owner sending 28 days of event counts and Search Console. The purchase event can be fired by typing ?payment=success, so Stripe is the real signal."
+    },
+    {
+     "at": "2026-11-23",
+     "kind": "question",
+     "found": "New question: Sign-up activation: + addresses and Cognito's real messages (proposal #39); GA4 counts still unread"
     }
    ]
   },
@@ -702,8 +707,14 @@
    "id": "emails",
    "part": "Every email the site sends: activation, the autopilot, the weekly check, sign-up alerts",
    "where": "stockiq-cognito-email-sender, stockiq-ai-trader send_mail, weekly_check.py --email, stockiq-email-capture",
-   "last": null,
-   "log": []
+   "last": "2026-11-23",
+   "log": [
+    {
+     "at": "2026-11-23",
+     "kind": "improved",
+     "found": "Improved: Found two faults, proposals #39 (activation link breaks for + addresses) and #40 (false 'email could not be sent' for non-owner members)"
+    }
+   ]
   },
   {
    "id": "ap-themes",
