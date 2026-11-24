@@ -150,3 +150,9 @@ Rules:
 - **Could break:** the free pool is organisation-wide: if the owner's other account raises its units again, StockIQ's tables bill (look at the cost check's capacity line and DynamoDB on the Admin bill); throttles at 17:00 UTC returning.
 - **Undo:** lower the units (once a day at most) or `--billing-mode PAY_PER_REQUEST`.
 - **Remove after:** 2026-12-06
+
+### 2026-11-24 · Every AI job is back on GPT-5.6 Luna (the 20 Nov note "Luna 250,000" was wrong for it)
+- **Changed:** `stockiq-ai-trader` `USUAL_MODEL` (so `CHOOSE_MODELS` and `DIGEST_MODEL`), `stockiq-ai-chat` `CHAT_MODEL`, and the three news calls on this Mac. OpenAI's data-sharing page (help.openai.com article 10306912) puts **gpt-5.6-luna in the small-model group (2.5M a day on Build, 10M above), with gpt-5.4-mini, -nano and gpt-5.6-terra; gpt-6-luna is in the large group (250K)**. The groups' quotas are shared across their models. Read the page again before changing models. The autopilot's choosing restarts on a new model: never pool trades from 20 Nov (GPT-5.4 mini) with after the deploy of this entry (about 08:10 UTC, 24 Nov).
+- **Could break:** "AI model gpt-5.6-luna not used" in the trader's log; an empty chat reply; more "Rejected (" in the daily email (news); an OpenAI charge (the small pool being used up).
+- **Undo:** `~/VSCODE/backup/stockiq-{ai-trader,ai-chat}_before_luna56_20261124.zip`; the news scripts from git.
+- **Remove after:** 2026-12-08
